@@ -1,5 +1,5 @@
 /* -
- * Mezzo [core]
+ * Mezzo [http-akka]
  */
 
 package mezzo
@@ -28,17 +28,15 @@ import akka.http.scaladsl.unmarshalling.Unmarshal
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-trait AkkaHttpClient extends Dehydrated {
-  type H = HydrateAkkaHttpClient[_]
-}
-
-class HydrateAkkaHttpClient[H <: HydrationMacros](h0: H) extends Hydration(h0) {
+private[h2akka] final class HydrateAkkaHttpClient[H <: HydrationMacros](h0: H)
+    extends Hydration(h0)
+{
   import h._
   import c.universe._
 
   type Out[F[_]] = AkkaClientRequestHandler => (F ~> Future)
 
-  override def hydrate(
+  override final def hydrate(
     F: Symbol,
     nodes: List[NodeInfo]
   ): Tree = {
@@ -71,14 +69,14 @@ class HydrateAkkaHttpClient[H <: HydrationMacros](h0: H) extends Hydration(h0) {
       """
   }
 
-  def hydrateMethod(
+  private[this] final def hydrateMethod(
     methodName: TermName,
     opName: String,
     FA: Type,
     A: Type
   ): Tree = {
 
-    val needsEncoding = FA.typeSymbol.companion.isModule
+    val needsEncoding = !isSingleton(FA)
     val makeRequest =
       if (needsEncoding)
         q"handler.request[$FA, $A](GET, $opName, op)"

@@ -13,6 +13,53 @@ def module(modName: String): Project =
   Project(modName, file(s"""modules/$modName"""))
     .settings(name := s"$modName")
 
+lazy val root = (project in file("."))
+  .settings(noPublishSettings)
+  .aggregate(`core`)
+  .aggregate(`http-akka`)
+  .aggregate(`demo`)
+  .settings(TaskKey[Unit]("copyReadme") := {
+    (tutTargetDirectory in `readme`).value.listFiles().foreach(file =>
+      IO.copyFile(file, new File((baseDirectory in ThisBuild).value, file.name)))
+  })
+  .settings(TaskKey[Unit]("checkDiff") := {
+    val diff = "git diff".!!
+    if (diff.nonEmpty) sys.error("Working directory is dirty!\n" + diff)
+  })
+
+lazy val `core` = module("core")
+  .settings(macroSettings)
+  .settings(libraryDependencies ++= Seq(
+    "org.typelevel"     %% "cats-core"     % V.cats,
+    "com.chuusai"       %% "shapeless"     % V.shapeless
+  ))
+
+lazy val `http-akka` = module("http-akka")
+  .dependsOn(core)
+  .settings(libraryDependencies ++= Seq(
+    "com.typesafe.akka" %% "akka-http"     % V.akkahttp,
+    "io.circe"          %% "circe-core"    % V.circe,
+    "io.circe"          %% "circe-parser"  % V.circe
+  ))
+
+lazy val `demo` = module("demo")
+  .dependsOn(`http-akka`)
+  .settings(noPublishSettings)
+  .settings(libraryDependencies ++= Seq(
+    "io.circe"          %% "circe-generic" % V.circe
+  ))
+
+lazy val `readme` = module("readme")
+  .dependsOn(`core`)
+  .dependsOn(`http-akka`)
+  .settings(noPublishSettings)
+  .settings(tutSettings)
+  .settings(libraryDependencies ++= Seq(
+    "io.circe"          %% "circe-generic" % V.circe
+  ))
+  .settings(
+    tutScalacOptions ~= (_.filterNot(Set("-Yno-predef"))))
+
 lazy val macroSettings: Seq[Setting[_]] = Seq(
   libraryDependencies ++= Seq(
     scalaOrganization.value % "scala-compiler" % scalaVersion.value % Provided,
@@ -29,21 +76,3 @@ lazy val macroSettings: Seq[Setting[_]] = Seq(
     }
   }
 )
-
-
-lazy val core = module("core")
-  .settings(macroSettings)
-  .settings(libraryDependencies ++= Seq(
-    "org.typelevel"     %% "cats-core"     % V.cats,
-    "com.chuusai"       %% "shapeless"     % V.shapeless,
-    "com.typesafe.akka" %% "akka-http"     % V.akkahttp,
-    "io.circe"          %% "circe-core"    % V.circe,
-    "io.circe"          %% "circe-generic" % V.circe,
-    "io.circe"          %% "circe-parser"  % V.circe
-  ))
-  .settings(libraryDependencies ++= Seq(
-    "org.scalacheck"    %% "scalacheck" % V.scalacheck
-  ))
-
-lazy val demo = module("demo")
-  .dependsOn(core)

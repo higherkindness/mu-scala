@@ -1,8 +1,17 @@
 ### Mezzo
 [![Build Status](https://api.travis-ci.org/andyscott/mezzo.png?branch=master)](https://travis-ci.org/andyscott/mezzo)
 
+```tut:invisible
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration._
 
-
+implicit val system = ActorSystem("testing")
+implicit val mat    = ActorMaterializer()
+```
 
 ### Introduction
 
@@ -13,7 +22,7 @@ What does this mean?
 
 Consider a simple API for a counter:
 
-```scala
+```tut:silent
 import scala.concurrent.Future
 
 trait CounterAPI {
@@ -27,7 +36,7 @@ This is a very traditional looking API. What we really want to
 do is model our API as a series of case classes (an ADT). This will
 allow to get a lot of work done for free.
 
-```scala
+```tut:silent
 sealed abstract class CounterOp[A] extends Product with Serializable
 object CounterOp {
   case class Adjust(delta: Long) extends CounterOp[Long]
@@ -40,7 +49,7 @@ If we want, we can implement the traditional interface by lifting our ADT
 operations into our return type of Future. We can do this with a natural
 transformation (`~>`).
 
-```scala
+```tut:silent
 import cats.~>
 
 case class CounterOps(eval: CounterOp ~> Future) extends CounterAPI {
@@ -56,7 +65,7 @@ We can go ahead and implement our API using a natural transformation.
 This is a lot like writing the body of an Actor, except the body is
 strongly typed.
 
-```scala
+```tut:silent
 class DummyCounter extends (CounterOp ~> Future) {
 
   override def apply[A](rawOp: CounterOp[A]): Future[A] = rawOp match {
@@ -78,14 +87,14 @@ class DummyCounter extends (CounterOp ~> Future) {
 
 We can now instantly hydrate a HTTP server and HTTP client for our API.
 
-```scala
+```tut:silent
 import mezzo.Hydrate
 import mezzo.h2akka._
 import io.circe.generic.auto._
 ```
 
 *server:*
-```scala
+```tut:silent
 import akka.http.scaladsl.Http
 
 val backend = new DummyCounter()
@@ -94,7 +103,7 @@ val binding = Http().bindAndHandle(routes, "localhost", 8080)
 ```
 
 *client:*
-```scala
+```tut:silent
 import akka.http.scaladsl.Http
 
 val handler = AkkaClientRequestHandler(system, "http://localhost:8080/")
@@ -104,30 +113,19 @@ val counter = CounterOps(client)
 
 And the client works as expected:
 
-```scala
+```tut:book
 Await.result(counter.read(),      10.seconds)
-// res4: Long = 0
-
 Await.result(counter.adjust(1),   10.seconds)
-// res5: Long = 1
-
 Await.result(counter.adjust(10),  10.seconds)
-// res6: Long = 11
-
 Await.result(counter.adjust(100), 10.seconds)
-// res7: Long = 111
-
 Await.result(counter.read(),      10.seconds)
-// res8: Long = 111
-
 Await.result(counter.reset(),     10.seconds)
-
 Await.result(counter.read(),      10.seconds)
-// res10: Long = 0
 ```
 
-
-
+```tut:invisible
+system.terminate()
+```
 ### Documentation
 
 Documetation coming soon.

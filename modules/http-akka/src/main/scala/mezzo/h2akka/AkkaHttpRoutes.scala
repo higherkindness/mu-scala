@@ -1,5 +1,5 @@
 /* -
- * Mezzo [core]
+ * Mezzo [http-akka]
  */
 
 package mezzo
@@ -24,17 +24,15 @@ import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.model.MediaTypes.`application/json`
 import akka.http.scaladsl.unmarshalling.{ FromEntityUnmarshaller, Unmarshaller }
 
-trait AkkaHttpRoutes extends Dehydrated {
-  type H = HydrateAkkaHttpRoutes[_]
-}
-
-class HydrateAkkaHttpRoutes[H <: HydrationMacros](h0: H) extends Hydration(h0) {
+private[h2akka] final class HydrateAkkaHttpRoutes[H <: HydrationMacros](h0: H)
+    extends Hydration(h0)
+{
   import h._
   import c.universe._
 
   type Out[F[_]] = (F ~> Future) => Route
 
-  override def hydrate(
+  override final def hydrate(
     F: Symbol,
     nodes: List[NodeInfo]
   ): Tree =
@@ -51,7 +49,7 @@ class HydrateAkkaHttpRoutes[H <: HydrationMacros](h0: H) extends Hydration(h0) {
        ..${nodes.map(info => makeRoute(info.name, info.in, info.out))})
      """
 
-  def makeRoute(opName: String, FA: Type, A: Type): Tree = {
+  private[this] final def makeRoute(opName: String, FA: Type, A: Type): Tree = {
 
     val needsDecoding = !isSingleton(FA)
     val needsEncoding = isUnitType(A)
