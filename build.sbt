@@ -13,6 +13,11 @@ def module(modName: String): Project =
   Project(modName, file(s"""modules/$modName"""))
     .settings(name := s"$modName")
 
+addCommandAlias("validate", ";" + List(
+  "compile",
+  "readme/tut", "copyReadme", "checkDiff"
+).mkString(";"))
+
 lazy val root = (project in file("."))
   .settings(noPublishSettings)
   .aggregate(`core`)
@@ -29,6 +34,7 @@ lazy val root = (project in file("."))
 
 lazy val `core` = module("core")
   .settings(macroSettings)
+  .settings(crossVersionSharedSources)
   .settings(libraryDependencies ++= Seq(
     "org.typelevel"     %% "cats-core"     % V.cats,
     "com.chuusai"       %% "shapeless"     % V.shapeless
@@ -76,3 +82,15 @@ lazy val macroSettings: Seq[Setting[_]] = Seq(
     }
   }
 )
+
+lazy val crossVersionSharedSources: Seq[Setting[_]] =
+  Seq(Compile, Test).map { sc =>
+    (unmanagedSourceDirectories in sc) ++= {
+      (unmanagedSourceDirectories in sc ).value.flatMap { dir: File =>
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((2, y)) if y == 11 => Some(new File(dir.getPath + "_2.11"))
+          case _                       => None
+        }
+      }
+    }
+  }
