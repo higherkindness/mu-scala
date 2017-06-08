@@ -1,25 +1,31 @@
-project/boot
-target
-.ensime
-.ensime_lucene
-.ensime_cache
-TAGS
-\#*#
-*~
-.#*
-.lib
-.history
-.*.swp
-.idea
-.idea/*
-.idea_modules
-.DS_Store
-.sbtrc
-*.sublime-project
-*.sublime-workspace
-tests.iml
+*.class
 *.log
-metastore_db/
-checkpoint/
-testData/
-.phantom-temp
+
+# sbt specific
+.cache
+.history
+.lib/
+dist/*
+target
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
+
+# ENSIME specific
+.ensime_cache/
+.ensime
+
+# IDEA Specific
+.idea/
+*.iws
+/out/
+.idea_modules/
+
+.DS_Store
+
+/secring.gpg

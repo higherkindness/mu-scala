@@ -1,13 +1,27 @@
-/* -
- * Mezzo [demo]
+/*
+ * Copyright 2017 47 Degrees, LLC. <http://www.47deg.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-package mezzodemo
+package freestyle
+package http
+package demo
 
 import scala.Predef._
 
-import mezzo.Hydrate
-import mezzo.h2akka._
+import freestyle.http.core.Hydrate
+import freestyle.http.h2akka._
 
 import cats._
 import io.circe.generic.auto._
@@ -22,22 +36,21 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Try
 
-
 // a simple demo API facade
 case class CounterAPI(eval: CounterOp ~> Future) {
   import CounterOp._
 
   def adjust(delta: Long): Future[Long] = eval(Adjust(delta))
-  def reset()            : Future[Unit] = eval(Reset)
-  def read()             : Future[Long] = eval(Read)
+  def reset(): Future[Unit]             = eval(Reset)
+  def read(): Future[Long]              = eval(Read)
 }
 
 // the actual algebra for our API (I'd actually call this the API)
 sealed abstract class CounterOp[A] extends Product with Serializable
 object CounterOp {
   case class Adjust(delta: Long) extends CounterOp[Long]
-  case object Reset extends CounterOp[Unit]
-  case object Read extends CounterOp[Long]
+  case object Reset              extends CounterOp[Unit]
+  case object Read               extends CounterOp[Long]
 }
 
 // an implementation of the API
@@ -81,13 +94,13 @@ object DummyApp extends App {
   val counter = CounterAPI(client)
 
   // interact with our service over HTTP
-  println("---> " + Try(Await.result(counter.read(),      10.seconds)))
+  println("---> " + Try(Await.result(counter.read(), 10.seconds)))
   println("---> " + Try(Await.result(counter.adjust(100), 10.seconds)))
-  println("---> " + Try(Await.result(counter.reset(),     10.seconds)))
+  println("---> " + Try(Await.result(counter.reset(), 10.seconds)))
   println("---> " + Try(Await.result(counter.adjust(200), 10.seconds)))
-  println("---> " + Try(Await.result(counter.read(),      10.seconds)))
+  println("---> " + Try(Await.result(counter.read(), 10.seconds)))
   println("---> " + Try(Await.result(counter.adjust(300), 10.seconds)))
-  println("---> " + Try(Await.result(counter.read(),      10.seconds)))
+  println("---> " + Try(Await.result(counter.read(), 10.seconds)))
 
   // shutdown the world
   system.terminate()
