@@ -14,8 +14,20 @@
  * limitations under the License.
  */
 
-package freestyle
+package freestyle.rpc.demo
+package greeting
 
-object Main extends App {
-  println("Hello from project freestyle-rpc")
+import scala.concurrent.Future
+
+class GreetingService extends GreeterGrpc.Greeter {
+
+  def sayHello(request: MessageRequest): Future[MessageReply] = {
+    println(s"Hi message received from ${request.name}")
+    Future.successful(MessageReply(s"Hello ${request.name} from HelloService!"))
+  }
+
+  def sayGoodbye(request: MessageRequest): Future[MessageReply] = {
+    println(s"Goodbye message received from ${request.name}")
+    Future.successful(MessageReply(s"See you soon ${request.name}!"))
+  }
 }
