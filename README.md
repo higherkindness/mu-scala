@@ -1,6 +1,20 @@
 # freestyle-rpc
 
-RPC with Freestyle
+Simple RPC with Freestyle
+
+## Demo
+
+Run server:
+
+```
+sbt runServer
+```
+
+Run client:
+
+```
+sbt runClient
+```
 
 [comment]: # (Start Copyright)
 # Copyright
