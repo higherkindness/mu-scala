@@ -17,56 +17,116 @@
 package freestyle.rpc.demo
 package greeting
 
+import java.util.concurrent.{CountDownLatch, TimeUnit}
+
 import io.grpc.ManagedChannelBuilder
 import freestyle.rpc.demo.greeting.GreeterGrpc._
 import io.grpc.stub.StreamObserver
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Promise}
+import scala.concurrent.{Await, Future, Promise}
 import scala.concurrent.duration._
+import scala.util.Random
 
 object GreetingClientApp {
-
-  private val channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext(true).build
 
   def main(args: Array[String]): Unit = {
 
     val request = MessageRequest("Freestyle")
-
-    val asyncHelloClient: GreeterStub = GreeterGrpc.stub(channel)
+    val client  = new GreetingClient(host, port)
 
     // Unary RPCs where the client sends a single request to the server and
     // gets a single response back, just like a normal function call:
-
-    val response = for {
-      hi  <- asyncHelloClient.sayHello(request)
-      bye <- asyncHelloClient.sayGoodbye(request)
-    } yield (hi.message, bye.message)
-
-    println("")
-    println(s"Received -> ${Await.result(response, Duration.Inf)}")
-    println("")
+    client.unaryDemo(request)
 
     // Server streaming RPCs where the client sends a request to the server and
     // gets a stream to read a sequence of messages back. The client reads from
     // the returned stream until there are no more messages.
 
-    val streamingCompleted = Promise[Unit]()
-    val lotOfRepliesObserver = new StreamObserver[MessageReply] {
+    client.serverStreamingDemo(request)
 
-      override def onError(t: Throwable): Unit = println(s"Streaming failure: ${t.getMessage}")
+    // Client streaming RPCs where the client writes a sequence of messages and sends them
+    // to the server, again using a provided stream. Once the client has finished writing the messages,
+    // it waits for the server to read them and return its response.
 
-      override def onCompleted(): Unit = {
-        println("Lot of Replies streaming completed")
-        streamingCompleted.success((): Unit)
-      }
+    client.clientStreamingDemo()
 
-      override def onNext(value: MessageReply): Unit = println(s"Received by streaming -> $value")
+    (): Unit
+  }
+
+  class GreetingClient(host: String, port: Int) {
+
+    private[this] val channel =
+      ManagedChannelBuilder.forAddress(host, port).usePlaintext(true).build
+
+    private[this] val asyncHelloClient: GreeterStub = GreeterGrpc.stub(channel)
+
+    def unaryDemo(request: MessageRequest): Unit = {
+
+      val response = for {
+        hi  <- asyncHelloClient.sayHello(request)
+        bye <- asyncHelloClient.sayGoodbye(request)
+      } yield (hi.message, bye.message)
+
+      println("")
+      println(s"Received -> ${Await.result(response, Duration.Inf)}")
+      println("")
     }
 
-    asyncHelloClient.lotsOfReplies(request, lotOfRepliesObserver)
+    def serverStreamingDemo(request: MessageRequest): Future[Unit] = {
+      val lotOfRepliesStreamingPromise = Promise[Unit]()
+      val lotOfRepliesObserver = new StreamObserver[MessageReply] {
 
-    Await.ready(streamingCompleted.future, Duration.Inf)
-    (): Unit
+        override def onError(t: Throwable): Unit =
+          println(s"[lotOfRepliesObserver] Streaming failure: ${t.getMessage}")
+
+        override def onCompleted(): Unit = {
+          println("[lotOfRepliesObserver] Lot of Replies streaming completed")
+          lotOfRepliesStreamingPromise.success((): Unit)
+        }
+
+        override def onNext(value: MessageReply): Unit =
+          println(s"[lotOfRepliesObserver] Received by streaming -> $value")
+      }
+
+      asyncHelloClient.lotsOfReplies(request, lotOfRepliesObserver)
+
+      Await.ready(lotOfRepliesStreamingPromise.future, Duration.Inf)
+    }
+
+    def clientStreamingDemo(): Boolean = {
+      val countDownLatch = new CountDownLatch(1)
+      val responseObserver = new StreamObserver[MessageReply] {
+
+        override def onError(t: Throwable): Unit = {
+          println(s"[responseObserver] Streaming failure: ${t.getMessage}")
+          countDownLatch.countDown()
+        }
+
+        override def onCompleted(): Unit = {
+          println("[responseObserver] Lot of greetings streaming completed")
+          countDownLatch.countDown()
+        }
+
+        override def onNext(value: MessageReply): Unit =
+          println(s"[responseObserver] Received by streaming -> $value")
+      }
+
+      val requestObserver = asyncHelloClient.lotsOfGreetings(responseObserver)
+
+      val randomRequestList = 1 to math.min(5, Random.nextInt(20))
+
+      try {
+        randomRequestList foreach (i =>
+          requestObserver.onNext(MessageRequest(s"I'm Freestyle $i")))
+      } catch {
+        case t: Throwable =>
+          countDownLatch.countDown()
+          requestObserver.onError(t)
+      }
+
+      requestObserver.onCompleted()
+      countDownLatch.await(1, TimeUnit.MINUTES)
+    }
   }
 }

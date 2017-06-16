@@ -30,16 +30,19 @@ class GreetingService extends GreeterGrpc.Greeter {
   val initialDelay: Long = 0l
   val interval: Long     = 500l
 
+  // rpc SayHello (MessageRequest) returns (MessageReply) {}
   def sayHello(request: MessageRequest): Future[MessageReply] = {
     println(s"Hi message received from ${request.name}")
     Future.successful(MessageReply(s"Hello ${request.name} from HelloService!"))
   }
 
+  // rpc SayGoodbye (MessageRequest) returns (MessageReply) {}
   def sayGoodbye(request: MessageRequest): Future[MessageReply] = {
     println(s"Goodbye message received from ${request.name}")
     Future.successful(MessageReply(s"See you soon ${request.name}!"))
   }
 
+  // rpc LotsOfReplies(MessageRequest) returns (stream MessageReply) {}
   def lotsOfReplies(
       request: MessageRequest,
       responseObserver: StreamObserver[MessageReply]): Unit = {
@@ -63,4 +66,24 @@ class GreetingService extends GreeterGrpc.Greeter {
     scheduler.scheduleAtFixedRate(tick, initialDelay, interval, TimeUnit.MILLISECONDS)
     (): Unit
   }
+
+  // rpc LotsOfGreetings(stream MessageRequest) returns (MessageReply) {}
+  override def lotsOfGreetings(
+      responseObserver: StreamObserver[MessageReply]): StreamObserver[MessageRequest] =
+    new StreamObserver[MessageRequest] {
+      val counter = new AtomicInteger(0)
+
+      override def onError(t: Throwable): Unit =
+        println(s"[lotsOfGreetings] Streaming failure: ${t.getMessage}")
+
+      override def onCompleted(): Unit = {
+        println(s"[lotsOfGreetings] Streaming completed.")
+
+        responseObserver.onNext(MessageReply("It's done ;)"))
+        responseObserver.onCompleted()
+      }
+
+      override def onNext(value: MessageRequest): Unit =
+        println(s"This is your message ${counter.incrementAndGet()}, ${value.name}")
+    }
 }
