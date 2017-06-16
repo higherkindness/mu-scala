@@ -5,14 +5,15 @@ package freestyle.rpc.demo;
 service Greeter {
     rpc SayHello (MessageRequest) returns (MessageReply) {}
     rpc SayGoodbye (MessageRequest) returns (MessageReply) {}
+    rpc LotsOfReplies(MessageRequest) returns (stream MessageReply) {}
+    rpc LotsOfGreetings(stream MessageRequest) returns (MessageReply) {}
+    rpc BidiHello(stream MessageRequest) returns (stream MessageReply) {}
 }
 
-// The request message containing the user's name.
 message MessageRequest {
     string name = 1;
 }
 
-// The response message containing the greetings
 message MessageReply {
     string message = 1;
 }

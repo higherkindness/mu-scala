@@ -17,30 +17,39 @@
 package freestyle.rpc.demo
 package greeting
 
-import io.grpc.ManagedChannelBuilder
-import freestyle.rpc.demo.greeting.GreeterGrpc._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Await
-import scala.concurrent.duration._
-
 object GreetingClientApp {
-
-  private val channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext(true).build
 
   def main(args: Array[String]): Unit = {
 
     val request = MessageRequest("Freestyle")
+    val client  = new GreetingClient(host, port)
 
-    val asyncHelloClient: GreeterStub = GreeterGrpc.stub(channel)
+    // http://www.grpc.io/docs/guides/concepts.html
 
-    val response = for {
-      hi  <- asyncHelloClient.sayHello(request)
-      bye <- asyncHelloClient.sayGoodbye(request)
-    } yield (hi.message, bye.message)
+    // Unary RPCs where the client sends a single request to the server and
+    // gets a single response back, just like a normal function call:
+    client.unaryDemo(request)
 
-    println("")
-    println(s"Received -> ${Await.result(response, Duration.Inf)}")
-    println("")
+    // Server streaming RPCs where the client sends a request to the server and
+    // gets a stream to read a sequence of messages back. The client reads from
+    // the returned stream until there are no more messages.
+
+    client.serverStreamingDemo(request)
+
+    // Client streaming RPCs where the client writes a sequence of messages and sends them
+    // to the server, again using a provided stream. Once the client has finished writing the messages,
+    // it waits for the server to read them and return its response.
+
+    client.clientStreamingDemo()
+
+    // Bidirectional streaming RPCs where both sides send a sequence of messages using a read-write stream.
+    // The two streams operate independently, so clients and servers can read and write in whatever order
+    // they like: for example, the server could wait to receive all the client messages before writing its
+    // responses, or it could alternately read a message then write a message, or some other combination
+    // of reads and writes. The order of messages in each stream is preserved.
+
+    client.biStreamingDemo()
+
+    (): Unit
   }
 }
