@@ -17,23 +17,14 @@
 package freestyle.rpc.demo
 package greeting
 
-import java.util.concurrent.{CountDownLatch, TimeUnit}
-
-import io.grpc.ManagedChannelBuilder
-import freestyle.rpc.demo.greeting.GreeterGrpc._
-import io.grpc.stub.StreamObserver
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future, Promise}
-import scala.concurrent.duration._
-import scala.util.Random
-
 object GreetingClientApp {
 
   def main(args: Array[String]): Unit = {
 
     val request = MessageRequest("Freestyle")
     val client  = new GreetingClient(host, port)
+
+    // http://www.grpc.io/docs/guides/concepts.html
 
     // Unary RPCs where the client sends a single request to the server and
     // gets a single response back, just like a normal function call:
@@ -51,82 +42,14 @@ object GreetingClientApp {
 
     client.clientStreamingDemo()
 
+    // Bidirectional streaming RPCs where both sides send a sequence of messages using a read-write stream.
+    // The two streams operate independently, so clients and servers can read and write in whatever order
+    // they like: for example, the server could wait to receive all the client messages before writing its
+    // responses, or it could alternately read a message then write a message, or some other combination
+    // of reads and writes. The order of messages in each stream is preserved.
+
+    client.biStreamingDemo()
+
     (): Unit
-  }
-
-  class GreetingClient(host: String, port: Int) {
-
-    private[this] val channel =
-      ManagedChannelBuilder.forAddress(host, port).usePlaintext(true).build
-
-    private[this] val asyncHelloClient: GreeterStub = GreeterGrpc.stub(channel)
-
-    def unaryDemo(request: MessageRequest): Unit = {
-
-      val response = for {
-        hi  <- asyncHelloClient.sayHello(request)
-        bye <- asyncHelloClient.sayGoodbye(request)
-      } yield (hi.message, bye.message)
-
-      println("")
-      println(s"Received -> ${Await.result(response, Duration.Inf)}")
-      println("")
-    }
-
-    def serverStreamingDemo(request: MessageRequest): Future[Unit] = {
-      val lotOfRepliesStreamingPromise = Promise[Unit]()
-      val lotOfRepliesObserver = new StreamObserver[MessageReply] {
-
-        override def onError(t: Throwable): Unit =
-          println(s"[lotOfRepliesObserver] Streaming failure: ${t.getMessage}")
-
-        override def onCompleted(): Unit = {
-          println("[lotOfRepliesObserver] Lot of Replies streaming completed")
-          lotOfRepliesStreamingPromise.success((): Unit)
-        }
-
-        override def onNext(value: MessageReply): Unit =
-          println(s"[lotOfRepliesObserver] Received by streaming -> $value")
-      }
-
-      asyncHelloClient.lotsOfReplies(request, lotOfRepliesObserver)
-
-      Await.ready(lotOfRepliesStreamingPromise.future, Duration.Inf)
-    }
-
-    def clientStreamingDemo(): Boolean = {
-      val countDownLatch = new CountDownLatch(1)
-      val responseObserver = new StreamObserver[MessageReply] {
-
-        override def onError(t: Throwable): Unit = {
-          println(s"[responseObserver] Streaming failure: ${t.getMessage}")
-          countDownLatch.countDown()
-        }
-
-        override def onCompleted(): Unit = {
-          println("[responseObserver] Lot of greetings streaming completed")
-          countDownLatch.countDown()
-        }
-
-        override def onNext(value: MessageReply): Unit =
-          println(s"[responseObserver] Received by streaming -> $value")
-      }
-
-      val requestObserver = asyncHelloClient.lotsOfGreetings(responseObserver)
-
-      val randomRequestList = 1 to math.min(5, Random.nextInt(20))
-
-      try {
-        randomRequestList foreach (i =>
-          requestObserver.onNext(MessageRequest(s"I'm Freestyle $i")))
-      } catch {
-        case t: Throwable =>
-          countDownLatch.countDown()
-          requestObserver.onError(t)
-      }
-
-      requestObserver.onCompleted()
-      countDownLatch.await(1, TimeUnit.MINUTES)
-    }
   }
 }

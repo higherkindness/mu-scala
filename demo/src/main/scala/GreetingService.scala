@@ -71,19 +71,41 @@ class GreetingService extends GreeterGrpc.Greeter {
   override def lotsOfGreetings(
       responseObserver: StreamObserver[MessageReply]): StreamObserver[MessageRequest] =
     new StreamObserver[MessageRequest] {
-      val counter = new AtomicInteger(0)
+      val loggerInfo = "lotsOfGreetings"
+      val counter    = new AtomicInteger(0)
 
       override def onError(t: Throwable): Unit =
-        println(s"[lotsOfGreetings] Streaming failure: ${t.getMessage}")
+        println(s"[$loggerInfo] Streaming failure: ${t.getMessage}")
 
       override def onCompleted(): Unit = {
-        println(s"[lotsOfGreetings] Streaming completed.")
+        println(s"[$loggerInfo] Streaming completed.")
 
-        responseObserver.onNext(MessageReply("It's done ;)"))
+        responseObserver.onNext(MessageReply(s"$loggerInfo - It's done ;)"))
         responseObserver.onCompleted()
       }
 
       override def onNext(value: MessageRequest): Unit =
-        println(s"This is your message ${counter.incrementAndGet()}, ${value.name}")
+        println(s"[$loggerInfo] This is your message ${counter.incrementAndGet()}, ${value.name}")
+    }
+
+  // rpc BidiHello(stream MessageRequest) returns (stream MessageReply) {}
+  override def bidiHello(
+      responseObserver: StreamObserver[MessageReply]): StreamObserver[MessageRequest] =
+    new StreamObserver[MessageRequest] {
+      val loggerInfo = "bidiHello"
+      val counter    = new AtomicInteger(0)
+
+      override def onError(t: Throwable): Unit =
+        println(s"[$loggerInfo] Streaming failure: ${t.getMessage}")
+
+      override def onCompleted(): Unit = {
+        println(s"[$loggerInfo] Streaming completed.")
+
+        responseObserver.onNext(MessageReply(s"$loggerInfo - It's done ;)"))
+        responseObserver.onCompleted()
+      }
+
+      override def onNext(value: MessageRequest): Unit =
+        println(s"[$loggerInfo] This is your message ${counter.incrementAndGet()}, ${value.name}")
     }
 }
