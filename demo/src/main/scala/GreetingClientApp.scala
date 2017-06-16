@@ -19,9 +19,10 @@ package greeting
 
 import io.grpc.ManagedChannelBuilder
 import freestyle.rpc.demo.greeting.GreeterGrpc._
+import io.grpc.stub.StreamObserver
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Await
+import scala.concurrent.{Await, Promise}
 import scala.concurrent.duration._
 
 object GreetingClientApp {
@@ -34,6 +35,9 @@ object GreetingClientApp {
 
     val asyncHelloClient: GreeterStub = GreeterGrpc.stub(channel)
 
+    // Unary RPCs where the client sends a single request to the server and
+    // gets a single response back, just like a normal function call:
+
     val response = for {
       hi  <- asyncHelloClient.sayHello(request)
       bye <- asyncHelloClient.sayGoodbye(request)
@@ -42,5 +46,27 @@ object GreetingClientApp {
     println("")
     println(s"Received -> ${Await.result(response, Duration.Inf)}")
     println("")
+
+    // Server streaming RPCs where the client sends a request to the server and
+    // gets a stream to read a sequence of messages back. The client reads from
+    // the returned stream until there are no more messages.
+
+    val streamingCompleted = Promise[Unit]()
+    val lotOfRepliesObserver = new StreamObserver[MessageReply] {
+
+      override def onError(t: Throwable): Unit = println(s"Streaming failure: ${t.getMessage}")
+
+      override def onCompleted(): Unit = {
+        println("Lot of Replies streaming completed")
+        streamingCompleted.success((): Unit)
+      }
+
+      override def onNext(value: MessageReply): Unit = println(s"Received by streaming -> $value")
+    }
+
+    asyncHelloClient.lotsOfReplies(request, lotOfRepliesObserver)
+
+    Await.ready(streamingCompleted.future, Duration.Inf)
+    (): Unit
   }
 }

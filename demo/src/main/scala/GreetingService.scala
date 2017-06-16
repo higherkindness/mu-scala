@@ -17,9 +17,18 @@
 package freestyle.rpc.demo
 package greeting
 
+import java.util.concurrent.{Executors, TimeUnit}
+import java.util.concurrent.atomic.AtomicInteger
+
+import io.grpc.stub.StreamObserver
+
 import scala.concurrent.Future
 
 class GreetingService extends GreeterGrpc.Greeter {
+
+  val numberOfReplies    = 10
+  val initialDelay: Long = 0l
+  val interval: Long     = 500l
 
   def sayHello(request: MessageRequest): Future[MessageReply] = {
     println(s"Hi message received from ${request.name}")
@@ -29,5 +38,29 @@ class GreetingService extends GreeterGrpc.Greeter {
   def sayGoodbye(request: MessageRequest): Future[MessageReply] = {
     println(s"Goodbye message received from ${request.name}")
     Future.successful(MessageReply(s"See you soon ${request.name}!"))
+  }
+
+  def lotsOfReplies(
+      request: MessageRequest,
+      responseObserver: StreamObserver[MessageReply]): Unit = {
+    val scheduler = Executors.newSingleThreadScheduledExecutor()
+    val tick = new Runnable {
+      val counter = new AtomicInteger(10)
+      def run(): Unit = {
+        val n: Int = counter.getAndDecrement()
+
+        if (n >= 0) {
+          responseObserver.onNext(
+            MessageReply(
+              s"[$n] I'm sorry to be a bore, but I wanted to say hi again ${request.name}!"))
+        } else {
+          scheduler.shutdown()
+          responseObserver.onCompleted()
+        }
+      }
+    }
+
+    scheduler.scheduleAtFixedRate(tick, initialDelay, interval, TimeUnit.MILLISECONDS)
+    (): Unit
   }
 }
