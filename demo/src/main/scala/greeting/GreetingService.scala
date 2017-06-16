@@ -20,6 +20,7 @@ package greeting
 import java.util.concurrent.{Executors, TimeUnit}
 import java.util.concurrent.atomic.AtomicInteger
 
+import freestyle.rpc.demo.greeting.{GreeterGrpc, MessageReply, MessageRequest}
 import io.grpc.stub.StreamObserver
 
 import scala.concurrent.Future
@@ -105,7 +106,9 @@ class GreetingService extends GreeterGrpc.Greeter {
         responseObserver.onCompleted()
       }
 
-      override def onNext(value: MessageRequest): Unit =
+      override def onNext(value: MessageRequest): Unit = {
+        responseObserver.onNext(MessageReply(s"$loggerInfo - I did receive $value"))
         println(s"[$loggerInfo] This is your message ${counter.incrementAndGet()}, ${value.name}")
+      }
     }
 }
