@@ -14,11 +14,22 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package freestyle.rpc.demo
+package user
 
-package object demo {
+import freestyle.rpc.demo.user.UserServiceGrpc.UserServiceStub
+import io.grpc.ManagedChannelBuilder
 
-  val host = "localhost"
-  val port = 50051
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
 
+class UserClient(host: String, port: Int) {
+
+  private[this] val channel =
+    ManagedChannelBuilder.forAddress(host, port).usePlaintext(true).build
+
+  private[this] val client: UserServiceStub = UserServiceGrpc.stub(channel)
+
+  def login(request: UserPassword): Future[User] =
+    client.login(request)
 }

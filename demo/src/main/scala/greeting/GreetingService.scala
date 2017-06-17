@@ -105,7 +105,9 @@ class GreetingService extends GreeterGrpc.Greeter {
         responseObserver.onCompleted()
       }
 
-      override def onNext(value: MessageRequest): Unit =
+      override def onNext(value: MessageRequest): Unit = {
+        responseObserver.onNext(MessageReply(s"$loggerInfo - I did receive $value"))
         println(s"[$loggerInfo] This is your message ${counter.incrementAndGet()}, ${value.name}")
+      }
     }
 }

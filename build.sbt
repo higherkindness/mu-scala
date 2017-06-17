@@ -9,7 +9,7 @@ lazy val root = project
   .settings(name := "freestyle-rpc")
   .settings(moduleName := "root")
   .settings(noPublishSettings: _*)
-  .aggregate(rpc, demo)
+  .aggregate(rpc, googleApi, demo)
 
 lazy val rpc = project
   .in(file("rpc"))
@@ -20,19 +20,39 @@ lazy val rpc = project
     ): _*
   )
 
+lazy val GOPATH = Option(sys.props("go.path")).getOrElse("/your/go/path")
+
+lazy val googleApi = project
+  .in(file("third_party"))
+  .settings(
+    PB.protoSources.in(Compile) ++= Seq(
+      file(s"$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis/")
+    ),
+    PB.targets.in(Compile) := Seq(scalapb.gen() -> sourceManaged.in(Compile).value),
+    libraryDependencies += "com.trueaccord.scalapb" %% "scalapb-runtime" % cv.scalapbVersion % "protobuf"
+  )
+
 lazy val demo = project
   .in(file("demo"))
-  .aggregate(rpc)
-  .dependsOn(rpc)
+  .aggregate(rpc, googleApi)
+  .dependsOn(rpc, googleApi)
   .settings(moduleName := "freestyle-rpc-demo")
   .settings(noPublishSettings: _*)
   .settings(commandAliases: _*)
   .settings(
     Seq(
-      PB.protoSources.in(Compile) := Seq(sourceDirectory.in(Compile).value / "proto"),
+      PB.protocOptions.in(Compile) ++= Seq(
+        "-I/usr/local/include -I.",
+        s"-I$GOPATH/src",
+        s"-I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis",
+        "--go_out=plugins=grpc:./demo/gateway",
+        "--grpc-gateway_out=logtostderr=true:./demo/gateway",
+        "--swagger_out=logtostderr=true:./demo/gateway"
+      ),
+      PB.protoSources.in(Compile) ++= Seq(sourceDirectory.in(Compile).value / "proto"),
       PB.targets.in(Compile) := Seq(scalapb.gen() -> sourceManaged.in(Compile).value),
       libraryDependencies ++= Seq(
-        "io.grpc"                % "grpc-netty"            % cv.grpcJavaVersion,
+        "io.grpc"                % "grpc-all"              % cv.grpcJavaVersion,
         "com.trueaccord.scalapb" %% "scalapb-runtime"      % cv.scalapbVersion % "protobuf",
         "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % cv.scalapbVersion
       )

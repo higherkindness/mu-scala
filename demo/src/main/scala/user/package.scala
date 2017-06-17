@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package freestyle.rpc.demo
 
-package object demo {
+package object user {
 
-  val host = "localhost"
-  val port = 50051
+  type DB = Map[(String, String), User]
 
+  val database: DB =
+    Map[(String, String), User](("frees", "password") -> User("Freestyle", "hello@frees.io"))
 }

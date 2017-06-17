@@ -14,11 +14,23 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package freestyle.rpc.demo
+package user
 
-package object demo {
+import freestyle.rpc.demo.greeting.GrpcServer
 
-  val host = "localhost"
-  val port = 50051
+import scala.concurrent.ExecutionContext
+
+object UserServerApp {
+
+  def main(args: Array[String]): Unit = {
+
+    val serverServiceDefinition =
+      UserServiceGrpc.bindService(new UserService, ExecutionContext.global)
+    val server = new GrpcServer(serverServiceDefinition)
+
+    server.start()
+    server.blockUntilShutdown()
+  }
 
 }

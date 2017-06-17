@@ -14,11 +14,23 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package freestyle.rpc.demo
+package user
 
-package object demo {
+import io.grpc.Status.Code
+import io.grpc.{Metadata, Status, StatusException}
 
-  val host = "localhost"
-  val port = 50051
+import scala.concurrent.Future
 
+class UserService extends UserServiceGrpc.UserService {
+
+  val errorStatus: Status = Code.NOT_FOUND.toStatus.withDescription("Unknown user")
+
+  def login(request: UserPassword): Future[User] = {
+    database.get((request.login, request.password)) match {
+      case Some(user) => Future.successful(user)
+      case None =>
+        Future.failed(new StatusException(errorStatus, new Metadata()))
+    }
+  }
 }

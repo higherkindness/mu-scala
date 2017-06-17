@@ -9,7 +9,7 @@
 
 Simple RPC with Freestyle
 
-## Demo
+## Greeting Demo
 
 Run server:
 
@@ -21,6 +21,102 @@ Run client:
 
 ```
 sbt runClient
+```
+
+## User Demo
+
+Based on https://github.com/grpc-ecosystem/grpc-gateway.
+
+[grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway) is a plugin of protoc. It reads gRPC service definition, and generates a reverse-proxy server which translates a RESTful JSON API into gRPC. This server is generated according to custom options in your gRPC definition. 
+This server is generated according to [custom options](https://cloud.google.com/service-management/reference/rpc/google.api#http) in your gRPC definition.
+
+### Prerequisites
+
+It's mandatory to follow these [instructions](https://github.com/grpc-ecosystem/grpc-gateway#installation) before proceeding. You might want use `brew install protobuf` if you're using OSX.
+
+And then:
+
+```bash
+$ brew install go
+$ go get -u github.com/golang/protobuf/{proto,protoc-gen-go}
+$ go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+$ go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
+$ go get -u -v google.golang.org/grpc
+$ go get -u github.com/golang/protobuf/protoc-gen-go
+```
+
+Finally, make sure that your `$GOPATH/bin` is in your `$PATH`.
+
+### Troubleshooting
+
+#### `failed to run aclocal: No such file or directory`
+
+The development release of a program source code often comes with `autogen.sh` which is used to prepare a build process, including verifying program functionality and generating configure script. This `autogen.sh` script then relies on `autoreconf` to invoke `autoconf`, `automake`, `aclocal` and other related tools.
+
+The missing `aclocal` is part of `automake` package. Thus, to fix this error, install `automake` package.
+
+* `OSX`: 
+
+https://gist.github.com/justinbellamy/2672db1c78f024f2d4fe
+
+* `Debian`, `Ubuntu` or `Linux Mint`:
+
+```bash
+$ sudo apt-get install automake
+```
+
+* `CentOS`, `Fedora` or `RHEL`:
+
+```bash
+$ sudo yum install automake
+```
+
+## Run Demo
+
+### Running the Server
+
+```
+sbt -Dgo.path=$GOPATH ";project demo;runMain freestyle.rpc.demo.user.UserServerApp"
+```
+
+### Running the Client
+
+Now, you could invoke the service:
+
+* Using the client, as usual:
+
+```
+sbt -Dgo.path=$GOPATH ";project demo;runMain freestyle.rpc.demo.user.UserClientApp"
+```
+
+### Generating and Running the Gateway
+
+You could generate a reverse proxy and writing an endpoint as it's described [here](https://github.com/grpc-ecosystem/grpc-gateway#usage).
+
+
+
+To run the gateway:
+
+```bash
+go run demo/gateway/server/entry.go
+```
+
+Then, you could use `curl` or similar to fetch the user over `HTTP`:
+
+```bash
+curl -X POST \
+     -H "Content-Type: application/json" \
+     -H "Cache-Control: no-cache" \
+     -H "Postman-Token: 1e813409-6aa6-8cd1-70be-51305f31667f" \
+     -d '{
+        "password" : "password"
+     }' "http://127.0.0.1:8080/v1/frees"
+```
+
+HTTP Response:
+
+```bash
+{"name":"Freestyle","email":"hello@frees.io"}%
 ```
 
 [comment]: # (Start Copyright)

@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package freestyle.rpc.demo
+package user
 
-package object demo {
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
-  val host = "localhost"
-  val port = 50051
+object UserClientApp {
 
+  def main(args: Array[String]): Unit = {
+    val request = UserPassword("frees", "password")
+    val client  = new UserClient(host, port)
+
+    val response = client.login(request)
+
+    println(s"Login Result -> ${Await.result(response, Duration.Inf)}")
+  }
 }
