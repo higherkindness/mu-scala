@@ -20,7 +20,6 @@ package greeting
 import java.util.concurrent.{Executors, TimeUnit}
 import java.util.concurrent.atomic.AtomicInteger
 
-import freestyle.rpc.demo.greeting.{GreeterGrpc, MessageReply, MessageRequest}
 import io.grpc.stub.StreamObserver
 
 import scala.concurrent.Future

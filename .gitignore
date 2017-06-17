@@ -29,3 +29,5 @@ project/plugins/project/
 .DS_Store
 
 /secring.gpg
+demo/gateway/*json
+demo/gateway/*go
