@@ -76,7 +76,7 @@ $ sudo yum install automake
 ### Running the Server
 
 ```
-sbt -Dgo.path=$GOPATH ";project demo;runMain freestyle.rpc.demo.user.UserServerApp"
+sbt -Dgo.path=$GOPATH ";project demo-http;runMain freestyle.rpc.demo.user.UserServerApp"
 ```
 
 ### Running the Client
@@ -86,14 +86,12 @@ Now, you could invoke the service:
 * Using the client, as usual:
 
 ```
-sbt -Dgo.path=$GOPATH ";project demo;runMain freestyle.rpc.demo.user.UserClientApp"
+sbt -Dgo.path=$GOPATH ";project demo-http;runMain freestyle.rpc.demo.user.UserClientApp"
 ```
 
 ### Generating and Running the Gateway
 
 You could generate a reverse proxy and writing an endpoint as it's described [here](https://github.com/grpc-ecosystem/grpc-gateway#usage).
-
-
 
 To run the gateway:
 
