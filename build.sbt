@@ -9,7 +9,7 @@ lazy val root = project
   .settings(name := "freestyle-rpc")
   .settings(moduleName := "root")
   .settings(noPublishSettings: _*)
-  .aggregate(rpc, googleApi, demo)
+  .aggregate(rpc, `demo-greeting`)
 
 lazy val rpc = project
   .in(file("rpc"))
@@ -20,7 +20,14 @@ lazy val rpc = project
     ): _*
   )
 
-lazy val GOPATH = Option(sys.props("go.path")).getOrElse("/your/go/path")
+lazy val `demo-greeting` = project
+  .in(file("demo/greeting"))
+  .settings(moduleName := "freestyle-rpc-demo-greeting")
+  .aggregate(rpc)
+  .dependsOn(rpc)
+  .settings(noPublishSettings: _*)
+  .settings(commandAliases: _*)
+  .settings(demoCommonSettings: _*)
 
 lazy val googleApi = project
   .in(file("third_party"))
@@ -32,37 +39,22 @@ lazy val googleApi = project
     libraryDependencies += "com.trueaccord.scalapb" %% "scalapb-runtime" % cv.scalapbVersion % "protobuf"
   )
 
-lazy val demo = project
-  .in(file("demo"))
-  .aggregate(rpc, googleApi)
-  .dependsOn(rpc, googleApi)
-  .settings(moduleName := "freestyle-rpc-demo")
+lazy val `demo-http` = project
+  .in(file("demo/http"))
+  .settings(moduleName := "freestyle-rpc-demo-http")
+  .aggregate(rpc, googleApi, `demo-greeting`)
+  .dependsOn(rpc, googleApi, `demo-greeting`)
   .settings(noPublishSettings: _*)
-  .settings(commandAliases: _*)
+  .settings(demoCommonSettings: _*)
   .settings(
     Seq(
       PB.protocOptions.in(Compile) ++= Seq(
         "-I/usr/local/include -I.",
         s"-I$GOPATH/src",
         s"-I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis",
-        "--go_out=plugins=grpc:./demo/gateway",
-        "--grpc-gateway_out=logtostderr=true:./demo/gateway",
-        "--swagger_out=logtostderr=true:./demo/gateway"
-      ),
-      PB.protoSources.in(Compile) ++= Seq(sourceDirectory.in(Compile).value / "proto"),
-      PB.targets.in(Compile) := Seq(scalapb.gen() -> sourceManaged.in(Compile).value),
-      libraryDependencies ++= Seq(
-        "io.grpc"                % "grpc-all"              % cv.grpcJavaVersion,
-        "com.trueaccord.scalapb" %% "scalapb-runtime"      % cv.scalapbVersion % "protobuf",
-        "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % cv.scalapbVersion
+        "--go_out=plugins=grpc:./demo/http/gateway",
+        "--grpc-gateway_out=logtostderr=true:./demo/http/gateway",
+        "--swagger_out=logtostderr=true:./demo/http/gateway"
       )
     ): _*
   )
-
-lazy val commandAliases: Seq[Def.Setting[_]] =
-  addCommandAlias(
-    "runServer",
-    ";project demo;runMain freestyle.rpc.demo.greeting.GreetingServerApp") ++
-    addCommandAlias(
-      "runClient",
-      ";project demo;runMain freestyle.rpc.demo.greeting.GreetingClientApp")
