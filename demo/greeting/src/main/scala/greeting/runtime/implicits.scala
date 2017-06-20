@@ -14,12 +14,27 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package freestyle.rpc.demo
+package greeting.runtime
 
-package object demo {
+import freestyle._
+import freestyle.implicits._
+import freestyle.rpc.demo.greeting._
+import freestyle.rpc.server._
+import freestyle.rpc.server.implicits._
+import freestyle.rpc.server.handlers._
 
-  val host      = "localhost"
-  val portNode1 = 50051
-  val portNode2 = 50052
+import scala.concurrent.{ExecutionContext, Future}
+
+object implicits {
+
+  implicit val config = Config(portNode1)
+
+  implicit val grpcConfigs: List[GrpcConfig] = List(
+    AddService(GreeterGrpc.bindService(new GreetingService, ExecutionContext.global))
+  )
+
+  implicit val grpcServerKleisli =
+    new GrpcServerHandler[Future] andThen new GrpcConfigInterpreter[Future]
 
 }

@@ -22,7 +22,8 @@ object GreetingClientApp {
   def main(args: Array[String]): Unit = {
 
     val request = MessageRequest("Freestyle")
-    val client  = new GreetingClient(host, port)
+    val client  = new GreetingClient(host, portNode1)
+    // val client  = new GreetingClient(host, portNode2)
 
     // http://www.grpc.io/docs/guides/concepts.html
 

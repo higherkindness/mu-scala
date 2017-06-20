@@ -15,19 +15,26 @@
  */
 
 package freestyle.rpc.demo
-package greeting
+package user.runtime
 
-import cats.implicits._
-import runtime.implicits._
+import freestyle._
+import freestyle.implicits._
+import freestyle.rpc.demo.user.{UserService, UserServiceGrpc}
 import freestyle.rpc.server._
 import freestyle.rpc.server.implicits._
+import freestyle.rpc.server.handlers._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.Duration
-import scala.concurrent.Await
+import scala.concurrent.{ExecutionContext, Future}
 
-object GreetingServerApp {
+object implicits {
 
-  def main(args: Array[String]): Unit =
-    Await.result(server[GrpcServer.Op].bootstrapFuture, Duration.Inf)
+  implicit val config = Config(portNode1)
+
+  implicit val grpcConfigs: List[GrpcConfig] = List(
+    AddService(UserServiceGrpc.bindService(new UserService, ExecutionContext.global))
+  )
+
+  implicit val grpcServerKleisli =
+    new GrpcServerHandler[Future] andThen new GrpcConfigInterpreter[Future]
+
 }

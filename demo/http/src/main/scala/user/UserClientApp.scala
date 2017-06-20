@@ -24,7 +24,7 @@ object UserClientApp {
 
   def main(args: Array[String]): Unit = {
     val request = UserPassword("frees", "password")
-    val client  = new UserClient(host, port)
+    val client  = new UserClient(host, portNode1)
 
     val response = client.login(request)
 

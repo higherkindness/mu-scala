@@ -96,7 +96,7 @@ You could generate a reverse proxy and writing an endpoint as it's described [he
 To run the gateway:
 
 ```bash
-go run demo/gateway/server/entry.go
+go run demo/http/gateway/server/entry.go
 ```
 
 Then, you could use `curl` or similar to fetch the user over `HTTP`:

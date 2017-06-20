@@ -14,31 +14,37 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.demo
-package greeting
+package freestyle.rpc
+package server
 
-import io.grpc.{Server, ServerBuilder, ServerServiceDefinition}
+import freestyle._
+import io.grpc._
 
-class GrpcServer(serverServiceDefinition: ServerServiceDefinition) {
+import scala.concurrent.duration.TimeUnit
 
-  var server: Option[Server] = None
+@free
+trait GrpcServer {
 
-  def start(): Unit = {
-    server = Option(
-      ServerBuilder
-        .forPort(port)
-        .addService(serverServiceDefinition)
-        .build
-        .start
-    )
+  def start(): FS[Server]
 
-    Runtime.getRuntime.addShutdownHook(new Thread() {
-      override def run(): Unit = stopServer()
-    })
-  }
+  def getPort: FS[Int]
 
-  def stopServer(): Unit = server.foreach(_.shutdown())
+  def getServices: FS[List[ServerServiceDefinition]]
 
-  def blockUntilShutdown(): Unit =
-    server.foreach(_.awaitTermination())
+  def getImmutableServices: FS[List[ServerServiceDefinition]]
+
+  def getMutableServices: FS[List[ServerServiceDefinition]]
+
+  def shutdown(): FS[Server]
+
+  def shutdownNow(): FS[Server]
+
+  def isShutdown: FS[Boolean]
+
+  def isTerminated: FS[Boolean]
+
+  def awaitTerminationTimeout(timeout: Long, unit: TimeUnit): FS[Boolean]
+
+  def awaitTermination(): FS[Unit]
+
 }
