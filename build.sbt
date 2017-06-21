@@ -29,6 +29,15 @@ lazy val `demo-greeting` = project
   .settings(commandAliases: _*)
   .settings(demoCommonSettings: _*)
 
+lazy val `demo-protocolgen` = project
+  .in(file("demo/protocolgen"))
+  .settings(moduleName := "freestyle-rpc-demo-protocolgen")
+  .aggregate(rpc)
+  .dependsOn(rpc)
+  .settings(noPublishSettings: _*)
+  .settings(commandAliases: _*)
+  .settings(demoCommonSettings: _*)
+
 lazy val googleApi = project
   .in(file("third_party"))
   .settings(
