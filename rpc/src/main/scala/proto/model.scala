@@ -179,4 +179,8 @@ object model {
       reservedTags: List[Int] = Nil,
       fields: List[ProtoMessageField] = Nil)
 
+  final case class ProtoService()
+
+  case class ProtoDefinitions(messages: List[ProtoMessage], services: List[ProtoService])
+
 }

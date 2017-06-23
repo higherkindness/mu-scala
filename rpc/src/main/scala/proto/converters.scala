@@ -18,14 +18,10 @@ package freestyle
 package rpc
 package protocol
 
-import java.util.NoSuchElementException
-
 import freestyle.rpc.protocol.model._
-import simulacrum.typeclass
 
-import scala.meta.Defn.{Class, Trait}
+import scala.meta.Defn.Class
 import scala.meta._
-import scala.meta.contrib._
 
 object converters {
 

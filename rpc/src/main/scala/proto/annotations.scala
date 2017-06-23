@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle
-package rpc
-package protocol
+package proto
 
 import scala.annotation.StaticAnnotation
 

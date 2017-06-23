@@ -19,20 +19,13 @@ package rpc
 package protocol
 
 import java.io.File
-import java.nio.file.Files
 
-import cats._
 import cats.implicits._
-import freestyle.rpc.protocol.converters._
-import freestyle.rpc.protocol.encoders.ProtoEncoder
-import freestyle.rpc.protocol.model.ProtoMessage
+import freestyle.rpc.protocol.encoders._
+import freestyle.rpc.protocol.model._
+import freestyle.rpc.protocol.processors._
 
-import scala.collection.immutable
-import scala.meta.Mod.Annot
-import scala.meta._
 import scala.util.Try
-import scala.meta.Defn.{Class, Trait}
-import scala.meta.contrib._
 
 object ProtoCodeGen {
 
@@ -43,7 +36,11 @@ object ProtoCodeGen {
         jfile.getParentFile.mkdirs()
         // Do scala.meta code generation here.
 
-        println(ProtoAnnotationProcessor[Try].processAnnotations(new File(input)))
+        for {
+          definitions <- ProtoAnnotationsProcessor[Try].process(new File(input))
+          strMessages = definitions.messages.map(ProtoEncoder[ProtoMessage].encode)
+        } yield println(strMessages)
+
 //        Files.write(
 //          jfile.toPath,
 //          source"""package mycodegen
@@ -53,43 +50,6 @@ object ProtoCodeGen {
 //                   """.syntax.getBytes("UTF-8")
 //        )
     }
-  }
-
-  class ProtoAnnotationProcessor[M[_]](
-      implicit ME: MonadError[M, Throwable],
-      converter: ScalaMetaClass2ProtoMessage,
-      encoder: ProtoEncoder[ProtoMessage]) {
-
-    def processAnnotations(file: File) =
-      for {
-        source <- sourceOf(file)
-        messages      = messageClasses(source)
-        services      = serviceClasses(source)
-        protoMessages = messages.map(encodeMessage)
-      } yield protoMessages
-
-    private[this] def sourceOf(file: File): M[Source] =
-      ME.catchNonFatal(file.parse[Source].get)
-
-    private[this] def messageClasses(source: Source): immutable.Seq[Class] = source.collect {
-      case c: Class if c.hasMod(mod"@message") => c
-    }
-
-    private[this] def serviceClasses(source: Source): immutable.Seq[Trait] = source.collect {
-      case t: Trait if t.hasMod(mod"@service") => t
-    }
-
-    private[this] def encodeMessage(c: Class): String =
-      encoder.encode(converter.convert(c))
-
-  }
-
-  object ProtoAnnotationProcessor {
-    def apply[M[_]](
-        implicit ME: MonadError[M, Throwable],
-        PC: ScalaMetaClass2ProtoMessage,
-        EN: ProtoEncoder[ProtoMessage]) =
-      new ProtoAnnotationProcessor[M]()
   }
 
 }

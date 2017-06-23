@@ -6,6 +6,7 @@ package protocolgen
 import freestyle.internal.EffectLike
 import freestyle.rpc.protocol._
 import io.grpc.stub.StreamObserver
+import proto.{message, rpc, service}
 
 @message
 case class MessageRequest(name: String, n: Int)
