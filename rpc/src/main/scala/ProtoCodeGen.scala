@@ -36,10 +36,10 @@ object ProtoCodeGen {
       case input :: output :: Nil if input.endsWith(".scala") =>
         val inputFile = new File(input)
 
-        val processed = ProtoAnnotationsProcessor[Try].process(inputFile).map { definitions =>
-          definitions.messages.map(ProtoEncoder[ProtoMessage].encode) ++ definitions.services
-            .map(ProtoEncoder[ProtoService].encode)
-        }
+        val processed =
+          ProtoAnnotationsProcessor[Try]
+            .process(inputFile)
+            .map(ProtoEncoder[ProtoDefinitions].encode)
 
         processed match {
           case Success(protoContents) =>
@@ -48,10 +48,9 @@ object ProtoCodeGen {
             println(protoContents)
             Files.write(
               new File(jfile.toPath + "/" + inputFile.getName.replaceAll(".scala", ".proto")).toPath,
-              protoContents
-                .mkString("\n\n")
-                .getBytes(Charset.forName("UTF-8")),
-              StandardOpenOption.CREATE_NEW
+              protoContents.getBytes(Charset.forName("UTF-8")),
+              StandardOpenOption.CREATE
+              //StandardOpenOption.CREATE_NEW
             )
 
           case Failure(e) => e.printStackTrace()

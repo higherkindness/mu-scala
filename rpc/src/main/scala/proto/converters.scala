@@ -20,7 +20,7 @@ package protocol
 
 import freestyle.rpc.protocol.model._
 
-import scala.meta.Defn.{Class, Trait}
+import scala.meta.Defn.{Class, Object, Trait}
 import scala.meta._
 import scala.meta.contrib._
 
@@ -31,14 +31,20 @@ object converters {
   }
 
   class DefaultScalaMetaSource2ProtoDefinitions(
-      implicit MC: ScalaMetaClass2ProtoMessage,
+      implicit OC: ScalaMetaObject2ProtoOptions,
+      MC: ScalaMetaClass2ProtoMessage,
       SC: ScalaMetaTrait2ProtoService)
       extends ScalaMetaSource2ProtoDefinitions {
 
     override def convert(s: Source): ProtoDefinitions = ProtoDefinitions(
+      options = optionDirectives(s).toList.flatMap(OC.convert),
       messages = messageClasses(s).map(MC.convert).toList,
       services = serviceClasses(s).map(SC.convert).toList
     )
+
+    private[this] def optionDirectives(source: Source): Seq[Object] = source.collect {
+      case o: Object /*if o.hasMod(mod"@option")*/ => o
+    }
 
     private[this] def messageClasses(source: Source): Seq[Class] = source.collect {
       case c: Class if c.hasMod(mod"@message") => c
@@ -51,7 +57,8 @@ object converters {
 
   object ScalaMetaSource2ProtoDefinitions {
     implicit def defaultSourceToProtoDefinitions(
-        implicit MC: ScalaMetaClass2ProtoMessage,
+        implicit OC: ScalaMetaObject2ProtoOptions,
+        MC: ScalaMetaClass2ProtoMessage,
         SC: ScalaMetaTrait2ProtoService): ScalaMetaSource2ProtoDefinitions =
       new DefaultScalaMetaSource2ProtoDefinitions
   }
@@ -107,7 +114,6 @@ object converters {
     implicit def defaultTrait2ServiceConverter =
       new ScalaMetaTrait2ProtoService {
         override def convert(t: Trait): ProtoService = {
-          println(t.structure)
           ProtoService(
             name = t.name.value,
             rpcs = t.collect {
@@ -160,6 +166,28 @@ object converters {
               throw new IllegalArgumentException(s"unexpected $param without return type")
           }
 
+      }
+  }
+
+  trait ScalaMetaObject2ProtoOptions {
+    def convert(o: Object): List[ProtoOption]
+  }
+
+  object ScalaMetaObject2ProtoOptions {
+    implicit def defaultObject2Options: ScalaMetaObject2ProtoOptions =
+      new ScalaMetaObject2ProtoOptions {
+        override def convert(o: Object): List[ProtoOption] = {
+          o.mods.collect {
+            case Mod.Annot(
+                Term.Apply(
+                  Ctor.Ref.Name("option"),
+                  Seq(
+                    Term.Arg.Named(Term.Name("name"), Lit.String(name)),
+                    Term.Arg.Named(Term.Name("value"), Lit.String(value)),
+                    Term.Arg.Named(Term.Name("quote"), Lit.Boolean(quote))))) =>
+              ProtoOption(name, value, quote)
+          }.toList
+        }
       }
   }
 

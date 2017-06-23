@@ -49,8 +49,10 @@ object processors {
 
     def process(file: File): M[ProtoDefinitions] = sourceOf(file) map C.convert
 
-    private[this] def sourceOf(file: File): M[Source] =
-      ME.catchNonFatal(file.parse[Source].get)
+    private[this] def sourceOf(file: File): M[Source] = {
+      val source = ME.catchNonFatal(file.parse[Source].get)
+      source
+    }
 
   }
 

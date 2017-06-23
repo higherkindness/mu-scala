@@ -35,8 +35,7 @@ object encoders {
       new ProtoEncoder[ProtoMessageField] {
         override def encode(a: ProtoMessageField): String = a match {
           case m: ProtoEnum =>
-            s"""
-               |enum ${m.id} {
+            s"""enum ${m.id} {
                |  ${m.values.zipWithIndex.map { case (v, i) => s"${v.name} = $i" }.mkString(";\n")}
                |}
                |${a.mod.fold("")(m => PME.encode(m) + " ")}${a.id} ${a.name} = ${a.tag};
@@ -49,8 +48,7 @@ object encoders {
         implicit MFEncoder: ProtoEncoder[ProtoMessageField]): ProtoEncoder[ProtoMessage] =
       new ProtoEncoder[ProtoMessage] {
         override def encode(a: ProtoMessage): String =
-          s"""
-             |message ${a.name} {
+          s"""message ${a.name} {
              |${a.fields.map(MFEncoder.encode).mkString("   ", "\n   ", "")}
              |}
            """.stripMargin
@@ -69,8 +67,7 @@ object encoders {
         implicit MFEncoder: ProtoEncoder[ProtoServiceField]): ProtoEncoder[ProtoService] =
       new ProtoEncoder[ProtoService] {
         override def encode(a: ProtoService): String =
-          s"""
-             |service ${a.name} {
+          s"""service ${a.name} {
              |${a.rpcs.map(MFEncoder.encode).mkString("   ", "\n   ", "")}
              |}
            """.stripMargin
@@ -88,6 +85,28 @@ object encoders {
           case Some(BidirectionalStreaming) =>
             s"rpc ${a.name} (stream ${a.request.capitalize}) returns (stream ${a.response.capitalize}) {}"
         }
+
+      }
+
+    implicit def defaultProtoOptionEncoder: ProtoEncoder[ProtoOption] =
+      new ProtoEncoder[ProtoOption] {
+        override def encode(a: ProtoOption): String =
+          s"option ${a.name} = ${if (a.quote) { "\"" + a.value + "\"" } else a.value};"
+      }
+
+    implicit def defaultProtoDefinitionsEncoder(
+        implicit POM: ProtoEncoder[ProtoOption],
+        PEM: ProtoEncoder[ProtoMessage],
+        PES: ProtoEncoder[ProtoService]): ProtoEncoder[ProtoDefinitions] =
+      new ProtoEncoder[ProtoDefinitions] {
+        override def encode(d: ProtoDefinitions): String =
+          s"""${d.prelude}
+             |
+             |${d.options.map(POM.encode).mkString("\n")}
+             |
+             |${d.messages.map(PEM.encode).mkString("\n")}
+             |${d.services.map(PES.encode).mkString("\n")}
+           """.stripMargin
 
       }
 

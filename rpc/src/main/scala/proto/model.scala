@@ -21,15 +21,22 @@ package protocol
 object model {
 
   sealed trait ProtoFieldMod extends Product with Serializable
-  case object Optional       extends ProtoFieldMod
-  case object Repeated       extends ProtoFieldMod
-  case object Required       extends ProtoFieldMod
+
+  case object Optional extends ProtoFieldMod
+
+  case object Repeated extends ProtoFieldMod
+
+  case object Required extends ProtoFieldMod
 
   sealed trait ProtoMessageField extends Product with Serializable {
     def mod: Option[ProtoFieldMod]
+
     def name: String
+
     def id: String
+
     def tag: Int
+
     def comment: Option[String]
   }
 
@@ -187,6 +194,12 @@ object model {
       response: String,
       streamingType: Option[StreamingType])
 
-  case class ProtoDefinitions(messages: List[ProtoMessage], services: List[ProtoService])
+  final case class ProtoOption(name: String, value: String, quote: Boolean)
+
+  final case class ProtoDefinitions(
+      prelude: String = "syntax = \"proto3\";",
+      options: List[ProtoOption],
+      messages: List[ProtoMessage],
+      services: List[ProtoService])
 
 }

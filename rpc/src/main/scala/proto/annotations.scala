@@ -29,6 +29,8 @@ package object protocol {
 
   class message extends StaticAnnotation
 
+  class option(val name: String, val value: String, val quote: Boolean) extends StaticAnnotation
+
   sealed trait StreamingType         extends Product with Serializable
   case object RequestStreaming       extends StreamingType
   case object ResponseStreaming      extends StreamingType
