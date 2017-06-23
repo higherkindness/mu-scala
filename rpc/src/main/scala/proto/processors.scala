@@ -26,10 +26,7 @@ import freestyle.rpc.protocol.converters._
 import freestyle.rpc.protocol.model.ProtoDefinitions
 import simulacrum.typeclass
 
-import scala.collection.immutable
-import scala.meta.Defn.{Class, Trait}
 import scala.meta._
-import scala.meta.contrib._
 
 object processors {
 
@@ -40,33 +37,20 @@ object processors {
 
   object ProtoAnnotationsProcessor {
     implicit def defaultProtoAnnotationsProcessor[M[_]](
-        implicit ME: MonadError[M, Throwable]): ProtoAnnotationsProcessor[M] =
+        implicit ME: MonadError[M, Throwable],
+        C: ScalaMetaSource2ProtoDefinitions): ProtoAnnotationsProcessor[M] =
       new DefaultProtoAnnotationsProcessor[M]()
   }
 
   class DefaultProtoAnnotationsProcessor[M[_]](
       implicit ME: MonadError[M, Throwable],
-      converter: ScalaMetaClass2ProtoMessage)
-      extends ProtoAnnotationsProcessor[M] {
+      C: ScalaMetaSource2ProtoDefinitions
+  ) extends ProtoAnnotationsProcessor[M] {
 
-    def process(file: File): M[ProtoDefinitions] =
-      for {
-        source <- sourceOf(file)
-        messages      = messageClasses(source)
-        services      = serviceClasses(source)
-        protoMessages = messages.map(converter.convert)
-      } yield ProtoDefinitions(protoMessages.toList, Nil)
+    def process(file: File): M[ProtoDefinitions] = sourceOf(file) map C.convert
 
     private[this] def sourceOf(file: File): M[Source] =
       ME.catchNonFatal(file.parse[Source].get)
-
-    private[this] def messageClasses(source: Source): immutable.Seq[Class] = source.collect {
-      case c: Class if c.hasMod(mod"@message") => c
-    }
-
-    private[this] def serviceClasses(source: Source): immutable.Seq[Trait] = source.collect {
-      case t: Trait if t.hasMod(mod"@service") => t
-    }
 
   }
 

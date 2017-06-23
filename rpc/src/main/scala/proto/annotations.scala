@@ -14,10 +14,24 @@
  * limitations under the License.
  */
 
-package proto
+package freestyle
+package rpc
 
 import scala.annotation.StaticAnnotation
 
-class service extends StaticAnnotation
-class rpc     extends StaticAnnotation
-class message extends StaticAnnotation
+package object protocol {
+
+  class service extends StaticAnnotation
+
+  class rpc extends StaticAnnotation
+
+  class stream[S <: StreamingType] extends StaticAnnotation
+
+  class message extends StaticAnnotation
+
+  sealed trait StreamingType         extends Product with Serializable
+  case object RequestStreaming       extends StreamingType
+  case object ResponseStreaming      extends StreamingType
+  case object BidirectionalStreaming extends StreamingType
+
+}

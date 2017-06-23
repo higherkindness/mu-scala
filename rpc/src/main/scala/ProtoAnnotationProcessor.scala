@@ -34,12 +34,13 @@ object ProtoCodeGen {
       case input :: output :: Nil if input.endsWith(".scala") =>
         val jfile = new File(output)
         jfile.getParentFile.mkdirs()
-        // Do scala.meta code generation here.
+        val processed = ProtoAnnotationsProcessor[Try].process(new File(input)).map {
+          definitions =>
+            definitions.messages.map(ProtoEncoder[ProtoMessage].encode) ++ definitions.services
+              .map(ProtoEncoder[ProtoService].encode)
+        }
 
-        for {
-          definitions <- ProtoAnnotationsProcessor[Try].process(new File(input))
-          strMessages = definitions.messages.map(ProtoEncoder[ProtoMessage].encode)
-        } yield println(strMessages)
+        println(processed)
 
 //        Files.write(
 //          jfile.toPath,

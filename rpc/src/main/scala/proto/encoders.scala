@@ -65,6 +65,32 @@ object encoders {
         }
       }
 
+    implicit def defaultProtoServiceEncoder(
+        implicit MFEncoder: ProtoEncoder[ProtoServiceField]): ProtoEncoder[ProtoService] =
+      new ProtoEncoder[ProtoService] {
+        override def encode(a: ProtoService): String =
+          s"""
+             |service ${a.name} {
+             |${a.rpcs.map(MFEncoder.encode).mkString("   ", "\n   ", "")}
+             |}
+           """.stripMargin
+      }
+
+    implicit def defaultProtoServiceFieldEncoder: ProtoEncoder[ProtoServiceField] =
+      new ProtoEncoder[ProtoServiceField] {
+        override def encode(a: ProtoServiceField): String = a.streamingType match {
+          case None =>
+            s"rpc ${a.name} (${a.request.capitalize}) returns (${a.response.capitalize}) {}"
+          case Some(RequestStreaming) =>
+            s"rpc ${a.name} (stream ${a.request.capitalize}) returns (${a.response.capitalize}) {}"
+          case Some(ResponseStreaming) =>
+            s"rpc ${a.name} (${a.request.capitalize}) returns (stream ${a.response.capitalize}) {}"
+          case Some(BidirectionalStreaming) =>
+            s"rpc ${a.name} (stream ${a.request.capitalize}) returns (stream ${a.response.capitalize}) {}"
+        }
+
+      }
+
   }
 
 }

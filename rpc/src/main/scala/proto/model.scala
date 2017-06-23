@@ -179,7 +179,13 @@ object model {
       reservedTags: List[Int] = Nil,
       fields: List[ProtoMessageField] = Nil)
 
-  final case class ProtoService()
+  final case class ProtoService(name: String, rpcs: List[ProtoServiceField])
+
+  final case class ProtoServiceField(
+      name: String,
+      request: String,
+      response: String,
+      streamingType: Option[StreamingType])
 
   case class ProtoDefinitions(messages: List[ProtoMessage], services: List[ProtoService])
 

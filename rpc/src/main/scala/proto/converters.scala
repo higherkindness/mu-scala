@@ -20,10 +20,41 @@ package protocol
 
 import freestyle.rpc.protocol.model._
 
-import scala.meta.Defn.Class
+import scala.meta.Defn.{Class, Trait}
 import scala.meta._
+import scala.meta.contrib._
 
 object converters {
+
+  trait ScalaMetaSource2ProtoDefinitions {
+    def convert(s: Source): ProtoDefinitions
+  }
+
+  class DefaultScalaMetaSource2ProtoDefinitions(
+      implicit MC: ScalaMetaClass2ProtoMessage,
+      SC: ScalaMetaTrait2ProtoService)
+      extends ScalaMetaSource2ProtoDefinitions {
+
+    override def convert(s: Source): ProtoDefinitions = ProtoDefinitions(
+      messages = messageClasses(s).map(MC.convert).toList,
+      services = serviceClasses(s).map(SC.convert).toList
+    )
+
+    private[this] def messageClasses(source: Source): Seq[Class] = source.collect {
+      case c: Class if c.hasMod(mod"@message") => c
+    }
+
+    private[this] def serviceClasses(source: Source): Seq[Trait] = source.collect {
+      case t: Trait if t.hasMod(mod"@service") => t
+    }
+  }
+
+  object ScalaMetaSource2ProtoDefinitions {
+    implicit def defaultSourceToProtoDefinitions(
+        implicit MC: ScalaMetaClass2ProtoMessage,
+        SC: ScalaMetaTrait2ProtoService): ScalaMetaSource2ProtoDefinitions =
+      new DefaultScalaMetaSource2ProtoDefinitions
+  }
 
   trait ScalaMetaClass2ProtoMessage {
     def convert(c: Class): ProtoMessage
@@ -67,4 +98,69 @@ object converters {
         }
       }
   }
+
+  trait ScalaMetaTrait2ProtoService {
+    def convert(t: Trait): ProtoService
+  }
+
+  object ScalaMetaTrait2ProtoService {
+    implicit def defaultTrait2ServiceConverter =
+      new ScalaMetaTrait2ProtoService {
+        override def convert(t: Trait): ProtoService = {
+          println(t.structure)
+          ProtoService(
+            name = t.name.value,
+            rpcs = t.collect {
+              case q"@rpc @stream[ResponseStreaming] def $name[..$tparams]($request, observer: StreamObserver[$response]): FS[Unit]" =>
+                ProtoServiceField(
+                  name = name.value,
+                  request = extractParamType(request),
+                  response = response.toString(),
+                  streamingType = Some(ResponseStreaming))
+              case q"@rpc @stream[RequestStreaming] def $name[..$tparams]($param): FS[StreamObserver[$response]]" =>
+                ProtoServiceField(
+                  name = name.value,
+                  request = extractParamStreamingType(param),
+                  response = response.toString(),
+                  streamingType = Some(RequestStreaming)
+                )
+              case q"@rpc @stream[BidirectionalStreaming] def $name[..$tparams]($param): FS[StreamObserver[$response]]" =>
+                ProtoServiceField(
+                  name = name.value,
+                  request = extractParamStreamingType(param),
+                  response = response.toString(),
+                  streamingType = Some(BidirectionalStreaming)
+                )
+              case q"@rpc def $name[..$tparams]($request): FS[$response]" =>
+                ProtoServiceField(
+                  name = name.value,
+                  request = extractParamType(request),
+                  response = response.toString(),
+                  streamingType = None)
+            }
+          )
+        }
+
+        private[this] def extractParamType(param: Term.Param): String =
+          param.decltpe match {
+            case Some(retType) => retType.toString()
+            case None =>
+              throw new IllegalArgumentException(s"unexpected $param without return type")
+          }
+
+        private[this] def extractParamStreamingType(param: Term.Param): String =
+          param.decltpe match {
+            case Some(retType) =>
+              retType match {
+                case t"StreamObserver[$request]" => request.toString()
+                case _ =>
+                  throw new IllegalArgumentException(s"$param not enclosed in StreamObserver[_]")
+              }
+            case None =>
+              throw new IllegalArgumentException(s"unexpected $param without return type")
+          }
+
+      }
+  }
+
 }
