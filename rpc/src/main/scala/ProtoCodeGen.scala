@@ -19,37 +19,44 @@ package rpc
 package protocol
 
 import java.io.File
+import java.nio.charset.Charset
+import java.nio.file.{Files, StandardOpenOption}
 
 import cats.implicits._
 import freestyle.rpc.protocol.encoders._
 import freestyle.rpc.protocol.model._
 import freestyle.rpc.protocol.processors._
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 object ProtoCodeGen {
 
   def main(args: Array[String]): Unit = {
     args.toList match {
       case input :: output :: Nil if input.endsWith(".scala") =>
-        val jfile = new File(output)
-        jfile.getParentFile.mkdirs()
-        val processed = ProtoAnnotationsProcessor[Try].process(new File(input)).map {
-          definitions =>
-            definitions.messages.map(ProtoEncoder[ProtoMessage].encode) ++ definitions.services
-              .map(ProtoEncoder[ProtoService].encode)
+        val inputFile = new File(input)
+
+        val processed = ProtoAnnotationsProcessor[Try].process(inputFile).map { definitions =>
+          definitions.messages.map(ProtoEncoder[ProtoMessage].encode) ++ definitions.services
+            .map(ProtoEncoder[ProtoService].encode)
         }
 
-        println(processed)
+        processed match {
+          case Success(protoContents) =>
+            val jfile = new File(output)
+            //jfile.getParentFile.mkdirs()
+            println(protoContents)
+            Files.write(
+              new File(jfile.toPath + "/" + inputFile.getName.replaceAll(".scala", ".proto")).toPath,
+              protoContents
+                .mkString("\n\n")
+                .getBytes(Charset.forName("UTF-8")),
+              StandardOpenOption.CREATE_NEW
+            )
 
-//        Files.write(
-//          jfile.toPath,
-//          source"""package mycodegen
-//                   object Generated {
-//                     val msg = "Hello world!"
-//                   }
-//                   """.syntax.getBytes("UTF-8")
-//        )
+          case Failure(e) => e.printStackTrace()
+        }
+
     }
   }
 
