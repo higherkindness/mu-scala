@@ -16,7 +16,8 @@ lazy val rpc = project
   .settings(moduleName := "freestyle-rpc")
   .settings(
     Seq(
-      libraryDependencies ++= commonDeps ++ freestyleCoreDeps()
+      libraryDependencies ++= commonDeps ++ freestyleCoreDeps(),
+      libraryDependencies += "org.scalameta" %% "contrib" % "1.8.0"
     ): _*
   )
 

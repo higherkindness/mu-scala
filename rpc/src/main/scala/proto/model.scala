@@ -20,7 +20,13 @@ package protocol
 
 object model {
 
+  sealed trait ProtoFieldMod extends Product with Serializable
+  case object Optional       extends ProtoFieldMod
+  case object Repeated       extends ProtoFieldMod
+  case object Required       extends ProtoFieldMod
+
   sealed trait ProtoMessageField extends Product with Serializable {
+    def mod: Option[ProtoFieldMod]
     def name: String
     def id: String
     def tag: Int
@@ -28,6 +34,7 @@ object model {
   }
 
   final case class ProtoDouble(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       id: String = "double",
       tag: Int,
@@ -35,6 +42,7 @@ object model {
       extends ProtoMessageField
 
   final case class ProtoFloat(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       id: String = "float",
       tag: Int,
@@ -42,6 +50,7 @@ object model {
       extends ProtoMessageField
 
   final case class ProtoInt32(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       id: String = "int32",
       tag: Int,
@@ -49,6 +58,7 @@ object model {
       extends ProtoMessageField
 
   final case class ProtoInt64(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       id: String = "int64",
       tag: Int,
@@ -56,6 +66,7 @@ object model {
       extends ProtoMessageField
 
   final case class ProtoUInt32(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       id: String = "uint32",
       tag: Int,
@@ -63,6 +74,7 @@ object model {
       extends ProtoMessageField
 
   final case class ProtoUInt64(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       id: String = "uint64",
       tag: Int,
@@ -70,6 +82,7 @@ object model {
       extends ProtoMessageField
 
   final case class ProtoSInt32(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       id: String = "sint32",
       tag: Int,
@@ -77,6 +90,7 @@ object model {
       extends ProtoMessageField
 
   final case class ProtoSInt64(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       id: String = "sint64",
       tag: Int,
@@ -84,6 +98,7 @@ object model {
       extends ProtoMessageField
 
   final case class ProtoFInt32(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       id: String = "fixed32",
       tag: Int,
@@ -91,6 +106,7 @@ object model {
       extends ProtoMessageField
 
   final case class ProtoFInt64(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       id: String = "fixed64",
       tag: Int,
@@ -98,6 +114,7 @@ object model {
       extends ProtoMessageField
 
   final case class ProtoSFInt32(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       id: String = "sfixed32",
       tag: Int,
@@ -105,6 +122,7 @@ object model {
       extends ProtoMessageField
 
   final case class ProtoSFInt64(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       id: String = "sfixed64",
       tag: Int,
@@ -112,6 +130,7 @@ object model {
       extends ProtoMessageField
 
   final case class ProtoBool(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       id: String = "bool",
       tag: Int,
@@ -119,6 +138,7 @@ object model {
       extends ProtoMessageField
 
   final case class ProtoString(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       id: String = "string",
       tag: Int,
@@ -126,6 +146,7 @@ object model {
       extends ProtoMessageField
 
   final case class ProtoBytes(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       id: String = "bytes",
       tag: Int,
@@ -133,6 +154,7 @@ object model {
       extends ProtoMessageField
 
   final case class ProtoEnum(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       id: String = "enum",
       tag: Int,
@@ -140,16 +162,18 @@ object model {
       comment: Option[String] = None)
       extends ProtoMessageField
 
-  final case class ProtoEnumValue(name: String, tag: Int)
+  final case class ProtoEnumValue(mod: Option[ProtoFieldMod] = None, name: String, tag: Int)
 
   final case class ProtoCustomType(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       id: String,
       tag: Int,
       comment: Option[String] = None)
-      extends ProtoMessageField(name, id, tag, comment)
+      extends ProtoMessageField
 
   final case class ProtoMessage(
+      mod: Option[ProtoFieldMod] = None,
       name: String,
       reservedNames: List[String] = Nil,
       reservedTags: List[Int] = Nil,
