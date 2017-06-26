@@ -24,9 +24,9 @@ import io.grpc._
 
 case class Config(port: Int)
 
-sealed trait GrpcConfig
+sealed trait GrpcConfig extends Product with Serializable
 
-case object GetDirectExecutor extends GrpcConfig
+case object DirectExecutor extends GrpcConfig
 
 case class SetExecutor(executor: Executor) extends GrpcConfig
 

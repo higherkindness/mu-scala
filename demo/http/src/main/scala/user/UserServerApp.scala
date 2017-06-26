@@ -18,11 +18,10 @@ package freestyle.rpc.demo
 package user
 
 import cats.implicits._
-import runtime.implicits._
 import freestyle.rpc.server._
 import freestyle.rpc.server.implicits._
+import runtime.implicits._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.concurrent.Await
 

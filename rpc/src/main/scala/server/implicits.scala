@@ -18,17 +18,10 @@ package freestyle.rpc
 package server
 
 import cats.{~>, Monad}
-import freestyle.{Capture, FreeS}
 import freestyle._
 import freestyle.implicits._
 
 import scala.concurrent.Future
-
-trait FutureCaptureInstance {
-  implicit val `scala.concurrent.FutureCaptureInstance`: Capture[Future] = new Capture[Future] {
-    override def capture[A](a: ⇒ A): Future[A] = Future.successful(a)
-  }
-}
 
 trait Syntax {
 
@@ -47,7 +40,7 @@ trait Syntax {
   }
 }
 
-object implicits extends FutureCaptureInstance with Syntax {
+object implicits extends CaptureInstances with Syntax {
 
   def server[F[_]](implicit app: GrpcServer[F]): FreeS[F, Unit] = {
     for {

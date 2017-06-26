@@ -37,31 +37,34 @@ class GrpcServerHandler[F[_]](implicit C: Capture[F])
       }
     })
 
-    Kleisli(s => C.capture(s.start()))
+    captureWithServer(_.start())
   }
 
-  def getPort: GrpcServerOps[F, Int] = Kleisli(s => C.capture(s.getPort))
+  def getPort: GrpcServerOps[F, Int] = captureWithServer(_.getPort)
 
   def getServices: GrpcServerOps[F, List[ServerServiceDefinition]] =
-    Kleisli(s => C.capture(s.getServices.asScala.toList))
+    captureWithServer(_.getServices.asScala.toList)
 
   def getImmutableServices: GrpcServerOps[F, List[ServerServiceDefinition]] =
-    Kleisli(s => C.capture(s.getImmutableServices.asScala.toList))
+    captureWithServer(_.getImmutableServices.asScala.toList)
 
   def getMutableServices: GrpcServerOps[F, List[ServerServiceDefinition]] =
-    Kleisli(s => C.capture(s.getMutableServices.asScala.toList))
+    captureWithServer(_.getMutableServices.asScala.toList)
 
-  def shutdown: GrpcServerOps[F, Server] = Kleisli(s => C.capture(s.shutdown()))
+  def shutdown: GrpcServerOps[F, Server] = captureWithServer(_.shutdown())
 
-  def shutdownNow: GrpcServerOps[F, Server] = Kleisli(s => C.capture(s.shutdownNow()))
+  def shutdownNow: GrpcServerOps[F, Server] = captureWithServer(_.shutdownNow())
 
-  def isShutdown: GrpcServerOps[F, Boolean] = Kleisli(s => C.capture(s.isShutdown))
+  def isShutdown: GrpcServerOps[F, Boolean] = captureWithServer(_.isShutdown)
 
-  def isTerminated: GrpcServerOps[F, Boolean] = Kleisli(s => C.capture(s.isTerminated))
+  def isTerminated: GrpcServerOps[F, Boolean] = captureWithServer(_.isTerminated)
 
   def awaitTerminationTimeout(timeout: Long, unit: TimeUnit): GrpcServerOps[F, Boolean] =
-    Kleisli(s => C.capture(s.awaitTermination(timeout, unit)))
+    captureWithServer(_.awaitTermination(timeout, unit))
 
-  def awaitTermination: GrpcServerOps[F, Unit] = Kleisli(s => C.capture(s.awaitTermination()))
+  def awaitTermination: GrpcServerOps[F, Unit] = captureWithServer(_.awaitTermination())
+
+  private[this] def captureWithServer[A](f: Server => A): GrpcServerOps[F, A] =
+    Kleisli(s => C.capture(f(s)))
 
 }

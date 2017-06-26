@@ -19,7 +19,7 @@ package user.runtime
 
 import freestyle._
 import freestyle.implicits._
-import freestyle.rpc.demo.user.{UserService, UserServiceGrpc}
+import freestyle.rpc.demo.user._
 import freestyle.rpc.server._
 import freestyle.rpc.server.implicits._
 import freestyle.rpc.server.handlers._
@@ -28,13 +28,14 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object implicits {
 
-  implicit val config = Config(portNode1)
+  implicit val config: Config       = Config(portNode1)
+  implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
   implicit val grpcConfigs: List[GrpcConfig] = List(
     AddService(UserServiceGrpc.bindService(new UserService, ExecutionContext.global))
   )
 
-  implicit val grpcServerKleisli =
+  implicit val grpcServerHandler =
     new GrpcServerHandler[Future] andThen new GrpcConfigInterpreter[Future]
 
 }

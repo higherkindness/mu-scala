@@ -32,7 +32,7 @@ package object server {
       configOptions
         .foldLeft[ServerBuilder[_]](ServerBuilder.forPort(initConfig.port))((acc, option) =>
           (option match {
-            case GetDirectExecutor               => acc.directExecutor()
+            case DirectExecutor                  => acc.directExecutor()
             case SetExecutor(ex)                 => acc.executor(ex)
             case AddService(srv)                 => acc.addService(srv)
             case AddBindableService(srv)         => acc.addService(srv)

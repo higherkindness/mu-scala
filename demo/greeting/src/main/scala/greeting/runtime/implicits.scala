@@ -28,13 +28,14 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object implicits {
 
-  implicit val config = Config(portNode1)
+  implicit val config: Config       = Config(portNode1)
+  implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
   implicit val grpcConfigs: List[GrpcConfig] = List(
-    AddService(GreeterGrpc.bindService(new GreetingService, ExecutionContext.global))
+    AddService(GreeterGrpc.bindService(new GreetingService, ec))
   )
 
-  implicit val grpcServerKleisli =
+  implicit val grpcServerHandler =
     new GrpcServerHandler[Future] andThen new GrpcConfigInterpreter[Future]
 
 }
