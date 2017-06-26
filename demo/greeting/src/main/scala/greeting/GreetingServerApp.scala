@@ -17,18 +17,16 @@
 package freestyle.rpc.demo
 package greeting
 
-import scala.concurrent.ExecutionContext
+import cats.implicits._
+import freestyle.rpc.server._
+import freestyle.rpc.server.implicits._
+import runtime.implicits._
+
+import scala.concurrent.duration.Duration
+import scala.concurrent.Await
 
 object GreetingServerApp {
 
-  def main(args: Array[String]): Unit = {
-
-    val serverServiceDefinition =
-      GreeterGrpc.bindService(new GreetingService, ExecutionContext.global)
-    val server = new GrpcServer(serverServiceDefinition)
-
-    server.start()
-    server.blockUntilShutdown()
-  }
-
+  def main(args: Array[String]): Unit =
+    Await.result(server[GrpcServer.Op].bootstrapFuture, Duration.Inf)
 }

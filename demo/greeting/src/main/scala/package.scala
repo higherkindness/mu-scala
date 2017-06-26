@@ -18,7 +18,8 @@ package freestyle.rpc
 
 package object demo {
 
-  val host = "localhost"
-  val port = 50051
+  val host      = "localhost"
+  val portNode1 = 50051
+  val portNode2 = 50052
 
 }

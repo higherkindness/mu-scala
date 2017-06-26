@@ -16,7 +16,10 @@ lazy val rpc = project
   .settings(moduleName := "freestyle-rpc")
   .settings(
     Seq(
-      libraryDependencies ++= commonDeps ++ freestyleCoreDeps()
+      libraryDependencies ++= commonDeps ++ freestyleCoreDeps() ++
+        Seq(
+          "io.grpc" % "grpc-all" % "1.4.0"
+        )
     ): _*
   )
 
