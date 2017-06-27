@@ -17,6 +17,14 @@
 package freestyle.rpc.demo
 package greeting
 
+import freestyle.rpc.demo.echo.EchoServiceGrpc
+import freestyle.rpc.demo.echo.EchoServiceGrpc.EchoServiceStub
+import freestyle.rpc.demo.echo_messages.EchoRequest
+import io.grpc.ManagedChannelBuilder
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 object GreetingClientApp {
 
   def main(args: Array[String]): Unit = {
@@ -51,6 +59,21 @@ object GreetingClientApp {
 
     client.biStreamingDemo()
 
+    // EchoDemo using the same server where the greeting service is deployed.
+    echoDemo(EchoRequest("echo..."))
+
     (): Unit
+  }
+
+  def echoDemo(request: EchoRequest): Unit = {
+
+    val channel =
+      ManagedChannelBuilder.forAddress(host, portNode1).usePlaintext(true).build
+
+    val asyncEchoClient: EchoServiceStub = EchoServiceGrpc.stub(channel)
+
+    println("")
+    println(s"Received -> ${Await.result(asyncEchoClient.echo(request), Duration.Inf)}")
+    println("")
   }
 }

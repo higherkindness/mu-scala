@@ -19,7 +19,9 @@ package greeting.runtime
 
 import freestyle._
 import freestyle.implicits._
+import freestyle.rpc.demo.echo.EchoServiceGrpc
 import freestyle.rpc.demo.greeting._
+import freestyle.rpc.demo.greeting.service._
 import freestyle.rpc.server._
 import freestyle.rpc.server.implicits._
 import freestyle.rpc.server.handlers._
@@ -32,7 +34,8 @@ object implicits {
   implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
   implicit val grpcConfigs: List[GrpcConfig] = List(
-    AddService(GreeterGrpc.bindService(new GreetingService, ec))
+    AddService(GreeterGrpc.bindService(new GreetingService, ec)),
+    AddService(EchoServiceGrpc.bindService(new EchoService, ec))
   )
 
   implicit val grpcServerHandler =

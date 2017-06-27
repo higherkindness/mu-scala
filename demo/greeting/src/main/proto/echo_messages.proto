@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package freestyle.rpc.demo;
+
+message EchoRequest {
+    string message = 1;
+}
+
+message EchoResponse {
+    string message = 1;
+}
