@@ -16,6 +16,7 @@
 
 package freestyle.rpc.demo
 package greeting
+package service
 
 import java.util.concurrent.{Executors, TimeUnit}
 import java.util.concurrent.atomic.AtomicInteger

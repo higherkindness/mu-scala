@@ -27,9 +27,8 @@ package object server {
   class GrpcConfigInterpreter[F[_]](implicit initConfig: Config, configList: List[GrpcConfig])
       extends (Kleisli[F, Server, ?] ~> F) {
 
-    private[this] def interpret(configOptions: List[GrpcConfig])(
-        implicit initConfig: Config): Server =
-      configOptions
+    private[this] def build(configList: List[GrpcConfig]): Server =
+      configList
         .foldLeft[ServerBuilder[_]](ServerBuilder.forPort(initConfig.port))((acc, option) =>
           (option match {
             case DirectExecutor                  => acc.directExecutor()
@@ -44,8 +43,6 @@ package object server {
             case SetCompressorRegistry(cr)       => acc.compressorRegistry(cr)
           }).asInstanceOf[ServerBuilder[_]])
         .build()
-
-    private[this] def build(configList: List[GrpcConfig]): Server = interpret(configList)
 
     override def apply[B](fa: Kleisli[F, Server, B]): F[B] =
       fa(build(configList))
