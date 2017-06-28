@@ -17,7 +17,6 @@
 package freestyle.rpc.demo
 package greeting
 
-import cats._
 import cats.implicits._
 import freestyle._
 import freestyle.implicits._
@@ -62,7 +61,7 @@ object GreetingClientApp {
     }
   }
 
-  def runProgram[F[_]](implicit M: Monad[F]): Unit = {
+  def main(args: Array[String]): Unit = {
 
     Await.result(unaryDemo[ClientAPP.Op].interpret[Future], Duration.Inf)
 
@@ -88,11 +87,6 @@ object GreetingClientApp {
 
     client.biStreamingDemo()
 
-    (): Unit
-  }
-
-  def main(args: Array[String]): Unit = {
-    runProgram[Future]
     (): Unit
   }
 }
