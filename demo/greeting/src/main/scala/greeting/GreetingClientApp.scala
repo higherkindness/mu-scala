@@ -17,33 +17,57 @@
 package freestyle.rpc.demo
 package greeting
 
-import freestyle.rpc.demo.echo.EchoServiceGrpc
-import freestyle.rpc.demo.echo.EchoServiceGrpc.EchoServiceStub
-import freestyle.rpc.demo.echo_messages.EchoRequest
-import io.grpc.ManagedChannelBuilder
+import cats._
+import cats.implicits._
+import freestyle._
+import freestyle.implicits._
+import freestyle.rpc.demo.echo_messages._
+import runtime.implicits.client._
+import greeting.client._
+import io.grpc._
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
+
+@module
+trait ClientAPP {
+  val greetingClientM: GreetingClientM
+  val echoClientM: EchoClientM
+}
 
 object GreetingClientApp {
 
-  def main(args: Array[String]): Unit = {
+  val messageRequest = MessageRequest("Freestyle")
+  val echoRequest    = EchoRequest("echo...")
 
-    val request = MessageRequest("Freestyle")
-    val client  = new GreetingClient(host, portNode1)
-    // val client  = new GreetingClient(host, portNode2)
+  def unaryDemo[F[_]](implicit APP: ClientAPP[F]): FreeS[F, (String, String, String)] = {
 
-    // http://www.grpc.io/docs/guides/concepts.html
+    val greetingClientM: GreetingClientM[F] = APP.greetingClientM
+    val echoClientM: EchoClientM[F]         = APP.echoClientM
 
-    // Unary RPCs where the client sends a single request to the server and
-    // gets a single response back, just like a normal function call:
-    client.unaryDemo(request)
+    val defaultOptions = CallOptions.DEFAULT
+
+    for {
+      hi   <- greetingClientM.sayHello(messageRequest, defaultOptions)
+      bye  <- greetingClientM.sayGoodbye(messageRequest, defaultOptions)
+      echo <- echoClientM.echo(echoRequest, defaultOptions)
+    } yield {
+      println(s"Received -> (${hi.message}, ${bye.message}, ${echo.message})")
+      (hi.message, bye.message, echo.message)
+    }
+  }
+
+  def runProgram[F[_]](implicit M: Monad[F]) = {
+
+    Await.result(unaryDemo[ClientAPP.Op].interpret[Future], Duration.Inf)
+
+    val client = new GreetingClient(host, portNode1)
 
     // Server streaming RPCs where the client sends a request to the server and
     // gets a stream to read a sequence of messages back. The client reads from
     // the returned stream until there are no more messages.
 
-    client.serverStreamingDemo(request)
+    client.serverStreamingDemo(messageRequest)
 
     // Client streaming RPCs where the client writes a sequence of messages and sends them
     // to the server, again using a provided stream. Once the client has finished writing the messages,
@@ -59,21 +83,11 @@ object GreetingClientApp {
 
     client.biStreamingDemo()
 
-    // EchoDemo using the same server where the greeting service is deployed.
-    echoDemo(EchoRequest("echo..."))
-
     (): Unit
   }
 
-  def echoDemo(request: EchoRequest): Unit = {
-
-    val channel =
-      ManagedChannelBuilder.forAddress(host, portNode1).usePlaintext(true).build
-
-    val asyncEchoClient: EchoServiceStub = EchoServiceGrpc.stub(channel)
-
-    println("")
-    println(s"Received -> ${Await.result(asyncEchoClient.echo(request), Duration.Inf)}")
-    println("")
+  def main(args: Array[String]): Unit = {
+    runProgram[Future]
+    (): Unit
   }
 }

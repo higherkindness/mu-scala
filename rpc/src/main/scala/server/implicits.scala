@@ -29,8 +29,8 @@ trait Syntax {
 
   final class ServerOps(server: FreeS[GrpcServer.Op, Unit]) {
 
-    def bootstrapM[M[_]](implicit MM: Monad[M], handler: GrpcServer.Op ~> M): M[Unit] =
-      server.interpret[M]
+    def bootstrapM[F[_]](implicit M: Monad[F], handler: GrpcServer.Op ~> F): F[Unit] =
+      server.interpret[F]
 
     def bootstrapFuture(
         implicit MF: Monad[Future],

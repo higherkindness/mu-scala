@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.demo
-package greeting
+package freestyle.rpc
+package client
 
-import cats.implicits._
-import freestyle.rpc.server._
-import freestyle.rpc.server.implicits._
-import runtime.implicits.server._
+import freestyle._
+import io.grpc.{CallOptions, ClientCall, MethodDescriptor}
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.Await
+@free
+trait ChannelM {
 
-object GreetingServerApp {
+  def newCall[I, O](
+      methodDescriptor: MethodDescriptor[I, O],
+      callOptions: CallOptions): FS[ClientCall[I, O]]
 
-  def main(args: Array[String]): Unit =
-    Await.result(server[GrpcServer.Op].bootstrapFuture, Duration.Inf)
+  def authority: FS[String]
+
 }
