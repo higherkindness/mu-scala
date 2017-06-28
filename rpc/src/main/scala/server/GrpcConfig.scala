@@ -24,24 +24,14 @@ import io.grpc._
 
 case class Config(port: Int)
 
-sealed trait GrpcConfig extends Product with Serializable
-
-case object DirectExecutor extends GrpcConfig
-
-case class SetExecutor(executor: Executor) extends GrpcConfig
-
-case class AddService(service: ServerServiceDefinition) extends GrpcConfig
-
-case class AddBindableService(bindableService: BindableService) extends GrpcConfig
-
-case class AddTransportFilter(filter: ServerTransportFilter) extends GrpcConfig
-
-case class AddStreamTracerFactory(factory: ServerStreamTracer.Factory) extends GrpcConfig
-
+sealed trait GrpcConfig                                                  extends Product with Serializable
+case object DirectExecutor                                               extends GrpcConfig
+case class SetExecutor(executor: Executor)                               extends GrpcConfig
+case class AddService(service: ServerServiceDefinition)                  extends GrpcConfig
+case class AddBindableService(bindableService: BindableService)          extends GrpcConfig
+case class AddTransportFilter(filter: ServerTransportFilter)             extends GrpcConfig
+case class AddStreamTracerFactory(factory: ServerStreamTracer.Factory)   extends GrpcConfig
 case class SetFallbackHandlerRegistry(fallbackRegistry: HandlerRegistry) extends GrpcConfig
-
-case class UseTransportSecurity(certChain: File, privateKey: File) extends GrpcConfig
-
-case class SetDecompressorRegistry(registry: DecompressorRegistry) extends GrpcConfig
-
-case class SetCompressorRegistry(registry: CompressorRegistry) extends GrpcConfig
+case class UseTransportSecurity(certChain: File, privateKey: File)       extends GrpcConfig
+case class SetDecompressorRegistry(registry: DecompressorRegistry)       extends GrpcConfig
+case class SetCompressorRegistry(registry: CompressorRegistry)           extends GrpcConfig

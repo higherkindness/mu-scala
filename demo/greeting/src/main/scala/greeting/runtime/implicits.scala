@@ -17,28 +17,67 @@
 package freestyle.rpc.demo
 package greeting.runtime
 
+import cats.~>
 import freestyle._
 import freestyle.implicits._
+import freestyle.async.implicits._
 import freestyle.rpc.demo.echo.EchoServiceGrpc
 import freestyle.rpc.demo.greeting._
+import freestyle.rpc.demo.greeting.runtime.server.Implicits
 import freestyle.rpc.demo.greeting.service._
-import freestyle.rpc.server._
-import freestyle.rpc.server.implicits._
-import freestyle.rpc.server.handlers._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object implicits {
+trait CommonImplicits {
 
-  implicit val config: Config       = Config(portNode1)
   implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
-  implicit val grpcConfigs: List[GrpcConfig] = List(
-    AddService(GreeterGrpc.bindService(new GreetingService, ec)),
-    AddService(EchoServiceGrpc.bindService(new EchoService, ec))
-  )
+}
 
-  implicit val grpcServerHandler =
-    new GrpcServerHandler[Future] andThen new GrpcConfigInterpreter[Future]
+object server {
+
+  trait Implicits extends CommonImplicits {
+
+    import freestyle.rpc.server._
+    import freestyle.rpc.server.handlers._
+    import freestyle.rpc.server.implicits._
+
+    implicit val config: Config = Config(portNode1)
+
+    implicit val grpcConfigs: List[GrpcConfig] = List(
+      AddService(GreeterGrpc.bindService(new GreetingService, ec)),
+      AddService(EchoServiceGrpc.bindService(new EchoService, ec))
+    )
+
+    implicit val grpcServerHandler =
+      new GrpcServerHandler[Future] andThen new GrpcConfigInterpreter[Future]
+
+  }
+
+  object implicits extends Implicits
+
+}
+
+object client {
+
+  trait Implicits extends CommonImplicits {
+
+    import freestyle.rpc.client._
+    import freestyle.rpc.client.implicits._
+    import freestyle.rpc.client.handlers.{ChannelMHandler, ClientCallsMHandler}
+
+    val channelFor: ManagedChannelFor = ManagedChannelForAddress(host, portNode1)
+
+    val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
+
+    implicit def channelMHandler[F[_]]: ChannelM.Op ~> Future =
+      new ChannelMHandler[Future] andThen
+        new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
+
+    implicit val clientCallsMHandler: ClientCallsM.Op ~> Future = new ClientCallsMHandler[Future]
+
+  }
+
+  object implicits extends Implicits
 
 }
