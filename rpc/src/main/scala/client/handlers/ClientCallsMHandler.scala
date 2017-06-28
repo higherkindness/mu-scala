@@ -26,51 +26,48 @@ import freestyle.rpc.client.implicits._
 
 import scala.collection.JavaConverters._
 
-class ClientCallsMHandler[F[_]](implicit C: Capture[F], AC: AsyncContext[F])
-    extends ClientCallsM.Handler[F] {
+class ClientCallsMHandler[M[_]](implicit C: Capture[M], AC: AsyncContext[M])
+    extends ClientCallsM.Handler[M] {
 
-  def asyncUnaryCall[I, O](
-      call: ClientCall[I, O],
-      param: I,
-      observer: StreamObserver[O]): F[Unit] =
+  def async[I, O](call: ClientCall[I, O], param: I, observer: StreamObserver[O]): M[Unit] =
     C.capture(ClientCalls.asyncUnaryCall(call, param, observer))
 
-  def asyncServerStreamingCall[I, O](
+  def asyncStreamServer[I, O](
       call: ClientCall[I, O],
       param: I,
-      responseObserver: StreamObserver[O]): F[Unit] =
+      responseObserver: StreamObserver[O]): M[Unit] =
     C.capture(ClientCalls.asyncServerStreamingCall(call, param, responseObserver))
 
-  def asyncClientStreamingCall[I, O](
+  def asyncStreamClient[I, O](
       call: ClientCall[I, O],
-      responseObserver: StreamObserver[O]): F[StreamObserver[I]] =
+      responseObserver: StreamObserver[O]): M[StreamObserver[I]] =
     C.capture(ClientCalls.asyncClientStreamingCall(call, responseObserver))
 
-  def asyncBidiStreamingCall[I, O](
+  def asyncStreamBidi[I, O](
       call: ClientCall[I, O],
-      responseObserver: StreamObserver[O]): F[StreamObserver[I]] =
+      responseObserver: StreamObserver[O]): M[StreamObserver[I]] =
     C.capture(ClientCalls.asyncBidiStreamingCall(call, responseObserver))
 
-  def blockingUnaryCall[I, O](call: ClientCall[I, O], param: I): F[O] =
+  def sync[I, O](call: ClientCall[I, O], param: I): M[O] =
     C.capture(ClientCalls.blockingUnaryCall(call, param))
 
-  def blockingUnaryCallChannel[I, O](
+  def syncC[I, O](
       channel: Channel,
       method: MethodDescriptor[I, O],
       callOptions: CallOptions,
-      param: I): F[O] =
+      param: I): M[O] =
     C.capture(ClientCalls.blockingUnaryCall(channel, method, callOptions, param))
 
-  def blockingServerStreamingCall[I, O](call: ClientCall[I, O], param: I): F[Iterator[O]] =
+  def syncStreamServer[I, O](call: ClientCall[I, O], param: I): M[Iterator[O]] =
     C.capture(ClientCalls.blockingServerStreamingCall(call, param).asScala)
 
-  def blockingServerStreamingCallChannel[I, O](
+  def syncStreamServerC[I, O](
       channel: Channel,
       method: MethodDescriptor[I, O],
       callOptions: CallOptions,
-      param: I): F[Iterator[O]] =
+      param: I): M[Iterator[O]] =
     C.capture(ClientCalls.blockingServerStreamingCall(channel, method, callOptions, param).asScala)
 
-  def futureUnaryCall[I, O](call: ClientCall[I, O], param: I): F[O] =
+  def asyncM[I, O](call: ClientCall[I, O], param: I): M[O] =
     listenableFuture2Async.apply(ClientCalls.futureUnaryCall(call, param))
 }

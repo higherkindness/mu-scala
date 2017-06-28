@@ -22,7 +22,7 @@ import cats.implicits._
 import freestyle._
 import freestyle.implicits._
 import freestyle.rpc.demo.echo_messages._
-import runtime.implicits.client._
+import runtime.client.implicits._
 import greeting.client._
 import io.grpc._
 
@@ -37,27 +37,32 @@ trait ClientAPP {
 
 object GreetingClientApp {
 
+  type UnaryDemoResponse = (MessageReply, MessageReply, EchoResponse)
+
   val messageRequest = MessageRequest("Freestyle")
   val echoRequest    = EchoRequest("echo...")
 
-  def unaryDemo[F[_]](implicit APP: ClientAPP[F]): FreeS[F, (String, String, String)] = {
+  def unaryDemo[F[_]](implicit APP: ClientAPP[F]): FreeS[F, UnaryDemoResponse] = {
 
     val greetingClientM: GreetingClientM[F] = APP.greetingClientM
     val echoClientM: EchoClientM[F]         = APP.echoClientM
 
     val defaultOptions = CallOptions.DEFAULT
 
-    for {
-      hi   <- greetingClientM.sayHello(messageRequest, defaultOptions)
-      bye  <- greetingClientM.sayGoodbye(messageRequest, defaultOptions)
-      echo <- echoClientM.echo(echoRequest, defaultOptions)
-    } yield {
-      println(s"Received -> (${hi.message}, ${bye.message}, ${echo.message})")
-      (hi.message, bye.message, echo.message)
+    val tupled = (
+      greetingClientM.sayHello(messageRequest, defaultOptions) |@|
+        greetingClientM.sayGoodbye(messageRequest, defaultOptions) |@|
+        echoClientM.echo(echoRequest, defaultOptions)
+    ).tupled
+
+    tupled.map {
+      case (hi: MessageReply, bye: MessageReply, echo: EchoResponse) =>
+        println(s"Received -> (${hi.message}, ${bye.message}, ${echo.message})")
+        (hi, bye, echo)
     }
   }
 
-  def runProgram[F[_]](implicit M: Monad[F]) = {
+  def runProgram[F[_]](implicit M: Monad[F]): Unit = {
 
     Await.result(unaryDemo[ClientAPP.Op].interpret[Future], Duration.Inf)
 

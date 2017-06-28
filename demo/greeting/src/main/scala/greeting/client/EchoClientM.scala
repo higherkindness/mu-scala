@@ -34,7 +34,7 @@ trait EchoClientM {
       options: CallOptions = CallOptions.DEFAULT): FS.Seq[EchoResponse] =
     for {
       call     <- channelOps.newCall(EchoServiceGrpc.METHOD_ECHO, options)
-      response <- clientCallsM.futureUnaryCall(call, request)
+      response <- clientCallsM.asyncM(call, request)
     } yield response
 
 }

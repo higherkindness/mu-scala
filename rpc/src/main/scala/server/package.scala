@@ -29,8 +29,8 @@ package object server {
 
     private[this] def build(configList: List[GrpcConfig]): Server =
       configList
-        .foldLeft[ServerBuilder[_]](ServerBuilder.forPort(initConfig.port))((acc, option) =>
-          (option match {
+        .foldLeft(ServerBuilder.forPort(initConfig.port))((acc, option) =>
+          option match {
             case DirectExecutor                  => acc.directExecutor()
             case SetExecutor(ex)                 => acc.executor(ex)
             case AddService(srv)                 => acc.addService(srv)
@@ -41,7 +41,7 @@ package object server {
             case UseTransportSecurity(cc, pk)    => acc.useTransportSecurity(cc, pk)
             case SetDecompressorRegistry(dr)     => acc.decompressorRegistry(dr)
             case SetCompressorRegistry(cr)       => acc.compressorRegistry(cr)
-          }).asInstanceOf[ServerBuilder[_]])
+        })
         .build()
 
     override def apply[B](fa: Kleisli[F, Server, B]): F[B] =

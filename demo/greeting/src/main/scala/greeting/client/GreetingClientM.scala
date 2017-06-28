@@ -34,7 +34,7 @@ trait GreetingClientM {
       options: CallOptions = CallOptions.DEFAULT): FS.Seq[MessageReply] =
     for {
       call     <- channelOps.newCall(GreeterGrpc.METHOD_SAY_HELLO, options)
-      response <- clientCallsM.futureUnaryCall(call, request)
+      response <- clientCallsM.asyncM(call, request)
     } yield response
 
   def sayGoodbye(
@@ -42,7 +42,7 @@ trait GreetingClientM {
       options: CallOptions = CallOptions.DEFAULT): FS.Seq[MessageReply] =
     for {
       call     <- channelOps.newCall(GreeterGrpc.METHOD_SAY_GOODBYE, options)
-      response <- clientCallsM.futureUnaryCall(call, request)
+      response <- clientCallsM.asyncM(call, request)
     } yield response
 
   def lotsOfReplies(
@@ -51,7 +51,7 @@ trait GreetingClientM {
       options: CallOptions = CallOptions.DEFAULT): FS.Seq[Unit] =
     for {
       call     <- channelOps.newCall(GreeterGrpc.METHOD_LOTS_OF_REPLIES, options)
-      response <- clientCallsM.asyncServerStreamingCall(call, request, responseObserver)
+      response <- clientCallsM.asyncStreamServer(call, request, responseObserver)
     } yield response
 
   def lotsOfGreetings(
@@ -59,7 +59,7 @@ trait GreetingClientM {
       options: CallOptions = CallOptions.DEFAULT): FS.Seq[StreamObserver[MessageRequest]] =
     for {
       call     <- channelOps.newCall(GreeterGrpc.METHOD_LOTS_OF_GREETINGS, options)
-      response <- clientCallsM.asyncClientStreamingCall(call, responseObserver)
+      response <- clientCallsM.asyncStreamClient(call, responseObserver)
     } yield response
 
   def bidiHello(
@@ -67,7 +67,7 @@ trait GreetingClientM {
       options: CallOptions = CallOptions.DEFAULT): FS.Seq[StreamObserver[MessageRequest]] =
     for {
       call     <- channelOps.newCall(GreeterGrpc.METHOD_BIDI_HELLO, options)
-      response <- clientCallsM.asyncBidiStreamingCall(call, responseObserver)
+      response <- clientCallsM.asyncStreamBidi(call, responseObserver)
     } yield response
 
 }

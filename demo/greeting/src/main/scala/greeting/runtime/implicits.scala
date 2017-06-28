@@ -23,51 +23,61 @@ import freestyle.implicits._
 import freestyle.async.implicits._
 import freestyle.rpc.demo.echo.EchoServiceGrpc
 import freestyle.rpc.demo.greeting._
+import freestyle.rpc.demo.greeting.runtime.server.Implicits
 import freestyle.rpc.demo.greeting.service._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait ServerImplicits {
-
-  import freestyle.rpc.server._
-  import freestyle.rpc.server.handlers._
-  import freestyle.rpc.server.implicits._
-
-  implicit val config: Config       = Config(portNode1)
-  implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
-
-  implicit val grpcConfigs: List[GrpcConfig] = List(
-    AddService(GreeterGrpc.bindService(new GreetingService, ec)),
-    AddService(EchoServiceGrpc.bindService(new EchoService, ec))
-  )
-
-  implicit val grpcServerHandler =
-    new GrpcServerHandler[Future] andThen new GrpcConfigInterpreter[Future]
-}
-
-trait ClientImplicits {
-
-  import freestyle.rpc.client._
-  import freestyle.rpc.client.implicits._
-  import freestyle.rpc.client.handlers.{ChannelMHandler, ClientCallsMHandler}
+trait CommonImplicits {
 
   implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
-  val channelFor: ManagedChannelFor = ManagedChannelForAddress(host, portNode1)
+}
 
-  val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
+object server {
 
-  implicit def channelMHandler[F[_]]: ChannelM.Op ~> Future =
-    new ChannelMHandler[Future] andThen
-      new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
+  trait Implicits extends CommonImplicits {
 
-  implicit val clientCallsMHandler: ClientCallsM.Op ~> Future = new ClientCallsMHandler[Future]
+    import freestyle.rpc.server._
+    import freestyle.rpc.server.handlers._
+    import freestyle.rpc.server.implicits._
+
+    implicit val config: Config = Config(portNode1)
+
+    implicit val grpcConfigs: List[GrpcConfig] = List(
+      AddService(GreeterGrpc.bindService(new GreetingService, ec)),
+      AddService(EchoServiceGrpc.bindService(new EchoService, ec))
+    )
+
+    implicit val grpcServerHandler =
+      new GrpcServerHandler[Future] andThen new GrpcConfigInterpreter[Future]
+
+  }
+
+  object implicits extends Implicits
 
 }
 
-object implicits {
+object client {
 
-  object server extends ServerImplicits
+  trait Implicits extends CommonImplicits {
 
-  object client extends ClientImplicits
+    import freestyle.rpc.client._
+    import freestyle.rpc.client.implicits._
+    import freestyle.rpc.client.handlers.{ChannelMHandler, ClientCallsMHandler}
+
+    val channelFor: ManagedChannelFor = ManagedChannelForAddress(host, portNode1)
+
+    val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
+
+    implicit def channelMHandler[F[_]]: ChannelM.Op ~> Future =
+      new ChannelMHandler[Future] andThen
+        new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
+
+    implicit val clientCallsMHandler: ClientCallsM.Op ~> Future = new ClientCallsMHandler[Future]
+
+  }
+
+  object implicits extends Implicits
+
 }

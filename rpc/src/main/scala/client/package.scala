@@ -40,8 +40,8 @@ package object client {
       }
 
       configList
-        .foldLeft[ManagedChannelBuilder[_]](builder) { (acc, cfg) =>
-          (cfg match {
+        .foldLeft(builder) { (acc, cfg) =>
+          cfg match {
             case DirectExecutor                     => acc.directExecutor()
             case SetExecutor(executor)              => acc.executor(executor)
             case AddInterceptorList(interceptors)   => acc.intercept(interceptors.asJava)
@@ -55,7 +55,7 @@ package object client {
             case SetCompressorRegistry(registry)    => acc.compressorRegistry(registry)
             case SetIdleTimeout(value, unit)        => acc.idleTimeout(value, unit)
             case SetMaxInboundMessageSize(max)      => acc.maxInboundMessageSize(max)
-          }).asInstanceOf[ManagedChannelBuilder[_]]
+          }
         }
         .build()
     }

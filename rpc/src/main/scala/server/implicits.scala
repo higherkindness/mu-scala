@@ -29,8 +29,8 @@ trait Syntax {
 
   final class ServerOps(server: FreeS[GrpcServer.Op, Unit]) {
 
-    def bootstrapM[F[_]](implicit M: Monad[F], handler: GrpcServer.Op ~> F): F[Unit] =
-      server.interpret[F]
+    def bootstrapM[M[_]: Monad](implicit handler: GrpcServer.Op ~> M): M[Unit] =
+      server.interpret[M]
 
     def bootstrapFuture(
         implicit MF: Monad[Future],
@@ -42,7 +42,7 @@ trait Syntax {
 
 object implicits extends CaptureInstances with Syntax {
 
-  def server[F[_]](implicit app: GrpcServer[F]): FreeS[F, Unit] = {
+  def server[M[_]](implicit app: GrpcServer[M]): FreeS[M, Unit] = {
     for {
       _ <- app.start()
       _ <- app.awaitTermination()

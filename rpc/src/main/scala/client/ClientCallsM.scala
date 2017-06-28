@@ -24,37 +24,37 @@ import io.grpc.stub.StreamObserver
 @free
 trait ClientCallsM {
 
-  def asyncUnaryCall[I, O](call: ClientCall[I, O], param: I, observer: StreamObserver[O]): FS[Unit]
+  def async[I, O](call: ClientCall[I, O], param: I, observer: StreamObserver[O]): FS[Unit]
 
-  def asyncServerStreamingCall[I, O](
+  def asyncStreamServer[I, O](
       call: ClientCall[I, O],
       param: I,
       responseObserver: StreamObserver[O]): FS[Unit]
 
-  def asyncClientStreamingCall[I, O](
+  def asyncStreamClient[I, O](
       call: ClientCall[I, O],
       responseObserver: StreamObserver[O]): FS[StreamObserver[I]]
 
-  def asyncBidiStreamingCall[I, O](
+  def asyncStreamBidi[I, O](
       call: ClientCall[I, O],
       responseObserver: StreamObserver[O]): FS[StreamObserver[I]]
 
-  def blockingUnaryCall[I, O](call: ClientCall[I, O], param: I): FS[O]
+  def sync[I, O](call: ClientCall[I, O], param: I): FS[O]
 
-  def blockingUnaryCallChannel[I, O](
+  def syncC[I, O](
       channel: Channel,
       method: MethodDescriptor[I, O],
       callOptions: CallOptions,
       param: I): FS[O]
 
-  def blockingServerStreamingCall[I, O](call: ClientCall[I, O], param: I): FS[Iterator[O]]
+  def syncStreamServer[I, O](call: ClientCall[I, O], param: I): FS[Iterator[O]]
 
-  def blockingServerStreamingCallChannel[I, O](
+  def syncStreamServerC[I, O](
       channel: Channel,
       method: MethodDescriptor[I, O],
       callOptions: CallOptions,
       param: I): FS[Iterator[O]]
 
-  def futureUnaryCall[I, O](call: ClientCall[I, O], param: I): FS[O]
+  def asyncM[I, O](call: ClientCall[I, O], param: I): FS[O]
 
 }

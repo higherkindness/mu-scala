@@ -22,14 +22,14 @@ import freestyle.Capture
 import freestyle.rpc.client.{ChannelM, ManagedChannelOps}
 import io.grpc.{CallOptions, ClientCall, MethodDescriptor}
 
-class ChannelMHandler[F[_]](implicit C: Capture[F])
-    extends ChannelM.Handler[ManagedChannelOps[F, ?]] {
+class ChannelMHandler[M[_]](implicit C: Capture[M])
+    extends ChannelM.Handler[ManagedChannelOps[M, ?]] {
 
   def newCall[I, O](
       methodDescriptor: MethodDescriptor[I, O],
-      callOptions: CallOptions): ManagedChannelOps[F, ClientCall[I, O]] =
+      callOptions: CallOptions): ManagedChannelOps[M, ClientCall[I, O]] =
     Kleisli(ch => C.capture(ch.newCall(methodDescriptor, callOptions)))
 
-  def authority: ManagedChannelOps[F, String] =
+  def authority: ManagedChannelOps[M, String] =
     Kleisli(ch => C.capture(ch.authority()))
 }

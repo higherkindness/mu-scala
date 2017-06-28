@@ -20,7 +20,7 @@ package greeting
 import cats.implicits._
 import freestyle.rpc.server._
 import freestyle.rpc.server.implicits._
-import runtime.implicits.server._
+import runtime.server.implicits._
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.Await
