@@ -1,6 +1,7 @@
 import freestyle.FreestylePlugin
 import sbt.Keys._
 import sbt._
+import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
 import sbtprotoc.ProtocPlugin.autoImport.PB
 import com.trueaccord.scalapb.compiler.{Version => cv}
 
@@ -34,5 +35,7 @@ object ProjectPlugin extends AutoPlugin {
     lazy val GOPATH = Option(sys.props("go.path")).getOrElse("/your/go/path")
 
   }
+
+  override def projectSettings: Seq[Def.Setting[_]] = scalaMetaSettings
 
 }
