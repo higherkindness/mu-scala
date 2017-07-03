@@ -18,15 +18,18 @@ package freestyle.rpc.demo
 package greeting.runtime
 
 import cats.~>
+import cats.implicits._
 import freestyle._
 import freestyle.implicits._
 import freestyle.async.implicits._
+import freestyle.config.implicits._
+import freestyle.rpc.client.ChannelConfig
 import freestyle.rpc.demo.echo.EchoServiceGrpc
 import freestyle.rpc.demo.greeting._
-import freestyle.rpc.demo.greeting.runtime.server.Implicits
 import freestyle.rpc.demo.greeting.service._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 trait CommonImplicits {
 
@@ -42,15 +45,18 @@ object server {
     import freestyle.rpc.server.handlers._
     import freestyle.rpc.server.implicits._
 
-    implicit val config: Config = Config(portNode1)
+    val config: Config = Await.result(
+      ConfigForPort[ServerConfig.Op]("rpc.server.port")
+        .interpret[Future],
+      1.seconds)
 
-    implicit val grpcConfigs: List[GrpcConfig] = List(
+    val grpcConfigs: List[GrpcConfig] = List(
       AddService(GreeterGrpc.bindService(new GreetingService, ec)),
       AddService(EchoServiceGrpc.bindService(new EchoService, ec))
     )
 
-    implicit val grpcServerHandler =
-      new GrpcServerHandler[Future] andThen new GrpcConfigInterpreter[Future]
+    implicit val grpcServerHandler: GrpcServer.Op ~> Future =
+      new GrpcServerHandler[Future] andThen new GrpcConfigInterpreter[Future](config, grpcConfigs)
 
   }
 
@@ -66,7 +72,11 @@ object client {
     import freestyle.rpc.client.implicits._
     import freestyle.rpc.client.handlers.{ChannelMHandler, ClientCallsMHandler}
 
-    val channelFor: ManagedChannelFor = ManagedChannelForAddress(host, portNode1)
+    val channelFor: ManagedChannelFor =
+      Await.result(
+        ConfigForAddress[ChannelConfig.Op]("rpc.client.host", "rpc.client.port")
+          .interpret[Future],
+        1.seconds)
 
     val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
 

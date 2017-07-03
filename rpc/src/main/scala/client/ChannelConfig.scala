@@ -19,6 +19,11 @@ package client
 
 import java.util.concurrent.{Executor, TimeUnit}
 
+import cats.implicits._
+import freestyle._
+import freestyle.config.ConfigM
+import freestyle.config.implicits._
+import freestyle.rpc.client._
 import io.grpc._
 
 sealed trait ManagedChannelFor                               extends Product with Serializable
@@ -39,3 +44,24 @@ case class SetDecompressorRegistry(registry: DecompressorRegistry)    extends Ma
 case class SetCompressorRegistry(registry: CompressorRegistry)        extends ManagedChannelConfig
 case class SetIdleTimeout(value: Long, unit: TimeUnit)                extends ManagedChannelConfig
 case class SetMaxInboundMessageSize(max: Int)                         extends ManagedChannelConfig
+
+@module
+trait ChannelConfig {
+
+  val configM: ConfigM
+  val defaultHost = "localhost"
+  val defaultPort = 50051
+
+  def loadChannelAddress(hostPath: String, portPath: String): FS.Seq[ManagedChannelForAddress] =
+    for {
+      config <- configM.load
+    } yield
+      ManagedChannelForAddress(
+        config.string(hostPath).getOrElse(defaultHost),
+        config.int(portPath).getOrElse(defaultPort))
+
+  def loadChannelTarget(targetPath: String): FS.Seq[ManagedChannelForTarget] =
+    for {
+      config <- configM.load
+    } yield ManagedChannelForTarget(config.string(targetPath).getOrElse("target"))
+}
