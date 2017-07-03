@@ -19,6 +19,7 @@ lazy val rpc = project
       libraryDependencies ++= commonDeps ++ freestyleCoreDeps() ++
         Seq(
           %%("freestyle-async"),
+          %%("freestyle-config"),
           "io.grpc" % "grpc-all" % "1.4.0"
         )
     ): _*
@@ -33,7 +34,10 @@ lazy val `demo-greeting` = project
   .settings(commandAliases: _*)
   .settings(demoCommonSettings: _*)
   .settings(Seq(
-    libraryDependencies += %%("freestyle-async")
+    libraryDependencies ++= Seq(
+      %%("freestyle-async"),
+      %%("freestyle-config")
+    )
   ): _*)
 
 lazy val googleApi = project

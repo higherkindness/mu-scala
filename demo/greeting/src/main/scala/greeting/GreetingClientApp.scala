@@ -20,6 +20,8 @@ package greeting
 import cats.implicits._
 import freestyle._
 import freestyle.implicits._
+import freestyle.config.ConfigM
+import freestyle.config.implicits._
 import freestyle.rpc.demo.echo_messages._
 import runtime.client.implicits._
 import greeting.client._
@@ -65,7 +67,7 @@ object GreetingClientApp {
 
     Await.result(unaryDemo[ClientAPP.Op].interpret[Future], Duration.Inf)
 
-    val client = new GreetingClient(host, portNode1)
+    val client = new GreetingClient
 
     // Server streaming RPCs where the client sends a request to the server and
     // gets a stream to read a sequence of messages back. The client reads from

@@ -28,10 +28,11 @@ import scala.concurrent.{Await, Future, Promise}
 import scala.concurrent.duration._
 import scala.util.Random
 
-class GreetingClient(host: String, port: Int) {
+class GreetingClient {
 
+  // This channel construction is pending to be changed once streaming is supported
   private[this] val channel =
-    ManagedChannelBuilder.forAddress(host, port).usePlaintext(true).build
+    ManagedChannelBuilder.forAddress("localhost", 50051).usePlaintext(true).build
 
   private[this] val asyncHelloClient: GreeterStub = GreeterGrpc.stub(channel)
 

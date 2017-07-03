@@ -18,6 +18,7 @@ package freestyle.rpc
 
 import cats.data.Kleisli
 import cats.~>
+import freestyle.FreeS
 
 import scala.collection.JavaConverters._
 import io.grpc._
@@ -63,4 +64,12 @@ package object client {
     override def apply[A](fa: Kleisli[F, ManagedChannel, A]): F[A] =
       fa(build(initConfig, configList))
   }
+
+  def ConfigForAddress[F[_]](hostPath: String, portPath: String)(
+      implicit CC: ChannelConfig[F]): FreeS[F, ManagedChannelForAddress] =
+    CC.loadChannelAddress(hostPath, portPath)
+
+  def ConfigForTarget[F[_]](target: String)(
+      implicit CC: ChannelConfig[F]): FreeS[F, ManagedChannelForTarget] =
+    CC.loadChannelTarget(target)
 }

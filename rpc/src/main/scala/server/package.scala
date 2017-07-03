@@ -18,13 +18,14 @@ package freestyle.rpc
 
 import cats.data.Kleisli
 import cats.~>
+import freestyle.FreeS
 import io.grpc._
 
 package object server {
 
   type GrpcServerOps[F[_], A] = Kleisli[F, Server, A]
 
-  class GrpcConfigInterpreter[F[_]](implicit initConfig: Config, configList: List[GrpcConfig])
+  class GrpcConfigInterpreter[F[_]](initConfig: Config, configList: List[GrpcConfig])
       extends (Kleisli[F, Server, ?] ~> F) {
 
     private[this] def build(configList: List[GrpcConfig]): Server =
@@ -48,4 +49,7 @@ package object server {
       fa(build(configList))
 
   }
+
+  def ConfigForPort[F[_]](portPath: String)(implicit SC: ServerConfig[F]): FreeS[F, Config] =
+    SC.loadConfigPort(portPath)
 }
