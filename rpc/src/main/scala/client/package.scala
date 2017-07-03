@@ -69,7 +69,7 @@ package object client {
       implicit CC: ChannelConfig[F]): FreeS[F, ManagedChannelForAddress] =
     CC.loadChannelAddress(hostPath, portPath)
 
-  def ConfigForTarget[M[_]](target: String)(
-      implicit CC: ChannelConfig[M]): FreeS[M, ManagedChannelForTarget] =
+  def ConfigForTarget[F[_]](target: String)(
+      implicit CC: ChannelConfig[F]): FreeS[F, ManagedChannelForTarget] =
     CC.loadChannelTarget(target)
 }
