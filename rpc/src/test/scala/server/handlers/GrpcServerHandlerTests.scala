@@ -17,12 +17,8 @@
 package freestyle.rpc
 package server.handlers
 
-import java.util.concurrent.TimeUnit
-
 import freestyle.rpc.server.RpcTestSuite
-import io.grpc.{Server, ServerServiceDefinition}
 
-import scala.collection.JavaConverters._
 import scala.concurrent.duration.TimeUnit
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -71,14 +67,14 @@ class GrpcServerHandlerTests extends RpcTestSuite {
 
     }
 
-    "allow to stop an started GrpcServer" in {
+    "allow to stop a started GrpcServer" in {
 
       runKFuture(handler.shutdown, serverMock) shouldBe serverCopyMock
       (serverMock.shutdown _).verify().once()
 
     }
 
-    "allow to stop immediately an started GrpcServer" in {
+    "allow to stop immediately a started GrpcServer" in {
 
       runKFuture(handler.shutdownNow, serverMock) shouldBe serverCopyMock
       (serverMock.shutdownNow _).verify().once()
@@ -99,14 +95,14 @@ class GrpcServerHandlerTests extends RpcTestSuite {
 
     }
 
-    "allow to to terminate after a certain timeout is reached" in {
+    "allow to terminate after a certain timeout is reached" in {
 
       runKFuture(handler.awaitTerminationTimeout(timeout, timeoutUnit), serverMock) shouldBe b
       (serverMock.awaitTermination(_: Long, _: TimeUnit)).verify(timeout, timeoutUnit).once()
 
     }
 
-    "allow stopping an started GrpcServer" in {
+    "allow stopping a started GrpcServer" in {
 
       runKFuture(handler.awaitTermination, serverMock) shouldBe unit
       (serverMock.awaitTermination _).verify().once()
