@@ -53,15 +53,12 @@ trait ChannelConfig {
   val defaultPort = 50051
 
   def loadChannelAddress(hostPath: String, portPath: String): FS.Seq[ManagedChannelForAddress] =
-    for {
-      config <- configM.load
-    } yield
+    configM.load map (config =>
       ManagedChannelForAddress(
         config.string(hostPath).getOrElse(defaultHost),
-        config.int(portPath).getOrElse(defaultPort))
+        config.int(portPath).getOrElse(defaultPort)))
 
   def loadChannelTarget(targetPath: String): FS.Seq[ManagedChannelForTarget] =
-    for {
-      config <- configM.load
-    } yield ManagedChannelForTarget(config.string(targetPath).getOrElse("target"))
+    configM.load map (config =>
+      ManagedChannelForTarget(config.string(targetPath).getOrElse("target")))
 }

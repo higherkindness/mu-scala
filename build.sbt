@@ -20,7 +20,8 @@ lazy val rpc = project
         Seq(
           %%("freestyle-async"),
           %%("freestyle-config"),
-          "io.grpc" % "grpc-all" % "1.4.0"
+          "io.grpc"                % "grpc-all" % "1.4.0",
+          %%("scalamockScalatest") % "test"
         )
     ): _*
   )
@@ -33,12 +34,13 @@ lazy val `demo-greeting` = project
   .settings(noPublishSettings: _*)
   .settings(commandAliases: _*)
   .settings(demoCommonSettings: _*)
-  .settings(Seq(
-    libraryDependencies ++= Seq(
-      %%("freestyle-async"),
-      %%("freestyle-config")
-    )
-  ): _*)
+  .settings(
+    Seq(
+      libraryDependencies ++= Seq(
+        %%("freestyle-async"),
+        %%("freestyle-config")
+      )
+    ): _*)
 
 lazy val googleApi = project
   .in(file("third_party"))

@@ -40,12 +40,15 @@ trait Syntax {
   }
 }
 
-object implicits extends CaptureInstances with Syntax {
+trait Helpers {
 
-  def server[M[_]](implicit app: GrpcServer[M]): FreeS[M, Unit] = {
+  def server[M[_]](implicit APP: GrpcServer[M]): FreeS[M, Unit] = {
     for {
-      _ <- app.start()
-      _ <- app.awaitTermination()
+      _ <- APP.start()
+      _ <- APP.awaitTermination()
     } yield ()
   }
+
 }
+
+object implicits extends CaptureInstances with Syntax with Helpers

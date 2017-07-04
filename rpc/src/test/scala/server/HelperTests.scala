@@ -17,18 +17,23 @@
 package freestyle.rpc
 package server
 
-import cats.implicits._
-import freestyle._
-import freestyle.config.ConfigM
-import freestyle.config.implicits._
+import cats.Id
+import freestyle.rpc.server.implicits._
 
-@module
-trait ServerConfig {
+class HelperTests extends RpcTestSuite {
 
-  val configM: ConfigM
+  import implicits._
 
-  val defaultPort = 50051
+  "server helper" should {
 
-  def loadConfigPort(portPath: String): FS.Seq[Config] =
-    configM.load map (config => Config(config.int(portPath).getOrElse(defaultPort)))
+    "work as expected" in {
+
+      server[GrpcServer.Op].interpret[Id] shouldBe ((): Unit)
+
+      (serverMock.start _).verify()
+      (serverMock.awaitTermination _).verify()
+    }
+
+  }
+
 }

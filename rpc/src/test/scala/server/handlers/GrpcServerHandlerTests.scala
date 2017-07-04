@@ -1,0 +1,118 @@
+/*
+ * Copyright 2017 47 Degrees, LLC. <http://www.47deg.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package freestyle.rpc
+package server.handlers
+
+import java.util.concurrent.TimeUnit
+
+import freestyle.rpc.server.RpcTestSuite
+import io.grpc.{Server, ServerServiceDefinition}
+
+import scala.collection.JavaConverters._
+import scala.concurrent.duration.TimeUnit
+import scala.concurrent.{ExecutionContext, Future}
+
+class GrpcServerHandlerTests extends RpcTestSuite {
+
+  implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
+
+  import implicits._
+
+  val handler: GrpcServerHandler[Future] = new GrpcServerHandler[Future]
+
+  "GrpcServer.Handler" should {
+
+    "allow to start a GrpcServer" in {
+
+      runKFuture(handler.start, serverMock) shouldBe serverCopyMock
+      (serverMock.start _).verify().once()
+
+    }
+
+    "allow to get the port where server is running" in {
+
+      runKFuture(handler.getPort, serverMock) shouldBe port
+      (serverMock.getPort _).verify().once()
+
+    }
+
+    "allow to get the services running under the Server instance" in {
+
+      runKFuture(handler.getServices, serverMock) shouldBe serviceList
+      (serverMock.getServices _).verify().once()
+
+    }
+
+    "allow to get the immutable services running under the Server instance" in {
+
+      runKFuture(handler.getImmutableServices, serverMock) shouldBe immutableServiceList
+      (serverMock.getImmutableServices _).verify().once()
+
+    }
+
+    "allow to get the mutable services running under the Server instance" in {
+
+      runKFuture(handler.getMutableServices, serverMock) shouldBe mutableServiceList
+      (serverMock.getMutableServices _).verify().once()
+
+    }
+
+    "allow to stop an started GrpcServer" in {
+
+      runKFuture(handler.shutdown, serverMock) shouldBe serverCopyMock
+      (serverMock.shutdown _).verify().once()
+
+    }
+
+    "allow to stop immediately an started GrpcServer" in {
+
+      runKFuture(handler.shutdownNow, serverMock) shouldBe serverCopyMock
+      (serverMock.shutdownNow _).verify().once()
+
+    }
+
+    "allow to ask whether a Server is shutdown" in {
+
+      runKFuture(handler.isShutdown, serverMock) shouldBe b
+      (serverMock.isShutdown _).verify().once()
+
+    }
+
+    "allow to ask whether a Server instance has been terminated" in {
+
+      runKFuture(handler.isTerminated, serverMock) shouldBe b
+      (serverMock.isTerminated _).verify().once()
+
+    }
+
+    "allow to to terminate after a certain timeout is reached" in {
+
+      runKFuture(handler.awaitTerminationTimeout(timeout, timeoutUnit), serverMock) shouldBe b
+      (serverMock.awaitTermination(_: Long, _: TimeUnit)).verify(timeout, timeoutUnit).once()
+
+    }
+
+    "allow stopping an started GrpcServer" in {
+
+      runKFuture(handler.awaitTermination, serverMock) shouldBe unit
+      (serverMock.awaitTermination _).verify().once()
+
+    }
+
+  }
+
+}
