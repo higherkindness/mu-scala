@@ -21,14 +21,16 @@ import cats.implicits._
 import freestyle._
 import freestyle.config.ConfigM
 import freestyle.config.implicits._
+import io.grpc.Server
 
 @module
 trait ServerConfig {
 
   val configM: ConfigM
 
-  val defaultPort = 50051
-
-  def loadConfigPort(portPath: String): FS.Seq[Config] =
-    configM.load map (config => Config(config.int(portPath).getOrElse(defaultPort)))
+  def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): FS.Seq[Server] =
+    configM.load.map { config =>
+      val port = config.int(portPath).getOrElse(defaultPort)
+      SServerBuilder(port, configList).buildServer
+    }
 }
