@@ -18,7 +18,7 @@ package freestyle
 package rpc
 package protocol
 
-import freestyle.rpc.protocol.model._
+import freestyle.rpc.protocol.model.{ProtoFieldMod, _}
 
 import scala.meta.Defn.{Class, Object, Trait}
 import scala.meta._
@@ -72,34 +72,42 @@ object converters {
       new ScalaMetaClass2ProtoMessage {
         override def convert(c: Class): ProtoMessage = ProtoMessage(
           name = c.name.value,
-          fields =
-            c.ctor.paramss.flatten.zipWithIndex.map { case (p, t) => PC.convert(p, t + 1) }.toList
+          fields = c.ctor.paramss.flatten.zipWithIndex.map {
+            case (p, t) => PC.convert(p, t + 1, None)
+          }.toList
         )
       }
   }
 
   trait ScalaMetaParam2ProtoMessageField {
-    def convert(p: Term.Param, tag: Int): ProtoMessageField
+    def convert(p: Term.Param, tag: Int, mod: Option[ProtoFieldMod]): ProtoMessageField
   }
 
   object ScalaMetaParam2ProtoMessageField {
     implicit def defaultParam2ProtoMessageField: ScalaMetaParam2ProtoMessageField =
       new ScalaMetaParam2ProtoMessageField {
-        override def convert(p: Term.Param, tag: Int): ProtoMessageField = p match {
+        override def convert(
+            p: Term.Param,
+            tag: Int,
+            mod: Option[ProtoFieldMod] = None): ProtoMessageField = p match {
           case param"..$mods $paramname: Double = $expropt" =>
-            ProtoDouble(name = paramname.value, tag = tag)
+            ProtoDouble(mod = mod, name = paramname.value, tag = tag)
           case param"..$mods $paramname: Float = $expropt" =>
-            ProtoFloat(name = paramname.value, tag = tag)
+            ProtoFloat(mod = mod, name = paramname.value, tag = tag)
           case param"..$mods $paramname: Long = $expropt" =>
-            ProtoInt64(name = paramname.value, tag = tag)
+            ProtoInt64(mod = mod, name = paramname.value, tag = tag)
           case param"..$mods $paramname: Boolean = $expropt" =>
-            ProtoBool(name = paramname.value, tag = tag)
+            ProtoBool(mod = mod, name = paramname.value, tag = tag)
           case param"..$mods $paramname: Int = $expropt" =>
-            ProtoInt32(name = paramname.value, tag = tag)
+            ProtoInt32(mod = mod, name = paramname.value, tag = tag)
           case param"..$mods $paramname: String = $expropt" =>
-            ProtoString(name = paramname.value, tag = tag)
+            ProtoString(mod = mod, name = paramname.value, tag = tag)
           case param"..$mods $paramname: Array[Byte] = $expropt" =>
-            ProtoBytes(name = paramname.value, tag = tag)
+            ProtoBytes(mod = mod, name = paramname.value, tag = tag)
+          case param"..$mods $paramname: List[$tpe] = $expropt" =>
+            convert(param"..$mods $paramname: $tpe = $expropt", tag, Some(Repeated))
+          case param"..$mods $paramname: Option[$tpe] = $expropt" =>
+            convert(param"..$mods $paramname: $tpe = $expropt", tag, Some(Optional))
           case param"..$mods $paramname: $tpe = $expropt" =>
             ProtoCustomType(name = paramname.value, tag = tag, id = tpe.toString())
         }

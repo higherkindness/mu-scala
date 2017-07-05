@@ -40,7 +40,7 @@ object encoders {
                |}
                |${a.mod.fold("")(m => PME.encode(m) + " ")}${a.id} ${a.name} = ${a.tag};
          """.stripMargin
-          case _ => s"${a.id} ${a.name} = ${a.tag};"
+          case _ => s"${a.mod.fold("")(m => PME.encode(m) + " ")}${a.id} ${a.name} = ${a.tag};"
         }
       }
 

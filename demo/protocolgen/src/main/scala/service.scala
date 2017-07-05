@@ -13,10 +13,10 @@ import io.grpc.stub.StreamObserver
 object protocols {
 
   @message
-  case class MessageRequest(name: String, n: Int)
+  case class MessageRequest(name: String, n: Option[Int])
 
   @message
-  case class MessageReply(name: String, n: Int)
+  case class MessageReply(name: String, n: List[Int])
 
   @service
   trait GreetingService[F[_]] extends EffectLike[F] {
