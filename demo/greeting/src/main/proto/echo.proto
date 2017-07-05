@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+import "echo_messages.proto";
+
+package freestyle.rpc.demo;
+
+service EchoService {
+    rpc Echo (EchoRequest) returns (EchoResponse);
+}

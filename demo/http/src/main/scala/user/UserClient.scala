@@ -23,10 +23,11 @@ import io.grpc.ManagedChannelBuilder
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 
-class UserClient(host: String, port: Int) {
+class UserClient {
 
+  // This channel construction is pending to be changed once streaming is supported
   private[this] val channel =
-    ManagedChannelBuilder.forAddress(host, port).usePlaintext(true).build
+    ManagedChannelBuilder.forAddress("localhost", 50051).usePlaintext(true).build
 
   private[this] val client: UserServiceStub = UserServiceGrpc.stub(channel)
 

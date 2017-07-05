@@ -19,34 +19,22 @@ package greeting
 
 import java.util.concurrent.{CountDownLatch, TimeUnit}
 
-import io.grpc.ManagedChannelBuilder
 import freestyle.rpc.demo.greeting.GreeterGrpc._
+import io.grpc.ManagedChannelBuilder
 import io.grpc.stub.StreamObserver
 
 import scala.collection.immutable
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Await, Future, Promise}
 import scala.concurrent.duration._
 import scala.util.Random
 
-class GreetingClient(host: String, port: Int) {
+class GreetingClient {
 
+  // This channel construction is pending to be changed once streaming is supported
   private[this] val channel =
-    ManagedChannelBuilder.forAddress(host, port).usePlaintext(true).build
+    ManagedChannelBuilder.forAddress("localhost", 50051).usePlaintext(true).build
 
   private[this] val asyncHelloClient: GreeterStub = GreeterGrpc.stub(channel)
-
-  def unaryDemo(request: MessageRequest): Unit = {
-
-    val response = for {
-      hi  <- asyncHelloClient.sayHello(request)
-      bye <- asyncHelloClient.sayGoodbye(request)
-    } yield (hi.message, bye.message)
-
-    println("")
-    println(s"Received -> ${Await.result(response, Duration.Inf)}")
-    println("")
-  }
 
   def serverStreamingDemo(request: MessageRequest): Future[Unit] = {
     val lotOfRepliesStreamingPromise = Promise[Unit]()

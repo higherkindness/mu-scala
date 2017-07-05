@@ -18,20 +18,14 @@ lazy val rpc = project
     Seq(
       libraryDependencies ++= commonDeps ++ freestyleCoreDeps() ++
         Seq(
-          "io.grpc"       % "grpc-all" % "1.4.0",
-          "org.scalameta" %% "contrib" % "1.8.0"
+          %%("freestyle-async"),
+          %%("freestyle-config"),
+          %%("scalameta-contrib"),
+          "io.grpc"                % "grpc-all" % "1.4.0",
+          %%("scalamockScalatest") % "test"
         )
     ): _*
   )
-
-lazy val `demo-greeting` = project
-  .in(file("demo/greeting"))
-  .settings(moduleName := "freestyle-rpc-demo-greeting")
-  .aggregate(rpc)
-  .dependsOn(rpc)
-  .settings(noPublishSettings: _*)
-  .settings(commandAliases: _*)
-  .settings(demoCommonSettings: _*)
 
 lazy val `demo-protocolgen` = project
   .in(file("demo/protocolgen"))
@@ -41,6 +35,22 @@ lazy val `demo-protocolgen` = project
   .settings(noPublishSettings: _*)
   .settings(commandAliases: _*)
   .settings(demoCommonSettings: _*)
+
+lazy val `demo-greeting` = project
+  .in(file("demo/greeting"))
+  .settings(moduleName := "freestyle-rpc-demo-greeting")
+  .aggregate(rpc)
+  .dependsOn(rpc)
+  .settings(noPublishSettings: _*)
+  .settings(commandAliases: _*)
+  .settings(demoCommonSettings: _*)
+  .settings(
+    Seq(
+      libraryDependencies ++= Seq(
+        %%("freestyle-async"),
+        %%("freestyle-config")
+      )
+    ): _*)
 
 lazy val googleApi = project
   .in(file("third_party"))

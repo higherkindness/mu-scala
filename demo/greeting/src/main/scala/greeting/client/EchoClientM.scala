@@ -15,18 +15,26 @@
  */
 
 package freestyle.rpc.demo
-package greeting
+package greeting.client
 
-import cats.implicits._
-import freestyle.rpc.server._
-import freestyle.rpc.server.implicits._
-import runtime.server.implicits._
+import freestyle._
+import freestyle.rpc.client._
+import freestyle.rpc.demo.echo.EchoServiceGrpc
+import freestyle.rpc.demo.echo_messages._
+import io.grpc.CallOptions
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.Await
+@module
+trait EchoClientM {
 
-object GreetingServerApp {
+  val clientCallsM: ClientCallsM
+  val channelOps: ChannelM
 
-  def main(args: Array[String]): Unit =
-    Await.result(server[GrpcServer.Op].bootstrapFuture, Duration.Inf)
+  def echo(
+      request: EchoRequest,
+      options: CallOptions = CallOptions.DEFAULT): FS.Seq[EchoResponse] =
+    for {
+      call     <- channelOps.newCall(EchoServiceGrpc.METHOD_ECHO, options)
+      response <- clientCallsM.asyncM(call, request)
+    } yield response
+
 }

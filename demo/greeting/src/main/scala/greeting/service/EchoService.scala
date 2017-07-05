@@ -16,17 +16,18 @@
 
 package freestyle.rpc.demo
 package greeting
+package service
 
-import cats.implicits._
-import freestyle.rpc.server._
-import freestyle.rpc.server.implicits._
-import runtime.server.implicits._
+import freestyle.rpc.demo.echo.EchoServiceGrpc
+import freestyle.rpc.demo.echo_messages.{EchoRequest, EchoResponse}
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.Await
+import scala.concurrent.Future
 
-object GreetingServerApp {
+class EchoService extends EchoServiceGrpc.EchoService {
 
-  def main(args: Array[String]): Unit =
-    Await.result(server[GrpcServer.Op].bootstrapFuture, Duration.Inf)
+  override def echo(request: EchoRequest): Future[EchoResponse] = {
+    println(s"Echo request ${request.message}")
+    Future.successful(EchoResponse("Server Echo!"))
+  }
+
 }

@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.demo
-package greeting
+package freestyle.rpc
+package server
 
-import cats.implicits._
-import freestyle.rpc.server._
+import cats.Id
 import freestyle.rpc.server.implicits._
-import runtime.server.implicits._
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.Await
+class HelperTests extends RpcTestSuite {
 
-object GreetingServerApp {
+  import implicits._
 
-  def main(args: Array[String]): Unit =
-    Await.result(server[GrpcServer.Op].bootstrapFuture, Duration.Inf)
+  "server helper" should {
+
+    "work as expected" in {
+
+      server[GrpcServer.Op].interpret[Id] shouldBe ((): Unit)
+
+      (serverMock.start _).verify()
+      (serverMock.awaitTermination _).verify()
+    }
+
+  }
+
 }

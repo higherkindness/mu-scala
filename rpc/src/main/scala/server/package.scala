@@ -18,20 +18,20 @@ package freestyle.rpc
 
 import cats.data.Kleisli
 import cats.~>
+import freestyle.FreeS
 import io.grpc._
 
 package object server {
 
   type GrpcServerOps[F[_], A] = Kleisli[F, Server, A]
 
-  class GrpcConfigInterpreter[F[_]](implicit initConfig: Config, configList: List[GrpcConfig])
+  class GrpcConfigInterpreter[F[_]](initConfig: Config, configList: List[GrpcConfig])
       extends (Kleisli[F, Server, ?] ~> F) {
 
-    private[this] def interpret(configOptions: List[GrpcConfig])(
-        implicit initConfig: Config): Server =
-      configOptions
-        .foldLeft[ServerBuilder[_]](ServerBuilder.forPort(initConfig.port))((acc, option) =>
-          (option match {
+    private[this] def build(configList: List[GrpcConfig]): Server =
+      configList
+        .foldLeft(ServerBuilder.forPort(initConfig.port))((acc, option) =>
+          option match {
             case DirectExecutor                  => acc.directExecutor()
             case SetExecutor(ex)                 => acc.executor(ex)
             case AddService(srv)                 => acc.addService(srv)
@@ -42,13 +42,14 @@ package object server {
             case UseTransportSecurity(cc, pk)    => acc.useTransportSecurity(cc, pk)
             case SetDecompressorRegistry(dr)     => acc.decompressorRegistry(dr)
             case SetCompressorRegistry(cr)       => acc.compressorRegistry(cr)
-          }).asInstanceOf[ServerBuilder[_]])
+        })
         .build()
-
-    private[this] def build(configList: List[GrpcConfig]): Server = interpret(configList)
 
     override def apply[B](fa: Kleisli[F, Server, B]): F[B] =
       fa(build(configList))
 
   }
+
+  def ConfigForPort[F[_]](portPath: String)(implicit SC: ServerConfig[F]): FreeS[F, Config] =
+    SC.loadConfigPort(portPath)
 }

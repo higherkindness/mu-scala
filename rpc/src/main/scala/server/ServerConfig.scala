@@ -15,11 +15,20 @@
  */
 
 package freestyle.rpc
+package server
 
-package object demo {
+import cats.implicits._
+import freestyle._
+import freestyle.config.ConfigM
+import freestyle.config.implicits._
 
-  val host      = "localhost"
-  val portNode1 = 50051
-  val portNode2 = 50052
+@module
+trait ServerConfig {
 
+  val configM: ConfigM
+
+  val defaultPort = 50051
+
+  def loadConfigPort(portPath: String): FS.Seq[Config] =
+    configM.load map (config => Config(config.int(portPath).getOrElse(defaultPort)))
 }
