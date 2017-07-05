@@ -58,8 +58,6 @@ object encoders {
       new ProtoEncoder[ProtoFieldMod] {
         override def encode(a: ProtoFieldMod): String = a match {
           case Repeated => "repeated"
-          case Optional => "optional"
-          case Required => "required"
         }
       }
 

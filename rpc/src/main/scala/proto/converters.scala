@@ -107,7 +107,7 @@ object converters {
           case param"..$mods $paramname: List[$tpe] = $expropt" =>
             convert(param"..$mods $paramname: $tpe = $expropt", tag, Some(Repeated))
           case param"..$mods $paramname: Option[$tpe] = $expropt" =>
-            convert(param"..$mods $paramname: $tpe = $expropt", tag, Some(Optional))
+            convert(param"..$mods $paramname: $tpe = $expropt", tag, None)
           case param"..$mods $paramname: $tpe = $expropt" =>
             ProtoCustomType(name = paramname.value, tag = tag, id = tpe.toString())
         }

@@ -22,11 +22,7 @@ object model {
 
   sealed trait ProtoFieldMod extends Product with Serializable
 
-  case object Optional extends ProtoFieldMod
-
   case object Repeated extends ProtoFieldMod
-
-  case object Required extends ProtoFieldMod
 
   sealed trait ProtoMessageField extends Product with Serializable {
     def mod: Option[ProtoFieldMod]
