@@ -37,13 +37,20 @@ lazy val `demo-protocolgen` = project
   .settings(noPublishSettings: _*)
   .settings(commandAliases: _*)
   .settings(
-    protogen := fullRunTask(
-      protogen,
-      Compile,
-      "freestyle.rpc.protocol.ProtoCodeGen",
-      (baseDirectory.value / "src" / "main" / "scala").absolutePath,
-      (baseDirectory.value / "src" / "main" / "proto").absolutePath
-    )
+    protogen := {
+      toError(
+        (runner in Compile).value
+          .run(
+            mainClass = "freestyle.rpc.protocol.ProtoCodeGen",
+            classpath = sbt.Attributed.data((fullClasspath in Compile).value),
+            options = Seq(
+              (baseDirectory.value / "src" / "main" / "scala").absolutePath,
+              (baseDirectory.value / "src" / "main" / "proto").absolutePath
+            ),
+            log = streams.value.log
+          )
+      )
+    }
   )
 
 lazy val `demo-greeting` = project
