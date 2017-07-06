@@ -23,14 +23,20 @@ import freestyle.config.ConfigM
 import freestyle.config.implicits._
 import io.grpc.Server
 
+case class ServerW(port: Int, configList: List[GrpcConfig]) {
+
+  lazy val server: Server = SServerBuilder(port, configList).build
+
+}
+
 @module
 trait ServerConfig {
 
   val configM: ConfigM
 
-  def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): FS.Seq[Server] =
+  def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): FS.Seq[ServerW] =
     configM.load.map { config =>
       val port = config.int(portPath).getOrElse(defaultPort)
-      SServerBuilder(port, configList).buildServer
+      ServerW(port, configList)
     }
 }

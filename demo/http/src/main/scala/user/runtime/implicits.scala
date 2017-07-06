@@ -26,7 +26,6 @@ import freestyle.rpc.demo.user._
 import freestyle.rpc.server._
 import freestyle.rpc.server.implicits._
 import freestyle.rpc.server.handlers._
-import io.grpc.Server
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -39,13 +38,13 @@ object implicits {
     AddService(UserServiceGrpc.bindService(new UserService, ExecutionContext.global))
   )
 
-  val serverFromConfig: Server = Await.result(
+  val conf: ServerW = Await.result(
     BuildServerFromConfig[ServerConfig.Op]("rpc.server.port", grpcConfigs)
       .interpret[Future],
     1.seconds)
 
   implicit val grpcServerHandler: GrpcServer.Op ~> Future =
     new GrpcServerHandler[Future] andThen
-      new GrpcKInterpreter[Future](serverFromConfig)
+      new GrpcKInterpreter[Future](conf.server)
 
 }

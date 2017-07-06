@@ -35,6 +35,6 @@ package object server {
   }
 
   def BuildServerFromConfig[F[_]](portPath: String, configList: List[GrpcConfig] = Nil)(
-      implicit SC: ServerConfig[F]): FreeS[F, Server] =
+      implicit SC: ServerConfig[F]): FreeS[F, ServerW] =
     SC.buildServer(portPath, configList)
 }

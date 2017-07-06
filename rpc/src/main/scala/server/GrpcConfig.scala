@@ -38,9 +38,7 @@ case class SServerBuilder(port: Int, grpcConfigList: List[GrpcConfig] = Nil) {
 
   protected[this] lazy val sb: ServerBuilder[_ <: ServerBuilder[_]] = ServerBuilder.forPort(port)
 
-  def withGrpcConfigList(l: List[GrpcConfig]): SServerBuilder = this.copy(grpcConfigList = l)
-
-  def buildServer: Server = {
+  def build: Server = {
     grpcConfigList
       .foldLeft[ServerBuilder[_ <: ServerBuilder[_]]](sb)((acc, option) =>
         option match {

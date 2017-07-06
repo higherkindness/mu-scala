@@ -67,6 +67,14 @@ trait RpcTestSuite extends WordSpec with Matchers with OneInstancePerTest with M
 
   object implicits extends DummyData {
 
+    implicit class FutureOps[A](f: Future[A]) {
+
+      def await: A = await(Duration.Inf)
+
+      def await(d: Duration): A = Await.result(f, d)
+
+    }
+
     def idApply[A](fa: GrpcServer.Op[A]): Id[A] = {
       import GrpcServer._
       fa match {

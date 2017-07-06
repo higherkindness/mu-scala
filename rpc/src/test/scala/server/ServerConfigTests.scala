@@ -38,16 +38,22 @@ class ServerConfigTests extends RpcTestSuite {
 
     "load the port specified in the config file" in {
 
-      val serverF = BuildServerFromConfig[ServerConfig.Op]("rpc.server.port").interpret[Future]
+      val serverConf: ServerW =
+        BuildServerFromConfig[ServerConfig.Op]("rpc.server.port")
+          .interpret[Future]
+          .await
 
-      serverF map (_.getPort shouldBe port)
+      serverConf.port shouldBe port
     }
 
     "load the default port when the config port path is not found" in {
 
-      val serverF = BuildServerFromConfig[ServerConfig.Op]("rpc.wrong.path").interpret[Future]
+      val serverConf: ServerW =
+        BuildServerFromConfig[ServerConfig.Op]("rpc.wrong.path")
+          .interpret[Future]
+          .await
 
-      serverF map (_.getPort shouldBe port)
+      serverConf.port shouldBe defaultPort
     }
 
   }
@@ -69,9 +75,9 @@ class ServerConfigTests extends RpcTestSuite {
     "work as expected" in {
 
       val configList: List[GrpcConfig] = List(AddService(sd1))
-      val server: Server               = SServerBuilder(port).withGrpcConfigList(configList).buildServer
+      val server: Server               = SServerBuilder(port, configList).build
 
-      server.getServices.asScala shouldBe List(sd1)
+      server.getServices.asScala.toList shouldBe List(sd1)
     }
   }
 }
