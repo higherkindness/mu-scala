@@ -20,22 +20,13 @@ package server
 import java.util.concurrent.TimeUnit
 
 import cats.{~>, Id}
-import cats.data.Kleisli
 import io.grpc.{Server, ServerServiceDefinition}
-import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, OneInstancePerTest, WordSpec}
 
 import scala.collection.JavaConverters._
-import scala.concurrent.duration.{Duration, TimeUnit}
-import scala.concurrent.{Await, Future}
+import scala.concurrent.duration.TimeUnit
+import scala.concurrent.Future
 
-trait RpcTestSuite extends WordSpec with Matchers with OneInstancePerTest with MockFactory {
-
-  def runK[F[_], A, B](kleisli: Kleisli[F, A, B], v: A): F[B] =
-    kleisli.run(v)
-
-  def runKFuture[A, B](kleisli: Kleisli[Future, A, B], v: A): B =
-    Await.result(kleisli.run(v), Duration.Inf)
+trait RpcServerTestSuite extends RpcBaseTestSuite {
 
   trait DummyData {
 
@@ -65,15 +56,7 @@ trait RpcTestSuite extends WordSpec with Matchers with OneInstancePerTest with M
     (serverMock.awaitTermination _).when().returns(unit)
   }
 
-  object implicits extends DummyData {
-
-    implicit class FutureOps[A](f: Future[A]) {
-
-      def await: A = await(Duration.Inf)
-
-      def await(d: Duration): A = Await.result(f, d)
-
-    }
+  object implicits extends Helpers with DummyData {
 
     def idApply[A](fa: GrpcServer.Op[A]): Id[A] = {
       import GrpcServer._

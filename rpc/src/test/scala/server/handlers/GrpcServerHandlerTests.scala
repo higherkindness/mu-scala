@@ -17,12 +17,12 @@
 package freestyle.rpc
 package server.handlers
 
-import freestyle.rpc.server.RpcTestSuite
+import freestyle.rpc.server.RpcServerTestSuite
 
 import scala.concurrent.duration.TimeUnit
 import scala.concurrent.{ExecutionContext, Future}
 
-class GrpcServerHandlerTests extends RpcTestSuite {
+class GrpcServerHandlerTests extends RpcServerTestSuite {
 
   implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
 
