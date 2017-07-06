@@ -36,6 +36,7 @@ lazy val `demo-protocolgen` = project
   .dependsOn(rpc)
   .settings(noPublishSettings: _*)
   .settings(commandAliases: _*)
+  .settings(demoCommonSettings: _*)
   .settings(
     protogen := {
       toError(
