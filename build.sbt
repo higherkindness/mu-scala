@@ -9,7 +9,7 @@ lazy val root = project
   .settings(name := "freestyle-rpc")
   .settings(moduleName := "root")
   .settings(noPublishSettings: _*)
-  .aggregate(rpc, `demo-greeting`)
+  .aggregate(rpc, `demo-greeting`, `demo-protocolgen`)
 
 lazy val rpc = project
   .in(file("rpc"))
@@ -27,6 +27,8 @@ lazy val rpc = project
     ): _*
   )
 
+lazy val protogen = taskKey[Unit]("Generates .proto files from freestyle-rpc service definitions")
+
 lazy val `demo-protocolgen` = project
   .in(file("demo/protocolgen"))
   .settings(moduleName := "freestyle-rpc-demo-protocolgen")
@@ -34,7 +36,15 @@ lazy val `demo-protocolgen` = project
   .dependsOn(rpc)
   .settings(noPublishSettings: _*)
   .settings(commandAliases: _*)
-  .settings(demoCommonSettings: _*)
+  .settings(
+    protogen := fullRunTask(
+      protogen,
+      Compile,
+      "freestyle.rpc.protocol.ProtoCodeGen",
+      (baseDirectory.value / "src" / "main" / "scala").absolutePath,
+      (baseDirectory.value / "src" / "main" / "proto").absolutePath
+    )
+  )
 
 lazy val `demo-greeting` = project
   .in(file("demo/greeting"))

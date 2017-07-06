@@ -19,8 +19,6 @@ package rpc
 package protocol
 
 import java.io.File
-import java.nio.charset.Charset
-import java.nio.file.{Files, StandardOpenOption}
 
 import cats.implicits._
 import freestyle.rpc.protocol.encoders._
@@ -33,9 +31,21 @@ object ProtoCodeGen {
 
   def main(args: Array[String]): Unit = {
     args.toList match {
-      case input :: output :: Nil if input.endsWith(".scala") =>
-        val inputFile = new File(input)
+      case input :: output :: Nil =>
+        generate(new File(input), new File(output)); ()
+      case _ =>
+        throw new IllegalArgumentException(s"Expected 2 $args with input and output directories")
+    }
+  }
 
+  def generate(input: File, output: File): Seq[File] = {
+    def allScalaFiles(f: File): List[File] = {
+      val children   = f.listFiles
+      val scalaFiles = children.filter(f => """.*\.scala$""".r.findFirstIn(f.getName).isDefined)
+      (scalaFiles ++ children.filter(_.isDirectory).flatMap(allScalaFiles)).toList
+    }
+    if (input.isDirectory && output.isDirectory) {
+      allScalaFiles(input) map { inputFile =>
         val processed =
           ProtoAnnotationsProcessor[Try]
             .process(inputFile)
@@ -43,19 +53,23 @@ object ProtoCodeGen {
 
         processed match {
           case Success(protoContents) =>
-            val jfile = new File(output)
-            //jfile.getParentFile.mkdirs()
-            println(protoContents)
-            Files.write(
-              new File(jfile.toPath + "/" + inputFile.getName.replaceAll(".scala", ".proto")).toPath,
-              protoContents.getBytes(Charset.forName("UTF-8")),
-              StandardOpenOption.CREATE
-              //StandardOpenOption.CREATE_NEW
-            )
-
-          case Failure(e) => e.printStackTrace()
+            val outputFile =
+              new File(output.toPath + "/" + inputFile.getName.replaceAll(".scala", ".proto"))
+            println(s"""
+                |
+                |Scala File: $inputFile
+                |Proto File: $outputFile
+                |----------------------------------
+                |$protoContents
+                |----------------------------------
+                |
+              """.stripMargin)
+            outputFile
+          case Failure(e) => throw e
         }
-
+      }
+    } else {
+      throw new IllegalArgumentException(s"Expected $input and $output to be directories")
     }
   }
 
