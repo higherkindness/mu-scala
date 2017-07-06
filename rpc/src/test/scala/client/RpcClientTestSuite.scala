@@ -57,9 +57,13 @@ trait RpcClientTestSuite extends RpcBaseTestSuite {
     val exception: Throwable = new RuntimeException("Test exception")
 
     def failedFuture[T]: ListenableFuture[T] =
-      service.submit(() => throw exception)
+      service.submit(new Callable[T] {
+        override def call(): T = throw exception
+      })
 
     def successfulFuture[T](value: T): ListenableFuture[T] =
-      service.submit(() => value)
+      service.submit(new Callable[T] {
+        override def call(): T = value
+      })
   }
 }
