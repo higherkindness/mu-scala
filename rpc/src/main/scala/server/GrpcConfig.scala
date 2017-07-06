@@ -22,8 +22,6 @@ import java.util.concurrent.Executor
 
 import io.grpc._
 
-case class Config(port: Int)
-
 sealed trait GrpcConfig                                                  extends Product with Serializable
 case object DirectExecutor                                               extends GrpcConfig
 case class SetExecutor(executor: Executor)                               extends GrpcConfig
@@ -35,3 +33,27 @@ case class SetFallbackHandlerRegistry(fallbackRegistry: HandlerRegistry) extends
 case class UseTransportSecurity(certChain: File, privateKey: File)       extends GrpcConfig
 case class SetDecompressorRegistry(registry: DecompressorRegistry)       extends GrpcConfig
 case class SetCompressorRegistry(registry: CompressorRegistry)           extends GrpcConfig
+
+case class SServerBuilder(port: Int, grpcConfigList: List[GrpcConfig] = Nil) {
+
+  protected[this] lazy val sb: ServerBuilder[_ <: ServerBuilder[_]] = ServerBuilder.forPort(port)
+
+  def build: Server = {
+    grpcConfigList
+      .foldLeft[ServerBuilder[_ <: ServerBuilder[_]]](sb)((acc, option) =>
+        option match {
+          case DirectExecutor                  => acc.directExecutor()
+          case SetExecutor(ex)                 => acc.executor(ex)
+          case AddService(srv)                 => acc.addService(srv)
+          case AddBindableService(srv)         => acc.addService(srv)
+          case AddTransportFilter(filter)      => acc.addTransportFilter(filter)
+          case AddStreamTracerFactory(factory) => acc.addStreamTracerFactory(factory)
+          case SetFallbackHandlerRegistry(fr)  => acc.fallbackHandlerRegistry(fr)
+          case UseTransportSecurity(cc, pk)    => acc.useTransportSecurity(cc, pk)
+          case SetDecompressorRegistry(dr)     => acc.decompressorRegistry(dr)
+          case SetCompressorRegistry(cr)       => acc.compressorRegistry(cr)
+      })
+      .build()
+  }
+
+}

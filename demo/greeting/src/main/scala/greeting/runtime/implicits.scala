@@ -23,7 +23,6 @@ import freestyle._
 import freestyle.implicits._
 import freestyle.async.implicits._
 import freestyle.config.implicits._
-import freestyle.rpc.client.ChannelConfig
 import freestyle.rpc.demo.echo.EchoServiceGrpc
 import freestyle.rpc.demo.greeting._
 import freestyle.rpc.demo.greeting.service._
@@ -45,18 +44,19 @@ object server {
     import freestyle.rpc.server.handlers._
     import freestyle.rpc.server.implicits._
 
-    val config: Config = Await.result(
-      ConfigForPort[ServerConfig.Op]("rpc.server.port")
-        .interpret[Future],
-      1.seconds)
-
     val grpcConfigs: List[GrpcConfig] = List(
       AddService(GreeterGrpc.bindService(new GreetingService, ec)),
       AddService(EchoServiceGrpc.bindService(new EchoService, ec))
     )
 
+    val conf: ServerW = Await.result(
+      BuildServerFromConfig[ServerConfig.Op]("rpc.server.port", grpcConfigs)
+        .interpret[Future],
+      1.seconds)
+
     implicit val grpcServerHandler: GrpcServer.Op ~> Future =
-      new GrpcServerHandler[Future] andThen new GrpcConfigInterpreter[Future](config, grpcConfigs)
+      new GrpcServerHandler[Future] andThen
+        new GrpcKInterpreter[Future](conf.server)
 
   }
 

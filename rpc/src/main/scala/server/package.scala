@@ -25,31 +25,16 @@ package object server {
 
   type GrpcServerOps[F[_], A] = Kleisli[F, Server, A]
 
-  class GrpcConfigInterpreter[F[_]](initConfig: Config, configList: List[GrpcConfig])
-      extends (Kleisli[F, Server, ?] ~> F) {
+  val defaultPort = 50051
 
-    private[this] def build(configList: List[GrpcConfig]): Server =
-      configList
-        .foldLeft(ServerBuilder.forPort(initConfig.port))((acc, option) =>
-          option match {
-            case DirectExecutor                  => acc.directExecutor()
-            case SetExecutor(ex)                 => acc.executor(ex)
-            case AddService(srv)                 => acc.addService(srv)
-            case AddBindableService(srv)         => acc.addService(srv)
-            case AddTransportFilter(filter)      => acc.addTransportFilter(filter)
-            case AddStreamTracerFactory(factory) => acc.addStreamTracerFactory(factory)
-            case SetFallbackHandlerRegistry(fr)  => acc.fallbackHandlerRegistry(fr)
-            case UseTransportSecurity(cc, pk)    => acc.useTransportSecurity(cc, pk)
-            case SetDecompressorRegistry(dr)     => acc.decompressorRegistry(dr)
-            case SetCompressorRegistry(cr)       => acc.compressorRegistry(cr)
-        })
-        .build()
+  class GrpcKInterpreter[F[_]](server: Server) extends (Kleisli[F, Server, ?] ~> F) {
 
     override def apply[B](fa: Kleisli[F, Server, B]): F[B] =
-      fa(build(configList))
+      fa(server)
 
   }
 
-  def ConfigForPort[F[_]](portPath: String)(implicit SC: ServerConfig[F]): FreeS[F, Config] =
-    SC.loadConfigPort(portPath)
+  def BuildServerFromConfig[F[_]](portPath: String, configList: List[GrpcConfig] = Nil)(
+      implicit SC: ServerConfig[F]): FreeS[F, ServerW] =
+    SC.buildServer(portPath, configList)
 }

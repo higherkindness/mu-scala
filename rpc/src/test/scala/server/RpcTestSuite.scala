@@ -67,21 +67,39 @@ trait RpcTestSuite extends WordSpec with Matchers with OneInstancePerTest with M
 
   object implicits extends DummyData {
 
-    implicit val grpcServerHandler: GrpcServer.Op ~> Id = new (GrpcServer.Op ~> Id) {
+    implicit class FutureOps[A](f: Future[A]) {
+
+      def await: A = await(Duration.Inf)
+
+      def await(d: Duration): A = Await.result(f, d)
+
+    }
+
+    def idApply[A](fa: GrpcServer.Op[A]): Id[A] = {
       import GrpcServer._
-      override def apply[A](fa: GrpcServer.Op[A]): Id[A] = fa match {
-        case StartOP()                                => serverMock.start()
-        case GetPortOP()                              => serverMock.getPort
-        case GetServicesOP()                          => serverMock.getServices.asScala.toList
-        case GetImmutableServicesOP()                 => serverMock.getImmutableServices.asScala.toList
-        case GetMutableServicesOP()                   => serverMock.getMutableServices.asScala.toList
-        case ShutdownOP()                             => serverMock.shutdown()
-        case ShutdownNowOP()                          => serverMock.shutdownNow()
-        case IsShutdownOP()                           => serverMock.isShutdown
-        case IsTerminatedOP()                         => serverMock.isTerminated
-        case AwaitTerminationTimeoutOP(timeout, unit) => serverMock.awaitTermination(timeout, unit)
-        case AwaitTerminationOP()                     => serverMock.awaitTermination()
+      fa match {
+        case StartOP()                       => serverMock.start()
+        case GetPortOP()                     => serverMock.getPort
+        case GetServicesOP()                 => serverMock.getServices.asScala.toList
+        case GetImmutableServicesOP()        => serverMock.getImmutableServices.asScala.toList
+        case GetMutableServicesOP()          => serverMock.getMutableServices.asScala.toList
+        case ShutdownOP()                    => serverMock.shutdown()
+        case ShutdownNowOP()                 => serverMock.shutdownNow()
+        case IsShutdownOP()                  => serverMock.isShutdown
+        case IsTerminatedOP()                => serverMock.isTerminated
+        case AwaitTerminationTimeoutOP(t, u) => serverMock.awaitTermination(t, u)
+        case AwaitTerminationOP()            => serverMock.awaitTermination()
       }
     }
+
+    implicit val grpcServerHandlerId: GrpcServer.Op ~> Id =
+      new (GrpcServer.Op ~> Id) {
+        override def apply[A](fa: GrpcServer.Op[A]): Id[A] = idApply(fa)
+      }
+
+    implicit val grpcServerHandlerFuture: GrpcServer.Op ~> Future =
+      new (GrpcServer.Op ~> Future) {
+        override def apply[A](fa: GrpcServer.Op[A]): Future[A] = Future.successful(idApply(fa))
+      }
   }
 }
