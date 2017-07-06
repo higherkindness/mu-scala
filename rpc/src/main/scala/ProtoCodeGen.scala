@@ -19,6 +19,8 @@ package rpc
 package protocol
 
 import java.io.File
+import java.nio.charset.Charset
+import java.nio.file.{Files, StandardOpenOption}
 
 import cats.implicits._
 import freestyle.rpc.protocol.encoders._
@@ -32,13 +34,22 @@ object ProtoCodeGen {
   def main(args: Array[String]): Unit = {
     args.toList match {
       case input :: output :: Nil =>
-        generate(new File(input), new File(output)); ()
+        generate(new File(input), new File(output)) map {
+          case (file, contents) =>
+            Files.write(
+              file.toPath,
+              contents
+                .mkString("\n\n")
+                .getBytes(Charset.forName("UTF-8")),
+              StandardOpenOption.CREATE_NEW
+            )
+        }; ()
       case _ =>
         throw new IllegalArgumentException(s"Expected 2 $args with input and output directories")
     }
   }
 
-  def generate(input: File, output: File): Seq[File] = {
+  def generate(input: File, output: File): Seq[(File, String)] = {
     def allScalaFiles(f: File): List[File] = {
       val children   = f.listFiles
       val scalaFiles = children.filter(f => """.*\.scala$""".r.findFirstIn(f.getName).isDefined)
@@ -64,7 +75,7 @@ object ProtoCodeGen {
                 |----------------------------------
                 |
               """.stripMargin)
-            outputFile
+            (outputFile, protoContents)
           case Failure(e) => throw e
         }
       }
