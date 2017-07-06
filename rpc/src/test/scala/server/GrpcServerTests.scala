@@ -24,7 +24,7 @@ import cats.implicits._
 import freestyle._
 import io.grpc.{Server, ServerServiceDefinition}
 
-class GrpcServerTests extends RpcTestSuite {
+class GrpcServerTests extends RpcServerTestSuite {
 
   import implicits._
 

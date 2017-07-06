@@ -15,25 +15,24 @@
  */
 
 package freestyle.rpc
-package server
+package client.utils
 
-import cats.Id
-import freestyle.rpc.server.implicits._
+import com.google.common.base.Charsets.UTF_8
+import com.google.common.io.ByteStreams
+import java.io.ByteArrayInputStream
+import java.io.IOException
+import java.io.InputStream
 
-class HelperTests extends RpcServerTestSuite {
+import io.grpc.MethodDescriptor
 
-  import implicits._
+class StringMarshaller extends MethodDescriptor.Marshaller[String] {
 
-  "server helper" should {
+  override def stream(value: String) = new ByteArrayInputStream(value.getBytes(UTF_8))
 
-    "work as expected" in {
-
-      server[GrpcServer.Op].interpret[Id] shouldBe ((): Unit)
-
-      (serverMock.start _).verify()
-      (serverMock.awaitTermination _).verify()
+  override def parse(stream: InputStream): String =
+    try new String(ByteStreams.toByteArray(stream), UTF_8)
+    catch {
+      case ex: IOException =>
+        throw new RuntimeException(ex)
     }
-
-  }
-
 }

@@ -28,7 +28,7 @@ import io.grpc.Server
 import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Future}
 
-class ServerConfigTests extends RpcTestSuite {
+class ServerConfigTests extends RpcServerTestSuite {
 
   import implicits._
 

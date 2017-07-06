@@ -23,7 +23,7 @@ import freestyle.rpc.server.implicits._
 
 import scala.concurrent.ExecutionContext
 
-class SyntaxTests extends RpcTestSuite {
+class SyntaxTests extends RpcServerTestSuite {
 
   import implicits._
 
@@ -41,12 +41,12 @@ class SyntaxTests extends RpcTestSuite {
 
     "allow using bootstrapFuture" in {
 
-      server[GrpcServer.Op].bootstrapFuture.map { f =>
-        f shouldBe ((): Unit)
+      val f = server[GrpcServer.Op].bootstrapFuture.await
 
-        (serverMock.start _).verify().once()
-        (serverMock.awaitTermination _).verify().once()
-      }
+      f shouldBe ((): Unit)
+
+      (serverMock.start _).verify().once()
+      (serverMock.awaitTermination _).verify().once()
     }
 
   }
