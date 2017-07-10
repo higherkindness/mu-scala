@@ -125,20 +125,20 @@ object converters {
           ProtoService(
             name = t.name.value,
             rpcs = t.collect {
-              case q"@rpc @stream[ResponseStreaming] def $name[..$tparams]($request, observer: StreamObserver[$response]): FS[Unit]" =>
+              case q"@rpc @stream[ResponseStreaming.type] def $name[..$tparams]($request, observer: StreamObserver[$response]): FS[Unit]" =>
                 ProtoServiceField(
                   name = name.value,
                   request = extractParamType(request),
                   response = response.toString(),
                   streamingType = Some(ResponseStreaming))
-              case q"@rpc @stream[RequestStreaming] def $name[..$tparams]($param): FS[StreamObserver[$response]]" =>
+              case q"@rpc @stream[RequestStreaming.type] def $name[..$tparams]($param): FS[StreamObserver[$response]]" =>
                 ProtoServiceField(
                   name = name.value,
                   request = extractParamStreamingType(param),
                   response = response.toString(),
                   streamingType = Some(RequestStreaming)
                 )
-              case q"@rpc @stream[BidirectionalStreaming] def $name[..$tparams]($param): FS[StreamObserver[$response]]" =>
+              case q"@rpc @stream[BidirectionalStreaming.type] def $name[..$tparams]($param): FS[StreamObserver[$response]]" =>
                 ProtoServiceField(
                   name = name.value,
                   request = extractParamStreamingType(param),

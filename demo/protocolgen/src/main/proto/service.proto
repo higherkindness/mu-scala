@@ -21,4 +21,4 @@ service GreetingService {
    rpc bidiHello (stream MessageReply) returns (stream MessageRequest) {}
 }
            
-                        
+           

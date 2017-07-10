@@ -39,9 +39,8 @@ object ProtoCodeGen {
             Files.write(
               file.toPath,
               contents
-                .mkString("\n\n")
                 .getBytes(Charset.forName("UTF-8")),
-              StandardOpenOption.CREATE_NEW
+              StandardOpenOption.CREATE
             )
         }; ()
       case _ =>
