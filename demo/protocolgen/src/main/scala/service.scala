@@ -19,7 +19,6 @@ package rpc
 package demo
 package protocolgen
 
-import freestyle.internal.EffectLike
 import freestyle.rpc.protocol._
 import io.grpc.stub.StreamObserver
 
@@ -34,8 +33,9 @@ object protocols {
   @message
   case class MessageReply(name: String, n: List[Int])
 
+  @free
   @service
-  trait GreetingService[F[_]] extends EffectLike[F] {
+  trait GreetingService {
 
     @rpc def sayHello(msg: MessageRequest): FS[MessageReply]
 
