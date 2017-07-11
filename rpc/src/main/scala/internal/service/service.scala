@@ -21,7 +21,6 @@ import freestyle.internal.ScalametaUtil
 import scala.collection.immutable.Seq
 import scala.meta.Defn.{Class, Object, Trait}
 import scala.meta._
-import scala.meta.contrib._
 
 // $COVERAGE-OFF$ScalaJS + coverage = fails with NoClassDef exceptions
 object serviceImpl {
@@ -55,18 +54,27 @@ object serviceImpl {
   }
 
   def enrich(members: Seq[Stat]): Seq[Stat] =
-    members :+ q"trait ServiceHandler[F[_]] extends Handler[({type L[A] = _root_.freestyle.FreeS[F, A]})#L]"
+    members ++ Seq(
+      q"""
+         trait ServiceHandler
+            extends Handler[_root_.scala.concurrent.Future]
+            with _root_.com.trueaccord.scalapb.grpc.AbstractService {
+               override def serviceCompanion = ServiceHandler
+            }
+       """,
+      q"""
+         object ServiceHandler extends _root_.com.trueaccord.scalapb.grpc.ServiceCompanion[ServiceHandler] {
+            implicit def serviceCompanion: _root_.com.trueaccord.scalapb.grpc.ServiceCompanion[ServiceHandler] = this
+            lazy val javaDescriptor: _root_.com.google.protobuf.Descriptors.ServiceDescriptor = ???
+         }
+       """
+    )
 
 }
 
 private[internal] object errors {
-  // Messages of error
   val invalid = "Invalid use of `@service`"
   val abstractOnly =
     "`@service` can only annotate a trait or abstract class already annotated with @free"
-  val onlyReqs =
-    "In a `@service`-trait (or class), all abstract methods declarations should be of type FS[_] and annotated with @rpc"
-  val nonEmpty =
-    "A `@service` trait or class must have at least one abstract method of type `FS[_]`"
 }
 // $COVERAGE-ON$
