@@ -16,6 +16,8 @@
 
 package freestyle.rpc.internal.service
 
+import java.io.{ByteArrayInputStream, InputStream}
+
 import freestyle.internal.ScalametaUtil
 import freestyle.rpc.protocol.{
   BidirectionalStreaming,
@@ -27,6 +29,7 @@ import freestyle.rpc.protocol.{
 import scala.collection.immutable.Seq
 import scala.meta.Defn.{Class, Object, Trait}
 import scala.meta._
+import _root_.io.grpc.MethodDescriptor.Marshaller
 
 // $COVERAGE-OFF$ScalaJS + coverage = fails with NoClassDef exceptions
 object serviceImpl {
@@ -43,7 +46,6 @@ object serviceImpl {
     case Term.Block(Seq(cls: Class, companion: Object)) if ScalametaUtil.isAbstract(cls) =>
       serviceExtras(cls, companion)
     case _ =>
-      println(defn.getClass)
       abort(s"$invalid. $abstractOnly")
   }
 
@@ -65,7 +67,7 @@ object serviceImpl {
   }
 
   def enrich(serviceAlg: ServiceAlg, members: Seq[Stat]): Seq[Stat] =
-    members ++ serviceAlg.methodDescriptors :+ serviceAlg.serviceBindings
+    members ++ Seq(serviceAlg.pbDirectImports) ++ serviceAlg.methodDescriptors :+ serviceAlg.serviceBindings
 
 }
 
@@ -85,23 +87,25 @@ case class ServiceAlg(defn: Defn) {
   val requests: List[RPCRequest] = template.stats.toList.flatten.collect {
     case q"@rpc @stream[ResponseStreaming.type] def $name[..$tparams]($request, observer: StreamObserver[$response]): FS[Unit]" =>
       RPCRequest(algName, name, Some(ResponseStreaming), paramTpe(request), response)
-    case q"@rpc @stream[RequestStreaming.type] def $name[..$tparams]($request): FS[StreamObserver[$response]]" =>
-      RPCRequest(algName, name, Some(RequestStreaming), paramTpe(request), response)
-    case q"@rpc @stream[BidirectionalStreaming.type] def $name[..$tparams](param: StreamObserver[$request]): FS[StreamObserver[$response]]" =>
+    case q"@rpc @stream[RequestStreaming.type] def $name[..$tparams]($paranName: StreamObserver[$request]): FS[StreamObserver[$response]]" =>
+      RPCRequest(algName, name, Some(RequestStreaming), request, response)
+    case q"@rpc @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: StreamObserver[$request]): FS[StreamObserver[$response]]" =>
       RPCRequest(algName, name, Some(BidirectionalStreaming), request, response)
     case q"@rpc def $name[..$tparams]($request): FS[$response]" =>
       RPCRequest(algName, name, None, paramTpe(request), response)
+    case e => throw new MatchError("Unmatched rpc method: " + e.toString())
   }
 
   val methodDescriptors: Seq[Defn.Val] = requests.map(_.methodDescriptor)
+
+  val pbDirectImports: Import =
+    q"import _root_.cats.instances.list._, _root_.cats.instances.option._, _root_.pbdirect._, _root_.freestyle.rpc.internal.service.encoders._"
 
   val serviceBindings: Defn.Def = {
     val args: Seq[Term.Tuple] = requests.map(_.call)
     q"""
        def bindService[M[_]](implicit handler: Handler[M]): _root_.io.grpc.ServerServiceDefinition =
-           new freestyle.rpc.internal.service.GRPCServiceDefBuilder.apply(${Lit.String(
-      algName.value)}, ..$args)
-
+           new freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(algName.value)}, ..$args).apply
      """
   }
 
@@ -136,34 +140,38 @@ private[internal] case class RPCRequest(
     case Some(RequestStreaming) =>
       q"""
          ($name,
-         _root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(new _root_.io.grpc.stub.ServerCalls.ClientStreamingMethod[$responseType, $requestType] {
-                 override def invoke(observer: _root_.io.grpc.stub.StreamObserver[$requestType]): _root_.io.grpc.stub.StreamObserver[$responseType] =
-                   handler.$name(observer)
-         }))
+         _root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(
+            new _root_.io.grpc.stub.ServerCalls.ClientStreamingMethod[$requestType, $responseType] {
+                 override def invoke(observer: _root_.io.grpc.stub.StreamObserver[$responseType]): _root_.io.grpc.stub.StreamObserver[$requestType] =
+                   ???
+            }))
        """
     case Some(ResponseStreaming) =>
       q"""
          ($name,
-         _root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(new _root_.io.grpc.stub.ServerCalls.ServerStreamingMethod[$requestType, $responseType] {
+         _root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(
+            new _root_.io.grpc.stub.ServerCalls.ServerStreamingMethod[$requestType, $responseType] {
                  override def invoke(request: $requestType, observer: _root_.io.grpc.stub.StreamObserver[$responseType]): Unit =
-                   handler.$name(request, observer)
-         }))
+                   ???
+            }))
        """
     case Some(BidirectionalStreaming) =>
       q"""
          ($name,
-         _root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(new _root_.io.grpc.stub.ServerCalls.BidiStreamingMethod[$responseType, $requestType] {
-                 override def invoke(observer: _root_.io.grpc.stub.StreamObserver[$requestType]): _root_.io.grpc.stub.StreamObserver[$responseType] =
-                   handler.$name(observer)
-         }))
+         _root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(
+            new _root_.io.grpc.stub.ServerCalls.BidiStreamingMethod[$requestType, $responseType] {
+                 override def invoke(observer: _root_.io.grpc.stub.StreamObserver[$responseType]): _root_.io.grpc.stub.StreamObserver[$requestType] =
+                   ???
+            }))
        """
     case None =>
       q"""
           ($name,
-         _root_.io.grpc.stub.ServerCalls.asyncUnaryCall(new _root_.io.grpc.stub.ServerCalls.UnaryMethod[$requestType, $responseType] {
+         _root_.io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new _root_.io.grpc.stub.ServerCalls.UnaryMethod[$requestType, $responseType] {
                  override def invoke(request: $requestType, observer: _root_.io.grpc.stub.StreamObserver[$responseType]): Unit =
-                   handler.$name(request).onComplete(com.trueaccord.scalapb.grpc.Grpc.completeObserver(observer))(executionContext)
-         }))
+                   ???
+            }))
        """
   }
 
@@ -185,5 +193,21 @@ private[internal] object errors {
   val invalid = "Invalid use of `@service`"
   val abstractOnly =
     "`@service` can only annotate a trait or abstract class already annotated with @free"
+}
+
+object encoders {
+
+  import pbdirect._
+
+  implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader]: Marshaller[A] =
+    new Marshaller[A] {
+
+      override def parse(stream: InputStream): A =
+        Iterator.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray.pbTo[A]
+
+      override def stream(value: A): InputStream = new ByteArrayInputStream(value.toPB)
+
+    }
+
 }
 // $COVERAGE-ON$

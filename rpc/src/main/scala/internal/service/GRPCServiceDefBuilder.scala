@@ -23,15 +23,18 @@ import io.grpc.{
   ServerServiceDefinition
 }
 
-class GRPCServiceDefBuilder[Req, Res] {
-  def apply(
-      name: String,
-      calls: (MethodDescriptor[Req, Res], ServerCallHandler[Req, Res])*): ServerServiceDefinition = {
+class GRPCServiceDefBuilder(
+    name: String,
+    calls: (MethodDescriptor[_, _], ServerCallHandler[_, _])*) {
+  def apply: ServerServiceDefinition = {
     val builder = io.grpc.ServerServiceDefinition.builder(name)
     calls
       .foldLeft(builder) {
         case (b, (descriptor, call)) =>
-          b.addMethod(ServerMethodDefinition.create(descriptor, call))
+          b.addMethod(
+            ServerMethodDefinition.create(
+              descriptor.asInstanceOf[MethodDescriptor[Any, Any]],
+              call.asInstanceOf[ServerCallHandler[Any, Any]]))
       }
       .build()
   }

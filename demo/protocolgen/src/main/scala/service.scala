@@ -45,12 +45,11 @@ object protocols {
 
     @rpc
     @stream[RequestStreaming.type]
-    def lotsOfGreetings(
-        @stream msg: StreamObserver[MessageReply]): FS[StreamObserver[MessageRequest]]
+    def lotsOfGreetings(msg: StreamObserver[MessageReply]): FS[StreamObserver[MessageRequest]]
 
     @rpc
     @stream[BidirectionalStreaming.type]
-    def bidiHello(@stream msg: StreamObserver[MessageReply]): FS[StreamObserver[MessageRequest]]
+    def bidiHello(msg: StreamObserver[MessageReply]): FS[StreamObserver[MessageRequest]]
   }
 
 }
