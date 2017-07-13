@@ -104,7 +104,7 @@ case class ServiceAlg(defn: Defn) {
   val serviceBindings: Defn.Def = {
     val args: Seq[Term.Tuple] = requests.map(_.call)
     q"""
-       def bindService[M[_]](implicit handler: Handler[M]): _root_.io.grpc.ServerServiceDefinition =
+       def bindService: _root_.io.grpc.ServerServiceDefinition =
            new freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(algName.value)}, ..$args).apply
      """
   }
@@ -125,9 +125,11 @@ private[internal] case class RPCRequest(
     requestType: Type,
     responseType: Type) {
 
+  val descriptorName: Term.Name = name.copy(value = name.value + "MethodDescriptor")
+
   def methodDescriptor =
     q"""
-        val ${Pat.Var.Term(name)}: _root_.io.grpc.MethodDescriptor[$requestType, $responseType] =
+        val ${Pat.Var.Term(descriptorName)}: _root_.io.grpc.MethodDescriptor[$requestType, $responseType] =
           _root_.io.grpc.MethodDescriptor.create(
           ${utils.methodType(streamingType)},
           _root_.io.grpc.MethodDescriptor.generateFullMethodName(${Lit.String(algName.value)}, ${Lit
@@ -139,7 +141,7 @@ private[internal] case class RPCRequest(
   val call: Term.Tuple = streamingType match {
     case Some(RequestStreaming) =>
       q"""
-         ($name,
+         ($descriptorName,
          _root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(
             new _root_.io.grpc.stub.ServerCalls.ClientStreamingMethod[$requestType, $responseType] {
                  override def invoke(observer: _root_.io.grpc.stub.StreamObserver[$responseType]): _root_.io.grpc.stub.StreamObserver[$requestType] =
@@ -148,7 +150,7 @@ private[internal] case class RPCRequest(
        """
     case Some(ResponseStreaming) =>
       q"""
-         ($name,
+         ($descriptorName,
          _root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(
             new _root_.io.grpc.stub.ServerCalls.ServerStreamingMethod[$requestType, $responseType] {
                  override def invoke(request: $requestType, observer: _root_.io.grpc.stub.StreamObserver[$responseType]): Unit =
@@ -157,7 +159,7 @@ private[internal] case class RPCRequest(
        """
     case Some(BidirectionalStreaming) =>
       q"""
-         ($name,
+         ($descriptorName,
          _root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(
             new _root_.io.grpc.stub.ServerCalls.BidiStreamingMethod[$requestType, $responseType] {
                  override def invoke(observer: _root_.io.grpc.stub.StreamObserver[$responseType]): _root_.io.grpc.stub.StreamObserver[$requestType] =
@@ -166,7 +168,7 @@ private[internal] case class RPCRequest(
        """
     case None =>
       q"""
-          ($name,
+          ($descriptorName,
          _root_.io.grpc.stub.ServerCalls.asyncUnaryCall(
             new _root_.io.grpc.stub.ServerCalls.UnaryMethod[$requestType, $responseType] {
                  override def invoke(request: $requestType, observer: _root_.io.grpc.stub.StreamObserver[$responseType]): Unit =
