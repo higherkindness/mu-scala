@@ -104,16 +104,9 @@ case class ServiceAlg(defn: Defn) {
   val serviceBindings: Defn.Def = {
     val args: Seq[Term.Tuple] = requests.map(_.call)
     q"""
-       def bindService: _root_.io.grpc.ServerServiceDefinition =
+       def bindService[F[_], M[_]](implicit algebra: $algName[F], handler: _root_.freestyle.FSHandler[F, M], ME: _root_.cats.MonadError[M, Throwable], C: _root_.cats.Comonad[M]): _root_.io.grpc.ServerServiceDefinition =
            new freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(algName.value)}, ..$args).apply
      """
-  }
-
-  def recurseApply(select: Term.Select, requests: List[RPCRequest]): Term.Select = {
-    requests match {
-      case Nil    => select
-      case h :: t => recurseApply(select.copy(h.call), t)
-    }
   }
 
 }
@@ -142,38 +135,22 @@ private[internal] case class RPCRequest(
     case Some(RequestStreaming) =>
       q"""
          ($descriptorName,
-         _root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(
-            new _root_.io.grpc.stub.ServerCalls.ClientStreamingMethod[$requestType, $responseType] {
-                 override def invoke(observer: _root_.io.grpc.stub.StreamObserver[$responseType]): _root_.io.grpc.stub.StreamObserver[$requestType] =
-                   ???
-            }))
+         _root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(_root_.freestyle.rpc.internal.service.calls.clientStreamingMethod(algebra.$name)))
        """
     case Some(ResponseStreaming) =>
       q"""
          ($descriptorName,
-         _root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(
-            new _root_.io.grpc.stub.ServerCalls.ServerStreamingMethod[$requestType, $responseType] {
-                 override def invoke(request: $requestType, observer: _root_.io.grpc.stub.StreamObserver[$responseType]): Unit =
-                   ???
-            }))
+         _root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(_root_.freestyle.rpc.internal.service.calls.serverStreamingMethod(algebra.$name)))
        """
     case Some(BidirectionalStreaming) =>
       q"""
          ($descriptorName,
-         _root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(
-            new _root_.io.grpc.stub.ServerCalls.BidiStreamingMethod[$requestType, $responseType] {
-                 override def invoke(observer: _root_.io.grpc.stub.StreamObserver[$responseType]): _root_.io.grpc.stub.StreamObserver[$requestType] =
-                   ???
-            }))
+         _root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(_root_.freestyle.rpc.internal.service.calls.bidiStreamingMethod(algebra.$name)))
        """
     case None =>
       q"""
           ($descriptorName,
-         _root_.io.grpc.stub.ServerCalls.asyncUnaryCall(
-            new _root_.io.grpc.stub.ServerCalls.UnaryMethod[$requestType, $responseType] {
-                 override def invoke(request: $requestType, observer: _root_.io.grpc.stub.StreamObserver[$responseType]): Unit =
-                   ???
-            }))
+         _root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.freestyle.rpc.internal.service.calls.unaryMethod(algebra.$name)))
        """
   }
 

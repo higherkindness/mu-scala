@@ -19,10 +19,12 @@ package demo
 package protocolgen
 package runtime
 
-import cats.~>
-import freestyle.rpc.demo.protocolgen.protocols.GreetingService
+import cats.{~>, Comonad}
+import freestyle.rpc.demo.protocolgen.protocols.{GreetingService, MessageReply}
+import io.grpc.stub.StreamObserver
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 trait CommonImplicits {
 
@@ -34,12 +36,46 @@ object server {
 
   trait Implicits extends CommonImplicits {
 
+    import cats.implicits._
     import freestyle.rpc.server._
     import freestyle.rpc.server.handlers._
     import freestyle.rpc.server.implicits._
 
+    implicit val finiteDuration: FiniteDuration = 5.seconds
+
+    implicit def futureComonad(
+        implicit ec: ExecutionContext,
+        atMost: FiniteDuration): Comonad[Future] =
+      new Comonad[Future] {
+        def extract[A](x: Future[A]): A =
+          Await.result(x, atMost)
+
+        override def coflatMap[A, B](fa: Future[A])(f: (Future[A]) => B): Future[B] = Future(f(fa))
+
+        override def map[A, B](fa: Future[A])(f: (A) => B): Future[B] = fa.map(f)
+      }
+
+    implicit val greetingServiceHandler: GreetingService.Handler[Future] =
+      new GreetingService.Handler[Future] {
+        override protected[this] def sayHello(
+            msg: protocols.MessageRequest): Future[protocols.MessageReply] =
+          Future.successful(MessageReply("hello", List(1, 2, 3, 4, 5)))
+
+        override protected[this] def lotsOfReplies(
+            msg: protocols.MessageRequest,
+            observer: StreamObserver[protocols.MessageReply]): Future[Unit] = ???
+
+        override protected[this] def lotsOfGreetings(
+            msg: StreamObserver[protocols.MessageReply]): Future[
+          StreamObserver[protocols.MessageRequest]] = ???
+
+        override protected[this] def bidiHello(
+            msg: StreamObserver[protocols.MessageReply]): Future[
+          StreamObserver[protocols.MessageRequest]] = ???
+      }
+
     val grpcConfigs: List[GrpcConfig] = List(
-      AddService(GreetingService.bindService)
+      AddService(GreetingService.bindService[GreetingService.Op, Future])
     )
 
     val conf: ServerW = ServerW(50051, grpcConfigs)

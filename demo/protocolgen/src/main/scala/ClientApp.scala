@@ -32,7 +32,8 @@ object ClientApp {
 
     val asyncHelloClient: Client.GreetingServiceStub = Client.clientStub(channel)
 
-    Await.result(asyncHelloClient.sayHello(MessageRequest("hi", None)), Duration.Inf)
+    val result = Await.result(asyncHelloClient.sayHello(MessageRequest("hi", None)), Duration.Inf)
+    println(result)
 
     (): Unit
   }

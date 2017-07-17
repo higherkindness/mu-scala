@@ -35,6 +35,7 @@ object protocols {
 
   @free
   @service
+  @debug
   trait GreetingService {
 
     @rpc def sayHello(msg: MessageRequest): FS[MessageReply]
