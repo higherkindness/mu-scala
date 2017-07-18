@@ -31,14 +31,9 @@ import scala.meta.Defn.{Class, Object, Trait}
 import scala.meta._
 import _root_.io.grpc.MethodDescriptor.Marshaller
 
-// $COVERAGE-OFF$ScalaJS + coverage = fails with NoClassDef exceptions
 object serviceImpl {
 
   import errors._
-
-//  implicit val mirror = Mirror()
-//
-//  println(mirror.database)
 
   def service(defn: Any): Stat = defn match {
     case Term.Block(Seq(cls: Trait, companion: Object)) =>
@@ -249,4 +244,3 @@ object encoders {
     }
 
 }
-// $COVERAGE-ON$
