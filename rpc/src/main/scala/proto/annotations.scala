@@ -17,11 +17,18 @@
 package freestyle
 package rpc
 
-import scala.annotation.StaticAnnotation
+import freestyle.rpc.internal.service.serviceImpl
+
+import scala.annotation.{compileTimeOnly, StaticAnnotation}
 
 package object protocol {
 
-  class service extends StaticAnnotation
+  @compileTimeOnly("enable macro paradise to expand @free macro annotations")
+  class service extends StaticAnnotation {
+    import scala.meta._
+
+    inline def apply(defn: Any): Any = meta { serviceImpl.service(defn) }
+  }
 
   class rpc extends StaticAnnotation
 

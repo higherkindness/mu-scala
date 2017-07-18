@@ -32,7 +32,13 @@ object ProjectPlugin extends AutoPlugin {
         addCommandAlias(
           "runClient",
           ";project demo-greeting;runMain freestyle.rpc.demo.greeting.GreetingClientApp") ++
-        addCommandAlias("validateHttpDemo", ";project demo-http;clean;compile;test")
+        addCommandAlias("validateHttpDemo", ";project demo-http;clean;compile;test") ++
+        addCommandAlias(
+          "runS",
+          ";project demo-protocolgen;runMain freestyle.rpc.demo.protocolgen.ServerApp") ++
+        addCommandAlias(
+          "runC",
+          ";project demo-protocolgen;runMain freestyle.rpc.demo.protocolgen.ClientApp")
 
     lazy val GOPATH = Option(sys.props("go.path")).getOrElse("/your/go/path")
 

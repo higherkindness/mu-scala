@@ -16,12 +16,14 @@ lazy val rpc = project
   .settings(moduleName := "freestyle-rpc")
   .settings(
     Seq(
+      resolvers += Resolver.bintrayRepo("beyondthelines", "maven"),
       libraryDependencies ++= commonDeps ++ freestyleCoreDeps() ++
         Seq(
           %%("freestyle-async"),
           %%("freestyle-config"),
           %%("scalameta-contrib"),
           "io.grpc"                % "grpc-all" % "1.4.0",
+          "beyondthelines"         %% "pbdirect" % "0.0.3",
           %%("scalamockScalatest") % "test"
         )
     ): _*
