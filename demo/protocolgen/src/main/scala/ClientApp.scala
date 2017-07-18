@@ -21,8 +21,10 @@ package protocolgen
 import freestyle.rpc.demo.protocolgen.protocols._
 import io.grpc._
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
+import scala.concurrent.ExecutionContext.Implicits.global
+import freestyle.async.implicits._
 
 object ClientApp {
 
@@ -30,9 +32,9 @@ object ClientApp {
 
     val channel = ManagedChannelBuilder.forAddress("localhost", 50051).usePlaintext(true).build
 
-    val asyncHelloClient: Client.GreetingServiceStub = Client.clientStub(channel)
+    val client: GreetingService.Client[Future] = GreetingService.client[Future](channel)
 
-    val result = Await.result(asyncHelloClient.sayHello(MessageRequest("hi", None)), Duration.Inf)
+    val result = Await.result(client.sayHello(MessageRequest("hi", None)), Duration.Inf)
     println(result)
 
     (): Unit

@@ -31,14 +31,9 @@ import scala.meta.Defn.{Class, Object, Trait}
 import scala.meta._
 import _root_.io.grpc.MethodDescriptor.Marshaller
 
-// $COVERAGE-OFF$ScalaJS + coverage = fails with NoClassDef exceptions
 object serviceImpl {
 
   import errors._
-
-//  implicit val mirror = Mirror()
-//
-//  println(mirror.database)
 
   def service(defn: Any): Stat = defn match {
     case Term.Block(Seq(cls: Trait, companion: Object)) =>
@@ -67,7 +62,10 @@ object serviceImpl {
   }
 
   def enrich(serviceAlg: ServiceAlg, members: Seq[Stat]): Seq[Stat] =
-    members ++ Seq(serviceAlg.pbDirectImports) ++ serviceAlg.methodDescriptors :+ serviceAlg.serviceBindings
+    members ++
+      Seq(serviceAlg.pbDirectImports) ++
+      serviceAlg.methodDescriptors ++
+      Seq(serviceAlg.serviceBindings, serviceAlg.client, serviceAlg.clientInstance)
 
 }
 
@@ -109,6 +107,33 @@ case class ServiceAlg(defn: Defn) {
      """
   }
 
+  val clientName: Type.Name = Type.Name("Client")
+
+  val client: Class = {
+    val clientDefs: Seq[Defn.Def] = requests.map(_.clientDef)
+    q"""
+       class $clientName[M[_]](channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
+          (implicit AC : _root_.freestyle.async.AsyncContext[M])
+          extends _root_.io.grpc.stub.AbstractStub[$clientName[M]](channel, options) {
+
+          override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $clientName[M] = {
+              new ${clientName.ctorRef(Ctor.Name(clientName.value))}[M](channel, options)
+          }
+
+          ..$clientDefs
+
+       }
+     """
+  }
+
+  val clientInstance =
+    q"""
+       def client[M[_]: _root_.freestyle.async.AsyncContext](
+          channel: _root_.io.grpc.Channel, 
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT) : $clientName[M] =
+             new ${clientName.ctorRef(Ctor.Name(clientName.value))}[M](channel, options)
+     """
+
 }
 
 private[internal] case class RPCRequest(
@@ -130,6 +155,36 @@ private[internal] case class RPCRequest(
             implicitly[_root_.io.grpc.MethodDescriptor.Marshaller[$requestType]],
             implicitly[_root_.io.grpc.MethodDescriptor.Marshaller[$responseType]])
       """
+
+  val clientDef: Defn.Def = streamingType match {
+    case Some(RequestStreaming) =>
+      q"""
+         def $name(responseObserver: _root_.io.grpc.stub.StreamObserver[$responseType]): _root_.io.grpc.stub.StreamObserver[$requestType] = {
+            _root_.io.grpc.stub.ClientCalls.asyncClientStreamingCall(channel.newCall($descriptorName, options), responseObserver)
+         }
+       """
+    case Some(ResponseStreaming) =>
+      q"""
+         def $name(request: $requestType, responseObserver: _root_.io.grpc.stub.StreamObserver[$responseType]): Unit = {
+            _root_.io.grpc.stub.ClientCalls.asyncServerStreamingCall(channel.newCall($descriptorName, options), request, responseObserver)
+         }
+       """
+    case Some(BidirectionalStreaming) =>
+      q"""
+         def $name(responseObserver: _root_.io.grpc.stub.StreamObserver[$responseType]): _root_.io.grpc.stub.StreamObserver[$requestType] = {
+            _root_.io.grpc.stub.ClientCalls.asyncBidiStreamingCall(channel.newCall($descriptorName, options), responseObserver)
+         }
+       """
+    case None =>
+      q"""
+         def $name(request: $requestType): M[$responseType] =
+            _root_.freestyle.rpc.client.implicits.listenableFuture2Async(AC).apply(
+              _root_.io.grpc.stub.ClientCalls
+                .futureUnaryCall(
+                  channel.newCall($descriptorName, options),
+                  request))
+      """
+  }
 
   val call: Term.Tuple = streamingType match {
     case Some(RequestStreaming) =>
@@ -189,4 +244,3 @@ object encoders {
     }
 
 }
-// $COVERAGE-ON$
