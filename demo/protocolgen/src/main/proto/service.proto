@@ -17,8 +17,8 @@ message MessageReply {
 service GreetingService {
    rpc sayHello (MessageRequest) returns (MessageReply) {}
    rpc lotsOfReplies (MessageRequest) returns (stream MessageReply) {}
-   rpc lotsOfGreetings (stream MessageReply) returns (MessageRequest) {}
-   rpc bidiHello (stream MessageReply) returns (stream MessageRequest) {}
+   rpc lotsOfGreetings (stream MessageRequest) returns (MessageReply) {}
+   rpc bidiHello (stream MessageRequest) returns (stream MessageReply) {}
 }
            
            

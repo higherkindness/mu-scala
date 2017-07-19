@@ -18,21 +18,28 @@ package freestyle.rpc
 package demo
 package protocolgen
 
+import cats.~>
 import freestyle.rpc.demo.protocolgen.protocols._
 import io.grpc._
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
-import scala.concurrent.ExecutionContext.Implicits.global
 import freestyle.async.implicits._
+import freestyle.rpc.client.implicits._
+import monix.eval.Task
+import monix.execution.Scheduler
 
 object ClientApp {
 
   def main(args: Array[String]): Unit = {
 
+    implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+    implicit val scheduler: Scheduler = monix.execution.Scheduler.Implicits.global
+
     val channel = ManagedChannelBuilder.forAddress("localhost", 50051).usePlaintext(true).build
 
-    val client: GreetingService.Client[Future] = GreetingService.client[Future](channel)
+    val client: GreetingService.Client[Future] =
+      GreetingService.client[Future](channel)
 
     val result = Await.result(client.sayHello(MessageRequest("hi", None)), Duration.Inf)
     println(result)

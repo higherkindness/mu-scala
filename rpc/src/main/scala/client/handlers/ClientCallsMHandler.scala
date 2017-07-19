@@ -68,6 +68,7 @@ class ClientCallsMHandler[M[_]](implicit C: Capture[M], AC: AsyncContext[M])
       param: I): M[Iterator[O]] =
     C.capture(ClientCalls.blockingServerStreamingCall(channel, method, callOptions, param).asScala)
 
+  import client.implicits._
   def asyncM[I, O](call: ClientCall[I, O], param: I): M[O] =
-    listenableFuture2Async.apply(ClientCalls.futureUnaryCall(call, param))
+    ClientCalls.futureUnaryCall(call, param)
 }

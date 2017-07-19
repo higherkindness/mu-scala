@@ -125,20 +125,20 @@ object converters {
           ProtoService(
             name = t.name.value,
             rpcs = t.collect {
-              case q"@rpc @stream[ResponseStreaming.type] def $name[..$tparams]($request, observer: StreamObserver[$response]): FS[Unit]" =>
+              case q"@rpc @stream[ResponseStreaming.type] def $name[..$tparams]($request): FS[Observable[$response]]" =>
                 ProtoServiceField(
                   name = name.value,
                   request = extractParamType(request),
                   response = response.toString(),
                   streamingType = Some(ResponseStreaming))
-              case q"@rpc @stream[RequestStreaming.type] def $name[..$tparams]($param): FS[StreamObserver[$response]]" =>
+              case q"@rpc @stream[RequestStreaming.type] def $name[..$tparams]($param): FS[$response]" =>
                 ProtoServiceField(
                   name = name.value,
                   request = extractParamStreamingType(param),
                   response = response.toString(),
                   streamingType = Some(RequestStreaming)
                 )
-              case q"@rpc @stream[BidirectionalStreaming.type] def $name[..$tparams]($param): FS[StreamObserver[$response]]" =>
+              case q"@rpc @stream[BidirectionalStreaming.type] def $name[..$tparams]($param): FS[Observable[$response]]" =>
                 ProtoServiceField(
                   name = name.value,
                   request = extractParamStreamingType(param),
@@ -166,9 +166,10 @@ object converters {
           param.decltpe match {
             case Some(retType) =>
               retType match {
-                case t"StreamObserver[$request]" => request.toString()
+                case t"Observable[$request]" => request.toString()
                 case _ =>
-                  throw new IllegalArgumentException(s"$param not enclosed in StreamObserver[_]")
+                  throw new IllegalArgumentException(
+                    s"$param not enclosed in monix.reactive.Observable[_]")
               }
             case None =>
               throw new IllegalArgumentException(s"unexpected $param without return type")

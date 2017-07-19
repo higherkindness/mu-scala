@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.internal.service
+package freestyle.rpc
+package internal.service
 
 import io.grpc.{
   MethodDescriptor,
