@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.internal.service
+package freestyle.rpc
+package internal.service
 
 import java.io.{ByteArrayInputStream, InputStream}
 
@@ -83,11 +84,11 @@ case class ServiceAlg(defn: Defn) {
   }
 
   val requests: List[RPCRequest] = template.stats.toList.flatten.collect {
-    case q"@rpc @stream[ResponseStreaming.type] def $name[..$tparams]($request, observer: StreamObserver[$response]): FS[Unit]" =>
+    case q"@rpc @stream[ResponseStreaming.type] def $name[..$tparams]($request): FS[Observable[$response]]" =>
       RPCRequest(algName, name, Some(ResponseStreaming), paramTpe(request), response)
-    case q"@rpc @stream[RequestStreaming.type] def $name[..$tparams]($paranName: StreamObserver[$request]): FS[StreamObserver[$response]]" =>
+    case q"@rpc @stream[RequestStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): FS[$response]" =>
       RPCRequest(algName, name, Some(RequestStreaming), request, response)
-    case q"@rpc @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: StreamObserver[$request]): FS[StreamObserver[$response]]" =>
+    case q"@rpc @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): FS[Observable[$response]]" =>
       RPCRequest(algName, name, Some(BidirectionalStreaming), request, response)
     case q"@rpc def $name[..$tparams]($request): FS[$response]" =>
       RPCRequest(algName, name, None, paramTpe(request), response)
@@ -102,7 +103,7 @@ case class ServiceAlg(defn: Defn) {
   val serviceBindings: Defn.Def = {
     val args: Seq[Term.Tuple] = requests.map(_.call)
     q"""
-       def bindService[F[_], M[_]](implicit algebra: $algName[F], handler: _root_.freestyle.FSHandler[F, M], ME: _root_.cats.MonadError[M, Throwable], C: _root_.cats.Comonad[M]): _root_.io.grpc.ServerServiceDefinition =
+       def bindService[F[_], M[_]](implicit algebra: $algName[F], handler: _root_.freestyle.FSHandler[F, M], ME: _root_.cats.MonadError[M, Throwable], C: _root_.cats.Comonad[M], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
            new freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(algName.value)}, ..$args).apply
      """
   }
@@ -113,7 +114,7 @@ case class ServiceAlg(defn: Defn) {
     val clientDefs: Seq[Defn.Def] = requests.map(_.clientDef)
     q"""
        class $clientName[M[_]](channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
-          (implicit AC : _root_.freestyle.async.AsyncContext[M])
+          (implicit AC : _root_.freestyle.async.AsyncContext[M], H: FSHandler[_root_.monix.eval.Task, M])
           extends _root_.io.grpc.stub.AbstractStub[$clientName[M]](channel, options) {
 
           override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $clientName[M] = {
@@ -130,7 +131,8 @@ case class ServiceAlg(defn: Defn) {
     q"""
        def client[M[_]: _root_.freestyle.async.AsyncContext](
           channel: _root_.io.grpc.Channel, 
-          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT) : $clientName[M] =
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
+          (implicit H: FSHandler[_root_.monix.eval.Task, M]) : $clientName[M] =
              new ${clientName.ctorRef(Ctor.Name(clientName.value))}[M](channel, options)
      """
 
@@ -159,30 +161,23 @@ private[internal] case class RPCRequest(
   val clientDef: Defn.Def = streamingType match {
     case Some(RequestStreaming) =>
       q"""
-         def $name(responseObserver: _root_.io.grpc.stub.StreamObserver[$responseType]): _root_.io.grpc.stub.StreamObserver[$requestType] = {
-            _root_.io.grpc.stub.ClientCalls.asyncClientStreamingCall(channel.newCall($descriptorName, options), responseObserver)
-         }
+         def $name(input: _root_.monix.reactive.Observable[$requestType]): M[$responseType] =
+           _root_.freestyle.rpc.internal.client.calls.clientStreaming(input, $descriptorName, channel, options)
        """
     case Some(ResponseStreaming) =>
       q"""
-         def $name(request: $requestType, responseObserver: _root_.io.grpc.stub.StreamObserver[$responseType]): Unit = {
-            _root_.io.grpc.stub.ClientCalls.asyncServerStreamingCall(channel.newCall($descriptorName, options), request, responseObserver)
-         }
+         def $name(request: $requestType): _root_.monix.reactive.Observable[$responseType] =
+           _root_.freestyle.rpc.internal.client.calls.serverStreaming(request, $descriptorName, channel, options)
        """
     case Some(BidirectionalStreaming) =>
       q"""
-         def $name(responseObserver: _root_.io.grpc.stub.StreamObserver[$responseType]): _root_.io.grpc.stub.StreamObserver[$requestType] = {
-            _root_.io.grpc.stub.ClientCalls.asyncBidiStreamingCall(channel.newCall($descriptorName, options), responseObserver)
-         }
+         def $name(input: _root_.monix.reactive.Observable[$requestType]): _root_.monix.reactive.Observable[$responseType] =
+           _root_.freestyle.rpc.internal.client.calls.bidiStreaming(input, $descriptorName, channel, options)
        """
     case None =>
       q"""
          def $name(request: $requestType): M[$responseType] =
-            _root_.freestyle.rpc.client.implicits.listenableFuture2Async(AC).apply(
-              _root_.io.grpc.stub.ClientCalls
-                .futureUnaryCall(
-                  channel.newCall($descriptorName, options),
-                  request))
+           _root_.freestyle.rpc.internal.client.calls.unary(request, $descriptorName, channel, options)
       """
   }
 

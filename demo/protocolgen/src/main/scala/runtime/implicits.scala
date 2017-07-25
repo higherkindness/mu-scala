@@ -22,13 +22,16 @@ package runtime
 import cats.{~>, Comonad}
 import freestyle.rpc.demo.protocolgen.protocols.{GreetingService, MessageReply}
 import io.grpc.stub.StreamObserver
+import monix.eval.Task
+import monix.reactive.Observable
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 trait CommonImplicits {
 
-  implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
+  implicit val ec: ExecutionContext         = ExecutionContext.Implicits.global
+  implicit val S: monix.execution.Scheduler = monix.execution.Scheduler.Implicits.global
 
 }
 
@@ -40,6 +43,7 @@ object server {
     import freestyle.rpc.server._
     import freestyle.rpc.server.handlers._
     import freestyle.rpc.server.implicits._
+    import freestyle.rpc.client.implicits._
 
     implicit val finiteDuration: FiniteDuration = 5.seconds
 
@@ -62,16 +66,13 @@ object server {
           Future.successful(MessageReply("hello", List(1, 2, 3, 4, 5)))
 
         override protected[this] def lotsOfReplies(
-            msg: protocols.MessageRequest,
-            observer: StreamObserver[protocols.MessageReply]): Future[Unit] = ???
+            msg: protocols.MessageRequest): Future[Observable[protocols.MessageReply]] = ???
 
         override protected[this] def lotsOfGreetings(
-            msg: StreamObserver[protocols.MessageReply]): Future[
-          StreamObserver[protocols.MessageRequest]] = ???
+            msg: Observable[protocols.MessageRequest]): Future[MessageReply] = ???
 
-        override protected[this] def bidiHello(
-            msg: StreamObserver[protocols.MessageReply]): Future[
-          StreamObserver[protocols.MessageRequest]] = ???
+        override protected[this] def bidiHello(msg: Observable[protocols.MessageRequest]): Future[
+          Observable[protocols.MessageReply]] = ???
       }
 
     val grpcConfigs: List[GrpcConfig] = List(

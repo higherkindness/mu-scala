@@ -14,31 +14,36 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package freestyle
+package rpc
 package client
 
-import cats.~>
-import com.google.common.util.concurrent._
-import freestyle._
-import freestyle.implicits._
+import com.google.common.util.concurrent.ListenableFuture
 import freestyle.async.AsyncContext
+import freestyle.rpc.client.handlers._
+import monix.eval.Task
+import monix.execution.Scheduler
+
+import scala.concurrent.Future
 
 trait Conversions {
 
-  class ListenableFuture2AsyncM[F[_]](implicit AC: AsyncContext[F])
-      extends FSHandler[ListenableFuture, F] {
-    override def apply[A](fa: ListenableFuture[A]): F[A] =
-      AC.runAsync { cb =>
-        Futures.addCallback(fa, new FutureCallback[A] {
-          override def onSuccess(result: A): Unit = cb(Right(result))
+  implicit def listenableFutureHandler[F[_]](
+      implicit AC: AsyncContext[F]): ListenableFutureMHandler[F] =
+    new ListenableFutureMHandler[F]
 
-          override def onFailure(t: Throwable): Unit = cb(Left(t))
-        })
-      }
-  }
-
-  implicit def listenableFuture2Async[F[_]](implicit AC: AsyncContext[F]): ListenableFuture ~> F =
-    new ListenableFuture2AsyncM[F]
+  implicit def listenableFutureToAsyncConverter[F[_], A](future: ListenableFuture[A])(
+      implicit AC: AsyncContext[F]): F[A] =
+    listenableFutureHandler.apply(future)
 }
 
-object implicits extends CaptureInstances with Conversions
+trait FutureInstances {
+
+  implicit def task2Future(
+      implicit AC: AsyncContext[Future],
+      S: Scheduler): FSHandler[Task, Future] =
+    new TaskMHandler[Future]
+
+}
+
+object implicits extends CaptureInstances with Conversions with FutureInstances

@@ -19,17 +19,17 @@ package client
 
 import cats.~>
 import freestyle.async.implicits._
-import freestyle.rpc.client.implicits._
 import com.google.common.util.concurrent.ListenableFuture
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import freestyle.rpc.client.implicits._
 
 class ConversionsTests extends RpcClientTestSuite {
 
   import implicits._
 
-  val handler: ListenableFuture ~> Future = listenableFuture2Async[Future]
+  val handler: ListenableFuture ~> Future = listenableFutureHandler[Future]
 
   "Conversion methods" should {
 

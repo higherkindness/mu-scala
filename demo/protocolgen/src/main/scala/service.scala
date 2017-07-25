@@ -20,7 +20,7 @@ package demo
 package protocolgen
 
 import freestyle.rpc.protocol._
-import io.grpc.stub.StreamObserver
+import monix.reactive.Observable
 
 @option(name = "java_package", value = "com.example.foo", quote = true)
 @option(name = "java_multiple_files", value = "true", quote = false)
@@ -42,15 +42,15 @@ object protocols {
 
     @rpc
     @stream[ResponseStreaming.type]
-    def lotsOfReplies(msg: MessageRequest, observer: StreamObserver[MessageReply]): FS[Unit]
+    def lotsOfReplies(msg: MessageRequest): FS[Observable[MessageReply]]
 
     @rpc
     @stream[RequestStreaming.type]
-    def lotsOfGreetings(msg: StreamObserver[MessageReply]): FS[StreamObserver[MessageRequest]]
+    def lotsOfGreetings(msg: Observable[MessageRequest]): FS[MessageReply]
 
     @rpc
     @stream[BidirectionalStreaming.type]
-    def bidiHello(msg: StreamObserver[MessageReply]): FS[StreamObserver[MessageRequest]]
+    def bidiHello(msg: Observable[MessageRequest]): FS[Observable[MessageReply]]
   }
 
 }
