@@ -45,12 +45,8 @@ object ClientApp {
     val resultM: Future[Unit] = for {
       _ <- lotOfRepliesFuture(client)
       _ <- bidiHelloTaskFuture(client)
-      _ <- client
-        .sayHello(MessageRequest("hi", Some(1)))
-        .map(m => println(s"1 - sayHello = $m"))
-      _ <- client
-        .lotsOfGreetings(Observable.fromIterable(getSampleIterable("client-streaming", 3)))
-        .map(m => println(s"2 - lotsOfGreetings = $m"))
+      _ <- sayHelloFuture(client)
+      _ <- lotsOfGreetingsFuture(client)
     } yield (): Unit
 
     Await.result(
@@ -74,6 +70,18 @@ object ClientApp {
     client
       .bidiHello(Observable.fromIterable(getSampleIterable("bidirectional", 4)))
       .runF("bidiHello")
+
+  private[this] def sayHelloFuture(client: GreetingService.Client[Future])(
+      implicit S: Scheduler): Future[Unit] =
+    client
+      .sayHello(MessageRequest("hi", Some(1)))
+      .map(m => println(s"1 - sayHello = $m"))
+
+  private[this] def lotsOfGreetingsFuture(client: GreetingService.Client[Future])(
+      implicit S: Scheduler): Future[Unit] =
+    client
+      .lotsOfGreetings(Observable.fromIterable(getSampleIterable("client-streaming", 3)))
+      .map(m => println(s"2 - lotsOfGreetings = $m"))
 
   private[this] def getSampleIterable(str: String, id: Int): List[MessageRequest] =
     (1 to 10).map(i => MessageRequest(s"[$str] hello$i", Some(id))).toList
