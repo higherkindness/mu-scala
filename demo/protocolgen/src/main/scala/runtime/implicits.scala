@@ -21,8 +21,6 @@ package runtime
 
 import cats.{~>, Comonad}
 import freestyle.rpc.demo.protocolgen.protocols.{GreetingService, MessageReply}
-import io.grpc.stub.StreamObserver
-import monix.eval.Task
 import monix.reactive.Observable
 
 import scala.concurrent.duration._
@@ -61,18 +59,39 @@ object server {
 
     implicit val greetingServiceHandler: GreetingService.Handler[Future] =
       new GreetingService.Handler[Future] {
+
+        private[this] val commonListN: List[Int] = List(1, 2, 3, 4, 5)
+        private[this] val messageReplyList: List[MessageReply] =
+          (1 to 10).map(i => MessageReply(s"hello$i", commonListN map (_ * i))).toList
+
         override protected[this] def sayHello(
             msg: protocols.MessageRequest): Future[protocols.MessageReply] =
-          Future.successful(MessageReply("hello", List(1, 2, 3, 4, 5)))
+          Future.successful(MessageReply("hello", commonListN))
 
         override protected[this] def lotsOfReplies(
-            msg: protocols.MessageRequest): Future[Observable[protocols.MessageReply]] = ???
+            msg: protocols.MessageRequest): Future[Observable[protocols.MessageReply]] = {
+          println(s"[lots of replies] Received: $msg")
+          Future.successful(Observable.fromIterable(messageReplyList))
+        }
 
         override protected[this] def lotsOfGreetings(
-            msg: Observable[protocols.MessageRequest]): Future[MessageReply] = ???
+            msgs: Observable[protocols.MessageRequest]): Future[MessageReply] = {
+          msgs.zipWithIndex
+            .map { case (m, i) => println(s"Hi ${m.name}, message $i received [${m.n}]") }
+            .completedL
+            .runAsync
 
-        override protected[this] def bidiHello(msg: Observable[protocols.MessageRequest]): Future[
-          Observable[protocols.MessageReply]] = ???
+          Future.successful(MessageReply("hello", commonListN))
+        }
+
+        override protected[this] def bidiHello(msgs: Observable[protocols.MessageRequest]): Future[
+          Observable[protocols.MessageReply]] =
+          Future.successful(
+            msgs.flatMap { request =>
+              println(s"Hi ${request.name}, message received [${request.n}]")
+              Observable.fromIterable(messageReplyList)
+            }
+          )
       }
 
     val grpcConfigs: List[GrpcConfig] = List(

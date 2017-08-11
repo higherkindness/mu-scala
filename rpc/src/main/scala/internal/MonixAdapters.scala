@@ -65,7 +65,7 @@ trait MonixAdapters {
         override implicit def scheduler: Scheduler = S
         override def onError(ex: Throwable): Unit  = fa.onError(ex)
         override def onComplete(): Unit            = fa.onCompleted()
-        override def onNext(elem: A): Future[Ack] = {
+        override def onNext(elem: A): Future[Ack] =
           catsStdInstancesForFuture(S).handleError[Ack] {
             fa.onNext(elem)
             Continue
@@ -73,7 +73,6 @@ trait MonixAdapters {
             fa.onError(t)
             Stop
           }
-        }
       }
     }
 

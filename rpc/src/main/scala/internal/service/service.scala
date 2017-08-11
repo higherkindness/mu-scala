@@ -56,9 +56,7 @@ object serviceImpl {
         case template"{ ..$earlyInit } with ..$inits { $self => ..$stats }" =>
           val enrichedTemplate =
             template"{ ..$earlyInit } with ..$inits { $self => ..${enrich(serviceAlg, stats)} }"
-          val result = q"..$mods object $ename extends $enrichedTemplate"
-          println(result)
-          result
+          q"..$mods object $ename extends $enrichedTemplate"
       }
   }
 

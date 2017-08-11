@@ -72,7 +72,7 @@ object calls {
 
     override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
       transform[Req, Res](
-        inputObservable => C.extract(f(inputObservable).map(Observable.eval(_)).interpret[M]),
+        inputObservable => Observable.eval(C.extract(f(inputObservable).interpret[M])),
         responseObserver
       )
     }
