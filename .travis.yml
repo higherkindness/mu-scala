@@ -9,11 +9,6 @@ scala:
 jdk:
 - oraclejdk8
 
-env:
-  global:
-  - GOPATH="${HOME}/go"
-  - PATH="${GOPATH}/bin:${PATH}"
-
 before_cache:
 - du -h -d 1 $HOME/.ivy2/
 - du -h -d 2 $HOME/.sbt/
@@ -35,19 +30,9 @@ before_install:
 - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
     openssl aes-256-cbc -K $encrypted_80bb47bfd841_key -iv $encrypted_80bb47bfd841_iv -in secring.gpg.enc -out secring.gpg -d;
   fi
-- sh ./scripts/protobuf.sh
-- sh ./scripts/gimme.sh
-
-install:
-- go get -u github.com/golang/protobuf/{proto,protoc-gen-go}
-- go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
-- go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
-- go get -u -v google.golang.org/grpc
-- go get -u github.com/golang/protobuf/protoc-gen-go
 
 script:
 - sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
-- sbt -Dgo.path=$GOPATH ++$TRAVIS_SCALA_VERSION validateHttpDemo
 
 after_success:
 - bash <(curl -s https://codecov.io/bash) -t 5b75b318-ab71-4fbc-9203-bfa7765cdbdc
