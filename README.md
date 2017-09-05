@@ -9,7 +9,27 @@
 
 Simple RPC with Freestyle
 
-# Demo
+## Installation
+
+Add the following dependency to your project's build file.
+
+For Scala 2.11.x and 2.12.x:
+
+[comment]: # (Start Replace)
+
+```scala
+"io.frees" %% "frees-rpc" % "0.0.1"
+```
+
+Or, if using Scala.js (0.6.x):
+
+```scala
+"io.frees" %%% "frees-rpc" % "0.0.1"
+```
+
+[comment]: # (End Replace)
+
+## Demo
 
 See [freestyle-rpc-examples repo](https://github.com/frees-io/freestyle-rpc-examples).
 
