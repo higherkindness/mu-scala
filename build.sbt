@@ -14,7 +14,7 @@ lazy val rpc = project
           %%("freestyle-async"),
           %%("freestyle-config"),
           %%("scalameta-contrib"),
-          "io.grpc"        % "grpc-all"  % "1.4.0",
+          "io.grpc"        % "grpc-all"  % "1.6.1",
           "beyondthelines" %% "pbdirect" % "0.0.3",
           %%("monix"),
           %%("scalamockScalatest") % "test"
