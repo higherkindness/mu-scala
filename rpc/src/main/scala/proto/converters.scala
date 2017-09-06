@@ -108,8 +108,12 @@ object converters {
             convert(param"..$mods $paramname: $tpe = $expropt", tag, Some(Repeated))
           case param"..$mods $paramname: Option[$tpe] = $expropt" =>
             convert(param"..$mods $paramname: $tpe = $expropt", tag, None)
-          case param"..$mods $paramname: $tpe = $expropt" =>
-            ProtoCustomType(name = paramname.value, tag = tag, id = tpe.toString())
+          case param"..$mods $paramname: $tpe = $expr" =>
+            val ntpe = tpe match {
+              case Some(tt) => tt.toString
+              case _        => tpe.toString
+            }
+            ProtoCustomType(name = paramname.value, tag = tag, id = ntpe)
         }
       }
   }
