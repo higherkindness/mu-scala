@@ -113,7 +113,7 @@ object converters {
               case Some(tt) => tt.toString
               case _        => tpe.toString
             }
-            ProtoCustomType(name = paramname.value, tag = tag, id = ntpe)
+            ProtoCustomType(mod = mod, name = paramname.value, tag = tag, id = ntpe)
         }
       }
   }
