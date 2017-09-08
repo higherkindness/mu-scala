@@ -32,7 +32,7 @@ package object client {
       configList: List[ManagedChannelConfig])
       extends (Kleisli[F, ManagedChannel, ?] ~> F) {
 
-    private[this] def build(
+    def build(
         initConfig: ManagedChannelFor,
         configList: List[ManagedChannelConfig]): ManagedChannel = {
       val builder: ManagedChannelBuilder[_] = initConfig match {
