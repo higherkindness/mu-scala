@@ -1,5 +1,14 @@
 # Changelog
 
+## 09/08/2017 - Version 0.0.2
+
+Release changes:
+
+* Bug Fix  Proto Code Generator for Custom Types ([#42](https://github.com/frees-io/freestyle-rpc/pull/42))
+* Fixes proto code generator for repeated types ([#43](https://github.com/frees-io/freestyle-rpc/pull/43))
+* Adds LoggingM as a part of GrpcServerApp module ([#44](https://github.com/frees-io/freestyle-rpc/pull/44))
+
+
 ## 09/05/2017 - Version 0.0.1
 
 Release changes:
