@@ -33,7 +33,7 @@ class SyntaxTests extends RpcServerTestSuite {
 
     "allow using bootstrapM" in {
 
-      server[GrpcServer.Op].bootstrapM[Id] shouldBe ((): Unit)
+      server[GrpcServerApp.Op].bootstrapM[Id] shouldBe ((): Unit)
 
       (serverMock.start _).verify().once()
       (serverMock.awaitTermination _).verify().once()
@@ -41,7 +41,7 @@ class SyntaxTests extends RpcServerTestSuite {
 
     "allow using bootstrapFuture" in {
 
-      val f = server[GrpcServer.Op].bootstrapFuture.await
+      val f = server[GrpcServerApp.Op].bootstrapFuture.await
 
       f shouldBe ((): Unit)
 
