@@ -20,14 +20,22 @@ package server
 import cats.{~>, Monad}
 import freestyle._
 import freestyle.implicits._
+import freestyle.logging._
+import freestyle.loggingJVM.implicits._
 
 import scala.concurrent.Future
 
+@module
+trait GrpcServerApp {
+  val server: GrpcServer
+  val log: LoggingM
+}
+
 trait Syntax {
 
-  implicit def serverOps(server: FreeS[GrpcServer.Op, Unit]): ServerOps = new ServerOps(server)
+  implicit def serverOps(server: FreeS[GrpcServerApp.Op, Unit]): ServerOps = new ServerOps(server)
 
-  final class ServerOps(server: FreeS[GrpcServer.Op, Unit]) {
+  final class ServerOps(server: FreeS[GrpcServerApp.Op, Unit]) {
 
     def bootstrapM[M[_]: Monad](implicit handler: GrpcServer.Op ~> M): M[Unit] =
       server.interpret[M]
@@ -42,10 +50,14 @@ trait Syntax {
 
 trait Helpers {
 
-  def server[M[_]](implicit APP: GrpcServer[M]): FreeS[M, Unit] = {
+  def server[M[_]](implicit APP: GrpcServerApp[M]): FreeS[M, Unit] = {
+    val server = APP.server
+    val log    = APP.log
     for {
-      _ <- APP.start()
-      _ <- APP.awaitTermination()
+      _    <- server.start()
+      port <- server.getPort
+      _    <- log.info(s"Server started, listening on $port")
+      _    <- server.awaitTermination()
     } yield ()
   }
 
