@@ -13,6 +13,7 @@ lazy val rpc = project
         Seq(
           %%("freestyle-async"),
           %%("freestyle-config"),
+          %%("freestyle-logging"),
           %%("scalameta-contrib"),
           "io.grpc"        % "grpc-all"  % "1.6.1",
           "beyondthelines" %% "pbdirect" % "0.0.3",

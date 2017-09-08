@@ -28,7 +28,7 @@ class HelperTests extends RpcServerTestSuite {
 
     "work as expected" in {
 
-      server[GrpcServer.Op].interpret[Id] shouldBe ((): Unit)
+      server[GrpcServerApp.Op].bootstrapM[Id] shouldBe ((): Unit)
 
       (serverMock.start _).verify()
       (serverMock.awaitTermination _).verify()
