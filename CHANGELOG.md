@@ -1,5 +1,13 @@
 # Changelog
 
+## 10/03/2017 - Version 0.0.3
+
+Release changes:
+
+* Makes the ChannelBuilder build a public method ([#45](https://github.com/frees-io/freestyle-rpc/pull/45))
+* Fixes Client Streaming rpc server ([#46](https://github.com/frees-io/freestyle-rpc/pull/46))
+
+
 ## 09/08/2017 - Version 0.0.2
 
 Release changes:
