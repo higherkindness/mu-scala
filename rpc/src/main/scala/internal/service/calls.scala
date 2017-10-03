@@ -29,6 +29,7 @@ import io.grpc.stub.ServerCalls.{
 }
 import io.grpc.stub.StreamObserver
 import io.grpc.{Status, StatusException}
+import monix.eval.Task
 import monix.execution.{Ack, Scheduler}
 import monix.reactive.Observable
 import monix.reactive.observables.ObservableLike.Transformer
@@ -66,13 +67,13 @@ object calls {
 
   def clientStreamingMethod[F[_], M[_], Req, Res](f: (Observable[Req]) => FreeS[F, Res])(
       implicit ME: MonadError[M, Throwable],
-      C: Comonad[M],
       H: FSHandler[F, M],
+      HTask: FSHandler[M, Task],
       S: Scheduler): ClientStreamingMethod[Req, Res] = new ClientStreamingMethod[Req, Res] {
 
     override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
       transform[Req, Res](
-        inputObservable => Observable.eval(C.extract(f(inputObservable).interpret[M])),
+        inputObservable => Observable.fromTask(HTask(f(inputObservable).interpret[M])),
         responseObserver
       )
     }
