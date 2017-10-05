@@ -34,50 +34,54 @@ object ProtoCodeGen {
   def main(args: Array[String]): Unit = {
     args.toList match {
       case input :: output :: Nil =>
-        generate(new File(input), new File(output)) map {
-          case (file, contents) =>
+        generate(new File(input), new File(output)) foreach {
+          case Some((file, contents)) =>
             Files.write(
               file.toPath,
               contents
                 .getBytes(Charset.forName("UTF-8")),
               StandardOpenOption.CREATE
             )
-        }; ()
+          case None =>
+        }
       case _ =>
         throw new IllegalArgumentException(s"Expected 2 $args with input and output directories")
     }
   }
 
-  def generate(input: File, output: File): Seq[(File, String)] = {
+  def generate(input: File, output: File): Seq[Option[(File, String)]] = {
     def allScalaFiles(f: File): List[File] = {
       val children   = f.listFiles
       val scalaFiles = children.filter(f => """.*\.scala$""".r.findFirstIn(f.getName).isDefined)
       (scalaFiles ++ children.filter(_.isDirectory).flatMap(allScalaFiles)).toList
     }
     if (input.isDirectory && output.isDirectory) {
-      allScalaFiles(input) map { inputFile =>
-        val processed =
+      allScalaFiles(input)
+        .map { inputFile =>
           ProtoAnnotationsProcessor[Try]
             .process(inputFile)
-            .map(ProtoEncoder[ProtoDefinitions].encode)
-
-        processed match {
-          case Success(protoContents) =>
-            val outputFile =
-              new File(output.toPath + "/" + inputFile.getName.replaceAll(".scala", ".proto"))
-            println(s"""
-                |
-                |Scala File: $inputFile
-                |Proto File: $outputFile
-                |----------------------------------
-                |$protoContents
-                |----------------------------------
-                |
-              """.stripMargin)
-            (outputFile, protoContents)
-          case Failure(e) => throw e
+            .map {
+              case pd if pd.options.nonEmpty && pd.messages.nonEmpty && pd.services.nonEmpty =>
+                val protoContents = ProtoEncoder[ProtoDefinitions].encode(pd)
+                val outputFile =
+                  new File(output.toPath + "/" + inputFile.getName.replaceAll(".scala", ".proto"))
+                println(s"""
+                           |
+                           |Scala File: $inputFile
+                           |Proto File: $outputFile
+                           |----------------------------------
+                           |$protoContents
+                           |----------------------------------
+                           |""".stripMargin)
+                Some((outputFile, protoContents))
+              case _ =>
+                None
+            }
         }
-      }
+        .map {
+          case Success(s) => s
+          case Failure(t) => throw t
+        }
     } else {
       throw new IllegalArgumentException(s"Expected $input and $output to be directories")
     }

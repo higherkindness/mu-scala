@@ -17,8 +17,3 @@
 package freestyle
 package rpc
 package protocol
-
-sealed trait StreamingType         extends Product with Serializable
-case object RequestStreaming       extends StreamingType
-case object ResponseStreaming      extends StreamingType
-case object BidirectionalStreaming extends StreamingType
