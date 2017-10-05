@@ -8,18 +8,16 @@ lazy val rpc = project
   .settings(scalaMetaSettings: _*)
   .settings(
     Seq(
-      resolvers += Resolver.bintrayRepo("beyondthelines", "maven"),
       libraryDependencies ++= commonDeps ++ freestyleCoreDeps() ++
         Seq(
+          %("grpc-all"),
           %%("freestyle-async"),
           %%("freestyle-config"),
           %%("freestyle-logging"),
-          %%("scalameta-contrib"),
-          "io.grpc"        % "grpc-all"  % "1.6.1",
-          "beyondthelines" %% "pbdirect" % "0.0.3",
+          %%("scalameta-contrib", "1.8.0"),
+          %%("pbdirect"),
           %%("monix"),
           %%("scalamockScalatest") % "test"
-        ),
-      coverageExcludedPackages := "<empty>;freestyle\\.rpc\\.demo\\..*"
+        )
     ): _*
   )
