@@ -1,1 +1,1 @@
-addSbtPlugin("io.frees" % "sbt-freestyle" % "0.1.2")
+addSbtPlugin("io.frees" % "sbt-freestyle" % "0.2.4")
