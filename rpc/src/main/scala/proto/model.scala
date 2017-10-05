@@ -193,7 +193,10 @@ object model {
   final case class ProtoOption(name: String, value: String, quote: Boolean)
 
   final case class ProtoDefinitions(
-      prelude: String = "syntax = \"proto3\";",
+      prelude: String = """|// This file has been automatically generated for use by
+                           |// sbt-frees-protogen plugin, from freestyle-rpc service definitions
+                           |
+                           |syntax = "proto3";""".stripMargin,
       options: List[ProtoOption],
       messages: List[ProtoMessage],
       services: List[ProtoService])

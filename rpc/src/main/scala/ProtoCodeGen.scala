@@ -55,17 +55,19 @@ object ProtoCodeGen {
       (scalaFiles ++ children.filter(_.isDirectory).flatMap(allScalaFiles)).toList
     }
     if (input.isDirectory && output.isDirectory) {
-      allScalaFiles(input) map { inputFile =>
-        val processed =
+      val allProcessedFiles = allScalaFiles(input)
+        .map { inputFile =>
           ProtoAnnotationsProcessor[Try]
             .process(inputFile)
+            .collect {
+              case pd if pd.options.nonEmpty && pd.messages.nonEmpty && pd.services.nonEmpty =>
+                pd
+            }
             .map(ProtoEncoder[ProtoDefinitions].encode)
-
-        processed match {
-          case Success(protoContents) =>
-            val outputFile =
-              new File(output.toPath + "/" + inputFile.getName.replaceAll(".scala", ".proto"))
-            println(s"""
+            .map { protoContents =>
+              val outputFile =
+                new File(output.toPath + "/" + inputFile.getName.replaceAll(".scala", ".proto"))
+              println(s"""
                 |
                 |Scala File: $inputFile
                 |Proto File: $outputFile
@@ -74,9 +76,18 @@ object ProtoCodeGen {
                 |----------------------------------
                 |
               """.stripMargin)
-            (outputFile, protoContents)
-          case Failure(e) => throw e
+              (outputFile, protoContents)
+            }
         }
+
+      allProcessedFiles.collect {
+        case Failure(_: NoSuchElementException) =>
+        case Failure(t) =>
+          throw t
+      }
+
+      allProcessedFiles.collect {
+        case Success(s) => s
       }
     } else {
       throw new IllegalArgumentException(s"Expected $input and $output to be directories")
