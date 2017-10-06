@@ -2,11 +2,6 @@ pgpPassphrase := Some(getEnvVar("PGP_PASSPHRASE").getOrElse("").toCharArray)
 pgpPublicRing := file(s"$gpgFolder/pubring.gpg")
 pgpSecretRing := file(s"$gpgFolder/secring.gpg")
 
-lazy val root = project
-  .in(file("."))
-  .settings(noPublishSettings)
-  .aggregate(rpc, protogen)
-
 lazy val rpc = project
   .in(file("rpc"))
   .settings(moduleName := "frees-rpc")
@@ -30,11 +25,5 @@ lazy val rpc = project
 lazy val protogen = project
   .in(file("protogen"))
   .settings(moduleName := "sbt-frees-protogen")
-  .settings(scalaMetaSettings: _*)
-  .settings(
-    Seq(
-      sbtPlugin := true,
-      scalaVersion := sbtorgpolicies.model.scalac.`2.12`,
-      crossScalaVersions := Seq(sbtorgpolicies.model.scalac.`2.12`)
-    ): _*
-  )
+  .settings(scalacOptions ~= (_ filterNot (_ == "-Xplugin-require:macroparadise")))
+  .settings(sbtPlugin := true)
