@@ -1,13 +1,15 @@
 language: scala
 
-sudo: required
+jdk:
+- oraclejdk8
+
+env:
+- SCALA_2_12=2.12.3
 
 scala:
 - 2.11.11
-- 2.12.3
+- $SCALA_2_12
 
-jdk:
-- oraclejdk8
 
 before_cache:
 - du -h -d 1 $HOME/.ivy2/
@@ -32,8 +34,25 @@ before_install:
   fi
 
 script:
-- sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
+- sbt ++$TRAVIS_SCALA_VERSION orgScriptCI;
+
+- if [ "$TRAVIS_SCALA_VERSION" = "$SCALA_2_12" ]; then
+    sbt ++$TRAVIS_SCALA_VERSION protogen/compile;
+  fi
 
 after_success:
 - bash <(curl -s https://codecov.io/bash) -t 5b75b318-ab71-4fbc-9203-bfa7765cdbdc
+
 - sbt ++$TRAVIS_SCALA_VERSION orgAfterCISuccess
+
+- if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" -a "$TRAVIS_SCALA_VERSION" = "$SCALA_2_12" ]; then
+    if grep -q "SNAPSHOT" version.sbt; then
+      sbt ++$TRAVIS_SCALA_VERSION protogen/publish;
+    else
+      git reset --hard HEAD;
+      git clean -f;
+      git checkout master;
+      git pull origin master;
+      sbt ++$TRAVIS_SCALA_VERSION protogen/release;
+    fi
+  fi

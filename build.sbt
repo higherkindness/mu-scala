@@ -1,3 +1,5 @@
+import sbtorgpolicies.model._
+
 pgpPassphrase := Some(getEnvVar("PGP_PASSPHRASE").getOrElse("").toCharArray)
 pgpPublicRing := file(s"$gpgFolder/pubring.gpg")
 pgpSecretRing := file(s"$gpgFolder/secring.gpg")
@@ -5,7 +7,7 @@ pgpSecretRing := file(s"$gpgFolder/secring.gpg")
 lazy val root = project
   .in(file("."))
   .settings(noPublishSettings)
-  .aggregate(rpc, protogen)
+  .aggregate(rpc)
 
 lazy val rpc = project
   .in(file("rpc"))
@@ -34,7 +36,6 @@ lazy val protogen = project
   .settings(
     Seq(
       sbtPlugin := true,
-      scalaVersion := sbtorgpolicies.model.scalac.`2.12`,
-      crossScalaVersions := Seq(sbtorgpolicies.model.scalac.`2.12`)
+      scalaVersion := scalac.`2.12`
     ): _*
   )
