@@ -43,19 +43,19 @@ package object client {
       configList
         .foldLeft(builder) { (acc, cfg) =>
           cfg match {
-            case DirectExecutor                    => acc.directExecutor()
-            case SetExecutor(executor)             => acc.executor(executor)
-            case AddInterceptorList(interceptors)  => acc.intercept(interceptors.asJava)
-            case AddInterceptor(interceptors @ _*) => acc.intercept(interceptors: _*)
-            case UserAgent(userAgent)              => acc.userAgent(userAgent)
-            case OverrideAuthority(authority)      => acc.overrideAuthority(authority)
-            case UsePlaintext(skipNegotiation)     => acc.usePlaintext(skipNegotiation)
-            case NameResolverFactory(rf)           => acc.nameResolverFactory(rf)
-            case LoadBalancerFactory(lbf)          => acc.loadBalancerFactory(lbf)
-            case SetDecompressorRegistry(registry) => acc.decompressorRegistry(registry)
-            case SetCompressorRegistry(registry)   => acc.compressorRegistry(registry)
-            case SetIdleTimeout(value, unit)       => acc.idleTimeout(value, unit)
-            case SetMaxInboundMessageSize(max)     => acc.maxInboundMessageSize(max)
+            case DirectExecutor                     => acc.directExecutor()
+            case SetExecutor(executor)              => acc.executor(executor)
+            case AddInterceptorList(interceptors)   => acc.intercept(interceptors.asJava)
+            case AddInterceptor(interceptors @ _ *) => acc.intercept(interceptors: _*)
+            case UserAgent(userAgent)               => acc.userAgent(userAgent)
+            case OverrideAuthority(authority)       => acc.overrideAuthority(authority)
+            case UsePlaintext(skipNegotiation)      => acc.usePlaintext(skipNegotiation)
+            case NameResolverFactory(rf)            => acc.nameResolverFactory(rf)
+            case LoadBalancerFactory(lbf)           => acc.loadBalancerFactory(lbf)
+            case SetDecompressorRegistry(registry)  => acc.decompressorRegistry(registry)
+            case SetCompressorRegistry(registry)    => acc.compressorRegistry(registry)
+            case SetIdleTimeout(value, unit)        => acc.idleTimeout(value, unit)
+            case SetMaxInboundMessageSize(max)      => acc.maxInboundMessageSize(max)
           }
         }
         .build()

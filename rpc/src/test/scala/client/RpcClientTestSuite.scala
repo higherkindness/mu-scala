@@ -19,7 +19,11 @@ package client
 
 import java.util.concurrent.{Callable, Executors}
 
-import com.google.common.util.concurrent.{ListenableFuture, ListeningExecutorService, MoreExecutors}
+import com.google.common.util.concurrent.{
+  ListenableFuture,
+  ListeningExecutorService,
+  MoreExecutors
+}
 import freestyle.rpc.client.utils.StringMarshaller
 import io.grpc.{ClientCall, ManagedChannel, MethodDescriptor}
 
