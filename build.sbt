@@ -36,8 +36,6 @@ lazy val protogen = project
   .settings(
     Seq(
       sbtPlugin := true,
-      scalaVersion := scalac.`2.12`,
-      crossScalaVersions := Seq(scalac.`2.10`, scalac.`2.12`),
-      crossSbtVersions := Seq(sbtV.`0.13`, sbtV.`1.0`)
+      scalaVersion := scalac.`2.12`
     ): _*
   )
