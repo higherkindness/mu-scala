@@ -3,9 +3,13 @@ language: scala
 jdk:
 - oraclejdk8
 
+env:
+- SCALA_2_12=2.12.3
+
 scala:
 - 2.11.11
-- 2.12.3
+- $SCALA_2_12
+
 
 before_cache:
 - du -h -d 1 $HOME/.ivy2/
@@ -32,7 +36,7 @@ before_install:
 script:
 - sbt ++$TRAVIS_SCALA_VERSION orgScriptCI;
 
-- if [ "$TRAVIS_SCALA_VERSION" = "2.12.3" ]; then
+- if [ "$TRAVIS_SCALA_VERSION" = "$SCALA_2_12" ]; then
     sbt ++$TRAVIS_SCALA_VERSION protogen/compile;
   fi
 
@@ -41,7 +45,7 @@ after_success:
 
 - sbt ++$TRAVIS_SCALA_VERSION orgAfterCISuccess
 
-- if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" -a "$TRAVIS_SCALA_VERSION" = "2.12.3" ]; then
+- if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" -a "$TRAVIS_SCALA_VERSION" = "$SCALA_2_12" ]; then
     if grep -q "SNAPSHOT" version.sbt; then
       sbt ++$TRAVIS_SCALA_VERSION protogen/publish;
     else
