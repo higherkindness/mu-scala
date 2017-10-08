@@ -34,11 +34,11 @@ before_install:
   fi
 
 script:
-- sbt ++$TRAVIS_SCALA_VERSION orgScriptCI;
-
 - if [ "$TRAVIS_SCALA_VERSION" = "$SCALA_2_12" ]; then
     sbt ++$TRAVIS_SCALA_VERSION protogen/compile;
   fi
+
+- sbt ++$TRAVIS_SCALA_VERSION orgScriptCI;
 
 after_success:
 - bash <(curl -s https://codecov.io/bash) -t 5b75b318-ab71-4fbc-9203-bfa7765cdbdc
