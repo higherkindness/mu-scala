@@ -21,9 +21,3 @@ lazy val rpc = project
         )
     ): _*
   )
-
-lazy val protogen = project
-  .in(file("protogen"))
-  .settings(moduleName := "sbt-frees-protogen")
-  .settings(scalacOptions ~= (_ filterNot (_ == "-Xplugin-require:macroparadise")))
-  .settings(sbtPlugin := true)

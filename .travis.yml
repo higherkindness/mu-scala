@@ -3,12 +3,9 @@ language: scala
 jdk:
 - oraclejdk8
 
-env:
-- SCALA_2_12=2.12.3
-
 scala:
 - 2.11.11
-- $SCALA_2_12
+- 2.12.3
 
 
 before_cache:
@@ -34,19 +31,8 @@ before_install:
   fi
 
 script:
-- if [ "$TRAVIS_SCALA_VERSION" = "$SCALA_2_12" ]; then
-    sbt ++$TRAVIS_SCALA_VERSION protogen/compile;
-  fi
-
-- sbt ++$TRAVIS_SCALA_VERSION orgScriptCI;
+- sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
 
 after_success:
 - bash <(curl -s https://codecov.io/bash) -t 5b75b318-ab71-4fbc-9203-bfa7765cdbdc
-
-- if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
-    if grep -q "SNAPSHOT" version.sbt; then
-      sbt ++$TRAVIS_SCALA_VERSION publish;
-    else
-      sbt ++$SCALA_2_12 orgAfterCISuccess;
-    fi
-  fi
+- sbt ++$TRAVIS_SCALA_VERSION orgAfterCISuccess
