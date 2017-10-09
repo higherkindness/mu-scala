@@ -1,5 +1,17 @@
 # Changelog
 
+## 10/09/2017 - Version 0.0.6
+
+Release changes:
+
+* Upgrades to sbt 1.0.1 and Scala 2.12.3 ([#48](https://github.com/frees-io/freestyle-rpc/pull/48))
+* Brings sbt-frees-protogen as a separate Artifact ([#49](https://github.com/frees-io/freestyle-rpc/pull/49))
+* Adds warning about generated proto files ([#50](https://github.com/frees-io/freestyle-rpc/pull/50))
+* Fixes Travis Builds ([#52](https://github.com/frees-io/freestyle-rpc/pull/52))
+* Fixes RPC build and Publishing Issues ([#53](https://github.com/frees-io/freestyle-rpc/pull/53))
+* Removes protogen ([#54](https://github.com/frees-io/freestyle-rpc/pull/54))
+
+
 ## 10/09/2017 - Version 0.0.5
 
 Release changes:
