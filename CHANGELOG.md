@@ -1,5 +1,12 @@
 # Changelog
 
+## 10/10/2017 - Version 0.0.7
+
+Release changes:
+
+* Feature/common code in isolated artifact ([#55](https://github.com/frees-io/freestyle-rpc/pull/55))
+
+
 ## 10/09/2017 - Version 0.0.6
 
 Release changes:
