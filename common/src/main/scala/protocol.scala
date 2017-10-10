@@ -16,25 +16,9 @@
 
 package freestyle
 package rpc
+package protocol
 
-import freestyle.rpc.internal.service.serviceImpl
-
-import scala.annotation.{compileTimeOnly, StaticAnnotation}
-
-package object protocol {
-
-  @compileTimeOnly("enable macro paradise to expand @free macro annotations")
-  class service extends StaticAnnotation {
-    import scala.meta._
-
-    inline def apply(defn: Any): Any = meta { serviceImpl.service(defn) }
-  }
-
-  class rpc extends StaticAnnotation
-
-  class stream[S <: StreamingType] extends StaticAnnotation
-
-  class message extends StaticAnnotation
-
-  class option(val name: String, val value: String, val quote: Boolean) extends StaticAnnotation
-}
+sealed trait StreamingType         extends Product with Serializable
+case object RequestStreaming       extends StreamingType
+case object ResponseStreaming      extends StreamingType
+case object BidirectionalStreaming extends StreamingType
