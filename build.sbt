@@ -14,15 +14,17 @@ lazy val rpc = project
   .settings(scalaMetaSettings: _*)
   .settings(
     Seq(
-      libraryDependencies ++= commonDeps ++ freestyleCoreDeps() ++
+      libraryDependencies ++= commonDeps ++
         Seq(
-          %%("freestyle-async"),
-          %%("freestyle-config"),
-          %%("freestyle-logging"),
+          %%("frees-core"),
+          %%("frees-async"),
+          %%("frees-config"),
+          %%("frees-logging"),
           %("grpc-all"),
           %%("monix"),
           %%("pbdirect"),
           %%("scalameta-contrib", "1.8.0"),
+          %%("scalatest") % "test",
           %%("scalamockScalatest") % "test"
         )
     ): _*

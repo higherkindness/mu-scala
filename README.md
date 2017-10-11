@@ -21,12 +21,6 @@ For Scala 2.11.x and 2.12.x:
 "io.frees" %% "frees-rpc" % "0.0.7"
 ```
 
-Or, if using Scala.js (0.6.x):
-
-```scala
-"io.frees" %%% "frees-rpc" % "0.0.7"
-```
-
 [comment]: # (End Replace)
 
 ## Demo
