@@ -30,10 +30,9 @@ import io.grpc.stub.ServerCalls.{
 import io.grpc.stub.StreamObserver
 import io.grpc.{Status, StatusException}
 import monix.eval.Task
-import monix.execution.{Ack, Cancelable, Scheduler}
+import monix.execution.{Ack, Scheduler}
 import monix.reactive.{Observable, Observer, Pipe}
 import monix.reactive.observers.Subscriber
-import monix.reactive.subjects.PublishSubject
 
 import scala.concurrent.Future
 
@@ -98,7 +97,7 @@ object calls {
 
     override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
       transform[Req, Res](
-        inputObservable => C.extract(f(inputObservable).interpret[M]),
+        (inputObservable: Observable[Req]) => C.extract(f(inputObservable).interpret[M]),
         StreamObserver2Subscriber(responseObserver)
       )
     }
@@ -109,15 +108,15 @@ object calls {
       subscriber: Subscriber[Res]): Subscriber[Req] =
     new Subscriber[Req] {
 
-      val pipe: Pipe[Req, Res] = Pipe.publish[Req].transform[Res](transformer)
+      val pipe: Pipe[Req, Res]                      = Pipe.publish[Req].transform[Res](transformer)
+      val (in: Observer[Req], out: Observable[Res]) = pipe.unicast
 
-      val subject: Observer[Req] = pipe.multicast._1
-      pipe.multicast._2.subscribe(subscriber)
+      out.unsafeSubscribeFn(subscriber)
 
       override implicit def scheduler: Scheduler   = subscriber.scheduler
-      override def onError(t: Throwable): Unit     = subject.onError(t)
-      override def onComplete(): Unit              = subject.onComplete()
-      override def onNext(value: Req): Future[Ack] = subject.onNext(value)
+      override def onError(t: Throwable): Unit     = in.onError(t)
+      override def onComplete(): Unit              = in.onComplete()
+      override def onNext(value: Req): Future[Ack] = in.onNext(value)
     }
 
 }
