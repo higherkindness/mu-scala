@@ -24,7 +24,7 @@ import io.grpc.stub.StreamObserver
 import monix.eval.Callback
 import monix.execution.Ack.{Continue, Stop}
 import monix.execution.{Ack, Scheduler}
-import monix.reactive.observables.ObservableLike.Operator
+import monix.reactive.Observable.Operator
 import monix.reactive.observers.Subscriber
 import org.reactivestreams.{Subscriber => RSubscriber}
 

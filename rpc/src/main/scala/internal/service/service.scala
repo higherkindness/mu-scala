@@ -112,7 +112,7 @@ case class ServiceAlg(defn: Defn) {
     val clientDefs: Seq[Defn.Def] = requests.map(_.clientDef)
     q"""
        class $clientName[M[_]](channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
-          (implicit AC : _root_.freestyle.async.AsyncContext[M], H: FSHandler[_root_.monix.eval.Task, M])
+          (implicit AC : _root_.freestyle.async.AsyncContext[M], H: FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext)
           extends _root_.io.grpc.stub.AbstractStub[$clientName[M]](channel, options) {
 
           override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $clientName[M] = {
@@ -130,7 +130,7 @@ case class ServiceAlg(defn: Defn) {
        def client[M[_]: _root_.freestyle.async.AsyncContext](
           channel: _root_.io.grpc.Channel, 
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
-          (implicit H: FSHandler[_root_.monix.eval.Task, M]) : $clientName[M] =
+          (implicit H: FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext) : $clientName[M] =
              new ${clientName.ctorRef(Ctor.Name(clientName.value))}[M](channel, options)
      """
 

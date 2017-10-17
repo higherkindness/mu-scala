@@ -20,25 +20,27 @@ package internal
 package client
 
 import freestyle.async.AsyncContext
+import freestyle.asyncGuava.implicits._
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
 import io.grpc.stub.{ClientCalls, StreamObserver}
 import monix.eval.Task
 import monix.reactive.Observable
 import org.reactivestreams._
 
+import scala.concurrent.ExecutionContext
+
 object calls {
 
   import internal.converters._
-
-  import freestyle.rpc.client.implicits._
 
   def unary[M[_], Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit AC: AsyncContext[M]): M[Res] =
-    ClientCalls
-      .futureUnaryCall(channel.newCall(descriptor, options), request)
+      options: CallOptions)(implicit AC: AsyncContext[M], E: ExecutionContext): M[Res] =
+    listenableFuture2Async.apply(
+      ClientCalls
+        .futureUnaryCall(channel.newCall(descriptor, options), request))
 
   def serverStreaming[Req, Res](
       request: Req,

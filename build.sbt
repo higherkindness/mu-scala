@@ -18,13 +18,14 @@ lazy val rpc = project
         Seq(
           %%("frees-core"),
           %%("frees-async"),
+          %%("frees-async-guava"),
           %%("frees-config"),
           %%("frees-logging"),
           %("grpc-all"),
           %%("monix"),
           %%("pbdirect"),
           %%("scalameta-contrib", "1.8.0"),
-          %%("scalatest") % "test",
+          %%("scalatest")          % "test",
           %%("scalamockScalatest") % "test"
         )
     ): _*

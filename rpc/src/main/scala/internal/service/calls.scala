@@ -30,9 +30,8 @@ import io.grpc.stub.ServerCalls.{
 import io.grpc.stub.StreamObserver
 import io.grpc.{Status, StatusException}
 import monix.eval.Task
-import monix.execution.{Ack, Scheduler}
-import monix.reactive.Observable
-import monix.reactive.observables.ObservableLike.Transformer
+import monix.execution.{Ack, Cancelable, Scheduler}
+import monix.reactive.{Observable, Observer, Pipe}
 import monix.reactive.observers.Subscriber
 import monix.reactive.subjects.PublishSubject
 
@@ -106,12 +105,14 @@ object calls {
   }
 
   private[this] def transform[Req, Res](
-      transformer: Transformer[Req, Res],
+      transformer: Observable[Req] => Observable[Res],
       subscriber: Subscriber[Res]): Subscriber[Req] =
     new Subscriber[Req] {
 
-      val subject: PublishSubject[Req] = PublishSubject[Req]
-      subject.transform(transformer).subscribe(subscriber)
+      val pipe: Pipe[Req, Res] = Pipe.publish[Req].transform[Res](transformer)
+
+      val subject: Observer[Req] = pipe.multicast._1
+      pipe.multicast._2.subscribe(subscriber)
 
       override implicit def scheduler: Scheduler   = subscriber.scheduler
       override def onError(t: Throwable): Unit     = subject.onError(t)

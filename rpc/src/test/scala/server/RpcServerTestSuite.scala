@@ -61,17 +61,17 @@ trait RpcServerTestSuite extends RpcBaseTestSuite {
     def idApply[A](fa: GrpcServer.Op[A]): Id[A] = {
       import GrpcServer._
       fa match {
-        case StartOP()                       => serverMock.start()
-        case GetPortOP()                     => serverMock.getPort
-        case GetServicesOP()                 => serverMock.getServices.asScala.toList
-        case GetImmutableServicesOP()        => serverMock.getImmutableServices.asScala.toList
-        case GetMutableServicesOP()          => serverMock.getMutableServices.asScala.toList
-        case ShutdownOP()                    => serverMock.shutdown()
-        case ShutdownNowOP()                 => serverMock.shutdownNow()
-        case IsShutdownOP()                  => serverMock.isShutdown
-        case IsTerminatedOP()                => serverMock.isTerminated
-        case AwaitTerminationTimeoutOP(t, u) => serverMock.awaitTermination(t, u)
-        case AwaitTerminationOP()            => serverMock.awaitTermination()
+        case StartOp()                       => serverMock.start()
+        case GetPortOp()                     => serverMock.getPort
+        case GetServicesOp()                 => serverMock.getServices.asScala.toList
+        case GetImmutableServicesOp()        => serverMock.getImmutableServices.asScala.toList
+        case GetMutableServicesOp()          => serverMock.getMutableServices.asScala.toList
+        case ShutdownOp()                    => serverMock.shutdown()
+        case ShutdownNowOp()                 => serverMock.shutdownNow()
+        case IsShutdownOp()                  => serverMock.isShutdown
+        case IsTerminatedOp()                => serverMock.isTerminated
+        case AwaitTerminationTimeoutOp(t, u) => serverMock.awaitTermination(t, u)
+        case AwaitTerminationOp()            => serverMock.awaitTermination()
       }
     }
 
