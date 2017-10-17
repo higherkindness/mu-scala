@@ -1,5 +1,12 @@
 # Changelog
 
+## 10/17/2017 - Version 0.0.8
+
+Release changes:
+
+* Freestyle 0.4.0 Upgrade ([#56](https://github.com/frees-io/freestyle-rpc/pull/56))
+
+
 ## 10/10/2017 - Version 0.0.7
 
 Release changes:
