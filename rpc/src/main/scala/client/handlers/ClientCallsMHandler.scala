@@ -19,14 +19,15 @@ package client.handlers
 
 import freestyle.Capture
 import freestyle.async.AsyncContext
+import freestyle.asyncGuava.implicits._
 import freestyle.rpc.client.ClientCallsM
 import io.grpc.{CallOptions, Channel, ClientCall, MethodDescriptor}
 import io.grpc.stub.{ClientCalls, StreamObserver}
-import freestyle.rpc.client.implicits._
 
 import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContext
 
-class ClientCallsMHandler[M[_]](implicit C: Capture[M], AC: AsyncContext[M])
+class ClientCallsMHandler[M[_]](implicit C: Capture[M], AC: AsyncContext[M], E: ExecutionContext)
     extends ClientCallsM.Handler[M] {
 
   def async[I, O](call: ClientCall[I, O], param: I, observer: StreamObserver[O]): M[Unit] =
@@ -68,7 +69,6 @@ class ClientCallsMHandler[M[_]](implicit C: Capture[M], AC: AsyncContext[M])
       param: I): M[Iterator[O]] =
     C.capture(ClientCalls.blockingServerStreamingCall(channel, method, callOptions, param).asScala)
 
-  import client.implicits._
   def asyncM[I, O](call: ClientCall[I, O], param: I): M[O] =
-    ClientCalls.futureUnaryCall(call, param)
+    listenableFuture2Async.apply(ClientCalls.futureUnaryCall(call, param))
 }

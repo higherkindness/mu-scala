@@ -18,7 +18,7 @@ before_cache:
 cache:
   directories:
   - $HOME/.sbt/cache
-  - $HOME/.sbt/0.13
+  - $HOME/.sbt/1.0
   - $HOME/.sbt/boot/
   - $HOME/.sbt/boot/scala*
   - $HOME/.sbt/launchers

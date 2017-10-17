@@ -18,24 +18,12 @@ package freestyle
 package rpc
 package client
 
-import com.google.common.util.concurrent.ListenableFuture
 import freestyle.async.AsyncContext
 import freestyle.rpc.client.handlers._
 import monix.eval.Task
 import monix.execution.Scheduler
 
 import scala.concurrent.Future
-
-trait Conversions {
-
-  implicit def listenableFutureHandler[F[_]](
-      implicit AC: AsyncContext[F]): ListenableFutureMHandler[F] =
-    new ListenableFutureMHandler[F]
-
-  implicit def listenableFutureToAsyncConverter[F[_], A](future: ListenableFuture[A])(
-      implicit AC: AsyncContext[F]): F[A] =
-    listenableFutureHandler.apply(future)
-}
 
 trait FutureInstances {
 
@@ -46,4 +34,4 @@ trait FutureInstances {
 
 }
 
-object implicits extends CaptureInstances with Conversions with FutureInstances
+object implicits extends CaptureInstances with FutureInstances
