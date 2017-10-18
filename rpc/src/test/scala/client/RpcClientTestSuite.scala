@@ -40,7 +40,9 @@ trait RpcClientTestSuite extends RpcBaseTestSuite {
       new StringMarshaller()
     )
 
-    val authority: String      = "localhost:8696"
+    val host: String           = "localhost"
+    val port: Int              = 8696
+    val authority: String      = s"$host:$port"
     val foo                    = "Bar"
     val failureMessage: String = "❗"
 
