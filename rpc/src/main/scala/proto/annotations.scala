@@ -21,6 +21,7 @@ import freestyle.rpc.internal.service.serviceImpl
 
 import scala.annotation.{compileTimeOnly, StaticAnnotation}
 
+// $COVERAGE-OFF$
 package object protocol {
 
   @compileTimeOnly("enable macro paradise to expand @free macro annotations")
@@ -38,3 +39,5 @@ package object protocol {
 
   class option(val name: String, val value: String, val quote: Boolean) extends StaticAnnotation
 }
+
+// $COVERAGE-ON$

@@ -32,6 +32,7 @@ import scala.meta.Defn.{Class, Object, Trait}
 import scala.meta._
 import _root_.io.grpc.MethodDescriptor.Marshaller
 
+// $COVERAGE-OFF$
 object serviceImpl {
 
   import errors._
@@ -237,3 +238,5 @@ object encoders {
     }
 
 }
+
+// $COVERAGE-ON$
