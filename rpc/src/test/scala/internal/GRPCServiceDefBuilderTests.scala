@@ -23,7 +23,8 @@ import io.grpc.testing.TestMethodDescriptors
 
 class GRPCServiceDefBuilderTests extends RpcBaseTestSuite {
 
-  val serviceName = "service_foo"
+  val serviceName        = "service_foo"
+  val invalidServiceName = "invalid_service_name"
   val flowMethod: MethodDescriptor[String, Integer] =
     TestMethodDescriptors.noopMethod[String, Integer]()
   val headers: Metadata                     = new Metadata()
@@ -44,6 +45,14 @@ class GRPCServiceDefBuilderTests extends RpcBaseTestSuite {
         new GRPCServiceDefBuilder(serviceName, (flowMethod, handler))
 
       gRPCServiceDefBuilder.apply.getServiceDescriptor.getName shouldBe serviceName
+    }
+
+    "throw an java.lang.IllegalArgumentException when the serviceName is not valid" in {
+
+      val gRPCServiceDefBuilder =
+        new GRPCServiceDefBuilder(invalidServiceName, (flowMethod, handler))
+
+      an[IllegalArgumentException] should be thrownBy gRPCServiceDefBuilder.apply
     }
 
   }
