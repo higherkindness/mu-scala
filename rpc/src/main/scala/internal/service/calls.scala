@@ -40,19 +40,6 @@ object calls {
 
   import converters._
 
-  private[this] def completeObserver[A](observer: StreamObserver[A])(
-      t: Either[Throwable, A]): Unit = t match {
-    case Right(value) =>
-      observer.onNext(value)
-      observer.onCompleted()
-    case Left(s: StatusException) =>
-      observer.onError(s)
-    case Left(e) =>
-      observer.onError(
-        Status.INTERNAL.withDescription(e.getMessage).withCause(e).asException()
-      )
-  }
-
   def unaryMethod[F[_], M[_], Req, Res](f: (Req) => FreeS[F, Res])(
       implicit ME: MonadError[M, Throwable],
       H: FSHandler[F, M]): UnaryMethod[Req, Res] = new UnaryMethod[Req, Res] {
@@ -101,6 +88,19 @@ object calls {
         StreamObserver2Subscriber(responseObserver)
       )
     }
+  }
+
+  private[this] def completeObserver[A](observer: StreamObserver[A])(
+      t: Either[Throwable, A]): Unit = t match {
+    case Right(value) =>
+      observer.onNext(value)
+      observer.onCompleted()
+    case Left(s: StatusException) =>
+      observer.onError(s)
+    case Left(e) =>
+      observer.onError(
+        Status.INTERNAL.withDescription(e.getMessage).withCause(e).asException()
+      )
   }
 
   private[this] def transform[Req, Res](

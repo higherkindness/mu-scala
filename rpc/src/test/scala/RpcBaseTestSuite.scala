@@ -25,6 +25,8 @@ import scala.concurrent.{Await, Future}
 
 trait RpcBaseTestSuite extends WordSpec with Matchers with OneInstancePerTest with MockFactory {
 
+  val port: Int = 42424
+
   sealed trait Syntax {
 
     implicit class FutureOps[A](f: Future[A]) {
