@@ -85,6 +85,8 @@ object Utils {
 
     val cList = List(c1, c2)
     val eList = List(e1, e2)
+
+    val dResult: D = D(6)
   }
 
   object handlers {
@@ -100,8 +102,11 @@ object Utils {
         override protected[this] def unary(a: A): F[C] =
           C.capture(c1)
 
-        override protected[this] def serverStreaming(b: B): F[Observable[C]] =
-          C.capture(Observable.fromIterable(cList))
+        override protected[this] def serverStreaming(b: B): F[Observable[C]] = {
+          println(s"b = $b")
+          val obs = Observable.fromIterable(cList)
+          C.capture(obs)
+        }
 
         override protected[this] def clientStreaming(oa: Observable[A]): F[D] =
           T2F(
@@ -140,8 +145,17 @@ object Utils {
         override protected[this] def u(x: Int, y: Int): F[C] =
           client.unary(A(x, y))
 
-        override protected[this] def ss(a: Int, b: Int): F[C] =
-          T2F(client.serverStreaming(B(A(a, a), A(b, b))).firstL)
+        override protected[this] def ss(a: Int, b: Int): F[List[C]] = T2F {
+          client
+            .serverStreaming(B(A(a, a), A(b, b)))
+            .zipWithIndex
+            .map {
+              case (c, i) =>
+                println(s"Result #$i: $c")
+                c
+            }
+            .toListL
+        }
 
         override protected[this] def cs(cList: List[C], bar: Int): F[D] =
           client.clientStreaming(Observable.fromIterable(cList.map(c => c.a)))
@@ -165,7 +179,7 @@ object Utils {
     @free
     trait MyRPCClient {
       def u(x: Int, y: Int): FS[C]
-      def ss(a: Int, b: Int): FS[C]
+      def ss(a: Int, b: Int): FS[List[C]]
       def cs(cList: List[C], bar: Int): FS[D]
       def bs(eList: List[E]): FS[E]
     }
@@ -298,6 +312,7 @@ object Utils {
       def runF: A = Await.result(fs.interpret[Future], Duration.Inf)
 
     }
+
   }
 
   object implicits extends FreesRuntime

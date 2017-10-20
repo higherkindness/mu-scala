@@ -61,17 +61,6 @@ class FreesRPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   "frees-rpc client" should {
 
-    /*
-     * def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, Unit] = {
-        for {
-           _ <- APP.u(a1.x, a1.y)
-          _ <- APP.ss(a2.x, a2.y)
-          _ <- APP.cs(cList, i)
-          _ <- APP.bs(eList)
-        } yield ()
-      }
-     */
-
     "be able to run unary services" in {
 
       def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, C] =
@@ -83,12 +72,10 @@ class FreesRPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run server streaming services" in {
 
-      def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, C] =
+      def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, List[C]] =
         APP.ss(a2.x, a2.y)
 
-      println(clientProgram[MyRPCClient.Op].runF)
-
-      1 shouldBe 1
+      clientProgram[MyRPCClient.Op].runF shouldBe cList
 
     }
 
@@ -97,7 +84,7 @@ class FreesRPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, D] =
         APP.cs(cList, i)
 
-      clientProgram[MyRPCClient.Op].runF shouldBe D(6)
+      clientProgram[MyRPCClient.Op].runF shouldBe dResult
     }
 
     "be able to run client bidirectional streaming services" in {
@@ -111,16 +98,16 @@ class FreesRPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run rpc services monadically" in {
 
-      def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, E] = {
+      def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, (C, List[C], D, E)] = {
         for {
-          _ <- APP.u(a1.x, a1.y)
-          _ <- APP.ss(a2.x, a2.y)
-          _ <- APP.cs(cList, i)
-          r <- APP.bs(eList)
-        } yield r
+          w <- APP.u(a1.x, a1.y)
+          x <- APP.ss(a2.x, a2.y)
+          y <- APP.cs(cList, i)
+          z <- APP.bs(eList)
+        } yield (w, x, y, z)
       }
 
-      clientProgram[MyRPCClient.Op].runF shouldBe e1
+      clientProgram[MyRPCClient.Op].runF shouldBe ((c1, cList, dResult, e1))
 
     }
 
