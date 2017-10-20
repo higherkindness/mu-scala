@@ -76,19 +76,6 @@ trait MonixAdapters {
       }
     }
 
-  def streamObserver2MonixCallback: StreamObserver ~> Callback =
-    new (StreamObserver ~> Callback) {
-
-      override def apply[A](fa: StreamObserver[A]): Callback[A] = new Callback[A] {
-
-        override def onError(ex: Throwable): Unit = fa.onError(ex)
-        override def onSuccess(value: A): Unit = {
-          fa.onNext(value)
-          fa.onCompleted()
-        }
-      }
-    }
-
 }
 
 object converters extends MonixAdapters {
@@ -103,9 +90,6 @@ object converters extends MonixAdapters {
   private[internal] implicit def StreamObserver2Subscriber[A](observer: StreamObserver[A])(
       implicit S: Scheduler): Subscriber[A] =
     streamObserver2MonixSubscriber.apply(observer)
-
-  private[internal] implicit def StreamObserver2Callback[A](
-      observer: StreamObserver[A]): Callback[A] = streamObserver2MonixCallback(observer)
 
   private[internal] implicit def StreamObserver2MonixOperator[Req, Res](
       op: StreamObserver[Res] => StreamObserver[Req]): Operator[Req, Res] =
