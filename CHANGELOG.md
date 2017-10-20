@@ -1,5 +1,15 @@
 # Changelog
 
+## 10/20/2017 - Version 0.1.0
+
+Release changes:
+
+* Test Coverage for some client definitions ([#57](https://github.com/frees-io/freestyle-rpc/pull/57))
+* Test Coverage for client defs (Second Round) ([#58](https://github.com/frees-io/freestyle-rpc/pull/58))
+* Test Coverage Server Definitions ([#60](https://github.com/frees-io/freestyle-rpc/pull/60))
+* Releases 0.1.0 ([#61](https://github.com/frees-io/freestyle-rpc/pull/61))
+
+
 ## 10/17/2017 - Version 0.0.8
 
 Release changes:
