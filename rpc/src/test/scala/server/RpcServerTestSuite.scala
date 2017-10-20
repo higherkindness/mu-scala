@@ -32,7 +32,6 @@ trait RpcServerTestSuite extends RpcBaseTestSuite {
 
     val serverMock: Server                                  = stub[Server]
     val serverCopyMock: Server                              = stub[Server]
-    val port: Int                                           = 42
     val timeout: Long                                       = 1l
     val timeoutUnit: TimeUnit                               = TimeUnit.MINUTES
     val b: Boolean                                          = true
