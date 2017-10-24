@@ -1,5 +1,13 @@
 # Changelog
 
+## 10/24/2017 - Version 0.1.1
+
+Release changes:
+
+* Removes Scalajs badge ([#62](https://github.com/frees-io/freestyle-rpc/pull/62))
+* Upgrades to the latest version of sbt-freestyle ([#64](https://github.com/frees-io/freestyle-rpc/pull/64))
+
+
 ## 10/20/2017 - Version 0.1.0
 
 Release changes:
