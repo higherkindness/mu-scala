@@ -52,6 +52,8 @@ object Utils {
     @service
     trait FreesRPCService {
 
+      @rpc def notAllowed(b: Boolean): FS[C]
+
       @rpc def unary(a: A): FS[C]
 
       @rpc
@@ -99,6 +101,8 @@ object Utils {
       class FreesRPCServiceServerHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F)
           extends FreesRPCService.Handler[F] {
 
+        override protected[this] def notAllowed(b: Boolean): F[C] = C.capture(c1)
+
         override protected[this] def unary(a: A): F[C] =
           C.capture(c1)
 
@@ -142,6 +146,9 @@ object Utils {
           T2F: Task ~> F)
           extends MyRPCClient.Handler[F] {
 
+        override protected[this] def notAllowed(b: Boolean): F[C] =
+          client.notAllowed(b)
+
         override protected[this] def u(x: Int, y: Int): F[C] =
           client.unary(A(x, y))
 
@@ -178,6 +185,7 @@ object Utils {
 
     @free
     trait MyRPCClient {
+      def notAllowed(b: Boolean): FS[C]
       def u(x: Int, y: Int): FS[C]
       def ss(a: Int, b: Int): FS[List[C]]
       def cs(cList: List[C], bar: Int): FS[D]
