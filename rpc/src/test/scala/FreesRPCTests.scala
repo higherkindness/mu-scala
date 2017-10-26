@@ -111,6 +111,15 @@ class FreesRPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     }
 
+    "#67 issue - booleans as request are not allowed" ignore {
+
+      def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, C] =
+        APP.notAllowed(true)
+
+      clientProgram[MyRPCClient.Op].runF shouldBe c1
+
+    }
+
   }
 
 }
