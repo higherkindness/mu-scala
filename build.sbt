@@ -43,12 +43,12 @@ lazy val rpc = project
           %%("frees-config"),
           %%("frees-logging"),
           %("grpc-all"),
-          %("grpc-testing"),
           %%("monix"),
           %%("pbdirect"),
           %%("scalameta-contrib", "1.8.0"),
-          %%("scalatest")          % "test",
-          %%("scalamockScalatest") % "test"
+          %("grpc-testing")        % Test,
+          %%("scalatest")          % Test,
+          %%("scalamockScalatest") % Test
         )
     ): _*
   )
