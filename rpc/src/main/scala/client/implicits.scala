@@ -18,20 +18,4 @@ package freestyle
 package rpc
 package client
 
-import freestyle.async.AsyncContext
-import freestyle.rpc.client.handlers._
-import monix.eval.Task
-import monix.execution.Scheduler
-
-import scala.concurrent.Future
-
-trait FutureInstances {
-
-  implicit def task2Future(
-      implicit AC: AsyncContext[Future],
-      S: Scheduler): FSHandler[Task, Future] =
-    new TaskMHandler[Future]
-
-}
-
-object implicits extends CaptureInstances with FutureInstances
+object implicits extends CaptureInstances with AsyncInstances
