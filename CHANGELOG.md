@@ -1,5 +1,13 @@
 # Changelog
 
+## 10/30/2017 - Version 0.1.2
+
+Release changes:
+
+* Provides an evidence where #67 shows up ([#68](https://github.com/frees-io/freestyle-rpc/pull/68))
+* Groups async implicits into AsyncInstances trait ([#71](https://github.com/frees-io/freestyle-rpc/pull/71))
+
+
 ## 10/24/2017 - Version 0.1.1
 
 Release changes:
