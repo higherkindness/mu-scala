@@ -26,7 +26,7 @@ class ImplicitTests extends RpcClientTestSuite {
 
   type FSHandlerTask2Future = FSHandler[Task, Future]
 
-  "FutureInstances.task2Future" should {
+  "AsyncInstances.task2Future" should {
 
     "provide an implicit evidence allowing to transform from monix.eval.Task to scala.concurrent.Future" in {
 

@@ -249,42 +249,21 @@ object Utils {
 
   }
 
-  trait FreesRuntime extends freestyle.rpc.client.FutureInstances {
+  trait FreesRuntime {
 
     import service._
     import helpers._
     import handlers.server._
     import handlers.client._
-    import clientProgram._
     import cats.implicits._
     import freestyle.implicits._
     import freestyle.async.implicits._
-    import freestyle.loggingJVM.implicits._
     import freestyle.rpc.server._
     import freestyle.rpc.server.implicits._
     import freestyle.rpc.server.handlers._
 
     implicit val ec: ExecutionContext         = ExecutionContext.Implicits.global
     implicit val S: monix.execution.Scheduler = monix.execution.Scheduler.Implicits.global
-
-    protected val atMostDuration: FiniteDuration = 10.seconds
-
-    implicit def futureComonad(implicit ec: ExecutionContext): Comonad[Future] =
-      new Comonad[Future] {
-        def extract[A](x: Future[A]): A =
-          Await.result(x, atMostDuration)
-
-        override def coflatMap[A, B](fa: Future[A])(f: (Future[A]) => B): Future[B] = Future(f(fa))
-
-        override def map[A, B](fa: Future[A])(f: (A) => B): Future[B] =
-          fa.map(f)
-      }
-
-    implicit val future2Task: Future ~> Task =
-      new (Future ~> Task) {
-        override def apply[A](fa: Future[A]): Task[A] =
-          Task.deferFuture(fa)
-      }
 
     //////////////////////////////////
     // Server Runtime Configuration //
