@@ -16,7 +16,7 @@
 
 package freestyle.rpc
 
-import cats.{~>, Comonad, Monad, MonadError}
+import cats.{~>, Monad, MonadError}
 import freestyle._
 import freestyle.rpc.client._
 import freestyle.rpc.protocol._
@@ -53,6 +53,8 @@ object Utils {
     trait FreesRPCService {
 
       @rpc def notAllowed(b: Boolean): FS[C]
+
+      @rpc def empty(empty: Empty): FS[Empty]
 
       @rpc def unary(a: A): FS[C]
 
@@ -103,11 +105,13 @@ object Utils {
 
         override protected[this] def notAllowed(b: Boolean): F[C] = C.capture(c1)
 
+        override protected[this] def empty(empty: Empty): F[Empty] = C.capture(Empty())
+
         override protected[this] def unary(a: A): F[C] =
           C.capture(c1)
 
         override protected[this] def serverStreaming(b: B): F[Observable[C]] = {
-          println(s"b = $b")
+          helpers.debug(s"[SERVER] b -> $b")
           val obs = Observable.fromIterable(cList)
           C.capture(obs)
         }
@@ -116,6 +120,7 @@ object Utils {
           T2F(
             oa.foldLeftL(D(0)) {
               case (current, a) =>
+                helpers.debug(s"[SERVER] Current -> $current / a -> $a")
                 D(current.bar + a.x + a.y)
             }
           )
@@ -149,6 +154,9 @@ object Utils {
         override protected[this] def notAllowed(b: Boolean): F[C] =
           client.notAllowed(b)
 
+        override protected[this] def empty: F[Empty] =
+          client.empty(protocol.Empty())
+
         override protected[this] def u(x: Int, y: Int): F[C] =
           client.unary(A(x, y))
 
@@ -158,7 +166,7 @@ object Utils {
             .zipWithIndex
             .map {
               case (c, i) =>
-                println(s"Result #$i: $c")
+                helpers.debug(s"[CLIENT] Result #$i: $c")
                 c
             }
             .toListL
@@ -186,6 +194,7 @@ object Utils {
     @free
     trait MyRPCClient {
       def notAllowed(b: Boolean): FS[C]
+      def empty: FS[Empty]
       def u(x: Int, y: Int): FS[C]
       def ss(a: Int, b: Int): FS[List[C]]
       def cs(cList: List[C], bar: Int): FS[D]
@@ -246,6 +255,9 @@ object Utils {
         _    <- server.shutdownNow()
       } yield ()
     }
+
+    def debug(str: String): Unit =
+      println(s"\n\n$str\n\n")
 
   }
 

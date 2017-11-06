@@ -38,6 +38,9 @@ package object protocol {
   class message extends StaticAnnotation
 
   class option(val name: String, val value: String, val quote: Boolean) extends StaticAnnotation
+
+  @message
+  case class Empty()
 }
 
 // $COVERAGE-ON$

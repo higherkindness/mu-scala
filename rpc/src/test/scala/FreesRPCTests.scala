@@ -20,6 +20,7 @@ import freestyle._
 import org.scalatest._
 import freestyle.rpc.server.GrpcServerApp
 import freestyle.rpc.Utils.clientProgram.MyRPCClient
+import freestyle.rpc.protocol.Empty
 
 class FreesRPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
@@ -117,6 +118,15 @@ class FreesRPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         APP.notAllowed(true)
 
       clientProgram[MyRPCClient.Op].runF shouldBe c1
+
+    }
+
+    "be able to invoke services with empty requests" in {
+
+      def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, Empty] =
+        APP.empty
+
+      clientProgram[MyRPCClient.Op].runF shouldBe Empty()
 
     }
 
