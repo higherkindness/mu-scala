@@ -1,5 +1,15 @@
 # Changelog
 
+## 11/06/2017 - Version 0.2.0
+
+Release changes:
+
+* Upgrades to gRPC 1.7.0 ([#74](https://github.com/frees-io/freestyle-rpc/pull/74))
+* Provides Empty Message ([#75](https://github.com/frees-io/freestyle-rpc/pull/75))
+* Updates macros to avoid deprecation warnings ([#76](https://github.com/frees-io/freestyle-rpc/pull/76))
+* Releases 0.2.0 ([#77](https://github.com/frees-io/freestyle-rpc/pull/77))
+
+
 ## 10/30/2017 - Version 0.1.2
 
 Release changes:
