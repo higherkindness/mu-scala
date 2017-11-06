@@ -33,12 +33,11 @@ trait RpcClientTestSuite extends RpcBaseTestSuite {
     val managedChannelMock: ManagedChannel = mock[ManagedChannel]
     val clientCallMock: C                  = stub[C]
 
-    val methodDescriptor: M = MethodDescriptor.create(
-      MethodDescriptor.MethodType.UNARY,
-      MethodDescriptor.generateFullMethodName("foo.Bar", "Bar"),
-      new StringMarshaller(),
-      new StringMarshaller()
-    )
+    val methodDescriptor: M = MethodDescriptor
+      .newBuilder(new StringMarshaller(), new StringMarshaller())
+      .setType(MethodDescriptor.MethodType.UNARY)
+      .setFullMethodName(MethodDescriptor.generateFullMethodName("foo.Bar", "Bar"))
+      .build()
 
     val host: String           = "localhost"
     val port: Int              = 8696

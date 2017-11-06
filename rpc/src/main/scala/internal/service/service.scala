@@ -148,13 +148,16 @@ private[internal] case class RPCRequest(
 
   def methodDescriptor =
     q"""
-        val ${Pat.Var.Term(descriptorName)}: _root_.io.grpc.MethodDescriptor[$requestType, $responseType] =
-          _root_.io.grpc.MethodDescriptor.create(
-          ${utils.methodType(streamingType)},
-          _root_.io.grpc.MethodDescriptor.generateFullMethodName(${Lit.String(algName.value)}, ${Lit
-      .String(name.value)}),
-            implicitly[_root_.io.grpc.MethodDescriptor.Marshaller[$requestType]],
-            implicitly[_root_.io.grpc.MethodDescriptor.Marshaller[$responseType]])
+       val ${Pat.Var.Term(descriptorName)}: _root_.io.grpc.MethodDescriptor[$requestType, $responseType] =
+         _root_.io.grpc.MethodDescriptor
+           .newBuilder(
+             implicitly[_root_.io.grpc.MethodDescriptor.Marshaller[$requestType]],
+             implicitly[_root_.io.grpc.MethodDescriptor.Marshaller[$responseType]])
+           .setType(${utils.methodType(streamingType)})
+           .setFullMethodName(
+             _root_.io.grpc.MethodDescriptor.generateFullMethodName(${Lit.String(algName.value)}, ${Lit
+      .String(name.value)}))
+           .build()
       """
 
   val clientDef: Defn.Def = streamingType match {
