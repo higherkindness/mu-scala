@@ -42,7 +42,7 @@ lazy val rpc = project
           %%("frees-async-guava"),
           %%("frees-config"),
           %%("frees-logging"),
-          %("grpc-all"),
+          %("grpc-all", "1.7.0"),
           %%("monix"),
           %%("pbdirect"),
           %%("scalameta-contrib", "1.8.0"),
