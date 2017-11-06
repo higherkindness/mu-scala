@@ -7,7 +7,9 @@
 
 # freestyle-rpc
 
-Simple RPC with Freestyle
+Freestyle RPC is a purely functional library for building [RPC] endpoint based services with support for [RPC] and [HTTP/2].
+
+Also known as [frees-rpc], it brings the ability to combine [RPC] protocols, services and clients in your `Freestyle` program, thanks to [gRPC].
 
 ## Installation
 
@@ -23,9 +25,16 @@ libraryDependencies += "io.frees" %% "frees-rpc" % "0.1.2"
 
 [comment]: # (End Replace)
 
+The full documentation is available at [frees-rpc](http://frees.io/docs/rpc/) site.
+
 ## Demo
 
 See [freestyle-rpc-examples repo](https://github.com/frees-io/freestyle-rpc-examples).
+
+[RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
+[HTTP/2]: https://http2.github.io/
+[gRPC]: https://grpc.io/
+[frees-rpc]: http://frees.io/docs/rpc/
 
 [comment]: # (Start Copyright)
 # Copyright
