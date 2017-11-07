@@ -52,7 +52,7 @@ object Utils {
     @service
     trait FreesRPCService {
 
-      @rpc(Avro) def notAllowed(b: Boolean): FS[C]
+      @rpc(Protobuf) def notAllowed(b: Boolean): FS[C]
 
       @rpc(Protobuf) def empty(empty: Empty): FS[Empty]
 
@@ -66,7 +66,7 @@ object Utils {
       @stream[RequestStreaming.type]
       def clientStreaming(oa: Observable[A]): FS[D]
 
-      @rpc(Protobuf)
+      @rpc(Avro)
       @stream[BidirectionalStreaming.type]
       def biStreaming(oe: Observable[E]): FS[Observable[E]]
     }
