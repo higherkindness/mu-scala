@@ -63,7 +63,7 @@ class GrpcServerTests extends RpcServerTestSuite {
         val k = awaitTerminationTimeout(timeout, timeoutUnit)
         val l = awaitTermination()
 
-        (a |@| b |@| c |@| d |@| e |@| f |@| g |@| h |@| i |@| j |@| k |@| l).tupled
+        (a, b, c, d, e, f, g, h, i, j, k, l).tupled
       }
 
       program[GrpcServer.Op].interpret[Id] shouldBe ((

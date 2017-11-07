@@ -20,12 +20,7 @@ package internal.service
 import java.io.{ByteArrayInputStream, InputStream}
 
 import freestyle.internal.ScalametaUtil
-import freestyle.rpc.protocol.{
-  BidirectionalStreaming,
-  RequestStreaming,
-  ResponseStreaming,
-  StreamingType
-}
+import freestyle.rpc.protocol._
 
 import scala.collection.immutable.Seq
 import scala.meta.Defn.{Class, Object, Trait}
@@ -82,17 +77,19 @@ case class ServiceAlg(defn: Defn) {
     tpe
   }
 
+  // format: OFF
   val requests: List[RPCRequest] = template.stats.toList.flatten.collect {
-    case q"@rpc @stream[ResponseStreaming.type] def $name[..$tparams]($request): FS[Observable[$response]]" =>
-      RPCRequest(algName, name, Some(ResponseStreaming), paramTpe(request), response)
-    case q"@rpc @stream[RequestStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): FS[$response]" =>
-      RPCRequest(algName, name, Some(RequestStreaming), request, response)
-    case q"@rpc @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): FS[Observable[$response]]" =>
-      RPCRequest(algName, name, Some(BidirectionalStreaming), request, response)
-    case q"@rpc def $name[..$tparams]($request): FS[$response]" =>
-      RPCRequest(algName, name, None, paramTpe(request), response)
+    case q"@rpc($s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): FS[Observable[$response]]" =>
+      RPCRequest(algName, name, utils.serializationType(s), Some(ResponseStreaming), paramTpe(request), response)
+    case q"@rpc($s) @stream[RequestStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): FS[$response]" =>
+      RPCRequest(algName, name, utils.serializationType(s), Some(RequestStreaming), request, response)
+    case q"@rpc($s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): FS[Observable[$response]]" =>
+      RPCRequest(algName, name, utils.serializationType(s), Some(BidirectionalStreaming), request, response)
+    case q"@rpc($s) def $name[..$tparams]($request): FS[$response]" =>
+      RPCRequest(algName, name, utils.serializationType(s), None, paramTpe(request), response)
     case e => throw new MatchError("Unmatched rpc method: " + e.toString())
   }
+  // format: ON
 
   val methodDescriptors: Seq[Defn.Val] = requests.map(_.methodDescriptor)
 
@@ -140,6 +137,7 @@ case class ServiceAlg(defn: Defn) {
 private[internal] case class RPCRequest(
     algName: Type.Name,
     name: Term.Name,
+    serialization: SerializationType,
     streamingType: Option[StreamingType],
     requestType: Type,
     responseType: Type) {
@@ -216,6 +214,11 @@ private[internal] object utils {
     case Some(BidirectionalStreaming) =>
       q"_root_.io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING"
     case None => q"_root_.io.grpc.MethodDescriptor.MethodType.UNARY"
+  }
+
+  private[internal] def serializationType(s: Term.Arg): SerializationType = s match {
+    case q"Protobuf" => Protobuf
+    case q"Avro"     => Avro
   }
 
 }
