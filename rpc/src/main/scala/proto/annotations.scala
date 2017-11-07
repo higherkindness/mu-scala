@@ -31,7 +31,7 @@ package object protocol {
     inline def apply(defn: Any): Any = meta { serviceImpl.service(defn) }
   }
 
-  class rpc extends StaticAnnotation
+  class rpc(val serializationType: SerializationType) extends StaticAnnotation
 
   class stream[S <: StreamingType] extends StaticAnnotation
 

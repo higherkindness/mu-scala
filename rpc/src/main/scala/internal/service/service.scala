@@ -17,15 +17,10 @@
 package freestyle.rpc
 package internal.service
 
-import java.io.{ByteArrayInputStream, InputStream}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
 
 import freestyle.internal.ScalametaUtil
-import freestyle.rpc.protocol.{
-  BidirectionalStreaming,
-  RequestStreaming,
-  ResponseStreaming,
-  StreamingType
-}
+import freestyle.rpc.protocol._
 
 import scala.collection.immutable.Seq
 import scala.meta.Defn.{Class, Object, Trait}
@@ -63,7 +58,7 @@ object serviceImpl {
 
   def enrich(serviceAlg: ServiceAlg, members: Seq[Stat]): Seq[Stat] =
     members ++
-      Seq(serviceAlg.pbDirectImports) ++
+      Seq(serviceAlg.commonImports) ++
       serviceAlg.methodDescriptors ++
       Seq(serviceAlg.serviceBindings, serviceAlg.client, serviceAlg.clientInstance)
 
@@ -82,22 +77,24 @@ case class ServiceAlg(defn: Defn) {
     tpe
   }
 
+  // format: OFF
   val requests: List[RPCRequest] = template.stats.toList.flatten.collect {
-    case q"@rpc @stream[ResponseStreaming.type] def $name[..$tparams]($request): FS[Observable[$response]]" =>
-      RPCRequest(algName, name, Some(ResponseStreaming), paramTpe(request), response)
-    case q"@rpc @stream[RequestStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): FS[$response]" =>
-      RPCRequest(algName, name, Some(RequestStreaming), request, response)
-    case q"@rpc @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): FS[Observable[$response]]" =>
-      RPCRequest(algName, name, Some(BidirectionalStreaming), request, response)
-    case q"@rpc def $name[..$tparams]($request): FS[$response]" =>
-      RPCRequest(algName, name, None, paramTpe(request), response)
+    case q"@rpc($s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): FS[Observable[$response]]" =>
+      RPCRequest(algName, name, utils.serializationType(s), Some(ResponseStreaming), paramTpe(request), response)
+    case q"@rpc($s) @stream[RequestStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): FS[$response]" =>
+      RPCRequest(algName, name, utils.serializationType(s), Some(RequestStreaming), request, response)
+    case q"@rpc($s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): FS[Observable[$response]]" =>
+      RPCRequest(algName, name, utils.serializationType(s), Some(BidirectionalStreaming), request, response)
+    case q"@rpc($s) def $name[..$tparams]($request): FS[$response]" =>
+      RPCRequest(algName, name, utils.serializationType(s), None, paramTpe(request), response)
     case e => throw new MatchError("Unmatched rpc method: " + e.toString())
   }
+  // format: ON
 
   val methodDescriptors: Seq[Defn.Val] = requests.map(_.methodDescriptor)
 
-  val pbDirectImports: Import =
-    q"import _root_.cats.instances.list._, _root_.cats.instances.option._, _root_.pbdirect._, _root_.freestyle.rpc.internal.service.encoders._"
+  val commonImports: Import =
+    q"import _root_.cats.instances.list._, _root_.cats.instances.option._"
 
   val serviceBindings: Defn.Def = {
     val args: Seq[Term.Tuple] = requests.map(_.call)
@@ -140,15 +137,26 @@ case class ServiceAlg(defn: Defn) {
 private[internal] case class RPCRequest(
     algName: Type.Name,
     name: Term.Name,
+    serialization: SerializationType,
     streamingType: Option[StreamingType],
     requestType: Type,
     responseType: Type) {
 
   val descriptorName: Term.Name = name.copy(value = name.value + "MethodDescriptor")
 
+  val encodersImport: Import = serialization match {
+    case Protobuf =>
+      q"import _root_.pbdirect._, _root_.freestyle.rpc.internal.service.encoders.pbd._"
+    case Avro =>
+      q"import _root_.freestyle.rpc.internal.service.encoders.avro._"
+  }
+
   def methodDescriptor =
     q"""
-       val ${Pat.Var.Term(descriptorName)}: _root_.io.grpc.MethodDescriptor[$requestType, $responseType] =
+       val ${Pat.Var.Term(descriptorName)}: _root_.io.grpc.MethodDescriptor[$requestType, $responseType] = {
+
+         $encodersImport
+
          _root_.io.grpc.MethodDescriptor
            .newBuilder(
              implicitly[_root_.io.grpc.MethodDescriptor.Marshaller[$requestType]],
@@ -158,6 +166,7 @@ private[internal] case class RPCRequest(
              _root_.io.grpc.MethodDescriptor.generateFullMethodName(${Lit.String(algName.value)}, ${Lit
       .String(name.value)}))
            .build()
+       }
       """
 
   val clientDef: Defn.Def = streamingType match {
@@ -218,6 +227,11 @@ private[internal] object utils {
     case None => q"_root_.io.grpc.MethodDescriptor.MethodType.UNARY"
   }
 
+  private[internal] def serializationType(s: Term.Arg): SerializationType = s match {
+    case q"Protobuf" => Protobuf
+    case q"Avro"     => Avro
+  }
+
 }
 
 private[internal] object errors {
@@ -228,17 +242,47 @@ private[internal] object errors {
 
 object encoders {
 
-  import pbdirect._
+  object pbd {
 
-  implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader]: Marshaller[A] =
-    new Marshaller[A] {
+    import pbdirect._
 
-      override def parse(stream: InputStream): A =
-        Iterator.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray.pbTo[A]
+    implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader]: Marshaller[A] =
+      new Marshaller[A] {
 
-      override def stream(value: A): InputStream = new ByteArrayInputStream(value.toPB)
+        override def parse(stream: InputStream): A =
+          Iterator.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray.pbTo[A]
 
-    }
+        override def stream(value: A): InputStream = new ByteArrayInputStream(value.toPB)
+
+      }
+  }
+
+  object avro {
+
+    import com.sksamuel.avro4s._
+
+    implicit def avroMarshallers[A: SchemaFor: FromRecord: ToRecord]: Marshaller[A] =
+      new Marshaller[A] {
+
+        override def parse(stream: InputStream): A = {
+          val bytes: Array[Byte] =
+            Iterator.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray
+          val in: ByteArrayInputStream        = new ByteArrayInputStream(bytes)
+          val input: AvroBinaryInputStream[A] = AvroInputStream.binary[A](in)
+          input.iterator().toList.head
+        }
+
+        override def stream(value: A): InputStream = {
+          val baos: ByteArrayOutputStream       = new ByteArrayOutputStream()
+          val output: AvroBinaryOutputStream[A] = AvroOutputStream.binary[A](baos)
+          output.write(value)
+          output.close()
+
+          new ByteArrayInputStream(baos.toByteArray)
+        }
+
+      }
+  }
 
 }
 

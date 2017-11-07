@@ -22,3 +22,7 @@ sealed trait StreamingType         extends Product with Serializable
 case object RequestStreaming       extends StreamingType
 case object ResponseStreaming      extends StreamingType
 case object BidirectionalStreaming extends StreamingType
+
+sealed trait SerializationType extends Product with Serializable
+case object Protobuf           extends SerializationType
+case object Avro               extends SerializationType
