@@ -28,6 +28,8 @@ lazy val common = project
   .settings(moduleName := "frees-rpc-common")
   .settings(scalacOptions := Seq("-deprecation", "-encoding", "UTF-8", "-feature", "-unchecked"))
 
+lazy val freesV = "0.4.2"
+
 lazy val rpc = project
   .in(file("rpc"))
   .dependsOn(common)
@@ -37,11 +39,11 @@ lazy val rpc = project
     Seq(
       libraryDependencies ++= commonDeps ++
         Seq(
-          %%("frees-core"),
-          %%("frees-async"),
-          %%("frees-async-guava"),
-          %%("frees-config"),
-          %%("frees-logging"),
+          %%("frees-core", freesV),
+          %%("frees-async", freesV),
+          %%("frees-async-guava", freesV),
+          %%("frees-config", freesV),
+          %%("frees-logging", freesV),
           %("grpc-all", "1.7.0"),
           %%("monix"),
           %%("pbdirect"),

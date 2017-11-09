@@ -28,7 +28,7 @@ import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
 
-trait AsyncInstances {
+trait RPCAsyncImplicits extends freestyle.async.Implicits {
 
   protected[this] val asyncLogger: Logger            = Logger[this.type]
   protected[this] val atMostDuration: FiniteDuration = 10.seconds
