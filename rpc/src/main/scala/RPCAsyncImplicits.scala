@@ -46,9 +46,7 @@ trait RPCAsyncImplicits extends freestyle.async.Implicits {
         fa.map(f)
     }
 
-  implicit def task2Future(
-      implicit AC: AsyncContext[Future],
-      S: Scheduler): FSHandler[Task, Future] =
+  implicit def task2Future(implicit S: Scheduler): FSHandler[Task, Future] =
     new TaskMHandler[Future]
 
   implicit val future2Task: Future ~> Task =

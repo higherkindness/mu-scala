@@ -268,8 +268,6 @@ object Utils {
     import handlers.server._
     import handlers.client._
     import cats.implicits._
-    import freestyle.implicits._
-    import freestyle.async.implicits._
     import freestyle.rpc.server._
     import freestyle.rpc.server.implicits._
     import freestyle.rpc.server.handlers._
