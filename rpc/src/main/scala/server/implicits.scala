@@ -68,4 +68,6 @@ object implicits
     with RPCAsyncImplicits
     with Syntax
     with Helpers
+    with freestyle.Interpreters
+    with freestyle.FreeSInstances
     with freestyle.loggingJVM.Implicits
