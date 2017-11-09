@@ -25,11 +25,11 @@ libraryDependencies += "io.frees" %% "frees-rpc" % "0.2.0"
 
 [comment]: # (End Replace)
 
-The full documentation is available at [frees-rpc](http://frees.io/docs/rpc/) site.
+The full documentation is available at [frees-rpc](http://frees.io/docs/rpc) site.
 
 ## Demo
 
-See [freestyle-rpc-examples repo](https://github.com/frees-io/freestyle-rpc-examples).
+See [freestyle-rpc-examples](https://github.com/frees-io/freestyle-rpc-examples) repo.
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
