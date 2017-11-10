@@ -18,4 +18,8 @@ package freestyle
 package rpc
 package client
 
-object implicits extends CaptureInstances with AsyncInstances
+object implicits
+    extends CaptureInstances
+    with freestyle.Interpreters
+    with freestyle.FreeSInstances
+    with RPCAsyncImplicits

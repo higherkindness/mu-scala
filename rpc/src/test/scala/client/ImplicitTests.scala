@@ -31,7 +31,6 @@ class ImplicitTests extends RpcClientTestSuite {
     "provide an implicit evidence allowing to transform from monix.eval.Task to scala.concurrent.Future" in {
 
       implicit val S: monix.execution.Scheduler = monix.execution.Scheduler.Implicits.global
-      import freestyle.async.implicits.futureAsyncContext
 
       freestyle.rpc.client.implicits.task2Future shouldBe a[FSHandlerTask2Future]
     }
@@ -40,17 +39,7 @@ class ImplicitTests extends RpcClientTestSuite {
 
       shapeless.test.illTyped(
         """freestyle.rpc.client.implicits.task2Future""",
-        ".*could not find implicit value for parameter AC.*"
-      )
-    }
-
-    "fail compiling when the freestyle.async.AsyncContext implicit evidence is not present" in {
-
-      implicit val S: monix.execution.Scheduler = monix.execution.Scheduler.Implicits.global
-
-      shapeless.test.illTyped(
-        """freestyle.rpc.client.implicits.task2Future""",
-        ".*could not find implicit value for parameter AC.*"
+        ".*Cannot find an implicit Scheduler, either import monix.execution.Scheduler.Implicits.global or use a custom one.*"
       )
     }
 

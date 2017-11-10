@@ -25,20 +25,24 @@ import freestyle.rpc.protocol.Empty
 class FreesRPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   import cats.implicits._
-  import freestyle.implicits._
-  import freestyle.loggingJVM.implicits._
   import freestyle.rpc.Utils.service._
   import freestyle.rpc.Utils.database._
   import freestyle.rpc.Utils.helpers._
   import freestyle.rpc.Utils.implicits._
 
-  override protected def beforeAll(): Unit =
+  override protected def beforeAll(): Unit = {
+    import freestyle.rpc.server.implicits._
     serverStart[GrpcServerApp.Op].runF
+  }
 
-  override protected def afterAll(): Unit =
+  override protected def afterAll(): Unit = {
+    import freestyle.rpc.server.implicits._
     serverStop[GrpcServerApp.Op].runF
+  }
 
   "frees-rpc server" should {
+
+    import freestyle.rpc.server.implicits._
 
     "allow to startup a server and check if it's alive" in {
 
@@ -61,6 +65,8 @@ class FreesRPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
   }
 
   "frees-rpc client" should {
+
+    import freestyle.rpc.client.implicits._
 
     "be able to run unary services" in {
 

@@ -65,7 +65,9 @@ trait Helpers {
 
 object implicits
     extends CaptureInstances
-    with AsyncInstances
+    with RPCAsyncImplicits
     with Syntax
     with Helpers
+    with freestyle.Interpreters
+    with freestyle.FreeSInstances
     with freestyle.loggingJVM.Implicits
