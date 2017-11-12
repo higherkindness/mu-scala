@@ -144,29 +144,29 @@ private[internal] case class RPCRequest(
 
   val descriptorName: Term.Name = name.copy(value = name.value + "MethodDescriptor")
 
-  val encodersImport: Import = serialization match {
+  val marshallers: (Term.ApplyType, Term.ApplyType) = serialization match {
     case Protobuf =>
-      q"import _root_.pbdirect._, _root_.freestyle.rpc.internal.service.encoders.pbd._"
+      (
+        q"_root_.freestyle.rpc.internal.service.encoders.pbd.pbDirectMarshaller[$requestType]",
+        q"_root_.freestyle.rpc.internal.service.encoders.pbd.pbDirectMarshaller[$responseType]"
+      )
     case Avro =>
-      q"import _root_.freestyle.rpc.internal.service.encoders.avro._"
+      (
+        q"_root_.freestyle.rpc.internal.service.encoders.avro.avroMarshaller[$requestType]",
+        q"_root_.freestyle.rpc.internal.service.encoders.avro.avroMarshaller[$responseType]"
+      )
   }
 
   def methodDescriptor =
     q"""
-       val ${Pat.Var.Term(descriptorName)}: _root_.io.grpc.MethodDescriptor[$requestType, $responseType] = {
-
-         $encodersImport
-
+       val ${Pat.Var.Term(descriptorName)}: _root_.io.grpc.MethodDescriptor[$requestType, $responseType] =
          _root_.io.grpc.MethodDescriptor
-           .newBuilder(
-             implicitly[_root_.io.grpc.MethodDescriptor.Marshaller[$requestType]],
-             implicitly[_root_.io.grpc.MethodDescriptor.Marshaller[$responseType]])
+           .newBuilder(${marshallers._1}, ${marshallers._2})
            .setType(${utils.methodType(streamingType)})
            .setFullMethodName(
              _root_.io.grpc.MethodDescriptor.generateFullMethodName(${Lit.String(algName.value)}, ${Lit
       .String(name.value)}))
            .build()
-       }
       """
 
   val clientDef: Defn.Def = streamingType match {
@@ -246,7 +246,7 @@ object encoders {
 
     import pbdirect._
 
-    implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader]: Marshaller[A] =
+    def pbDirectMarshaller[A: PBWriter: PBReader]: Marshaller[A] =
       new Marshaller[A] {
 
         override def parse(stream: InputStream): A =
@@ -261,7 +261,7 @@ object encoders {
 
     import com.sksamuel.avro4s._
 
-    implicit def avroMarshallers[A: SchemaFor: FromRecord: ToRecord]: Marshaller[A] =
+    def avroMarshaller[A: SchemaFor: FromRecord: ToRecord]: Marshaller[A] =
       new Marshaller[A] {
 
         override def parse(stream: InputStream): A = {
