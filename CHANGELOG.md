@@ -1,5 +1,14 @@
 # Changelog
 
+## 11/14/2017 - Version 0.3.0
+
+Release changes:
+
+* Support for Avro Serialization ([#78](https://github.com/frees-io/freestyle-rpc/pull/78))
+* Async Implicits provided by frees-rpc Implicits ([#80](https://github.com/frees-io/freestyle-rpc/pull/80))
+* Releases 0.3.0 ([#82](https://github.com/frees-io/freestyle-rpc/pull/82))
+
+
 ## 11/06/2017 - Version 0.2.0
 
 Release changes:
