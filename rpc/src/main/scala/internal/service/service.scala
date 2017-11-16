@@ -58,7 +58,6 @@ object serviceImpl {
 
   def enrich(serviceAlg: ServiceAlg, members: Seq[Stat]): Seq[Stat] =
     members ++
-      Seq(serviceAlg.commonImports) ++
       serviceAlg.methodDescriptors ++
       Seq(serviceAlg.serviceBindings, serviceAlg.client, serviceAlg.clientInstance)
 
@@ -92,9 +91,6 @@ case class ServiceAlg(defn: Defn) {
   // format: ON
 
   val methodDescriptors: Seq[Defn.Val] = requests.map(_.methodDescriptor)
-
-  val commonImports: Import =
-    q"import _root_.cats.instances.list._, _root_.cats.instances.option._"
 
   val serviceBindings: Defn.Def = {
     val args: Seq[Term.Tuple] = requests.map(_.call)
