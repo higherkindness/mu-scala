@@ -1,5 +1,12 @@
 # Changelog
 
+## 11/16/2017 - Version 0.3.1
+
+Release changes:
+
+* Removes global imports ([#84](https://github.com/frees-io/freestyle-rpc/pull/84))
+
+
 ## 11/14/2017 - Version 0.3.0
 
 Release changes:
