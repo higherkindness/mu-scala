@@ -1,5 +1,12 @@
 # Changelog
 
+## 11/17/2017 - Version 0.3.2
+
+Release changes:
+
+* Suppress wart warnings ([#85](https://github.com/frees-io/freestyle-rpc/pull/85))
+
+
 ## 11/16/2017 - Version 0.3.1
 
 Release changes:
