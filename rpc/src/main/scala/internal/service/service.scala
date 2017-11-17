@@ -102,9 +102,13 @@ case class ServiceAlg(defn: Defn) {
 
   val clientName: Type.Name = Type.Name("Client")
 
+  val wartSuppress =
+    mod"""@_root_.java.lang.SuppressWarnings(_root_.scala.Array("org.wartremover.warts.DefaultArguments"))"""
+
   val client: Class = {
     val clientDefs: Seq[Defn.Def] = requests.map(_.clientDef)
     q"""
+       $wartSuppress
        class $clientName[M[_]](channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
           (implicit AC : _root_.freestyle.async.AsyncContext[M], H: FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext)
           extends _root_.io.grpc.stub.AbstractStub[$clientName[M]](channel, options) {
@@ -121,6 +125,7 @@ case class ServiceAlg(defn: Defn) {
 
   val clientInstance =
     q"""
+       $wartSuppress
        def client[M[_]: _root_.freestyle.async.AsyncContext](
           channel: _root_.io.grpc.Channel, 
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
@@ -138,6 +143,9 @@ private[internal] case class RPCRequest(
     requestType: Type,
     responseType: Type) {
 
+  val wartSuppress =
+    mod"""@_root_.java.lang.SuppressWarnings(_root_.scala.Array("org.wartremover.warts.Null"))"""
+
   val descriptorName: Term.Name = name.copy(value = name.value + "MethodDescriptor")
 
   val encodersImport: Import = serialization match {
@@ -149,6 +157,7 @@ private[internal] case class RPCRequest(
 
   def methodDescriptor =
     q"""
+       $wartSuppress
        val ${Pat.Var.Term(descriptorName)}: _root_.io.grpc.MethodDescriptor[$requestType, $responseType] = {
 
          $encodersImport
