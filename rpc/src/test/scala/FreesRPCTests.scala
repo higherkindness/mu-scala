@@ -136,6 +136,31 @@ class FreesRPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     }
 
+    "#71 issue - empty for avro" in {
+
+      def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, Empty] =
+        APP.emptyAvro
+
+      clientProgram[MyRPCClient.Op].runF shouldBe Empty()
+    }
+
+    "#71 issue - empty response with one param for avro" in {
+
+      def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, Empty] =
+        APP.emptyAvroParam(a4)
+
+      clientProgram[MyRPCClient.Op].runF shouldBe Empty()
+    }
+
+    "#71 issue - response with empty params for avro" in {
+
+      def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, A] =
+        APP.emptyAvroParamResponse
+
+      clientProgram[MyRPCClient.Op].runF shouldBe a4
+
+    }
+
   }
 
 }

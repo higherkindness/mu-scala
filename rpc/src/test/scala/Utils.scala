@@ -18,6 +18,7 @@ package freestyle.rpc
 
 import cats.{~>, Monad, MonadError}
 import freestyle._
+import freestyle.rpc.Utils.database.a4
 import freestyle.rpc.client._
 import freestyle.rpc.protocol._
 import freestyle.rpc.server._
@@ -56,7 +57,17 @@ object Utils {
 
       @rpc(Protobuf) def empty(empty: Empty): FS[Empty]
 
+      @rpc(Protobuf) def emptyParam(a: A): FS[Empty]
+
+      @rpc(Protobuf) def emptyParamResponse(empty: Empty): FS[A]
+
       @rpc(Avro) def unary(a: A): FS[C]
+
+      @rpc(Avro) def emptyAvro(empty: Empty): FS[Empty]
+
+      @rpc(Avro) def emptyAvroParam(a: A): FS[Empty]
+
+      @rpc(Avro) def emptyAvroParamResponse(empty: Empty): FS[A]
 
       @rpc(Protobuf)
       @stream[ResponseStreaming.type]
@@ -106,6 +117,16 @@ object Utils {
         override protected[this] def notAllowed(b: Boolean): F[C] = C.capture(c1)
 
         override protected[this] def empty(empty: Empty): F[Empty] = C.capture(Empty())
+
+        override protected[this] def emptyParam(a: A): F[Empty] = C.capture(Empty())
+
+        override protected[this] def emptyParamResponse(empty: Empty): F[A] = C.capture(a4)
+
+        override protected[this] def emptyAvro(empty: Empty): F[Empty] = C.capture(Empty())
+
+        override protected[this] def emptyAvroParam(a: A): F[Empty] = C.capture(Empty())
+
+        override protected[this] def emptyAvroParamResponse(empty: Empty): F[A] = C.capture(a4)
 
         override protected[this] def unary(a: A): F[C] =
           C.capture(c1)
@@ -157,6 +178,21 @@ object Utils {
         override protected[this] def empty: F[Empty] =
           client.empty(protocol.Empty())
 
+        override protected[this] def emptyParam(a: A): F[Empty] =
+          client.emptyParam(a)
+
+        override protected[this] def emptyParamResponse: F[A] =
+          client.emptyParamResponse(protocol.Empty())
+
+        override protected[this] def emptyAvro: F[Empty] =
+          client.emptyAvro(protocol.Empty())
+
+        override protected[this] def emptyAvroParam(a: A): F[Empty] =
+          client.emptyAvroParam(a)
+
+        override protected[this] def emptyAvroParamResponse: F[A] =
+          client.emptyAvroParamResponse(protocol.Empty())
+
         override protected[this] def u(x: Int, y: Int): F[C] =
           client.unary(A(x, y))
 
@@ -195,6 +231,11 @@ object Utils {
     trait MyRPCClient {
       def notAllowed(b: Boolean): FS[C]
       def empty: FS[Empty]
+      def emptyParam(a: A): FS[Empty]
+      def emptyParamResponse: FS[A]
+      def emptyAvro: FS[Empty]
+      def emptyAvroParam(a: A): FS[Empty]
+      def emptyAvroParamResponse: FS[A]
       def u(x: Int, y: Int): FS[C]
       def ss(a: Int, b: Int): FS[List[C]]
       def cs(cList: List[C], bar: Int): FS[D]
