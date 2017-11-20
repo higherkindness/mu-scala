@@ -19,9 +19,9 @@ package freestyle.rpc
 import freestyle._
 import org.scalatest._
 import freestyle.rpc.server.GrpcServerApp
-import freestyle.rpc.Utils.clientProgram.MyRPCClient
+//import freestyle.rpc.Utils.clientProgram.MyRPCClient
 import freestyle.rpc.protocol.Empty
-
+/*
 class FreesRPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   import cats.implicits._
@@ -139,3 +139,4 @@ class FreesRPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
   }
 
 }
+ */

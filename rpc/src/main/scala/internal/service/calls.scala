@@ -19,8 +19,10 @@ package rpc
 package internal
 package service
 
+import cats.arrow.FunctionK
+import cats.free.FreeApplicative
 import cats.implicits._
-import cats.{Comonad, MonadError}
+import cats.{~>, Comonad, Monad, MonadError}
 import io.grpc.stub.ServerCalls.{
   BidiStreamingMethod,
   ClientStreamingMethod,
@@ -40,15 +42,25 @@ object calls {
 
   import converters._
 
-  def unaryMethod[F[_], M[_], Req, Res](f: (Req) => FreeS[F, Res])(
-      implicit ME: MonadError[M, Throwable],
-      H: FSHandler[F, M]): UnaryMethod[Req, Res] = new UnaryMethod[Req, Res] {
-    override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
-      val result = f(request).interpret[M]
-      ME.attempt(result).map(completeObserver(responseObserver))
-      (): Unit
+  def unaryMethod[F[_], M[_], Req, Res](
+      f: (Req) => F[Res])(implicit ME: MonadError[M, Throwable], H: F ~> M): UnaryMethod[Req, Res] =
+    new UnaryMethod[Req, Res] {
+      override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
+        val result = H.apply(f(request))
+        ME.attempt(result).map(completeObserver(responseObserver))
+        (): Unit
+      }
     }
-  }
+
+//  def unaryMethod[F[_], M[_], Req, Res](f: (Req) => FreeS[F, Res])(
+//      implicit ME: MonadError[M, Throwable],
+//      H: FSHandler[F, M]): UnaryMethod[Req, Res] = new UnaryMethod[Req, Res] {
+//    override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
+//      val result = f(request).interpret[M]
+//      ME.attempt(result).map(completeObserver(responseObserver))
+//      (): Unit
+//    }
+//  }
 
   def clientStreamingMethod[F[_], M[_], Req, Res](f: (Observable[Req]) => FreeS[F, Res])(
       implicit ME: MonadError[M, Throwable],

@@ -32,21 +32,33 @@ object serviceImpl {
 
   import errors._
 
-  def service(defn: Any): Stat = defn match {
-    case Term.Block(Seq(cls: Trait, companion: Object)) =>
-      serviceExtras(cls, companion)
-    case Term.Block(Seq(cls: Class, companion: Object)) if ScalametaUtil.isAbstract(cls) =>
-      serviceExtras(cls, companion)
-    case _ =>
-      abort(s"$invalid. $abstractOnly")
+  def service(defn: Any): Stat = {
+    defn match {
+      case Term.Block(Seq(cls: Trait, companion: Object)) =>
+        val x = serviceExtras(cls, companion)
+        println(x)
+        println("trait")
+        x
+      case Term.Block(Seq(cls: Class, companion: Object)) if ScalametaUtil.isAbstract(cls) =>
+        val x = serviceExtras(cls, companion)
+        println(x)
+        println("blah")
+        x
+      case cls: Trait =>
+        val x = serviceExtrasForF(cls)
+        println(x)
+        x
+      case _ =>
+        abort(s"$invalid. $abstractOnly")
+    }
   }
 
   def serviceExtras(alg: Defn, companion: Object): Term.Block = {
-    val serviceAlg = ServiceAlg(alg)
+    val serviceAlg = FreeServiceAlg(alg)
     Term.Block(Seq(alg, enrich(serviceAlg, companion)))
   }
 
-  def enrich(serviceAlg: ServiceAlg, companion: Object): Object = companion match {
+  def enrich(serviceAlg: FreeServiceAlg, companion: Object): Object = companion match {
     case q"..$mods object $ename extends $template" =>
       template match {
         case template"{ ..$earlyInit } with ..$inits { $self => ..$stats }" =>
@@ -56,60 +68,62 @@ object serviceImpl {
       }
   }
 
-  def enrich(serviceAlg: ServiceAlg, members: Seq[Stat]): Seq[Stat] =
+  def enrich(serviceAlg: FreeServiceAlg, members: Seq[Stat]): Seq[Stat] =
     members ++
       Seq(serviceAlg.commonImports) ++
       serviceAlg.methodDescriptors ++
       Seq(serviceAlg.serviceBindings, serviceAlg.client, serviceAlg.clientInstance)
 
+  def enrich(serviceAlg: RPCService, members: Seq[Stat]): Seq[Stat] =
+    members ++
+      Seq(serviceAlg.commonImports) ++
+      serviceAlg.methodDescriptors ++
+      Seq(serviceAlg.serviceBindings, serviceAlg.client, serviceAlg.clientInstance)
+
+  def serviceExtrasForF(alg: Defn): Term.Block = {
+    val serviceAlg = ServiceAlg(alg)
+    Term.Block(Seq(alg) ++ enrich(serviceAlg, Seq()))
+  }
 }
 
-case class ServiceAlg(defn: Defn) {
+trait RPCService {
+  import utils._
 
-  val (algName, template) = defn match {
+  def defn: Defn
+
+  lazy val (algName, template) = defn match {
     case c: Class => (c.name, c.templ)
     case t: Trait => (t.name, t.templ)
   }
-
-  private[this] def paramTpe(param: Term.Param): Type = {
-    val Term.Param(_, paramname, Some(ptpe), _) = param
-    val targ"${tpe: Type}"                      = ptpe
-    tpe
-  }
-
   // format: OFF
-  val requests: List[RPCRequest] = template.stats.toList.flatten.collect {
-    case q"@rpc($s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): FS[Observable[$response]]" =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(ResponseStreaming), paramTpe(request), response)
-    case q"@rpc($s) @stream[RequestStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): FS[$response]" =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(RequestStreaming), request, response)
-    case q"@rpc($s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): FS[Observable[$response]]" =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(BidirectionalStreaming), request, response)
-    case q"@rpc($s) def $name[..$tparams]($request): FS[$response]" =>
-      RPCRequest(algName, name, utils.serializationType(s), None, paramTpe(request), response)
-    case e => throw new MatchError("Unmatched rpc method: " + e.toString())
-  }
+  lazy val defaultTypeParam = Type.Param(Nil, Type.Name("Id"), Nil, Type.Bounds(None, None), Nil, Nil)
   // format: ON
 
-  val methodDescriptors: Seq[Defn.Val] = requests.map(_.methodDescriptor)
+  def typeParam: Type.Param
 
-  val commonImports: Import =
+  lazy val commonImports: Import =
     q"import _root_.cats.instances.list._, _root_.cats.instances.option._"
 
-  val serviceBindings: Defn.Def = {
+  val requests: List[RPCRequest] =
+    buildRequests(algName, typeParam, template.stats.toList.flatten)
+
+  lazy val clientName: Type.Name = Type.Name("Client")
+
+  lazy val methodDescriptors: Seq[Defn.Val] = requests.map(_.methodDescriptor)
+
+  lazy val serviceBindings: Defn.Def = {
     val args: Seq[Term.Tuple] = requests.map(_.call)
     q"""
-       def bindService[F[_], M[_]](implicit algebra: $algName[F], HTask: _root_.freestyle.FSHandler[M, _root_.monix.eval.Task], handler: _root_.freestyle.FSHandler[F, M], ME: _root_.cats.MonadError[M, Throwable], C: _root_.cats.Comonad[M], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
+         def bindService[F[_], M[_]](implicit algebra: $algName[F], HTask: _root_.freestyle.FSHandler[M, _root_.monix.eval.Task], NT: _root_.cats.arrow.FunctionK[F, M], ME: _root_.cats.MonadError[M, Throwable], C: _root_.cats.Comonad[M], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
            new freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(algName.value)}, ..$args).apply
-     """
+      """
   }
 
-  val clientName: Type.Name = Type.Name("Client")
-
-  val client: Class = {
+  lazy val client: Class = {
     val clientDefs: Seq[Defn.Def] = requests.map(_.clientDef)
     q"""
-       class $clientName[M[_]](channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
+       class $clientName[M[_]](channel:
+       _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
           (implicit AC : _root_.freestyle.async.AsyncContext[M], H: FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext)
           extends _root_.io.grpc.stub.AbstractStub[$clientName[M]](channel, options) {
 
@@ -123,15 +137,27 @@ case class ServiceAlg(defn: Defn) {
      """
   }
 
-  val clientInstance =
+  lazy val clientInstance =
     q"""
        def client[M[_]: _root_.freestyle.async.AsyncContext](
-          channel: _root_.io.grpc.Channel, 
+          channel: _root_.io.grpc.Channel,
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
           (implicit H: FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext) : $clientName[M] =
              new ${clientName.ctorRef(Ctor.Name(clientName.value))}[M](channel, options)
      """
+}
 
+case class ServiceAlg(defn: Defn) extends RPCService {
+  val typeParam: Type.Param = defn match {
+    case c: Class => c.tparams.head
+    case t: Trait => t.tparams.head
+  }
+}
+
+case class FreeServiceAlg(defn: Defn) extends RPCService {
+  // format: OFF
+  val typeParam = Type.Param(Nil, Type.Name("FS"), Nil, Type.Bounds(None, None), Nil, Nil)
+  // format: ON
 }
 
 private[internal] case class RPCRequest(
@@ -214,10 +240,30 @@ private[internal] case class RPCRequest(
          _root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.freestyle.rpc.internal.service.calls.unaryMethod(algebra.$name)))
        """
   }
-
 }
 
 private[internal] object utils {
+
+  def paramTpe(param: Term.Param): Type = {
+    val Term.Param(_, paramname, Some(ptpe), _) = param
+    val targ"${tpe: Type}"                      = ptpe
+    tpe
+  }
+
+  // format: OFF
+  def buildRequests(algName: Type.Name, typeParam: Type.Param, stats: List[Stat]): List[RPCRequest] = stats.collect {
+    case q"@rpc($s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): $typeParam[Observable[$response]]" =>
+      RPCRequest(algName, name, utils.serializationType(s), Some(ResponseStreaming), paramTpe(request), response)
+    case q"@rpc($s) @stream[RequestStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): $typeParam[$response]" =>
+      RPCRequest(algName, name, utils.serializationType(s), Some(RequestStreaming), request, response)
+    case q"@rpc($s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): $typeParam[Observable[$response]]" =>
+      RPCRequest(algName, name, utils.serializationType(s), Some(BidirectionalStreaming), request, response)
+    case q"@rpc($s) def $name[..$tparams]($request): $typeParam[$response]" =>
+      RPCRequest(algName, name, utils.serializationType(s), None, paramTpe(request), response)
+    case e =>
+      throw new MatchError("Unmatched rpc method: " + e.toString())
+  }
+  // format: ON
 
   private[internal] def methodType(s: Option[StreamingType]): Term.Select = s match {
     case Some(RequestStreaming)  => q"_root_.io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING"

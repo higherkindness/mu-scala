@@ -16,6 +16,8 @@
 
 package freestyle.rpc
 
+import cats.arrow.FunctionK
+import cats.free.FreeApplicative
 import cats.{~>, Monad, MonadError}
 import freestyle._
 import freestyle.rpc.client._
@@ -32,6 +34,15 @@ import scala.util.{Failure, Success, Try}
 object Utils {
 
   object service {
+
+    implicit def testNTT[F[_], M[_]: Monad](implicit F2M: F ~> M): FreeApplicative[F, ?] ~> M[?] = { //why do I need to put ? inside the M[_]?
+      new FunctionK[FreeApplicative[F, ?], M[?]] {
+        def apply[A](fa: FreeApplicative[F, A]): M[A] =
+          //        val parInterpreter = λ[FSHandler[FreeApplicative[F, ?], M]](_.foldMap(F2M))
+          fa.foldMap(F2M)
+
+      }
+    }
 
     @message
     case class A(x: Int, y: Int)
