@@ -266,6 +266,11 @@ object encoders {
 
     import com.sksamuel.avro4s._
 
+    implicit val emptyMarshallers: Marshaller[Empty.type] = new Marshaller[Empty.type] {
+      override def parse(stream: InputStream) = Empty
+      override def stream(value: Empty.type)  = new ByteArrayInputStream(Array.empty)
+    }
+
     implicit def avroMarshallers[A: SchemaFor: FromRecord: ToRecord]: Marshaller[A] =
       new Marshaller[A] {
 

@@ -129,10 +129,52 @@ class FreesRPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to invoke services with empty requests" in {
 
-      def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, Empty] =
+      def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, Empty.type] =
         APP.empty
 
-      clientProgram[MyRPCClient.Op].runF shouldBe Empty()
+      clientProgram[MyRPCClient.Op].runF shouldBe Empty
+
+    }
+
+    "#71 issue - empty for avro" in {
+
+      def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, Empty.type] =
+        APP.emptyAvro
+
+      clientProgram[MyRPCClient.Op].runF shouldBe Empty
+    }
+
+    "#71 issue - empty response with one param for avro" in {
+
+      def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, Empty.type] =
+        APP.emptyAvroParam(a4)
+
+      clientProgram[MyRPCClient.Op].runF shouldBe Empty
+    }
+
+    "#71 issue - response with empty params for avro" in {
+
+      def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, A] =
+        APP.emptyAvroParamResponse
+
+      clientProgram[MyRPCClient.Op].runF shouldBe a4
+
+    }
+
+    "#71 issue - empty response with one param for proto" in {
+
+      def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, Empty.type] =
+        APP.emptyParam(a4)
+
+      clientProgram[MyRPCClient.Op].runF shouldBe Empty
+    }
+
+    "#71 issue - response with empty params for proto" in {
+
+      def clientProgram[M[_]](implicit APP: MyRPCClient[M]): FreeS[M, A] =
+        APP.emptyParamResponse
+
+      clientProgram[MyRPCClient.Op].runF shouldBe a4
 
     }
 
