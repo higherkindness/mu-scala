@@ -96,7 +96,8 @@ case class ServiceAlg(defn: Defn) {
     val args: Seq[Term.Tuple] = requests.map(_.call)
     q"""
        def bindService[F[_], M[_]](implicit algebra: $algName[F], HTask: _root_.freestyle.FSHandler[M, _root_.monix.eval.Task], handler: _root_.freestyle.FSHandler[F, M], ME: _root_.cats.MonadError[M, Throwable], C: _root_.cats.Comonad[M], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
-           new freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(algName.value)}, ..$args).apply
+           new _root_.freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(
+      algName.value)}, ..$args).apply
      """
   }
 
@@ -110,7 +111,7 @@ case class ServiceAlg(defn: Defn) {
     q"""
        $wartSuppress
        class $clientName[M[_]](channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
-          (implicit AC : _root_.freestyle.async.AsyncContext[M], H: FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext)
+          (implicit AC : _root_.freestyle.async.AsyncContext[M], H: _root_.freestyle.FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext)
           extends _root_.io.grpc.stub.AbstractStub[$clientName[M]](channel, options) {
 
           override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $clientName[M] = {
@@ -129,7 +130,7 @@ case class ServiceAlg(defn: Defn) {
        def client[M[_]: _root_.freestyle.async.AsyncContext](
           channel: _root_.io.grpc.Channel, 
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
-          (implicit H: FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext) : $clientName[M] =
+          (implicit H: _root_.freestyle.FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext) : $clientName[M] =
              new ${clientName.ctorRef(Ctor.Name(clientName.value))}[M](channel, options)
      """
 
