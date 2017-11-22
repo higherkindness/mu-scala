@@ -1,5 +1,13 @@
 # Changelog
 
+## 11/22/2017 - Version 0.3.3
+
+Release changes:
+
+* Case class Empty is valid for Avro as well ([#87](https://github.com/frees-io/freestyle-rpc/pull/87))
+* Fixes missing FQFN ([#88](https://github.com/frees-io/freestyle-rpc/pull/88))
+
+
 ## 11/17/2017 - Version 0.3.2
 
 Release changes:
