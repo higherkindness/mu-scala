@@ -28,7 +28,7 @@ lazy val common = project
   .settings(moduleName := "frees-rpc-common")
   .settings(scalacOptions := Seq("-deprecation", "-encoding", "UTF-8", "-feature", "-unchecked"))
 
-lazy val freesV = "0.4.2"
+lazy val freesV = "0.4.4"
 
 lazy val rpc = project
   .in(file("rpc"))
