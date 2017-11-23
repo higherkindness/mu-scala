@@ -1,5 +1,12 @@
 # Changelog
 
+## 11/23/2017 - Version 0.3.4
+
+Release changes:
+
+* Adds monix.eval.Task Comonad Implicit Evidence ([#89](https://github.com/frees-io/freestyle-rpc/pull/89))
+
+
 ## 11/22/2017 - Version 0.3.3
 
 Release changes:
