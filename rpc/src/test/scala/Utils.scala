@@ -281,13 +281,12 @@ object Utils {
     //////////////////////////////////
     // Server Runtime Configuration //
     //////////////////////////////////
-    implicit def x[F[_]]: F ~> F = FunctionK.id[F]
 
     implicit val freesRPCHandler: ServerRPCService[Future] =
       new ServerRPCService[Future]
 
     def grpcConfigs: List[GrpcConfig] = List(
-      AddService(RPCService.bindService[Future, Future])
+      AddService(RPCService.bindService[Future])
     )
 
     implicit val grpcServerHandler: GrpcServer.Op ~> Future =

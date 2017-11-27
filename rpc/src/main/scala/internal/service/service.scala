@@ -35,15 +35,11 @@ object serviceImpl {
   def service(defn: Any): Stat = {
     defn match {
       case Term.Block(Seq(cls: Trait, companion: Object)) =>
-        val x = freeServiceExtras(cls, companion)
-//        println(x)
-        x
+        freeServiceExtras(cls, companion)
       case Term.Block(Seq(cls: Class, companion: Object)) if ScalametaUtil.isAbstract(cls) =>
         freeServiceExtras(cls, companion)
       case cls: Trait =>
-        val x = defaultServiceExtras(cls.name, cls)
-//        println(x)
-        x
+        defaultServiceExtras(cls.name, cls)
       case _ =>
         abort(s"$invalid. $abstractOnly")
     }
@@ -54,22 +50,8 @@ object serviceImpl {
     Term.Block(Seq(alg, enrich(serviceAlg, companion)))
   }
 
-  def mkCompanion(name: Type.Name, stats: Seq[Stat]): Object = {
-    val prot = q"""@_root_.java.lang.SuppressWarnings(_root_.scala.Array(
-                                           "org.wartremover.warts.Any",
-                                           "org.wartremover.warts.AsInstanceOf",
-                                           "org.wartremover.warts.Throw"
-                                         ))
-                                         object X {}"""
-
-    prot.copy(
-      name = Term.Name(name.value),
-      templ = prot.templ.copy(
-        stats = Some(stats)
-      ))
-  }
-
   def defaultServiceExtras(name: Type.Name, alg: Defn): Term.Block = {
+    import utils._
     val serviceAlg = ServiceAlg(alg)
     Term.Block(Seq(alg) ++ Seq(mkCompanion(name, enrich(serviceAlg, Nil))))
   }
@@ -122,13 +104,7 @@ trait RPCService {
 
   lazy val methodDescriptors: Seq[Defn.Val] = requests.map(_.methodDescriptor)
 
-  lazy val serviceBindings: Defn.Def = {
-    val args: Seq[Term.Tuple] = requests.map(_.call)
-    q"""
-         def bindService[F[_], M[_]](implicit algebra: $algName[F], HTask: _root_.freestyle.FSHandler[M, _root_.monix.eval.Task], NT: _root_.cats.arrow.FunctionK[F, M], ME: _root_.cats.MonadError[M, Throwable], C: _root_.cats.Comonad[M], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
-           new freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(algName.value)}, ..$args).apply
-      """
-  }
+  def serviceBindings: Defn.Def
 
   lazy val client: Class = {
     val clientDefs: Seq[Defn.Def] = requests.map(_.clientDef)
@@ -163,12 +139,28 @@ case class ServiceAlg(defn: Defn) extends RPCService {
     case c: Class => c.tparams.head
     case t: Trait => t.tparams.head
   }
+
+  lazy val serviceBindings: Defn.Def = {
+    val args: Seq[Term.Tuple] = requests.map(c => c.call(""))
+    q"""
+         def bindService[F[_]](implicit algebra: $algName[F], HTask: _root_.freestyle.FSHandler[F, _root_.monix.eval.Task], ME: _root_.cats.MonadError[F, Throwable], C: _root_.cats.Comonad[F], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
+           new freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(algName.value)}, ..$args).apply
+      """
+  }
 }
 
 case class FreeServiceAlg(defn: Defn) extends RPCService {
   // format: OFF
   val typeParam = Type.Param(Nil, Type.Name("FS"), Nil, Type.Bounds(None, None), Nil, Nil)
   // format: ON
+
+  lazy val serviceBindings: Defn.Def = {
+    val args: Seq[Term.Tuple] = requests.map(_.call("Free"))
+    q"""
+         def bindService[F[_], M[_]](implicit algebra: $algName[F], HTask: _root_.freestyle.FSHandler[M, _root_.monix.eval.Task], NT: _root_.cats.arrow.FunctionK[F, M], ME: _root_.cats.MonadError[M, Throwable], C: _root_.cats.Comonad[M], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
+           new freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(algName.value)}, ..$args).apply
+      """
+  }
 }
 
 private[internal] case class RPCRequest(
@@ -229,31 +221,50 @@ private[internal] case class RPCRequest(
       """
   }
 
-  val call: Term.Tuple = streamingType match {
+  def call(callType: String): Term.Tuple = streamingType match {
     case Some(RequestStreaming) =>
       q"""
          ($descriptorName,
-         _root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(_root_.freestyle.rpc.internal.service.calls.clientStreamingMethod(algebra.$name)))
+         _root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(_root_.freestyle.rpc.internal.service.calls.${Term
+        .Name(s"clientStreamingMethod$callType")}(algebra.$name)))
        """
     case Some(ResponseStreaming) =>
       q"""
          ($descriptorName,
-         _root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(_root_.freestyle.rpc.internal.service.calls.serverStreamingMethod(algebra.$name)))
+         _root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(_root_.freestyle.rpc.internal.service.calls.${Term
+        .Name(s"serverStreamingMethod$callType")}(algebra.$name)))
        """
     case Some(BidirectionalStreaming) =>
       q"""
          ($descriptorName,
-         _root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(_root_.freestyle.rpc.internal.service.calls.bidiStreamingMethod(algebra.$name)))
+         _root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(_root_.freestyle.rpc.internal.service.calls.${Term
+        .Name(s"bidiStreamingMethod$callType")}(algebra.$name)))
        """
     case None =>
       q"""
           ($descriptorName,
-         _root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.freestyle.rpc.internal.service.calls.unaryMethod(algebra.$name)))
+         _root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.freestyle.rpc.internal.service.calls.${Term
+        .Name(s"unaryMethod$callType")}(algebra.$name)))
        """
   }
 }
 
 private[internal] object utils {
+
+  def mkCompanion(name: Type.Name, stats: Seq[Stat]): Object = {
+    val prot = q"""@_root_.java.lang.SuppressWarnings(_root_.scala.Array(
+                                           "org.wartremover.warts.Any",
+                                           "org.wartremover.warts.AsInstanceOf",
+                                           "org.wartremover.warts.Throw"
+                                         ))
+                                         object X {}"""
+
+    prot.copy(
+      name = Term.Name(name.value),
+      templ = prot.templ.copy(
+        stats = Some(stats)
+      ))
+  }
 
   def paramTpe(param: Term.Param): Type = {
     val Term.Param(_, paramname, Some(ptpe), _) = param

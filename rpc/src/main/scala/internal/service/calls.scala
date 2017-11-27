@@ -19,8 +19,6 @@ package rpc
 package internal
 package service
 
-import cats.arrow.FunctionK
-import cats.free.FreeApplicative
 import cats.implicits._
 import cats.{~>, Comonad, Monad, MonadError}
 import io.grpc.stub.ServerCalls.{
@@ -42,61 +40,74 @@ object calls {
 
   import converters._
 
-  def unaryMethod[F[_], M[_], Req, Res](
-      f: (Req) => F[Res])(implicit ME: MonadError[M, Throwable], H: F ~> M): UnaryMethod[Req, Res] =
+  def unaryMethodFree[F[_], M[_], Req, Res](f: (Req) => FreeS[F, Res])(
+      implicit ME: MonadError[M, Throwable],
+      H: FSHandler[F, M]): UnaryMethod[Req, Res] =
+    unaryMethod[M, Req, Res](f andThen (_.interpret[M]))
+
+  def unaryMethod[F[_], Req, Res](f: (Req) => F[Res])(
+      implicit ME: MonadError[F, Throwable]): UnaryMethod[Req, Res] =
     new UnaryMethod[Req, Res] {
       override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
-        val result = H.apply(f(request))
-        ME.attempt(result).map(completeObserver(responseObserver))
+        ME.attempt(f(request)).map(completeObserver(responseObserver))
         (): Unit
       }
     }
 
-//  def unaryMethod[F[_], M[_], Req, Res](f: (Req) => FreeS[F, Res])(
-//      implicit ME: MonadError[M, Throwable],
-//      H: FSHandler[F, M]): UnaryMethod[Req, Res] = new UnaryMethod[Req, Res] {
-//    override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
-//      val result = f(request).interpret[M]
-//      ME.attempt(result).map(completeObserver(responseObserver))
-//      (): Unit
-//    }
-//  }
-
-  def clientStreamingMethod[F[_], M[_], Req, Res](f: (Observable[Req]) => F[Res])(
+  def clientStreamingMethodFree[F[_], M[_], Req, Res](f: (Observable[Req]) => FreeS[F, Res])(
       implicit ME: MonadError[M, Throwable],
-      H: F ~> M,
-      HTask: M ~> Task,
+      H: FSHandler[F, M],
+      HTask: FSHandler[M, Task],
+      S: Scheduler): ClientStreamingMethod[Req, Res] =
+    clientStreamingMethod(f andThen (_.interpret[M]))
+
+  def clientStreamingMethod[F[_], Req, Res](f: (Observable[Req]) => F[Res])(
+      implicit ME: MonadError[F, Throwable],
+      HTask: F ~> Task,
       S: Scheduler): ClientStreamingMethod[Req, Res] = new ClientStreamingMethod[Req, Res] {
 
     override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
       transform[Req, Res](
-        inputObservable => Observable.fromTask(HTask(H(f(inputObservable)))),
+        inputObservable => Observable.fromTask(HTask(f(inputObservable))),
         responseObserver
       )
     }
   }
 
-  def serverStreamingMethod[F[_], M[_], Req, Res](f: (Req) => F[Observable[Res]])(
+  def serverStreamingMethodFree[F[_], M[_], Req, Res](f: (Req) => FreeS[F, Observable[Res]])(
       implicit ME: MonadError[M, Throwable],
       C: Comonad[M],
-      H: F ~> M,
+      H: FSHandler[F, M],
+      S: Scheduler): ServerStreamingMethod[Req, Res] =
+    serverStreamingMethod(f andThen (_.interpret[M]))
+
+  def serverStreamingMethod[F[_], Req, Res](f: (Req) => F[Observable[Res]])(
+      implicit ME: MonadError[F, Throwable],
+      C: Comonad[F],
       S: Scheduler): ServerStreamingMethod[Req, Res] = new ServerStreamingMethod[Req, Res] {
 
     override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
-      C.extract(H(f(request))).subscribe(responseObserver)
+      C.extract(f(request)).subscribe(responseObserver)
       (): Unit
     }
   }
 
-  def bidiStreamingMethod[F[_], M[_], Req, Res](f: (Observable[Req]) => F[Observable[Res]])(
+  def bidiStreamingMethodFree[F[_], M[_], Req, Res](
+      f: (Observable[Req]) => FreeS[F, Observable[Res]])(
       implicit ME: MonadError[M, Throwable],
       C: Comonad[M],
-      H: F ~> M,
+      H: FSHandler[F, M],
+      S: Scheduler): BidiStreamingMethod[Req, Res] =
+    bidiStreamingMethod(f andThen (_.interpret[M]))
+
+  def bidiStreamingMethod[F[_], Req, Res](f: (Observable[Req]) => F[Observable[Res]])(
+      implicit ME: MonadError[F, Throwable],
+      C: Comonad[F],
       S: Scheduler): BidiStreamingMethod[Req, Res] = new BidiStreamingMethod[Req, Res] {
 
     override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
       transform[Req, Res](
-        (inputObservable: Observable[Req]) => C.extract(H(f(inputObservable))),
+        (inputObservable: Observable[Req]) => C.extract(f(inputObservable)),
         StreamObserver2Subscriber(responseObserver)
       )
     }
