@@ -141,7 +141,7 @@ case class ServiceAlg(defn: Defn) extends RPCService {
   }
 
   lazy val serviceBindings: Defn.Def = {
-    val args: Seq[Term.Tuple] = requests.map(c => c.call(""))
+    val args: Seq[Term.Tuple] = requests.map(c => c.call(None))
     q"""
          def bindService[F[_]](implicit algebra: $algName[F], HTask: _root_.freestyle.FSHandler[F, _root_.monix.eval.Task], ME: _root_.cats.MonadError[F, Throwable], C: _root_.cats.Comonad[F], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
            new freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(algName.value)}, ..$args).apply
@@ -155,7 +155,7 @@ case class FreeServiceAlg(defn: Defn) extends RPCService {
   // format: ON
 
   lazy val serviceBindings: Defn.Def = {
-    val args: Seq[Term.Tuple] = requests.map(_.call("Free"))
+    val args: Seq[Term.Tuple] = requests.map(_.call(Some("Free")))
     q"""
          def bindService[F[_], M[_]](implicit algebra: $algName[F], HTask: _root_.freestyle.FSHandler[M, _root_.monix.eval.Task], NT: _root_.cats.arrow.FunctionK[F, M], ME: _root_.cats.MonadError[M, Throwable], C: _root_.cats.Comonad[M], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
            new freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(algName.value)}, ..$args).apply
@@ -221,31 +221,36 @@ private[internal] case class RPCRequest(
       """
   }
 
-  def call(callType: String): Term.Tuple = streamingType match {
-    case Some(RequestStreaming) =>
-      q"""
+  def call(callType: Option[String]): Term.Tuple = {
+    def grpcCall(methodName: String): Term.Name =
+      Term.Name(methodName + callType.getOrElse(""))
+
+    streamingType match {
+      case Some(RequestStreaming) =>
+        q"""
          ($descriptorName,
-         _root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(_root_.freestyle.rpc.internal.service.calls.${Term
-        .Name(s"clientStreamingMethod$callType")}(algebra.$name)))
+         _root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(_root_.freestyle.rpc.internal.service.calls.${grpcCall(
+          s"clientStreamingMethod$callType")}(algebra.$name)))
        """
-    case Some(ResponseStreaming) =>
-      q"""
+      case Some(ResponseStreaming) =>
+        q"""
          ($descriptorName,
-         _root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(_root_.freestyle.rpc.internal.service.calls.${Term
-        .Name(s"serverStreamingMethod$callType")}(algebra.$name)))
+         _root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(_root_.freestyle.rpc.internal.service.calls.${grpcCall(
+          s"serverStreamingMethod")}(algebra.$name)))
        """
-    case Some(BidirectionalStreaming) =>
-      q"""
+      case Some(BidirectionalStreaming) =>
+        q"""
          ($descriptorName,
-         _root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(_root_.freestyle.rpc.internal.service.calls.${Term
-        .Name(s"bidiStreamingMethod$callType")}(algebra.$name)))
+         _root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(_root_.freestyle.rpc.internal.service.calls.${grpcCall(
+          s"bidiStreamingMethod")}(algebra.$name)))
        """
-    case None =>
-      q"""
+      case None =>
+        q"""
           ($descriptorName,
-         _root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.freestyle.rpc.internal.service.calls.${Term
-        .Name(s"unaryMethod$callType")}(algebra.$name)))
+         _root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.freestyle.rpc.internal.service.calls.${grpcCall(
+          s"unaryMethod")}(algebra.$name)))
        """
+    }
   }
 }
 
