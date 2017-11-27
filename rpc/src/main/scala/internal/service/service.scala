@@ -35,27 +35,43 @@ object serviceImpl {
   def service(defn: Any): Stat = {
     defn match {
       case Term.Block(Seq(cls: Trait, companion: Object)) =>
-        val x = serviceExtras(cls, companion)
-        println(x)
-        println("trait")
+        val x = freeServiceExtras(cls, companion)
+//        println(x)
         x
       case Term.Block(Seq(cls: Class, companion: Object)) if ScalametaUtil.isAbstract(cls) =>
-        val x = serviceExtras(cls, companion)
-        println(x)
-        println("blah")
-        x
+        freeServiceExtras(cls, companion)
       case cls: Trait =>
-        val x = serviceExtrasForF(cls)
-        println(x)
+        val x = defaultServiceExtras(cls.name, cls)
+//        println(x)
         x
       case _ =>
         abort(s"$invalid. $abstractOnly")
     }
   }
 
-  def serviceExtras(alg: Defn, companion: Object): Term.Block = {
+  def freeServiceExtras(alg: Defn, companion: Object): Term.Block = {
     val serviceAlg = FreeServiceAlg(alg)
     Term.Block(Seq(alg, enrich(serviceAlg, companion)))
+  }
+
+  def mkCompanion(name: Type.Name, stats: Seq[Stat]): Object = {
+    val prot = q"""@_root_.java.lang.SuppressWarnings(_root_.scala.Array(
+                                           "org.wartremover.warts.Any",
+                                           "org.wartremover.warts.AsInstanceOf",
+                                           "org.wartremover.warts.Throw"
+                                         ))
+                                         object X {}"""
+
+    prot.copy(
+      name = Term.Name(name.value),
+      templ = prot.templ.copy(
+        stats = Some(stats)
+      ))
+  }
+
+  def defaultServiceExtras(name: Type.Name, alg: Defn): Term.Block = {
+    val serviceAlg = ServiceAlg(alg)
+    Term.Block(Seq(alg) ++ Seq(mkCompanion(name, enrich(serviceAlg, Nil))))
   }
 
   def enrich(serviceAlg: FreeServiceAlg, companion: Object): Object = companion match {
@@ -79,11 +95,6 @@ object serviceImpl {
       Seq(serviceAlg.commonImports) ++
       serviceAlg.methodDescriptors ++
       Seq(serviceAlg.serviceBindings, serviceAlg.client, serviceAlg.clientInstance)
-
-  def serviceExtrasForF(alg: Defn): Term.Block = {
-    val serviceAlg = ServiceAlg(alg)
-    Term.Block(Seq(alg) ++ enrich(serviceAlg, Seq()))
-  }
 }
 
 trait RPCService {

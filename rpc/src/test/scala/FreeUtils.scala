@@ -31,7 +31,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-object Utils {
+object FreeUtils {
 
   implicit def testNTT[F[_], M[_]: Monad](implicit F2M: F ~> M): FreeApplicative[F, ?] ~> M[?] = { //why do I need to put ? inside the M[_]?
     new FunctionK[FreeApplicative[F, ?], M[?]] {
@@ -41,7 +41,6 @@ object Utils {
   }
 
   object service {
-
     @message
     case class A(x: Int, y: Int)
 
@@ -57,28 +56,28 @@ object Utils {
     @message
     case class E(a: A, foo: String)
 
+    @free
     @service
-    trait RPCService[F[_]] {
+    trait FreesRPCService {
 
-      @rpc(Protobuf) def notAllowed(b: Boolean): F[C]
+      @rpc(Protobuf) def notAllowed(b: Boolean): FS[C]
 
-      @rpc(Protobuf) def empty(empty: Empty): F[Empty]
+      @rpc(Protobuf) def empty(empty: Empty): FS[Empty]
 
-      @rpc(Avro) def unary(a: A): F[C]
+      @rpc(Avro) def unary(a: A): FS[C]
 
       @rpc(Protobuf)
       @stream[ResponseStreaming.type]
-      def serverStreaming(b: B): F[Observable[C]]
+      def serverStreaming(b: B): FS[Observable[C]]
 
       @rpc(Protobuf)
       @stream[RequestStreaming.type]
-      def clientStreaming(oa: Observable[A]): F[D]
+      def clientStreaming(oa: Observable[A]): FS[D]
 
       @rpc(Avro)
       @stream[BidirectionalStreaming.type]
-      def biStreaming(oe: Observable[E]): F[Observable[E]]
+      def biStreaming(oe: Observable[E]): FS[Observable[E]]
     }
-
   }
 
   object database {
@@ -108,23 +107,23 @@ object Utils {
       import database._
       import service._
 
-      class ServerRPCService[F[_]](implicit C: Capture[F], T2F: Task ~> F) extends RPCService[F] {
-        import database._
+      class FreesRPCServiceServerHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F)
+          extends FreesRPCService.Handler[F] {
 
-        def notAllowed(b: Boolean): F[C] = C.capture(c1)
+        override protected[this] def notAllowed(b: Boolean): F[C] = C.capture(c1)
 
-        def empty(empty: Empty): F[Empty] = C.capture(Empty())
+        override protected[this] def empty(empty: Empty): F[Empty] = C.capture(Empty())
 
-        def unary(a: A): F[C] =
+        override protected[this] def unary(a: A): F[C] =
           C.capture(c1)
 
-        def serverStreaming(b: B): F[Observable[C]] = {
+        override protected[this] def serverStreaming(b: B): F[Observable[C]] = {
           helpers.debug(s"[SERVER] b -> $b")
           val obs = Observable.fromIterable(cList)
           C.capture(obs)
         }
 
-        def clientStreaming(oa: Observable[A]): F[D] =
+        override protected[this] def clientStreaming(oa: Observable[A]): F[D] =
           T2F(
             oa.foldLeftL(D(0)) {
               case (current, a) =>
@@ -133,7 +132,7 @@ object Utils {
             }
           )
 
-        def biStreaming(oe: Observable[E]): F[Observable[E]] =
+        override protected[this] def biStreaming(oe: Observable[E]): F[Observable[E]] =
           C.capture {
             oe.flatMap { e: E =>
               save(e)
@@ -142,8 +141,9 @@ object Utils {
             }
           }
 
-        def save(e: E) = e // do something else with e?
+        private[this] def save(e: E) = e // do something else with e?
       }
+
     }
 
     object client {
@@ -152,21 +152,22 @@ object Utils {
       import service._
       import cats.implicits._
 
-      class ClientRPCService[F[_]: Monad](
-          implicit client: RPCService.Client[F],
+      class FreesRPCServiceClientHandler[F[_]: Monad](
+          implicit client: FreesRPCService.Client[F],
           M: MonadError[F, Throwable],
-          T2F: Task ~> F) {
+          T2F: Task ~> F)
+          extends MyRPCClient.Handler[F] {
 
-        def notAllowed(b: Boolean): F[C] =
+        override protected[this] def notAllowed(b: Boolean): F[C] =
           client.notAllowed(b)
 
-        def empty: F[Empty] =
+        override protected[this] def empty: F[Empty] =
           client.empty(protocol.Empty())
 
-        def u(x: Int, y: Int): F[C] =
+        override protected[this] def u(x: Int, y: Int): F[C] =
           client.unary(A(x, y))
 
-        def ss(a: Int, b: Int): F[List[C]] = T2F {
+        override protected[this] def ss(a: Int, b: Int): F[List[C]] = T2F {
           client
             .serverStreaming(B(A(a, a), A(b, b)))
             .zipWithIndex
@@ -178,16 +179,19 @@ object Utils {
             .toListL
         }
 
-        def cs(cList: List[C], bar: Int): F[D] =
+        override protected[this] def cs(cList: List[C], bar: Int): F[D] =
           client.clientStreaming(Observable.fromIterable(cList.map(c => c.a)))
 
-        def bs(eList: List[E]): F[E] =
+        override protected[this] def bs(eList: List[E]): F[E] =
           T2F(
             client
               .biStreaming(Observable.fromIterable(eList))
               .firstL)
+
       }
+
     }
+
   }
 
   object clientProgram {
@@ -281,13 +285,12 @@ object Utils {
     //////////////////////////////////
     // Server Runtime Configuration //
     //////////////////////////////////
-    implicit def x[F[_]]: F ~> F = FunctionK.id[F]
 
-    implicit val freesRPCHandler: ServerRPCService[Future] =
-      new ServerRPCService[Future]
+    implicit val freesRPCHandler: FreesRPCService.Handler[Future] =
+      new FreesRPCServiceServerHandler[Future]
 
-    def grpcConfigs: List[GrpcConfig] = List(
-      AddService(RPCService.bindService[Future, Future])
+    val grpcConfigs: List[GrpcConfig] = List(
+      AddService(FreesRPCService.bindService[FreesRPCService.Op, Future])
     )
 
     implicit val grpcServerHandler: GrpcServer.Op ~> Future =
@@ -298,11 +301,11 @@ object Utils {
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    implicit val freesRPCServiceClient: RPCService.Client[Future] =
-      RPCService.client[Future](createManagedChannel)
+    implicit val freesRPCServiceClient: FreesRPCService.Client[Future] =
+      FreesRPCService.client[Future](createManagedChannel)
 
-    implicit val freesRPCServiceClientHandler: ClientRPCService[Future] =
-      new ClientRPCService[Future]
+    implicit val freesRPCServiceClientHandler: FreesRPCServiceClientHandler[Future] =
+      new FreesRPCServiceClientHandler[Future]
 
     ////////////
     // Syntax //

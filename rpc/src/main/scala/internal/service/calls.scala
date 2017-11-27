@@ -62,41 +62,41 @@ object calls {
 //    }
 //  }
 
-  def clientStreamingMethod[F[_], M[_], Req, Res](f: (Observable[Req]) => FreeS[F, Res])(
+  def clientStreamingMethod[F[_], M[_], Req, Res](f: (Observable[Req]) => F[Res])(
       implicit ME: MonadError[M, Throwable],
-      H: FSHandler[F, M],
-      HTask: FSHandler[M, Task],
+      H: F ~> M,
+      HTask: M ~> Task,
       S: Scheduler): ClientStreamingMethod[Req, Res] = new ClientStreamingMethod[Req, Res] {
 
     override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
       transform[Req, Res](
-        inputObservable => Observable.fromTask(HTask(f(inputObservable).interpret[M])),
+        inputObservable => Observable.fromTask(HTask(H(f(inputObservable)))),
         responseObserver
       )
     }
   }
 
-  def serverStreamingMethod[F[_], M[_], Req, Res](f: (Req) => FreeS[F, Observable[Res]])(
+  def serverStreamingMethod[F[_], M[_], Req, Res](f: (Req) => F[Observable[Res]])(
       implicit ME: MonadError[M, Throwable],
       C: Comonad[M],
-      H: FSHandler[F, M],
+      H: F ~> M,
       S: Scheduler): ServerStreamingMethod[Req, Res] = new ServerStreamingMethod[Req, Res] {
 
     override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
-      C.extract(f(request).interpret[M]).subscribe(responseObserver)
+      C.extract(H(f(request))).subscribe(responseObserver)
       (): Unit
     }
   }
 
-  def bidiStreamingMethod[F[_], M[_], Req, Res](f: (Observable[Req]) => FreeS[F, Observable[Res]])(
+  def bidiStreamingMethod[F[_], M[_], Req, Res](f: (Observable[Req]) => F[Observable[Res]])(
       implicit ME: MonadError[M, Throwable],
       C: Comonad[M],
-      H: FSHandler[F, M],
+      H: F ~> M,
       S: Scheduler): BidiStreamingMethod[Req, Res] = new BidiStreamingMethod[Req, Res] {
 
     override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
       transform[Req, Res](
-        (inputObservable: Observable[Req]) => C.extract(f(inputObservable).interpret[M]),
+        (inputObservable: Observable[Req]) => C.extract(H(f(inputObservable))),
         StreamObserver2Subscriber(responseObserver)
       )
     }
