@@ -33,13 +33,6 @@ import scala.util.{Failure, Success, Try}
 
 object FreeUtils {
 
-  implicit def testNTT[F[_], M[_]: Monad](implicit F2M: F ~> M): FreeApplicative[F, ?] ~> M[?] = { //why do I need to put ? inside the M[_]?
-    new FunctionK[FreeApplicative[F, ?], M[?]] {
-      def apply[A](fa: FreeApplicative[F, A]): M[A] =
-        fa.foldMap(F2M)
-    }
-  }
-
   object service {
     @message
     case class A(x: Int, y: Int)

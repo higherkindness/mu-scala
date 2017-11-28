@@ -87,8 +87,6 @@ trait RPCService {
     case t: Trait => (t.name, t.templ)
   }
 
-  val defaultTypeParam = Type.Param(Nil, Type.Name("Id"), Nil, Type.Bounds(None, None), Nil, Nil)
-
   val commonImports: Import =
     q"import _root_.cats.instances.list._, _root_.cats.instances.option._"
 
