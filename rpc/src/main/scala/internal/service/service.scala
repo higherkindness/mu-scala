@@ -39,7 +39,7 @@ object serviceImpl {
       case Term.Block(Seq(cls: Class, companion: Object)) if ScalametaUtil.isAbstract(cls) =>
         freeServiceExtras(cls, companion)
       case cls: Trait =>
-        defaultServiceExtras(cls.name, cls)
+        serviceExtras(cls.name, cls)
       case _ =>
         abort(s"$invalid. $abstractOnly")
     }
@@ -50,7 +50,7 @@ object serviceImpl {
     Term.Block(Seq(alg, enrich(serviceAlg, companion)))
   }
 
-  def defaultServiceExtras(name: Type.Name, alg: Defn): Term.Block = {
+  def serviceExtras(name: Type.Name, alg: Defn): Term.Block = {
     import utils._
     val serviceAlg = ServiceAlg(alg)
     Term.Block(Seq(alg) ++ Seq(mkCompanion(name, enrich(serviceAlg, Nil))))
@@ -66,12 +66,6 @@ object serviceImpl {
       }
   }
 
-  def enrich(serviceAlg: FreeServiceAlg, members: Seq[Stat]): Seq[Stat] =
-    members ++
-      Seq(serviceAlg.commonImports) ++
-      serviceAlg.methodDescriptors ++
-      Seq(serviceAlg.serviceBindings, serviceAlg.client, serviceAlg.clientInstance)
-
   def enrich(serviceAlg: RPCService, members: Seq[Stat]): Seq[Stat] =
     members ++
       Seq(serviceAlg.commonImports) ++
@@ -84,29 +78,28 @@ trait RPCService {
 
   def defn: Defn
 
-  lazy val (algName, template) = defn match {
-    case c: Class => (c.name, c.templ)
-    case t: Trait => (t.name, t.templ)
-  }
-  // format: OFF
-  lazy val defaultTypeParam = Type.Param(Nil, Type.Name("Id"), Nil, Type.Bounds(None, None), Nil, Nil)
-  // format: ON
+  def serviceBindings: Defn.Def
 
   def typeParam: Type.Param
 
-  lazy val commonImports: Import =
+  val (algName, template) = defn match {
+    case c: Class => (c.name, c.templ)
+    case t: Trait => (t.name, t.templ)
+  }
+
+  val defaultTypeParam = Type.Param(Nil, Type.Name("Id"), Nil, Type.Bounds(None, None), Nil, Nil)
+
+  val commonImports: Import =
     q"import _root_.cats.instances.list._, _root_.cats.instances.option._"
 
   val requests: List[RPCRequest] =
     buildRequests(algName, typeParam, template.stats.toList.flatten)
 
-  lazy val clientName: Type.Name = Type.Name("Client")
+  val clientName: Type.Name = Type.Name("Client")
 
-  lazy val methodDescriptors: Seq[Defn.Val] = requests.map(_.methodDescriptor)
+  val methodDescriptors: Seq[Defn.Val] = requests.map(_.methodDescriptor)
 
-  def serviceBindings: Defn.Def
-
-  lazy val client: Class = {
+  val client: Class = {
     val clientDefs: Seq[Defn.Def] = requests.map(_.clientDef)
     q"""
        class $clientName[M[_]](channel:
@@ -124,7 +117,7 @@ trait RPCService {
      """
   }
 
-  lazy val clientInstance =
+  val clientInstance =
     q"""
        def client[M[_]: _root_.freestyle.async.AsyncContext](
           channel: _root_.io.grpc.Channel,
@@ -150,9 +143,7 @@ case class ServiceAlg(defn: Defn) extends RPCService {
 }
 
 case class FreeServiceAlg(defn: Defn) extends RPCService {
-  // format: OFF
   val typeParam = Type.Param(Nil, Type.Name("FS"), Nil, Type.Bounds(None, None), Nil, Nil)
-  // format: ON
 
   lazy val serviceBindings: Defn.Def = {
     val args: Seq[Term.Tuple] = requests.map(_.call(Some("Free")))
@@ -230,25 +221,25 @@ private[internal] case class RPCRequest(
         q"""
          ($descriptorName,
          _root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(_root_.freestyle.rpc.internal.service.calls.${grpcCall(
-          s"clientStreamingMethod$callType")}(algebra.$name)))
+          "clientStreamingMethod")}(algebra.$name)))
        """
       case Some(ResponseStreaming) =>
         q"""
          ($descriptorName,
          _root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(_root_.freestyle.rpc.internal.service.calls.${grpcCall(
-          s"serverStreamingMethod")}(algebra.$name)))
+          "serverStreamingMethod")}(algebra.$name)))
        """
       case Some(BidirectionalStreaming) =>
         q"""
          ($descriptorName,
          _root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(_root_.freestyle.rpc.internal.service.calls.${grpcCall(
-          s"bidiStreamingMethod")}(algebra.$name)))
+          "bidiStreamingMethod")}(algebra.$name)))
        """
       case None =>
         q"""
           ($descriptorName,
          _root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.freestyle.rpc.internal.service.calls.${grpcCall(
-          s"unaryMethod")}(algebra.$name)))
+          "unaryMethod")}(algebra.$name)))
        """
     }
   }
