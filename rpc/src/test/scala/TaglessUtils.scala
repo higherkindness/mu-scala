@@ -16,10 +16,12 @@
 
 package freestyle.rpc
 
-import cats.arrow.FunctionK
-import cats.free.FreeApplicative
-import cats.{~>, Monad, MonadError}
+import cats._
+import cats.implicits._
 import freestyle._
+//import freestyle.tagless._
+import cats.{~>, Monad, MonadError}
+
 import freestyle.rpc.client._
 import freestyle.rpc.protocol._
 import freestyle.rpc.server._
@@ -31,7 +33,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-object FreeUtils {
+object TaglessUtils {
 
   object service {
     @message
@@ -49,7 +51,7 @@ object FreeUtils {
     @message
     case class E(a: A, foo: String)
 
-    @free
+    @freestyle.tagless.tagless
     @service
     trait FreesRPCService {
 
@@ -103,20 +105,20 @@ object FreeUtils {
       class FreesRPCServiceServerHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F)
           extends FreesRPCService.Handler[F] {
 
-        override protected[this] def notAllowed(b: Boolean): F[C] = C.capture(c1)
+        def notAllowed(b: Boolean): F[C] = C.capture(c1)
 
-        override protected[this] def empty(empty: Empty): F[Empty] = C.capture(Empty())
+        def empty(empty: Empty): F[Empty] = C.capture(Empty())
 
-        override protected[this] def unary(a: A): F[C] =
+        def unary(a: A): F[C] =
           C.capture(c1)
 
-        override protected[this] def serverStreaming(b: B): F[Observable[C]] = {
+        def serverStreaming(b: B): F[Observable[C]] = {
           helpers.debug(s"[SERVER] b -> $b")
           val obs = Observable.fromIterable(cList)
           C.capture(obs)
         }
 
-        override protected[this] def clientStreaming(oa: Observable[A]): F[D] =
+        def clientStreaming(oa: Observable[A]): F[D] =
           T2F(
             oa.foldLeftL(D(0)) {
               case (current, a) =>
@@ -125,7 +127,7 @@ object FreeUtils {
             }
           )
 
-        override protected[this] def biStreaming(oe: Observable[E]): F[Observable[E]] =
+        def biStreaming(oe: Observable[E]): F[Observable[E]] =
           C.capture {
             oe.flatMap { e: E =>
               save(e)
@@ -134,14 +136,14 @@ object FreeUtils {
             }
           }
 
-        private[this] def save(e: E) = e // do something else with e?
+        def save(e: E) = e // do something else with e?
       }
 
     }
 
     object client {
 
-      import freestyle.rpc.FreeUtils.clientProgram.MyRPCClient
+      import freestyle.rpc.TaglessUtils.clientProgram.MyRPCClient
       import service._
       import cats.implicits._
 
@@ -283,7 +285,7 @@ object FreeUtils {
       new FreesRPCServiceServerHandler[Future]
 
     val grpcConfigs: List[GrpcConfig] = List(
-      AddService(FreesRPCService.bindService[FreesRPCService.Op, Future])
+      AddService(FreesRPCService.bindService[Future])
     )
 
     implicit val grpcServerHandler: GrpcServer.Op ~> Future =

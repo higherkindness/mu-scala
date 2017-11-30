@@ -19,16 +19,16 @@ package freestyle.rpc
 import freestyle._
 import org.scalatest._
 import freestyle.rpc.server.GrpcServerApp
-import freestyle.rpc.FreeUtils.clientProgram.MyRPCClient
+import freestyle.rpc.TaglessUtils.clientProgram.MyRPCClient
 import freestyle.rpc.protocol.Empty
 
 class FreesRPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   import cats.implicits._
-  import freestyle.rpc.FreeUtils.service._
-  import freestyle.rpc.FreeUtils.database._
-  import freestyle.rpc.FreeUtils.helpers._
-  import freestyle.rpc.FreeUtils.implicits._
+  import freestyle.rpc.TaglessUtils.service._
+  import freestyle.rpc.TaglessUtils.database._
+  import freestyle.rpc.TaglessUtils.helpers._
+  import freestyle.rpc.TaglessUtils.implicits._
 
   override protected def beforeAll(): Unit = {
     import freestyle.rpc.server.implicits._

@@ -35,9 +35,9 @@ object serviceImpl {
   def service(defn: Any): Stat = {
     defn match {
       case Term.Block(Seq(cls: Trait, companion: Object)) =>
-        freeServiceExtras(cls, companion)
+        taglessServiceExtras(cls, companion)
       case Term.Block(Seq(cls: Class, companion: Object)) if ScalametaUtil.isAbstract(cls) =>
-        freeServiceExtras(cls, companion)
+        taglessServiceExtras(cls, companion)
       case cls: Trait =>
         serviceExtras(cls.name, cls)
       case _ =>
@@ -45,8 +45,8 @@ object serviceImpl {
     }
   }
 
-  def freeServiceExtras(alg: Defn, companion: Object): Term.Block = {
-    val serviceAlg = FreeServiceAlg(alg)
+  def taglessServiceExtras(alg: Defn, companion: Object): Term.Block = {
+    val serviceAlg = TaglessServiceAlg(alg)
     Term.Block(Seq(alg, enrich(serviceAlg, companion)))
   }
 
@@ -56,7 +56,7 @@ object serviceImpl {
     Term.Block(Seq(alg) ++ Seq(mkCompanion(name, enrich(serviceAlg, Nil))))
   }
 
-  def enrich(serviceAlg: FreeServiceAlg, companion: Object): Object = companion match {
+  def enrich(serviceAlg: TaglessServiceAlg, companion: Object): Object = companion match {
     case q"..$mods object $ename extends $template" =>
       template match {
         case template"{ ..$earlyInit } with ..$inits { $self => ..$stats }" =>
@@ -78,7 +78,13 @@ trait RPCService {
 
   def defn: Defn
 
-  def serviceBindings: Defn.Def
+  lazy val serviceBindings: Defn.Def = {
+    val args: Seq[Term.Tuple] = requests.map(c => c.call(None))
+    q"""
+         def bindService[F[_]](implicit algebra: $algName[F], HTask: _root_.freestyle.FSHandler[F, _root_.monix.eval.Task], ME: _root_.cats.MonadError[F, Throwable], C: _root_.cats.Comonad[F], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
+           new freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(algName.value)}, ..$args).apply
+      """
+  }
 
   def typeParam: Type.Param
 
@@ -130,26 +136,10 @@ case class ServiceAlg(defn: Defn) extends RPCService {
     case c: Class => c.tparams.head
     case t: Trait => t.tparams.head
   }
-
-  lazy val serviceBindings: Defn.Def = {
-    val args: Seq[Term.Tuple] = requests.map(c => c.call(None))
-    q"""
-         def bindService[F[_]](implicit algebra: $algName[F], HTask: _root_.freestyle.FSHandler[F, _root_.monix.eval.Task], ME: _root_.cats.MonadError[F, Throwable], C: _root_.cats.Comonad[F], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
-           new freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(algName.value)}, ..$args).apply
-      """
-  }
 }
 
-case class FreeServiceAlg(defn: Defn) extends RPCService {
+case class TaglessServiceAlg(defn: Defn) extends RPCService {
   val typeParam = Type.Param(Nil, Type.Name("FS"), Nil, Type.Bounds(None, None), Nil, Nil)
-
-  lazy val serviceBindings: Defn.Def = {
-    val args: Seq[Term.Tuple] = requests.map(_.call(Some("Free")))
-    q"""
-         def bindService[F[_], M[_]](implicit algebra: $algName[F], HTask: _root_.freestyle.FSHandler[M, _root_.monix.eval.Task], NT: _root_.cats.arrow.FunctionK[F, M], ME: _root_.cats.MonadError[M, Throwable], C: _root_.cats.Comonad[M], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
-           new freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(algName.value)}, ..$args).apply
-      """
-  }
 }
 
 private[internal] case class RPCRequest(
@@ -211,33 +201,26 @@ private[internal] case class RPCRequest(
   }
 
   def call(callType: Option[String]): Term.Tuple = {
-    def grpcCall(methodName: String): Term.Name =
-      Term.Name(methodName + callType.getOrElse(""))
-
     streamingType match {
       case Some(RequestStreaming) =>
         q"""
          ($descriptorName,
-         _root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(_root_.freestyle.rpc.internal.service.calls.${grpcCall(
-          "clientStreamingMethod")}(algebra.$name)))
+         _root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(_root_.freestyle.rpc.internal.service.calls.clientStreamingMethod(algebra.$name)))
        """
       case Some(ResponseStreaming) =>
         q"""
          ($descriptorName,
-         _root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(_root_.freestyle.rpc.internal.service.calls.${grpcCall(
-          "serverStreamingMethod")}(algebra.$name)))
+         _root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(_root_.freestyle.rpc.internal.service.calls.serverStreamingMethod(algebra.$name)))
        """
       case Some(BidirectionalStreaming) =>
         q"""
          ($descriptorName,
-         _root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(_root_.freestyle.rpc.internal.service.calls.${grpcCall(
-          "bidiStreamingMethod")}(algebra.$name)))
+         _root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(_root_.freestyle.rpc.internal.service.calls.bidiStreamingMethod(algebra.$name)))
        """
       case None =>
         q"""
           ($descriptorName,
-         _root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.freestyle.rpc.internal.service.calls.${grpcCall(
-          "unaryMethod")}(algebra.$name)))
+         _root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.freestyle.rpc.internal.service.calls.unaryMethod(algebra.$name)))
        """
     }
   }

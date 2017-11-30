@@ -139,7 +139,7 @@ object Utils {
 
     object client {
 
-      import freestyle.rpc.FreeUtils.clientProgram.MyRPCClient
+      import freestyle.rpc.TaglessUtils.clientProgram.MyRPCClient
       import service._
       import cats.implicits._
 
