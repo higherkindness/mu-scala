@@ -77,14 +77,6 @@ trait RPCService {
 
   def defn: Defn
 
-//  lazy val serviceBindings: Defn.Def = {
-//    val args: Seq[Term.Tuple] = requests.map(c => c.call(None))
-//    q"""
-//         def bindService[F[_]](implicit algebra: $algName[F], HTask: _root_.freestyle.FSHandler[F, _root_.monix.eval.Task], ME: _root_.cats.MonadError[F, Throwable], C: _root_.cats.Comonad[F], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
-//           new freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(algName.value)}, ..$args).apply
-//      """
-//  }
-
   def typeParam: Type.Param
 
   val (algName, template) = defn match {
