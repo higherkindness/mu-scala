@@ -139,25 +139,26 @@ object Utils {
 
     object client {
 
-      import freestyle.rpc.TaglessUtils.clientProgram.MyRPCClient
+      import freestyle.rpc.Utils.clientProgram.MyRPCClient
       import service._
       import cats.implicits._
 
       class ClientRPCService[F[_]: Monad](
           implicit client: RPCService.Client[F],
           M: MonadError[F, Throwable],
-          T2F: Task ~> F) {
+          T2F: Task ~> F)
+          extends MyRPCClient.Handler[F] {
 
-        def notAllowed(b: Boolean): F[C] =
+        override protected[this] def notAllowed(b: Boolean): F[C] =
           client.notAllowed(b)
 
-        def empty: F[Empty] =
+        override protected[this] def empty: F[Empty] =
           client.empty(protocol.Empty())
 
-        def u(x: Int, y: Int): F[C] =
+        override protected[this] def u(x: Int, y: Int): F[C] =
           client.unary(A(x, y))
 
-        def ss(a: Int, b: Int): F[List[C]] = T2F {
+        override protected[this] def ss(a: Int, b: Int): F[List[C]] = T2F {
           client
             .serverStreaming(B(A(a, a), A(b, b)))
             .zipWithIndex
@@ -169,14 +170,15 @@ object Utils {
             .toListL
         }
 
-        def cs(cList: List[C], bar: Int): F[D] =
+        override protected[this] def cs(cList: List[C], bar: Int): F[D] =
           client.clientStreaming(Observable.fromIterable(cList.map(c => c.a)))
 
-        def bs(eList: List[E]): F[E] =
+        override protected[this] def bs(eList: List[E]): F[E] =
           T2F(
             client
               .biStreaming(Observable.fromIterable(eList))
               .firstL)
+
       }
     }
   }

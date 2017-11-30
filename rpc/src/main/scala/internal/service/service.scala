@@ -132,10 +132,10 @@ trait RPCService {
 }
 
 case class ServiceAlg(defn: Defn) extends RPCService {
-  val typeParam: Type.Param = defn match {
-    case c: Class => c.tparams.head
-    case t: Trait => t.tparams.head
-  }
+  val typeParam: Type.Param = (defn match {
+    case c: Class => c.tparams.headOption
+    case t: Trait => t.tparams.headOption
+  }) getOrElse abort("Type parameter must be specified")
 }
 
 case class TaglessServiceAlg(defn: Defn) extends RPCService {

@@ -19,7 +19,6 @@ package freestyle.rpc
 import cats._
 import cats.implicits._
 import freestyle._
-//import
 import cats.{~>, Monad, MonadError}
 
 import freestyle.rpc.client._
