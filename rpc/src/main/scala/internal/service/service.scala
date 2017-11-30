@@ -68,7 +68,6 @@ object serviceImpl {
 
   def enrich(serviceAlg: RPCService, members: Seq[Stat]): Seq[Stat] =
     members ++
-      Seq(serviceAlg.commonImports) ++
       serviceAlg.methodDescriptors ++
       Seq(serviceAlg.serviceBindings, serviceAlg.client, serviceAlg.clientInstance)
 }
@@ -78,13 +77,13 @@ trait RPCService {
 
   def defn: Defn
 
-  lazy val serviceBindings: Defn.Def = {
-    val args: Seq[Term.Tuple] = requests.map(c => c.call(None))
-    q"""
-         def bindService[F[_]](implicit algebra: $algName[F], HTask: _root_.freestyle.FSHandler[F, _root_.monix.eval.Task], ME: _root_.cats.MonadError[F, Throwable], C: _root_.cats.Comonad[F], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
-           new freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(algName.value)}, ..$args).apply
-      """
-  }
+//  lazy val serviceBindings: Defn.Def = {
+//    val args: Seq[Term.Tuple] = requests.map(c => c.call(None))
+//    q"""
+//         def bindService[F[_]](implicit algebra: $algName[F], HTask: _root_.freestyle.FSHandler[F, _root_.monix.eval.Task], ME: _root_.cats.MonadError[F, Throwable], C: _root_.cats.Comonad[F], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
+//           new freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(algName.value)}, ..$args).apply
+//      """
+//  }
 
   def typeParam: Type.Param
 
@@ -93,22 +92,31 @@ trait RPCService {
     case t: Trait => (t.name, t.templ)
   }
 
-  val commonImports: Import =
-    q"import _root_.cats.instances.list._, _root_.cats.instances.option._"
-
   val requests: List[RPCRequest] =
     buildRequests(algName, typeParam, template.stats.toList.flatten)
 
+  val methodDescriptors: Seq[Defn.Val] = requests.map(_.methodDescriptor)
+
+  val serviceBindings: Defn.Def = {
+    val args: Seq[Term.Tuple] = requests.map(_.call)
+    q"""
+       def bindService[F[_]](implicit algebra: $algName[F], HTask: _root_.freestyle.FSHandler[F, _root_.monix.eval.Task], ME: _root_.cats.MonadError[F, Throwable], C: _root_.cats.Comonad[F], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
+           new _root_.freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(
+      algName.value)}, ..$args).apply
+     """
+  }
+
   val clientName: Type.Name = Type.Name("Client")
 
-  val methodDescriptors: Seq[Defn.Val] = requests.map(_.methodDescriptor)
+  val wartSuppress =
+    mod"""@_root_.java.lang.SuppressWarnings(_root_.scala.Array("org.wartremover.warts.DefaultArguments"))"""
 
   val client: Class = {
     val clientDefs: Seq[Defn.Def] = requests.map(_.clientDef)
     q"""
-       class $clientName[M[_]](channel:
-       _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
-          (implicit AC : _root_.freestyle.async.AsyncContext[M], H: FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext)
+       $wartSuppress
+       class $clientName[M[_]](channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
+          (implicit AC : _root_.freestyle.async.AsyncContext[M], H: _root_.freestyle.FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext)
           extends _root_.io.grpc.stub.AbstractStub[$clientName[M]](channel, options) {
 
           override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $clientName[M] = {
@@ -123,10 +131,11 @@ trait RPCService {
 
   val clientInstance =
     q"""
+       $wartSuppress
        def client[M[_]: _root_.freestyle.async.AsyncContext](
           channel: _root_.io.grpc.Channel,
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
-          (implicit H: FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext) : $clientName[M] =
+          (implicit H: _root_.freestyle.FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext) : $clientName[M] =
              new ${clientName.ctorRef(Ctor.Name(clientName.value))}[M](channel, options)
      """
 }
@@ -150,6 +159,9 @@ private[internal] case class RPCRequest(
     requestType: Type,
     responseType: Type) {
 
+  val wartSuppress =
+    mod"""@_root_.java.lang.SuppressWarnings(_root_.scala.Array("org.wartremover.warts.Null"))"""
+
   val descriptorName: Term.Name = name.copy(value = name.value + "MethodDescriptor")
 
   val encodersImport: Import = serialization match {
@@ -161,6 +173,7 @@ private[internal] case class RPCRequest(
 
   def methodDescriptor =
     q"""
+       $wartSuppress
        val ${Pat.Var.Term(descriptorName)}: _root_.io.grpc.MethodDescriptor[$requestType, $responseType] = {
 
          $encodersImport
@@ -200,7 +213,7 @@ private[internal] case class RPCRequest(
       """
   }
 
-  def call(callType: Option[String]): Term.Tuple = {
+  val call: Term.Tuple = {
     streamingType match {
       case Some(RequestStreaming) =>
         q"""
@@ -305,6 +318,11 @@ object encoders {
   object avro {
 
     import com.sksamuel.avro4s._
+
+    implicit val emptyMarshallers: Marshaller[Empty.type] = new Marshaller[Empty.type] {
+      override def parse(stream: InputStream) = Empty
+      override def stream(value: Empty.type)  = new ByteArrayInputStream(Array.empty)
+    }
 
     implicit def avroMarshallers[A: SchemaFor: FromRecord: ToRecord]: Marshaller[A] =
       new Marshaller[A] {

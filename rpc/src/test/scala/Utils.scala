@@ -18,6 +18,7 @@ package freestyle.rpc
 
 import cats.{~>, Monad, MonadError}
 import freestyle._
+import freestyle.rpc.Utils.database.a4
 import freestyle.rpc.client._
 import freestyle.rpc.protocol._
 import freestyle.rpc.server._
@@ -53,9 +54,19 @@ object Utils {
 
       @rpc(Protobuf) def notAllowed(b: Boolean): F[C]
 
-      @rpc(Protobuf) def empty(empty: Empty): F[Empty]
-
       @rpc(Avro) def unary(a: A): F[C]
+
+      @rpc(Protobuf) def empty(empty: Empty.type): F[Empty.type]
+
+      @rpc(Protobuf) def emptyParam(a: A): F[Empty.type]
+
+      @rpc(Protobuf) def emptyParamResponse(empty: Empty.type): F[A]
+
+      @rpc(Avro) def emptyAvro(empty: Empty.type): F[Empty.type]
+
+      @rpc(Avro) def emptyAvroParam(a: A): F[Empty.type]
+
+      @rpc(Avro) def emptyAvroParamResponse(empty: Empty.type): F[A]
 
       @rpc(Protobuf)
       @stream[ResponseStreaming.type]
@@ -98,13 +109,23 @@ object Utils {
 
       import database._
       import service._
+      import freestyle.rpc.protocol._
 
       class ServerRPCService[F[_]](implicit C: Capture[F], T2F: Task ~> F) extends RPCService[F] {
-        import database._
 
         def notAllowed(b: Boolean): F[C] = C.capture(c1)
 
-        def empty(empty: Empty): F[Empty] = C.capture(Empty())
+        def empty(empty: Empty.type): F[Empty.type] = C.capture(Empty)
+
+        def emptyParam(a: A): F[Empty.type] = C.capture(Empty)
+
+        def emptyParamResponse(empty: Empty.type): F[A] = C.capture(a4)
+
+        def emptyAvro(empty: Empty.type): F[Empty.type] = C.capture(Empty)
+
+        def emptyAvroParam(a: A): F[Empty.type] = C.capture(Empty)
+
+        def emptyAvroParamResponse(empty: Empty.type): F[A] = C.capture(a4)
 
         def unary(a: A): F[C] =
           C.capture(c1)
@@ -135,6 +156,7 @@ object Utils {
 
         def save(e: E) = e // do something else with e?
       }
+
     }
 
     object client {
@@ -142,8 +164,9 @@ object Utils {
       import freestyle.rpc.Utils.clientProgram.MyRPCClient
       import service._
       import cats.implicits._
+      import freestyle.rpc.protocol._
 
-      class ClientRPCService[F[_]: Monad](
+      class FreesRPCServiceClientHandler[F[_]: Monad](
           implicit client: RPCService.Client[F],
           M: MonadError[F, Throwable],
           T2F: Task ~> F)
@@ -152,8 +175,23 @@ object Utils {
         override protected[this] def notAllowed(b: Boolean): F[C] =
           client.notAllowed(b)
 
-        override protected[this] def empty: F[Empty] =
-          client.empty(protocol.Empty())
+        override protected[this] def empty: F[Empty.type] =
+          client.empty(protocol.Empty)
+
+        override protected[this] def emptyParam(a: A): F[Empty.type] =
+          client.emptyParam(a)
+
+        override protected[this] def emptyParamResponse: F[A] =
+          client.emptyParamResponse(protocol.Empty)
+
+        override protected[this] def emptyAvro: F[Empty.type] =
+          client.emptyAvro(protocol.Empty)
+
+        override protected[this] def emptyAvroParam(a: A): F[Empty.type] =
+          client.emptyAvroParam(a)
+
+        override protected[this] def emptyAvroParamResponse: F[A] =
+          client.emptyAvroParamResponse(protocol.Empty)
 
         override protected[this] def u(x: Int, y: Int): F[C] =
           client.unary(A(x, y))
@@ -180,7 +218,9 @@ object Utils {
               .firstL)
 
       }
+
     }
+
   }
 
   object clientProgram {
@@ -190,7 +230,12 @@ object Utils {
     @free
     trait MyRPCClient {
       def notAllowed(b: Boolean): FS[C]
-      def empty: FS[Empty]
+      def empty: FS[Empty.type]
+      def emptyParam(a: A): FS[Empty.type]
+      def emptyParamResponse: FS[A]
+      def emptyAvro: FS[Empty.type]
+      def emptyAvroParam(a: A): FS[Empty.type]
+      def emptyAvroParamResponse: FS[A]
       def u(x: Int, y: Int): FS[C]
       def ss(a: Int, b: Int): FS[List[C]]
       def cs(cList: List[C], bar: Int): FS[D]
@@ -278,7 +323,7 @@ object Utils {
     implicit val freesRPCHandler: ServerRPCService[Future] =
       new ServerRPCService[Future]
 
-    def grpcConfigs: List[GrpcConfig] = List(
+    val grpcConfigs: List[GrpcConfig] = List(
       AddService(RPCService.bindService[Future])
     )
 
@@ -293,8 +338,8 @@ object Utils {
     implicit val freesRPCServiceClient: RPCService.Client[Future] =
       RPCService.client[Future](createManagedChannel)
 
-    implicit val freesRPCServiceClientHandler: ClientRPCService[Future] =
-      new ClientRPCService[Future]
+    implicit val freesRPCServiceClientHandler: FreesRPCServiceClientHandler[Future] =
+      new FreesRPCServiceClientHandler[Future]
 
     ////////////
     // Syntax //

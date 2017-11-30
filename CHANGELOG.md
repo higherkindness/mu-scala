@@ -1,5 +1,34 @@
 # Changelog
 
+## 11/23/2017 - Version 0.3.4
+
+Release changes:
+
+* Adds monix.eval.Task Comonad Implicit Evidence ([#89](https://github.com/frees-io/freestyle-rpc/pull/89))
+
+
+## 11/22/2017 - Version 0.3.3
+
+Release changes:
+
+* Case class Empty is valid for Avro as well ([#87](https://github.com/frees-io/freestyle-rpc/pull/87))
+* Fixes missing FQFN ([#88](https://github.com/frees-io/freestyle-rpc/pull/88))
+
+
+## 11/17/2017 - Version 0.3.2
+
+Release changes:
+
+* Suppress wart warnings ([#85](https://github.com/frees-io/freestyle-rpc/pull/85))
+
+
+## 11/16/2017 - Version 0.3.1
+
+Release changes:
+
+* Removes global imports ([#84](https://github.com/frees-io/freestyle-rpc/pull/84))
+
+
 ## 11/14/2017 - Version 0.3.0
 
 Release changes:

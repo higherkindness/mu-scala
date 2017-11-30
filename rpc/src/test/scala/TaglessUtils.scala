@@ -16,11 +16,8 @@
 
 package freestyle.rpc
 
-import cats._
-import cats.implicits._
-import freestyle._
 import cats.{~>, Monad, MonadError}
-
+import freestyle._
 import freestyle.rpc.client._
 import freestyle.rpc.protocol._
 import freestyle.rpc.server._
@@ -35,6 +32,7 @@ import scala.util.{Failure, Success, Try}
 object TaglessUtils {
 
   object service {
+
     @message
     case class A(x: Int, y: Int)
 
@@ -50,15 +48,25 @@ object TaglessUtils {
     @message
     case class E(a: A, foo: String)
 
-    @freestyle.tagless.tagless //if i import freestyle.tagless._ then I get ambiguous implicits
+    @freestyle.tagless.tagless
     @service
-    trait FreesRPCService {
+    trait TaglessRPCService {
 
       @rpc(Protobuf) def notAllowed(b: Boolean): FS[C]
 
-      @rpc(Protobuf) def empty(empty: Empty): FS[Empty]
-
       @rpc(Avro) def unary(a: A): FS[C]
+
+      @rpc(Protobuf) def empty(empty: Empty.type): FS[Empty.type]
+
+      @rpc(Protobuf) def emptyParam(a: A): FS[Empty.type]
+
+      @rpc(Protobuf) def emptyParamResponse(empty: Empty.type): FS[A]
+
+      @rpc(Avro) def emptyAvro(empty: Empty.type): FS[Empty.type]
+
+      @rpc(Avro) def emptyAvroParam(a: A): FS[Empty.type]
+
+      @rpc(Avro) def emptyAvroParamResponse(empty: Empty.type): FS[A]
 
       @rpc(Protobuf)
       @stream[ResponseStreaming.type]
@@ -72,6 +80,7 @@ object TaglessUtils {
       @stream[BidirectionalStreaming.type]
       def biStreaming(oe: Observable[E]): FS[Observable[E]]
     }
+
   }
 
   object database {
@@ -100,13 +109,24 @@ object TaglessUtils {
 
       import database._
       import service._
+      import freestyle.rpc.protocol._
 
-      class FreesRPCServiceServerHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F)
-          extends FreesRPCService.Handler[F] {
+      class TaglessRPCServiceServerHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F)
+          extends TaglessRPCService.Handler[F] {
 
         def notAllowed(b: Boolean): F[C] = C.capture(c1)
 
-        def empty(empty: Empty): F[Empty] = C.capture(Empty())
+        def empty(empty: Empty.type): F[Empty.type] = C.capture(Empty)
+
+        def emptyParam(a: A): F[Empty.type] = C.capture(Empty)
+
+        def emptyParamResponse(empty: Empty.type): F[A] = C.capture(a4)
+
+        def emptyAvro(empty: Empty.type): F[Empty.type] = C.capture(Empty)
+
+        def emptyAvroParam(a: A): F[Empty.type] = C.capture(Empty)
+
+        def emptyAvroParamResponse(empty: Empty.type): F[A] = C.capture(a4)
 
         def unary(a: A): F[C] =
           C.capture(c1)
@@ -145,9 +165,10 @@ object TaglessUtils {
       import freestyle.rpc.TaglessUtils.clientProgram.MyRPCClient
       import service._
       import cats.implicits._
+      import freestyle.rpc.protocol._
 
-      class FreesRPCServiceClientHandler[F[_]: Monad](
-          implicit client: FreesRPCService.Client[F],
+      class TaglessRPCServiceClientHandler[F[_]: Monad](
+          implicit client: TaglessRPCService.Client[F],
           M: MonadError[F, Throwable],
           T2F: Task ~> F)
           extends MyRPCClient.Handler[F] {
@@ -155,8 +176,23 @@ object TaglessUtils {
         override protected[this] def notAllowed(b: Boolean): F[C] =
           client.notAllowed(b)
 
-        override protected[this] def empty: F[Empty] =
-          client.empty(protocol.Empty())
+        override protected[this] def empty: F[Empty.type] =
+          client.empty(protocol.Empty)
+
+        override protected[this] def emptyParam(a: A): F[Empty.type] =
+          client.emptyParam(a)
+
+        override protected[this] def emptyParamResponse: F[A] =
+          client.emptyParamResponse(protocol.Empty)
+
+        override protected[this] def emptyAvro: F[Empty.type] =
+          client.emptyAvro(protocol.Empty)
+
+        override protected[this] def emptyAvroParam(a: A): F[Empty.type] =
+          client.emptyAvroParam(a)
+
+        override protected[this] def emptyAvroParamResponse: F[A] =
+          client.emptyAvroParamResponse(protocol.Empty)
 
         override protected[this] def u(x: Int, y: Int): F[C] =
           client.unary(A(x, y))
@@ -195,7 +231,12 @@ object TaglessUtils {
     @free
     trait MyRPCClient {
       def notAllowed(b: Boolean): FS[C]
-      def empty: FS[Empty]
+      def empty: FS[Empty.type]
+      def emptyParam(a: A): FS[Empty.type]
+      def emptyParamResponse: FS[A]
+      def emptyAvro: FS[Empty.type]
+      def emptyAvroParam(a: A): FS[Empty.type]
+      def emptyAvroParamResponse: FS[A]
       def u(x: Int, y: Int): FS[C]
       def ss(a: Int, b: Int): FS[List[C]]
       def cs(cList: List[C], bar: Int): FS[D]
@@ -262,7 +303,7 @@ object TaglessUtils {
 
   }
 
-  trait FreesRuntime {
+  trait TaglessRuntime {
 
     import service._
     import helpers._
@@ -280,11 +321,11 @@ object TaglessUtils {
     // Server Runtime Configuration //
     //////////////////////////////////
 
-    implicit val freesRPCHandler: FreesRPCService.Handler[Future] =
-      new FreesRPCServiceServerHandler[Future]
+    implicit val taglessRPCHandler: TaglessRPCService.Handler[Future] =
+      new TaglessRPCServiceServerHandler[Future]
 
     val grpcConfigs: List[GrpcConfig] = List(
-      AddService(FreesRPCService.bindService[Future])
+      AddService(TaglessRPCService.bindService[Future])
     )
 
     implicit val grpcServerHandler: GrpcServer.Op ~> Future =
@@ -295,11 +336,11 @@ object TaglessUtils {
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    implicit val freesRPCServiceClient: FreesRPCService.Client[Future] =
-      FreesRPCService.client[Future](createManagedChannel)
+    implicit val taglessRPCServiceClient: TaglessRPCService.Client[Future] =
+      TaglessRPCService.client[Future](createManagedChannel)
 
-    implicit val freesRPCServiceClientHandler: FreesRPCServiceClientHandler[Future] =
-      new FreesRPCServiceClientHandler[Future]
+    implicit val taglessRPCServiceClientHandler: TaglessRPCServiceClientHandler[Future] =
+      new TaglessRPCServiceClientHandler[Future]
 
     ////////////
     // Syntax //
@@ -313,6 +354,6 @@ object TaglessUtils {
 
   }
 
-  object implicits extends FreesRuntime
+  object implicits extends TaglessRuntime
 
 }

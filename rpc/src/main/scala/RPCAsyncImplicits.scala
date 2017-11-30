@@ -18,7 +18,6 @@ package freestyle
 package rpc
 
 import cats.{~>, Comonad}
-import freestyle.async.AsyncContext
 import freestyle.rpc.client.handlers._
 import journal.Logger
 import monix.eval.Task
@@ -33,7 +32,7 @@ trait RPCAsyncImplicits extends freestyle.async.Implicits {
   protected[this] val asyncLogger: Logger            = Logger[this.type]
   protected[this] val atMostDuration: FiniteDuration = 10.seconds
 
-  implicit def futureComonad(implicit ec: ExecutionContext): Comonad[Future] =
+  implicit def futureComonad(implicit EC: ExecutionContext): Comonad[Future] =
     new Comonad[Future] {
       def extract[A](x: Future[A]): A = {
         asyncLogger.info(s"${Thread.currentThread().getName} Waiting $atMostDuration for $x...")
@@ -43,6 +42,19 @@ trait RPCAsyncImplicits extends freestyle.async.Implicits {
       override def coflatMap[A, B](fa: Future[A])(f: (Future[A]) => B): Future[B] = Future(f(fa))
 
       override def map[A, B](fa: Future[A])(f: (A) => B): Future[B] =
+        fa.map(f)
+    }
+
+  implicit def taskComonad(implicit S: Scheduler): Comonad[Task] =
+    new Comonad[Task] {
+      def extract[A](x: Task[A]): A = {
+        asyncLogger.info(s"${Thread.currentThread().getName} Waiting $atMostDuration for $x...")
+        Await.result(x.runAsync, atMostDuration)
+      }
+
+      override def coflatMap[A, B](fa: Task[A])(f: (Task[A]) => B): Task[B] = Task(f(fa))
+
+      override def map[A, B](fa: Task[A])(f: (A) => B): Task[B] =
         fa.map(f)
     }
 

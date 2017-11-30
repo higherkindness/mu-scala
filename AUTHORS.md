@@ -11,5 +11,6 @@ The maintainers of the project are:
 These are the people that have contributed to the freestyle-rpc project:
 
 * Adrián Ramírez Fornell <[AdrianRaFo](https://github.com/AdrianRaFo)>
+* Ernesto Periñán <[eperinan](https://github.com/eperinan)>
 * Juan Pedro Moreno <[juanpedromoreno](https://github.com/juanpedromoreno)>
 * Raúl Raja Martínez <[raulraja](https://github.com/raulraja)>
