@@ -20,7 +20,7 @@ package internal
 package service
 
 import cats.implicits._
-import cats.{~>, Comonad, Monad, MonadError}
+import cats.{~>, Comonad, MonadError}
 import io.grpc.stub.ServerCalls.{
   BidiStreamingMethod,
   ClientStreamingMethod,
@@ -40,11 +40,6 @@ object calls {
 
   import converters._
 
-  def unaryMethodFree[F[_], M[_], Req, Res](f: (Req) => FreeS[F, Res])(
-      implicit ME: MonadError[M, Throwable],
-      H: FSHandler[F, M]): UnaryMethod[Req, Res] =
-    unaryMethod[M, Req, Res](f andThen (_.interpret[M]))
-
   def unaryMethod[F[_], Req, Res](f: (Req) => F[Res])(
       implicit ME: MonadError[F, Throwable]): UnaryMethod[Req, Res] =
     new UnaryMethod[Req, Res] {
@@ -53,13 +48,6 @@ object calls {
         (): Unit
       }
     }
-
-  def clientStreamingMethodFree[F[_], M[_], Req, Res](f: (Observable[Req]) => FreeS[F, Res])(
-      implicit ME: MonadError[M, Throwable],
-      H: FSHandler[F, M],
-      HTask: FSHandler[M, Task],
-      S: Scheduler): ClientStreamingMethod[Req, Res] =
-    clientStreamingMethod(f andThen (_.interpret[M]))
 
   def clientStreamingMethod[F[_], Req, Res](f: (Observable[Req]) => F[Res])(
       implicit ME: MonadError[F, Throwable],
@@ -74,13 +62,6 @@ object calls {
     }
   }
 
-  def serverStreamingMethodFree[F[_], M[_], Req, Res](f: (Req) => FreeS[F, Observable[Res]])(
-      implicit ME: MonadError[M, Throwable],
-      C: Comonad[M],
-      H: FSHandler[F, M],
-      S: Scheduler): ServerStreamingMethod[Req, Res] =
-    serverStreamingMethod(f andThen (_.interpret[M]))
-
   def serverStreamingMethod[F[_], Req, Res](f: (Req) => F[Observable[Res]])(
       implicit ME: MonadError[F, Throwable],
       C: Comonad[F],
@@ -91,14 +72,6 @@ object calls {
       (): Unit
     }
   }
-
-  def bidiStreamingMethodFree[F[_], M[_], Req, Res](
-      f: (Observable[Req]) => FreeS[F, Observable[Res]])(
-      implicit ME: MonadError[M, Throwable],
-      C: Comonad[M],
-      H: FSHandler[F, M],
-      S: Scheduler): BidiStreamingMethod[Req, Res] =
-    bidiStreamingMethod(f andThen (_.interpret[M]))
 
   def bidiStreamingMethod[F[_], Req, Res](f: (Observable[Req]) => F[Observable[Res]])(
       implicit ME: MonadError[F, Throwable],

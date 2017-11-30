@@ -282,7 +282,7 @@ private[internal] object utils {
 private[internal] object errors {
   val invalid = "Invalid use of `@service`"
   val abstractOnly =
-    "`@service` can only annotate a trait or abstract class already annotated with @free"
+    "`@service` can only annotate a trait or abstract class already annotated with @tagless"
 }
 
 object encoders {

@@ -19,7 +19,7 @@ package freestyle.rpc
 import cats._
 import cats.implicits._
 import freestyle._
-//import freestyle.tagless._
+//import
 import cats.{~>, Monad, MonadError}
 
 import freestyle.rpc.client._
@@ -51,7 +51,7 @@ object TaglessUtils {
     @message
     case class E(a: A, foo: String)
 
-    @freestyle.tagless.tagless
+    @freestyle.tagless.tagless //if i import freestyle.tagless._ then I get ambiguous implicits
     @service
     trait FreesRPCService {
 
