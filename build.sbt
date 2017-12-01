@@ -47,7 +47,7 @@ lazy val rpc = project
           %%("frees-tagless", freesV),
           %("grpc-all", "1.7.0"),
           %%("monix"),
-          %%("pbdirect"),
+          %%("pbdirect", "0.0.7"),
           "com.sksamuel.avro4s" %% "avro4s-core" % "1.8.0",
           %%("scalameta-contrib", "1.8.0"),
           %("grpc-testing")        % Test,
