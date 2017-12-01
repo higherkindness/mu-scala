@@ -44,6 +44,7 @@ lazy val rpc = project
           %%("frees-async-guava", freesV),
           %%("frees-config", freesV),
           %%("frees-logging", freesV),
+          %%("frees-tagless", freesV),
           %("grpc-all", "1.7.0"),
           %%("monix"),
           %%("pbdirect"),

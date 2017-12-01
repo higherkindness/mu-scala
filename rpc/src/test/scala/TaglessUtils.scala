@@ -18,7 +18,6 @@ package freestyle.rpc
 
 import cats.{~>, Monad, MonadError}
 import freestyle._
-import freestyle.rpc.Utils.database.a4
 import freestyle.rpc.client._
 import freestyle.rpc.protocol._
 import freestyle.rpc.server._
@@ -30,7 +29,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-object Utils {
+object TaglessUtils {
 
   object service {
 
@@ -49,36 +48,37 @@ object Utils {
     @message
     case class E(a: A, foo: String)
 
+    @freestyle.tagless.tagless
     @service
-    trait RPCService[F[_]] {
+    trait TaglessRPCService {
 
-      @rpc(Protobuf) def notAllowed(b: Boolean): F[C]
+      @rpc(Protobuf) def notAllowed(b: Boolean): FS[C]
 
-      @rpc(Avro) def unary(a: A): F[C]
+      @rpc(Avro) def unary(a: A): FS[C]
 
-      @rpc(Protobuf) def empty(empty: Empty.type): F[Empty.type]
+      @rpc(Protobuf) def empty(empty: Empty.type): FS[Empty.type]
 
-      @rpc(Protobuf) def emptyParam(a: A): F[Empty.type]
+      @rpc(Protobuf) def emptyParam(a: A): FS[Empty.type]
 
-      @rpc(Protobuf) def emptyParamResponse(empty: Empty.type): F[A]
+      @rpc(Protobuf) def emptyParamResponse(empty: Empty.type): FS[A]
 
-      @rpc(Avro) def emptyAvro(empty: Empty.type): F[Empty.type]
+      @rpc(Avro) def emptyAvro(empty: Empty.type): FS[Empty.type]
 
-      @rpc(Avro) def emptyAvroParam(a: A): F[Empty.type]
+      @rpc(Avro) def emptyAvroParam(a: A): FS[Empty.type]
 
-      @rpc(Avro) def emptyAvroParamResponse(empty: Empty.type): F[A]
+      @rpc(Avro) def emptyAvroParamResponse(empty: Empty.type): FS[A]
 
       @rpc(Protobuf)
       @stream[ResponseStreaming.type]
-      def serverStreaming(b: B): F[Observable[C]]
+      def serverStreaming(b: B): FS[Observable[C]]
 
       @rpc(Protobuf)
       @stream[RequestStreaming.type]
-      def clientStreaming(oa: Observable[A]): F[D]
+      def clientStreaming(oa: Observable[A]): FS[D]
 
       @rpc(Avro)
       @stream[BidirectionalStreaming.type]
-      def biStreaming(oe: Observable[E]): F[Observable[E]]
+      def biStreaming(oe: Observable[E]): FS[Observable[E]]
     }
 
   }
@@ -111,7 +111,8 @@ object Utils {
       import service._
       import freestyle.rpc.protocol._
 
-      class ServerRPCService[F[_]](implicit C: Capture[F], T2F: Task ~> F) extends RPCService[F] {
+      class TaglessRPCServiceServerHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F)
+          extends TaglessRPCService.Handler[F] {
 
         def notAllowed(b: Boolean): F[C] = C.capture(c1)
 
@@ -161,13 +162,13 @@ object Utils {
 
     object client {
 
-      import freestyle.rpc.Utils.clientProgram.MyRPCClient
+      import freestyle.rpc.TaglessUtils.clientProgram.MyRPCClient
       import service._
       import cats.implicits._
       import freestyle.rpc.protocol._
 
-      class FreesRPCServiceClientHandler[F[_]: Monad](
-          implicit client: RPCService.Client[F],
+      class TaglessRPCServiceClientHandler[F[_]: Monad](
+          implicit client: TaglessRPCService.Client[F],
           M: MonadError[F, Throwable],
           T2F: Task ~> F)
           extends MyRPCClient.Handler[F] {
@@ -302,7 +303,7 @@ object Utils {
 
   }
 
-  trait FreesRuntime {
+  trait TaglessRuntime {
 
     import service._
     import helpers._
@@ -320,11 +321,11 @@ object Utils {
     // Server Runtime Configuration //
     //////////////////////////////////
 
-    implicit val freesRPCHandler: ServerRPCService[Future] =
-      new ServerRPCService[Future]
+    implicit val taglessRPCHandler: TaglessRPCService.Handler[Future] =
+      new TaglessRPCServiceServerHandler[Future]
 
     val grpcConfigs: List[GrpcConfig] = List(
-      AddService(RPCService.bindService[Future])
+      AddService(TaglessRPCService.bindService[Future])
     )
 
     implicit val grpcServerHandler: GrpcServer.Op ~> Future =
@@ -335,11 +336,11 @@ object Utils {
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    implicit val freesRPCServiceClient: RPCService.Client[Future] =
-      RPCService.client[Future](createManagedChannel)
+    implicit val taglessRPCServiceClient: TaglessRPCService.Client[Future] =
+      TaglessRPCService.client[Future](createManagedChannel)
 
-    implicit val freesRPCServiceClientHandler: FreesRPCServiceClientHandler[Future] =
-      new FreesRPCServiceClientHandler[Future]
+    implicit val taglessRPCServiceClientHandler: TaglessRPCServiceClientHandler[Future] =
+      new TaglessRPCServiceClientHandler[Future]
 
     ////////////
     // Syntax //
@@ -353,6 +354,6 @@ object Utils {
 
   }
 
-  object implicits extends FreesRuntime
+  object implicits extends TaglessRuntime
 
 }
