@@ -14,3 +14,4 @@ These are the people that have contributed to the freestyle-rpc project:
 * Ernesto Periñán <[eperinan](https://github.com/eperinan)>
 * Juan Pedro Moreno <[juanpedromoreno](https://github.com/juanpedromoreno)>
 * Raúl Raja Martínez <[raulraja](https://github.com/raulraja)>
+* Taylor Brown <[tbrown1979](https://github.com/tbrown1979)>
