@@ -28,7 +28,7 @@ lazy val common = project
   .settings(moduleName := "frees-rpc-common")
   .settings(scalacOptions := Seq("-deprecation", "-encoding", "UTF-8", "-feature", "-unchecked"))
 
-lazy val freesV = "0.4.4"
+lazy val freesV = "0.4.6"
 
 lazy val rpc = project
   .in(file("rpc"))
@@ -47,7 +47,7 @@ lazy val rpc = project
           %%("frees-tagless", freesV),
           %("grpc-all", "1.7.0"),
           %%("monix"),
-          %%("pbdirect"),
+          %%("pbdirect", "0.0.7"),
           "com.sksamuel.avro4s" %% "avro4s-core" % "1.8.0",
           %%("scalameta-contrib", "1.8.0"),
           %("grpc-testing")        % Test,
