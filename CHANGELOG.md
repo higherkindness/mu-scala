@@ -1,5 +1,13 @@
 # Changelog
 
+## 12/01/2017 - Version 0.4.0
+
+Release changes:
+
+* Replace @free with @tagless, and drop the requirement of an annotation ([#92](https://github.com/frees-io/freestyle-rpc/pull/92))
+* Upgrades frees-rpc to Freestyle 0.4.6 ([#94](https://github.com/frees-io/freestyle-rpc/pull/94))
+
+
 ## 11/23/2017 - Version 0.3.4
 
 Release changes:
