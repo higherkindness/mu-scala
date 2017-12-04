@@ -19,8 +19,10 @@ package rpc
 package internal
 package service
 
+import cats.effect.{Effect, IO}
+import cats.effect.implicits._
 import cats.implicits._
-import cats.{~>, Comonad, MonadError}
+import cats.{~>, Comonad}
 import io.grpc.stub.ServerCalls.{
   BidiStreamingMethod,
   ClientStreamingMethod,
@@ -41,16 +43,18 @@ object calls {
   import converters._
 
   def unaryMethod[F[_], Req, Res](f: (Req) => F[Res])(
-      implicit ME: MonadError[F, Throwable]): UnaryMethod[Req, Res] =
+      implicit EFF: Effect[F]): UnaryMethod[Req, Res] =
     new UnaryMethod[Req, Res] {
-      override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
-        ME.attempt(f(request)).map(completeObserver(responseObserver))
-        (): Unit
-      }
+      override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit =
+        EFF
+          .attempt(f(request))
+          .map(completeObserver(responseObserver))
+          .runAsync(_ => IO.pure(()))
+          .unsafeRunAsync(_ => ())
     }
 
   def clientStreamingMethod[F[_], Req, Res](f: (Observable[Req]) => F[Res])(
-      implicit ME: MonadError[F, Throwable],
+      implicit EFF: Effect[F],
       HTask: F ~> Task,
       S: Scheduler): ClientStreamingMethod[Req, Res] = new ClientStreamingMethod[Req, Res] {
 
@@ -63,8 +67,7 @@ object calls {
   }
 
   def serverStreamingMethod[F[_], Req, Res](f: (Req) => F[Observable[Res]])(
-      implicit ME: MonadError[F, Throwable],
-      C: Comonad[F],
+      implicit C: Comonad[F],
       S: Scheduler): ServerStreamingMethod[Req, Res] = new ServerStreamingMethod[Req, Res] {
 
     override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
@@ -74,8 +77,7 @@ object calls {
   }
 
   def bidiStreamingMethod[F[_], Req, Res](f: (Observable[Req]) => F[Observable[Res]])(
-      implicit ME: MonadError[F, Throwable],
-      C: Comonad[F],
+      implicit C: Comonad[F],
       S: Scheduler): BidiStreamingMethod[Req, Res] = new BidiStreamingMethod[Req, Res] {
 
     override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {

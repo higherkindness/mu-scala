@@ -16,9 +16,11 @@
 
 package freestyle.rpc
 
+import cats.effect.IO
 import cats.{~>, Monad, MonadError}
 import freestyle._
 import freestyle.rpc.Utils.database.a4
+import freestyle.asyncCatsEffect.implicits._
 import freestyle.rpc.client._
 import freestyle.rpc.protocol._
 import freestyle.rpc.server._
@@ -27,10 +29,12 @@ import monix.eval.Task
 import monix.reactive.Observable
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.Await
 import scala.util.{Failure, Success, Try}
 
 object Utils {
+
+  type ConcurrentMonad[A] = IO[A]
 
   object service {
 
@@ -263,7 +267,7 @@ object Utils {
       val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
 
       val managedChannelInterpreter =
-        new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
+        new ManagedChannelInterpreter[ConcurrentMonad](channelFor, channelConfigList)
 
       managedChannelInterpreter.build(channelFor, channelConfigList)
     }
@@ -313,41 +317,41 @@ object Utils {
     import freestyle.rpc.server.implicits._
     import freestyle.rpc.server.handlers._
 
-    implicit val ec: ExecutionContext         = ExecutionContext.Implicits.global
     implicit val S: monix.execution.Scheduler = monix.execution.Scheduler.Implicits.global
 
     //////////////////////////////////
     // Server Runtime Configuration //
     //////////////////////////////////
 
-    implicit val freesRPCHandler: ServerRPCService[Future] =
-      new ServerRPCService[Future]
+    implicit val freesRPCHandler: ServerRPCService[ConcurrentMonad] =
+      new ServerRPCService[ConcurrentMonad]
 
     val grpcConfigs: List[GrpcConfig] = List(
-      AddService(RPCService.bindService[Future])
+      AddService(RPCService.bindService[ConcurrentMonad])
     )
 
-    implicit val grpcServerHandler: GrpcServer.Op ~> Future =
-      new GrpcServerHandler[Future] andThen
-        new GrpcKInterpreter[Future](createServerConf(grpcConfigs).server)
+    implicit val grpcServerHandler: GrpcServer.Op ~> ConcurrentMonad =
+      new GrpcServerHandler[ConcurrentMonad] andThen
+        new GrpcKInterpreter[ConcurrentMonad](createServerConf(grpcConfigs).server)
 
     //////////////////////////////////
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    implicit val freesRPCServiceClient: RPCService.Client[Future] =
-      RPCService.client[Future](createManagedChannel)
+    implicit val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
+      RPCService.client[ConcurrentMonad](createManagedChannel)
 
-    implicit val freesRPCServiceClientHandler: FreesRPCServiceClientHandler[Future] =
-      new FreesRPCServiceClientHandler[Future]
+    implicit val freesRPCServiceClientHandler: FreesRPCServiceClientHandler[ConcurrentMonad] =
+      new FreesRPCServiceClientHandler[ConcurrentMonad]
 
     ////////////
     // Syntax //
     ////////////
 
-    implicit class InterpreterOps[F[_], A](fs: FreeS[F, A])(implicit H: FSHandler[F, Future]) {
+    implicit class InterpreterOps[F[_], A](fs: FreeS[F, A])(
+        implicit H: FSHandler[F, ConcurrentMonad]) {
 
-      def runF: A = Await.result(fs.interpret[Future], Duration.Inf)
+      def runF: A = Await.result(fs.interpret[ConcurrentMonad].unsafeToFuture(), Duration.Inf)
 
     }
 

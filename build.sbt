@@ -42,6 +42,7 @@ lazy val rpc = project
           %%("frees-core", freesV),
           %%("frees-async", freesV),
           %%("frees-async-guava", freesV),
+          %%("frees-async-cats-effect", freesV),
           %%("frees-config", freesV),
           %%("frees-logging", freesV),
           %%("frees-tagless", freesV),
