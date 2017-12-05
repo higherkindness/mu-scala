@@ -1,5 +1,12 @@
 # Changelog
 
+## 12/05/2017 - Version 0.4.1
+
+Release changes:
+
+* Server Endpoints and Effect Monad ([#95](https://github.com/frees-io/freestyle-rpc/pull/95))
+
+
 ## 12/01/2017 - Version 0.4.0
 
 Release changes:
