@@ -92,7 +92,7 @@ trait RPCService {
   val serviceBindings: Defn.Def = {
     val args: Seq[Term.Tuple] = requests.map(_.call)
     q"""
-       def bindService[F[_]](implicit algebra: $algName[F], HTask: _root_.freestyle.FSHandler[F, _root_.monix.eval.Task], ME: _root_.cats.MonadError[F, Throwable], C: _root_.cats.Comonad[F], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
+       def bindService[F[_]](implicit algebra: $algName[F], EFF: _root_.cats.effect.Effect[F], HTask: _root_.freestyle.FSHandler[F, _root_.monix.eval.Task], C: _root_.cats.Comonad[F], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
            new _root_.freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(
       algName.value)}, ..$args).apply
      """

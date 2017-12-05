@@ -17,6 +17,7 @@
 package freestyle
 package rpc
 
+import cats.effect.IO
 import cats.{~>, Comonad}
 import freestyle.rpc.client.handlers._
 import journal.Logger
@@ -27,10 +28,22 @@ import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
 
-trait RPCAsyncImplicits extends freestyle.async.Implicits {
+trait IOCapture {
+
+  implicit val ioCapture: Capture[IO] = new Capture[IO] {
+    override def capture[A](a: => A): IO[A] = IO(a)
+  }
+
+}
+
+trait BaseAsync extends freestyle.async.Implicits {
 
   protected[this] val asyncLogger: Logger            = Logger[this.type]
   protected[this] val atMostDuration: FiniteDuration = 10.seconds
+
+}
+
+trait FutureAsyncInstances extends BaseAsync {
 
   implicit def futureComonad(implicit EC: ExecutionContext): Comonad[Future] =
     new Comonad[Future] {
@@ -45,6 +58,18 @@ trait RPCAsyncImplicits extends freestyle.async.Implicits {
         fa.map(f)
     }
 
+  implicit val future2Task: Future ~> Task =
+    new (Future ~> Task) {
+      override def apply[A](fa: Future[A]): Task[A] = {
+        asyncLogger.info(s"${Thread.currentThread().getName} Deferring Future to Task...")
+        Task.deferFuture(fa)
+      }
+    }
+
+}
+
+trait TaskAsyncInstances extends BaseAsync {
+
   implicit def taskComonad(implicit S: Scheduler): Comonad[Task] =
     new Comonad[Task] {
       def extract[A](x: Task[A]): A = {
@@ -58,19 +83,32 @@ trait RPCAsyncImplicits extends freestyle.async.Implicits {
         fa.map(f)
     }
 
-  implicit def task2Future(implicit S: Scheduler): FSHandler[Task, Future] =
+  implicit def task2Future(implicit S: Scheduler): Task ~> Future =
     new TaskMHandler[Future]
-
-  implicit val future2Task: Future ~> Task =
-    new (Future ~> Task) {
-      override def apply[A](fa: Future[A]): Task[A] = {
-        asyncLogger.info(s"${Thread.currentThread().getName} Deferring Future to Task...")
-        Task.deferFuture(fa)
-      }
-    }
 
   implicit val task2Task: Task ~> Task = new (Task ~> Task) {
     override def apply[A](fa: Task[A]): Task[A] = fa
   }
 
+  implicit def task2IO(implicit S: Scheduler): Task ~> IO = new (Task ~> IO) {
+    override def apply[A](fa: Task[A]): IO[A] = fa.toIO
+  }
 }
+
+trait IOAsyncInstances extends BaseAsync {
+
+  implicit val ioComonad: Comonad[IO] = new Comonad[IO] {
+
+    override def extract[A](x: IO[A]): A = x.unsafeRunSync()
+
+    override def coflatMap[A, B](fa: IO[A])(f: IO[A] => B): IO[B] = IO.pure(f(fa))
+
+    override def map[A, B](fa: IO[A])(f: A => B): IO[B] = fa.map(f)
+  }
+
+  implicit val io2Task: IO ~> Task = new (IO ~> Task) {
+    override def apply[A](fa: IO[A]): Task[A] = fa.to[Task]
+  }
+}
+
+trait RPCAsyncImplicits extends FutureAsyncInstances with TaskAsyncInstances with IOAsyncInstances

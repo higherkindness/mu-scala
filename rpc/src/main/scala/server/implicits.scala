@@ -65,6 +65,7 @@ trait Helpers {
 
 object implicits
     extends CaptureInstances
+    with IOCapture
     with RPCAsyncImplicits
     with Syntax
     with Helpers
