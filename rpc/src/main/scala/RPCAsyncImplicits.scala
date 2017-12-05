@@ -31,7 +31,7 @@ import scala.concurrent.duration._
 trait IOCapture {
 
   implicit val ioCapture: Capture[IO] = new Capture[IO] {
-    override def capture[A](a: => A): IO[A] = IO.pure(a)
+    override def capture[A](a: => A): IO[A] = IO(a)
   }
 
 }
