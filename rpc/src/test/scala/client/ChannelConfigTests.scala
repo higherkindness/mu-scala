@@ -14,15 +14,34 @@
  * limitations under the License.
  */
 
-package freestyle
-package rpc
-package protocol
+package freestyle.rpc
+package client
 
-sealed trait StreamingType         extends Product with Serializable
-case object RequestStreaming       extends StreamingType
-case object ResponseStreaming      extends StreamingType
-case object BidirectionalStreaming extends StreamingType
+import cats.instances.try_._
+import freestyle.free._
+import freestyle.free.implicits._
+import freestyle.free.config.implicits._
 
-sealed trait SerializationType extends Product with Serializable
-case object Protobuf           extends SerializationType
-case object Avro               extends SerializationType
+import scala.util.{Success, Try}
+
+class ChannelConfigTests extends RpcClientTestSuite {
+
+  import implicits._
+
+  "ChannelConfig" should {
+
+    "for Address [host, port] work as expected" in {
+
+      ConfigForAddress[ChannelConfig.Op](host, port.toString)
+        .interpret[Try] shouldBe a[Success[_]]
+    }
+
+    "for Target work as expected" in {
+
+      ConfigForTarget[ChannelConfig.Op](host)
+        .interpret[Try] shouldBe a[Success[_]]
+    }
+
+  }
+
+}

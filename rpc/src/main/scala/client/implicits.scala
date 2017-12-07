@@ -16,13 +16,12 @@
 
 package freestyle
 package rpc
-package protocol
+package client
 
-sealed trait StreamingType         extends Product with Serializable
-case object RequestStreaming       extends StreamingType
-case object ResponseStreaming      extends StreamingType
-case object BidirectionalStreaming extends StreamingType
+import freestyle.free._
 
-sealed trait SerializationType extends Product with Serializable
-case object Protobuf           extends SerializationType
-case object Avro               extends SerializationType
+object implicits
+    extends CaptureInstances
+    with freestyle.free.Interpreters
+    with freestyle.free.FreeSInstances
+    with RPCAsyncImplicits

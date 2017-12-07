@@ -16,13 +16,21 @@
 
 package freestyle
 package rpc
-package protocol
+package client.handlers
 
-sealed trait StreamingType         extends Product with Serializable
-case object RequestStreaming       extends StreamingType
-case object ResponseStreaming      extends StreamingType
-case object BidirectionalStreaming extends StreamingType
+import freestyle.free._
+import freestyle.free.async.AsyncContext
+import monix.eval.{Callback, Task}
+import monix.execution.Scheduler
 
-sealed trait SerializationType extends Product with Serializable
-case object Protobuf           extends SerializationType
-case object Avro               extends SerializationType
+class TaskMHandler[F[_]](implicit AC: AsyncContext[F], S: Scheduler) extends FSHandler[Task, F] {
+
+  override def apply[A](fa: Task[A]): F[A] = AC.runAsync { cb =>
+    fa.runAsync(new Callback[A] {
+      override def onSuccess(value: A): Unit = cb(Right(value))
+
+      override def onError(ex: Throwable): Unit = cb(Left(ex))
+    })
+
+  }
+}
