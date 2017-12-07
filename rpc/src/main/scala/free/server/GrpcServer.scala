@@ -14,15 +14,37 @@
  * limitations under the License.
  */
 
-package freestyle.free
-package rpc
-package protocol
+package freestyle.free.rpc
+package server
 
-sealed trait StreamingType         extends Product with Serializable
-case object RequestStreaming       extends StreamingType
-case object ResponseStreaming      extends StreamingType
-case object BidirectionalStreaming extends StreamingType
+import freestyle.free._
+import io.grpc._
 
-sealed trait SerializationType extends Product with Serializable
-case object Protobuf           extends SerializationType
-case object Avro               extends SerializationType
+import scala.concurrent.duration.TimeUnit
+
+@free
+trait GrpcServer {
+
+  def start(): FS[Server]
+
+  def getPort: FS[Int]
+
+  def getServices: FS[List[ServerServiceDefinition]]
+
+  def getImmutableServices: FS[List[ServerServiceDefinition]]
+
+  def getMutableServices: FS[List[ServerServiceDefinition]]
+
+  def shutdown(): FS[Server]
+
+  def shutdownNow(): FS[Server]
+
+  def isShutdown: FS[Boolean]
+
+  def isTerminated: FS[Boolean]
+
+  def awaitTerminationTimeout(timeout: Long, unit: TimeUnit): FS[Boolean]
+
+  def awaitTermination(): FS[Unit]
+
+}

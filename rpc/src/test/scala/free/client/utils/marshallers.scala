@@ -14,15 +14,25 @@
  * limitations under the License.
  */
 
-package freestyle.free
-package rpc
-package protocol
+package freestyle.free.rpc
+package client.utils
 
-sealed trait StreamingType         extends Product with Serializable
-case object RequestStreaming       extends StreamingType
-case object ResponseStreaming      extends StreamingType
-case object BidirectionalStreaming extends StreamingType
+import com.google.common.base.Charsets.UTF_8
+import com.google.common.io.ByteStreams
+import java.io.ByteArrayInputStream
+import java.io.IOException
+import java.io.InputStream
 
-sealed trait SerializationType extends Product with Serializable
-case object Protobuf           extends SerializationType
-case object Avro               extends SerializationType
+import io.grpc.MethodDescriptor
+
+class StringMarshaller extends MethodDescriptor.Marshaller[String] {
+
+  override def stream(value: String) = new ByteArrayInputStream(value.getBytes(UTF_8))
+
+  override def parse(stream: InputStream): String =
+    try new String(ByteStreams.toByteArray(stream), UTF_8)
+    catch {
+      case ex: IOException =>
+        throw new RuntimeException(ex)
+    }
+}

@@ -14,15 +14,27 @@
  * limitations under the License.
  */
 
-package freestyle.free
-package rpc
-package protocol
+package freestyle.free.rpc
 
-sealed trait StreamingType         extends Product with Serializable
-case object RequestStreaming       extends StreamingType
-case object ResponseStreaming      extends StreamingType
-case object BidirectionalStreaming extends StreamingType
+import cats.data.Kleisli
+import cats.~>
+import freestyle.free.FreeS
+import io.grpc._
 
-sealed trait SerializationType extends Product with Serializable
-case object Protobuf           extends SerializationType
-case object Avro               extends SerializationType
+package object server {
+
+  type GrpcServerOps[F[_], A] = Kleisli[F, Server, A]
+
+  val defaultPort = 50051
+
+  class GrpcKInterpreter[F[_]](server: Server) extends (Kleisli[F, Server, ?] ~> F) {
+
+    override def apply[B](fa: Kleisli[F, Server, B]): F[B] =
+      fa(server)
+
+  }
+
+  def BuildServerFromConfig[F[_]](portPath: String, configList: List[GrpcConfig] = Nil)(
+      implicit SC: ServerConfig[F]): FreeS[F, ServerW] =
+    SC.buildServer(portPath, configList)
+}

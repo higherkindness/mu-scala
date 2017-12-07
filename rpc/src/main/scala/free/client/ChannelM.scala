@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-package freestyle.free
-package rpc
-package protocol
+package freestyle.free.rpc
+package client
 
-sealed trait StreamingType         extends Product with Serializable
-case object RequestStreaming       extends StreamingType
-case object ResponseStreaming      extends StreamingType
-case object BidirectionalStreaming extends StreamingType
+import freestyle.free._
+import io.grpc.{CallOptions, ClientCall, MethodDescriptor}
 
-sealed trait SerializationType extends Product with Serializable
-case object Protobuf           extends SerializationType
-case object Avro               extends SerializationType
+@free
+trait ChannelM {
+
+  def newCall[I, O](
+      methodDescriptor: MethodDescriptor[I, O],
+      callOptions: CallOptions): FS[ClientCall[I, O]]
+
+  def authority: FS[String]
+
+}

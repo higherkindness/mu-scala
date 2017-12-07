@@ -14,15 +14,26 @@
  * limitations under the License.
  */
 
-package freestyle.free
-package rpc
-package protocol
+package freestyle.free.rpc
+package server
 
-sealed trait StreamingType         extends Product with Serializable
-case object RequestStreaming       extends StreamingType
-case object ResponseStreaming      extends StreamingType
-case object BidirectionalStreaming extends StreamingType
+import cats.Id
+import freestyle.free.rpc.server.implicits._
 
-sealed trait SerializationType extends Product with Serializable
-case object Protobuf           extends SerializationType
-case object Avro               extends SerializationType
+class HelperTests extends RpcServerTestSuite {
+
+  import implicits._
+
+  "server helper" should {
+
+    "work as expected" in {
+
+      server[GrpcServerApp.Op].bootstrapM[Id] shouldBe ((): Unit)
+
+      (serverMock.start _).verify()
+      (serverMock.awaitTermination _).verify()
+    }
+
+  }
+
+}

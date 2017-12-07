@@ -14,15 +14,29 @@
  * limitations under the License.
  */
 
-package freestyle.free
-package rpc
-package protocol
+package freestyle.free.rpc
+package server
 
-sealed trait StreamingType         extends Product with Serializable
-case object RequestStreaming       extends StreamingType
-case object ResponseStreaming      extends StreamingType
-case object BidirectionalStreaming extends StreamingType
+import cats.implicits._
+import freestyle.free._
+import freestyle.free.config.ConfigM
+import freestyle.free.config.implicits._
+import io.grpc.Server
 
-sealed trait SerializationType extends Product with Serializable
-case object Protobuf           extends SerializationType
-case object Avro               extends SerializationType
+case class ServerW(port: Int, configList: List[GrpcConfig]) {
+
+  lazy val server: Server = SServerBuilder(port, configList).build
+
+}
+
+@module
+trait ServerConfig {
+
+  val configM: ConfigM
+
+  def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): FS.Seq[ServerW] =
+    configM.load.map { config =>
+      val port = config.int(portPath).getOrElse(defaultPort)
+      ServerW(port, configList)
+    }
+}
