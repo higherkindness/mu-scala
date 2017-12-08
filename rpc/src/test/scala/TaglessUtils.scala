@@ -19,6 +19,7 @@ package freestyle.rpc
 import cats.effect.IO
 import cats.{~>, Monad, MonadError}
 import freestyle.free._
+import freestyle.tagless.tagless
 import freestyle.free.asyncCatsEffect.implicits._
 import freestyle.rpc.client._
 import freestyle.rpc.protocol._
@@ -52,7 +53,7 @@ object TaglessUtils {
     @message
     case class E(a: A, foo: String)
 
-    @freestyle.tagless.tagless
+    @tagless
     @service
     trait TaglessRPCService {
 

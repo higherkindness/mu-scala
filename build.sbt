@@ -28,7 +28,7 @@ lazy val common = project
   .settings(moduleName := "frees-rpc-common")
   .settings(scalacOptions := Seq("-deprecation", "-encoding", "UTF-8", "-feature", "-unchecked"))
 
-lazy val freesV = "0.5.0"
+lazy val freesV = "0.4.7-SNAPSHOT"
 
 lazy val rpc = project
   .in(file("rpc"))
@@ -45,7 +45,6 @@ lazy val rpc = project
           %%("frees-async-cats-effect", freesV),
           %%("frees-config", freesV),
           %%("frees-logging", freesV),
-          %%("frees-tagless", freesV),
           %("grpc-all", "1.7.0"),
           %%("monix"),
           %%("pbdirect", "0.0.7"),
@@ -53,7 +52,8 @@ lazy val rpc = project
           %%("scalameta-contrib", "1.8.0"),
           %("grpc-testing")        % Test,
           %%("scalatest")          % Test,
-          %%("scalamockScalatest") % Test
+          %%("scalamockScalatest") % Test,
+          %%("mainecoon-core")     % Test
         )
     ): _*
   )
