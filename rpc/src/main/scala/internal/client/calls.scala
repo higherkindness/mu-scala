@@ -19,8 +19,9 @@ package rpc
 package internal
 package client
 
+import freestyle.free.FSHandler
 import freestyle.async.AsyncContext
-import freestyle.asyncGuava.implicits._
+import freestyle.free.asyncGuava.implicits._
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
 import io.grpc.stub.{ClientCalls, StreamObserver}
 import monix.eval.Task

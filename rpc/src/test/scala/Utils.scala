@@ -18,9 +18,9 @@ package freestyle.rpc
 
 import cats.effect.IO
 import cats.{~>, Monad, MonadError}
-import freestyle._
+import freestyle.free._
 import freestyle.rpc.Utils.database.a4
-import freestyle.asyncCatsEffect.implicits._
+import freestyle.free.asyncCatsEffect.implicits._
 import freestyle.rpc.client._
 import freestyle.rpc.protocol._
 import freestyle.rpc.server._
@@ -250,8 +250,8 @@ object Utils {
   object helpers {
 
     import cats.implicits._
-    import freestyle.implicits._
-    import freestyle.config.implicits._
+    import freestyle.free.implicits._
+    import freestyle.free.config.implicits._
 
     def createManagedChannel: ManagedChannel = {
 

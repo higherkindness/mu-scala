@@ -19,6 +19,9 @@ package rpc
 
 import cats.effect.IO
 import cats.{~>, Comonad}
+
+import freestyle.free._
+import freestyle.async.implicits._
 import freestyle.rpc.client.handlers._
 import journal.Logger
 import monix.eval.Task
@@ -36,7 +39,7 @@ trait IOCapture {
 
 }
 
-trait BaseAsync extends freestyle.async.Implicits {
+trait BaseAsync extends freestyle.free.async.Implicits {
 
   protected[this] val asyncLogger: Logger            = Logger[this.type]
   protected[this] val atMostDuration: FiniteDuration = 10.seconds

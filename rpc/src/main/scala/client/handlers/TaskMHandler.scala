@@ -18,6 +18,7 @@ package freestyle
 package rpc
 package client.handlers
 
+import freestyle.free._
 import freestyle.async.AsyncContext
 import monix.eval.{Callback, Task}
 import monix.execution.Scheduler

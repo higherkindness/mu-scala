@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 
 import cats.Id
 import cats.implicits._
-import freestyle._
+import freestyle.free._
 import io.grpc.{Server, ServerServiceDefinition}
 
 class GrpcServerTests extends RpcServerTestSuite {

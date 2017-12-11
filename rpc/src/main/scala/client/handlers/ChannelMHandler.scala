@@ -18,7 +18,7 @@ package freestyle.rpc
 package client.handlers
 
 import cats.data.Kleisli
-import freestyle.Capture
+import freestyle.free.Capture
 import freestyle.rpc.client.{ChannelM, ManagedChannelOps}
 import io.grpc.{CallOptions, ClientCall, MethodDescriptor}
 

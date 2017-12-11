@@ -19,7 +19,7 @@ package internal.service
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
 
-import freestyle.internal.ScalametaUtil
+import freestyle.free.internal.ScalametaUtil
 import freestyle.rpc.protocol._
 
 import scala.collection.immutable.Seq
@@ -92,7 +92,7 @@ trait RPCService {
   val serviceBindings: Defn.Def = {
     val args: Seq[Term.Tuple] = requests.map(_.call)
     q"""
-       def bindService[F[_]](implicit algebra: $algName[F], EFF: _root_.cats.effect.Effect[F], HTask: _root_.freestyle.FSHandler[F, _root_.monix.eval.Task], C: _root_.cats.Comonad[F], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
+       def bindService[F[_]](implicit algebra: $algName[F], EFF: _root_.cats.effect.Effect[F], HTask: _root_.freestyle.free.FSHandler[F, _root_.monix.eval.Task], C: _root_.cats.Comonad[F], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
            new _root_.freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(
       algName.value)}, ..$args).apply
      """
@@ -108,7 +108,7 @@ trait RPCService {
     q"""
        $wartSuppress
        class $clientName[M[_]](channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
-          (implicit AC : _root_.freestyle.async.AsyncContext[M], H: _root_.freestyle.FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext)
+          (implicit AC : _root_.freestyle.async.AsyncContext[M], H: _root_.freestyle.free.FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext)
           extends _root_.io.grpc.stub.AbstractStub[$clientName[M]](channel, options) {
 
           override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $clientName[M] = {
@@ -127,7 +127,7 @@ trait RPCService {
        def client[M[_]: _root_.freestyle.async.AsyncContext](
           channel: _root_.io.grpc.Channel,
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
-          (implicit H: _root_.freestyle.FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext) : $clientName[M] =
+          (implicit H: _root_.freestyle.free.FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext) : $clientName[M] =
              new ${clientName.ctorRef(Ctor.Name(clientName.value))}[M](channel, options)
      """
 }

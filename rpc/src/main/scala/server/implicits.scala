@@ -18,10 +18,10 @@ package freestyle.rpc
 package server
 
 import cats.{~>, Monad}
-import freestyle._
-import freestyle.implicits._
-import freestyle.logging._
-import freestyle.loggingJVM.implicits._
+import freestyle.free._
+import freestyle.free.implicits._
+import freestyle.free.logging._
+import freestyle.free.loggingJVM.implicits._
 
 import scala.concurrent.Future
 
@@ -69,6 +69,6 @@ object implicits
     with RPCAsyncImplicits
     with Syntax
     with Helpers
-    with freestyle.Interpreters
-    with freestyle.FreeSInstances
-    with freestyle.loggingJVM.Implicits
+    with freestyle.free.Interpreters
+    with freestyle.free.FreeSInstances
+    with freestyle.free.loggingJVM.Implicits

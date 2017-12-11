@@ -18,8 +18,9 @@ package freestyle.rpc
 
 import cats.effect.IO
 import cats.{~>, Monad, MonadError}
-import freestyle._
-import freestyle.asyncCatsEffect.implicits._
+import freestyle.free._
+import freestyle.tagless.tagless
+import freestyle.free.asyncCatsEffect.implicits._
 import freestyle.rpc.client._
 import freestyle.rpc.protocol._
 import freestyle.rpc.server._
@@ -52,7 +53,7 @@ object TaglessUtils {
     @message
     case class E(a: A, foo: String)
 
-    @freestyle.tagless.tagless
+    @tagless
     @service
     trait TaglessRPCService {
 
@@ -169,7 +170,7 @@ object TaglessUtils {
       import freestyle.rpc.TaglessUtils.clientProgram.MyRPCClient
       import service._
       import cats.implicits._
-      import freestyle.rpc.protocol._
+      import freestyle.rpc.protocol
 
       class TaglessRPCServiceClientHandler[F[_]: Monad](
           implicit client: TaglessRPCService.Client[F],
@@ -251,8 +252,8 @@ object TaglessUtils {
   object helpers {
 
     import cats.implicits._
-    import freestyle.implicits._
-    import freestyle.config.implicits._
+    import freestyle.free.implicits._
+    import freestyle.free.config.implicits._
 
     def createManagedChannel: ManagedChannel = {
 
