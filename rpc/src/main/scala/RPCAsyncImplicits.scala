@@ -21,6 +21,7 @@ import cats.effect.IO
 import cats.{~>, Comonad}
 
 import freestyle.free._
+import freestyle.async.implicits._
 import freestyle.rpc.client.handlers._
 import journal.Logger
 import monix.eval.Task
