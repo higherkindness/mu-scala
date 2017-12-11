@@ -203,7 +203,7 @@ object TaglessUtils extends CommonUtils {
 
   }
 
-  trait TaglessRuntime extends CommonRuntime {
+  trait TaglessRuntime {
 
     import service._
     import handlers.server._
