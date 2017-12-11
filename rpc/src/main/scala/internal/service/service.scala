@@ -108,7 +108,7 @@ trait RPCService {
     q"""
        $wartSuppress
        class $clientName[M[_]](channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
-          (implicit AC : _root_.freestyle.free.async.AsyncContext[M], H: _root_.freestyle.free.FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext)
+          (implicit AC : _root_.freestyle.async.AsyncContext[M], H: _root_.freestyle.free.FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext)
           extends _root_.io.grpc.stub.AbstractStub[$clientName[M]](channel, options) {
 
           override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $clientName[M] = {
@@ -124,7 +124,7 @@ trait RPCService {
   val clientInstance =
     q"""
        $wartSuppress
-       def client[M[_]: _root_.freestyle.free.async.AsyncContext](
+       def client[M[_]: _root_.freestyle.async.AsyncContext](
           channel: _root_.io.grpc.Channel,
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
           (implicit H: _root_.freestyle.free.FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext) : $clientName[M] =

@@ -32,10 +32,10 @@ class TaskMHandlerTests extends RpcClientTestSuite {
   "TaskMHandler" should {
 
     "transform monix.eval.Task into any effect F, if an implicit evidence of " +
-      "freestyle.free.async.AsyncContext[F] is provided" in {
+      "freestyle.async.AsyncContext[F] is provided" in {
 
       implicit val S: monix.execution.Scheduler = monix.execution.Scheduler.Implicits.global
-      import freestyle.free.async.implicits.futureAsyncContext
+      import freestyle.async.implicits.futureAsyncContext
 
       val handler: Task ~> Future = task2Future
       val fooTask: Task[String]   = Task.now(foo)
@@ -46,7 +46,7 @@ class TaskMHandlerTests extends RpcClientTestSuite {
     "recover from a failed monix.eval.Task wrapping them into scala.concurrent.Future" in {
 
       implicit val S: monix.execution.Scheduler = monix.execution.Scheduler.Implicits.global
-      import freestyle.free.async.implicits.futureAsyncContext
+      import freestyle.async.implicits.futureAsyncContext
 
       val handler: Task ~> Future  = task2Future
       val taskFailed: Task[String] = Task.raiseError(new RuntimeException(failureMessage))
