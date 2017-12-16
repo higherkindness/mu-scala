@@ -253,24 +253,14 @@ object Utils {
     import freestyle.implicits._
     import freestyle.config.implicits._
 
-    def createManagedChannel: ManagedChannel = {
-
-      val channelFor: ManagedChannelFor =
-        ConfigForAddress[ChannelConfig.Op]("rpc.client.host", "rpc.client.port")
-          .interpret[Try] match {
-          case Success(c) => c
-          case Failure(e) =>
-            e.printStackTrace()
-            throw new RuntimeException("Unable to load the client configuration", e)
-        }
-
-      val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
-
-      val managedChannelInterpreter =
-        new ManagedChannelInterpreter[ConcurrentMonad](channelFor, channelConfigList)
-
-      managedChannelInterpreter.build(channelFor, channelConfigList)
-    }
+    def createManagedChannelFor: ManagedChannelFor =
+      ConfigForAddress[ChannelConfig.Op]("rpc.client.host", "rpc.client.port")
+        .interpret[Try] match {
+        case Success(c) => c
+        case Failure(e) =>
+          e.printStackTrace()
+          throw new RuntimeException("Unable to load the client configuration", e)
+      }
 
     def createServerConf(grpcConfigs: List[GrpcConfig]): ServerW =
       BuildServerFromConfig[ServerConfig.Op]("rpc.server.port", grpcConfigs)
@@ -339,7 +329,7 @@ object Utils {
     //////////////////////////////////
 
     implicit val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
-      RPCService.client[ConcurrentMonad](createManagedChannel)
+      RPCService.client[ConcurrentMonad](createManagedChannelFor)
 
     implicit val freesRPCServiceClientHandler: FreesRPCServiceClientHandler[ConcurrentMonad] =
       new FreesRPCServiceClientHandler[ConcurrentMonad]
