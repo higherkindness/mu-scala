@@ -16,7 +16,7 @@
 
 package freestyle.rpc
 
-import freestyle._
+import freestyle.free._
 import org.scalatest._
 import freestyle.rpc.server.GrpcServerApp
 import freestyle.rpc.TaglessUtils.clientProgram.MyRPCClient

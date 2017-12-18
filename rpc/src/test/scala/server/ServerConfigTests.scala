@@ -20,9 +20,9 @@ package server
 import cats.Id
 import cats.data.Kleisli
 import cats.implicits._
-import freestyle._
-import freestyle.implicits._
-import freestyle.config.implicits._
+import freestyle.free._
+import freestyle.free.implicits._
+import freestyle.free.config.implicits._
 import io.grpc.Server
 
 import scala.collection.JavaConverters._

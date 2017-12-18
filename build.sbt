@@ -28,7 +28,10 @@ lazy val common = project
   .settings(moduleName := "frees-rpc-common")
   .settings(scalacOptions := Seq("-deprecation", "-encoding", "UTF-8", "-feature", "-unchecked"))
 
-lazy val freesV = "0.4.6"
+lazy val V = new {
+    val frees: String = "0.5.0"
+    val grpc: String = "1.7.1"
+}
 
 lazy val rpc = project
   .in(file("rpc"))
@@ -40,19 +43,18 @@ lazy val rpc = project
       scalacOptions += "-Ywarn-unused-import",
       libraryDependencies ++= commonDeps ++
         Seq(
-          %%("frees-core", freesV),
-          %%("frees-async", freesV),
-          %%("frees-async-guava", freesV),
-          %%("frees-async-cats-effect", freesV),
-          %%("frees-config", freesV),
-          %%("frees-logging", freesV),
-          %%("frees-tagless", freesV),
-          %("grpc-all", "1.7.0"),
+          %%("frees-core", V.frees),
+          %%("frees-async", V.frees),
+          %%("frees-async-guava", V.frees),
+          %%("frees-async-cats-effect", V.frees),
+          %%("frees-config", V.frees),
+          %%("frees-logging", V.frees),
+          %("grpc-all", V.grpc),
           %%("monix"),
           %%("pbdirect", "0.0.7"),
           "com.sksamuel.avro4s" %% "avro4s-core" % "1.8.0",
           %%("scalameta-contrib", "1.8.0"),
-          %("grpc-testing")        % Test,
+          %("grpc-testing", V.grpc) % Test,
           %%("scalatest")          % Test,
           %%("scalamockScalatest") % Test
         )
