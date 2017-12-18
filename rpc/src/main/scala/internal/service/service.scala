@@ -125,10 +125,16 @@ trait RPCService {
     q"""
        $wartSuppress
        def client[M[_]: _root_.freestyle.async.AsyncContext](
-          channel: _root_.io.grpc.Channel,
-          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
-          (implicit H: _root_.freestyle.FSHandler[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext) : $clientName[M] =
-             new ${clientName.ctorRef(Ctor.Name(clientName.value))}[M](channel, options)
+         channelFor: _root_.freestyle.rpc.client.ManagedChannelFor,
+         channelConfigList: List[_root_.freestyle.rpc.client.ManagedChannelConfig] = List(
+           _root_.freestyle.rpc.client.UsePlaintext(true)),
+           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)(
+         implicit H: _root_.freestyle.FSHandler[_root_.monix.eval.Task, M],
+             E: _root_.scala.concurrent.ExecutionContext): $clientName[M] = {
+         val managedChannelInterpreter =
+           new _root_.freestyle.rpc.client.ManagedChannelInterpreter[M](channelFor, channelConfigList)
+         new ${clientName.ctorRef(Ctor.Name(clientName.value))}[M](managedChannelInterpreter.build(channelFor, channelConfigList), options)
+       }
      """
 }
 
