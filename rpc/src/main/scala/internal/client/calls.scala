@@ -20,7 +20,8 @@ package internal
 package client
 
 import freestyle.async.AsyncContext
-import freestyle.asyncGuava.implicits._
+import freestyle.free._
+import freestyle.free.asyncGuava.implicits._
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
 import io.grpc.stub.{ClientCalls, StreamObserver}
 import monix.eval.Task
@@ -31,7 +32,7 @@ import scala.concurrent.ExecutionContext
 
 object calls {
 
-  import internal.converters._
+  import freestyle.rpc.internal.converters._
 
   def unary[M[_], Req, Res](
       request: Req,

@@ -17,7 +17,7 @@
 package freestyle.rpc
 package server
 
-import freestyle._
+import freestyle.free._
 import io.grpc._
 
 import scala.concurrent.duration.TimeUnit

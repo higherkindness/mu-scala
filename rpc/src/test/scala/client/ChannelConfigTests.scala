@@ -18,9 +18,9 @@ package freestyle.rpc
 package client
 
 import cats.instances.try_._
-import freestyle._
-import freestyle.implicits._
-import freestyle.config.implicits._
+import freestyle.free._
+import freestyle.free.implicits._
+import freestyle.free.config.implicits._
 
 import scala.util.{Success, Try}
 

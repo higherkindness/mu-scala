@@ -20,8 +20,8 @@ package client
 import java.util.concurrent.{Executor, TimeUnit}
 
 import cats.implicits._
-import freestyle._
-import freestyle.config.ConfigM
+import freestyle.free._
+import freestyle.free.config.ConfigM
 import io.grpc._
 
 sealed trait ManagedChannelFor                               extends Product with Serializable

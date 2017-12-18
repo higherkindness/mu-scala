@@ -27,9 +27,9 @@ import scala.util.{Failure, Success, Try}
 trait CommonUtils {
 
   import cats.implicits._
-  import freestyle._
-  import freestyle.implicits._
-  import freestyle.config.implicits._
+  import freestyle.free._
+  import freestyle.free.implicits._
+  import freestyle.free.config.implicits._
 
   type ConcurrentMonad[A] = IO[A]
 
@@ -94,7 +94,7 @@ trait CommonUtils {
 
   trait CommonRuntime {
 
-    import freestyle._
+    import freestyle.free._
     import freestyle.rpc.server.implicits._
 
     implicit val S: monix.execution.Scheduler = monix.execution.Scheduler.Implicits.global

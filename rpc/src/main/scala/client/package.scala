@@ -18,7 +18,7 @@ package freestyle.rpc
 
 import cats.data.Kleisli
 import cats.~>
-import freestyle.FreeS
+import freestyle.free.FreeS
 
 import scala.collection.JavaConverters._
 import io.grpc._

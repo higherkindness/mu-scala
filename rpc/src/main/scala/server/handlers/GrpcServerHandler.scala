@@ -19,7 +19,7 @@ package server.handlers
 
 import cats.data.Kleisli
 import freestyle.rpc.server.{GrpcServer, GrpcServerOps}
-import freestyle.Capture
+import freestyle.free.Capture
 import io.grpc.{Server, ServerServiceDefinition}
 
 import scala.collection.JavaConverters._

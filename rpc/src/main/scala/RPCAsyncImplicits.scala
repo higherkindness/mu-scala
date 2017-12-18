@@ -19,6 +19,7 @@ package rpc
 
 import cats.effect.IO
 import cats.{~>, Comonad}
+import freestyle.free.Capture
 import freestyle.rpc.client.handlers._
 import journal.Logger
 import monix.eval.Task

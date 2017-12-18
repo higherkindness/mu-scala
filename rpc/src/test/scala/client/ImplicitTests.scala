@@ -17,7 +17,7 @@
 package freestyle.rpc
 package client
 
-import freestyle.FSHandler
+import freestyle.free.FSHandler
 import monix.eval.Task
 
 import scala.concurrent.Future

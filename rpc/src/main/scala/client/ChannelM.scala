@@ -17,7 +17,7 @@
 package freestyle.rpc
 package client
 
-import freestyle._
+import freestyle.free._
 import io.grpc.{CallOptions, ClientCall, MethodDescriptor}
 
 @free

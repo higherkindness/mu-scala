@@ -17,9 +17,9 @@
 package freestyle.rpc
 
 import cats.{~>, Monad, MonadError}
-import freestyle._
+import freestyle.free._
 import freestyle.rpc.Utils.database.a4
-import freestyle.asyncCatsEffect.implicits._
+import freestyle.free.asyncCatsEffect.implicits._
 import freestyle.rpc.protocol._
 import monix.eval.Task
 import monix.reactive.Observable
