@@ -19,6 +19,7 @@ package server
 
 import cats.Id
 import freestyle.rpc.server.implicits._
+import io.grpc.Server
 
 class HelperTests extends RpcServerTestSuite {
 
@@ -30,8 +31,8 @@ class HelperTests extends RpcServerTestSuite {
 
       server[GrpcServerApp.Op].bootstrapM[Id] shouldBe ((): Unit)
 
-      (serverMock.start _).verify()
-      (serverMock.awaitTermination _).verify()
+      (serverMock.start _: () => Server).verify()
+      (serverMock.awaitTermination _: () => Unit).verify()
     }
 
   }

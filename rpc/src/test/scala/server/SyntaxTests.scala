@@ -18,8 +18,8 @@ package freestyle.rpc
 package server
 
 import cats.Id
-import cats.implicits._
 import freestyle.rpc.server.implicits._
+import io.grpc.Server
 
 import scala.concurrent.ExecutionContext
 
@@ -35,18 +35,8 @@ class SyntaxTests extends RpcServerTestSuite {
 
       server[GrpcServerApp.Op].bootstrapM[Id] shouldBe ((): Unit)
 
-      (serverMock.start _).verify().once()
-      (serverMock.awaitTermination _).verify().once()
-    }
-
-    "allow using bootstrapFuture" in {
-
-      val f = server[GrpcServerApp.Op].bootstrapFuture.await
-
-      f shouldBe ((): Unit)
-
-      (serverMock.start _).verify().once()
-      (serverMock.awaitTermination _).verify().once()
+      (serverMock.start _: () => Server).verify().once()
+      (serverMock.awaitTermination _: () => Unit).verify().once()
     }
 
   }

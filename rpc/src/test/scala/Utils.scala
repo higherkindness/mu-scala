@@ -16,42 +16,17 @@
 
 package freestyle.rpc
 
-import cats.effect.IO
 import cats.{~>, Monad, MonadError}
 import freestyle._
 import freestyle.rpc.Utils.database.a4
 import freestyle.asyncCatsEffect.implicits._
-import freestyle.rpc.client._
 import freestyle.rpc.protocol._
-import freestyle.rpc.server._
-import io.grpc.ManagedChannel
 import monix.eval.Task
 import monix.reactive.Observable
 
-import scala.concurrent.duration._
-import scala.concurrent.Await
-import scala.util.{Failure, Success, Try}
-
-object Utils {
-
-  type ConcurrentMonad[A] = IO[A]
+object Utils extends CommonUtils {
 
   object service {
-
-    @message
-    case class A(x: Int, y: Int)
-
-    @message
-    case class B(a1: A, a2: A)
-
-    @message
-    case class C(foo: String, a: A)
-
-    @message
-    case class D(bar: Int)
-
-    @message
-    case class E(a: A, foo: String)
 
     @service
     trait RPCService[F[_]] {
@@ -87,26 +62,6 @@ object Utils {
 
   }
 
-  object database {
-
-    import service._
-
-    val i: Int = 5
-    val a1: A  = A(1, 2)
-    val a2: A  = A(10, 20)
-    val a3: A  = A(100, 200)
-    val a4: A  = A(1000, 2000)
-    val c1: C  = C("foo1", a1)
-    val c2: C  = C("foo2", a1)
-    val e1: E  = E(a3, "foo3")
-    val e2: E  = E(a4, "foo4")
-
-    val cList = List(c1, c2)
-    val eList = List(e1, e2)
-
-    val dResult: D = D(6)
-  }
-
   object handlers {
 
     object server {
@@ -135,7 +90,7 @@ object Utils {
           C.capture(c1)
 
         def serverStreaming(b: B): F[Observable[C]] = {
-          helpers.debug(s"[SERVER] b -> $b")
+          debug(s"[SERVER] b -> $b")
           val obs = Observable.fromIterable(cList)
           C.capture(obs)
         }
@@ -144,7 +99,7 @@ object Utils {
           T2F(
             oa.foldLeftL(D(0)) {
               case (current, a) =>
-                helpers.debug(s"[SERVER] Current -> $current / a -> $a")
+                debug(s"[SERVER] Current -> $current / a -> $a")
                 D(current.bar + a.x + a.y)
             }
           )
@@ -167,7 +122,6 @@ object Utils {
 
       import freestyle.rpc.Utils.clientProgram.MyRPCClient
       import service._
-      import cats.implicits._
       import freestyle.rpc.protocol._
 
       class FreesRPCServiceClientHandler[F[_]: Monad](
@@ -206,7 +160,7 @@ object Utils {
             .zipWithIndex
             .map {
               case (c, i) =>
-                helpers.debug(s"[CLIENT] Result #$i: $c")
+                debug(s"[CLIENT] Result #$i: $c")
                 c
             }
             .toListL
@@ -229,8 +183,6 @@ object Utils {
 
   object clientProgram {
 
-    import service._
-
     @free
     trait MyRPCClient {
       def notAllowed(b: Boolean): FS[C]
@@ -247,67 +199,13 @@ object Utils {
     }
   }
 
-  object helpers {
-
-    import cats.implicits._
-    import freestyle.implicits._
-    import freestyle.config.implicits._
-
-    def createManagedChannelFor: ManagedChannelFor =
-      ConfigForAddress[ChannelConfig.Op]("rpc.client.host", "rpc.client.port")
-        .interpret[Try] match {
-        case Success(c) => c
-        case Failure(e) =>
-          e.printStackTrace()
-          throw new RuntimeException("Unable to load the client configuration", e)
-      }
-
-    def createServerConf(grpcConfigs: List[GrpcConfig]): ServerW =
-      BuildServerFromConfig[ServerConfig.Op]("rpc.server.port", grpcConfigs)
-        .interpret[Try] match {
-        case Success(c) => c
-        case Failure(e) =>
-          e.printStackTrace()
-          throw new RuntimeException("Unable to load the server configuration", e)
-      }
-
-    def serverStart[M[_]](implicit APP: GrpcServerApp[M]): FreeS[M, Unit] = {
-      val server = APP.server
-      val log    = APP.log
-      for {
-        _    <- server.start()
-        port <- server.getPort
-        _    <- log.info(s"Server started, listening on $port")
-      } yield ()
-    }
-
-    def serverStop[M[_]](implicit APP: GrpcServerApp[M]): FreeS[M, Unit] = {
-      val server = APP.server
-      val log    = APP.log
-      for {
-        port <- server.getPort
-        _    <- log.info(s"Stopping server listening on $port")
-        _    <- server.shutdownNow()
-      } yield ()
-    }
-
-    def debug(str: String): Unit =
-      println(s"\n\n$str\n\n")
-
-  }
-
-  trait FreesRuntime {
+  trait FreesRuntime extends CommonRuntime {
 
     import service._
-    import helpers._
     import handlers.server._
     import handlers.client._
-    import cats.implicits._
     import freestyle.rpc.server._
     import freestyle.rpc.server.implicits._
-    import freestyle.rpc.server.handlers._
-
-    implicit val S: monix.execution.Scheduler = monix.execution.Scheduler.Implicits.global
 
     //////////////////////////////////
     // Server Runtime Configuration //
@@ -320,9 +218,7 @@ object Utils {
       AddService(RPCService.bindService[ConcurrentMonad])
     )
 
-    implicit val grpcServerHandler: GrpcServer.Op ~> ConcurrentMonad =
-      new GrpcServerHandler[ConcurrentMonad] andThen
-        new GrpcKInterpreter[ConcurrentMonad](createServerConf(grpcConfigs).server)
+    implicit val serverW: ServerW = createServerConf(grpcConfigs)
 
     //////////////////////////////////
     // Client Runtime Configuration //
@@ -333,17 +229,6 @@ object Utils {
 
     implicit val freesRPCServiceClientHandler: FreesRPCServiceClientHandler[ConcurrentMonad] =
       new FreesRPCServiceClientHandler[ConcurrentMonad]
-
-    ////////////
-    // Syntax //
-    ////////////
-
-    implicit class InterpreterOps[F[_], A](fs: FreeS[F, A])(
-        implicit H: FSHandler[F, ConcurrentMonad]) {
-
-      def runF: A = Await.result(fs.interpret[ConcurrentMonad].unsafeToFuture(), Duration.Inf)
-
-    }
 
   }
 
