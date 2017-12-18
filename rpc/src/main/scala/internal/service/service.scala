@@ -158,7 +158,7 @@ private[internal] case class RPCRequest(
     responseType: Type) {
 
   val wartSuppress =
-    mod"""@_root_.java.lang.SuppressWarnings(_root_.scala.Array("org.wartremover.warts.Null"))"""
+    mod"""@_root_.java.lang.SuppressWarnings(_root_.scala.Array("org.wartremover.warts.Null","org.wartremover.warts.ExplicitImplicitTypes"))"""
 
   val descriptorName: Term.Name = name.copy(value = name.value + "MethodDescriptor")
 
@@ -241,11 +241,11 @@ private[internal] object utils {
 
   def mkCompanion(name: Type.Name, stats: Seq[Stat]): Object = {
     val prot = q"""@_root_.java.lang.SuppressWarnings(_root_.scala.Array(
-                                           "org.wartremover.warts.Any",
-                                           "org.wartremover.warts.AsInstanceOf",
-                                           "org.wartremover.warts.Throw"
-                                         ))
-                                         object X {}"""
+               "org.wartremover.warts.Any",
+               "org.wartremover.warts.NonUnitStatements",
+               "org.wartremover.warts.StringPlusAny",
+               "org.wartremover.warts.Throw"))
+               object X {}"""
 
     prot.copy(
       name = Term.Name(name.value),
