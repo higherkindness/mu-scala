@@ -1,5 +1,13 @@
 # Changelog
 
+## 12/18/2017 - Version 0.5.0
+
+Release changes:
+
+* Upgrades to Freestyle 0.5.0 ([#99](https://github.com/frees-io/freestyle-rpc/pull/99))
+* Adds additional SuppressWarnings built-in warts ([#100](https://github.com/frees-io/freestyle-rpc/pull/100))
+
+
 ## 12/18/2017 - Version 0.4.2
 
 Release changes:
