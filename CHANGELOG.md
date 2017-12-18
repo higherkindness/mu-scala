@@ -1,5 +1,13 @@
 # Changelog
 
+## 12/18/2017 - Version 0.4.2
+
+Release changes:
+
+* Reduces boilerplate when creating client instances ([#97](https://github.com/frees-io/freestyle-rpc/pull/97))
+* Reduces Boilerplate in Server creation ([#98](https://github.com/frees-io/freestyle-rpc/pull/98))
+
+
 ## 12/05/2017 - Version 0.4.1
 
 Release changes:
