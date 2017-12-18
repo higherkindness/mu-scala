@@ -22,13 +22,19 @@ import freestyle._
 import freestyle.implicits._
 import freestyle.logging._
 import freestyle.loggingJVM.implicits._
-
-import scala.concurrent.Future
+import freestyle.rpc.server.handlers.GrpcServerHandler
 
 @module
 trait GrpcServerApp {
   val server: GrpcServer
   val log: LoggingM
+}
+
+trait ServerImplicits {
+
+  implicit def grpcServerHandler[M[_]: Capture](implicit SW: ServerW): GrpcServer.Op ~> M =
+    new GrpcServerHandler[M] andThen new GrpcKInterpreter[M](SW.server)
+
 }
 
 trait Syntax {
@@ -39,11 +45,6 @@ trait Syntax {
 
     def bootstrapM[M[_]: Monad](implicit handler: GrpcServer.Op ~> M): M[Unit] =
       server.interpret[M]
-
-    def bootstrapFuture(
-        implicit MF: Monad[Future],
-        handler: GrpcServer.Op ~> Future): Future[Unit] =
-      server.interpret[Future]
 
   }
 }
@@ -69,6 +70,7 @@ object implicits
     with RPCAsyncImplicits
     with Syntax
     with Helpers
+    with ServerImplicits
     with freestyle.Interpreters
     with freestyle.FreeSInstances
     with freestyle.loggingJVM.Implicits

@@ -37,6 +37,7 @@ lazy val rpc = project
   .settings(scalaMetaSettings: _*)
   .settings(
     Seq(
+      scalacOptions += "-Ywarn-unused-import",
       libraryDependencies ++= commonDeps ++
         Seq(
           %%("frees-core", freesV),

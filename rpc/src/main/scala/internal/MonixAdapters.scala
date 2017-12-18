@@ -21,7 +21,6 @@ package internal
 import cats.instances.future._
 import cats.~>
 import io.grpc.stub.StreamObserver
-import monix.eval.Callback
 import monix.execution.Ack.{Continue, Stop}
 import monix.execution.{Ack, Scheduler}
 import monix.reactive.Observable.Operator

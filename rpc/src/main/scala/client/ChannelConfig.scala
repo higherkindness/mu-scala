@@ -22,8 +22,6 @@ import java.util.concurrent.{Executor, TimeUnit}
 import cats.implicits._
 import freestyle._
 import freestyle.config.ConfigM
-import freestyle.config.implicits._
-import freestyle.rpc.client._
 import io.grpc._
 
 sealed trait ManagedChannelFor                               extends Product with Serializable

@@ -164,7 +164,7 @@ private[internal] case class RPCRequest(
 
   val encodersImport: Import = serialization match {
     case Protobuf =>
-      q"import _root_.pbdirect._, _root_.freestyle.rpc.internal.service.encoders.pbd._"
+      q"import _root_.freestyle.rpc.internal.service.encoders.pbd._"
     case Avro =>
       q"import _root_.freestyle.rpc.internal.service.encoders.avro._"
   }

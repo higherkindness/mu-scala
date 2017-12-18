@@ -24,10 +24,8 @@ import freestyle.rpc.protocol.Empty
 
 class FreesRPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
-  import cats.implicits._
-  import freestyle.rpc.TaglessUtils.service._
+  import freestyle.rpc.Utils._
   import freestyle.rpc.TaglessUtils.database._
-  import freestyle.rpc.TaglessUtils.helpers._
   import freestyle.rpc.TaglessUtils.implicits._
 
   override protected def beforeAll(): Unit = {

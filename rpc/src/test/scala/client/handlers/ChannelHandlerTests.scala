@@ -44,7 +44,7 @@ class ChannelHandlerTests extends RpcClientTestSuite {
 
     "allow to fetch the authority of the destination the channel connects to" in {
 
-      (managedChannelMock.authority _).expects().returns(authority)
+      (managedChannelMock.authority _: () => String).expects().returns(authority)
 
       runKFuture(handler.authority, managedChannelMock) shouldBe authority
     }

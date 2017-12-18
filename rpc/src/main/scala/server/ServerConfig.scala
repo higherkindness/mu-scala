@@ -20,7 +20,6 @@ package server
 import cats.implicits._
 import freestyle._
 import freestyle.config.ConfigM
-import freestyle.config.implicits._
 import io.grpc.Server
 
 case class ServerW(port: Int, configList: List[GrpcConfig]) {

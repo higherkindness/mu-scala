@@ -80,17 +80,21 @@ class GrpcServerTests extends RpcServerTestSuite {
         b,
         unit): Result)
 
-      (serverMock.start _).verify().once()
-      (serverMock.getPort _).verify().once()
-      (serverMock.getServices _).verify().once()
-      (serverMock.getImmutableServices _).verify().once()
-      (serverMock.getMutableServices _).verify().once()
-      (serverMock.shutdown _).verify().once()
-      (serverMock.shutdownNow _).verify().once()
-      (serverMock.isShutdown _).verify().twice()
-      (serverMock.isTerminated _).verify().once()
+      (serverMock.start _: () => Server).verify().once()
+      (serverMock.getPort _: () => Int).verify().once()
+      (serverMock.getServices _: () => java.util.List[ServerServiceDefinition]).verify().once()
+      (serverMock.getImmutableServices _: () => java.util.List[ServerServiceDefinition])
+        .verify()
+        .once()
+      (serverMock.getMutableServices _: () => java.util.List[ServerServiceDefinition])
+        .verify()
+        .once()
+      (serverMock.shutdown _: () => Server).verify().once()
+      (serverMock.shutdownNow _: () => Server).verify().once()
+      (serverMock.isShutdown _: () => Boolean).verify().twice()
+      (serverMock.isTerminated _: () => Boolean).verify().once()
       (serverMock.awaitTermination(_: Long, _: TimeUnit)).verify(timeout, timeoutUnit).once()
-      (serverMock.awaitTermination _).verify().once()
+      (serverMock.awaitTermination _: () => Unit).verify().once()
     }
 
   }

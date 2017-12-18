@@ -14,24 +14,14 @@
  * limitations under the License.
  */
 
-package freestyle
-package rpc
-package client.handlers
+package freestyle.rpc
 
-import freestyle.async.AsyncContext
-import monix.eval.{Callback, Task}
-import monix.execution.Scheduler
+case class A(x: Int, y: Int)
 
-class TaskMHandler[F[_]](implicit AC: AsyncContext[F], S: Scheduler) extends FSHandler[Task, F] {
+case class B(a1: A, a2: A)
 
-  override def apply[A](fa: Task[A]): F[A] = AC.runAsync { cb =>
-    fa.runAsync {
-      new Callback[A] {
-        override def onSuccess(value: A): Unit = cb(Right(value))
+case class C(foo: String, a: A)
 
-        override def onError(ex: Throwable): Unit = cb(Left(ex))
-      }
-    }
-    (): Unit
-  }
-}
+case class D(bar: Int)
+
+case class E(a: A, foo: String)

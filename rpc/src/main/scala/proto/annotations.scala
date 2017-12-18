@@ -26,7 +26,6 @@ package object protocol {
 
   @compileTimeOnly("enable macro paradise to expand @free macro annotations")
   class service extends StaticAnnotation {
-    import scala.meta._
 
     inline def apply(defn: Any): Any = meta { serviceImpl.service(defn) }
   }
