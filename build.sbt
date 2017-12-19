@@ -45,7 +45,7 @@ lazy val rpc = project
         Seq(
           %%("frees-core", V.frees),
           %%("frees-async", V.frees),
-          %%("frees-async-guava", V.frees),
+          %%("frees-async-guava", V.frees) exclude ("com.google.guava", "guava"),
           %%("frees-async-cats-effect", V.frees),
           %%("frees-config", V.frees),
           %%("frees-logging", V.frees),
