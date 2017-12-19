@@ -1,5 +1,12 @@
 # Changelog
 
+## 12/19/2017 - Version 0.5.1
+
+Release changes:
+
+* Supports inner imports within @service macro. ([#101](https://github.com/frees-io/freestyle-rpc/pull/101))
+
+
 ## 12/18/2017 - Version 0.5.0
 
 Release changes:
