@@ -53,7 +53,7 @@ object serviceImpl {
   def serviceExtras(name: Type.Name, alg: Defn): Term.Block = {
     import utils._
     val serviceAlg = ServiceAlg(alg)
-    Term.Block(Seq(alg) ++ Seq(mkCompanion(name, enrich(serviceAlg, Nil))))
+    Term.Block(Seq(alg) ++ Seq(mkCompanion(name, enrich(serviceAlg, serviceAlg.innerImports))))
   }
 
   def enrich(serviceAlg: TaglessServiceAlg, companion: Object): Object = companion match {
@@ -84,8 +84,18 @@ trait RPCService {
     case t: Trait => (t.name, t.templ)
   }
 
-  val requests: List[RPCRequest] =
-    buildRequests(algName, typeParam, template.stats.toList.flatten)
+  val allServiceStats: List[Stat] = template.stats.toList.flatten
+
+  val rpcMethods: List[Stat] = allServiceStats.filter { s =>
+    s match {
+      case q"import ..$_" => false
+      case _              => true
+    }
+  }
+
+  val innerImports: List[Stat] = (allServiceStats.toSet -- rpcMethods).toList
+
+  val requests: List[RPCRequest] = buildRequests(algName, typeParam, rpcMethods)
 
   val methodDescriptors: Seq[Defn.Val] = requests.map(_.methodDescriptor)
 

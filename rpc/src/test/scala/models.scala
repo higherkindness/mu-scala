@@ -25,3 +25,7 @@ case class C(foo: String, a: A)
 case class D(bar: Int)
 
 case class E(a: A, foo: String)
+
+object ExternalScope {
+  case class External(e: E)
+}
