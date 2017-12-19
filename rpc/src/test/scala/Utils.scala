@@ -31,6 +31,8 @@ object Utils extends CommonUtils {
     @service
     trait RPCService[F[_]] {
 
+      import ExternalScope._
+
       @rpc(Protobuf) def notAllowed(b: Boolean): F[C]
 
       @rpc(Avro) def unary(a: A): F[C]
@@ -58,6 +60,9 @@ object Utils extends CommonUtils {
       @rpc(Avro)
       @stream[BidirectionalStreaming.type]
       def biStreaming(oe: Observable[E]): F[Observable[E]]
+
+      @rpc(Protobuf)
+      def scope(empty: Empty.type): F[External]
     }
 
   }
@@ -114,6 +119,10 @@ object Utils extends CommonUtils {
           }
 
         def save(e: E) = e // do something else with e?
+
+        import ExternalScope._
+
+        override def scope(empty: protocol.Empty.type): F[External] = C.capture(External(e1))
       }
 
     }
