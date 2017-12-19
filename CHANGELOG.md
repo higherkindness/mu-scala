@@ -1,5 +1,12 @@
 # Changelog
 
+## 12/19/2017 - Version 0.5.2
+
+Release changes:
+
+* Excludes Guava from frees-async-guava ([#102](https://github.com/frees-io/freestyle-rpc/pull/102))
+
+
 ## 12/19/2017 - Version 0.5.1
 
 Release changes:
