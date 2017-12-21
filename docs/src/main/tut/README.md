@@ -56,7 +56,7 @@ For Scala `2.11.x` and `2.12.x`:
 [comment]: # (Start Replace)
 
 ```scala
-libraryDependencies += "io.frees" %% "frees-rpc" % "0.5.2"
+libraryDependencies += "io.frees" %% "frees-rpc" % "0.6.0"
 ```
 
 [comment]: # (End Replace)
