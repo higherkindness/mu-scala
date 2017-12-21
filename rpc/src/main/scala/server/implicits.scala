@@ -39,9 +39,7 @@ trait ServerImplicits {
 
 trait Syntax {
 
-  implicit def serverOps(server: FreeS[GrpcServerApp.Op, Unit]): ServerOps = new ServerOps(server)
-
-  final class ServerOps(server: FreeS[GrpcServerApp.Op, Unit]) {
+  implicit class serverOps(server: FreeS[GrpcServerApp.Op, Unit]) {
 
     def bootstrapM[M[_]: Monad](implicit handler: GrpcServer.Op ~> M): M[Unit] =
       server.interpret[M]

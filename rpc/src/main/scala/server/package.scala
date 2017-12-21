@@ -27,7 +27,7 @@ package object server {
 
   val defaultPort = 50051
 
-  class GrpcKInterpreter[F[_]](server: Server) extends (Kleisli[F, Server, ?] ~> F) {
+  final class GrpcKInterpreter[F[_]](server: Server) extends (Kleisli[F, Server, ?] ~> F) {
 
     override def apply[B](fa: Kleisli[F, Server, B]): F[B] =
       fa(server)

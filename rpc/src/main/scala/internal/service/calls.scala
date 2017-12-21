@@ -20,9 +20,6 @@ package internal
 package service
 
 import cats.effect.{Effect, IO}
-import cats.effect.implicits._
-import cats.implicits._
-import cats.{~>, Comonad}
 import io.grpc.stub.ServerCalls.{
   BidiStreamingMethod,
   ClientStreamingMethod,
@@ -31,7 +28,6 @@ import io.grpc.stub.ServerCalls.{
 }
 import io.grpc.stub.StreamObserver
 import io.grpc.{Status, StatusException}
-import monix.eval.Task
 import monix.execution.{Ack, Scheduler}
 import monix.reactive.{Observable, Observer, Pipe}
 import monix.reactive.observers.Subscriber
@@ -42,54 +38,53 @@ object calls {
 
   import converters._
 
-  def unaryMethod[F[_], Req, Res](f: (Req) => F[Res])(
+  def unaryMethod[F[_], Req, Res](f: Req => F[Res])(
       implicit EFF: Effect[F]): UnaryMethod[Req, Res] =
     new UnaryMethod[Req, Res] {
       override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit =
         EFF
-          .attempt(f(request))
-          .map(completeObserver(responseObserver))
-          .runAsync(_ => IO.pure(()))
+          .runAsync(f(request))(either => IO(completeObserver(responseObserver)(either)))
           .unsafeRunAsync(_ => ())
     }
 
-  def clientStreamingMethod[F[_], Req, Res](f: (Observable[Req]) => F[Res])(
+  def clientStreamingMethod[F[_], Req, Res](f: Observable[Req] => F[Res])(
       implicit EFF: Effect[F],
-      HTask: F ~> Task,
       S: Scheduler): ClientStreamingMethod[Req, Res] = new ClientStreamingMethod[Req, Res] {
 
-    override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
+    override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] =
       transform[Req, Res](
-        inputObservable => Observable.fromTask(HTask(f(inputObservable))),
+        inputObservable => Observable.fromEffect(f(inputObservable)),
         responseObserver
       )
-    }
   }
 
-  def serverStreamingMethod[F[_], Req, Res](f: (Req) => F[Observable[Res]])(
-      implicit C: Comonad[F],
+  def serverStreamingMethod[F[_], Req, Res](f: Req => F[Observable[Res]])(
+      implicit EFF: Effect[F],
       S: Scheduler): ServerStreamingMethod[Req, Res] = new ServerStreamingMethod[Req, Res] {
 
-    override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
-      C.extract(f(request)).subscribe(responseObserver)
-      (): Unit
-    }
+    override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit =
+      EFF
+        .runAsync(f(request)) {
+          case Right(obs) => IO(obs.subscribe(responseObserver))
+          case Left(e)    => IO.raiseError(e) // this will throw, but consistent previous impl
+        }
+        .unsafeRunSync
   }
 
-  def bidiStreamingMethod[F[_], Req, Res](f: (Observable[Req]) => F[Observable[Res]])(
-      implicit C: Comonad[F],
+  def bidiStreamingMethod[F[_], Req, Res](f: Observable[Req] => F[Observable[Res]])(
+      implicit EFF: Effect[F],
       S: Scheduler): BidiStreamingMethod[Req, Res] = new BidiStreamingMethod[Req, Res] {
 
-    override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
-      transform[Req, Res](
-        (inputObservable: Observable[Req]) => C.extract(f(inputObservable)),
-        StreamObserver2Subscriber(responseObserver)
-      )
-    }
+    override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] =
+      Subscriber2StreamObserver {
+        transform[Req, Res](
+          (inputObservable: Observable[Req]) => Observable.fromEffect(f(inputObservable)).flatten,
+          StreamObserver2Subscriber(responseObserver)
+        )
+      }
   }
 
-  private[this] def completeObserver[A](observer: StreamObserver[A])(
-      t: Either[Throwable, A]): Unit = t match {
+  private[this] def completeObserver[A](observer: StreamObserver[A]): Either[Throwable, A] => Unit = {
     case Right(value) =>
       observer.onNext(value)
       observer.onCompleted()

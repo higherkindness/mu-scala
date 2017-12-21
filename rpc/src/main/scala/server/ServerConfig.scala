@@ -17,7 +17,7 @@
 package freestyle.rpc
 package server
 
-import cats.implicits._
+import cats.syntax.either._
 import freestyle.free._
 import freestyle.free.config.ConfigM
 import io.grpc.Server

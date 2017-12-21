@@ -19,7 +19,7 @@ package client
 
 import java.util.concurrent.{Executor, TimeUnit}
 
-import cats.implicits._
+import cats.syntax.either._
 import freestyle.free._
 import freestyle.free.config.ConfigM
 import io.grpc._
