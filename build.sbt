@@ -1,8 +1,20 @@
 import sbtorgpolicies.templates.badges._
+import sbtorgpolicies.runnable.syntax._
+
+lazy val V = new {
+  val frees: String = "0.5.0"
+  val grpc: String = "1.7.1"
+}
 
 pgpPassphrase := Some(getEnvVar("PGP_PASSPHRASE").getOrElse("").toCharArray)
 pgpPublicRing := file(s"$gpgFolder/pubring.gpg")
 pgpSecretRing := file(s"$gpgFolder/secring.gpg")
+
+orgAfterCISuccessTaskListSetting := List(
+  depUpdateDependencyIssues.asRunnableItem,
+  orgPublishReleaseTask.asRunnableItem(allModules = true, aggregated = false, crossScalaVersions = true),
+  orgUpdateDocFiles.asRunnableItem
+)
 
 lazy val root = project
   .in(file("."))
@@ -28,25 +40,21 @@ lazy val docs = project
   .dependsOn(common, rpc)
   .aggregate(common, rpc)
   .settings(name := "frees-rpc-docs")
-  .settings(micrositeSettings: _*)
   .settings(noPublishSettings: _*)
   .settings(
     addCompilerPlugin(%%("scalameta-paradise") cross CrossVersion.full),
     libraryDependencies += %%("scalameta", "1.8.0"),
     scalacOptions += "-Xplugin-require:macroparadise",
-    scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
+    scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains),
+    // Pointing to https://github.com/frees-io/freestyle/tree/master/docs/src/main/tut/docs/rpc
+    tutTargetDirectory := baseDirectory.value.getParentFile.getParentFile / "docs" / "src" / "main" / "tut" / "docs" / "rpc"
   )
-  .enablePlugins(MicrositesPlugin)
+  .enablePlugins(TutPlugin)
 
 lazy val common = project
   .in(file("common"))
   .settings(moduleName := "frees-rpc-common")
   .settings(scalacOptions := Seq("-deprecation", "-encoding", "UTF-8", "-feature", "-unchecked"))
-
-lazy val V = new {
-    val frees: String = "0.5.0"
-    val grpc: String = "1.7.1"
-}
 
 lazy val rpc = project
   .in(file("rpc"))
