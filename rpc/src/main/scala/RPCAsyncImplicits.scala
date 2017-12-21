@@ -21,7 +21,6 @@ import cats.~>
 import cats.arrow.FunctionK
 import cats.effect.{IO, Sync}
 import freestyle.free.Capture
-import freestyle.rpc.client.handlers._
 import journal.Logger
 import monix.eval.Task
 import monix.execution.Scheduler
