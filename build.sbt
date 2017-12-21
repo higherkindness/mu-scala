@@ -20,8 +20,23 @@ lazy val root = project
         GitHubIssuesBadge.apply
     )
   )
+  .dependsOn(common, rpc, docs)
+  .aggregate(common, rpc, docs)
+
+lazy val docs = project
+  .in(file("docs"))
   .dependsOn(common, rpc)
   .aggregate(common, rpc)
+  .settings(name := "frees-rpc-docs")
+  .settings(micrositeSettings: _*)
+  .settings(noPublishSettings: _*)
+  .settings(
+    addCompilerPlugin(%%("scalameta-paradise") cross CrossVersion.full),
+    libraryDependencies += %%("scalameta", "1.8.0"),
+    scalacOptions += "-Xplugin-require:macroparadise",
+    scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
+  )
+  .enablePlugins(MicrositesPlugin)
 
 lazy val common = project
   .in(file("common"))
