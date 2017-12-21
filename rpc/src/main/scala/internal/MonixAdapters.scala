@@ -18,8 +18,8 @@ package freestyle
 package rpc
 package internal
 
-import cats.instances.future._
 import cats.~>
+import cats.instances.future._
 import io.grpc.stub.StreamObserver
 import monix.execution.Ack.{Continue, Stop}
 import monix.execution.{Ack, Scheduler}

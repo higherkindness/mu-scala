@@ -22,19 +22,19 @@ import java.util.concurrent.Executor
 
 import io.grpc._
 
-sealed trait GrpcConfig                                                  extends Product with Serializable
-case object DirectExecutor                                               extends GrpcConfig
-case class SetExecutor(executor: Executor)                               extends GrpcConfig
-case class AddService(service: ServerServiceDefinition)                  extends GrpcConfig
-case class AddBindableService(bindableService: BindableService)          extends GrpcConfig
-case class AddTransportFilter(filter: ServerTransportFilter)             extends GrpcConfig
-case class AddStreamTracerFactory(factory: ServerStreamTracer.Factory)   extends GrpcConfig
-case class SetFallbackHandlerRegistry(fallbackRegistry: HandlerRegistry) extends GrpcConfig
-case class UseTransportSecurity(certChain: File, privateKey: File)       extends GrpcConfig
-case class SetDecompressorRegistry(registry: DecompressorRegistry)       extends GrpcConfig
-case class SetCompressorRegistry(registry: CompressorRegistry)           extends GrpcConfig
+sealed trait GrpcConfig                                                        extends Product with Serializable
+case object DirectExecutor                                                     extends GrpcConfig
+final case class SetExecutor(executor: Executor)                               extends GrpcConfig
+final case class AddService(service: ServerServiceDefinition)                  extends GrpcConfig
+final case class AddBindableService(bindableService: BindableService)          extends GrpcConfig
+final case class AddTransportFilter(filter: ServerTransportFilter)             extends GrpcConfig
+final case class AddStreamTracerFactory(factory: ServerStreamTracer.Factory)   extends GrpcConfig
+final case class SetFallbackHandlerRegistry(fallbackRegistry: HandlerRegistry) extends GrpcConfig
+final case class UseTransportSecurity(certChain: File, privateKey: File)       extends GrpcConfig
+final case class SetDecompressorRegistry(registry: DecompressorRegistry)       extends GrpcConfig
+final case class SetCompressorRegistry(registry: CompressorRegistry)           extends GrpcConfig
 
-case class SServerBuilder(port: Int, grpcConfigList: List[GrpcConfig] = Nil) {
+final case class SServerBuilder(port: Int, grpcConfigList: List[GrpcConfig] = Nil) {
 
   protected[this] lazy val sb: ServerBuilder[_ <: ServerBuilder[_]] = ServerBuilder.forPort(port)
 
