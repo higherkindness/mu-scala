@@ -1,5 +1,13 @@
 # Changelog
 
+## 12/21/2017 - Version 0.6.0
+
+Release changes:
+
+* Use Effect instance instead of Comonad#extract ([#103](https://github.com/frees-io/freestyle-rpc/pull/103))
+* Compiled docs in frees-rpc repo ([#104](https://github.com/frees-io/freestyle-rpc/pull/104))
+
+
 ## 12/19/2017 - Version 0.5.2
 
 Release changes:
