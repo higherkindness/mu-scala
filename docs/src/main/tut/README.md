@@ -186,6 +186,56 @@ object protocols {
 
 Naturally, the [RPC] services are grouped in a [@free algebra]. Therefore, we are following one of the primary principles of Freestyle; you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.
 
+In the above example, we can see that `sayHello` returns a `FS[HelloReply]`. However, very often the services might:
+
+* Return an empty response.
+* Receive an empty request.
+* A combination of both.
+
+`frees-rpc` provides an `Empty` object, defined at `freestyle.rpc.protocol`, that you might want to use for these purposes.
+
+For instance:
+
+```tut:silent
+@option(name = "java_package", value = "quickstart", quote = true)
+@option(name = "java_multiple_files", value = "true", quote = false)
+@option(name = "java_outer_classname", value = "Quickstart", quote = true)
+object protocol {
+
+  /**
+   * The request message containing the user's name.
+   * @param name User's name.
+   */
+  @message
+  case class HelloRequest(name: String)
+
+  /**
+   * The response message,
+   * @param message Message containing the greetings.
+   */
+  @message
+  case class HelloReply(message: String)
+
+  @service
+  trait Greeter[F[_]] {
+
+    /**
+     * The greeter service definition.
+     *
+     * @param request Say Hello Request.
+     * @return HelloReply.
+     */
+    @rpc(Protobuf) def sayHello(request: HelloRequest): F[HelloReply]
+
+    @rpc(Protobuf) def emptyResponse(request: HelloRequest): F[Empty.type]
+
+    @rpc(Protobuf) def emptyRequest(request: Empty.type): F[HelloReply]
+
+    @rpc(Protobuf) def emptyRequestRespose(request: Empty.type): F[Empty.type]
+  }
+}
+```
+ 
 We are also using some additional annotations:
 
 * `@option`: used to define the equivalent headers in `.proto` files.
