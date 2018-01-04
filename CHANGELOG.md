@@ -1,5 +1,13 @@
 # Changelog
 
+## 01/04/2018 - Version 0.6.1
+
+Release changes:
+
+* Docs - Empty.type Request/Response ([#105](https://github.com/frees-io/freestyle-rpc/pull/105))
+* Upgrade to Freestyle 0.5.1 ([#107](https://github.com/frees-io/freestyle-rpc/pull/107))
+
+
 ## 12/21/2017 - Version 0.6.0
 
 Release changes:
