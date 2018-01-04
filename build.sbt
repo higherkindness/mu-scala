@@ -2,6 +2,7 @@ import sbtorgpolicies.templates.badges._
 import sbtorgpolicies.runnable.syntax._
 
 lazy val V = new {
+  val frees: String = "0.5.0"
   val grpc: String = "1.7.1"
 }
 
@@ -65,13 +66,13 @@ lazy val rpc = project
       scalacOptions += "-Ywarn-unused-import",
       libraryDependencies ++= commonDeps ++
         Seq(
-          %%("frees-core"),
-          %%("frees-async"),
-          %%("frees-async-guava") exclude ("com.google.guava", "guava"),
-          %%("frees-async-cats-effect"),
-          %%("frees-config"),
-          %%("frees-logging"),
-          %("grpc-all"),
+          %%("frees-core", V.frees),
+          %%("frees-async", V.frees),
+          %%("frees-async-guava", V.frees) exclude ("com.google.guava", "guava"),
+          %%("frees-async-cats-effect", V.frees),
+          %%("frees-config", V.frees),
+          %%("frees-logging", V.frees),
+          %("grpc-all", V.grpc),
           %%("monix"),
           %%("pbdirect", "0.0.7"),
           "com.sksamuel.avro4s" %% "avro4s-core" % "1.8.0",
