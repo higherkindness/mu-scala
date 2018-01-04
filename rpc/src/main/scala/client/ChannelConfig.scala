@@ -17,6 +17,7 @@
 package freestyle.rpc
 package client
 
+import cats.syntax.either._
 import java.util.concurrent.{Executor, TimeUnit}
 
 import freestyle.free._
