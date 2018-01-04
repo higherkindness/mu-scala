@@ -2,7 +2,7 @@ import sbtorgpolicies.templates.badges._
 import sbtorgpolicies.runnable.syntax._
 
 lazy val V = new {
-  val frees: String = "0.5.0"
+  val frees: String = "0.5.1"
   val grpc: String = "1.7.1"
 }
 
