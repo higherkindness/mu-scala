@@ -2,8 +2,12 @@ import sbtorgpolicies.templates.badges._
 import sbtorgpolicies.runnable.syntax._
 
 lazy val V = new {
+  val avro4s: String = "1.8.0"
   val frees: String = "0.5.1"
   val grpc: String = "1.7.1"
+  val pbdirect: String = "0.0.8"
+  val scalameta: String = "1.8.0"
+  val scalametaContrib: String = "1.8.0"
 }
 
 pgpPassphrase := Some(getEnvVar("PGP_PASSPHRASE").getOrElse("").toCharArray)
@@ -43,7 +47,7 @@ lazy val docs = project
   .settings(noPublishSettings: _*)
   .settings(
     addCompilerPlugin(%%("scalameta-paradise") cross CrossVersion.full),
-    libraryDependencies += %%("scalameta", "1.8.0"),
+    libraryDependencies += %%("scalameta", V.scalameta),
     scalacOptions += "-Xplugin-require:macroparadise",
     scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains),
     // Pointing to https://github.com/frees-io/freestyle/tree/master/docs/src/main/tut/docs/rpc
@@ -74,9 +78,9 @@ lazy val rpc = project
           %%("frees-logging", V.frees),
           %("grpc-all", V.grpc),
           %%("monix"),
-          %%("pbdirect", "0.0.7"),
-          "com.sksamuel.avro4s" %% "avro4s-core" % "1.8.0",
-          %%("scalameta-contrib", "1.8.0"),
+          %%("pbdirect", V.pbdirect),
+          "com.sksamuel.avro4s" %% "avro4s-core" % V.avro4s,
+          %%("scalameta-contrib", V.scalametaContrib),
           %("grpc-testing", V.grpc) % Test,
           %%("scalatest")          % Test,
           %%("scalamockScalatest") % Test
