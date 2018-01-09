@@ -13,17 +13,28 @@ Also known as [frees-rpc], it brings the ability to combine [RPC] protocols, ser
 
 ## Installation
 
-Add the following dependency to your project's build file.
+`frees-rpc` is cross-built for Scala `2.11.x` and `2.12.x`:
 
-For Scala 2.11.x and 2.12.x:
+Add the following dependency to your project's build file.
 
 [comment]: # (Start Replace)
 
 ```scala
-libraryDependencies += "io.frees" %% "frees-rpc" % "0.6.1"
+libraryDependencies += "io.frees" %% "frees-rpc-core" % "0.6.1"
 ```
 
 [comment]: # (End Replace)
+
+Optionally, [frees-rpc] provides some configuration helpers using [frees-config] to load the application configuration values.
+
+[comment]: # (Start Replace)
+
+```scala
+libraryDependencies += "io.frees" %% "frees-rpc-config" % "0.6.1"
+```
+
+[comment]: # (End Replace)
+
 
 The full documentation is available at [frees-rpc](http://frees.io/docs/rpc) site.
 

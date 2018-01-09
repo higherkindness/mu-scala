@@ -3,18 +3,18 @@ pgpPublicRing := file(s"$gpgFolder/pubring.gpg")
 pgpSecretRing := file(s"$gpgFolder/secring.gpg")
 
 lazy val common = project
-  .in(file("common"))
+  .in(file("modules/common"))
   .settings(moduleName := "frees-rpc-common")
   .settings(commonSettings)
 
 lazy val core = project
-  .in(file("rpc"))
+  .in(file("modules/core"))
   .dependsOn(common)
   .settings(moduleName := "frees-rpc-core")
   .settings(coreSettings)
 
 lazy val config = project
-  .in(file("rpc-config"))
+  .in(file("modules/config"))
   .dependsOn(core % "compile->compile;test->test")
   .settings(moduleName := "frees-rpc-config")
   .settings(configSettings)
