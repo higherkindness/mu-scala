@@ -19,44 +19,13 @@ package server
 
 import cats.Id
 import cats.data.Kleisli
-import cats.implicits._
-import freestyle.free._
-import freestyle.free.implicits._
-import freestyle.free.config.implicits._
 import io.grpc.Server
 
 import scala.collection.JavaConverters._
-import scala.concurrent.{ExecutionContext, Future}
 
 class ServerConfigTests extends RpcServerTestSuite {
 
   import implicits._
-
-  implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
-
-  "ServerConfig.Op" should {
-
-    "load the port specified in the config file" in {
-
-      val serverConf: ServerW =
-        BuildServerFromConfig[ServerConfig.Op]("rpc.server.port")
-          .interpret[Future]
-          .await
-
-      serverConf.port shouldBe port
-    }
-
-    "load the default port when the config port path is not found" in {
-
-      val serverConf: ServerW =
-        BuildServerFromConfig[ServerConfig.Op]("rpc.wrong.path")
-          .interpret[Future]
-          .await
-
-      serverConf.port shouldBe defaultPort
-    }
-
-  }
 
   "GrpcConfigInterpreter" should {
 
@@ -65,7 +34,7 @@ class ServerConfigTests extends RpcServerTestSuite {
       val kInterpreter =
         new GrpcKInterpreter[Id](serverMock).apply(Kleisli[Id, Server, Int](s => s.getPort))
 
-      kInterpreter shouldBe port
+      kInterpreter shouldBe SC.port
     }
 
   }
@@ -75,7 +44,7 @@ class ServerConfigTests extends RpcServerTestSuite {
     "work as expected" in {
 
       val configList: List[GrpcConfig] = List(AddService(sd1))
-      val server: Server               = SServerBuilder(port, configList).build
+      val server: Server               = SServerBuilder(SC.port, configList).build
 
       server.getServices.asScala.toList shouldBe List(sd1)
     }

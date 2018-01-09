@@ -69,7 +69,7 @@ class GrpcServerTests extends RpcServerTestSuite {
       program[GrpcServer.Op].interpret[Id] shouldBe ((
         b,
         serverCopyMock,
-        port,
+        SC.port,
         serviceList,
         immutableServiceList,
         mutableServiceList,

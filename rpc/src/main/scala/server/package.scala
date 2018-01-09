@@ -18,7 +18,6 @@ package freestyle.rpc
 
 import cats.data.Kleisli
 import cats.~>
-import freestyle.free.FreeS
 import io.grpc._
 
 package object server {
@@ -33,8 +32,4 @@ package object server {
       fa(server)
 
   }
-
-  def BuildServerFromConfig[F[_]](portPath: String, configList: List[GrpcConfig] = Nil)(
-      implicit SC: ServerConfig[F]): FreeS[F, ServerW] =
-    SC.buildServer(portPath, configList)
 }

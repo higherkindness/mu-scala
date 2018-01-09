@@ -21,13 +21,10 @@ import cats.~>
 import cats.arrow.FunctionK
 import cats.effect.{IO, Sync}
 import freestyle.free.Capture
-import journal.Logger
 import monix.eval.Task
 import monix.execution.Scheduler
 
-import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.Future
-import scala.concurrent.duration._
 
 trait IOCapture {
 
@@ -35,35 +32,20 @@ trait IOCapture {
     new Capture[F] { def capture[A](a: => A): F[A] = F.delay(a) }
 }
 
-trait BaseAsync extends freestyle.async.Implicits {
-
-  protected[this] val asyncLogger: Logger            = Logger[this.type]
-  protected[this] val atMostDuration: FiniteDuration = 10.seconds
-
-}
-
-trait FutureAsyncInstances extends BaseAsync {
+trait AsyncInstances {
 
   implicit val future2Task: Future ~> Task =
     λ[Future ~> Task] { fa =>
-      asyncLogger.info(s"${Thread.currentThread().getName} Deferring Future to Task...")
       Task.deferFuture(fa)
     }
-
-}
-
-trait TaskAsyncInstances extends BaseAsync {
 
   implicit def task2Future(implicit S: Scheduler): Task ~> Future = λ[Task ~> Future](_.runAsync)
 
   implicit val task2Task: Task ~> Task = FunctionK.id[Task]
 
   implicit def task2IO(implicit S: Scheduler): Task ~> IO = λ[Task ~> IO](_.toIO)
-}
-
-trait IOAsyncInstances extends BaseAsync {
 
   implicit val io2Task: IO ~> Task = λ[IO ~> Task](_.to[Task])
 }
 
-trait RPCAsyncImplicits extends FutureAsyncInstances with TaskAsyncInstances with IOAsyncInstances
+trait RPCAsyncImplicits extends AsyncInstances

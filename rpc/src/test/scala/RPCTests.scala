@@ -18,7 +18,7 @@ package freestyle.rpc
 
 import freestyle.free._
 import org.scalatest._
-import freestyle.rpc.server.GrpcServerApp
+import freestyle.rpc.server._
 import freestyle.rpc.Utils.clientProgram.MyRPCClient
 import freestyle.rpc.protocol.Empty
 
@@ -30,12 +30,12 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   override protected def beforeAll(): Unit = {
     import freestyle.rpc.server.implicits._
-    serverStart[GrpcServerApp.Op].runF
+    serverStart[GrpcServer.Op].runF
   }
 
   override protected def afterAll(): Unit = {
     import freestyle.rpc.server.implicits._
-    serverStop[GrpcServerApp.Op].runF
+    serverStop[GrpcServer.Op].runF
   }
 
   "frees-rpc server" should {
@@ -44,19 +44,19 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "allow to startup a server and check if it's alive" in {
 
-      def check[M[_]](implicit APP: GrpcServerApp[M]): FreeS[M, Boolean] =
-        APP.server.isShutdown
+      def check[M[_]](implicit S: GrpcServer[M]): FreeS[M, Boolean] =
+        S.isShutdown
 
-      check[GrpcServerApp.Op].runF shouldBe false
+      check[GrpcServer.Op].runF shouldBe false
 
     }
 
     "allow to get the port where it's running" in {
 
-      def check[M[_]](implicit APP: GrpcServerApp[M]): FreeS[M, Int] =
-        APP.server.getPort
+      def check[M[_]](implicit S: GrpcServer[M]): FreeS[M, Int] =
+        S.getPort
 
-      check[GrpcServerApp.Op].runF shouldBe port
+      check[GrpcServer.Op].runF shouldBe SC.port
 
     }
 

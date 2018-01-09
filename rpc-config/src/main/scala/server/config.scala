@@ -15,33 +15,14 @@
  */
 
 package freestyle.rpc
-package client
+package server
 
-import cats.instances.try_._
 import freestyle.free._
-import freestyle.free.implicits._
-import freestyle.free.config.implicits._
 
-import scala.util.{Success, Try}
+package object config {
 
-class ChannelConfigTests extends RpcClientTestSuite {
-
-  import implicits._
-
-  "ChannelConfig" should {
-
-    "for Address [host, port] work as expected" in {
-
-      ConfigForAddress[ChannelConfig.Op](host, port.toString)
-        .interpret[Try] shouldBe a[Success[_]]
-    }
-
-    "for Target work as expected" in {
-
-      ConfigForTarget[ChannelConfig.Op](host)
-        .interpret[Try] shouldBe a[Success[_]]
-    }
-
-  }
+  def BuildServerFromConfig[F[_]](portPath: String, configList: List[GrpcConfig] = Nil)(
+      implicit SC: ServerConfig[F]): FreeS[F, ServerW] =
+    SC.buildServer(portPath, configList)
 
 }

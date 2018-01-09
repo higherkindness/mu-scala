@@ -16,29 +16,20 @@
 
 package freestyle.rpc
 package server
+package config
 
-import cats.Id
-import freestyle.rpc.server.implicits._
-import io.grpc.Server
+import cats.syntax.either._
+import freestyle.free._
+import freestyle.free.config.ConfigM
 
-import scala.concurrent.ExecutionContext
+@module
+trait ServerConfig {
 
-class SyntaxTests extends RpcServerTestSuite {
+  val configM: ConfigM
 
-  import implicits._
-
-  implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
-
-  "server syntax" should {
-
-    "allow using bootstrapM" in {
-
-      server[GrpcServer.Op].bootstrapM[Id] shouldBe ((): Unit)
-
-      (serverMock.start _: () => Server).verify().once()
-      (serverMock.awaitTermination _: () => Unit).verify().once()
+  def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): FS.Seq[ServerW] =
+    configM.load.map { config =>
+      val port = config.int(portPath).getOrElse(defaultPort)
+      ServerW(port, configList)
     }
-
-  }
-
 }

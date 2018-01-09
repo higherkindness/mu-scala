@@ -42,7 +42,7 @@ class GrpcServerHandlerTests extends RpcServerTestSuite {
 
     "allow to get the port where server is running" in {
 
-      runKFuture(handler.getPort, serverMock) shouldBe port
+      runKFuture(handler.getPort, serverMock) shouldBe SC.port
       (serverMock.getPort _: () => Int).verify().once()
 
     }
