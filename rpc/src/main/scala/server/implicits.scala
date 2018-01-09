@@ -20,15 +20,7 @@ package server
 import cats.{~>, Monad}
 import freestyle.free._
 import freestyle.free.implicits._
-import freestyle.free.logging._
-import freestyle.free.loggingJVM.implicits._
 import freestyle.rpc.server.handlers.GrpcServerHandler
-
-@module
-trait GrpcServerApp {
-  val server: GrpcServer
-  val log: LoggingM
-}
 
 trait ServerImplicits {
 
@@ -39,7 +31,7 @@ trait ServerImplicits {
 
 trait Syntax {
 
-  implicit class serverOps(server: FreeS[GrpcServerApp.Op, Unit]) {
+  implicit class serverOps(server: FreeS[GrpcServer.Op, Unit]) {
 
     def bootstrapM[M[_]: Monad](implicit handler: GrpcServer.Op ~> M): M[Unit] =
       server.interpret[M]
@@ -49,14 +41,11 @@ trait Syntax {
 
 trait Helpers {
 
-  def server[M[_]](implicit APP: GrpcServerApp[M]): FreeS[M, Unit] = {
-    val server = APP.server
-    val log    = APP.log
+  def server[M[_]](implicit S: GrpcServer[M]): FreeS[M, Unit] = {
     for {
-      _    <- server.start()
-      port <- server.getPort
-      _    <- log.info(s"Server started, listening on $port")
-      _    <- server.awaitTermination()
+      _ <- S.start()
+      _ <- S.getPort
+      _ <- S.awaitTermination()
     } yield ()
   }
 
@@ -71,4 +60,3 @@ object implicits
     with ServerImplicits
     with Interpreters
     with FreeSInstances
-    with loggingJVM.Implicits

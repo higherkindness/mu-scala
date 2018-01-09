@@ -15,30 +15,18 @@
  */
 
 package freestyle.rpc
-package server
+package client
 
-import cats.Id
-import freestyle.rpc.server.implicits._
-import io.grpc.Server
+import freestyle.free._
 
-import scala.concurrent.ExecutionContext
+package object config {
 
-class SyntaxTests extends RpcServerTestSuite {
+  def ConfigForAddress[F[_]](hostPath: String, portPath: String)(
+      implicit CC: ChannelConfig[F]): FreeS[F, ManagedChannelForAddress] =
+    CC.loadChannelAddress(hostPath, portPath)
 
-  import implicits._
-
-  implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
-
-  "server syntax" should {
-
-    "allow using bootstrapM" in {
-
-      server[GrpcServer.Op].bootstrapM[Id] shouldBe ((): Unit)
-
-      (serverMock.start _: () => Server).verify().once()
-      (serverMock.awaitTermination _: () => Unit).verify().once()
-    }
-
-  }
+  def ConfigForTarget[F[_]](target: String)(
+      implicit CC: ChannelConfig[F]): FreeS[F, ManagedChannelForTarget] =
+    CC.loadChannelTarget(target)
 
 }

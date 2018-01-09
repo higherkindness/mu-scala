@@ -39,9 +39,7 @@ trait RpcClientTestSuite extends RpcBaseTestSuite {
       .setFullMethodName(MethodDescriptor.generateFullMethodName("foo.Bar", "Bar"))
       .build()
 
-    val host: String           = "localhost"
-    val port: Int              = 8696
-    val authority: String      = s"$host:$port"
+    val authority: String      = s"${SC.host}:${SC.port}"
     val foo                    = "Bar"
     val failureMessage: String = "❗"
 

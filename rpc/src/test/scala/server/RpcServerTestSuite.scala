@@ -43,7 +43,7 @@ trait RpcServerTestSuite extends RpcBaseTestSuite {
     val mutableServiceList: List[ServerServiceDefinition]   = List(sd2)
 
     (serverMock.start _: () => Server).when().returns(serverCopyMock)
-    (serverMock.getPort _: () => Int).when().returns(port)
+    (serverMock.getPort _: () => Int).when().returns(SC.port)
     (serverMock.getServices _: () => java.util.List[ServerServiceDefinition])
       .when()
       .returns(serviceList.asJava)

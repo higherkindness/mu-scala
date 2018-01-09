@@ -49,14 +49,24 @@ Freestyle RPC is a purely functional library for building RPC endpoint based ser
 
 ## Installation
 
-Add the following dependency to your project's build file.
+`frees-rpc` is cross-built for Scala `2.11.x` and `2.12.x`:
 
-For Scala `2.11.x` and `2.12.x`:
+Add the following dependency to your project's build file.
 
 [comment]: # (Start Replace)
 
 ```scala
-libraryDependencies += "io.frees" %% "frees-rpc" % "0.6.1"
+libraryDependencies += "io.frees" %% "frees-rpc-core" % "0.6.1"
+```
+
+[comment]: # (End Replace)
+
+Optionally, [frees-rpc] provides some configuration helpers using [frees-config] to load the application configuration values.
+
+[comment]: # (Start Replace)
+
+```scala
+libraryDependencies += "io.frees" %% "frees-rpc-config" % "0.6.1"
 ```
 
 [comment]: # (End Replace)
@@ -531,7 +541,7 @@ What else is needed? We just need to define a `main` method:
 ```tut:silent
 import cats.effect.IO
 import cats.effect.IO._
-import freestyle.rpc.server.GrpcServerApp
+import freestyle.rpc.server.GrpcServer
 import freestyle.rpc.server.implicits._
 
 object RPCServer {
@@ -539,7 +549,7 @@ object RPCServer {
   import gserver.implicits._
 
   def main(args: Array[String]): Unit =
-    server[GrpcServerApp.Op].bootstrapM[IO].unsafeRunSync()
+    server[GrpcServer.Op].bootstrapM[IO].unsafeRunSync()
 
 }
 ```
@@ -579,6 +589,7 @@ import cats.effect.IO
 import freestyle.free.config.implicits._
 import freestyle.free.asyncCatsEffect.implicits._
 import freestyle.rpc.client._
+import freestyle.rpc.client.config._
 import freestyle.rpc.client.implicits._
 import monix.eval.Task
 import io.grpc.ManagedChannel
@@ -607,7 +618,10 @@ object gclient {
 }
 ```
 
-**Note**: `host` and `port` would be read from the application configuration file.
+**Notes**:
+
+* `host` and `port` would be read from the application configuration file.
+* To be able to use the `ConfigForAddress` helper, you need to add the `frees-rpc-config` dependency to your build.
 
 ### Client Program
 
@@ -681,3 +695,4 @@ This extra section is not specifically about [frees-rpc]. Very often our microse
 [cats-effect]: https://github.com/typelevel/cats-effect
 [freestyle-rpc-examples]: https://github.com/frees-io/freestyle-rpc-examples
 [Metrifier]: https://github.com/47deg/metrifier
+[frees-config]: http://frees.io/docs/patterns/config/

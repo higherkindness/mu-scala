@@ -16,29 +16,42 @@
 
 package freestyle.rpc
 package server
+package config
 
-import cats.Id
-import freestyle.rpc.server.implicits._
-import io.grpc.Server
+import cats.implicits._
+import freestyle.free._
+import freestyle.free.implicits._
+import freestyle.free.config.implicits._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
-class SyntaxTests extends RpcServerTestSuite {
+class ServerConfigTests extends RpcServerTestSuite {
 
   import implicits._
 
   implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
-  "server syntax" should {
+  "ServerConfig.Op" should {
 
-    "allow using bootstrapM" in {
+    "load the port specified in the config file" in {
 
-      server[GrpcServer.Op].bootstrapM[Id] shouldBe ((): Unit)
+      val serverConf: ServerW =
+        BuildServerFromConfig[ServerConfig.Op]("rpc.server.port")
+          .interpret[Future]
+          .await
 
-      (serverMock.start _: () => Server).verify().once()
-      (serverMock.awaitTermination _: () => Unit).verify().once()
+      serverConf.port shouldBe SC.port
+    }
+
+    "load the default port when the config port path is not found" in {
+
+      val serverConf: ServerW =
+        BuildServerFromConfig[ServerConfig.Op]("rpc.wrong.path")
+          .interpret[Future]
+          .await
+
+      serverConf.port shouldBe defaultPort
     }
 
   }
-
 }

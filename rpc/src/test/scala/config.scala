@@ -15,27 +15,10 @@
  */
 
 package freestyle.rpc
-package server
 
-import cats.syntax.either._
-import freestyle.free._
-import freestyle.free.config.ConfigM
-import io.grpc.Server
+object SC {
 
-case class ServerW(port: Int, configList: List[GrpcConfig]) {
+  val port: Int    = 50051
+  val host: String = "localhost"
 
-  lazy val server: Server = SServerBuilder(port, configList).build
-
-}
-
-@module
-trait ServerConfig {
-
-  val configM: ConfigM
-
-  def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): FS.Seq[ServerW] =
-    configM.load.map { config =>
-      val port = config.int(portPath).getOrElse(defaultPort)
-      ServerW(port, configList)
-    }
 }

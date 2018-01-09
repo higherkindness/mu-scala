@@ -17,19 +17,15 @@
 package freestyle.rpc
 
 import cats.effect.IO
-import freestyle.rpc.client.{ChannelConfig, ConfigForAddress, ManagedChannelFor}
+import freestyle.rpc.client._
 import freestyle.rpc.server._
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
-import scala.util.{Failure, Success, Try}
 
 trait CommonUtils {
 
-  import cats.implicits._
   import freestyle.free._
-  import freestyle.free.implicits._
-  import freestyle.free.config.implicits._
 
   type ConcurrentMonad[A] = IO[A]
 
@@ -51,41 +47,21 @@ trait CommonUtils {
     val dResult: D = D(6)
   }
 
-  def createManagedChannelFor: ManagedChannelFor =
-    ConfigForAddress[ChannelConfig.Op]("rpc.client.host", "rpc.client.port")
-      .interpret[Try] match {
-      case Success(c) => c
-      case Failure(e) =>
-        e.printStackTrace()
-        throw new RuntimeException("Unable to load the client configuration", e)
-    }
+  def createManagedChannelFor: ManagedChannelFor = ManagedChannelForAddress(SC.host, SC.port)
 
-  def createServerConf(grpcConfigs: List[GrpcConfig]): ServerW =
-    BuildServerFromConfig[ServerConfig.Op]("rpc.server.port", grpcConfigs)
-      .interpret[Try] match {
-      case Success(c) => c
-      case Failure(e) =>
-        e.printStackTrace()
-        throw new RuntimeException("Unable to load the server configuration", e)
-    }
+  def createServerConf(grpcConfigs: List[GrpcConfig]): ServerW = ServerW(SC.port, grpcConfigs)
 
-  def serverStart[M[_]](implicit APP: GrpcServerApp[M]): FreeS[M, Unit] = {
-    val server = APP.server
-    val log    = APP.log
+  def serverStart[M[_]](implicit S: GrpcServer[M]): FreeS[M, Unit] = {
     for {
-      _    <- server.start()
-      port <- server.getPort
-      _    <- log.info(s"Server started, listening on $port")
+      _    <- S.start()
+      port <- S.getPort
     } yield ()
   }
 
-  def serverStop[M[_]](implicit APP: GrpcServerApp[M]): FreeS[M, Unit] = {
-    val server = APP.server
-    val log    = APP.log
+  def serverStop[M[_]](implicit S: GrpcServer[M]): FreeS[M, Unit] = {
     for {
-      port <- server.getPort
-      _    <- log.info(s"Stopping server listening on $port")
-      _    <- server.shutdownNow()
+      port <- S.getPort
+      _    <- S.shutdownNow()
     } yield ()
   }
 
