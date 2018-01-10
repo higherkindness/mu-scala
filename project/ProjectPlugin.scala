@@ -64,7 +64,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val clientCoreSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("frees-core", V.frees),
+        %%("frees-async-cats-effect", V.frees),
         %("grpc-testing", V.grpc) % Test,
         %%("scalamockScalatest")  % Test
       )
@@ -84,7 +84,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("frees-core", V.frees),
+        %%("frees-async-cats-effect", V.frees),
         %("grpc-core", V.grpc),
         %("grpc-netty", V.grpc),
         %("grpc-testing", V.grpc) % Test,
@@ -101,9 +101,8 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val testsSettings = Seq(
       libraryDependencies ++= Seq(
-        %%("frees-async-cats-effect", V.frees) % Test,
-        %("grpc-testing", V.grpc)              % Test,
-        %%("scalamockScalatest")               % Test
+        %("grpc-testing", V.grpc) % Test,
+        %%("scalamockScalatest")  % Test
       )
     )
 

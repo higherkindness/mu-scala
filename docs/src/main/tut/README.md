@@ -51,25 +51,26 @@ Freestyle RPC is a purely functional library for building RPC endpoint based ser
 
 `frees-rpc` is cross-built for Scala `2.11.x` and `2.12.x`:
 
-Add the following dependency to your project's build file.
-
 [comment]: # (Start Replace)
 
 ```scala
-libraryDependencies += "io.frees" %% "frees-rpc-core" % "0.6.1"
+// required for the RPC Server:
+libraryDependencies += "io.frees" %% "frees-rpc-server"        % "0.6.1"
+
+// required for the RPC Client/s, using either Netty or OkHttp as transport layer:
+libraryDependencies += "io.frees" %% "frees-rpc-client-netty"  % "0.6.1"
+// or:
+libraryDependencies += "io.frees" %% "frees-rpc-client-okhttp" % "0.6.1"
+
+// optional - for both server and client configuration.
+libraryDependencies += "io.frees" %% "frees-rpc-config"        % "0.6.1"
 ```
 
 [comment]: # (End Replace)
 
-Optionally, [frees-rpc] provides some configuration helpers using [frees-config] to load the application configuration values.
+Note: `frees-rpc-config` provides some configuration helpers using [frees-config] to load the application configuration values.
 
 [comment]: # (Start Replace)
-
-```scala
-libraryDependencies += "io.frees" %% "frees-rpc-config" % "0.6.1"
-```
-
-[comment]: # (End Replace)
 
 ## About gRPC
 
@@ -491,6 +492,8 @@ As a side note, `CommonRuntime` will also be used later on for the client progra
 
 #### Runtime Implicits
 
+For the server bootstrapping, remember adding `frees-rpc-server` dependency to your build.
+
 Now, we need to implicitly provide two things:
 
 * A runtime interpreter of our `ServiceHandler` tied to a specific type. In our case, we'll use `cats.effects.IO`.
@@ -559,6 +562,8 @@ Fortunately, once all the runtime requirements are in place (**`import gserver.i
 ### Client
 
 [frees-rpc] derives a client automatically based on the protocol. This is especially useful because you can distribute it depending on the protocol/service definitions. If you change something in your protocol definition, you will get a new client for free without having to write anything.
+
+You will need to add either `frees-rpc-client-netty` or `frees-rpc-client-okhttp` to your build.
 
 ### Client Runtime
 
