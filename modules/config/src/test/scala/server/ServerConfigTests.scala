@@ -22,6 +22,7 @@ import cats.implicits._
 import freestyle.free._
 import freestyle.free.implicits._
 import freestyle.free.config.implicits._
+import freestyle.rpc.common.SC
 
 import scala.concurrent.{ExecutionContext, Future}
 

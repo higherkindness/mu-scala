@@ -15,33 +15,28 @@
  */
 
 package freestyle.rpc
-package client
-package config
+package async
 
-import cats.instances.try_._
-import freestyle.free._
-import freestyle.free.implicits._
-import freestyle.free.config.implicits._
-import freestyle.rpc.common.SC
+import cats.~>
+import cats.arrow.FunctionK
+import cats.effect.IO
+import monix.eval.Task
+import monix.execution.Scheduler
 
-import scala.util.{Success, Try}
+import scala.concurrent.Future
 
-class ChannelConfigTests extends RpcClientTestSuite {
+trait RPCAsyncImplicits {
 
-  "ChannelConfig" should {
-
-    "for Address [host, port] work as expected" in {
-
-      ConfigForAddress[ChannelConfig.Op](SC.host, SC.port.toString)
-        .interpret[Try] shouldBe a[Success[_]]
+  implicit val future2Task: Future ~> Task =
+    λ[Future ~> Task] { fa =>
+      Task.deferFuture(fa)
     }
 
-    "for Target work as expected" in {
+  implicit def task2Future(implicit S: Scheduler): Task ~> Future = λ[Task ~> Future](_.runAsync)
 
-      ConfigForTarget[ChannelConfig.Op](SC.host)
-        .interpret[Try] shouldBe a[Success[_]]
-    }
+  implicit val task2Task: Task ~> Task = FunctionK.id[Task]
 
-  }
+  implicit def task2IO(implicit S: Scheduler): Task ~> IO = λ[Task ~> IO](_.toIO)
 
+  implicit val io2Task: IO ~> Task = λ[IO ~> Task](_.to[Task])
 }
