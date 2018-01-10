@@ -273,16 +273,16 @@ private[internal] object utils {
   // format: OFF
   def buildRequests(algName: Type.Name, typeParam: Type.Param, stats: List[Stat]): List[RPCRequest] = stats.collect {
     case q"@rpc($s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): $typeParam[Observable[$response]]" =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(ResponseStreaming), paramTpe(request), response)
+      Option(RPCRequest(algName, name, utils.serializationType(s), Some(ResponseStreaming), paramTpe(request), response))
     case q"@rpc($s) @stream[RequestStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): $typeParam[$response]" =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(RequestStreaming), request, response)
+      Option(RPCRequest(algName, name, utils.serializationType(s), Some(RequestStreaming), request, response))
     case q"@rpc($s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): $typeParam[Observable[$response]]" =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(BidirectionalStreaming), request, response)
+      Option(RPCRequest(algName, name, utils.serializationType(s), Some(BidirectionalStreaming), request, response))
     case q"@rpc($s) def $name[..$tparams]($request): $typeParam[$response]" =>
-      RPCRequest(algName, name, utils.serializationType(s), None, paramTpe(request), response)
+      Option(RPCRequest(algName, name, utils.serializationType(s), None, paramTpe(request), response))
     case e =>
-      throw new MatchError("Unmatched rpc method: " + e.toString())
-  }
+      None
+  }.flatten
   // format: ON
 
   private[internal] def methodType(s: Option[StreamingType]): Term.Select = s match {

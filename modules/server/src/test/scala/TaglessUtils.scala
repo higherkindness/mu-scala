@@ -21,6 +21,7 @@ import freestyle.free._
 import freestyle.free.asyncCatsEffect.implicits._
 import freestyle.rpc.common._
 import freestyle.rpc.protocol._
+import freestyle.tagless.tagless
 import monix.eval.Task
 import monix.reactive.Observable
 
@@ -28,7 +29,7 @@ object TaglessUtils extends CommonUtils {
 
   object service {
 
-    @freestyle.tagless.tagless
+    @tagless
     @service
     trait TaglessRPCService {
 
