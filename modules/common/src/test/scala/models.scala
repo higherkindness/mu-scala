@@ -15,33 +15,18 @@
  */
 
 package freestyle.rpc
-package client
-package config
+package common
 
-import cats.instances.try_._
-import freestyle.free._
-import freestyle.free.implicits._
-import freestyle.free.config.implicits._
-import freestyle.rpc.common.SC
+case class A(x: Int, y: Int)
 
-import scala.util.{Success, Try}
+case class B(a1: A, a2: A)
 
-class ChannelConfigTests extends RpcClientTestSuite {
+case class C(foo: String, a: A)
 
-  "ChannelConfig" should {
+case class D(bar: Int)
 
-    "for Address [host, port] work as expected" in {
+case class E(a: A, foo: String)
 
-      ConfigForAddress[ChannelConfig.Op](SC.host, SC.port.toString)
-        .interpret[Try] shouldBe a[Success[_]]
-    }
-
-    "for Target work as expected" in {
-
-      ConfigForTarget[ChannelConfig.Op](SC.host)
-        .interpret[Try] shouldBe a[Success[_]]
-    }
-
-  }
-
+object ExternalScope {
+  case class External(e: E)
 }

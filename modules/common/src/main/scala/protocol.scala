@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package freestyle
-package rpc
+package freestyle.rpc
 package protocol
+
+import scala.annotation.StaticAnnotation
 
 sealed trait StreamingType         extends Product with Serializable
 case object RequestStreaming       extends StreamingType
@@ -26,3 +27,11 @@ case object BidirectionalStreaming extends StreamingType
 sealed trait SerializationType extends Product with Serializable
 case object Protobuf           extends SerializationType
 case object Avro               extends SerializationType
+
+class rpc(val serializationType: SerializationType)                   extends StaticAnnotation
+class stream[S <: StreamingType]                                      extends StaticAnnotation
+class message                                                         extends StaticAnnotation
+class option(val name: String, val value: String, val quote: Boolean) extends StaticAnnotation
+
+@message
+object Empty

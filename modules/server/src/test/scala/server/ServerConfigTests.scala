@@ -15,33 +15,39 @@
  */
 
 package freestyle.rpc
-package client
-package config
+package server
 
-import cats.instances.try_._
-import freestyle.free._
-import freestyle.free.implicits._
-import freestyle.free.config.implicits._
+import cats.Id
+import cats.data.Kleisli
 import freestyle.rpc.common.SC
+import io.grpc.Server
 
-import scala.util.{Success, Try}
+import scala.collection.JavaConverters._
 
-class ChannelConfigTests extends RpcClientTestSuite {
+class ServerConfigTests extends RpcServerTestSuite {
 
-  "ChannelConfig" should {
+  import implicits._
 
-    "for Address [host, port] work as expected" in {
+  "GrpcConfigInterpreter" should {
 
-      ConfigForAddress[ChannelConfig.Op](SC.host, SC.port.toString)
-        .interpret[Try] shouldBe a[Success[_]]
-    }
+    "work as expected" in {
 
-    "for Target work as expected" in {
+      val kInterpreter =
+        new GrpcKInterpreter[Id](serverMock).apply(Kleisli[Id, Server, Int](s => s.getPort))
 
-      ConfigForTarget[ChannelConfig.Op](SC.host)
-        .interpret[Try] shouldBe a[Success[_]]
+      kInterpreter shouldBe SC.port
     }
 
   }
 
+  "SServerBuilder" should {
+
+    "work as expected" in {
+
+      val configList: List[GrpcConfig] = List(AddService(sd1))
+      val server: Server               = SServerBuilder(SC.port, configList).build
+
+      server.getServices.asScala.toList shouldBe List(sd1)
+    }
+  }
 }

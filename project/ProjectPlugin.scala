@@ -25,21 +25,68 @@ object ProjectPlugin extends AutoPlugin {
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
-      scalacOptions := Seq("-deprecation", "-encoding", "UTF-8", "-feature", "-unchecked")
+      scalacOptions := Seq(
+        "-deprecation",
+        "-encoding",
+        "UTF-8",
+        "-feature",
+        "-unchecked",
+        "-language:higherKinds"),
+      libraryDependencies ++= Seq(
+        %%("cats-core")          % Test,
+        %%("scalamockScalatest") % Test
+      )
     )
 
-    lazy val coreSettings: Seq[Def.Setting[_]] = Seq(
+    lazy val asyncSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("frees-core", V.frees),
-        %%("frees-async", V.frees),
+        %%("cats-core"),
+        %%("cats-effect"),
+        %%("monix"),
+        %%("shapeless")  % Test,
+        %%("frees-core") % Test
+      )
+    )
+
+    lazy val internalSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("cats-effect"),
         %%("frees-async-guava", V.frees) exclude ("com.google.guava", "guava"),
-        %%("frees-async-cats-effect", V.frees),
         %("grpc-core", V.grpc),
         %("grpc-stub", V.grpc),
-        %("grpc-netty", V.grpc),
         %%("monix"),
         %%("pbdirect", V.pbdirect),
         "com.sksamuel.avro4s"     %% "avro4s-core" % V.avro4s,
+        %("grpc-testing", V.grpc) % Test,
+        %%("scalamockScalatest")  % Test
+      )
+    )
+
+    lazy val clientCoreSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("frees-async-cats-effect", V.frees),
+        %("grpc-testing", V.grpc) % Test,
+        %%("scalamockScalatest")  % Test
+      )
+    )
+
+    lazy val clientNettySettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %("grpc-netty", V.grpc)
+      )
+    )
+
+    lazy val clientOkHttpSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %("grpc-okhttp", V.grpc)
+      )
+    )
+
+    lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("frees-async-cats-effect", V.frees),
+        %("grpc-core", V.grpc),
+        %("grpc-netty", V.grpc),
         %("grpc-testing", V.grpc) % Test,
         %%("scalamockScalatest")  % Test
       )

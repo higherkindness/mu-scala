@@ -7,15 +7,52 @@ lazy val common = project
   .settings(moduleName := "frees-rpc-common")
   .settings(commonSettings)
 
-lazy val core = project
-  .in(file("modules/core"))
-  .dependsOn(common)
-  .settings(moduleName := "frees-rpc-core")
-  .settings(coreSettings)
+lazy val async = project
+  .in(file("modules/async"))
+  .dependsOn(common % "test->test")
+  .settings(moduleName := "frees-rpc-async")
+  .settings(asyncSettings)
+
+lazy val internal = project
+  .in(file("modules/internal"))
+  .dependsOn(common % "compile->compile;test->test")
+  .settings(moduleName := "frees-rpc-internal")
+  .settings(internalSettings)
+
+lazy val client = project
+  .in(file("modules/client"))
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(internal)
+  .dependsOn(async)
+  .settings(moduleName := "frees-rpc-client-core")
+  .settings(clientCoreSettings)
+
+lazy val `client-netty` = project
+  .in(file("modules/client-netty"))
+  .dependsOn(client % "compile->compile;test->test")
+  .settings(moduleName := "frees-rpc-client-netty")
+  .settings(clientNettySettings)
+
+lazy val `client-okhttp` = project
+  .in(file("modules/client-okhttp"))
+  .dependsOn(client % "compile->compile;test->test")
+  .settings(moduleName := "frees-rpc-client-okhttp")
+  .settings(clientOkHttpSettings)
+
+lazy val server = project
+  .in(file("modules/server"))
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(client % "test->test")
+  .dependsOn(internal)
+  .dependsOn(async)
+  .settings(moduleName := "frees-rpc-server")
+  .settings(serverSettings)
 
 lazy val config = project
   .in(file("modules/config"))
-  .dependsOn(core % "compile->compile;test->test")
+  .dependsOn(common % "test->test")
+  .dependsOn(client % "compile->compile;test->test")
+  .dependsOn(server % "compile->compile;test->test")
   .settings(moduleName := "frees-rpc-config")
   .settings(configSettings)
 
@@ -25,7 +62,12 @@ lazy val config = project
 
 lazy val allModules: Seq[ProjectReference] = Seq(
   common,
-  core,
+  async,
+  internal,
+  client,
+  `client-netty`,
+  `client-okhttp`,
+  server,
   config
 )
 

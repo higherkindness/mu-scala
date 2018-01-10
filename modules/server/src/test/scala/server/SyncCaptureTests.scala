@@ -15,31 +15,25 @@
  */
 
 package freestyle.rpc
-package client
-package config
+package server
 
-import cats.instances.try_._
-import freestyle.free._
-import freestyle.free.implicits._
-import freestyle.free.config.implicits._
-import freestyle.rpc.common.SC
+import cats.effect.IO
+import freestyle.free.Capture
 
-import scala.util.{Success, Try}
+class SyncCaptureTests extends RpcServerTestSuite {
 
-class ChannelConfigTests extends RpcClientTestSuite {
+  "SyncCapture" should {
 
-  "ChannelConfig" should {
+    "work as expected" in {
 
-    "for Address [host, port] work as expected" in {
+      val foo: String = "foo"
+      val instance    = new SyncCapture {}
 
-      ConfigForAddress[ChannelConfig.Op](SC.host, SC.port.toString)
-        .interpret[Try] shouldBe a[Success[_]]
-    }
+      import instance._
 
-    "for Target work as expected" in {
+      def a(implicit C: Capture[IO]) = C.capture(foo)
 
-      ConfigForTarget[ChannelConfig.Op](SC.host)
-        .interpret[Try] shouldBe a[Success[_]]
+      a.unsafeRunSync() shouldBe foo
     }
 
   }

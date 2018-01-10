@@ -16,32 +16,5 @@
 
 package freestyle.rpc
 package client
-package config
 
-import cats.instances.try_._
-import freestyle.free._
-import freestyle.free.implicits._
-import freestyle.free.config.implicits._
-import freestyle.rpc.common.SC
-
-import scala.util.{Success, Try}
-
-class ChannelConfigTests extends RpcClientTestSuite {
-
-  "ChannelConfig" should {
-
-    "for Address [host, port] work as expected" in {
-
-      ConfigForAddress[ChannelConfig.Op](SC.host, SC.port.toString)
-        .interpret[Try] shouldBe a[Success[_]]
-    }
-
-    "for Target work as expected" in {
-
-      ConfigForTarget[ChannelConfig.Op](SC.host)
-        .interpret[Try] shouldBe a[Success[_]]
-    }
-
-  }
-
-}
+class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
