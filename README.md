@@ -15,28 +15,42 @@ Also known as [frees-rpc], it brings the ability to combine [RPC] protocols, ser
 
 `frees-rpc` is cross-built for Scala `2.11.x` and `2.12.x`:
 
-Add the following dependency to your project's build file.
-
 [comment]: # (Start Replace)
 
 ```scala
-libraryDependencies += "io.frees" %% "frees-rpc-core" % "0.6.1"
+// required for the RPC Server:
+libraryDependencies += "io.frees" %% "frees-rpc-server"        % "0.6.1"
+
+// required for the RPC Client/s, using either Netty or OkHttp as transport layer:
+libraryDependencies += "io.frees" %% "frees-rpc-client-netty"  % "0.6.1"
+// or:
+libraryDependencies += "io.frees" %% "frees-rpc-client-okhttp" % "0.6.1"
+
+// optional - for both server and client configuration.
+libraryDependencies += "io.frees" %% "frees-rpc-config"        % "0.6.1"
 ```
 
 [comment]: # (End Replace)
 
-Optionally, [frees-rpc] provides some configuration helpers using [frees-config] to load the application configuration values.
+Note: `frees-rpc-config` provides some configuration helpers using [frees-config] to load the application configuration values.
 
-[comment]: # (Start Replace)
-
-```scala
-libraryDependencies += "io.frees" %% "frees-rpc-config" % "0.6.1"
-```
-
-[comment]: # (End Replace)
-
+## Documentation
 
 The full documentation is available at [frees-rpc](http://frees.io/docs/rpc) site.
+
+## Sbt Modules
+
+`frees-rpc` code is placed in different sbt modules:
+
+* `frees-rpc-common`: contains the protocol types, with the minimum set of dependencies.
+* `frees-rpc-async`: contains just the async implicit instances (NTs between effect/async types).
+* `frees-rpc-internal` where the macros are placed.
+* `frees-rpc-client-core`: algebra and code related to the RPC clients.
+* `frees-rpc-client-netty`: it doesn't add any additional code, just a transport layer provider based on `grpc-netty`.
+* `frees-rpc-client-okhttp`: similar to the `Netty` one, it doesn't add any additional code, just a transport layer provider based on `grpc-okhttp`.
+* `frees-rpc-server`: algebra and code related to the RPC server.
+* `frees-rpc-config`: helpers to be able to load the client and the server configuration.
+* `frees-rpc-tests`: it won't be published, it just houses tests for client and server altogether.
 
 ## Demo
 

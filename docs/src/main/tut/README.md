@@ -70,8 +70,6 @@ libraryDependencies += "io.frees" %% "frees-rpc-config"        % "0.6.1"
 
 Note: `frees-rpc-config` provides some configuration helpers using [frees-config] to load the application configuration values.
 
-[comment]: # (Start Replace)
-
 ## About gRPC
 
 > [gRPC](https://grpc.io/about/) is a modern, open source, and high-performance RPC framework that can run in any environment. It can efficiently connect services in and across data centers with pluggable support for load balancing, tracing, health checking, and authentication. It's also applicable in the last mile of distributed computing to connect devices, mobile applications, and browsers to backend services.
