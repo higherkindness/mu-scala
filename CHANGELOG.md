@@ -1,5 +1,16 @@
 # Changelog
 
+## 01/10/2018 - Version 0.7.0
+
+Release changes:
+
+* Update build ([#108](https://github.com/frees-io/freestyle-rpc/pull/108))
+* Splits core module in [core, config] ([#109](https://github.com/frees-io/freestyle-rpc/pull/109))
+* Organizes all sbt modules under modules folder ([#112](https://github.com/frees-io/freestyle-rpc/pull/112))
+* Splits core into Server and Client submodules ([#113](https://github.com/frees-io/freestyle-rpc/pull/113))
+* Moves non-server tests to the root ([#114](https://github.com/frees-io/freestyle-rpc/pull/114))
+* Updates build and Releases 0.7.0 ([#115](https://github.com/frees-io/freestyle-rpc/pull/115))
+
 ## 01/04/2018 - Version 0.6.1
 
 Release changes:

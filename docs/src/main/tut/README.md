@@ -55,15 +55,15 @@ Freestyle RPC is a purely functional library for building RPC endpoint based ser
 
 ```scala
 // required for the RPC Server:
-libraryDependencies += "io.frees" %% "frees-rpc-server"        % "0.6.1"
+libraryDependencies += "io.frees" %% "frees-rpc-server"        % "0.7.0"
 
 // required for the RPC Client/s, using either Netty or OkHttp as transport layer:
-libraryDependencies += "io.frees" %% "frees-rpc-client-netty"  % "0.6.1"
+libraryDependencies += "io.frees" %% "frees-rpc-client-netty"  % "0.7.0"
 // or:
-libraryDependencies += "io.frees" %% "frees-rpc-client-okhttp" % "0.6.1"
+libraryDependencies += "io.frees" %% "frees-rpc-client-okhttp" % "0.7.0"
 
 // optional - for both server and client configuration.
-libraryDependencies += "io.frees" %% "frees-rpc-config"        % "0.6.1"
+libraryDependencies += "io.frees" %% "frees-rpc-config"        % "0.7.0"
 ```
 
 [comment]: # (End Replace)
