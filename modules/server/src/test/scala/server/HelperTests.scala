@@ -17,11 +17,11 @@
 package freestyle.rpc
 package server
 
-import cats.Id
-import freestyle.rpc.server.implicits._
+import cats.Monad
+import freestyle.rpc.common.ConcurrentMonad
 import io.grpc.Server
 
-class HelperTests extends RpcServerTestSuite {
+class HelperTests extends RpcServerTestSuite with Helpers {
 
   import implicits._
 
@@ -29,7 +29,7 @@ class HelperTests extends RpcServerTestSuite {
 
     "work as expected" in {
 
-      server[GrpcServer.Op].bootstrapM[Id] shouldBe ((): Unit)
+      server[ConcurrentMonad](Monad[ConcurrentMonad], grpcServerHandlerTests) shouldBe ((): Unit)
 
       (serverMock.start _: () => Server).verify()
       (serverMock.awaitTermination _: () => Unit).verify()

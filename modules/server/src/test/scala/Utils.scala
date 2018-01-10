@@ -16,8 +16,8 @@
 
 package freestyle.rpc
 
-import cats.{~>, Monad, MonadError}
-import freestyle.free._
+import cats.{~>, Applicative, Monad, MonadError}
+import freestyle.tagless._
 import freestyle.rpc.common._
 import freestyle.free.asyncCatsEffect.implicits._
 import freestyle.rpc.protocol._
@@ -75,29 +75,30 @@ object Utils extends CommonUtils {
       import service._
       import freestyle.rpc.protocol._
 
-      class ServerRPCService[F[_]](implicit C: Capture[F], T2F: Task ~> F) extends RPCService[F] {
+      class ServerRPCService[F[_]](implicit F: Applicative[F], T2F: Task ~> F)
+          extends RPCService[F] {
 
-        def notAllowed(b: Boolean): F[C] = C.capture(c1)
+        def notAllowed(b: Boolean): F[C] = F.pure(c1)
 
-        def empty(empty: Empty.type): F[Empty.type] = C.capture(Empty)
+        def empty(empty: Empty.type): F[Empty.type] = F.pure(Empty)
 
-        def emptyParam(a: A): F[Empty.type] = C.capture(Empty)
+        def emptyParam(a: A): F[Empty.type] = F.pure(Empty)
 
-        def emptyParamResponse(empty: Empty.type): F[A] = C.capture(a4)
+        def emptyParamResponse(empty: Empty.type): F[A] = F.pure(a4)
 
-        def emptyAvro(empty: Empty.type): F[Empty.type] = C.capture(Empty)
+        def emptyAvro(empty: Empty.type): F[Empty.type] = F.pure(Empty)
 
-        def emptyAvroParam(a: A): F[Empty.type] = C.capture(Empty)
+        def emptyAvroParam(a: A): F[Empty.type] = F.pure(Empty)
 
-        def emptyAvroParamResponse(empty: Empty.type): F[A] = C.capture(a4)
+        def emptyAvroParamResponse(empty: Empty.type): F[A] = F.pure(a4)
 
         def unary(a: A): F[C] =
-          C.capture(c1)
+          F.pure(c1)
 
         def serverStreaming(b: B): F[Observable[C]] = {
           debug(s"[SERVER] b -> $b")
           val obs = Observable.fromIterable(cList)
-          C.capture(obs)
+          F.pure(obs)
         }
 
         def clientStreaming(oa: Observable[A]): F[D] =
@@ -110,7 +111,7 @@ object Utils extends CommonUtils {
           )
 
         def biStreaming(oe: Observable[E]): F[Observable[E]] =
-          C.capture {
+          F.pure {
             oe.flatMap { e: E =>
               save(e)
 
@@ -122,7 +123,7 @@ object Utils extends CommonUtils {
 
         import ExternalScope._
 
-        override def scope(empty: protocol.Empty.type): F[External] = C.capture(External(e1))
+        override def scope(empty: protocol.Empty.type): F[External] = F.pure(External(e1))
       }
 
     }
@@ -188,24 +189,6 @@ object Utils extends CommonUtils {
 
     }
 
-  }
-
-  object clientProgram {
-
-    @free
-    trait MyRPCClient {
-      def notAllowed(b: Boolean): FS[C]
-      def empty: FS[Empty.type]
-      def emptyParam(a: A): FS[Empty.type]
-      def emptyParamResponse: FS[A]
-      def emptyAvro: FS[Empty.type]
-      def emptyAvroParam(a: A): FS[Empty.type]
-      def emptyAvroParamResponse: FS[A]
-      def u(x: Int, y: Int): FS[C]
-      def ss(a: Int, b: Int): FS[List[C]]
-      def cs(cList: List[C], bar: Int): FS[D]
-      def bs(eList: List[E]): FS[E]
-    }
   }
 
   trait FreesRuntime extends CommonRuntime {

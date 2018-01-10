@@ -19,17 +19,16 @@ package server
 
 import java.util.concurrent.TimeUnit
 
-import cats.Id
-import cats.implicits._
-import freestyle.free._
-import freestyle.rpc.common.SC
+import cats.Monad
+import cats.syntax.apply._
+import freestyle.rpc.common.{ConcurrentMonad, SC}
 import io.grpc.{Server, ServerServiceDefinition}
 
 class GrpcServerTests extends RpcServerTestSuite {
 
   import implicits._
 
-  "GrpcServer.Op" should {
+  "GrpcServer" should {
 
     type Result = (
         Boolean,
@@ -47,7 +46,7 @@ class GrpcServerTests extends RpcServerTestSuite {
 
     "behaves as expected" in {
 
-      def program[F[_]](implicit APP: GrpcServer[F]): FreeS[F, Result] = {
+      def program[F[_]: Monad](APP: GrpcServer[F]): F[Result] = {
 
         import APP._
 
@@ -67,7 +66,7 @@ class GrpcServerTests extends RpcServerTestSuite {
         (a, b, c, d, e, f, g, h, i, j, k, l).tupled
       }
 
-      program[GrpcServer.Op].interpret[Id] shouldBe ((
+      program[ConcurrentMonad](grpcServerHandlerTests).unsafeRunSync() shouldBe ((
         b,
         serverCopyMock,
         SC.port,

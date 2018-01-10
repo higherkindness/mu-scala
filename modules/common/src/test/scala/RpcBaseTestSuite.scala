@@ -21,30 +21,12 @@ import cats.data.Kleisli
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, OneInstancePerTest, WordSpec}
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
-
 trait RpcBaseTestSuite extends WordSpec with Matchers with OneInstancePerTest with MockFactory {
 
-  sealed trait Syntax {
-
-    implicit class FutureOps[A](f: Future[A]) {
-
-      def await: A = await(Duration.Inf)
-
-      def await(d: Duration): A = Await.result(f, d)
-
-    }
-
-  }
-
-  trait Helpers extends Syntax {
+  trait Helpers {
 
     def runK[F[_], A, B](kleisli: Kleisli[F, A, B], v: A): F[B] =
       kleisli.run(v)
-
-    def runKFuture[A, B](kleisli: Kleisli[Future, A, B], v: A): B =
-      kleisli.run(v).await
 
   }
 }

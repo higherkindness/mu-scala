@@ -21,7 +21,10 @@ Also known as [frees-rpc], it brings the ability to combine [RPC] protocols, ser
 // required for the RPC Server:
 libraryDependencies += "io.frees" %% "frees-rpc-server"        % "0.7.0"
 
-// required for the RPC Client/s, using either Netty or OkHttp as transport layer:
+// required for a protocol definition:
+libraryDependencies += "io.frees" %% "frees-rpc-client-core"   % "0.7.0"
+
+// required for the use of the derived RPC Client/s, using either Netty or OkHttp as transport layer:
 libraryDependencies += "io.frees" %% "frees-rpc-client-netty"  % "0.7.0"
 // or:
 libraryDependencies += "io.frees" %% "frees-rpc-client-okhttp" % "0.7.0"
@@ -59,6 +62,7 @@ See [freestyle-rpc-examples](https://github.com/frees-io/freestyle-rpc-examples)
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
 [frees-rpc]: http://frees.io/docs/rpc/
+[frees-config]: http://frees.io/docs/patterns/config/
 
 [comment]: # (Start Copyright)
 # Copyright

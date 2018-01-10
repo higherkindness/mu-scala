@@ -16,12 +16,11 @@
 
 package freestyle.rpc
 
-import cats.{~>, Monad, MonadError}
-import freestyle.free._
+import cats.{~>, Applicative, Monad, MonadError}
+import freestyle.tagless.tagless
 import freestyle.free.asyncCatsEffect.implicits._
 import freestyle.rpc.common._
 import freestyle.rpc.protocol._
-import freestyle.tagless.tagless
 import monix.eval.Task
 import monix.reactive.Observable
 
@@ -31,35 +30,35 @@ object TaglessUtils extends CommonUtils {
 
     @tagless
     @service
-    trait TaglessRPCService {
+    trait TaglessRPCService[F[_]] {
 
-      @rpc(Protobuf) def notAllowed(b: Boolean): FS[C]
+      @rpc(Protobuf) def notAllowed(b: Boolean): F[C]
 
-      @rpc(Avro) def unary(a: A): FS[C]
+      @rpc(Avro) def unary(a: A): F[C]
 
-      @rpc(Protobuf) def empty(empty: Empty.type): FS[Empty.type]
+      @rpc(Protobuf) def empty(empty: Empty.type): F[Empty.type]
 
-      @rpc(Protobuf) def emptyParam(a: A): FS[Empty.type]
+      @rpc(Protobuf) def emptyParam(a: A): F[Empty.type]
 
-      @rpc(Protobuf) def emptyParamResponse(empty: Empty.type): FS[A]
+      @rpc(Protobuf) def emptyParamResponse(empty: Empty.type): F[A]
 
-      @rpc(Avro) def emptyAvro(empty: Empty.type): FS[Empty.type]
+      @rpc(Avro) def emptyAvro(empty: Empty.type): F[Empty.type]
 
-      @rpc(Avro) def emptyAvroParam(a: A): FS[Empty.type]
+      @rpc(Avro) def emptyAvroParam(a: A): F[Empty.type]
 
-      @rpc(Avro) def emptyAvroParamResponse(empty: Empty.type): FS[A]
+      @rpc(Avro) def emptyAvroParamResponse(empty: Empty.type): F[A]
 
       @rpc(Protobuf)
       @stream[ResponseStreaming.type]
-      def serverStreaming(b: B): FS[Observable[C]]
+      def serverStreaming(b: B): F[Observable[C]]
 
       @rpc(Protobuf)
       @stream[RequestStreaming.type]
-      def clientStreaming(oa: Observable[A]): FS[D]
+      def clientStreaming(oa: Observable[A]): F[D]
 
       @rpc(Avro)
       @stream[BidirectionalStreaming.type]
-      def biStreaming(oe: Observable[E]): FS[Observable[E]]
+      def biStreaming(oe: Observable[E]): F[Observable[E]]
     }
 
   }
@@ -72,30 +71,30 @@ object TaglessUtils extends CommonUtils {
       import service._
       import freestyle.rpc.protocol._
 
-      class TaglessRPCServiceServerHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F)
+      class TaglessRPCServiceServerHandler[F[_]](implicit F: Applicative[F], T2F: Task ~> F)
           extends TaglessRPCService.Handler[F] {
 
-        def notAllowed(b: Boolean): F[C] = C.capture(c1)
+        def notAllowed(b: Boolean): F[C] = F.pure(c1)
 
-        def empty(empty: Empty.type): F[Empty.type] = C.capture(Empty)
+        def empty(empty: Empty.type): F[Empty.type] = F.pure(Empty)
 
-        def emptyParam(a: A): F[Empty.type] = C.capture(Empty)
+        def emptyParam(a: A): F[Empty.type] = F.pure(Empty)
 
-        def emptyParamResponse(empty: Empty.type): F[A] = C.capture(a4)
+        def emptyParamResponse(empty: Empty.type): F[A] = F.pure(a4)
 
-        def emptyAvro(empty: Empty.type): F[Empty.type] = C.capture(Empty)
+        def emptyAvro(empty: Empty.type): F[Empty.type] = F.pure(Empty)
 
-        def emptyAvroParam(a: A): F[Empty.type] = C.capture(Empty)
+        def emptyAvroParam(a: A): F[Empty.type] = F.pure(Empty)
 
-        def emptyAvroParamResponse(empty: Empty.type): F[A] = C.capture(a4)
+        def emptyAvroParamResponse(empty: Empty.type): F[A] = F.pure(a4)
 
         def unary(a: A): F[C] =
-          C.capture(c1)
+          F.pure(c1)
 
         def serverStreaming(b: B): F[Observable[C]] = {
           debug(s"[SERVER] b -> $b")
           val obs = Observable.fromIterable(cList)
-          C.capture(obs)
+          F.pure(obs)
         }
 
         def clientStreaming(oa: Observable[A]): F[D] =
@@ -108,7 +107,7 @@ object TaglessUtils extends CommonUtils {
           )
 
         def biStreaming(oe: Observable[E]): F[Observable[E]] =
-          C.capture {
+          F.pure {
             oe.flatMap { e: E =>
               save(e)
 
@@ -184,24 +183,6 @@ object TaglessUtils extends CommonUtils {
 
   }
 
-  object clientProgram {
-
-    @free
-    trait MyRPCClient {
-      def notAllowed(b: Boolean): FS[C]
-      def empty: FS[Empty.type]
-      def emptyParam(a: A): FS[Empty.type]
-      def emptyParamResponse: FS[A]
-      def emptyAvro: FS[Empty.type]
-      def emptyAvroParam(a: A): FS[Empty.type]
-      def emptyAvroParamResponse: FS[A]
-      def u(x: Int, y: Int): FS[C]
-      def ss(a: Int, b: Int): FS[List[C]]
-      def cs(cList: List[C], bar: Int): FS[D]
-      def bs(eList: List[E]): FS[E]
-    }
-  }
-
   trait TaglessRuntime extends CommonRuntime {
 
     import service._
@@ -214,8 +195,10 @@ object TaglessUtils extends CommonUtils {
     // Server Runtime Configuration //
     //////////////////////////////////
 
-    implicit val taglessRPCHandler: TaglessRPCService.Handler[ConcurrentMonad] =
-      new TaglessRPCServiceServerHandler[ConcurrentMonad]
+    implicit def taglessRPCHandler[F[_]](
+        implicit F: Applicative[F],
+        T2F: Task ~> F): TaglessRPCService.Handler[F] =
+      new TaglessRPCServiceServerHandler[F]
 
     val grpcConfigs: List[GrpcConfig] = List(
       AddService(TaglessRPCService.bindService[ConcurrentMonad])

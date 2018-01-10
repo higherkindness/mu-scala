@@ -17,16 +17,15 @@
 package freestyle.rpc
 package server.handlers
 
+import cats.Applicative
 import cats.data.Kleisli
 import freestyle.rpc.server.{GrpcServer, GrpcServerOps}
-import freestyle.free.Capture
 import io.grpc.{Server, ServerServiceDefinition}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.TimeUnit
 
-class GrpcServerHandler[F[_]](implicit C: Capture[F])
-    extends GrpcServer.Handler[GrpcServerOps[F, ?]] {
+class GrpcServerHandler[F[_]: Applicative] extends GrpcServer.Handler[GrpcServerOps[F, ?]] {
 
   def start: GrpcServerOps[F, Server] = {
 
@@ -65,6 +64,11 @@ class GrpcServerHandler[F[_]](implicit C: Capture[F])
   def awaitTermination: GrpcServerOps[F, Unit] = captureWithServer(_.awaitTermination())
 
   private[this] def captureWithServer[A](f: Server => A): GrpcServerOps[F, A] =
-    Kleisli(s => C.capture(f(s)))
+    Kleisli(s => Applicative[F].pure(f(s)))
 
+}
+
+object GrpcServerHandler {
+  def apply[F[_]](implicit F: Applicative[F]): GrpcServer[GrpcServerOps[F, ?]] =
+    new GrpcServerHandler[F]()(F)
 }

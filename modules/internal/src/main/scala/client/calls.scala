@@ -19,7 +19,7 @@ package internal
 package client
 
 import freestyle.async.AsyncContext
-import freestyle.free._
+import freestyle.free.FSHandler
 import freestyle.free.asyncGuava.implicits._
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
 import io.grpc.stub.{ClientCalls, StreamObserver}

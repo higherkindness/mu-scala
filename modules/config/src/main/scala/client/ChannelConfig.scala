@@ -19,23 +19,23 @@ package client
 package config
 
 import cats.syntax.either._
-import freestyle.free._
+import freestyle.tagless._
 import freestyle.free.config.ConfigM
 
 @module
-trait ChannelConfig {
+trait ChannelConfig[F[_]] {
 
-  val configM: ConfigM
+  val configM: ConfigM[F]
   val defaultHost: String = "localhost"
   val defaultPort: Int    = freestyle.rpc.server.defaultPort
 
-  def loadChannelAddress(hostPath: String, portPath: String): FS.Seq[ManagedChannelForAddress] =
+  def loadChannelAddress(hostPath: String, portPath: String): F[ManagedChannelForAddress] =
     configM.load map (config =>
       ManagedChannelForAddress(
         config.string(hostPath).getOrElse(defaultHost),
         config.int(portPath).getOrElse(defaultPort)))
 
-  def loadChannelTarget(targetPath: String): FS.Seq[ManagedChannelForTarget] =
+  def loadChannelTarget(targetPath: String): F[ManagedChannelForTarget] =
     configM.load map (config =>
       ManagedChannelForTarget(config.string(targetPath).getOrElse("target")))
 }

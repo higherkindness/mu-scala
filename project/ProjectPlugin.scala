@@ -33,6 +33,7 @@ object ProjectPlugin extends AutoPlugin {
         "-unchecked",
         "-language:higherKinds"),
       libraryDependencies ++= Seq(
+        %%("cats-effect")        % Test,
         %%("cats-core")          % Test,
         %%("scalamockScalatest") % Test
       )

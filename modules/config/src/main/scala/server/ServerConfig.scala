@@ -23,11 +23,11 @@ import freestyle.free._
 import freestyle.free.config.ConfigM
 
 @module
-trait ServerConfig {
+trait ServerConfig[F[_]] {
 
-  val configM: ConfigM
+  val configM: ConfigM[F]
 
-  def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): FS.Seq[ServerW] =
+  def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): F[ServerW] =
     configM.load.map { config =>
       val port = config.int(portPath).getOrElse(defaultPort)
       ServerW(port, configList)
