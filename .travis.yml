@@ -40,4 +40,17 @@ jobs:
   include:
     - stage: deploy
       scala: 2.12.4
-      script: sbt ++$TRAVIS_SCALA_VERSION orgAfterCISuccess
+      script:
+        - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
+            if grep -q "SNAPSHOT" version.sbt; then
+              sbt ++$TRAVIS_SCALA_VERSION publish;
+            else
+              git reset --hard HEAD;
+              git clean -f;
+              git checkout master;
+              git pull origin master;
+              sbt release;
+              sbt orgUpdateDocFiles;
+              sbt depUpdateDependencyIssues;
+            fi
+          fi
