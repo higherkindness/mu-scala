@@ -50,7 +50,6 @@ The full documentation is available at [frees-rpc](http://frees.io/docs/rpc) sit
 * `frees-rpc-client-okhttp`: similar to the `Netty` one, it doesn't add any additional code, just a transport layer provider based on `grpc-okhttp`.
 * `frees-rpc-server`: algebra and code related to the RPC server.
 * `frees-rpc-config`: helpers to be able to load the client and the server configuration.
-* `frees-rpc-tests`: it won't be published, it just houses tests for client and server altogether.
 
 ## Demo
 

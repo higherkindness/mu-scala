@@ -40,7 +40,7 @@ trait Syntax {
   }
 }
 
-trait IOCapture {
+trait SyncCapture {
 
   implicit def syncCapture[F[_]](implicit F: Sync[F]): Capture[F] =
     new Capture[F] { def capture[A](a: => A): F[A] = F.delay(a) }
@@ -60,7 +60,7 @@ trait Helpers {
 
 object implicits
     extends CaptureInstances
-    with IOCapture
+    with SyncCapture
     with RPCAsyncImplicits
     with Syntax
     with Helpers

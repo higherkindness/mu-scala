@@ -42,6 +42,7 @@ lazy val `client-okhttp` = project
 lazy val server = project
   .in(file("modules/server"))
   .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(client % "test->test")
   .dependsOn(internal)
   .dependsOn(async)
   .settings(moduleName := "frees-rpc-server")
@@ -55,15 +56,6 @@ lazy val config = project
   .settings(moduleName := "frees-rpc-config")
   .settings(configSettings)
 
-lazy val tests = project
-  .in(file("modules/tests"))
-  .dependsOn(common % "test->test")
-  .dependsOn(client % "test->test")
-  .dependsOn(server % "test->test")
-  .settings(moduleName := "frees-rpc-tests")
-  .settings(noPublishSettings)
-  .settings(testsSettings)
-
 //////////////////////////
 //// MODULES REGISTRY ////
 //////////////////////////
@@ -76,8 +68,7 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `client-netty`,
   `client-okhttp`,
   server,
-  config,
-  tests
+  config
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =
