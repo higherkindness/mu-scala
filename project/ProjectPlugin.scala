@@ -18,7 +18,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String    = "1.8.0"
-      val frees: String     = "0.5.1"
+      val frees: String     = "0.5.2"
       val grpc: String      = "1.7.1"
       val pbdirect: String  = "0.0.8"
       val scalameta: String = "1.8.0"
@@ -56,7 +56,7 @@ object ProjectPlugin extends AutoPlugin {
         %("grpc-stub", V.grpc),
         %%("monix"),
         %%("pbdirect", V.pbdirect),
-        "com.sksamuel.avro4s"     %% "avro4s-core" % V.avro4s,
+        %%("avro4s", V.avro4s),
         %("grpc-testing", V.grpc) % Test,
         %%("scalamockScalatest")  % Test
       )
