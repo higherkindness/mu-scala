@@ -196,7 +196,7 @@ object protocols {
 }
 ```
 
-Naturally, the [RPC] services are grouped in a [@free algebra]. Therefore, we are following one of the primary principles of Freestyle; you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.
+Naturally, the [RPC] services are grouped in a [@tagless algebra]. Therefore, we are following one of the primary principles of Freestyle; you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.
 
 In the above example, we can see that `sayHello` returns a `FS[HelloReply]`. However, very often the services might:
 
@@ -423,22 +423,22 @@ Predictably, generating the server code is just implementing a service [Handler]
 Next, our dummy `Greeter` server implementation:
 
 ```tut:silent
-import cats.~>
+import cats.{~>, Applicative}
 import freestyle.free._
 import monix.eval.Task
 import monix.reactive.Observable
 import service._
 
-class ServiceHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F) extends Greeter[F] {
+class ServiceHandler[F[_]](implicit F: Applicative[F], T2F: Task ~> F) extends Greeter[F] {
 
   private[this] val dummyObservableResponse: Observable[HelloResponse] =
     Observable.fromIterable(1 to 5 map (i => HelloResponse(s"Reply $i")))
 
   override def sayHello(request: HelloRequest): F[HelloResponse] =
-    C.capture(HelloResponse(reply = "Good bye!"))
+    F.pure(HelloResponse(reply = "Good bye!"))
 
   override def lotsOfReplies(request: HelloRequest): F[Observable[HelloResponse]] =
-    C.capture(dummyObservableResponse)
+    F.pure(dummyObservableResponse)
 
   override def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse] = T2F {
     request
@@ -454,7 +454,7 @@ class ServiceHandler[F[_]](implicit C: Capture[F], T2F: Task ~> F) extends Greet
   }
 
   override def bidiHello(request: Observable[HelloRequest]): F[Observable[HelloResponse]] =
-    C.capture {
+    F.pure {
       request
         .flatMap { request: HelloRequest =>
           println(s"Saving $request...")
@@ -553,7 +553,7 @@ object RPCServer {
   import gserver.implicits._
 
   def main(args: Array[String]): Unit =
-    server[GrpcServer.Op].bootstrapM[IO].unsafeRunSync()
+    server[IO].unsafeRunSync()
 
 }
 ```
@@ -657,7 +657,7 @@ Provided below is a summary of all the current annotations that [frees-rpc] prov
 
 Annotation | Scope | Arguments | Description
 --- | --- | --- | ---
-@service | [@free algebra] | - | Tags the `@free` algebra as [RPC] service, in order to derive server and client code (macro expansion). **Important**: `@free` annotation should go first, followed by the `@service` annotation, and not inversely.
+@service | [@tagless algebra] | - | Tags the `@free` algebra as [RPC] service, in order to derive server and client code (macro expansion). **Important**: `@free` annotation should go first, followed by the `@service` annotation, and not inversely.
 @rpc | `Method` | (`SerializationType`) | Indicates the method is an RPC service. As `SerializationType` parameter value, `Protobuf` and `Avro` are the current supported serialization methods.
 @stream | `Method` | [`S <: StreamingType`] | There are three different types of streaming: server, client, and bidirectional. Hence, the `S` type parameter can be `ResponseStreaming`, `RequestStreaming`, or `BidirectionalStreaming`, respectively.
 @message | `Case Class` | - | Tags a case class a protobuf message.
@@ -694,7 +694,7 @@ This extra section is not specifically about [frees-rpc]. Very often our microse
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
-[@free algebra]: http://frees.io/docs/core/algebras/
+[@tagless algebra]: http://frees.io/docs/core/algebras/
 [PBDirect]: https://github.com/btlines/pbdirect
 [scalameta]: https://github.com/scalameta/scalameta
 [Monix]: https://monix.io/
