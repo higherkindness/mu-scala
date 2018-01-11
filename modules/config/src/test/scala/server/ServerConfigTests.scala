@@ -18,17 +18,12 @@ package freestyle.rpc
 package server
 package config
 
-import cats.implicits._
-import freestyle.free._
-import freestyle.free.implicits._
-import freestyle.free.config.implicits._
-import freestyle.rpc.common.SC
+import freestyle.tagless.config.implicits._
+import freestyle.rpc.common.{ConcurrentMonad, SC}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class ServerConfigTests extends RpcServerTestSuite {
-
-  import implicits._
 
   implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
@@ -37,9 +32,7 @@ class ServerConfigTests extends RpcServerTestSuite {
     "load the port specified in the config file" in {
 
       val serverConf: ServerW =
-        BuildServerFromConfig[ServerConfig.Op]("rpc.server.port")
-          .interpret[Future]
-          .await
+        BuildServerFromConfig[ConcurrentMonad]("rpc.server.port").unsafeRunSync()
 
       serverConf.port shouldBe SC.port
     }
@@ -47,9 +40,7 @@ class ServerConfigTests extends RpcServerTestSuite {
     "load the default port when the config port path is not found" in {
 
       val serverConf: ServerW =
-        BuildServerFromConfig[ServerConfig.Op]("rpc.wrong.path")
-          .interpret[Future]
-          .await
+        BuildServerFromConfig[ConcurrentMonad]("rpc.wrong.path").unsafeRunSync()
 
       serverConf.port shouldBe defaultPort
     }

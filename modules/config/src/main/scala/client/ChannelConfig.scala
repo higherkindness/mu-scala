@@ -21,23 +21,24 @@ package config
 import cats.Functor
 import cats.syntax.functor._
 import cats.syntax.either._
-import freestyle.tagless.module
+import freestyle.tagless._
 import freestyle.tagless.config.ConfigM
 
 @module
-abstract class ChannelConfig[F[_]: Functor] {
+trait ChannelConfig {
 
-  val configM: ConfigM[F]
+  val configM: ConfigM
+  implicit val functor: Functor
   val defaultHost: String = "localhost"
   val defaultPort: Int    = freestyle.rpc.server.defaultPort
 
-  def loadChannelAddress(hostPath: String, portPath: String): F[ManagedChannelForAddress] =
+  def loadChannelAddress(hostPath: String, portPath: String): FS[ManagedChannelForAddress] =
     configM.load map (config =>
       ManagedChannelForAddress(
         config.string(hostPath).getOrElse(defaultHost),
         config.int(portPath).getOrElse(defaultPort)))
 
-  def loadChannelTarget(targetPath: String): F[ManagedChannelForTarget] =
+  def loadChannelTarget(targetPath: String): FS[ManagedChannelForTarget] =
     configM.load map (config =>
       ManagedChannelForTarget(config.string(targetPath).getOrElse("target")))
 }

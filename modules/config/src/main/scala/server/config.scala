@@ -18,7 +18,6 @@ package freestyle.rpc
 package server
 
 import cats.Functor
-import cats.syntax.functor._
 
 package object config {
 

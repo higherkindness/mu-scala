@@ -25,11 +25,12 @@ import freestyle.tagless._
 import freestyle.tagless.config.ConfigM
 
 @module
-abstract class ServerConfig[F[_]: Functor] {
+trait ServerConfig {
 
-  val configM: ConfigM[F]
+  val configM: ConfigM
+  implicit val functor: Functor
 
-  def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): F[ServerW] =
+  def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): FS[ServerW] =
     configM.load.map { config =>
       val port = config.int(portPath).getOrElse(defaultPort)
       ServerW(port, configList)
