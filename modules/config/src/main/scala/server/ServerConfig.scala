@@ -18,16 +18,19 @@ package freestyle.rpc
 package server
 package config
 
+import cats.Functor
+import cats.syntax.functor._
 import cats.syntax.either._
-import freestyle.free._
-import freestyle.free.config.ConfigM
+import freestyle.tagless._
+import freestyle.tagless.config.ConfigM
 
 @module
 trait ServerConfig {
 
   val configM: ConfigM
+  implicit val functor: Functor
 
-  def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): FS.Seq[ServerW] =
+  def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): FS[ServerW] =
     configM.load.map { config =>
       val port = config.int(portPath).getOrElse(defaultPort)
       ServerW(port, configList)

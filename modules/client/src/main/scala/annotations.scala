@@ -24,7 +24,7 @@ import scala.annotation.{compileTimeOnly, StaticAnnotation}
 // $COVERAGE-OFF$
 package object protocol {
 
-  @compileTimeOnly("enable macro paradise to expand @free macro annotations")
+  @compileTimeOnly("enable macro paradise to expand @tagless macro annotations")
   class service extends StaticAnnotation {
 
     inline def apply(defn: Any): Any = meta { serviceImpl.service(defn) }

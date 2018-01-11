@@ -16,19 +16,14 @@
 
 package freestyle.rpc
 
-import cats.effect.IO
+import cats.Monad
+import cats.syntax.flatMap._
+import cats.syntax.functor._
 import freestyle.rpc.common._
 import freestyle.rpc.client._
 import freestyle.rpc.server._
 
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
-
 trait CommonUtils {
-
-  import freestyle.free._
-
-  type ConcurrentMonad[A] = IO[A]
 
   object database {
 
@@ -52,17 +47,17 @@ trait CommonUtils {
 
   def createServerConf(grpcConfigs: List[GrpcConfig]): ServerW = ServerW(SC.port, grpcConfigs)
 
-  def serverStart[M[_]](implicit S: GrpcServer[M]): FreeS[M, Unit] = {
+  def serverStart[F[_]: Monad](implicit S: GrpcServer[F]): F[Unit] = {
     for {
-      _    <- S.start()
-      port <- S.getPort
+      _ <- S.start()
+      _ <- S.getPort
     } yield ()
   }
 
-  def serverStop[M[_]](implicit S: GrpcServer[M]): FreeS[M, Unit] = {
+  def serverStop[F[_]: Monad](implicit S: GrpcServer[F]): F[Unit] = {
     for {
-      port <- S.getPort
-      _    <- S.shutdownNow()
+      _ <- S.getPort
+      _ <- S.shutdownNow()
     } yield ()
   }
 
@@ -71,17 +66,7 @@ trait CommonUtils {
 
   trait CommonRuntime {
 
-    import freestyle.free._
-    import freestyle.rpc.server.implicits._
-
     implicit val S: monix.execution.Scheduler = monix.execution.Scheduler.Implicits.global
-
-    implicit class InterpreterOps[F[_], A](fs: FreeS[F, A])(
-        implicit H: FSHandler[F, ConcurrentMonad]) {
-
-      def runF: A = Await.result(fs.interpret[ConcurrentMonad].unsafeToFuture(), Duration.Inf)
-
-    }
 
   }
 

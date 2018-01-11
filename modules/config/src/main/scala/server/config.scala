@@ -17,12 +17,12 @@
 package freestyle.rpc
 package server
 
-import freestyle.free._
+import cats.Functor
 
 package object config {
 
-  def BuildServerFromConfig[F[_]](portPath: String, configList: List[GrpcConfig] = Nil)(
-      implicit SC: ServerConfig[F]): FreeS[F, ServerW] =
+  def BuildServerFromConfig[F[_]: Functor](portPath: String, configList: List[GrpcConfig] = Nil)(
+      implicit SC: ServerConfig[F]): F[ServerW] =
     SC.buildServer(portPath, configList)
 
 }

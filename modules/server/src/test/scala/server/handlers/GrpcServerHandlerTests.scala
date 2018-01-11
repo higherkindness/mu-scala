@@ -17,12 +17,12 @@
 package freestyle.rpc
 package server.handlers
 
-import freestyle.rpc.common.SC
+import freestyle.rpc.common.{ConcurrentMonad, SC}
 import freestyle.rpc.server.RpcServerTestSuite
 import io.grpc.{Server, ServerServiceDefinition}
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.TimeUnit
-import scala.concurrent.{ExecutionContext, Future}
 
 class GrpcServerHandlerTests extends RpcServerTestSuite {
 
@@ -30,34 +30,34 @@ class GrpcServerHandlerTests extends RpcServerTestSuite {
 
   import implicits._
 
-  val handler: GrpcServerHandler[Future] = new GrpcServerHandler[Future]
+  val handler: GrpcServerHandler[ConcurrentMonad] = new GrpcServerHandler[ConcurrentMonad]
 
   "GrpcServer.Handler" should {
 
     "allow to start a GrpcServer" in {
 
-      runKFuture(handler.start, serverMock) shouldBe serverCopyMock
+      runK(handler.start, serverMock).unsafeRunSync() shouldBe serverCopyMock
       (serverMock.start _: () => Server).verify().once()
 
     }
 
     "allow to get the port where server is running" in {
 
-      runKFuture(handler.getPort, serverMock) shouldBe SC.port
+      runK(handler.getPort, serverMock).unsafeRunSync() shouldBe SC.port
       (serverMock.getPort _: () => Int).verify().once()
 
     }
 
     "allow to get the services running under the Server instance" in {
 
-      runKFuture(handler.getServices, serverMock) shouldBe serviceList
+      runK(handler.getServices, serverMock).unsafeRunSync() shouldBe serviceList
       (serverMock.getServices _: () => java.util.List[ServerServiceDefinition]).verify().once()
 
     }
 
     "allow to get the immutable services running under the Server instance" in {
 
-      runKFuture(handler.getImmutableServices, serverMock) shouldBe immutableServiceList
+      runK(handler.getImmutableServices, serverMock).unsafeRunSync() shouldBe immutableServiceList
       (serverMock.getImmutableServices _: () => java.util.List[ServerServiceDefinition])
         .verify()
         .once()
@@ -66,7 +66,7 @@ class GrpcServerHandlerTests extends RpcServerTestSuite {
 
     "allow to get the mutable services running under the Server instance" in {
 
-      runKFuture(handler.getMutableServices, serverMock) shouldBe mutableServiceList
+      runK(handler.getMutableServices, serverMock).unsafeRunSync() shouldBe mutableServiceList
       (serverMock.getMutableServices _: () => java.util.List[ServerServiceDefinition])
         .verify()
         .once()
@@ -75,42 +75,43 @@ class GrpcServerHandlerTests extends RpcServerTestSuite {
 
     "allow to stop a started GrpcServer" in {
 
-      runKFuture(handler.shutdown, serverMock) shouldBe serverCopyMock
+      runK(handler.shutdown, serverMock).unsafeRunSync() shouldBe serverCopyMock
       (serverMock.shutdown _: () => Server).verify().once()
 
     }
 
     "allow to stop immediately a started GrpcServer" in {
 
-      runKFuture(handler.shutdownNow, serverMock) shouldBe serverCopyMock
+      runK(handler.shutdownNow, serverMock).unsafeRunSync() shouldBe serverCopyMock
       (serverMock.shutdownNow _: () => Server).verify().once()
 
     }
 
     "allow to ask whether a Server is shutdown" in {
 
-      runKFuture(handler.isShutdown, serverMock) shouldBe b
+      runK(handler.isShutdown, serverMock).unsafeRunSync() shouldBe b
       (serverMock.isShutdown _: () => Boolean).verify().once()
 
     }
 
     "allow to ask whether a Server instance has been terminated" in {
 
-      runKFuture(handler.isTerminated, serverMock) shouldBe b
+      runK(handler.isTerminated, serverMock).unsafeRunSync() shouldBe b
       (serverMock.isTerminated _: () => Boolean).verify().once()
 
     }
 
     "allow to terminate after a certain timeout is reached" in {
 
-      runKFuture(handler.awaitTerminationTimeout(timeout, timeoutUnit), serverMock) shouldBe b
+      runK(handler.awaitTerminationTimeout(timeout, timeoutUnit), serverMock)
+        .unsafeRunSync() shouldBe b
       (serverMock.awaitTermination(_: Long, _: TimeUnit)).verify(timeout, timeoutUnit).once()
 
     }
 
     "allow stopping a started GrpcServer" in {
 
-      runKFuture(handler.awaitTermination, serverMock) shouldBe unit
+      runK(handler.awaitTermination, serverMock).unsafeRunSync() shouldBe unit
       (serverMock.awaitTermination _: () => Unit).verify().once()
 
     }

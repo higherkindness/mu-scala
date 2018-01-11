@@ -17,38 +17,22 @@
 package freestyle.rpc
 package server
 
-import cats.effect.Sync
-import cats.{~>, Monad}
-import freestyle.free._
+import cats.{Applicative, Monad}
+import cats.syntax.flatMap._
+import cats.syntax.functor._
 import freestyle.rpc.async.RPCAsyncImplicits
 import freestyle.rpc.server.handlers.GrpcServerHandler
 
 trait ServerImplicits {
 
-  implicit def grpcServerHandler[M[_]: Capture](implicit SW: ServerW): GrpcServer.Op ~> M =
-    new GrpcServerHandler[M] andThen new GrpcKInterpreter[M](SW.server)
+  implicit def grpcServerHandler[F[_]: Applicative](implicit SW: ServerW): GrpcServer[F] =
+    GrpcServerHandler[F].mapK[F](new GrpcKInterpreter[F](SW.server))
 
-}
-
-trait Syntax {
-
-  implicit class serverOps(server: FreeS[GrpcServer.Op, Unit]) {
-
-    def bootstrapM[M[_]: Monad](implicit handler: GrpcServer.Op ~> M): M[Unit] =
-      server.interpret[M]
-
-  }
-}
-
-trait SyncCapture {
-
-  implicit def syncCapture[F[_]](implicit F: Sync[F]): Capture[F] =
-    new Capture[F] { def capture[A](a: => A): F[A] = F.delay(a) }
 }
 
 trait Helpers {
 
-  def server[M[_]](implicit S: GrpcServer[M]): FreeS[M, Unit] = {
+  def server[F[_]: Monad](implicit S: GrpcServer[F]): F[Unit] = {
     for {
       _ <- S.start()
       _ <- S.getPort
@@ -58,12 +42,4 @@ trait Helpers {
 
 }
 
-object implicits
-    extends CaptureInstances
-    with SyncCapture
-    with RPCAsyncImplicits
-    with Syntax
-    with Helpers
-    with ServerImplicits
-    with Interpreters
-    with FreeSInstances
+object implicits extends RPCAsyncImplicits with Helpers with ServerImplicits

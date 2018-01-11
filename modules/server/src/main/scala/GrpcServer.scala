@@ -17,12 +17,12 @@
 package freestyle.rpc
 package server
 
-import freestyle.free._
+import freestyle.tagless.tagless
 import io.grpc._
 
 import scala.concurrent.duration.TimeUnit
 
-@free
+@tagless
 trait GrpcServer {
 
   def start(): FS[Server]

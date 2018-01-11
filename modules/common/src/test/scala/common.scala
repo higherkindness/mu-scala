@@ -15,30 +15,11 @@
  */
 
 package freestyle.rpc
-package server
 
-import cats.Id
-import freestyle.rpc.server.implicits._
-import io.grpc.Server
+import cats.effect.IO
 
-import scala.concurrent.ExecutionContext
+package object common {
 
-class SyntaxTests extends RpcServerTestSuite {
-
-  import implicits._
-
-  implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
-
-  "server syntax" should {
-
-    "allow using bootstrapM" in {
-
-      server[GrpcServer.Op].bootstrapM[Id] shouldBe ((): Unit)
-
-      (serverMock.start _: () => Server).verify().once()
-      (serverMock.awaitTermination _: () => Unit).verify().once()
-    }
-
-  }
+  type ConcurrentMonad[A] = IO[A]
 
 }

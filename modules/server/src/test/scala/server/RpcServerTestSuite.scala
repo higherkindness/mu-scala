@@ -19,13 +19,12 @@ package server
 
 import java.util.concurrent.TimeUnit
 
-import cats.{~>, Id}
+import cats.Applicative
 import freestyle.rpc.common.{RpcBaseTestSuite, SC}
 import io.grpc.{Server, ServerServiceDefinition}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.TimeUnit
-import scala.concurrent.Future
 
 trait RpcServerTestSuite extends RpcBaseTestSuite {
 
@@ -64,31 +63,36 @@ trait RpcServerTestSuite extends RpcBaseTestSuite {
 
   object implicits extends Helpers with DummyData {
 
-    def idApply[A](fa: GrpcServer.Op[A]): Id[A] = {
-      import GrpcServer._
-      fa match {
-        case StartOp()                       => serverMock.start()
-        case GetPortOp()                     => serverMock.getPort
-        case GetServicesOp()                 => serverMock.getServices.asScala.toList
-        case GetImmutableServicesOp()        => serverMock.getImmutableServices.asScala.toList
-        case GetMutableServicesOp()          => serverMock.getMutableServices.asScala.toList
-        case ShutdownOp()                    => serverMock.shutdown()
-        case ShutdownNowOp()                 => serverMock.shutdownNow()
-        case IsShutdownOp()                  => serverMock.isShutdown
-        case IsTerminatedOp()                => serverMock.isTerminated
-        case AwaitTerminationTimeoutOp(t, u) => serverMock.awaitTermination(t, u)
-        case AwaitTerminationOp()            => serverMock.awaitTermination()
+    def grpcServerHandlerTests[F[_]](implicit F: Applicative[F]): GrpcServer[F] = {
+      new GrpcServer[F] {
+
+        def start(): F[Server] = F.pure(serverMock.start())
+
+        def getPort: F[Int] = F.pure(serverMock.getPort)
+
+        def getServices: F[List[ServerServiceDefinition]] =
+          F.pure(serverMock.getServices.asScala.toList)
+
+        def getImmutableServices: F[List[ServerServiceDefinition]] =
+          F.pure(serverMock.getImmutableServices.asScala.toList)
+
+        def getMutableServices: F[List[ServerServiceDefinition]] =
+          F.pure(serverMock.getMutableServices.asScala.toList)
+
+        def shutdown(): F[Server] = F.pure(serverMock.shutdown())
+
+        def shutdownNow(): F[Server] = F.pure(serverMock.shutdownNow())
+
+        def isShutdown: F[Boolean] = F.pure(serverMock.isShutdown)
+
+        def isTerminated: F[Boolean] = F.pure(serverMock.isTerminated)
+
+        def awaitTerminationTimeout(timeout: Long, unit: TimeUnit): F[Boolean] =
+          F.pure(serverMock.awaitTermination(timeout, unit))
+
+        def awaitTermination(): F[Unit] = F.pure(serverMock.awaitTermination())
+
       }
     }
-
-    implicit val grpcServerHandlerId: GrpcServer.Op ~> Id =
-      new (GrpcServer.Op ~> Id) {
-        override def apply[A](fa: GrpcServer.Op[A]): Id[A] = idApply(fa)
-      }
-
-    implicit val grpcServerHandlerFuture: GrpcServer.Op ~> Future =
-      new (GrpcServer.Op ~> Future) {
-        override def apply[A](fa: GrpcServer.Op[A]): Future[A] = Future.successful(idApply(fa))
-      }
   }
 }

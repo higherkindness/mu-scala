@@ -18,7 +18,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String    = "1.8.0"
-      val frees: String     = "0.5.2"
+      val frees: String     = "0.5.3"
       val grpc: String      = "1.7.1"
       val pbdirect: String  = "0.0.8"
       val scalameta: String = "1.8.0"
@@ -33,6 +33,7 @@ object ProjectPlugin extends AutoPlugin {
         "-unchecked",
         "-language:higherKinds"),
       libraryDependencies ++= Seq(
+        %%("cats-effect")        % Test,
         %%("cats-core")          % Test,
         %%("scalamockScalatest") % Test
       )
