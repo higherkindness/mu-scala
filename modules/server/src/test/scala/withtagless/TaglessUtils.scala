@@ -31,35 +31,35 @@ object TaglessUtils extends CommonUtils {
 
     @tagless
     @service
-    trait TaglessRPCService[F[_]] {
+    trait TaglessRPCService {
 
-      @rpc(Protobuf) def notAllowed(b: Boolean): F[C]
+      @rpc(Protobuf) def notAllowed(b: Boolean): FS[C]
 
-      @rpc(Avro) def unary(a: A): F[C]
+      @rpc(Avro) def unary(a: A): FS[C]
 
-      @rpc(Protobuf) def empty(empty: Empty.type): F[Empty.type]
+      @rpc(Protobuf) def empty(empty: Empty.type): FS[Empty.type]
 
-      @rpc(Protobuf) def emptyParam(a: A): F[Empty.type]
+      @rpc(Protobuf) def emptyParam(a: A): FS[Empty.type]
 
-      @rpc(Protobuf) def emptyParamResponse(empty: Empty.type): F[A]
+      @rpc(Protobuf) def emptyParamResponse(empty: Empty.type): FS[A]
 
-      @rpc(Avro) def emptyAvro(empty: Empty.type): F[Empty.type]
+      @rpc(Avro) def emptyAvro(empty: Empty.type): FS[Empty.type]
 
-      @rpc(Avro) def emptyAvroParam(a: A): F[Empty.type]
+      @rpc(Avro) def emptyAvroParam(a: A): FS[Empty.type]
 
-      @rpc(Avro) def emptyAvroParamResponse(empty: Empty.type): F[A]
+      @rpc(Avro) def emptyAvroParamResponse(empty: Empty.type): FS[A]
 
       @rpc(Protobuf)
       @stream[ResponseStreaming.type]
-      def serverStreaming(b: B): F[Observable[C]]
+      def serverStreaming(b: B): FS[Observable[C]]
 
       @rpc(Protobuf)
       @stream[RequestStreaming.type]
-      def clientStreaming(oa: Observable[A]): F[D]
+      def clientStreaming(oa: Observable[A]): FS[D]
 
       @rpc(Avro)
       @stream[BidirectionalStreaming.type]
-      def biStreaming(oe: Observable[E]): F[Observable[E]]
+      def biStreaming(oe: Observable[E]): FS[Observable[E]]
     }
 
   }
@@ -67,18 +67,18 @@ object TaglessUtils extends CommonUtils {
   object client {
 
     @tagless
-    trait MyRPCClient[F[_]] {
-      def notAllowed(b: Boolean): F[C]
-      def empty: F[Empty.type]
-      def emptyParam(a: A): F[Empty.type]
-      def emptyParamResponse: F[A]
-      def emptyAvro: F[Empty.type]
-      def emptyAvroParam(a: A): F[Empty.type]
-      def emptyAvroParamResponse: F[A]
-      def u(x: Int, y: Int): F[C]
-      def ss(a: Int, b: Int): F[List[C]]
-      def cs(cList: List[C], bar: Int): F[D]
-      def bs(eList: List[E]): F[E]
+    trait MyRPCClient {
+      def notAllowed(b: Boolean): FS[C]
+      def empty: FS[Empty.type]
+      def emptyParam(a: A): FS[Empty.type]
+      def emptyParamResponse: FS[A]
+      def emptyAvro: FS[Empty.type]
+      def emptyAvroParam(a: A): FS[Empty.type]
+      def emptyAvroParamResponse: FS[A]
+      def u(x: Int, y: Int): FS[C]
+      def ss(a: Int, b: Int): FS[List[C]]
+      def cs(cList: List[C], bar: Int): FS[D]
+      def bs(eList: List[E]): FS[E]
     }
 
   }

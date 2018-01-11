@@ -23,28 +23,28 @@ import io.grpc._
 import scala.concurrent.duration.TimeUnit
 
 @tagless
-trait GrpcServer[F[_]] {
+trait GrpcServer {
 
-  def start(): F[Server]
+  def start(): FS[Server]
 
-  def getPort: F[Int]
+  def getPort: FS[Int]
 
-  def getServices: F[List[ServerServiceDefinition]]
+  def getServices: FS[List[ServerServiceDefinition]]
 
-  def getImmutableServices: F[List[ServerServiceDefinition]]
+  def getImmutableServices: FS[List[ServerServiceDefinition]]
 
-  def getMutableServices: F[List[ServerServiceDefinition]]
+  def getMutableServices: FS[List[ServerServiceDefinition]]
 
-  def shutdown(): F[Server]
+  def shutdown(): FS[Server]
 
-  def shutdownNow(): F[Server]
+  def shutdownNow(): FS[Server]
 
-  def isShutdown: F[Boolean]
+  def isShutdown: FS[Boolean]
 
-  def isTerminated: F[Boolean]
+  def isTerminated: FS[Boolean]
 
-  def awaitTerminationTimeout(timeout: Long, unit: TimeUnit): F[Boolean]
+  def awaitTerminationTimeout(timeout: Long, unit: TimeUnit): FS[Boolean]
 
-  def awaitTermination(): F[Unit]
+  def awaitTermination(): FS[Unit]
 
 }

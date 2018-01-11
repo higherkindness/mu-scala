@@ -71,18 +71,18 @@ object Utils extends CommonUtils {
   object client {
 
     @tagless
-    trait MyRPCClient[F[_]] {
-      def notAllowed(b: Boolean): F[C]
-      def empty: F[Empty.type]
-      def emptyParam(a: A): F[Empty.type]
-      def emptyParamResponse: F[A]
-      def emptyAvro: F[Empty.type]
-      def emptyAvroParam(a: A): F[Empty.type]
-      def emptyAvroParamResponse: F[A]
-      def u(x: Int, y: Int): F[C]
-      def ss(a: Int, b: Int): F[List[C]]
-      def cs(cList: List[C], bar: Int): F[D]
-      def bs(eList: List[E]): F[E]
+    trait MyRPCClient {
+      def notAllowed(b: Boolean): FS[C]
+      def empty: FS[Empty.type]
+      def emptyParam(a: A): FS[Empty.type]
+      def emptyParamResponse: FS[A]
+      def emptyAvro: FS[Empty.type]
+      def emptyAvroParam(a: A): FS[Empty.type]
+      def emptyAvroParamResponse: FS[A]
+      def u(x: Int, y: Int): FS[C]
+      def ss(a: Int, b: Int): FS[List[C]]
+      def cs(cList: List[C], bar: Int): FS[D]
+      def bs(eList: List[E]): FS[E]
     }
 
   }
