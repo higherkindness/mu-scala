@@ -1,5 +1,13 @@
 # Changelog
 
+## 01/11/2018 - Version 0.8.0
+
+Release changes:
+
+* Adds the job in Travis for the after CI SBT task ([#116](https://github.com/frees-io/freestyle-rpc/pull/116))
+* frees-rpc Tagless-final Migration - Release 0.8.0 ([#117](https://github.com/frees-io/freestyle-rpc/pull/117))
+
+
 ## 01/10/2018 - Version 0.7.0
 
 Release changes:
