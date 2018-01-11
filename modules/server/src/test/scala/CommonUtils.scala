@@ -21,9 +21,7 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import freestyle.rpc.common._
 import freestyle.rpc.client._
-import freestyle.rpc.protocol.Empty
 import freestyle.rpc.server._
-import freestyle.tagless.tagless
 
 trait CommonUtils {
 
@@ -72,22 +70,4 @@ trait CommonUtils {
 
   }
 
-  object clientProgram {
-
-    @tagless
-    trait MyRPCClient[F[_]] {
-      def notAllowed(b: Boolean): F[C]
-      def empty: F[Empty.type]
-      def emptyParam(a: A): F[Empty.type]
-      def emptyParamResponse: F[A]
-      def emptyAvro: F[Empty.type]
-      def emptyAvroParam(a: A): F[Empty.type]
-      def emptyAvroParamResponse: F[A]
-      def u(x: Int, y: Int): F[C]
-      def ss(a: Int, b: Int): F[List[C]]
-      def cs(cList: List[C], bar: Int): F[D]
-      def bs(eList: List[E]): F[E]
-    }
-
-  }
 }

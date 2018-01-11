@@ -15,12 +15,13 @@
  */
 
 package freestyle.rpc
+package withouttagless
 
 import cats.{~>, Applicative, Monad, MonadError}
-import freestyle.tagless._
 import freestyle.rpc.common._
 import freestyle.free.asyncCatsEffect.implicits._
 import freestyle.rpc.protocol._
+import freestyle.tagless.tagless
 import monix.eval.Task
 import monix.reactive.Observable
 
@@ -63,6 +64,25 @@ object Utils extends CommonUtils {
 
       @rpc(Protobuf)
       def scope(empty: Empty.type): F[External]
+    }
+
+  }
+
+  object client {
+
+    @tagless
+    trait MyRPCClient[F[_]] {
+      def notAllowed(b: Boolean): F[C]
+      def empty: F[Empty.type]
+      def emptyParam(a: A): F[Empty.type]
+      def emptyParamResponse: F[A]
+      def emptyAvro: F[Empty.type]
+      def emptyAvroParam(a: A): F[Empty.type]
+      def emptyAvroParamResponse: F[A]
+      def u(x: Int, y: Int): F[C]
+      def ss(a: Int, b: Int): F[List[C]]
+      def cs(cList: List[C], bar: Int): F[D]
+      def bs(eList: List[E]): F[E]
     }
 
   }
@@ -130,8 +150,8 @@ object Utils extends CommonUtils {
 
     object client {
 
-      import freestyle.rpc.Utils.clientProgram.MyRPCClient
       import service._
+      import freestyle.rpc.withouttagless.Utils.client.MyRPCClient
       import freestyle.rpc.protocol._
 
       class FreesRPCServiceClientHandler[F[_]: Monad](
@@ -140,31 +160,31 @@ object Utils extends CommonUtils {
           T2F: Task ~> F)
           extends MyRPCClient.Handler[F] {
 
-        override protected[this] def notAllowed(b: Boolean): F[C] =
+        override def notAllowed(b: Boolean): F[C] =
           client.notAllowed(b)
 
-        override protected[this] def empty: F[Empty.type] =
+        override def empty: F[Empty.type] =
           client.empty(protocol.Empty)
 
-        override protected[this] def emptyParam(a: A): F[Empty.type] =
+        override def emptyParam(a: A): F[Empty.type] =
           client.emptyParam(a)
 
-        override protected[this] def emptyParamResponse: F[A] =
+        override def emptyParamResponse: F[A] =
           client.emptyParamResponse(protocol.Empty)
 
-        override protected[this] def emptyAvro: F[Empty.type] =
+        override def emptyAvro: F[Empty.type] =
           client.emptyAvro(protocol.Empty)
 
-        override protected[this] def emptyAvroParam(a: A): F[Empty.type] =
+        override def emptyAvroParam(a: A): F[Empty.type] =
           client.emptyAvroParam(a)
 
-        override protected[this] def emptyAvroParamResponse: F[A] =
+        override def emptyAvroParamResponse: F[A] =
           client.emptyAvroParamResponse(protocol.Empty)
 
-        override protected[this] def u(x: Int, y: Int): F[C] =
+        override def u(x: Int, y: Int): F[C] =
           client.unary(A(x, y))
 
-        override protected[this] def ss(a: Int, b: Int): F[List[C]] = T2F {
+        override def ss(a: Int, b: Int): F[List[C]] = T2F {
           client
             .serverStreaming(B(A(a, a), A(b, b)))
             .zipWithIndex
@@ -176,10 +196,10 @@ object Utils extends CommonUtils {
             .toListL
         }
 
-        override protected[this] def cs(cList: List[C], bar: Int): F[D] =
+        override def cs(cList: List[C], bar: Int): F[D] =
           client.clientStreaming(Observable.fromIterable(cList.map(c => c.a)))
 
-        override protected[this] def bs(eList: List[E]): F[E] =
+        override def bs(eList: List[E]): F[E] =
           T2F(
             client
               .biStreaming(Observable.fromIterable(eList))

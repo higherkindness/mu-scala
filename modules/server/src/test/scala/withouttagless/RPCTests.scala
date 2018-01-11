@@ -15,6 +15,7 @@
  */
 
 package freestyle.rpc
+package withouttagless
 
 import cats.Monad
 import cats.syntax.flatMap._
@@ -22,14 +23,14 @@ import cats.syntax.functor._
 import org.scalatest._
 import freestyle.rpc.common._
 import freestyle.rpc.server._
-import freestyle.rpc.Utils.clientProgram.MyRPCClient
 import freestyle.rpc.protocol.Empty
 
 class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
-  import freestyle.rpc.Utils._
-  import freestyle.rpc.Utils.database._
-  import freestyle.rpc.Utils.implicits._
+  import freestyle.rpc.withouttagless.Utils._
+  import freestyle.rpc.withouttagless.Utils.client.MyRPCClient
+  import freestyle.rpc.withouttagless.Utils.database._
+  import freestyle.rpc.withouttagless.Utils.implicits._
 
   override protected def beforeAll(): Unit = {
     import freestyle.rpc.server.implicits._
