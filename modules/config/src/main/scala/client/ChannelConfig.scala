@@ -27,8 +27,9 @@ import freestyle.tagless.config.ConfigM
 @module
 trait ChannelConfig {
 
-  val configM: ConfigM
   implicit val functor: Functor
+
+  val configM: ConfigM
   val defaultHost: String = "localhost"
   val defaultPort: Int    = freestyle.rpc.server.defaultPort
 

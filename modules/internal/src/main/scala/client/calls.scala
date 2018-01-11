@@ -18,8 +18,8 @@ package freestyle.rpc
 package internal
 package client
 
+import cats.~>
 import freestyle.async.AsyncContext
-import freestyle.free.FSHandler
 import freestyle.free.asyncGuava.implicits._
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
 import io.grpc.stub.{ClientCalls, StreamObserver}
@@ -63,7 +63,7 @@ object calls {
       input: Observable[Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit H: FSHandler[Task, M]): M[Res] =
+      options: CallOptions)(implicit H: Task ~> M): M[Res] =
     H(
       input
         .liftByOperator(
