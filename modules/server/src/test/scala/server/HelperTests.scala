@@ -29,7 +29,8 @@ class HelperTests extends RpcServerTestSuite with Helpers {
 
     "work as expected" in {
 
-      server[ConcurrentMonad](Monad[ConcurrentMonad], grpcServerHandlerTests) shouldBe ((): Unit)
+      server[ConcurrentMonad](Monad[ConcurrentMonad], grpcServerHandlerTests)
+        .unsafeRunSync() shouldBe ((): Unit)
 
       (serverMock.start _: () => Server).verify()
       (serverMock.awaitTermination _: () => Unit).verify()

@@ -36,28 +36,28 @@ class GrpcServerHandlerTests extends RpcServerTestSuite {
 
     "allow to start a GrpcServer" in {
 
-      runK(handler.start, serverMock) shouldBe serverCopyMock
+      runK(handler.start, serverMock).unsafeRunSync() shouldBe serverCopyMock
       (serverMock.start _: () => Server).verify().once()
 
     }
 
     "allow to get the port where server is running" in {
 
-      runK(handler.getPort, serverMock) shouldBe SC.port
+      runK(handler.getPort, serverMock).unsafeRunSync() shouldBe SC.port
       (serverMock.getPort _: () => Int).verify().once()
 
     }
 
     "allow to get the services running under the Server instance" in {
 
-      runK(handler.getServices, serverMock) shouldBe serviceList
+      runK(handler.getServices, serverMock).unsafeRunSync() shouldBe serviceList
       (serverMock.getServices _: () => java.util.List[ServerServiceDefinition]).verify().once()
 
     }
 
     "allow to get the immutable services running under the Server instance" in {
 
-      runK(handler.getImmutableServices, serverMock) shouldBe immutableServiceList
+      runK(handler.getImmutableServices, serverMock).unsafeRunSync() shouldBe immutableServiceList
       (serverMock.getImmutableServices _: () => java.util.List[ServerServiceDefinition])
         .verify()
         .once()
@@ -66,7 +66,7 @@ class GrpcServerHandlerTests extends RpcServerTestSuite {
 
     "allow to get the mutable services running under the Server instance" in {
 
-      runK(handler.getMutableServices, serverMock) shouldBe mutableServiceList
+      runK(handler.getMutableServices, serverMock).unsafeRunSync() shouldBe mutableServiceList
       (serverMock.getMutableServices _: () => java.util.List[ServerServiceDefinition])
         .verify()
         .once()
@@ -75,42 +75,43 @@ class GrpcServerHandlerTests extends RpcServerTestSuite {
 
     "allow to stop a started GrpcServer" in {
 
-      runK(handler.shutdown, serverMock) shouldBe serverCopyMock
+      runK(handler.shutdown, serverMock).unsafeRunSync() shouldBe serverCopyMock
       (serverMock.shutdown _: () => Server).verify().once()
 
     }
 
     "allow to stop immediately a started GrpcServer" in {
 
-      runK(handler.shutdownNow, serverMock) shouldBe serverCopyMock
+      runK(handler.shutdownNow, serverMock).unsafeRunSync() shouldBe serverCopyMock
       (serverMock.shutdownNow _: () => Server).verify().once()
 
     }
 
     "allow to ask whether a Server is shutdown" in {
 
-      runK(handler.isShutdown, serverMock) shouldBe b
+      runK(handler.isShutdown, serverMock).unsafeRunSync() shouldBe b
       (serverMock.isShutdown _: () => Boolean).verify().once()
 
     }
 
     "allow to ask whether a Server instance has been terminated" in {
 
-      runK(handler.isTerminated, serverMock) shouldBe b
+      runK(handler.isTerminated, serverMock).unsafeRunSync() shouldBe b
       (serverMock.isTerminated _: () => Boolean).verify().once()
 
     }
 
     "allow to terminate after a certain timeout is reached" in {
 
-      runK(handler.awaitTerminationTimeout(timeout, timeoutUnit), serverMock) shouldBe b
+      runK(handler.awaitTerminationTimeout(timeout, timeoutUnit), serverMock)
+        .unsafeRunSync() shouldBe b
       (serverMock.awaitTermination(_: Long, _: TimeUnit)).verify(timeout, timeoutUnit).once()
 
     }
 
     "allow stopping a started GrpcServer" in {
 
-      runK(handler.awaitTermination, serverMock) shouldBe unit
+      runK(handler.awaitTermination, serverMock).unsafeRunSync() shouldBe unit
       (serverMock.awaitTermination _: () => Unit).verify().once()
 
     }
