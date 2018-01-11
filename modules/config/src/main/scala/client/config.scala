@@ -17,16 +17,14 @@
 package freestyle.rpc
 package client
 
-import freestyle.free._
-
 package object config {
 
   def ConfigForAddress[F[_]](hostPath: String, portPath: String)(
-      implicit CC: ChannelConfig[F]): FreeS[F, ManagedChannelForAddress] =
+      implicit CC: ChannelConfig[F]): F[ManagedChannelForAddress] =
     CC.loadChannelAddress(hostPath, portPath)
 
   def ConfigForTarget[F[_]](target: String)(
-      implicit CC: ChannelConfig[F]): FreeS[F, ManagedChannelForTarget] =
+      implicit CC: ChannelConfig[F]): F[ManagedChannelForTarget] =
     CC.loadChannelTarget(target)
 
 }

@@ -18,12 +18,14 @@ package freestyle.rpc
 package server
 package config
 
+import cats.Functor
+import cats.syntax.functor._
 import cats.syntax.either._
-import freestyle.free._
-import freestyle.free.config.ConfigM
+import freestyle.tagless._
+import freestyle.tagless.config.ConfigM
 
 @module
-trait ServerConfig[F[_]] {
+abstract class ServerConfig[F[_]: Functor] {
 
   val configM: ConfigM[F]
 

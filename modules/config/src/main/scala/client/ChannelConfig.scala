@@ -18,12 +18,14 @@ package freestyle.rpc
 package client
 package config
 
+import cats.Functor
+import cats.syntax.functor._
 import cats.syntax.either._
-import freestyle.tagless._
-import freestyle.free.config.ConfigM
+import freestyle.tagless.module
+import freestyle.tagless.config.ConfigM
 
 @module
-trait ChannelConfig[F[_]] {
+abstract class ChannelConfig[F[_]: Functor] {
 
   val configM: ConfigM[F]
   val defaultHost: String = "localhost"
