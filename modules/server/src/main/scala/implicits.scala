@@ -33,7 +33,7 @@ trait ServerImplicits {
 trait Helpers {
 
   def server[F[_]: Apply](implicit S: GrpcServer[F]): F[Unit] =
-    S.start() *> S.getPort *> S.awaitTermination().void
+    S.start() *> S.awaitTermination().void
 
 }
 

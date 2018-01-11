@@ -16,8 +16,7 @@
 
 package freestyle.rpc
 
-import cats.Apply
-import cats.syntax.apply._
+import cats.Functor
 import cats.syntax.functor._
 import freestyle.rpc.common._
 import freestyle.rpc.client._
@@ -47,11 +46,11 @@ trait CommonUtils {
 
   def createServerConf(grpcConfigs: List[GrpcConfig]): ServerW = ServerW(SC.port, grpcConfigs)
 
-  def serverStart[F[_]: Apply](implicit S: GrpcServer[F]): F[Unit] =
-    S.start() *> S.getPort.void
+  def serverStart[F[_]: Functor](implicit S: GrpcServer[F]): F[Unit] =
+    S.start().void
 
-  def serverStop[F[_]: Apply](implicit S: GrpcServer[F]): F[Unit] =
-    S.getPort *> S.shutdownNow().void
+  def serverStop[F[_]: Functor](implicit S: GrpcServer[F]): F[Unit] =
+    S.shutdownNow().void
 
   def debug(str: String): Unit =
     println(s"\n\n$str\n\n")
