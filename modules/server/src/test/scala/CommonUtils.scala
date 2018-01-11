@@ -16,8 +16,7 @@
 
 package freestyle.rpc
 
-import cats.Monad
-import cats.syntax.flatMap._
+import cats.Functor
 import cats.syntax.functor._
 import freestyle.rpc.common._
 import freestyle.rpc.client._
@@ -47,19 +46,11 @@ trait CommonUtils {
 
   def createServerConf(grpcConfigs: List[GrpcConfig]): ServerW = ServerW(SC.port, grpcConfigs)
 
-  def serverStart[F[_]: Monad](implicit S: GrpcServer[F]): F[Unit] = {
-    for {
-      _ <- S.start()
-      _ <- S.getPort
-    } yield ()
-  }
+  def serverStart[F[_]: Functor](implicit S: GrpcServer[F]): F[Unit] =
+    S.start().void
 
-  def serverStop[F[_]: Monad](implicit S: GrpcServer[F]): F[Unit] = {
-    for {
-      _ <- S.getPort
-      _ <- S.shutdownNow()
-    } yield ()
-  }
+  def serverStop[F[_]: Functor](implicit S: GrpcServer[F]): F[Unit] =
+    S.shutdownNow().void
 
   def debug(str: String): Unit =
     println(s"\n\n$str\n\n")

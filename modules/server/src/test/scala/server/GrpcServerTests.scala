@@ -19,7 +19,7 @@ package server
 
 import java.util.concurrent.TimeUnit
 
-import cats.Monad
+import cats.Apply
 import cats.syntax.apply._
 import freestyle.rpc.common.{ConcurrentMonad, SC}
 import io.grpc.{Server, ServerServiceDefinition}
@@ -46,7 +46,7 @@ class GrpcServerTests extends RpcServerTestSuite {
 
     "behaves as expected" in {
 
-      def program[F[_]: Monad](APP: GrpcServer[F]): F[Result] = {
+      def program[F[_]: Apply](APP: GrpcServer[F]): F[Result] = {
 
         import APP._
 

@@ -19,8 +19,8 @@ package server
 package config
 
 import cats.Functor
-import cats.syntax.functor._
 import cats.syntax.either._
+import cats.syntax.functor._
 import freestyle.tagless._
 import freestyle.tagless.config.ConfigM
 

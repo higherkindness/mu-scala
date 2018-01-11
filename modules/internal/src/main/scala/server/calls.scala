@@ -19,6 +19,7 @@ package internal
 package server
 
 import cats.effect.{Effect, IO}
+import cats.syntax.functor._
 import io.grpc.stub.ServerCalls.{
   BidiStreamingMethod,
   ClientStreamingMethod,
@@ -64,7 +65,7 @@ object calls {
     override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit =
       EFF
         .runAsync(f(request)) {
-          case Right(obs) => IO(obs.subscribe(responseObserver))
+          case Right(obs) => IO(obs.subscribe(responseObserver)).void
           case Left(e)    => IO.raiseError(e) // this will throw, but consistent previous impl
         }
         .unsafeRunSync
