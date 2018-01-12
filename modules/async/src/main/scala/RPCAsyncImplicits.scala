@@ -27,10 +27,7 @@ import scala.concurrent.Future
 
 trait RPCAsyncImplicits {
 
-  implicit val future2Task: Future ~> Task =
-    λ[Future ~> Task] { fa =>
-      Task.deferFuture(fa)
-    }
+  implicit val future2Task: Future ~> Task = λ[Future ~> Task](Task.deferFuture(_))
 
   implicit def task2Future(implicit S: Scheduler): Task ~> Future = λ[Task ~> Future](_.runAsync)
 
