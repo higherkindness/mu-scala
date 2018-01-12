@@ -510,7 +510,7 @@ import cats.effect.IO
 import freestyle.rpc.server._
 import freestyle.rpc.server.handlers._
 import freestyle.rpc.server.implicits._
-import freestyle.free.asyncCatsEffect.implicits._
+import freestyle.async.catsEffect.implicits._
 import service._
 
 object gserver {
@@ -593,7 +593,7 @@ So, taking into account all we have just said, how would our code look?
 import cats.implicits._
 import cats.effect.IO
 import freestyle.free.config.implicits._
-import freestyle.free.asyncCatsEffect.implicits._
+import freestyle.async.catsEffect.implicits._
 import freestyle.rpc.client._
 import freestyle.rpc.client.config._
 import freestyle.rpc.client.implicits._
