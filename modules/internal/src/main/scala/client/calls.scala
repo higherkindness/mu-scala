@@ -20,7 +20,7 @@ package client
 
 import cats.~>
 import freestyle.async.AsyncContext
-import freestyle.free.asyncGuava.implicits._
+import freestyle.async.guava.implicits._
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
 import io.grpc.stub.{ClientCalls, StreamObserver}
 import monix.eval.Task
@@ -38,7 +38,7 @@ object calls {
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
       options: CallOptions)(implicit AC: AsyncContext[M], E: ExecutionContext): M[Res] =
-    listenableFuture2Async.apply(
+    listenableFuture2Async(
       ClientCalls
         .futureUnaryCall(channel.newCall(descriptor, options), request))
 

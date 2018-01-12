@@ -18,7 +18,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String    = "1.8.0"
-      val frees: String     = "0.5.3"
+      val frees: String     = "0.6.1"
       val grpc: String      = "1.7.1"
       val pbdirect: String  = "0.0.8"
       val scalameta: String = "1.8.0"
@@ -44,8 +44,8 @@ object ProjectPlugin extends AutoPlugin {
         %%("cats-core"),
         %%("cats-effect"),
         %%("monix"),
-        %%("shapeless")  % Test,
-        %%("frees-core") % Test
+        %%("shapeless")           % Test,
+        %%("frees-core", V.frees) % Test
       )
     )
 
