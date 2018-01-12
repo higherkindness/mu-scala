@@ -45,12 +45,12 @@ jobs:
             if grep -q "SNAPSHOT" version.sbt; then
               sbt ++$TRAVIS_SCALA_VERSION publish;
             else
+              sbt orgUpdateDocFiles;
               git reset --hard HEAD;
               git clean -f;
               git checkout master;
               git pull origin master;
               sbt release;
-              sbt orgUpdateDocFiles;
               sbt depUpdateDependencyIssues;
             fi
           fi
