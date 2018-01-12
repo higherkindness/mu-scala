@@ -1,5 +1,14 @@
 # Changelog
 
+## 01/12/2018 - Version 0.9.0
+
+Release changes:
+
+* Mini cleanup after move to finally tagless ([#118](https://github.com/frees-io/freestyle-rpc/pull/118))
+* Mini refactoring of `@service` ([#128](https://github.com/frees-io/freestyle-rpc/pull/128))
+* Upgrades to Freestyle 0.6.1. Releases 0.9.0. ([#129](https://github.com/frees-io/freestyle-rpc/pull/129))
+
+
 ## 01/11/2018 - Version 0.8.0
 
 Release changes:
