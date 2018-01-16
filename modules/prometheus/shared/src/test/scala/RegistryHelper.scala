@@ -18,31 +18,33 @@ package freestyle.rpc
 package prometheus
 package shared
 
+import freestyle.rpc.interceptors.MetricType
 import io.prometheus.client._
+
 import scala.collection.JavaConverters._
 
 object RegistryHelper {
 
-  def findRecordedMetric(name: String)(
+  def findRecordedMetric(mt: MetricType)(
       implicit CR: CollectorRegistry): Option[Collector.MetricFamilySamples] =
-    CR.metricFamilySamples.asScala.find(_.name == name)
+    CR.metricFamilySamples.asScala.find(_.name == mt.toMetricString)
 
-  def findRecordedMetricOrThrow(name: String)(
+  def findRecordedMetricOrThrow(mt: MetricType)(
       implicit CR: CollectorRegistry): Collector.MetricFamilySamples =
-    findRecordedMetric(name).getOrElse(
-      throw new IllegalArgumentException(s"Could not find metric with name: $name"))
+    findRecordedMetric(mt).getOrElse(
+      throw new IllegalArgumentException(s"Could not find metric with name: ${mt.toMetricString}"))
 
-  def extractMetricValue(name: String)(implicit CR: CollectorRegistry): Double = {
-    val result = findRecordedMetricOrThrow(name)
+  def extractMetricValue(mt: MetricType)(implicit CR: CollectorRegistry): Double = {
+    val result = findRecordedMetricOrThrow(mt)
     result.samples.asScala.headOption
       .map(_.value)
       .getOrElse(throw new IllegalArgumentException(
-        s"Expected one value, but got ${result.samples.size} for metric $name"))
+        s"Expected one value, but got ${result.samples.size} for metric ${mt.toMetricString}"))
   }
 
-  def countSamples(metricName: String, sampleName: String)(implicit CR: CollectorRegistry): Int =
+  def countSamples(mt: MetricType, sampleName: String)(implicit CR: CollectorRegistry): Int =
     CR.metricFamilySamples.asScala
-      .filter(_.name == metricName)
+      .filter(_.name == mt.toMetricString)
       .map { sample =>
         sample.samples.asScala.count(_.name == sampleName)
       }

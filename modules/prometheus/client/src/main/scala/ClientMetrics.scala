@@ -23,7 +23,23 @@ import io.prometheus.client._
 
 case class ClientMetrics(cfg: Configuration) {
 
-  import ClientMetrics._
+  import freestyle.rpc.interceptors.metrics._
+  import freestyle.rpc.prometheus.implicits._
+
+  private[this] val rpcStartedBuilder: Counter.Builder =
+    clientMetricRpcStarted.toCounterBuilder
+
+  private[this] val rpcCompletedBuilder: Counter.Builder =
+    clientMetricRpcCompleted.toCounterBuilder
+
+  private[this] val completedLatencySecondsBuilder: Histogram.Builder =
+    clientMetricCompletedLatencySeconds.toHistogramBuilder
+
+  private[this] val streamMessagesReceivedBuilder: Counter.Builder =
+    clientMetricStreamMessagesReceived.toCounterBuilder
+
+  private[this] val streamMessagesSentBuilder: Counter.Builder =
+    clientMetricStreamMessagesSent.toCounterBuilder
 
   val rpcStarted: Counter   = rpcStartedBuilder.register(cfg.collectorRegistry)
   val rpcCompleted: Counter = rpcCompletedBuilder.register(cfg.collectorRegistry)
@@ -38,42 +54,4 @@ case class ClientMetrics(cfg: Configuration) {
           .buckets(cfg.latencyBuckets: _*)
           .register(cfg.collectorRegistry))
     else None
-}
-
-object ClientMetrics {
-
-  val rpcStartedBuilder: Counter.Builder = Counter.build
-    .namespace("grpc")
-    .subsystem("client")
-    .name("started_total")
-    .labelNames("grpc_type", "grpc_service", "grpc_method")
-    .help("Total number of RPCs started on the client.")
-
-  val rpcCompletedBuilder: Counter.Builder = Counter.build
-    .namespace("grpc")
-    .subsystem("client")
-    .name("completed")
-    .labelNames("grpc_type", "grpc_service", "grpc_method", "grpc_code")
-    .help("Total number of RPCs completed on the client, regardless of success or failure.")
-
-  val completedLatencySecondsBuilder: Histogram.Builder = Histogram.build
-    .namespace("grpc")
-    .subsystem("client")
-    .name("completed_latency_seconds")
-    .labelNames("grpc_type", "grpc_service", "grpc_method")
-    .help("Histogram of rpc response latency (in seconds) for completed rpcs.")
-
-  val streamMessagesReceivedBuilder: Counter.Builder = Counter.build
-    .namespace("grpc")
-    .subsystem("client")
-    .name("msg_received_total")
-    .labelNames("grpc_type", "grpc_service", "grpc_method")
-    .help("Total number of stream messages received from the server.")
-
-  val streamMessagesSentBuilder: Counter.Builder = Counter.build
-    .namespace("grpc")
-    .subsystem("client")
-    .name("msg_sent_total")
-    .labelNames("grpc_type", "grpc_service", "grpc_method")
-    .help("Total number of stream messages sent by the client.")
 }

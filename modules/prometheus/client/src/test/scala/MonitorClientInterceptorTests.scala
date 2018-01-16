@@ -23,6 +23,7 @@ import freestyle.rpc.prometheus.shared.Configuration
 import freestyle.rpc.withouttagless.Utils.client.MyRPCClient
 import io.prometheus.client.{Collector, CollectorRegistry}
 import org.scalatest.BeforeAndAfterAll
+import freestyle.rpc.interceptors.metrics._
 
 import scala.collection.JavaConverters._
 
@@ -58,14 +59,14 @@ class MonitorClientInterceptorTests extends RpcBaseTestSuite with BeforeAndAfter
 
       clientProgram[ConcurrentMonad].unsafeRunSync()
 
-      val startedTotal: Double = extractMetricValue("grpc_client_started_total")
+      val startedTotal: Double = extractMetricValue(clientMetricRpcStarted)
       startedTotal should be >= 0d
       startedTotal should be <= 1d
-      findRecordedMetricOrThrow("grpc_client_msg_received_total").samples shouldBe empty
-      findRecordedMetricOrThrow("grpc_client_msg_sent_total").samples shouldBe empty
+      findRecordedMetricOrThrow(clientMetricStreamMessagesReceived).samples shouldBe empty
+      findRecordedMetricOrThrow(clientMetricStreamMessagesSent).samples shouldBe empty
 
       val handledSamples =
-        findRecordedMetricOrThrow("grpc_client_completed").samples.asScala.toList
+        findRecordedMetricOrThrow(clientMetricRpcCompleted).samples.asScala.toList
       handledSamples.size shouldBe 1
       handledSamples.headOption.foreach { s =>
         s.value should be >= 0d
@@ -97,25 +98,25 @@ class MonitorClientInterceptorTests extends RpcBaseTestSuite with BeforeAndAfter
 
       clientProgram[ConcurrentMonad].unsafeRunSync()
 
-      val startedTotal: Double = extractMetricValue("grpc_client_started_total")
+      val startedTotal: Double = extractMetricValue(clientMetricRpcStarted)
 
       startedTotal should be >= 0d
       startedTotal should be <= 1d
 
-      val msgSentTotal: Double = extractMetricValue("grpc_client_msg_sent_total")
+      val msgSentTotal: Double = extractMetricValue(clientMetricStreamMessagesSent)
       msgSentTotal should be >= 0d
       msgSentTotal should be <= 2d
 
-      findRecordedMetricOrThrow("grpc_client_msg_received_total").samples shouldBe empty
+      findRecordedMetricOrThrow(clientMetricStreamMessagesReceived).samples shouldBe empty
 
       clientProgram2[ConcurrentMonad].unsafeRunSync()
 
-      val msgSentTotal2: Double = extractMetricValue("grpc_client_msg_sent_total")
+      val msgSentTotal2: Double = extractMetricValue(clientMetricStreamMessagesSent)
       msgSentTotal2 should be >= 0d
       msgSentTotal2 should be <= 3d
 
       val handledSamples =
-        findRecordedMetricOrThrow("grpc_client_completed").samples.asScala.toList
+        findRecordedMetricOrThrow(clientMetricRpcCompleted).samples.asScala.toList
       handledSamples.size shouldBe 1
       handledSamples.headOption.foreach { s =>
         s.value should be >= 0d
@@ -144,9 +145,9 @@ class MonitorClientInterceptorTests extends RpcBaseTestSuite with BeforeAndAfter
 
       val response: List[C] = clientProgram[ConcurrentMonad].unsafeRunSync()
 
-      val startedTotal: Double     = extractMetricValue("grpc_client_started_total")
-      val msgReceivedTotal: Double = extractMetricValue("grpc_client_msg_received_total")
-      findRecordedMetricOrThrow("grpc_client_msg_sent_total").samples shouldBe empty
+      val startedTotal: Double     = extractMetricValue(clientMetricRpcStarted)
+      val msgReceivedTotal: Double = extractMetricValue(clientMetricStreamMessagesReceived)
+      findRecordedMetricOrThrow(clientMetricStreamMessagesSent).samples shouldBe empty
 
       startedTotal should be >= 0d
       startedTotal should be <= 1d
@@ -154,7 +155,7 @@ class MonitorClientInterceptorTests extends RpcBaseTestSuite with BeforeAndAfter
       msgReceivedTotal should be <= 2d
 
       val handledSamples =
-        findRecordedMetricOrThrow("grpc_client_completed").samples.asScala.toList
+        findRecordedMetricOrThrow(clientMetricRpcCompleted).samples.asScala.toList
       handledSamples.size shouldBe 1
       handledSamples.headOption.foreach { s =>
         s.value should be >= 0d
@@ -183,9 +184,9 @@ class MonitorClientInterceptorTests extends RpcBaseTestSuite with BeforeAndAfter
 
       clientProgram[ConcurrentMonad].unsafeRunSync()
 
-      val startedTotal: Double     = extractMetricValue("grpc_client_started_total")
-      val msgReceivedTotal: Double = extractMetricValue("grpc_client_msg_received_total")
-      val msgSentTotal: Double     = extractMetricValue("grpc_client_msg_sent_total")
+      val startedTotal: Double     = extractMetricValue(clientMetricRpcStarted)
+      val msgReceivedTotal: Double = extractMetricValue(clientMetricStreamMessagesReceived)
+      val msgSentTotal: Double     = extractMetricValue(clientMetricStreamMessagesSent)
 
       startedTotal should be >= 0d
       startedTotal should be <= 1d
@@ -195,7 +196,7 @@ class MonitorClientInterceptorTests extends RpcBaseTestSuite with BeforeAndAfter
       msgSentTotal should be <= 2d
 
       val handledSamples =
-        findRecordedMetricOrThrow("grpc_client_completed").samples.asScala.toList
+        findRecordedMetricOrThrow(clientMetricRpcCompleted).samples.asScala.toList
       handledSamples.size shouldBe 1
       handledSamples.headOption.foreach { s =>
         s.value should be >= 0d
@@ -224,7 +225,7 @@ class MonitorClientInterceptorTests extends RpcBaseTestSuite with BeforeAndAfter
 
       clientProgram[ConcurrentMonad].unsafeRunSync()
 
-      findRecordedMetric("grpc_client_completed_latency_seconds") shouldBe None
+      findRecordedMetric(clientMetricCompletedLatencySeconds) shouldBe None
 
     }
 
@@ -243,7 +244,7 @@ class MonitorClientInterceptorTests extends RpcBaseTestSuite with BeforeAndAfter
       clientProgram[ConcurrentMonad].unsafeRunSync()
 
       val metric: Option[Collector.MetricFamilySamples] =
-        findRecordedMetric("grpc_client_completed_latency_seconds")
+        findRecordedMetric(clientMetricCompletedLatencySeconds)
 
       metric shouldBe defined
       metric.map { m =>
@@ -269,7 +270,7 @@ class MonitorClientInterceptorTests extends RpcBaseTestSuite with BeforeAndAfter
       clientProgram[ConcurrentMonad].unsafeRunSync()
 
       countSamples(
-        "grpc_client_completed_latency_seconds",
+        clientMetricCompletedLatencySeconds,
         "grpc_client_completed_latency_seconds_bucket") shouldBe (buckets.size + 1)
 
     }
@@ -294,8 +295,8 @@ class MonitorClientInterceptorTests extends RpcBaseTestSuite with BeforeAndAfter
         b <- clientStreaming[ConcurrentMonad]
       } yield (a, b)).unsafeRunSync()
 
-      findRecordedMetricOrThrow("grpc_client_started_total").samples.size() shouldBe 2
-      findRecordedMetricOrThrow("grpc_client_completed").samples.size() shouldBe 2
+      findRecordedMetricOrThrow(clientMetricRpcStarted).samples.size() shouldBe 2
+      findRecordedMetricOrThrow(clientMetricRpcCompleted).samples.size() shouldBe 2
 
     }
 
