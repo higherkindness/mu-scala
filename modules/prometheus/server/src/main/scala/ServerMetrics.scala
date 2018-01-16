@@ -23,14 +23,34 @@ import io.prometheus.client._
 
 case class ServerMetrics(cfg: Configuration) {
 
-  import ServerMetrics._
+  import freestyle.rpc.interceptors.metrics._
+  import freestyle.rpc.prometheus.implicits._
+
+  private[this] val serverStartedBuilder: Counter.Builder =
+    serverMetricRpcStarted.toCounterBuilder
+
+  private[this] val serverHandledBuilder: Counter.Builder =
+    serverMetricHandledCompleted.toCounterBuilder
+
+  private[this] val serverHandledLatencySecondsBuilder: Histogram.Builder =
+    serverMetricHandledLatencySeconds.toHistogramBuilder
+
+  private[this] val serverStreamMessagesReceivedBuilder: Counter.Builder =
+    serverMetricStreamMessagesReceived.toCounterBuilder
+
+  private[this] val serverStreamMessagesSentBuilder: Counter.Builder =
+    serverMetricStreamMessagesSent.toCounterBuilder
 
   val serverStarted: Counter = serverStartedBuilder.register(cfg.collectorRegistry)
+
   val serverHandled: Counter = serverHandledBuilder.register(cfg.collectorRegistry)
+
   val serverStreamMessagesReceived: Counter =
     serverStreamMessagesReceivedBuilder.register(cfg.collectorRegistry)
+
   val serverStreamMessagesSent: Counter =
     serverStreamMessagesSentBuilder.register(cfg.collectorRegistry)
+
   val serverHandledLatencySeconds: Option[Histogram] =
     if (cfg.isIncludeLatencyHistograms)
       Some(
@@ -38,42 +58,5 @@ case class ServerMetrics(cfg: Configuration) {
           .buckets(cfg.latencyBuckets: _*)
           .register(cfg.collectorRegistry))
     else None
-}
 
-object ServerMetrics {
-
-  val serverStartedBuilder: Counter.Builder = Counter.build
-    .namespace("grpc")
-    .subsystem("server")
-    .name("started_total")
-    .labelNames("grpc_type", "grpc_service", "grpc_method")
-    .help("Total number of RPCs started on the server.")
-
-  val serverHandledBuilder: Counter.Builder = Counter.build
-    .namespace("grpc")
-    .subsystem("server")
-    .name("handled_total")
-    .labelNames("grpc_type", "grpc_service", "grpc_method", "grpc_code")
-    .help("Total number of RPCs completed on the server, regardless of success or failure.")
-
-  val serverHandledLatencySecondsBuilder: Histogram.Builder = Histogram.build
-    .namespace("grpc")
-    .subsystem("server")
-    .name("handled_latency_seconds")
-    .labelNames("grpc_type", "grpc_service", "grpc_method")
-    .help("Histogram of response latency (seconds) of gRPC that had been application-level handled by the server.")
-
-  val serverStreamMessagesReceivedBuilder: Counter.Builder = Counter.build
-    .namespace("grpc")
-    .subsystem("server")
-    .name("msg_received_total")
-    .labelNames("grpc_type", "grpc_service", "grpc_method")
-    .help("Total number of stream messages received from the client.")
-
-  val serverStreamMessagesSentBuilder: Counter.Builder = Counter.build
-    .namespace("grpc")
-    .subsystem("server")
-    .name("msg_sent_total")
-    .labelNames("grpc_type", "grpc_service", "grpc_method")
-    .help("Total number of stream messages sent by the server.")
 }
