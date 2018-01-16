@@ -77,7 +77,9 @@ lazy val `prometheus-client` = project
   .in(file("modules/prometheus/client"))
   .dependsOn(`prometheus-shared` % "compile->compile;test->test")
   .dependsOn(client % "compile->compile;test->test")
+  .dependsOn(server % "test->test")
   .settings(moduleName := "frees-rpc-prometheus-client")
+  .settings(prometheusClientSettings)
 
 //////////////////////////
 //// MODULES REGISTRY ////

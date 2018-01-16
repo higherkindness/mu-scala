@@ -24,12 +24,11 @@ import io.grpc.testing.TestMethodDescriptors
 
 class GRPCServiceDefBuilderTests extends RpcBaseTestSuite {
 
-  val serviceName        = "service_foo"
-  val invalidServiceName = "invalid_service_name"
-  val flowMethod: MethodDescriptor[String, Integer] =
-    TestMethodDescriptors.noopMethod[String, Integer]()
-  val headers: Metadata                     = new Metadata()
-  val listener: ServerCall.Listener[String] = new ServerCall.Listener[String]() {}
+  val serviceName                              = "service_foo"
+  val invalidServiceName                       = "invalid_service_name"
+  val flowMethod: MethodDescriptor[Void, Void] = TestMethodDescriptors.voidMethod
+  val headers: Metadata                        = new Metadata()
+  val listener: ServerCall.Listener[String]    = new ServerCall.Listener[String]() {}
 
   val handler: ServerCallHandler[String, Integer] = new ServerCallHandler[String, Integer]() {
     override def startCall(

@@ -61,6 +61,7 @@ case class MonitoringServerCall[Req, Res](
   private[this] val millisPerSecond = 1000L
 
   private[this] val startInstant: Instant = clock.instant
+
   reportStartMetrics()
 
   override def close(status: Status, responseHeaders: Metadata): Unit = {
@@ -70,7 +71,7 @@ case class MonitoringServerCall[Req, Res](
 
   override def sendMessage(message: Res): Unit = {
     if (serverMetrics.method.isServerStreaming) serverMetrics.recordStreamMessageSent()
-    super.sendMessage(message)
+    delegate().sendMessage(message)
   }
 
   private[this] def reportStartMetrics(): Unit =
@@ -92,6 +93,6 @@ case class MonitoringServerCallListener[Req](
 
   override def onMessage(request: Req): Unit = {
     if (serverMetrics.method.isClientStreaming) serverMetrics.recordStreamMessageReceived()
-    super.onMessage(request)
+    delegate.onMessage(request)
   }
 }
