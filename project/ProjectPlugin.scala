@@ -100,6 +100,18 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+    lazy val interceptorsSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %("grpc-core", V.grpc)
+      )
+    )
+
+    lazy val prometheusSettings = Seq(
+      libraryDependencies ++= Seq(
+        "io.prometheus" % "simpleclient" % "0.1.0"
+      )
+    )
+
     lazy val docsSettings = Seq(
       // Pointing to https://github.com/frees-io/freestyle/tree/master/docs/src/main/tut/docs/rpc
       tutTargetDirectory := baseDirectory.value.getParentFile.getParentFile / "docs" / "src" / "main" / "tut" / "docs" / "rpc"

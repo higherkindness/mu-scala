@@ -56,6 +56,29 @@ lazy val config = project
   .settings(moduleName := "frees-rpc-config")
   .settings(configSettings)
 
+lazy val interceptors = project
+  .in(file("modules/interceptors"))
+  .settings(moduleName := "frees-rpc-interceptors")
+  .settings(interceptorsSettings)
+
+lazy val `prometheus-shared` = project
+  .in(file("modules/prometheus/shared"))
+  .dependsOn(interceptors % "compile->compile;test->test")
+  .settings(moduleName := "frees-rpc-prometheus-shared")
+  .settings(prometheusSettings)
+
+lazy val `prometheus-server` = project
+  .in(file("modules/prometheus/server"))
+  .dependsOn(`prometheus-shared` % "compile->compile;test->test")
+  .dependsOn(server % "compile->compile;test->test")
+  .settings(moduleName := "frees-rpc-prometheus-server")
+
+lazy val `prometheus-client` = project
+  .in(file("modules/prometheus/client"))
+  .dependsOn(`prometheus-shared` % "compile->compile;test->test")
+  .dependsOn(client % "compile->compile;test->test")
+  .settings(moduleName := "frees-rpc-prometheus-client")
+
 //////////////////////////
 //// MODULES REGISTRY ////
 //////////////////////////
@@ -68,7 +91,11 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `client-netty`,
   `client-okhttp`,
   server,
-  config
+  config,
+  interceptors,
+  `prometheus-shared`,
+  `prometheus-client`,
+  `prometheus-server`
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =

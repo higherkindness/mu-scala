@@ -199,11 +199,19 @@ object Utils extends CommonUtils {
         override def cs(cList: List[C], bar: Int): F[D] =
           client.clientStreaming(Observable.fromIterable(cList.map(c => c.a)))
 
+        import cats.syntax.functor._
         override def bs(eList: List[E]): F[E] =
           T2F(
             client
               .biStreaming(Observable.fromIterable(eList))
-              .firstL)
+              .zipWithIndex
+              .map {
+                case (c, i) =>
+                  debug(s"[CLIENT] Result #$i: $c")
+                  c
+              }
+              .toListL
+          ).map(_.head)
 
       }
 
@@ -211,7 +219,7 @@ object Utils extends CommonUtils {
 
   }
 
-  trait FreesRuntime extends CommonRuntime {
+  trait FreesRuntime {
 
     import service._
     import handlers.server._
