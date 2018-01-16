@@ -65,7 +65,7 @@ case class MonitoringServerCall[Req, Res](
 
   override def close(status: Status, responseHeaders: Metadata): Unit = {
     reportEndMetrics(status)
-    super.close(status, responseHeaders)
+    delegate().close(status, responseHeaders)
   }
 
   override def sendMessage(message: Res): Unit = {

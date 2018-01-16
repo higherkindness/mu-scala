@@ -21,7 +21,6 @@ package server
 import freestyle.rpc.common.ConcurrentMonad
 import freestyle.rpc.prometheus.shared.Configuration
 import freestyle.rpc.withouttagless.Utils._
-import io.grpc.ServerInterceptors
 import io.prometheus.client.CollectorRegistry
 
 case class InterceptorsRuntime(
@@ -35,6 +34,7 @@ case class InterceptorsRuntime(
   import freestyle.rpc.server._
   import freestyle.rpc.server.implicits._
   import freestyle.async.catsEffect.implicits._
+  import freestyle.rpc.interceptors.implicits._
 
   //////////////////////////////////
   // Server Runtime Configuration //
@@ -43,8 +43,7 @@ case class InterceptorsRuntime(
   lazy val monitorInterceptor = MonitoringServerInterceptor(configuration.withCollectorRegistry(cr))
 
   lazy val grpcConfigs: List[GrpcConfig] = List(
-    AddService(
-      ServerInterceptors.intercept(RPCService.bindService[ConcurrentMonad], monitorInterceptor))
+    AddService(RPCService.bindService[ConcurrentMonad].interceptWith(monitorInterceptor))
   )
 
   implicit lazy val serverW: ServerW = createServerConfOnRandomPort(grpcConfigs)
