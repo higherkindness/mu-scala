@@ -17,12 +17,9 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String = "1.8.0"
-      val frees: String  = "0.6.1"
-      val grpc: String   = "1.9.0"
-      // See https://github.com/grpc/grpc-java/blob/master/SECURITY.md#netty
-      val netty              = "4.1.17.Final"
-      val nettyBoringssl     = "2.0.7.Final"
+      val avro4s: String     = "1.8.0"
+      val frees: String      = "0.6.1"
+      val grpc: String       = "1.9.0"
       val pbdirect: String   = "0.0.8"
       val prometheus: String = "0.1.0"
       val scalameta: String  = "1.8.0"
