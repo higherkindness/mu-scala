@@ -16,7 +16,7 @@
 
 package freestyle.rpc
 package prometheus
-package server
+package shared
 
 import io.prometheus.client._
 import scala.collection.JavaConverters._

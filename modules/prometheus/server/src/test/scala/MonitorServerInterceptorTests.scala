@@ -29,7 +29,7 @@ class MonitorServerInterceptorTests extends RpcBaseTestSuite {
 
   import freestyle.rpc.server.implicits._
   import freestyle.rpc.withouttagless.Utils.database._
-  import RegistryHelper._
+  import freestyle.rpc.prometheus.shared.RegistryHelper._
 
   "MonitorServerInterceptor for Prometheus" should {
 
@@ -54,14 +54,14 @@ class MonitorServerInterceptorTests extends RpcBaseTestSuite {
         findRecordedMetricOrThrow("grpc_server_handled_total").samples.asScala.toList
       handledSamples.size shouldBe 1
       handledSamples.headOption.foreach { s =>
+        s.value should be >= 0d
+        s.value should be <= 1d
+
         s.labelValues.asScala.toList should contain theSameElementsAs Vector(
           "UNARY",
           "RPCService",
           "unary",
           "OK")
-      }
-      handledSamples.headOption.map { s =>
-        s.value shouldBe 0.5 +- 0.5
       }
 
       serverRuntime.serverStop[ConcurrentMonad].unsafeRunSync()
@@ -88,7 +88,9 @@ class MonitorServerInterceptorTests extends RpcBaseTestSuite {
         findRecordedMetricOrThrow("grpc_server_handled_total").samples.asScala.toList
       handledSamples.size shouldBe 1
       handledSamples.headOption.foreach { s =>
-        s.value shouldBe 0.5 +- 0.5
+        s.value should be >= 0d
+        s.value should be <= 1d
+
         s.labelValues.asScala.toList should contain theSameElementsAs Vector(
           "CLIENT_STREAMING",
           "RPCService",
@@ -120,7 +122,9 @@ class MonitorServerInterceptorTests extends RpcBaseTestSuite {
         findRecordedMetricOrThrow("grpc_server_handled_total").samples.asScala.toList
       handledSamples.size shouldBe 1
       handledSamples.headOption.foreach { s =>
-        s.value shouldBe 0.5 +- 0.5
+        s.value should be >= 0d
+        s.value should be <= 1d
+
         s.labelValues.asScala.toList should contain theSameElementsAs Vector(
           "SERVER_STREAMING",
           "RPCService",
@@ -166,7 +170,8 @@ class MonitorServerInterceptorTests extends RpcBaseTestSuite {
         findRecordedMetricOrThrow("grpc_server_handled_total").samples.asScala.toList
       handledSamples.size shouldBe 1
       handledSamples.headOption.foreach { s =>
-        s.value shouldBe 0.5 +- 0.5
+        s.value should be >= 0d
+        s.value should be <= 1d
         s.labelValues.asScala.toList should contain theSameElementsAs Vector(
           "BIDI_STREAMING",
           "RPCService",
