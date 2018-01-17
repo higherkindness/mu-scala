@@ -123,7 +123,8 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val testingSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %("grpc-testing", V.grpc)
+        %("grpc-testing", V.grpc),
+        %%("scalacheck") % Test
       )
     )
 
