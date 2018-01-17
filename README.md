@@ -7,9 +7,9 @@
 
 # freestyle-rpc
 
-Freestyle RPC is a purely functional library for building [RPC] endpoint based services with support for [RPC] and [HTTP/2].
+Freestyle RPC is a purely functional library for building [RPC] endpoint-based services with support for [RPC] and [HTTP/2].
 
-Also known as [frees-rpc], it brings the ability to combine [RPC] protocols, services and clients in your `Freestyle` program, thanks to [gRPC].
+Also known as [frees-rpc], it brings the ability to combine [RPC] protocols, services, and clients in your `Freestyle` program, thanks to [gRPC].
 
 ## Installation
 
@@ -24,25 +24,25 @@ It's divided into multiple and different artifacts, grouped by scope:
 
 *Artifact Name* | *Scope* | *Mandatory* | *Description*
 --- | --- | --- | ---
-`frees-rpc-server` | Server | Yes | Needed to attach RPC Services and spin up an RPC Server.
+`frees-rpc-server` | Server | Yes | Needed to attach RPC Services and spin-up an RPC Server.
 `frees-rpc-client-core` | Client | Yes | Mandatory to define protocols and auto-derived clients.
-`frees-rpc-client-netty` | Client | Yes* | Optional if you use `OkHttp`, required instead from the client perspective.
-`frees-rpc-client-okhttp` | Client | Yes* | Optional if you use `Netty`, required instead from the client perspective.
-`frees-rpc-config` | Server/Client | No | It provides some configuration helpers using [frees-config] to load the application configuration values.
-`frees-rpc-prometheus-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, in the _Server_ side.
-`frees-rpc-prometheus-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, in the _Client_ side.
-`frees-rpc-prometheus-shared` | Provided | No | Common code for both client and server in the prometheus scope.
-`frees-rpc-dropwizard-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics, in the _Server_ side.
-`frees-rpc-dropwizard-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics, in the _Client_ side.
+`frees-rpc-client-netty` | Client | Yes* | Optional if you use `OkHttp`, required from the client perspective.
+`frees-rpc-client-okhttp` | Client | Yes* | Optional if you use `Netty`, required from the client perspective.
+`frees-rpc-config` | Server/Client | No | It provides configuration helpers using [frees-config] to load the application configuration values.
+`frees-rpc-prometheus-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, on the _Server_ side.
+`frees-rpc-prometheus-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, on the _Client_ side.
+`frees-rpc-prometheus-shared` | Provided | No | Common code for both the client and the server in the prometheus scope.
+`frees-rpc-dropwizard-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics, on the _Server_ side.
+`frees-rpc-dropwizard-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics, on the _Client_ side.
 `frees-rpc-interceptors` | Provided | No | Commons related to gRPC interceptors.
-`frees-rpc-testing` | Test | No | Utilities to test out `frees-rpc` applications. It provides the `grpc-testing` library as transitive dependency.
-`frees-rpc-common` | Provided | Provided | Common things used across all the project.
+`frees-rpc-testing` | Test | No | Utilities to test out `frees-rpc` applications. It provides the `grpc-testing` library as the transitive dependency.
+`frees-rpc-common` | Provided | Provided | Common things that are used throughout the project.
 `frees-rpc-internal` | Provided | Provided | Macros.
-`frees-rpc-async` | Provided | Provided | Async instances useful to interact with the RPC services on both sides, server and client.
+`frees-rpc-async` | Provided | Provided | Async instances useful for interacting with the RPC services on both sides, server and the client.
 
-* `Yes*`: in the client side you must choose either `Netty` or `OkHttp` as transport layer.
+* `Yes*`: on the client-side, you must choose either `Netty` or `OkHttp` as the transport layer.
 
-You could install any of these dependencies in you build as follows:
+You can install any of these dependencies in your build as follows:
 
 [comment]: # (Start Replace)
 
@@ -74,11 +74,11 @@ libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-client" % "0.9.0"
 
 ## Documentation
 
-The full documentation is available at [frees-rpc](http://frees.io/docs/rpc) site.
+The full documentation is available at the [frees-rpc](http://frees.io/docs/rpc) site.
 
 ## Demo
 
-See [freestyle-rpc-examples](https://github.com/frees-io/freestyle-rpc-examples) repo.
+See the [freestyle-rpc-examples](https://github.com/frees-io/freestyle-rpc-examples) repo.
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
@@ -91,6 +91,6 @@ See [freestyle-rpc-examples](https://github.com/frees-io/freestyle-rpc-examples)
 
 Freestyle is designed and developed by 47 Degrees
 
-Copyright (C) 2017-2018 47 Degrees. <http://47deg.com>
+Copyright (C) 2017-2018 47 Degrees. <https://47deg.com>
 
 [comment]: # (End Copyright)
