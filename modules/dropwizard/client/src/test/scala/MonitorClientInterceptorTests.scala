@@ -19,7 +19,7 @@ package dropwizard
 package client
 
 import com.codahale.metrics.MetricRegistry
-import freestyle.rpc.prometheus.client.{BaseMonitorClientInterceptorTests, ClientRuntime}
+import freestyle.rpc.prometheus.client.{BaseMonitorClientInterceptorTests, InterceptorsRuntime}
 import freestyle.rpc.prometheus.shared.Configuration
 import io.prometheus.client.dropwizard.DropwizardExports
 
@@ -27,30 +27,30 @@ class MonitorClientInterceptorTests extends BaseMonitorClientInterceptorTests {
 
   override def name: String = "Dropwizard"
 
-  def defaultClientRuntime: ClientRuntime = {
+  def defaultClientRuntime: InterceptorsRuntime = {
 
     val metrics: MetricRegistry      = new MetricRegistry
     val configuration: Configuration = Configuration.defaultBasicMetrics
     configuration.collectorRegistry.register(new DropwizardExports(metrics))
 
-    ClientRuntime(configuration)
+    InterceptorsRuntime(configuration)
   }
 
-  def allMetricsClientRuntime: ClientRuntime = {
+  def allMetricsClientRuntime: InterceptorsRuntime = {
 
     val metrics: MetricRegistry      = new MetricRegistry
     val configuration: Configuration = Configuration.defaultAllMetrics
     configuration.collectorRegistry.register(new DropwizardExports(metrics))
 
-    ClientRuntime(configuration)
+    InterceptorsRuntime(configuration)
   }
 
-  def clientRuntimeWithNonDefaultBuckets(buckets: Vector[Double]): ClientRuntime = {
+  def clientRuntimeWithNonDefaultBuckets(buckets: Vector[Double]): InterceptorsRuntime = {
 
     val metrics: MetricRegistry      = new MetricRegistry
     val configuration: Configuration = Configuration.defaultAllMetrics.withLatencyBuckets(buckets)
     configuration.collectorRegistry.register(new DropwizardExports(metrics))
 
-    ClientRuntime(configuration)
+    InterceptorsRuntime(configuration)
   }
 }
