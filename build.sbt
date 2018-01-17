@@ -16,6 +16,7 @@ lazy val async = project
 lazy val internal = project
   .in(file("modules/internal"))
   .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(testing % "test->test")
   .settings(moduleName := "frees-rpc-internal")
   .settings(internalSettings)
 
@@ -24,6 +25,7 @@ lazy val client = project
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(internal)
   .dependsOn(async)
+  .dependsOn(testing % "test->test")
   .settings(moduleName := "frees-rpc-client-core")
   .settings(clientCoreSettings)
 
@@ -45,6 +47,7 @@ lazy val server = project
   .dependsOn(client % "test->test")
   .dependsOn(internal)
   .dependsOn(async)
+  .dependsOn(testing % "test->test")
   .settings(moduleName := "frees-rpc-server")
   .settings(serverSettings)
 
@@ -53,6 +56,7 @@ lazy val config = project
   .dependsOn(common % "test->test")
   .dependsOn(client % "compile->compile;test->test")
   .dependsOn(server % "compile->compile;test->test")
+  .dependsOn(testing % "test->test")
   .settings(moduleName := "frees-rpc-config")
   .settings(configSettings)
 
@@ -96,6 +100,11 @@ lazy val `dropwizard-client` = project
   .settings(moduleName := "frees-rpc-dropwizard-client")
   .settings(dropwizardSettings)
 
+lazy val testing = project
+  .in(file("modules/testing"))
+  .settings(moduleName := "frees-rpc-testing")
+  .settings(testingSettings)
+
 //////////////////////////
 //// MODULES REGISTRY ////
 //////////////////////////
@@ -114,7 +123,8 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `prometheus-client`,
   `prometheus-server`,
   `dropwizard-server`,
-  `dropwizard-client`
+  `dropwizard-client`,
+  testing
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =

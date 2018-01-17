@@ -59,16 +59,14 @@ object ProjectPlugin extends AutoPlugin {
         %%("monix"),
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
-        %("grpc-testing", V.grpc) % Test,
-        %%("scalamockScalatest")  % Test
+        %%("scalamockScalatest") % Test
       )
     )
 
     lazy val clientCoreSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("frees-async-cats-effect", V.frees),
-        %("grpc-testing", V.grpc) % Test,
-        %%("scalamockScalatest")  % Test
+        %%("scalamockScalatest") % Test
       )
     )
 
@@ -89,15 +87,13 @@ object ProjectPlugin extends AutoPlugin {
         %%("frees-async-cats-effect", V.frees),
         %("grpc-core", V.grpc),
         %("grpc-netty", V.grpc),
-        %("grpc-testing", V.grpc) % Test,
-        %%("scalamockScalatest")  % Test
+        %%("scalamockScalatest") % Test
       )
     )
 
     lazy val configSettings = Seq(
       libraryDependencies ++= Seq(
-        %%("frees-config", V.frees),
-        %("grpc-testing", V.grpc) % Test
+        %%("frees-config", V.frees)
       )
     )
 
@@ -122,6 +118,12 @@ object ProjectPlugin extends AutoPlugin {
     lazy val dropwizardSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.prometheus" % "simpleclient_dropwizard" % V.prometheus
+      )
+    )
+
+    lazy val testingSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %("grpc-testing", V.grpc)
       )
     )
 
