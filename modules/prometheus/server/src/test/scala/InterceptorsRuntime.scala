@@ -24,7 +24,7 @@ import freestyle.rpc.withouttagless.Utils._
 import io.prometheus.client.CollectorRegistry
 
 case class InterceptorsRuntime(
-    configuration: Configuration = Configuration.defaultBasicMetrics,
+    configuration: Configuration,
     cr: CollectorRegistry = new CollectorRegistry())
     extends CommonUtils {
 
@@ -41,6 +41,8 @@ case class InterceptorsRuntime(
   //////////////////////////////////
 
   lazy val monitorInterceptor = MonitoringServerInterceptor(configuration.withCollectorRegistry(cr))
+
+  implicit val CR: CollectorRegistry = cr
 
   lazy val grpcConfigs: List[GrpcConfig] = List(
     AddService(RPCService.bindService[ConcurrentMonad].interceptWith(monitorInterceptor))

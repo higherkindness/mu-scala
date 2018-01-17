@@ -61,12 +61,12 @@ case class MonitoringClientCall[Req, Res](
     clientMetrics.recordCallStarted()
     val listener: MonitoringClientCallListener[Res] =
       MonitoringClientCallListener(responseListener, clientMetrics, clock)
-    clientCall.start(listener, headers)
+    delegate().start(listener, headers)
   }
 
   override def sendMessage(requestMessage: Req): Unit = {
     if (clientMetrics.method.isClientStreaming) clientMetrics.recordStreamMessageSent()
-    clientCall.sendMessage(requestMessage)
+    delegate().sendMessage(requestMessage)
   }
 }
 

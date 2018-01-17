@@ -107,15 +107,21 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val prometheusSettings = Seq(
+    lazy val prometheusSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.prometheus" % "simpleclient" % V.prometheus
       )
     )
 
-    lazy val prometheusClientSettings = Seq(
+    lazy val prometheusClientSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %("grpc-netty", V.grpc) % Test
+      )
+    )
+
+    lazy val dropwizardSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        "io.prometheus" % "simpleclient_dropwizard" % V.prometheus
       )
     )
 

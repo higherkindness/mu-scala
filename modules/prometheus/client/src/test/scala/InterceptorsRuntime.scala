@@ -24,6 +24,7 @@ import freestyle.rpc.prometheus.client.implicits.{createManagedChannelForPort, s
 import freestyle.rpc.prometheus.shared.Configuration
 import freestyle.rpc.withouttagless.Utils._
 import freestyle.rpc.withouttagless.Utils.handlers.client.FreesRPCServiceClientHandler
+import io.prometheus.client.CollectorRegistry
 
 trait InterceptorsRuntime extends CommonUtils {
 
@@ -49,18 +50,23 @@ trait InterceptorsRuntime extends CommonUtils {
 
 object implicits extends InterceptorsRuntime
 
-case class ClientRuntime(configuration: Configuration) {
+case class ClientRuntime(
+    configuration: Configuration,
+    cr: CollectorRegistry = new CollectorRegistry()) {
+
   import service._
   import handlers.client._
   import freestyle.rpc.client.implicits._
   import freestyle.async.catsEffect.implicits._
+
+  implicit val CR: CollectorRegistry = cr
 
   implicit lazy val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
     RPCService.client[ConcurrentMonad](
       channelFor = createManagedChannelForPort(serverW.port),
       channelConfigList = List(
         UsePlaintext(true),
-        AddInterceptor(MonitoringClientInterceptor(configuration))
+        AddInterceptor(MonitoringClientInterceptor(configuration.withCollectorRegistry(cr)))
       )
     )
 
