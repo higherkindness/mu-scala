@@ -13,46 +13,68 @@ Also known as [frees-rpc], it brings the ability to combine [RPC] protocols, ser
 
 ## Installation
 
-`frees-rpc` is cross-built for Scala `2.11.x` and `2.12.x`:
+`frees-rpc` is cross-built for Scala `2.11.x` and `2.12.x`.
+
+It's divided into multiple and different artifacts, grouped by scope:
+
+* `Provided`: used from other artifacts and transitively provided.
+* `Server`: specifically for the RPC server.
+* `Client`: focused on the RPC auto-derived clients by `frees-rpc`.
+* `Test`: useful to test `frees-rpc` applications.
+
+*Artifact Name* | *Scope* | *Mandatory* | *Description*
+--- | --- | --- | ---
+`frees-rpc-server` | Server | Yes | Needed to attach RPC Services and spin up an RPC Server.
+`frees-rpc-client-core` | Client | Yes | Mandatory to define protocols and auto-derived clients.
+`frees-rpc-client-netty` | Client | Yes* | Optional if you use `OkHttp`, required instead from the client perspective.
+`frees-rpc-client-okhttp` | Client | Yes* | Optional if you use `Netty`, required instead from the client perspective.
+`frees-rpc-config` | Server/Client | No | It provides some configuration helpers using [frees-config] to load the application configuration values.
+`frees-rpc-prometheus-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, in the _Server_ side.
+`frees-rpc-prometheus-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, in the _Client_ side.
+`frees-rpc-prometheus-shared` | Provided | No | Common code for both client and server in the prometheus scope.
+`frees-rpc-dropwizard-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics, in the _Server_ side.
+`frees-rpc-dropwizard-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics, in the _Client_ side.
+`frees-rpc-interceptors` | Provided | No | Commons related to gRPC interceptors.
+`frees-rpc-testing` | Test | No | Utilities to test out `frees-rpc` applications. It provides the `grpc-testing` library as transitive dependency.
+`frees-rpc-common` | Provided | Provided | Common things used across all the project.
+`frees-rpc-internal` | Provided | Provided | Macros.
+`frees-rpc-async` | Provided | Provided | Async instances useful to interact with the RPC services on both sides, server and client.
+
+* `Yes*`: in the client side you must choose either `Netty` or `OkHttp` as transport layer.
+
+You could install any of these dependencies in you build as follows:
 
 [comment]: # (Start Replace)
 
 ```scala
 // required for the RPC Server:
-libraryDependencies += "io.frees" %% "frees-rpc-server"        % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-server"            % "0.9.0"
 
 // required for a protocol definition:
-libraryDependencies += "io.frees" %% "frees-rpc-client-core"   % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-client-core"       % "0.9.0"
 
 // required for the use of the derived RPC Client/s, using either Netty or OkHttp as transport layer:
-libraryDependencies += "io.frees" %% "frees-rpc-client-netty"  % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-client-netty"      % "0.9.0"
 // or:
-libraryDependencies += "io.frees" %% "frees-rpc-client-okhttp" % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-client-okhttp"     % "0.9.0"
 
 // optional - for both server and client configuration.
-libraryDependencies += "io.frees" %% "frees-rpc-config"        % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-config"            % "0.9.0"
+
+// optional - for both server and client metrics reporting, using Prometheus.
+libraryDependencies += "io.frees" %% "frees-rpc-prometheus-server" % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-prometheus-client" % "0.9.0"
+
+// optional - for both server and client metrics reporting, using Dropwizard.
+libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-server" % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-client" % "0.9.0"
 ```
 
 [comment]: # (End Replace)
 
-Note: `frees-rpc-config` provides some configuration helpers using [frees-config] to load the application configuration values.
-
 ## Documentation
 
 The full documentation is available at [frees-rpc](http://frees.io/docs/rpc) site.
-
-## Sbt Modules
-
-`frees-rpc` code is placed in different sbt modules:
-
-* `frees-rpc-common`: contains the protocol types, with the minimum set of dependencies.
-* `frees-rpc-async`: contains just the async implicit instances (NTs between effect/async types).
-* `frees-rpc-internal` where the macros are placed.
-* `frees-rpc-client-core`: algebra and code related to the RPC clients.
-* `frees-rpc-client-netty`: it doesn't add any additional code, just a transport layer provider based on `grpc-netty`.
-* `frees-rpc-client-okhttp`: similar to the `Netty` one, it doesn't add any additional code, just a transport layer provider based on `grpc-okhttp`.
-* `frees-rpc-server`: algebra and code related to the RPC server.
-* `frees-rpc-config`: helpers to be able to load the client and the server configuration.
 
 ## Demo
 

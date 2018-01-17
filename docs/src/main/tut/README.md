@@ -37,6 +37,10 @@ Freestyle RPC is a purely functional library for building RPC endpoint based ser
       - [Runtime Implicits](#runtime-implicits-1)
     - [Client Program](#client-program)
   - [frees-rpc annotations](#frees-rpc-annotations)
+  - [Metrics Reporting](#metrics-reporting)
+    - [Monitor Server Calls](#monitor-server-calls)
+    - [Monitor Client Calls](#monitor-client-calls)
+    - [Dropwizard Metrics](#dropwizard-metrics)
   - [Next Steps](#next-steps)
   - [Comparing HTTP and RPC](#comparing-http-and-rpc)
 - [References](#references)
@@ -49,29 +53,64 @@ Freestyle RPC is a purely functional library for building RPC endpoint based ser
 
 ## Installation
 
-`frees-rpc` is cross-built for Scala `2.11.x` and `2.12.x`:
+`frees-rpc` is cross-built for Scala `2.11.x` and `2.12.x`.
+
+It's divided into multiple and different artifacts, grouped by scope:
+
+* `Provided`: used from other artifacts and transitively provided.
+* `Server`: specifically for the RPC server.
+* `Client`: focused on the RPC auto-derived clients by `frees-rpc`.
+* `Test`: useful to test `frees-rpc` applications.
+
+*Artifact Name* | *Scope* | *Mandatory* | *Description*
+--- | --- | --- | ---
+`frees-rpc-server` | Server | Yes | Needed to attach RPC Services and spin up an RPC Server.
+`frees-rpc-client-core` | Client | Yes | Mandatory to define protocols and auto-derived clients.
+`frees-rpc-client-netty` | Client | Yes* | Optional if you use `OkHttp`, required instead from the client perspective.
+`frees-rpc-client-okhttp` | Client | Yes* | Optional if you use `Netty`, required instead from the client perspective.
+`frees-rpc-config` | Server/Client | No | It provides some configuration helpers using [frees-config] to load the application configuration values.
+`frees-rpc-prometheus-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, in the _Server_ side.
+`frees-rpc-prometheus-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, in the _Client_ side.
+`frees-rpc-prometheus-shared` | Provided | No | Common code for both client and server in the prometheus scope.
+`frees-rpc-dropwizard-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics, in the _Server_ side.
+`frees-rpc-dropwizard-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics, in the _Client_ side.
+`frees-rpc-interceptors` | Provided | No | Commons related to gRPC interceptors.
+`frees-rpc-testing` | Test | No | Utilities to test out `frees-rpc` applications. It provides the `grpc-testing` library as transitive dependency.
+`frees-rpc-common` | Provided | Provided | Common things used across all the project.
+`frees-rpc-internal` | Provided | Provided | Macros.
+`frees-rpc-async` | Provided | Provided | Async instances useful to interact with the RPC services on both sides, server and client.
+
+* `Yes*`: in the client side you must choose either `Netty` or `OkHttp` as transport layer.
+
+You could install any of these dependencies in you build as follows:
 
 [comment]: # (Start Replace)
 
 ```scala
 // required for the RPC Server:
-libraryDependencies += "io.frees" %% "frees-rpc-server"        % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-server"            % "0.9.0"
 
 // required for a protocol definition:
-libraryDependencies += "io.frees" %% "frees-rpc-client-core"   % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-client-core"       % "0.9.0"
 
 // required for the use of the derived RPC Client/s, using either Netty or OkHttp as transport layer:
-libraryDependencies += "io.frees" %% "frees-rpc-client-netty"  % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-client-netty"      % "0.9.0"
 // or:
-libraryDependencies += "io.frees" %% "frees-rpc-client-okhttp" % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-client-okhttp"     % "0.9.0"
 
 // optional - for both server and client configuration.
-libraryDependencies += "io.frees" %% "frees-rpc-config"        % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-config"            % "0.9.0"
+
+// optional - for both server and client metrics reporting, using Prometheus.
+libraryDependencies += "io.frees" %% "frees-rpc-prometheus-server" % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-prometheus-client" % "0.9.0"
+
+// optional - for both server and client metrics reporting, using Dropwizard.
+libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-server" % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-client" % "0.9.0"
 ```
 
 [comment]: # (End Replace)
-
-Note: `frees-rpc-config` provides some configuration helpers using [frees-config] to load the application configuration values.
 
 ## About gRPC
 
@@ -247,7 +286,7 @@ object protocol {
   }
 }
 ```
- 
+
 We are also using some additional annotations:
 
 * `@option`: used to define the equivalent headers in `.proto` files.
@@ -662,6 +701,107 @@ Annotation | Scope | Arguments | Description
 @stream | `Method` | [`S <: StreamingType`] | There are three different types of streaming: server, client, and bidirectional. Hence, the `S` type parameter can be `ResponseStreaming`, `RequestStreaming`, or `BidirectionalStreaming`, respectively.
 @message | `Case Class` | - | Tags a case class a protobuf message.
 @option | `Object` | [name: String, value: String, quote: Boolean] | used to define the equivalent headers in `.proto` files
+
+## Metrics Reporting
+
+[frees-rpc] currently provides two different ways to monitor [gRPC] services: `Prometheus` and `Dropwizard` (using actually the `Prometheus` extension). The usage is quite similar for both.
+
+### Monitor Server Calls
+
+In order to monitor the RPC calls in the server side it's necessary intercepting them, in the next fragment of code we'll se how to do it:
+
+```tut:silent
+import cats.~>
+import cats.effect.IO
+import freestyle.rpc.server._
+import freestyle.rpc.server.handlers._
+import freestyle.rpc.server.implicits._
+import freestyle.async.catsEffect.implicits._
+import service._
+
+object InterceptingServerCalls {
+
+  trait Implicits extends CommonRuntime {
+
+    import freestyle.rpc.interceptors.implicits._
+
+    lazy val cr: CollectorRegistry = new CollectorRegistry()
+    lazy val monitorInterceptor = MonitoringServerInterceptor(
+      Configuration.defaultBasicMetrics.withCollectorRegistry(cr)
+    )
+
+    implicit val greeterServiceHandler: ServiceHandler[IO] = new ServiceHandler[IO]
+
+    val grpcConfigs: List[GrpcConfig] = List(
+      AddService(Greeter.bindService[IO].interceptWith(monitorInterceptor))
+    )
+
+    implicit val serverW: ServerW = ServerW(8080, grpcConfigs)
+  }
+
+  object implicits extends Implicits
+
+}
+```
+
+### Monitor Client Calls
+
+In this case, in order to intercept the client calls we need an additional configuration settings (by using `AddInterceptor`):
+
+```tut:silent
+import cats.implicits._
+import cats.effect.IO
+import freestyle.free.config.implicits._
+import freestyle.async.catsEffect.implicits._
+import freestyle.rpc.client._
+import freestyle.rpc.client.config._
+import freestyle.rpc.client.implicits._
+import monix.eval.Task
+import io.grpc.ManagedChannel
+import service._
+
+import scala.util.{Failure, Success, Try}
+
+object InterceptingClientCalls extends CommonRuntime {
+
+  val channelFor: ManagedChannelFor =
+    ConfigForAddress[ChannelConfig.Op]("rpc.host", "rpc.port")
+      .interpret[Try] match {
+      case Success(c) => c
+      case Failure(e) =>
+        e.printStackTrace()
+        throw new RuntimeException("Unable to load the client configuration", e)
+      }
+
+  implicit val serviceClient: Greeter.Client[Task] =
+    Greeter.client[Task](
+      channelFor = channelFor,
+      channelConfigList = List(
+        UsePlaintext(true),
+        AddInterceptor(
+          MonitoringClientInterceptor(
+            Configuration.defaultBasicMetrics
+          )
+        )
+      )
+    )
+}
+```
+
+That's all using `Prometheus` to monitor both [gRPC] ends.
+
+### Dropwizard Metrics
+
+The usage is equivalent, however, in this case we need to put an instance of `com.codahale.metrics.MetricRegistry` on the scene, then, using the _Dropwizard_ integration that _Prometheus_ already provides (`DropwizardExports`) you can associate it with the collector registry:
+
+```tut:silent
+import com.codahale.metrics.MetricRegistry
+import io.prometheus.client.dropwizard.DropwizardExports
+
+val metrics: MetricRegistry      = new MetricRegistry
+val configuration: Configuration = Configuration.defaultBasicMetrics
+configuration.collectorRegistry.register(new DropwizardExports(metrics))
+```
 
 ## Next Steps
 
