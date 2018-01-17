@@ -81,6 +81,21 @@ lazy val `prometheus-client` = project
   .settings(moduleName := "frees-rpc-prometheus-client")
   .settings(prometheusClientSettings)
 
+lazy val `dropwizard-server` = project
+  .in(file("modules/dropwizard/server"))
+  .dependsOn(`prometheus-server` % "compile->compile;test->test")
+  .dependsOn(server % "compile->compile;test->test")
+  .settings(moduleName := "frees-rpc-dropwizard-server")
+  .settings(dropwizardSettings)
+
+lazy val `dropwizard-client` = project
+  .in(file("modules/dropwizard/client"))
+  .dependsOn(`prometheus-client` % "compile->compile;test->test")
+  .dependsOn(client % "compile->compile;test->test")
+  .dependsOn(server % "test->test")
+  .settings(moduleName := "frees-rpc-dropwizard-client")
+  .settings(dropwizardSettings)
+
 //////////////////////////
 //// MODULES REGISTRY ////
 //////////////////////////
@@ -97,7 +112,9 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   interceptors,
   `prometheus-shared`,
   `prometheus-client`,
-  `prometheus-server`
+  `prometheus-server`,
+  `dropwizard-server`,
+  `dropwizard-client`
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =
