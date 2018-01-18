@@ -23,6 +23,8 @@ import org.scalatest.{Matchers, OneInstancePerTest, WordSpec}
 
 trait RpcBaseTestSuite extends WordSpec with Matchers with OneInstancePerTest with MockFactory {
 
+  val sleepM: ConcurrentMonad[Unit] = delayM(Thread.sleep(500))
+
   trait Helpers {
 
     def runK[F[_], A, B](kleisli: Kleisli[F, A, B], v: A): F[B] =

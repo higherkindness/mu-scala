@@ -130,8 +130,10 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
       (for {
         _ <- serverStart[ConcurrentMonad]
         _ <- clientProgram[ConcurrentMonad]
+        _ <- sleepM
         _ <- check1[ConcurrentMonad]
         _ <- clientProgram2[ConcurrentMonad]
+        _ <- sleepM
         _ <- check2[ConcurrentMonad]
         _ <- serverStop[ConcurrentMonad]
       } yield (): Unit).unsafeRunSync()
@@ -296,6 +298,7 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
         _ <- serverStart[ConcurrentMonad]
         _ <- unary[ConcurrentMonad]
         _ <- clientStreaming[ConcurrentMonad]
+        _ <- sleepM
         _ <- serverStop[ConcurrentMonad]
       } yield (): Unit).unsafeRunSync()
 
