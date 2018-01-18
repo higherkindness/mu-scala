@@ -7,56 +7,79 @@
 
 # freestyle-rpc
 
-Freestyle RPC is a purely functional library for building [RPC] endpoint based services with support for [RPC] and [HTTP/2].
+Freestyle RPC is a purely functional library for building [RPC] endpoint-based services with support for [RPC] and [HTTP/2].
 
-Also known as [frees-rpc], it brings the ability to combine [RPC] protocols, services and clients in your `Freestyle` program, thanks to [gRPC].
+Also known as [frees-rpc], it brings the ability to combine [RPC] protocols, services, and clients in your `Freestyle` program, thanks to [gRPC].
 
 ## Installation
 
-`frees-rpc` is cross-built for Scala `2.11.x` and `2.12.x`:
+`frees-rpc` is cross-built for Scala `2.11.x` and `2.12.x`.
+
+It's divided into multiple and different artifacts, grouped by scope:
+
+* `Server`: specifically for the RPC server.
+* `Client`: focused on the RPC auto-derived clients by `frees-rpc`.
+* `Server/Client`: used from other artifacts for both Server and Client.
+* `Test`: useful to test `frees-rpc` applications.
+
+*Artifact Name* | *Scope* | *Mandatory* | *Description*
+--- | --- | --- | ---
+`frees-rpc-server` | Server | Yes | Needed to attach RPC Services and spin-up an RPC Server.
+`frees-rpc-client-core` | Client | Yes | Mandatory to define protocols and auto-derived clients.
+`frees-rpc-client-netty` | Client | Yes* | Optional if you use `OkHttp`, required from the client perspective.
+`frees-rpc-client-okhttp` | Client | Yes* | Optional if you use `Netty`, required from the client perspective.
+`frees-rpc-config` | Server/Client | No | It provides configuration helpers using [frees-config] to load the application configuration values.
+`frees-rpc-prometheus-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, on the _Server_ side.
+`frees-rpc-prometheus-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, on the _Client_ side.
+`frees-rpc-prometheus-shared` | Server/Client | No | Common code for both the client and the server in the prometheus scope.
+`frees-rpc-dropwizard-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics, on the _Server_ side.
+`frees-rpc-dropwizard-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics, on the _Client_ side.
+`frees-rpc-interceptors` | Server/Client | No | Commons related to gRPC interceptors.
+`frees-rpc-testing` | Test | No | Utilities to test out `frees-rpc` applications. It provides the `grpc-testing` library as the transitive dependency.
+`frees-rpc-common` | Server/Client | Provided* | Common things that are used throughout the project.
+`frees-rpc-internal` | Server/Client | Provided* | Macros.
+`frees-rpc-async` | Server/Client | Provided* | Async instances useful for interacting with the RPC services on both sides, server and the client.
+
+* `Yes*`: on the client-side, you must choose either `Netty` or `OkHttp` as the transport layer.
+* `Provided*`: you don't need to add it to your build, it'll be transitively provided when using other dependencies.
+
+You can install any of these dependencies in your build as follows:
 
 [comment]: # (Start Replace)
 
 ```scala
 // required for the RPC Server:
-libraryDependencies += "io.frees" %% "frees-rpc-server"        % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-server"            % "0.9.0"
 
 // required for a protocol definition:
-libraryDependencies += "io.frees" %% "frees-rpc-client-core"   % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-client-core"       % "0.9.0"
 
 // required for the use of the derived RPC Client/s, using either Netty or OkHttp as transport layer:
-libraryDependencies += "io.frees" %% "frees-rpc-client-netty"  % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-client-netty"      % "0.9.0"
 // or:
-libraryDependencies += "io.frees" %% "frees-rpc-client-okhttp" % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-client-okhttp"     % "0.9.0"
 
 // optional - for both server and client configuration.
-libraryDependencies += "io.frees" %% "frees-rpc-config"        % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-config"            % "0.9.0"
+
+// optional - for both server and client metrics reporting, using Prometheus.
+libraryDependencies += "io.frees" %% "frees-rpc-prometheus-server" % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-prometheus-client" % "0.9.0"
+
+// optional - for both server and client metrics reporting, using Dropwizard.
+libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-server" % "0.9.0"
+libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-client" % "0.9.0"
 ```
 
 [comment]: # (End Replace)
 
-Note: `frees-rpc-config` provides some configuration helpers using [frees-config] to load the application configuration values.
-
 ## Documentation
 
-The full documentation is available at [frees-rpc](http://frees.io/docs/rpc) site.
-
-## Sbt Modules
-
-`frees-rpc` code is placed in different sbt modules:
-
-* `frees-rpc-common`: contains the protocol types, with the minimum set of dependencies.
-* `frees-rpc-async`: contains just the async implicit instances (NTs between effect/async types).
-* `frees-rpc-internal` where the macros are placed.
-* `frees-rpc-client-core`: algebra and code related to the RPC clients.
-* `frees-rpc-client-netty`: it doesn't add any additional code, just a transport layer provider based on `grpc-netty`.
-* `frees-rpc-client-okhttp`: similar to the `Netty` one, it doesn't add any additional code, just a transport layer provider based on `grpc-okhttp`.
-* `frees-rpc-server`: algebra and code related to the RPC server.
-* `frees-rpc-config`: helpers to be able to load the client and the server configuration.
+The full documentation is available at the [frees-rpc](http://frees.io/docs/rpc) site.
 
 ## Demo
 
-See [freestyle-rpc-examples](https://github.com/frees-io/freestyle-rpc-examples) repo.
+See the [freestyle-rpc-examples](https://github.com/frees-io/freestyle-rpc-examples) repo.
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
@@ -69,6 +92,6 @@ See [freestyle-rpc-examples](https://github.com/frees-io/freestyle-rpc-examples)
 
 Freestyle is designed and developed by 47 Degrees
 
-Copyright (C) 2017-2018 47 Degrees. <http://47deg.com>
+Copyright (C) 2017-2018 47 Degrees. <https://47deg.com>
 
 [comment]: # (End Copyright)
