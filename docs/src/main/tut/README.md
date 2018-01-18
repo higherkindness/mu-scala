@@ -648,19 +648,18 @@ object gclient {
   trait Implicits extends CommonRuntime {
 
     val channelFor: ManagedChannelFor =
-      ConfigForAddress[ChannelConfig.Op]("rpc.host", "rpc.port")
-        .interpret[Try] match {
+      ConfigForAddress[Try]("rpc.host", "rpc.port") match {
         case Success(c) => c
         case Failure(e) =>
           e.printStackTrace()
           throw new RuntimeException("Unable to load the client configuration", e)
+    }
 
     implicit val serviceClient: Greeter.Client[Task] =
       Greeter.client[Task](channelFor)
   }
 
   object implicits extends Implicits
-
 }
 ```
 
@@ -678,11 +677,14 @@ import service._
 import gclient.implicits._
 import monix.eval.Task
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 object RPCDemoApp {
 
   def main(args: Array[String]): Unit = {
 
-    val result: HelloResponse = serviceClient.sayHello(HelloRequest("foo")).unsafeRunSync
+    val result = Await.result(serviceClient.sayHello(HelloRequest("foo")).runAsync, Duration.Inf)
 
     println(s"Result = $result")
 
@@ -720,27 +722,26 @@ import freestyle.rpc.server.implicits._
 import freestyle.async.catsEffect.implicits._
 import service._
 
-object InterceptingServerCalls {
+import io.prometheus.client.CollectorRegistry
+import freestyle.rpc.prometheus.shared.Configuration
+import freestyle.rpc.prometheus.server.MonitoringServerInterceptor
 
-  trait Implicits extends CommonRuntime {
+object InterceptingServerCalls extends CommonRuntime {
 
-    import freestyle.rpc.interceptors.implicits._
+  import freestyle.rpc.interceptors.implicits._
 
-    lazy val cr: CollectorRegistry = new CollectorRegistry()
-    lazy val monitorInterceptor = MonitoringServerInterceptor(
-      Configuration.defaultBasicMetrics.withCollectorRegistry(cr)
-    )
+  lazy val cr: CollectorRegistry = new CollectorRegistry()
+  lazy val monitorInterceptor = MonitoringServerInterceptor(
+    Configuration.defaultBasicMetrics.withCollectorRegistry(cr)
+  )
 
-    implicit val greeterServiceHandler: ServiceHandler[IO] = new ServiceHandler[IO]
+  implicit val greeterServiceHandler: ServiceHandler[IO] = new ServiceHandler[IO]
 
-    val grpcConfigs: List[GrpcConfig] = List(
-      AddService(Greeter.bindService[IO].interceptWith(monitorInterceptor))
-    )
+  val grpcConfigs: List[GrpcConfig] = List(
+    AddService(Greeter.bindService[IO].interceptWith(monitorInterceptor))
+  )
 
-    implicit val serverW: ServerW = ServerW(8080, grpcConfigs)
-  }
-
-  object implicits extends Implicits
+  implicit val serverW: ServerW = ServerW(8080, grpcConfigs)
 
 }
 ```
@@ -763,11 +764,13 @@ import service._
 
 import scala.util.{Failure, Success, Try}
 
+import freestyle.rpc.prometheus.shared.Configuration
+import freestyle.rpc.prometheus.client.MonitoringClientInterceptor
+
 object InterceptingClientCalls extends CommonRuntime {
 
   val channelFor: ManagedChannelFor =
-    ConfigForAddress[ChannelConfig.Op]("rpc.host", "rpc.port")
-      .interpret[Try] match {
+    ConfigForAddress[Try]("rpc.host", "rpc.port") match {
       case Success(c) => c
       case Failure(e) =>
         e.printStackTrace()
