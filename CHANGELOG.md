@@ -1,5 +1,21 @@
 # Changelog
 
+## 01/18/2018 - Version 0.10.0
+
+Release changes:
+
+* gRPC Services Metrics using Prometheus ([#138](https://github.com/frees-io/freestyle-rpc/pull/138))
+* gRPC Client Metrics using Prometheus ([#139](https://github.com/frees-io/freestyle-rpc/pull/139))
+* Metrics DSL ([#140](https://github.com/frees-io/freestyle-rpc/pull/140))
+* Adds Dropwizard Metrics Support ([#141](https://github.com/frees-io/freestyle-rpc/pull/141))
+* Adds *frees-rpc-testing* including *grpc-testing* dependency ([#142](https://github.com/frees-io/freestyle-rpc/pull/142))
+* Adds some GRPC testing utilities ([#143](https://github.com/frees-io/freestyle-rpc/pull/143))
+* Monadic Server Start/RPC Calls/Stop in Tests ([#144](https://github.com/frees-io/freestyle-rpc/pull/144))
+* Fixes random test failure ([#147](https://github.com/frees-io/freestyle-rpc/pull/147))
+* Updates Docs regarding Metrics Reporting ([#145](https://github.com/frees-io/freestyle-rpc/pull/145))
+* Releases *frees-rpc* 0.10.0 ([#146](https://github.com/frees-io/freestyle-rpc/pull/146))
+
+
 ## 01/12/2018 - Version 0.9.0
 
 Release changes:
