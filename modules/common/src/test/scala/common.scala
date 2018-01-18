@@ -22,4 +22,6 @@ package object common {
 
   type ConcurrentMonad[A] = IO[A]
 
+  def delayM[A](a: A): ConcurrentMonad[A] = IO(a)
+
 }
