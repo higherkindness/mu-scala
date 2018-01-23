@@ -40,16 +40,6 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val asyncSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        %%("cats-core"),
-        %%("cats-effect"),
-        %%("monix"),
-        %%("shapeless")           % Test,
-        %%("frees-core", V.frees) % Test
-      )
-    )
-
     lazy val internalSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("frees-async-cats-effect", V.frees),

@@ -32,8 +32,6 @@ case class InterceptorsRuntime(
   import handlers.server._
   import handlers.client._
   import freestyle.rpc.server._
-  import freestyle.rpc.server.implicits._
-  import freestyle.async.catsEffect.implicits._
   import freestyle.rpc.interceptors.implicits._
 
   //////////////////////////////////

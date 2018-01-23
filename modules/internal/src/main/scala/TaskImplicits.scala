@@ -15,8 +15,18 @@
  */
 
 package freestyle.rpc
-package client
+package internal
 
-import freestyle.rpc.internal.TaskImplicits
+import cats.effect.LiftIO
+import freestyle.rpc.internal.LiftTask._
+import monix.eval.Task
+import monix.execution.Scheduler
 
-object implicits extends TaskImplicits
+trait TaskImplicits {
+
+  implicit class TaskOps[A](task: Task[A]) {
+
+    def to[F[_]](implicit F: LiftIO[F], s: Scheduler): F[A] = effectLiftTask[F].liftTask(task)
+
+  }
+}

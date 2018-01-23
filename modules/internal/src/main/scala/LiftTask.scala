@@ -15,25 +15,24 @@
  */
 
 package freestyle.rpc
-package async
+package internal
 
-import cats.~>
-import cats.arrow.FunctionK
-import cats.effect.IO
+import cats.effect.LiftIO
 import monix.eval.Task
 import monix.execution.Scheduler
 
-import scala.concurrent.Future
+trait LiftTask[F[_]] {
+  def liftTask[A](task: Task[A]): F[A]
+}
 
-trait RPCAsyncImplicits {
+object LiftTask {
+  implicit val taskLiftTask: LiftTask[Task] =
+    new LiftTask[Task] {
+      def liftTask[A](task: Task[A]): Task[A] = task
+    }
 
-  implicit val future2Task: Future ~> Task = λ[Future ~> Task](Task.deferFuture(_))
-
-  implicit def task2Future(implicit S: Scheduler): Task ~> Future = λ[Task ~> Future](_.runAsync)
-
-  implicit val task2Task: Task ~> Task = FunctionK.id[Task]
-
-  implicit def task2IO(implicit S: Scheduler): Task ~> IO = λ[Task ~> IO](_.toIO)
-
-  implicit val io2Task: IO ~> Task = λ[IO ~> Task](_.to[Task])
+  implicit def effectLiftTask[F[_]](implicit F: LiftIO[F], s: Scheduler): LiftTask[F] =
+    new LiftTask[F] {
+      def liftTask[A](task: Task[A]): F[A] = F.liftIO(task.toIO(s))
+    }
 }

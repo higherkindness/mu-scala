@@ -61,20 +61,20 @@ object calls {
       input: Observable[Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler): F[Res] =
-    input
-      .liftByOperator(
-        StreamObserver2MonixOperator(
-          (outputObserver: StreamObserver[Res]) =>
-            ClientCalls.asyncClientStreamingCall(
-              channel.newCall(descriptor, options),
-              outputObserver
+      options: CallOptions)(implicit S: Scheduler, L: LiftTask[F]): F[Res] =
+    L.liftTask {
+      input
+        .liftByOperator(
+          StreamObserver2MonixOperator(
+            (outputObserver: StreamObserver[Res]) =>
+              ClientCalls.asyncClientStreamingCall(
+                channel.newCall(descriptor, options),
+                outputObserver
+            )
           )
         )
-      )
-      .firstL
-      .toIO
-      .to[F]
+        .firstL
+    }
 
   def bidiStreaming[Req, Res](
       input: Observable[Req],
