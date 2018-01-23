@@ -18,20 +18,24 @@ package freestyle.rpc
 package internal
 package client
 
-import cats.effect.{Async, LiftIO}
+import cats.effect.Effect
 import freestyle.async.guava.implicits._
 import freestyle.async.catsEffect.implicits._
+import cats.effect._
+import _root_.fs2._
+import _root_.fs2.interop.reactivestreams._
+import cats.Monoid
+import monix.execution.Scheduler
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
 import io.grpc.stub.{ClientCalls, StreamObserver}
-import monix.execution.Scheduler
-import monix.reactive.Observable
 import org.reactivestreams._
 
-object calls {
+class fs2Calls[F[_]: Effect] {
 
-  import freestyle.rpc.internal.extensions.monix.implicits._
+  private[this] val fs2Adapters = freestyle.rpc.internal.extensions.fs2[F]
+  import fs2Adapters.implicits._
 
-  def unary[F[_]: Async, Req, Res](
+  def unary[Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
@@ -44,49 +48,36 @@ object calls {
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions): Observable[Res] =
-    Observable
-      .fromReactivePublisher(new Publisher[Res] {
-        override def subscribe(s: Subscriber[_ >: Res]): Unit = {
-          val subscriber: Subscriber[Res] = s.asInstanceOf[Subscriber[Res]]
-          ClientCalls.asyncServerStreamingCall(
-            channel.newCall[Req, Res](descriptor, options),
-            request,
-            subscriber
-          )
-        }
-      })
+      options: CallOptions)(implicit S: Scheduler): Stream[F, Res] =
+    new Publisher[Res] {
+      override def subscribe(s: Subscriber[_ >: Res]): Unit = {
+        val subscriber: Subscriber[Res] = s.asInstanceOf[Subscriber[Res]]
+        ClientCalls.asyncServerStreamingCall(
+          channel.newCall[Req, Res](descriptor, options),
+          request,
+          subscriber
+        )
+      }
+    }.toStream[F]
 
-  def clientStreaming[F[_]: LiftIO, Req, Res](
-      input: Observable[Req],
+  def clientStreaming[Req, Res: Monoid](
+      input: Stream[F, Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler, L: LiftTask[F]): F[Res] =
-    L.liftTask {
-      input
-        .liftByOperator(
-          StreamObserver2MonixOperator(
-            (outputObserver: StreamObserver[Res]) =>
-              ClientCalls.asyncClientStreamingCall(
-                channel.newCall(descriptor, options),
-                outputObserver
-            )
-          )
-        )
-        .firstL
+      options: CallOptions)(implicit S: Scheduler): F[Res] = {
+    val r: StreamObserver[Res] => StreamObserver[Req] = {
+      (outputStreamObserver: StreamObserver[Res]) =>
+        ClientCalls.asyncClientStreamingCall(
+          channel.newCall(descriptor, options),
+          outputStreamObserver)
     }
+    val subscriber: fs2Adapters.FStreamSubscriber[Res] = ???
+    subscriber.stream.compile.foldMonoid
+  }
 
   def bidiStreaming[Req, Res](
-      input: Observable[Req],
+      input: Stream[F, Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions): Observable[Res] =
-    input.liftByOperator(
-      StreamObserver2MonixOperator(
-        (outputObserver: StreamObserver[Res]) =>
-          ClientCalls.asyncBidiStreamingCall(
-            channel.newCall(descriptor, options),
-            outputObserver
-        ))
-    )
+      options: CallOptions): Stream[F, Res] = ???
 }
