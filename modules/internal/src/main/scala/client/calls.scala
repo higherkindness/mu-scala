@@ -31,11 +31,11 @@ object calls {
 
   import freestyle.rpc.internal.converters._
 
-  def unary[M[_]: Effect, Req, Res](
+  def unary[F[_]: Effect, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler): M[Res] =
+      options: CallOptions)(implicit S: Scheduler): F[Res] =
     listenableFuture2Async(
       ClientCalls
         .futureUnaryCall(channel.newCall(descriptor, options), request))
@@ -57,11 +57,11 @@ object calls {
         }
       })
 
-  def clientStreaming[M[_]: Effect, Req, Res](
+  def clientStreaming[F[_]: Effect, Req, Res](
       input: Observable[Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler): M[Res] =
+      options: CallOptions)(implicit S: Scheduler): F[Res] =
     input
       .liftByOperator(
         StreamObserver2MonixOperator(
@@ -74,7 +74,7 @@ object calls {
       )
       .firstL
       .toIO
-      .to[M]
+      .to[F]
 
   def bidiStreaming[Req, Res](
       input: Observable[Req],
