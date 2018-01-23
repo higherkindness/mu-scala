@@ -17,12 +17,13 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String     = "1.8.0"
-      val frees: String      = "0.6.2"
-      val grpc: String       = "1.9.0"
-      val pbdirect: String   = "0.0.8"
-      val prometheus: String = "0.1.0"
-      val scalameta: String  = "1.8.0"
+      val avro4s: String             = "1.8.0"
+      val frees: String              = "0.6.2"
+      val fs2ReactiveStreams: String = "0.2.8"
+      val grpc: String               = "1.9.0"
+      val pbdirect: String           = "0.0.8"
+      val prometheus: String         = "0.1.0"
+      val scalameta: String          = "1.8.0"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
@@ -57,6 +58,7 @@ object ProjectPlugin extends AutoPlugin {
         %("grpc-core", V.grpc),
         %("grpc-stub", V.grpc),
         %%("monix"),
+        "com.github.zainab-ali" %% "fs2-reactive-streams" % V.fs2ReactiveStreams,
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
         %%("scalamockScalatest") % Test
