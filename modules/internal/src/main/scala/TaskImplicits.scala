@@ -17,16 +17,13 @@
 package freestyle.rpc
 package internal
 
-import cats.effect.LiftIO
-import freestyle.rpc.internal.LiftTask._
 import monix.eval.Task
-import monix.execution.Scheduler
 
 trait TaskImplicits {
 
   implicit class TaskOps[A](task: Task[A]) {
 
-    def to[F[_]](implicit F: LiftIO[F], s: Scheduler): F[A] = effectLiftTask[F].liftTask(task)
+    def to[F[_]](implicit F: LiftTask[F]): F[A] = F.liftTask(task)
 
   }
 }

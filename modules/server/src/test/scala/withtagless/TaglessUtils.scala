@@ -17,7 +17,6 @@
 package freestyle.rpc
 package withtagless
 
-import cats.MonadError
 import cats.effect.Effect
 import cats.syntax.applicative._
 import freestyle.tagless.tagless
@@ -143,8 +142,7 @@ object TaglessUtils extends CommonUtils {
       import freestyle.rpc.protocol._
 
       class TaglessRPCServiceClientHandler[F[_]: Effect](
-          implicit client: TaglessRPCService.Client[F],
-          M: MonadError[F, Throwable])
+          implicit client: TaglessRPCService.Client[F])
           extends MyRPCClient.Handler[F] {
 
         override def notAllowed(b: Boolean): F[C] =
