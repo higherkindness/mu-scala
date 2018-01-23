@@ -117,12 +117,12 @@ trait RPCService {
     val clientDefs: Seq[Defn.Def] = requests.map(_.clientDef)
     q"""
        $wartSuppress
-       class $clientName[M[_]](channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
-          (implicit AC : _root_.freestyle.async.AsyncContext[M], H: _root_.cats.arrow.FunctionK[_root_.monix.eval.Task, M], E: _root_.scala.concurrent.ExecutionContext)
-          extends _root_.io.grpc.stub.AbstractStub[$clientName[M]](channel, options) {
+       class $clientName[F[_]: _root_.cats.effect.Effect](channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
+          (implicit S: _root_.monix.execution.Scheduler)
+          extends _root_.io.grpc.stub.AbstractStub[$clientName[F]](channel, options) {
 
-          override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $clientName[M] = {
-              new ${clientName.ctorRef(Ctor.Name(clientName.value))}[M](channel, options)
+          override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $clientName[F] = {
+              new ${clientName.ctorRef(Ctor.Name(clientName.value))}[F](channel, options)
           }
 
           ..$clientDefs
@@ -134,16 +134,15 @@ trait RPCService {
   val clientInstance =
     q"""
        $wartSuppress
-       def client[M[_]: _root_.freestyle.async.AsyncContext](
+       def client[F[_]: _root_.cats.effect.Effect](
          channelFor: _root_.freestyle.rpc.client.ManagedChannelFor,
          channelConfigList: List[_root_.freestyle.rpc.client.ManagedChannelConfig] = List(
            _root_.freestyle.rpc.client.UsePlaintext(true)),
            options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)(
-         implicit H: _root_.cats.arrow.FunctionK[_root_.monix.eval.Task, M],
-             E: _root_.scala.concurrent.ExecutionContext): $clientName[M] = {
+         implicit S: _root_.monix.execution.Scheduler): $clientName[F] = {
          val managedChannelInterpreter =
-           new _root_.freestyle.rpc.client.ManagedChannelInterpreter[M](channelFor, channelConfigList)
-         new ${clientName.ctorRef(Ctor.Name(clientName.value))}[M](managedChannelInterpreter.build(channelFor, channelConfigList), options)
+           new _root_.freestyle.rpc.client.ManagedChannelInterpreter[F](channelFor, channelConfigList)
+         new ${clientName.ctorRef(Ctor.Name(clientName.value))}[F](managedChannelInterpreter.build(channelFor, channelConfigList), options)
        }
      """
 }
@@ -201,7 +200,7 @@ private[internal] case class RPCRequest(
   val clientDef: Defn.Def = streamingType match {
     case Some(RequestStreaming) =>
       q"""
-         def $name(input: _root_.monix.reactive.Observable[$requestType]): M[$responseType] =
+         def $name(input: _root_.monix.reactive.Observable[$requestType]): F[$responseType] =
            _root_.freestyle.rpc.internal.client.calls.clientStreaming(input, $descriptorName, channel, options)
        """
     case Some(ResponseStreaming) =>
@@ -216,7 +215,7 @@ private[internal] case class RPCRequest(
        """
     case None =>
       q"""
-         def $name(request: $requestType): M[$responseType] =
+         def $name(request: $requestType): F[$responseType] =
            _root_.freestyle.rpc.internal.client.calls.unary(request, $descriptorName, channel, options)
       """
   }

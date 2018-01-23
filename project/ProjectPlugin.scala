@@ -52,7 +52,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val internalSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("cats-effect"),
+        %%("frees-async-cats-effect", V.frees),
         %%("frees-async-guava", V.frees) exclude ("com.google.guava", "guava"),
         %("grpc-core", V.grpc),
         %("grpc-stub", V.grpc),

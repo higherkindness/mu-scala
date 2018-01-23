@@ -18,26 +18,24 @@ package freestyle.rpc
 package internal
 package client
 
-import cats.~>
-import freestyle.async.AsyncContext
+import cats.effect.Effect
 import freestyle.async.guava.implicits._
+import freestyle.async.catsEffect.implicits._
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
 import io.grpc.stub.{ClientCalls, StreamObserver}
-import monix.eval.Task
+import monix.execution.Scheduler
 import monix.reactive.Observable
 import org.reactivestreams._
-
-import scala.concurrent.ExecutionContext
 
 object calls {
 
   import freestyle.rpc.internal.converters._
 
-  def unary[M[_], Req, Res](
+  def unary[M[_]: Effect, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit AC: AsyncContext[M], E: ExecutionContext): M[Res] =
+      options: CallOptions)(implicit S: Scheduler): M[Res] =
     listenableFuture2Async(
       ClientCalls
         .futureUnaryCall(channel.newCall(descriptor, options), request))
@@ -59,23 +57,24 @@ object calls {
         }
       })
 
-  def clientStreaming[M[_], Req, Res](
+  def clientStreaming[M[_]: Effect, Req, Res](
       input: Observable[Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit H: Task ~> M): M[Res] =
-    H(
-      input
-        .liftByOperator(
-          StreamObserver2MonixOperator(
-            (outputObserver: StreamObserver[Res]) =>
-              ClientCalls.asyncClientStreamingCall(
-                channel.newCall(descriptor, options),
-                outputObserver
-            )
+      options: CallOptions)(implicit S: Scheduler): M[Res] =
+    input
+      .liftByOperator(
+        StreamObserver2MonixOperator(
+          (outputObserver: StreamObserver[Res]) =>
+            ClientCalls.asyncClientStreamingCall(
+              channel.newCall(descriptor, options),
+              outputObserver
           )
         )
-        .firstL)
+      )
+      .firstL
+      .toIO
+      .to[M]
 
   def bidiStreaming[Req, Res](
       input: Observable[Req],

@@ -19,7 +19,6 @@ package withtagless
 
 import cats.{~>, Applicative, Monad, MonadError}
 import freestyle.tagless.tagless
-import freestyle.async.catsEffect.implicits._
 import freestyle.rpc.common._
 import freestyle.rpc.protocol._
 import monix.eval.Task
