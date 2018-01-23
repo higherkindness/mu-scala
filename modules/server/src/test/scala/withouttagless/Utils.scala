@@ -18,7 +18,7 @@ package freestyle.rpc
 package withouttagless
 
 import cats.MonadError
-import cats.effect.Effect
+import cats.effect.Async
 import cats.syntax.applicative._
 import freestyle.rpc.common._
 import freestyle.rpc.protocol._
@@ -96,7 +96,7 @@ object Utils extends CommonUtils {
       import service._
       import freestyle.rpc.protocol._
 
-      class ServerRPCService[F[_]: Effect] extends RPCService[F] {
+      class ServerRPCService[F[_]: Async] extends RPCService[F] {
 
         def notAllowed(b: Boolean): F[C] = c1.pure
 
@@ -150,7 +150,7 @@ object Utils extends CommonUtils {
       import freestyle.rpc.withouttagless.Utils.client.MyRPCClient
       import freestyle.rpc.protocol._
 
-      class FreesRPCServiceClientHandler[F[_]: Effect](
+      class FreesRPCServiceClientHandler[F[_]: Async](
           implicit client: RPCService.Client[F],
           M: MonadError[F, Throwable])
           extends MyRPCClient.Handler[F] {

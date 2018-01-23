@@ -18,7 +18,7 @@ package freestyle.rpc
 package internal
 package client
 
-import cats.effect.Effect
+import cats.effect.{Async, LiftIO}
 import freestyle.async.guava.implicits._
 import freestyle.async.catsEffect.implicits._
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
@@ -31,7 +31,7 @@ object calls {
 
   import freestyle.rpc.internal.converters._
 
-  def unary[F[_]: Effect, Req, Res](
+  def unary[F[_]: Async, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
@@ -57,7 +57,7 @@ object calls {
         }
       })
 
-  def clientStreaming[F[_]: Effect, Req, Res](
+  def clientStreaming[F[_]: LiftIO, Req, Res](
       input: Observable[Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,

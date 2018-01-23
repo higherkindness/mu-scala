@@ -17,7 +17,7 @@
 package freestyle.rpc
 package withtagless
 
-import cats.effect.Effect
+import cats.effect.Async
 import cats.syntax.applicative._
 import freestyle.tagless.tagless
 import freestyle.rpc.common._
@@ -91,7 +91,7 @@ object TaglessUtils extends CommonUtils {
       import service._
       import freestyle.rpc.protocol._
 
-      class TaglessRPCServiceServerHandler[F[_]: Effect] extends TaglessRPCService.Handler[F] {
+      class TaglessRPCServiceServerHandler[F[_]: Async] extends TaglessRPCService.Handler[F] {
 
         def notAllowed(b: Boolean): F[C] = c1.pure
 
@@ -141,7 +141,7 @@ object TaglessUtils extends CommonUtils {
       import freestyle.rpc.withtagless.TaglessUtils.client.MyRPCClient
       import freestyle.rpc.protocol._
 
-      class TaglessRPCServiceClientHandler[F[_]: Effect](
+      class TaglessRPCServiceClientHandler[F[_]: Async](
           implicit client: TaglessRPCService.Client[F])
           extends MyRPCClient.Handler[F] {
 
@@ -208,7 +208,7 @@ object TaglessUtils extends CommonUtils {
     // Server Runtime Configuration //
     //////////////////////////////////
 
-    implicit def taglessRPCHandler[F[_]: Effect]: TaglessRPCService.Handler[F] =
+    implicit def taglessRPCHandler[F[_]: Async]: TaglessRPCService.Handler[F] =
       new TaglessRPCServiceServerHandler[F]
 
     val grpcConfigs: List[GrpcConfig] = List(

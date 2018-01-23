@@ -463,7 +463,7 @@ Predictably, generating the server code is just implementing a service [Handler]
 Next, our dummy `Greeter` server implementation:
 
 ```tut:silent
-import cats.effect.Effect
+import cats.effect.Async
 import cats.syntax.applicative._
 import freestyle.free._
 import freestyle.rpc.server.implicits._
@@ -472,7 +472,7 @@ import monix.eval.Task
 import monix.reactive.Observable
 import service._
 
-class ServiceHandler[F[_]: Effect](implicit S: Scheduler) extends Greeter[F] {
+class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
 
   private[this] val dummyObservableResponse: Observable[HelloResponse] =
     Observable.fromIterable(1 to 5 map (i => HelloResponse(s"Reply $i")))
