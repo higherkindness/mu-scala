@@ -463,24 +463,27 @@ Predictably, generating the server code is just implementing a service [Handler]
 Next, our dummy `Greeter` server implementation:
 
 ```tut:silent
-import cats.{~>, Applicative}
+import cats.effect.Async
+import cats.syntax.applicative._
 import freestyle.free._
+import freestyle.rpc.server.implicits._
+import monix.execution.Scheduler
 import monix.eval.Task
 import monix.reactive.Observable
 import service._
 
-class ServiceHandler[F[_]](implicit F: Applicative[F], T2F: Task ~> F) extends Greeter[F] {
+class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
 
   private[this] val dummyObservableResponse: Observable[HelloResponse] =
     Observable.fromIterable(1 to 5 map (i => HelloResponse(s"Reply $i")))
 
   override def sayHello(request: HelloRequest): F[HelloResponse] =
-    F.pure(HelloResponse(reply = "Good bye!"))
+    HelloResponse(reply = "Good bye!").pure
 
   override def lotsOfReplies(request: HelloRequest): F[Observable[HelloResponse]] =
-    F.pure(dummyObservableResponse)
+    dummyObservableResponse.pure
 
-  override def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse] = T2F {
+  override def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse] =
     request
       .foldLeftL((0, HelloResponse(""))) {
         case ((i, response), currentRequest) =>
@@ -491,19 +494,18 @@ class ServiceHandler[F[_]](implicit F: Applicative[F], T2F: Task ~> F) extends G
               reply = s"$currentReply\nRequest ${currentRequest.greeting} -> Response: Reply $i"))
       }
       .map(_._2)
-  }
+      .to[F]
 
   override def bidiHello(request: Observable[HelloRequest]): F[Observable[HelloResponse]] =
-    F.pure {
-      request
-        .flatMap { request: HelloRequest =>
-          println(s"Saving $request...")
-          dummyObservableResponse
-        }
-        .onErrorHandle { e =>
-          throw e
-        }
-    }
+    request
+      .flatMap { request: HelloRequest =>
+        println(s"Saving $request...")
+        dummyObservableResponse
+      }
+      .onErrorHandle { e =>
+        throw e
+      }
+      .pure
 }
 ```
 

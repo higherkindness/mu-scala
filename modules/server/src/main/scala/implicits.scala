@@ -20,7 +20,7 @@ package server
 import cats.{Applicative, Apply}
 import cats.syntax.apply._
 import cats.syntax.functor._
-import freestyle.rpc.async.RPCAsyncImplicits
+import freestyle.rpc.internal.TaskImplicits
 import freestyle.rpc.server.handlers.GrpcServerHandler
 
 trait ServerImplicits {
@@ -37,4 +37,4 @@ trait Helpers {
 
 }
 
-object implicits extends RPCAsyncImplicits with Helpers with ServerImplicits
+object implicits extends TaskImplicits with Helpers with ServerImplicits

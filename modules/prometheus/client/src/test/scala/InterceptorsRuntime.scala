@@ -33,10 +33,7 @@ case class InterceptorsRuntime(
   import service._
   import handlers.server._
   import handlers.client._
-  import freestyle.async.catsEffect.implicits._
-
   import freestyle.rpc.server._
-  import freestyle.rpc.server.implicits._
 
   //////////////////////////////////
   // Server Runtime Configuration //

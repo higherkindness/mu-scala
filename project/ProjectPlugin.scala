@@ -18,7 +18,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String     = "1.8.0"
-      val frees: String      = "0.6.2"
+      val frees: String      = "0.6.3"
       val grpc: String       = "1.9.0"
       val pbdirect: String   = "0.0.8"
       val prometheus: String = "0.1.0"
@@ -40,19 +40,9 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val asyncSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        %%("cats-core"),
-        %%("cats-effect"),
-        %%("monix"),
-        %%("shapeless")           % Test,
-        %%("frees-core", V.frees) % Test
-      )
-    )
-
     lazy val internalSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("cats-effect"),
+        %%("frees-async-cats-effect", V.frees),
         %%("frees-async-guava", V.frees) exclude ("com.google.guava", "guava"),
         %("grpc-core", V.grpc),
         %("grpc-stub", V.grpc),
