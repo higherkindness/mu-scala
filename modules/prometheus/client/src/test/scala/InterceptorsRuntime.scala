@@ -21,8 +21,8 @@ package client
 import freestyle.rpc.client._
 import freestyle.rpc.common.ConcurrentMonad
 import freestyle.rpc.prometheus.shared.Configuration
-import freestyle.rpc.withouttagless.Utils._
-import freestyle.rpc.withouttagless.Utils.handlers.client.FreesRPCServiceClientHandler
+import freestyle.rpc.protocol.Utils._
+import freestyle.rpc.protocol.Utils.handlers.client.FreesRPCServiceClientHandler
 import io.prometheus.client.CollectorRegistry
 
 case class InterceptorsRuntime(

@@ -34,20 +34,13 @@ object serviceImpl {
 
   def service(defn: Any): Stat = {
     defn match {
-      case Term.Block(Seq(cls: Trait, companion: Object)) =>
-        taglessServiceExtras(cls, companion)
-      case Term.Block(Seq(cls: Class, companion: Object)) if ScalametaUtil.isAbstract(cls) =>
-        taglessServiceExtras(cls, companion)
       case cls: Trait =>
+        serviceExtras(cls.name, cls)
+      case cls: Class if ScalametaUtil.isAbstract(cls) =>
         serviceExtras(cls.name, cls)
       case _ =>
         abort(s"$invalid. $abstractOnly")
     }
-  }
-
-  def taglessServiceExtras(alg: Defn, companion: Object): Term.Block = {
-    val serviceAlg = TaglessServiceAlg(alg)
-    Term.Block(Seq(alg, enrich(serviceAlg, companion)))
   }
 
   def serviceExtras(name: Type.Name, alg: Defn): Term.Block = {
@@ -56,7 +49,7 @@ object serviceImpl {
     Term.Block(Seq(alg) ++ Seq(mkCompanion(name, enrich(serviceAlg, serviceAlg.innerImports))))
   }
 
-  def enrich(serviceAlg: TaglessServiceAlg, companion: Object): Object = companion match {
+  def enrich(serviceAlg: ServiceAlg, companion: Object): Object = companion match {
     case q"..$mods object $ename extends $template" =>
       template match {
         case template"{ ..$earlyInit } with ..$inits { $self => ..$stats }" =>
@@ -152,10 +145,6 @@ case class ServiceAlg(defn: Defn) extends RPCService {
     case c: Class => c.tparams.headOption
     case t: Trait => t.tparams.headOption
   }) getOrElse abort("Type parameter must be specified")
-}
-
-case class TaglessServiceAlg(defn: Defn) extends RPCService {
-  val typeParam = Type.Param(Nil, Type.Name("FS"), Nil, Type.Bounds(None, None), Nil, Nil)
 }
 
 private[internal] case class RPCRequest(
@@ -285,10 +274,10 @@ private[internal] object utils {
 
   // format: OFF
   def buildRequests(algName: Type.Name, typeParam: Type.Param, stats: List[Stat]): List[RPCRequest] = stats.collect {
-    case q"@rpc($s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): $typeParam[Stream[$resTypeParam, $response]]" =>
+    case q"@rpc($s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): Stream[$resTypeParam, $response]" =>
       RPCRequest(algName, name, utils.serializationType(s), Some(ResponseStreaming), Some(Fs2Stream), paramTpe(request), response)
 
-    case q"@rpc($s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): $typeParam[Observable[$response]]" =>
+    case q"@rpc($s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): Observable[$response]" =>
       RPCRequest(algName, name, utils.serializationType(s), Some(ResponseStreaming), Some(MonixObservable), paramTpe(request), response)
 
     case q"@rpc($s) @stream[RequestStreaming.type] def $name[..$tparams]($paranName: Stream[$reqTypeParam, $request]): $typeParam[$response]" =>
@@ -297,10 +286,10 @@ private[internal] object utils {
     case q"@rpc($s) @stream[RequestStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): $typeParam[$response]" =>
       RPCRequest(algName, name, utils.serializationType(s), Some(RequestStreaming), Some(MonixObservable), request, response)
 
-    case q"@rpc($s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: Stream[$reqTypeParam, $request]): $typeParam[Stream[$resTypeParam, $response]]" =>
+    case q"@rpc($s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: Stream[$reqTypeParam, $request]): Stream[$resTypeParam, $response]" =>
       RPCRequest(algName, name, utils.serializationType(s), Some(BidirectionalStreaming), Some(Fs2Stream), request, response)
 
-    case q"@rpc($s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): $typeParam[Observable[$response]]" =>
+    case q"@rpc($s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): Observable[$response]" =>
       RPCRequest(algName, name, utils.serializationType(s), Some(BidirectionalStreaming), Some(MonixObservable), request, response)
 
     case q"@rpc($s) def $name[..$tparams]($request): $typeParam[$response]" =>
