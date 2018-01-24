@@ -117,7 +117,7 @@ trait RPCService {
     val clientDefs: Seq[Defn.Def] = requests.map(_.clientDef)
     q"""
        $wartSuppress
-       class $clientName[F[_]: _root_.cats.effect.Async](channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
+       class $clientName[F[_]: _root_.cats.effect.Effect](channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
           (implicit S: _root_.monix.execution.Scheduler)
           extends _root_.io.grpc.stub.AbstractStub[$clientName[F]](channel, options) {
 
@@ -134,7 +134,7 @@ trait RPCService {
   val clientInstance =
     q"""
        $wartSuppress
-       def client[F[_]: _root_.cats.effect.Async](
+       def client[F[_]: _root_.cats.effect.Effect](
          channelFor: _root_.freestyle.rpc.client.ManagedChannelFor,
          channelConfigList: List[_root_.freestyle.rpc.client.ManagedChannelConfig] = List(
            _root_.freestyle.rpc.client.UsePlaintext(true)),
