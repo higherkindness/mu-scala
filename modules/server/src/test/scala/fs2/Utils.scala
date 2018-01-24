@@ -33,7 +33,7 @@ object Utils extends CommonUtils {
 
       @rpc(Protobuf)
       @stream[ResponseStreaming.type]
-      def serverStreaming(b: B): F[Stream[F, C]]
+      def serverStreaming(b: B): Stream[F, C]
 
       @rpc(Protobuf)
       @stream[RequestStreaming.type]
@@ -41,7 +41,7 @@ object Utils extends CommonUtils {
 
       @rpc(Avro)
       @stream[BidirectionalStreaming.type]
-      def biStreaming(oe: Stream[F, E]): F[Stream[F, E]]
+      def biStreaming(oe: Stream[F, E]): Stream[F, E]
 
     }
 
@@ -58,10 +58,9 @@ object Utils extends CommonUtils {
 
         def unary(a: A): F[C] = Effect[F].delay(c1)
 
-        def serverStreaming(b: B): F[Stream[F, C]] = {
+        def serverStreaming(b: B): Stream[F, C] = {
           debug(s"[SERVER] b -> $b")
-          val stream: Stream[F, C] = Stream.emits(cList)
-          Effect[F].pure(stream)
+          Stream.emits(cList)
         }
 
         def clientStreaming(oa: Stream[F, A]): F[D] =
@@ -71,15 +70,13 @@ object Utils extends CommonUtils {
               D(current.bar + a.x + a.y)
           }
 
-        def biStreaming(oe: Stream[F, E]): F[Stream[F, E]] =
-          Effect[F].pure {
-            oe.map { e: E =>
-              save(e)
-              e
-            }
+        def biStreaming(oe: Stream[F, E]): Stream[F, E] =
+          oe.map { e: E =>
+            save(e)
+            e
           }
 
-        def save(e: E) = e // do something else with e?
+        def save(e: E): E = e // do something else with e?
 
       }
 

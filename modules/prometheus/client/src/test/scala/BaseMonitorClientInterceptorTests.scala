@@ -20,7 +20,7 @@ package client
 
 import cats.Applicative
 import freestyle.rpc.common._
-import freestyle.rpc.withouttagless.Utils.client.MyRPCClient
+import freestyle.rpc.protocol.Utils.client.MyRPCClient
 import io.prometheus.client.Collector
 import freestyle.rpc.interceptors.metrics._
 
@@ -29,7 +29,7 @@ import scala.collection.JavaConverters._
 abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
 
   import freestyle.rpc.server.implicits._
-  import freestyle.rpc.withouttagless.Utils.database._
+  import freestyle.rpc.protocol.Utils.database._
   import freestyle.rpc.prometheus.shared.RegistryHelper._
 
   def name: String

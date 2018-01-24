@@ -19,7 +19,6 @@ package internal
 package server
 
 import cats.effect.{Effect, IO}
-import cats.syntax.functor._
 import io.grpc.stub.ServerCalls.{
   BidiStreamingMethod,
   ClientStreamingMethod,
@@ -58,27 +57,22 @@ object monixCalls {
       )
   }
 
-  def serverStreamingMethod[F[_], Req, Res](f: Req => F[Observable[Res]])(
+  def serverStreamingMethod[F[_], Req, Res](f: Req => Observable[Res])(
       implicit EFF: Effect[F],
       S: Scheduler): ServerStreamingMethod[Req, Res] = new ServerStreamingMethod[Req, Res] {
 
     override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit =
-      EFF
-        .runAsync(f(request)) {
-          case Right(obs) => IO(obs.subscribe(responseObserver)).void
-          case Left(e)    => IO.raiseError(e) // this will throw, but consistent previous impl
-        }
-        .unsafeRunSync
+      f(request).subscribe(responseObserver)
   }
 
-  def bidiStreamingMethod[F[_], Req, Res](f: Observable[Req] => F[Observable[Res]])(
+  def bidiStreamingMethod[F[_], Req, Res](f: Observable[Req] => Observable[Res])(
       implicit EFF: Effect[F],
       S: Scheduler): BidiStreamingMethod[Req, Res] = new BidiStreamingMethod[Req, Res] {
 
     override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] =
       Subscriber2StreamObserver {
         transform[Req, Res](
-          (inputObservable: Observable[Req]) => Observable.fromEffect(f(inputObservable)).flatten,
+          (inputObservable: Observable[Req]) => f(inputObservable),
           StreamObserver2Subscriber(responseObserver)
         )
       }
