@@ -62,13 +62,16 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
   private[this] def checkWithRetry(assertionF: () => Assertion)(
       step: Int = 0,
       maxRetries: Int = 10,
-      sleepMillis: Long = 500)(implicit CR: CollectorRegistry): Assertion =
+      sleepMillis: Long = 200)(implicit CR: CollectorRegistry): Assertion =
     try {
       assertionF()
     } catch {
       case e: TestFailedException =>
         if (step == maxRetries) throw e
-        else checkWithRetry(assertionF)(step + 1, maxRetries, sleepMillis)
+        else {
+          Thread.sleep(sleepMillis)
+          checkWithRetry(assertionF)(step + 1, maxRetries, sleepMillis)
+        }
     }
 
   s"MonitorClientInterceptor for $name" should {
