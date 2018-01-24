@@ -24,6 +24,10 @@ case object RequestStreaming       extends StreamingType
 case object ResponseStreaming      extends StreamingType
 case object BidirectionalStreaming extends StreamingType
 
+sealed trait StreamingImpl  extends Product with Serializable
+case object Fs2Stream       extends StreamingImpl
+case object MonixObservable extends StreamingImpl
+
 sealed trait SerializationType extends Product with Serializable
 case object Protobuf           extends SerializationType
 case object Avro               extends SerializationType

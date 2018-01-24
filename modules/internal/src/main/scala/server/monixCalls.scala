@@ -34,9 +34,9 @@ import monix.reactive.observers.Subscriber
 
 import scala.concurrent.Future
 
-object calls {
+object monixCalls {
 
-  import freestyle.rpc.internal.extensions.monix.implicits._
+  import freestyle.rpc.internal.converters._
 
   def unaryMethod[F[_], Req, Res](f: Req => F[Res])(
       implicit EFF: Effect[F]): UnaryMethod[Req, Res] =
@@ -96,7 +96,7 @@ object calls {
       )
   }
 
-  private[this] def transform[Req, Res](
+  def transform[Req, Res](
       transformer: Observable[Req] => Observable[Res],
       subscriber: Subscriber[Res]): Subscriber[Req] =
     new Subscriber[Req] {
