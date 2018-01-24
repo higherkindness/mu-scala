@@ -15,8 +15,15 @@
  */
 
 package freestyle.rpc
-package client
+package internal
 
-import freestyle.rpc.internal.TaskImplicits
+import monix.eval.Task
 
-object implicits extends TaskImplicits
+trait TaskImplicits {
+
+  implicit class TaskOps[A](task: Task[A]) {
+
+    def to[F[_]](implicit F: LiftTask[F]): F[A] = F.liftTask(task)
+
+  }
+}

@@ -18,7 +18,7 @@ package freestyle.rpc
 package internal
 package client
 
-import cats.effect.Effect
+import cats.effect.{Async, LiftIO}
 import freestyle.async.guava.implicits._
 import freestyle.async.catsEffect.implicits._
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
@@ -30,7 +30,7 @@ object monixCalls {
 
   import freestyle.rpc.internal.converters._
 
-  def unary[F[_]: Effect, Req, Res](
+  def unary[F[_]: Async, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
@@ -47,24 +47,24 @@ object monixCalls {
     Observable
       .fromReactivePublisher(createPublisher(request, descriptor, channel, options))
 
-  def clientStreaming[F[_]: Effect, Req, Res](
+  def clientStreaming[F[_]: LiftIO, Req, Res](
       input: Observable[Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler): F[Res] =
-    input
-      .liftByOperator(
-        StreamObserver2MonixOperator(
-          (outputObserver: StreamObserver[Res]) =>
-            ClientCalls.asyncClientStreamingCall(
-              channel.newCall(descriptor, options),
-              outputObserver
+      options: CallOptions)(implicit S: Scheduler, L: LiftTask[F]): F[Res] =
+    L.liftTask {
+      input
+        .liftByOperator(
+          StreamObserver2MonixOperator(
+            (outputObserver: StreamObserver[Res]) =>
+              ClientCalls.asyncClientStreamingCall(
+                channel.newCall(descriptor, options),
+                outputObserver
+            )
           )
         )
-      )
-      .firstL
-      .toIO
-      .to[F]
+        .firstL
+    }
 
   def bidiStreaming[Req, Res](
       input: Observable[Req],

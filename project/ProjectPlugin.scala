@@ -18,7 +18,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String             = "1.8.0"
-      val frees: String              = "0.6.2"
+      val frees: String              = "0.6.3"
       val fs2ReactiveStreams: String = "0.2.8"
       val grpc: String               = "1.9.0"
       val pbdirect: String           = "0.0.8"
@@ -38,16 +38,6 @@ object ProjectPlugin extends AutoPlugin {
         %%("cats-effect")        % Test,
         %%("cats-core")          % Test,
         %%("scalamockScalatest") % Test
-      )
-    )
-
-    lazy val asyncSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        %%("cats-core"),
-        %%("cats-effect"),
-        %%("monix"),
-        %%("shapeless")           % Test,
-        %%("frees-core", V.frees) % Test
       )
     )
 

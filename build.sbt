@@ -7,12 +7,6 @@ lazy val common = project
   .settings(moduleName := "frees-rpc-common")
   .settings(commonSettings)
 
-lazy val async = project
-  .in(file("modules/async"))
-  .dependsOn(common % "test->test")
-  .settings(moduleName := "frees-rpc-async")
-  .settings(asyncSettings)
-
 lazy val internal = project
   .in(file("modules/internal"))
   .dependsOn(common % "compile->compile;test->test")
@@ -24,7 +18,6 @@ lazy val client = project
   .in(file("modules/client"))
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(internal)
-  .dependsOn(async)
   .dependsOn(testing % "test->test")
   .settings(moduleName := "frees-rpc-client-core")
   .settings(clientCoreSettings)
@@ -46,7 +39,6 @@ lazy val server = project
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(client % "test->test")
   .dependsOn(internal)
-  .dependsOn(async)
   .dependsOn(testing % "test->test")
   .settings(moduleName := "frees-rpc-server")
   .settings(serverSettings)
@@ -111,7 +103,6 @@ lazy val testing = project
 
 lazy val allModules: Seq[ProjectReference] = Seq(
   common,
-  async,
   internal,
   client,
   `client-netty`,

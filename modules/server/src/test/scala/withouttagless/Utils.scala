@@ -17,11 +17,13 @@
 package freestyle.rpc
 package withouttagless
 
-import cats.{~>, Applicative, Monad, MonadError}
+import cats.MonadError
+import cats.effect.Async
+import cats.syntax.applicative._
 import freestyle.rpc.common._
 import freestyle.rpc.protocol._
+import freestyle.rpc.server.implicits._
 import freestyle.tagless.tagless
-import monix.eval.Task
 import monix.reactive.Observable
 
 object Utils extends CommonUtils {
@@ -94,55 +96,50 @@ object Utils extends CommonUtils {
       import service._
       import freestyle.rpc.protocol._
 
-      class ServerRPCService[F[_]](implicit F: Applicative[F], T2F: Task ~> F)
-          extends RPCService[F] {
+      class ServerRPCService[F[_]: Async] extends RPCService[F] {
 
-        def notAllowed(b: Boolean): F[C] = F.pure(c1)
+        def notAllowed(b: Boolean): F[C] = c1.pure
 
-        def empty(empty: Empty.type): F[Empty.type] = F.pure(Empty)
+        def empty(empty: Empty.type): F[Empty.type] = Empty.pure
 
-        def emptyParam(a: A): F[Empty.type] = F.pure(Empty)
+        def emptyParam(a: A): F[Empty.type] = Empty.pure
 
-        def emptyParamResponse(empty: Empty.type): F[A] = F.pure(a4)
+        def emptyParamResponse(empty: Empty.type): F[A] = a4.pure
 
-        def emptyAvro(empty: Empty.type): F[Empty.type] = F.pure(Empty)
+        def emptyAvro(empty: Empty.type): F[Empty.type] = Empty.pure
 
-        def emptyAvroParam(a: A): F[Empty.type] = F.pure(Empty)
+        def emptyAvroParam(a: A): F[Empty.type] = Empty.pure
 
-        def emptyAvroParamResponse(empty: Empty.type): F[A] = F.pure(a4)
+        def emptyAvroParamResponse(empty: Empty.type): F[A] = a4.pure
 
-        def unary(a: A): F[C] =
-          F.pure(c1)
+        def unary(a: A): F[C] = c1.pure
 
         def serverStreaming(b: B): F[Observable[C]] = {
           debug(s"[SERVER] b -> $b")
           val obs = Observable.fromIterable(cList)
-          F.pure(obs)
+          obs.pure
         }
 
         def clientStreaming(oa: Observable[A]): F[D] =
-          T2F(
-            oa.foldLeftL(D(0)) {
+          oa.foldLeftL(D(0)) {
               case (current, a) =>
                 debug(s"[SERVER] Current -> $current / a -> $a")
                 D(current.bar + a.x + a.y)
             }
-          )
+            .to[F]
 
         def biStreaming(oe: Observable[E]): F[Observable[E]] =
-          F.pure {
-            oe.flatMap { e: E =>
-              save(e)
+          oe.flatMap { e: E =>
+            save(e)
 
-              Observable.fromIterable(eList)
-            }
-          }
+            Observable.fromIterable(eList)
+          }.pure
 
         def save(e: E) = e // do something else with e?
 
         import ExternalScope._
 
-        override def scope(empty: protocol.Empty.type): F[External] = F.pure(External(e1))
+        override def scope(empty: protocol.Empty.type): F[External] = External(e1).pure
       }
 
     }
@@ -153,10 +150,9 @@ object Utils extends CommonUtils {
       import freestyle.rpc.withouttagless.Utils.client.MyRPCClient
       import freestyle.rpc.protocol._
 
-      class FreesRPCServiceClientHandler[F[_]: Monad](
+      class FreesRPCServiceClientHandler[F[_]: Async](
           implicit client: RPCService.Client[F],
-          M: MonadError[F, Throwable],
-          T2F: Task ~> F)
+          M: MonadError[F, Throwable])
           extends MyRPCClient.Handler[F] {
 
         override def notAllowed(b: Boolean): F[C] =
@@ -183,7 +179,7 @@ object Utils extends CommonUtils {
         override def u(x: Int, y: Int): F[C] =
           client.unary(A(x, y))
 
-        override def ss(a: Int, b: Int): F[List[C]] = T2F {
+        override def ss(a: Int, b: Int): F[List[C]] =
           client
             .serverStreaming(B(A(a, a), A(b, b)))
             .zipWithIndex
@@ -193,24 +189,24 @@ object Utils extends CommonUtils {
                 c
             }
             .toListL
-        }
+            .to[F]
 
         override def cs(cList: List[C], bar: Int): F[D] =
           client.clientStreaming(Observable.fromIterable(cList.map(c => c.a)))
 
         import cats.syntax.functor._
         override def bs(eList: List[E]): F[E] =
-          T2F(
-            client
-              .biStreaming(Observable.fromIterable(eList))
-              .zipWithIndex
-              .map {
-                case (c, i) =>
-                  debug(s"[CLIENT] Result #$i: $c")
-                  c
-              }
-              .toListL
-          ).map(_.head)
+          client
+            .biStreaming(Observable.fromIterable(eList))
+            .zipWithIndex
+            .map {
+              case (c, i) =>
+                debug(s"[CLIENT] Result #$i: $c")
+                c
+            }
+            .toListL
+            .to[F]
+            .map(_.head)
 
       }
 
