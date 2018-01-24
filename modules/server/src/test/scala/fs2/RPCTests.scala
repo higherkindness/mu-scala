@@ -59,7 +59,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   }
 
-  "frees-rpc client" should {
+  "frees-rpc client with fs2.Stream as streaming implementation" should {
 
     "be able to run unary services" in {
 
@@ -86,7 +86,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         .biStreaming(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
         .compile
         .toList
-        .unsafeRunSync() shouldBe eList
+        .unsafeRunSync()
+        .distinct shouldBe eList
 
     }
 
@@ -104,7 +105,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       tuple._1.unsafeRunSync() shouldBe c1
       tuple._2.compile.toList.unsafeRunSync() shouldBe cList
       tuple._3.unsafeRunSync() shouldBe dResult33
-      tuple._4.compile.toList.unsafeRunSync() shouldBe eList
+      tuple._4.compile.toList.unsafeRunSync().distinct shouldBe eList
 
     }
 

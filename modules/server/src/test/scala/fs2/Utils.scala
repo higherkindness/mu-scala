@@ -71,9 +71,9 @@ object Utils extends CommonUtils {
           }
 
         def biStreaming(oe: Stream[F, E]): Stream[F, E] =
-          oe.map { e: E =>
+          oe.flatMap { e: E =>
             save(e)
-            e
+            Stream.fromIterator(eList.iterator)
           }
 
         def save(e: E): E = e // do something else with e?
