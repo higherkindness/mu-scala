@@ -30,39 +30,36 @@ object fs2Calls {
 
   import freestyle.rpc.internal.converters._
 
-  def unaryMethod[F[_], Req, Res](f: Req => F[Res])(
-      implicit EFF: Effect[F]): UnaryMethod[Req, Res] =
+  def unaryMethod[F[_]: Effect, Req, Res](f: Req => F[Res]): UnaryMethod[Req, Res] =
     monixCalls.unaryMethod(f)
 
-  def clientStreamingMethod[F[_], Req, Res](f: Stream[F, Req] => F[Res])(
-      implicit EFF: Effect[F],
-      S: Scheduler): ClientStreamingMethod[Req, Res] = new ClientStreamingMethod[Req, Res] {
+  def clientStreamingMethod[F[_]: Effect, Req, Res](f: Stream[F, Req] => F[Res])(
+      implicit S: Scheduler): ClientStreamingMethod[Req, Res] =
+    new ClientStreamingMethod[Req, Res] {
 
-    override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] =
-      monixCalls.transform[Req, Res](
-        inputObservable =>
-          Observable.fromEffect(f(inputObservable.toReactivePublisher.toStream[F])),
-        responseObserver
-      )
-  }
+      override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] =
+        transform[Req, Res](
+          inputObservable =>
+            Observable.fromEffect(f(inputObservable.toReactivePublisher.toStream[F])),
+          responseObserver
+        )
+    }
 
-  def serverStreamingMethod[F[_], Req, Res](f: Req => Stream[F, Res])(
-      implicit EFF: Effect[F],
-      S: Scheduler): ServerStreamingMethod[Req, Res] = new ServerStreamingMethod[Req, Res] {
+  def serverStreamingMethod[F[_]: Effect, Req, Res](f: Req => Stream[F, Res])(
+      implicit S: Scheduler): ServerStreamingMethod[Req, Res] =
+    new ServerStreamingMethod[Req, Res] {
 
-    override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit =
-      Observable
-        .fromReactivePublisher(f(request).toUnicastPublisher)
-        .subscribe(responseObserver)
-  }
+      override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit =
+        f(request).toUnicastPublisher
+          .subscribe(StreamObserver2Subscriber(responseObserver).toReactive)
+    }
 
-  def bidiStreamingMethod[F[_], Req, Res](f: Stream[F, Req] => Stream[F, Res])(
-      implicit EFF: Effect[F],
-      S: Scheduler): BidiStreamingMethod[Req, Res] = new BidiStreamingMethod[Req, Res] {
+  def bidiStreamingMethod[F[_]: Effect, Req, Res](f: Stream[F, Req] => Stream[F, Res])(
+      implicit S: Scheduler): BidiStreamingMethod[Req, Res] = new BidiStreamingMethod[Req, Res] {
 
     override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] =
       Subscriber2StreamObserver {
-        monixCalls.transform[Req, Res](
+        transform[Req, Res](
           (inputObservable: Observable[Req]) =>
             Observable.fromReactivePublisher(
               f(inputObservable.toReactivePublisher.toStream[F]).toUnicastPublisher),

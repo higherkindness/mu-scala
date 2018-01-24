@@ -27,47 +27,42 @@ import io.grpc.stub.ServerCalls.{
 }
 import io.grpc.stub.StreamObserver
 import io.grpc.{Status, StatusException}
-import monix.execution.{Ack, Scheduler}
-import monix.reactive.{Observable, Observer, Pipe}
-import monix.reactive.observers.Subscriber
-
-import scala.concurrent.Future
+import monix.execution.Scheduler
+import monix.reactive.Observable
 
 object monixCalls {
 
   import freestyle.rpc.internal.converters._
 
-  def unaryMethod[F[_], Req, Res](f: Req => F[Res])(
-      implicit EFF: Effect[F]): UnaryMethod[Req, Res] =
+  def unaryMethod[F[_]: Effect, Req, Res](f: Req => F[Res]): UnaryMethod[Req, Res] =
     new UnaryMethod[Req, Res] {
       override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit =
-        EFF
+        Effect[F]
           .runAsync(f(request))(either => IO(completeObserver(responseObserver)(either)))
           .unsafeRunAsync(_ => ())
     }
 
-  def clientStreamingMethod[F[_], Req, Res](f: Observable[Req] => F[Res])(
-      implicit EFF: Effect[F],
-      S: Scheduler): ClientStreamingMethod[Req, Res] = new ClientStreamingMethod[Req, Res] {
+  def clientStreamingMethod[F[_]: Effect, Req, Res](f: Observable[Req] => F[Res])(
+      implicit S: Scheduler): ClientStreamingMethod[Req, Res] =
+    new ClientStreamingMethod[Req, Res] {
 
-    override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] =
-      transform[Req, Res](
-        inputObservable => Observable.fromEffect(f(inputObservable)),
-        responseObserver
-      )
-  }
+      override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] =
+        transform[Req, Res](
+          inputObservable => Observable.fromEffect(f(inputObservable)),
+          responseObserver
+        )
+    }
 
-  def serverStreamingMethod[F[_], Req, Res](f: Req => Observable[Res])(
-      implicit EFF: Effect[F],
-      S: Scheduler): ServerStreamingMethod[Req, Res] = new ServerStreamingMethod[Req, Res] {
+  def serverStreamingMethod[F[_]: Effect, Req, Res](f: Req => Observable[Res])(
+      implicit S: Scheduler): ServerStreamingMethod[Req, Res] =
+    new ServerStreamingMethod[Req, Res] {
 
-    override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit =
-      f(request).subscribe(responseObserver)
-  }
+      override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit =
+        f(request).subscribe(responseObserver)
+    }
 
-  def bidiStreamingMethod[F[_], Req, Res](f: Observable[Req] => Observable[Res])(
-      implicit EFF: Effect[F],
-      S: Scheduler): BidiStreamingMethod[Req, Res] = new BidiStreamingMethod[Req, Res] {
+  def bidiStreamingMethod[F[_]: Effect, Req, Res](f: Observable[Req] => Observable[Res])(
+      implicit S: Scheduler): BidiStreamingMethod[Req, Res] = new BidiStreamingMethod[Req, Res] {
 
     override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] =
       Subscriber2StreamObserver {
@@ -89,21 +84,5 @@ object monixCalls {
         Status.INTERNAL.withDescription(e.getMessage).withCause(e).asException()
       )
   }
-
-  def transform[Req, Res](
-      transformer: Observable[Req] => Observable[Res],
-      subscriber: Subscriber[Res]): Subscriber[Req] =
-    new Subscriber[Req] {
-
-      val pipe: Pipe[Req, Res]                      = Pipe.publish[Req].transform[Res](transformer)
-      val (in: Observer[Req], out: Observable[Res]) = pipe.unicast
-
-      out.unsafeSubscribeFn(subscriber)
-
-      override implicit def scheduler: Scheduler   = subscriber.scheduler
-      override def onError(t: Throwable): Unit     = in.onError(t)
-      override def onComplete(): Unit              = in.onComplete()
-      override def onNext(value: Req): Future[Ack] = in.onNext(value)
-    }
 
 }

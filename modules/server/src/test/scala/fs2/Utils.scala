@@ -59,14 +59,14 @@ object Utils extends CommonUtils {
         def unary(a: A): F[C] = Effect[F].delay(c1)
 
         def serverStreaming(b: B): Stream[F, C] = {
-          debug(s"[SERVER] b -> $b")
-          Stream.emits(cList)
+          debug(s"[fs2 - SERVER] b -> $b")
+          Stream.fromIterator(cList.iterator)
         }
 
         def clientStreaming(oa: Stream[F, A]): F[D] =
           oa.compile.fold(D(0)) {
             case (current, a) =>
-              debug(s"[SERVER] Current -> $current / a -> $a")
+              debug(s"[fs2 - SERVER] Current -> $current / a -> $a")
               D(current.bar + a.x + a.y)
           }
 

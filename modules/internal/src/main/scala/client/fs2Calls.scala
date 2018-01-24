@@ -39,7 +39,10 @@ object fs2Calls {
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
       options: CallOptions)(implicit S: Scheduler): Stream[F, Res] =
-    createPublisher(request, descriptor, channel, options).toStream[F]
+    monixCalls
+      .serverStreaming(request, descriptor, channel, options)
+      .toReactivePublisher
+      .toStream[F]
 
   def clientStreaming[F[_]: Effect, Req, Res](
       input: Stream[F, Req],
