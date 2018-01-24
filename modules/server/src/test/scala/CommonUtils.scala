@@ -45,7 +45,8 @@ trait CommonUtils {
     val cList = List(c1, c2)
     val eList = List(e1, e2)
 
-    val dResult: D = D(6)
+    val dResult: D   = D(6)
+    val dResult33: D = D(33)
   }
 
   def createManagedChannelFor: ManagedChannelFor = ManagedChannelForAddress(SC.host, SC.port)

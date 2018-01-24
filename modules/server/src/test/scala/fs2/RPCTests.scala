@@ -69,48 +69,44 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run server streaming services" in {
 
-      val aa: Stream[ConcurrentMonad, C] = freesRPCServiceClient.serverStreaming(b1)
-
-      val bb = aa.compile.toList
-      println(s"aa = $aa")
-      println(s"bb = $bb")
-
-      bb.unsafeRunSync shouldBe cList
+      freesRPCServiceClient.serverStreaming(b1).compile.toList.unsafeRunSync shouldBe cList
 
     }
-//
-//    "be able to run client streaming services" in {
-//
-//      freesRPCServiceClient
-//        .clientStreaming(Stream.fromIterator[ConcurrentMonad, A](aList.iterator))
-//        .unsafeRunSync() shouldBe dResult
-//    }
-//
-//    "be able to run client bidirectional streaming services" in {
-//
-//      freesRPCServiceClient
-//        .biStreaming(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
-//        .compile
-//        .toList
-//        .unsafeRunSync()
-//        .head shouldBe e1
-//
-//    }
 
-//    "be able to run rpc services concurrently" in {
-//
-//      val result =
-//        (
-//          freesRPCServiceClient.unary(a1),
-//          freesRPCServiceClient.serverStreaming(b1),
-//          freesRPCServiceClient.clientStreaming(
-//            Stream.fromIterator[ConcurrentMonad, A](aList.iterator)),
-//          freesRPCServiceClient.biStreaming(
-//            Stream.fromIterator[ConcurrentMonad, E](eList.iterator)))
-//
-//      result.unsafeRunSync() shouldBe ((c1, cList, dResult, e1))
-//
-//    }
+    "be able to run client streaming services" in {
+
+      freesRPCServiceClient
+        .clientStreaming(Stream.fromIterator[ConcurrentMonad, A](aList.iterator))
+        .unsafeRunSync() shouldBe dResult33
+    }
+
+    "be able to run client bidirectional streaming services" in {
+
+      freesRPCServiceClient
+        .biStreaming(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
+        .compile
+        .toList
+        .unsafeRunSync() shouldBe eList
+
+    }
+
+    "be able to run multiple rpc services" in {
+
+      val tuple =
+        (
+          freesRPCServiceClient.unary(a1),
+          freesRPCServiceClient.serverStreaming(b1),
+          freesRPCServiceClient.clientStreaming(
+            Stream.fromIterator[ConcurrentMonad, A](aList.iterator)),
+          freesRPCServiceClient.biStreaming(
+            Stream.fromIterator[ConcurrentMonad, E](eList.iterator)))
+
+      tuple._1.unsafeRunSync() shouldBe c1
+      tuple._2.compile.toList.unsafeRunSync() shouldBe cList
+      tuple._3.unsafeRunSync() shouldBe dResult33
+      tuple._4.compile.toList.unsafeRunSync() shouldBe eList
+
+    }
 
   }
 
