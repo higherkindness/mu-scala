@@ -25,9 +25,8 @@ import io.grpc.{CallOptions, Channel, MethodDescriptor}
 import io.grpc.stub.{ClientCalls, StreamObserver}
 import monix.execution.Scheduler
 import monix.reactive.Observable
-import org.reactivestreams._
 
-object calls {
+object monixCalls {
 
   import freestyle.rpc.internal.converters._
 
@@ -46,16 +45,7 @@ object calls {
       channel: Channel,
       options: CallOptions): Observable[Res] =
     Observable
-      .fromReactivePublisher(new Publisher[Res] {
-        override def subscribe(s: Subscriber[_ >: Res]): Unit = {
-          val subscriber: Subscriber[Res] = s.asInstanceOf[Subscriber[Res]]
-          ClientCalls.asyncServerStreamingCall(
-            channel.newCall[Req, Res](descriptor, options),
-            request,
-            subscriber
-          )
-        }
-      })
+      .fromReactivePublisher(createPublisher(request, descriptor, channel, options))
 
   def clientStreaming[F[_]: LiftIO, Req, Res](
       input: Observable[Req],

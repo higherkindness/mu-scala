@@ -34,20 +34,13 @@ object serviceImpl {
 
   def service(defn: Any): Stat = {
     defn match {
-      case Term.Block(Seq(cls: Trait, companion: Object)) =>
-        taglessServiceExtras(cls, companion)
-      case Term.Block(Seq(cls: Class, companion: Object)) if ScalametaUtil.isAbstract(cls) =>
-        taglessServiceExtras(cls, companion)
       case cls: Trait =>
+        serviceExtras(cls.name, cls)
+      case cls: Class if ScalametaUtil.isAbstract(cls) =>
         serviceExtras(cls.name, cls)
       case _ =>
         abort(s"$invalid. $abstractOnly")
     }
-  }
-
-  def taglessServiceExtras(alg: Defn, companion: Object): Term.Block = {
-    val serviceAlg = TaglessServiceAlg(alg)
-    Term.Block(Seq(alg, enrich(serviceAlg, companion)))
   }
 
   def serviceExtras(name: Type.Name, alg: Defn): Term.Block = {
@@ -56,7 +49,7 @@ object serviceImpl {
     Term.Block(Seq(alg) ++ Seq(mkCompanion(name, enrich(serviceAlg, serviceAlg.innerImports))))
   }
 
-  def enrich(serviceAlg: TaglessServiceAlg, companion: Object): Object = companion match {
+  def enrich(serviceAlg: ServiceAlg, companion: Object): Object = companion match {
     case q"..$mods object $ename extends $template" =>
       template match {
         case template"{ ..$earlyInit } with ..$inits { $self => ..$stats }" =>
@@ -102,7 +95,7 @@ trait RPCService {
   val serviceBindings: Defn.Def = {
     val args: Seq[Term.Tuple] = requests.map(_.call)
     q"""
-       def bindService[F[_]](implicit algebra: $algName[F], EFF: _root_.cats.effect.Effect[F], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
+       def bindService[F[_]: _root_.cats.effect.Effect](implicit algebra: $algName[F], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
            new _root_.freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(
       algName.value)}, ..$args).apply
      """
@@ -117,7 +110,7 @@ trait RPCService {
     val clientDefs: Seq[Defn.Def] = requests.map(_.clientDef)
     q"""
        $wartSuppress
-       class $clientName[F[_]: _root_.cats.effect.Async](channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
+       class $clientName[F[_]: _root_.cats.effect.Effect](channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
           (implicit S: _root_.monix.execution.Scheduler)
           extends _root_.io.grpc.stub.AbstractStub[$clientName[F]](channel, options) {
 
@@ -134,7 +127,7 @@ trait RPCService {
   val clientInstance =
     q"""
        $wartSuppress
-       def client[F[_]: _root_.cats.effect.Async](
+       def client[F[_]: _root_.cats.effect.Effect](
          channelFor: _root_.freestyle.rpc.client.ManagedChannelFor,
          channelConfigList: List[_root_.freestyle.rpc.client.ManagedChannelConfig] = List(
            _root_.freestyle.rpc.client.UsePlaintext(true)),
@@ -154,15 +147,12 @@ case class ServiceAlg(defn: Defn) extends RPCService {
   }) getOrElse abort("Type parameter must be specified")
 }
 
-case class TaglessServiceAlg(defn: Defn) extends RPCService {
-  val typeParam = Type.Param(Nil, Type.Name("FS"), Nil, Type.Bounds(None, None), Nil, Nil)
-}
-
 private[internal] case class RPCRequest(
     algName: Type.Name,
     name: Term.Name,
     serialization: SerializationType,
     streamingType: Option[StreamingType],
+    streamingImpl: Option[StreamingImpl],
     requestType: Type,
     responseType: Type) {
 
@@ -197,39 +187,63 @@ private[internal] case class RPCRequest(
        }
       """
 
+  def streamingImplType(tp: Type): Type = streamingImpl match {
+    case Some(Fs2Stream)       => targ"_root_.fs2.Stream[F, $tp]"
+    case Some(MonixObservable) => targ"_root_.monix.reactive.Observable[$tp]"
+    case None                  => targ"Unit"
+  }
+
+  def clientCallsType(methodName: Term.Name): Term.Apply = streamingImpl match {
+    case Some(Fs2Stream) =>
+      q"_root_.freestyle.rpc.internal.client.fs2Calls.$methodName(input, $descriptorName, channel, options)"
+    case Some(MonixObservable) =>
+      q"_root_.freestyle.rpc.internal.client.monixCalls.$methodName(input, $descriptorName, channel, options)"
+    case _ =>
+      q"_root_.freestyle.rpc.internal.client.monixCalls.$methodName(input, $descriptorName, channel, options)"
+  }
+
   val clientDef: Defn.Def = streamingType match {
     case Some(RequestStreaming) =>
       q"""
-         def $name(input: _root_.monix.reactive.Observable[$requestType]): F[$responseType] =
-           _root_.freestyle.rpc.internal.client.calls.clientStreaming(input, $descriptorName, channel, options)
+         def $name(input: ${streamingImplType(requestType)}): F[$responseType] =
+           ${clientCallsType(q"clientStreaming")}
        """
     case Some(ResponseStreaming) =>
       q"""
-         def $name(request: $requestType): _root_.monix.reactive.Observable[$responseType] =
-           _root_.freestyle.rpc.internal.client.calls.serverStreaming(request, $descriptorName, channel, options)
+         def $name(input: $requestType): ${streamingImplType(responseType)} =
+           ${clientCallsType(q"serverStreaming")}
        """
     case Some(BidirectionalStreaming) =>
       q"""
-         def $name(input: _root_.monix.reactive.Observable[$requestType]): _root_.monix.reactive.Observable[$responseType] =
-           _root_.freestyle.rpc.internal.client.calls.bidiStreaming(input, $descriptorName, channel, options)
+         def $name(input: ${streamingImplType(requestType)}): ${streamingImplType(responseType)} =
+           ${clientCallsType(q"bidiStreaming")}
        """
     case None =>
       q"""
-         def $name(request: $requestType): F[$responseType] =
-           _root_.freestyle.rpc.internal.client.calls.unary(request, $descriptorName, channel, options)
+         def $name(input: $requestType): F[$responseType] =
+           ${clientCallsType(q"unary")}
       """
+  }
+
+  def serverCallsType(methodName: Term.Name): Term.Apply = streamingImpl match {
+    case Some(Fs2Stream) =>
+      q"_root_.freestyle.rpc.internal.server.fs2Calls.$methodName(algebra.$name)"
+    case Some(MonixObservable) =>
+      q"_root_.freestyle.rpc.internal.server.monixCalls.$methodName(algebra.$name)"
+    case _ =>
+      q"_root_.freestyle.rpc.internal.server.monixCalls.$methodName(algebra.$name)"
   }
 
   val call: Term.Tuple = {
     val handler = streamingType match {
       case Some(RequestStreaming) =>
-        q"_root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(_root_.freestyle.rpc.internal.server.calls.clientStreamingMethod(algebra.$name))"
+        q"_root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(${serverCallsType(q"clientStreamingMethod")})"
       case Some(ResponseStreaming) =>
-        q"_root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(_root_.freestyle.rpc.internal.server.calls.serverStreamingMethod(algebra.$name))"
+        q"_root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(${serverCallsType(q"serverStreamingMethod")})"
       case Some(BidirectionalStreaming) =>
-        q"_root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(_root_.freestyle.rpc.internal.server.calls.bidiStreamingMethod(algebra.$name))"
+        q"_root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(${serverCallsType(q"bidiStreamingMethod")})"
       case None =>
-        q"_root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.freestyle.rpc.internal.server.calls.unaryMethod(algebra.$name))"
+        q"_root_.io.grpc.stub.ServerCalls.asyncUnaryCall(${serverCallsType(q"unaryMethod")})"
     }
     q"($descriptorName, $handler)"
   }
@@ -260,14 +274,26 @@ private[internal] object utils {
 
   // format: OFF
   def buildRequests(algName: Type.Name, typeParam: Type.Param, stats: List[Stat]): List[RPCRequest] = stats.collect {
-    case q"@rpc($s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): $typeParam[Observable[$response]]" =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(ResponseStreaming), paramTpe(request), response)
+    case q"@rpc($s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): Stream[$resTypeParam, $response]" =>
+      RPCRequest(algName, name, utils.serializationType(s), Some(ResponseStreaming), Some(Fs2Stream), paramTpe(request), response)
+
+    case q"@rpc($s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): Observable[$response]" =>
+      RPCRequest(algName, name, utils.serializationType(s), Some(ResponseStreaming), Some(MonixObservable), paramTpe(request), response)
+
+    case q"@rpc($s) @stream[RequestStreaming.type] def $name[..$tparams]($paranName: Stream[$reqTypeParam, $request]): $typeParam[$response]" =>
+      RPCRequest(algName, name, utils.serializationType(s), Some(RequestStreaming), Some(Fs2Stream), request, response)
+
     case q"@rpc($s) @stream[RequestStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): $typeParam[$response]" =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(RequestStreaming), request, response)
-    case q"@rpc($s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): $typeParam[Observable[$response]]" =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(BidirectionalStreaming), request, response)
+      RPCRequest(algName, name, utils.serializationType(s), Some(RequestStreaming), Some(MonixObservable), request, response)
+
+    case q"@rpc($s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: Stream[$reqTypeParam, $request]): Stream[$resTypeParam, $response]" =>
+      RPCRequest(algName, name, utils.serializationType(s), Some(BidirectionalStreaming), Some(Fs2Stream), request, response)
+
+    case q"@rpc($s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): Observable[$response]" =>
+      RPCRequest(algName, name, utils.serializationType(s), Some(BidirectionalStreaming), Some(MonixObservable), request, response)
+
     case q"@rpc($s) def $name[..$tparams]($request): $typeParam[$response]" =>
-      RPCRequest(algName, name, utils.serializationType(s), None, paramTpe(request), response)
+      RPCRequest(algName, name, utils.serializationType(s), None, None, paramTpe(request), response)
   }
   // format: ON
 
