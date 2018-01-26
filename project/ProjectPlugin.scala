@@ -21,6 +21,7 @@ object ProjectPlugin extends AutoPlugin {
       val frees: String              = "0.6.3"
       val fs2ReactiveStreams: String = "0.2.8"
       val grpc: String               = "1.9.0"
+      val monix: String              = "3.0.0-M3"
       val pbdirect: String           = "0.0.8"
       val prometheus: String         = "0.1.0"
       val scalameta: String          = "1.8.0"
@@ -47,8 +48,8 @@ object ProjectPlugin extends AutoPlugin {
         %%("frees-async-guava", V.frees) exclude ("com.google.guava", "guava"),
         %("grpc-core", V.grpc),
         %("grpc-stub", V.grpc),
-        %%("monix"),
-        "com.github.zainab-ali" %% "fs2-reactive-streams" % V.fs2ReactiveStreams,
+        %%("monix", V.monix),
+        %%("fs2-reactive-streams", V.fs2ReactiveStreams),
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
         %%("scalamockScalatest") % Test
