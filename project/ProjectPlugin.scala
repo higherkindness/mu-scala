@@ -19,7 +19,7 @@ object ProjectPlugin extends AutoPlugin {
     lazy val V = new {
       val avro4s: String             = "1.8.0"
       val frees: String              = "0.6.3"
-      val fs2ReactiveStreams: String = "0.2.8"
+      val fs2ReactiveStreams: String = "0.3.0"
       val grpc: String               = "1.9.0"
       val monix: String              = "3.0.0-M3"
       val pbdirect: String           = "0.0.8"
