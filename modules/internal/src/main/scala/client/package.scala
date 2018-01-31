@@ -36,7 +36,7 @@ package object client {
         ClientCalls.asyncServerStreamingCall(
           channel.newCall[Req, Res](descriptor, options),
           request,
-          subscriber
+          subscriber.toStreamObserver
         )
       }
     }

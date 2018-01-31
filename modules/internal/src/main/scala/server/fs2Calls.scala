@@ -38,7 +38,7 @@ object fs2Calls {
     new ClientStreamingMethod[Req, Res] {
 
       override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] =
-        transform[Req, Res](
+        transformStreamObserver[Req, Res](
           inputObservable =>
             Observable.fromEffect(f(inputObservable.toReactivePublisher.toStream[F])),
           responseObserver
@@ -50,22 +50,19 @@ object fs2Calls {
     new ServerStreamingMethod[Req, Res] {
 
       override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit =
-        f(request).toUnicastPublisher
-          .subscribe(StreamObserver2Subscriber(responseObserver).toReactive)
+        f(request).toUnicastPublisher.subscribe(responseObserver.toSubscriber.toReactive)
     }
 
   def bidiStreamingMethod[F[_]: Effect, Req, Res](f: Stream[F, Req] => Stream[F, Res])(
       implicit S: Scheduler): BidiStreamingMethod[Req, Res] = new BidiStreamingMethod[Req, Res] {
 
     override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] =
-      Subscriber2StreamObserver {
-        transform[Req, Res](
-          (inputObservable: Observable[Req]) =>
-            Observable.fromReactivePublisher(
-              f(inputObservable.toReactivePublisher.toStream[F]).toUnicastPublisher),
-          StreamObserver2Subscriber(responseObserver)
-        )
-      }
+      transformStreamObserver[Req, Res](
+        (inputObservable: Observable[Req]) =>
+          Observable.fromReactivePublisher(
+            f(inputObservable.toReactivePublisher.toStream[F]).toUnicastPublisher),
+        responseObserver
+      )
   }
 
 }

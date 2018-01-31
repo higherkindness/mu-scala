@@ -61,7 +61,7 @@ trait MonixAdapters {
 
       override def apply[A](fa: StreamObserver[A]): Subscriber[A] = new Subscriber[A] {
 
-        override implicit def scheduler: Scheduler = S
+        override implicit val scheduler: Scheduler = S
         override def onError(ex: Throwable): Unit  = fa.onError(ex)
         override def onComplete(): Unit            = fa.onCompleted()
         override def onNext(elem: A): Future[Ack] =
@@ -79,23 +79,28 @@ trait MonixAdapters {
 
 object converters extends MonixAdapters {
 
-  private[internal] implicit def Subscriber2StreamObserver[A](
-      subscriber: Subscriber[A]): StreamObserver[A] = monixSubscriber2StreamObserver(subscriber)
+  private[internal] implicit class SubscriberOps[A](private val subscriber: Subscriber[A])
+      extends AnyVal {
+    def toStreamObserver: StreamObserver[A] = monixSubscriber2StreamObserver(subscriber)
+  }
 
-  private[internal] implicit def RSubscriber2StreamObserver[A](
-      rSubscriber: RSubscriber[A]): StreamObserver[A] =
-    reactiveSubscriber2StreamObserver(rSubscriber)
+  private[internal] implicit class RSubscriberOps[A](private val rSubscriber: RSubscriber[A])
+      extends AnyVal {
+    def toStreamObserver: StreamObserver[A] = reactiveSubscriber2StreamObserver(rSubscriber)
+  }
 
-  private[internal] implicit def StreamObserver2Subscriber[A](observer: StreamObserver[A])(
-      implicit S: Scheduler): Subscriber[A] =
-    streamObserver2MonixSubscriber.apply(observer)
+  private[internal] implicit class StreamObserverOps[A](private val observer: StreamObserver[A])
+      extends AnyVal {
+    def toSubscriber(implicit S: Scheduler): Subscriber[A] =
+      streamObserver2MonixSubscriber.apply(observer)
+  }
 
-  private[internal] implicit def StreamObserver2MonixOperator[Req, Res](
+  private[internal] def StreamObserver2MonixOperator[Req, Res](
       op: StreamObserver[Res] => StreamObserver[Req]): Operator[Req, Res] =
     (outputSubscriber: Subscriber[Res]) => {
       implicit val s: Scheduler = outputSubscriber.scheduler
 
-      op(outputSubscriber)
+      op(outputSubscriber.toStreamObserver).toSubscriber
     }
 
 }
