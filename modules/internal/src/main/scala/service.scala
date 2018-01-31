@@ -17,15 +17,12 @@
 package freestyle.rpc
 package internal
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
-
 import freestyle.free.internal.ScalametaUtil
 import freestyle.rpc.protocol._
 
 import scala.collection.immutable.Seq
 import scala.meta.Defn.{Class, Object, Trait}
 import scala.meta._
-import _root_.io.grpc.MethodDescriptor.Marshaller
 
 // $COVERAGE-OFF$
 object serviceImpl {
@@ -318,57 +315,6 @@ private[internal] object errors {
   val invalid = "Invalid use of `@service`"
   val abstractOnly =
     "`@service` can only annotate a trait or abstract class already annotated with @tagless"
-}
-
-object encoders {
-
-  object pbd {
-
-    import pbdirect._
-
-    implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader]: Marshaller[A] =
-      new Marshaller[A] {
-
-        override def parse(stream: InputStream): A =
-          Iterator.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray.pbTo[A]
-
-        override def stream(value: A): InputStream = new ByteArrayInputStream(value.toPB)
-
-      }
-  }
-
-  object avro {
-
-    import com.sksamuel.avro4s._
-
-    implicit val emptyMarshallers: Marshaller[Empty.type] = new Marshaller[Empty.type] {
-      override def parse(stream: InputStream) = Empty
-      override def stream(value: Empty.type)  = new ByteArrayInputStream(Array.empty)
-    }
-
-    implicit def avroMarshallers[A: SchemaFor: FromRecord: ToRecord]: Marshaller[A] =
-      new Marshaller[A] {
-
-        override def parse(stream: InputStream): A = {
-          val bytes: Array[Byte] =
-            Iterator.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray
-          val in: ByteArrayInputStream        = new ByteArrayInputStream(bytes)
-          val input: AvroBinaryInputStream[A] = AvroInputStream.binary[A](in)
-          input.iterator().toList.head
-        }
-
-        override def stream(value: A): InputStream = {
-          val baos: ByteArrayOutputStream       = new ByteArrayOutputStream()
-          val output: AvroBinaryOutputStream[A] = AvroOutputStream.binary[A](baos)
-          output.write(value)
-          output.close()
-
-          new ByteArrayInputStream(baos.toByteArray)
-        }
-
-      }
-  }
-
 }
 
 // $COVERAGE-ON$
