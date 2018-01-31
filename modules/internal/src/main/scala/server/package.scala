@@ -17,6 +17,7 @@
 package freestyle.rpc
 package internal
 
+import io.grpc.stub.StreamObserver
 import monix.execution.{Ack, Scheduler}
 import monix.reactive.{Observable, Observer, Pipe}
 import monix.reactive.observers.Subscriber
@@ -40,5 +41,13 @@ package object server {
       override def onComplete(): Unit              = in.onComplete()
       override def onNext(value: Req): Future[Ack] = in.onNext(value)
     }
+
+  import freestyle.rpc.internal.converters._
+
+  private[server] def transformStreamObserver[Req, Res](
+      transformer: Observable[Req] => Observable[Res],
+      responseObserver: StreamObserver[Res]
+  )(implicit S: Scheduler): StreamObserver[Req] =
+    transform(transformer, responseObserver.toSubscriber).toStreamObserver
 
 }

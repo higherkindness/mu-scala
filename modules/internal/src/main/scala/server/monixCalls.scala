@@ -47,7 +47,7 @@ object monixCalls {
     new ClientStreamingMethod[Req, Res] {
 
       override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] =
-        transform[Req, Res](
+        transformStreamObserver[Req, Res](
           inputObservable => Observable.fromEffect(f(inputObservable)),
           responseObserver
         )
@@ -57,20 +57,17 @@ object monixCalls {
       implicit S: Scheduler): ServerStreamingMethod[Req, Res] =
     new ServerStreamingMethod[Req, Res] {
 
-      override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit =
-        f(request).subscribe(responseObserver)
+      override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
+        f(request).subscribe(responseObserver.toSubscriber)
+        ()
+      }
     }
 
   def bidiStreamingMethod[F[_]: Effect, Req, Res](f: Observable[Req] => Observable[Res])(
       implicit S: Scheduler): BidiStreamingMethod[Req, Res] = new BidiStreamingMethod[Req, Res] {
 
     override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] =
-      Subscriber2StreamObserver {
-        transform[Req, Res](
-          (inputObservable: Observable[Req]) => f(inputObservable),
-          StreamObserver2Subscriber(responseObserver)
-        )
-      }
+      transformStreamObserver(inputObservable => f(inputObservable), responseObserver)
   }
 
   private[this] def completeObserver[A](observer: StreamObserver[A]): Either[Throwable, A] => Unit = {
