@@ -17,15 +17,12 @@
 package freestyle.rpc
 package internal
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
-
 import freestyle.free.internal.ScalametaUtil
 import freestyle.rpc.protocol._
 
 import scala.collection.immutable.Seq
 import scala.meta.Defn.{Class, Object, Trait}
 import scala.meta._
-import _root_.io.grpc.MethodDescriptor.Marshaller
 
 // $COVERAGE-OFF$
 object serviceImpl {
@@ -43,26 +40,16 @@ object serviceImpl {
     }
   }
 
-  def serviceExtras(name: Type.Name, alg: Defn): Term.Block = {
+  private[this] def serviceExtras(name: Type.Name, alg: Defn): Term.Block = {
     import utils._
     val serviceAlg = ServiceAlg(alg)
-    Term.Block(Seq(alg) ++ Seq(mkCompanion(name, enrich(serviceAlg, serviceAlg.innerImports))))
+    Term.Block(alg +: Seq(mkCompanion(name, enrich(serviceAlg, serviceAlg.innerImports))))
   }
 
-  def enrich(serviceAlg: ServiceAlg, companion: Object): Object = companion match {
-    case q"..$mods object $ename extends $template" =>
-      template match {
-        case template"{ ..$earlyInit } with ..$inits { $self => ..$stats }" =>
-          val enrichedTemplate =
-            template"{ ..$earlyInit } with ..$inits { $self => ..${enrich(serviceAlg, stats)} }"
-          q"..$mods object $ename extends $enrichedTemplate"
-      }
-  }
-
-  def enrich(serviceAlg: RPCService, members: Seq[Stat]): Seq[Stat] =
+  private[this] def enrich(serviceAlg: RPCService, members: Seq[Stat]): Seq[Stat] =
     members ++
       serviceAlg.methodDescriptors ++
-      Seq(serviceAlg.serviceBindings, serviceAlg.client, serviceAlg.clientInstance)
+      Seq(serviceAlg.serviceBindings, serviceAlg.clientClass, serviceAlg.clientInstance)
 }
 
 trait RPCService {
@@ -72,51 +59,59 @@ trait RPCService {
 
   def typeParam: Type.Param
 
-  val (algName, template) = defn match {
+  private[this] val (algName, template) = defn match {
     case c: Class => (c.name, c.templ)
     case t: Trait => (t.name, t.templ)
   }
 
-  val allServiceStats: List[Stat] = template.stats.toList.flatten
-
-  val rpcMethods: List[Stat] = allServiceStats.filter { s =>
-    s match {
-      case q"import ..$_" => false
-      case _              => true
+  private[this] val (imports, noImports) = {
+    def isImport(stat: Stat): Boolean = stat match {
+      case q"import ..$_" => true
+      case _              => false
     }
+
+    val allServiceStats: List[Stat] = template.stats.toList.flatten
+    allServiceStats.partition(isImport)
   }
 
-  val innerImports: List[Stat] = (allServiceStats.toSet -- rpcMethods).toList
+  val innerImports: List[Stat] = imports
 
-  val requests: List[RPCRequest] = buildRequests(algName, typeParam, rpcMethods)
+  private[this] val requests: List[RPCRequest] = buildRequests(algName, typeParam, noImports)
 
   val methodDescriptors: Seq[Defn.Val] = requests.map(_.methodDescriptor)
 
   val serviceBindings: Defn.Def = {
     val args: Seq[Term.Tuple] = requests.map(_.call)
     q"""
-       def bindService[F[_]: _root_.cats.effect.Effect](implicit algebra: $algName[F], S: _root_.monix.execution.Scheduler): _root_.io.grpc.ServerServiceDefinition =
+       def bindService[F[_]](implicit
+         F: _root_.cats.effect.Effect[F],
+         algebra: $algName[F],
+         S: _root_.monix.execution.Scheduler
+       ): _root_.io.grpc.ServerServiceDefinition =
            new _root_.freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(
       algName.value)}, ..$args).apply
      """
   }
 
-  val clientName: Type.Name = Type.Name("Client")
+  private[this] val clientName: Type.Name = Type.Name("Client")
+  private[this] val clientCtor            = clientName.ctorRef(Ctor.Name(clientName.value))
 
-  val wartSuppress =
-    mod"""@_root_.java.lang.SuppressWarnings(_root_.scala.Array("org.wartremover.warts.DefaultArguments"))"""
+  private[this] val wartSuppress = surpressWarts("DefaultArguments")
 
-  val client: Class = {
+  val clientClass: Class = {
     val clientDefs: Seq[Defn.Def] = requests.map(_.clientDef)
     q"""
        $wartSuppress
-       class $clientName[F[_]: _root_.cats.effect.Effect](channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)
-          (implicit S: _root_.monix.execution.Scheduler)
-          extends _root_.io.grpc.stub.AbstractStub[$clientName[F]](channel, options) {
+       class $clientName[F[_]](
+         channel: _root_.io.grpc.Channel,
+         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+       )(implicit
+         F: _root_.cats.effect.Effect[F],
+         S: _root_.monix.execution.Scheduler
+       ) extends _root_.io.grpc.stub.AbstractStub[$clientName[F]](channel, options) {
 
-          override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $clientName[F] = {
-              new ${clientName.ctorRef(Ctor.Name(clientName.value))}[F](channel, options)
-          }
+          override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $clientName[F] =
+              new $clientCtor[F](channel, options)
 
           ..$clientDefs
 
@@ -127,15 +122,18 @@ trait RPCService {
   val clientInstance =
     q"""
        $wartSuppress
-       def client[F[_]: _root_.cats.effect.Effect](
+       def client[F[_]](
          channelFor: _root_.freestyle.rpc.client.ManagedChannelFor,
          channelConfigList: List[_root_.freestyle.rpc.client.ManagedChannelConfig] = List(
            _root_.freestyle.rpc.client.UsePlaintext(true)),
-           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT)(
-         implicit S: _root_.monix.execution.Scheduler): $clientName[F] = {
+           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+       )(implicit
+         F: _root_.cats.effect.Effect[F],
+         S: _root_.monix.execution.Scheduler
+       ): $clientName[F] = {
          val managedChannelInterpreter =
            new _root_.freestyle.rpc.client.ManagedChannelInterpreter[F](channelFor, channelConfigList)
-         new ${clientName.ctorRef(Ctor.Name(clientName.value))}[F](managedChannelInterpreter.build(channelFor, channelConfigList), options)
+         new $clientCtor[F](managedChannelInterpreter.build(channelFor, channelConfigList), options)
        }
      """
 }
@@ -156,19 +154,17 @@ private[internal] case class RPCRequest(
     requestType: Type,
     responseType: Type) {
 
-  val wartSuppress =
-    mod"""@_root_.java.lang.SuppressWarnings(_root_.scala.Array("org.wartremover.warts.Null","org.wartremover.warts.ExplicitImplicitTypes"))"""
+  private[this] val descriptorName: Term.Name = name.copy(value = name.value + "MethodDescriptor")
 
-  val descriptorName: Term.Name = name.copy(value = name.value + "MethodDescriptor")
+  def methodDescriptor = {
+    val wartSuppress = utils.surpressWarts("Null", "ExplicitImplicitTypes")
+    val encodersImport: Import = serialization match {
+      case Protobuf =>
+        q"import _root_.freestyle.rpc.internal.encoders.pbd._"
+      case Avro =>
+        q"import _root_.freestyle.rpc.internal.encoders.avro._"
+    }
 
-  val encodersImport: Import = serialization match {
-    case Protobuf =>
-      q"import _root_.freestyle.rpc.internal.encoders.pbd._"
-    case Avro =>
-      q"import _root_.freestyle.rpc.internal.encoders.avro._"
-  }
-
-  def methodDescriptor =
     q"""
        $wartSuppress
        val ${Pat.Var.Term(descriptorName)}: _root_.io.grpc.MethodDescriptor[$requestType, $responseType] = {
@@ -186,52 +182,43 @@ private[internal] case class RPCRequest(
            .build()
        }
       """
-
-  def streamingImplType(tp: Type): Type = streamingImpl match {
-    case Some(Fs2Stream)       => targ"_root_.fs2.Stream[F, $tp]"
-    case Some(MonixObservable) => targ"_root_.monix.reactive.Observable[$tp]"
-    case None                  => targ"Unit"
   }
 
-  def clientCallsType(methodName: Term.Name): Term.Apply = streamingImpl match {
-    case Some(Fs2Stream) =>
-      q"_root_.freestyle.rpc.internal.client.fs2Calls.$methodName(input, $descriptorName, channel, options)"
-    case Some(MonixObservable) =>
-      q"_root_.freestyle.rpc.internal.client.monixCalls.$methodName(input, $descriptorName, channel, options)"
-    case _ =>
-      q"_root_.freestyle.rpc.internal.client.monixCalls.$methodName(input, $descriptorName, channel, options)"
+  val clientDef: Defn.Def = {
+    def streamingImplType(tp: Type): Type = utils.StreamImpl.resultTypeFor(streamingImpl)(tp)
+
+    def clientCallsType(methodName: Term.Name): Term.Apply = {
+      val calls = utils.StreamImpl.clientCalls(streamingImpl.getOrElse(MonixObservable))
+      q"$calls.$methodName(input, $descriptorName, channel, options)"
+    }
+
+    streamingType match {
+      case Some(RequestStreaming) =>
+        q"""
+           def $name(input: ${streamingImplType(requestType)}): F[$responseType] =
+             ${clientCallsType(q"clientStreaming")}
+         """
+      case Some(ResponseStreaming) =>
+        q"""
+           def $name(input: $requestType): ${streamingImplType(responseType)} =
+             ${clientCallsType(q"serverStreaming")}
+         """
+      case Some(BidirectionalStreaming) =>
+        q"""
+           def $name(input: ${streamingImplType(requestType)}): ${streamingImplType(responseType)} =
+             ${clientCallsType(q"bidiStreaming")}
+         """
+      case None =>
+        q"""
+           def $name(input: $requestType): F[$responseType] =
+             ${clientCallsType(q"unary")}
+        """
+    }
   }
 
-  val clientDef: Defn.Def = streamingType match {
-    case Some(RequestStreaming) =>
-      q"""
-         def $name(input: ${streamingImplType(requestType)}): F[$responseType] =
-           ${clientCallsType(q"clientStreaming")}
-       """
-    case Some(ResponseStreaming) =>
-      q"""
-         def $name(input: $requestType): ${streamingImplType(responseType)} =
-           ${clientCallsType(q"serverStreaming")}
-       """
-    case Some(BidirectionalStreaming) =>
-      q"""
-         def $name(input: ${streamingImplType(requestType)}): ${streamingImplType(responseType)} =
-           ${clientCallsType(q"bidiStreaming")}
-       """
-    case None =>
-      q"""
-         def $name(input: $requestType): F[$responseType] =
-           ${clientCallsType(q"unary")}
-      """
-  }
-
-  def serverCallsType(methodName: Term.Name): Term.Apply = streamingImpl match {
-    case Some(Fs2Stream) =>
-      q"_root_.freestyle.rpc.internal.server.fs2Calls.$methodName(algebra.$name)"
-    case Some(MonixObservable) =>
-      q"_root_.freestyle.rpc.internal.server.monixCalls.$methodName(algebra.$name)"
-    case _ =>
-      q"_root_.freestyle.rpc.internal.server.monixCalls.$methodName(algebra.$name)"
+  private[this] def serverCallsType(methodName: Term.Name): Term.Apply = {
+    val calls = utils.StreamImpl.serverCalls(streamingImpl.getOrElse(MonixObservable))
+    q"$calls.$methodName(algebra.$name)"
   }
 
   val call: Term.Tuple = {
@@ -251,13 +238,15 @@ private[internal] case class RPCRequest(
 
 private[internal] object utils {
 
+  def surpressWarts(warts: String*): Mod.Annot = {
+    val quote       = "\""
+    val wartsString = warts.map("org.wartremover.warts." + _).mkString(quote, quote + ",", quote)
+    mod"""@_root_.java.lang.SuppressWarnings(_root_.scala.Array($wartsString))"""
+  }
+
   def mkCompanion(name: Type.Name, stats: Seq[Stat]): Object = {
-    val prot = q"""@_root_.java.lang.SuppressWarnings(_root_.scala.Array(
-               "org.wartremover.warts.Any",
-               "org.wartremover.warts.NonUnitStatements",
-               "org.wartremover.warts.StringPlusAny",
-               "org.wartremover.warts.Throw"))
-               object X {}"""
+    val warts = surpressWarts("Any", "NonUnitStatements", "StringPlusAny", "Throw")
+    val prot  = q"$warts object X {}"
 
     prot.copy(
       name = Term.Name(name.value),
@@ -274,28 +263,47 @@ private[internal] object utils {
 
   // format: OFF
   def buildRequests(algName: Type.Name, typeParam: Type.Param, stats: List[Stat]): List[RPCRequest] = stats.collect {
-    case q"@rpc($s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): Stream[$resTypeParam, $response]" =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(ResponseStreaming), Some(Fs2Stream), paramTpe(request), response)
+    case q"@rpc($s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): ${StreamImpl(impl, response)}" =>
+      RPCRequest(algName, name, utils.serializationType(s), Some(ResponseStreaming), Some(impl), paramTpe(request), response)
 
-    case q"@rpc($s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): Observable[$response]" =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(ResponseStreaming), Some(MonixObservable), paramTpe(request), response)
+    case q"@rpc($s) @stream[RequestStreaming.type] def $name[..$tparams]($paranName: ${Some(StreamImpl(impl, request))}): $typeParam[$response]" =>
+      RPCRequest(algName, name, utils.serializationType(s), Some(RequestStreaming), Some(impl), request, response)
 
-    case q"@rpc($s) @stream[RequestStreaming.type] def $name[..$tparams]($paranName: Stream[$reqTypeParam, $request]): $typeParam[$response]" =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(RequestStreaming), Some(Fs2Stream), request, response)
-
-    case q"@rpc($s) @stream[RequestStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): $typeParam[$response]" =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(RequestStreaming), Some(MonixObservable), request, response)
-
-    case q"@rpc($s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: Stream[$reqTypeParam, $request]): Stream[$resTypeParam, $response]" =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(BidirectionalStreaming), Some(Fs2Stream), request, response)
-
-    case q"@rpc($s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: Observable[$request]): Observable[$response]" =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(BidirectionalStreaming), Some(MonixObservable), request, response)
+    case q"@rpc($s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: ${Some(StreamImpl(implReq, request))}): ${StreamImpl(implResp, response)}" if implReq == implResp =>
+      RPCRequest(algName, name, utils.serializationType(s), Some(BidirectionalStreaming), Some(implReq), request, response)
 
     case q"@rpc($s) def $name[..$tparams]($request): $typeParam[$response]" =>
       RPCRequest(algName, name, utils.serializationType(s), None, None, paramTpe(request), response)
   }
   // format: ON
+
+  private[internal] object StreamImpl {
+    def unapply(tpe: Type): Option[(StreamingImpl, Type)] =
+      tpe match {
+        case t"Stream[${_}, $resultTpe]" => Some((Fs2Stream, resultTpe))
+        case t"Observable[$resultTpe]"   => Some((MonixObservable, resultTpe))
+        case _                           => None
+      }
+
+    def resultTypeFor(streamingImpl: Option[StreamingImpl])(tp: Type): Type =
+      streamingImpl match {
+        case Some(Fs2Stream)       => targ"_root_.fs2.Stream[F, $tp]"
+        case Some(MonixObservable) => targ"_root_.monix.reactive.Observable[$tp]"
+        case None                  => targ"Unit"
+      }
+
+    def clientCalls(streamingImpl: StreamingImpl): Term.Select =
+      streamingImpl match {
+        case Fs2Stream       => q"_root_.freestyle.rpc.internal.client.fs2Calls"
+        case MonixObservable => q"_root_.freestyle.rpc.internal.client.monixCalls"
+      }
+
+    def serverCalls(streamingImpl: StreamingImpl): Term.Select =
+      streamingImpl match {
+        case Fs2Stream       => q"_root_.freestyle.rpc.internal.server.fs2Calls"
+        case MonixObservable => q"_root_.freestyle.rpc.internal.server.monixCalls"
+      }
+  }
 
   private[internal] def methodType(s: Option[StreamingType]): Term.Select = {
     val suffix = s match {
@@ -318,57 +326,6 @@ private[internal] object errors {
   val invalid = "Invalid use of `@service`"
   val abstractOnly =
     "`@service` can only annotate a trait or abstract class already annotated with @tagless"
-}
-
-object encoders {
-
-  object pbd {
-
-    import pbdirect._
-
-    implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader]: Marshaller[A] =
-      new Marshaller[A] {
-
-        override def parse(stream: InputStream): A =
-          Iterator.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray.pbTo[A]
-
-        override def stream(value: A): InputStream = new ByteArrayInputStream(value.toPB)
-
-      }
-  }
-
-  object avro {
-
-    import com.sksamuel.avro4s._
-
-    implicit val emptyMarshallers: Marshaller[Empty.type] = new Marshaller[Empty.type] {
-      override def parse(stream: InputStream) = Empty
-      override def stream(value: Empty.type)  = new ByteArrayInputStream(Array.empty)
-    }
-
-    implicit def avroMarshallers[A: SchemaFor: FromRecord: ToRecord]: Marshaller[A] =
-      new Marshaller[A] {
-
-        override def parse(stream: InputStream): A = {
-          val bytes: Array[Byte] =
-            Iterator.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray
-          val in: ByteArrayInputStream        = new ByteArrayInputStream(bytes)
-          val input: AvroBinaryInputStream[A] = AvroInputStream.binary[A](in)
-          input.iterator().toList.head
-        }
-
-        override def stream(value: A): InputStream = {
-          val baos: ByteArrayOutputStream       = new ByteArrayOutputStream()
-          val output: AvroBinaryOutputStream[A] = AvroOutputStream.binary[A](baos)
-          output.write(value)
-          output.close()
-
-          new ByteArrayInputStream(baos.toByteArray)
-        }
-
-      }
-  }
-
 }
 
 // $COVERAGE-ON$
