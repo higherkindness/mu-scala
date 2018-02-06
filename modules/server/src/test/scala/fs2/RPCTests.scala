@@ -111,4 +111,60 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   }
 
+  "frees-rpc client with fs2.Stream as streaming implementation and compression enabled" should {
+
+    "be able to run unary services" in {
+
+      freesRPCServiceClient.unaryCompressed(a1).unsafeRunSync() shouldBe c1
+
+    }
+
+    "be able to run server streaming services" in {
+
+      freesRPCServiceClient
+        .serverStreamingCompressed(b1)
+        .compile
+        .toList
+        .unsafeRunSync shouldBe cList
+
+    }
+
+    "be able to run client streaming services" in {
+
+      freesRPCServiceClient
+        .clientStreamingCompressed(Stream.fromIterator[ConcurrentMonad, A](aList.iterator))
+        .unsafeRunSync() shouldBe dResult33
+    }
+
+    "be able to run client bidirectional streaming services" in {
+
+      freesRPCServiceClient
+        .biStreamingCompressed(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
+        .compile
+        .toList
+        .unsafeRunSync()
+        .distinct shouldBe eList
+
+    }
+
+    "be able to run multiple rpc services" in {
+
+      val tuple =
+        (
+          freesRPCServiceClient.unaryCompressed(a1),
+          freesRPCServiceClient.serverStreamingCompressed(b1),
+          freesRPCServiceClient.clientStreamingCompressed(
+            Stream.fromIterator[ConcurrentMonad, A](aList.iterator)),
+          freesRPCServiceClient.biStreamingCompressed(
+            Stream.fromIterator[ConcurrentMonad, E](eList.iterator)))
+
+      tuple._1.unsafeRunSync() shouldBe c1
+      tuple._2.compile.toList.unsafeRunSync() shouldBe cList
+      tuple._3.unsafeRunSync() shouldBe dResult33
+      tuple._4.compile.toList.unsafeRunSync().distinct shouldBe eList
+
+    }
+
+  }
+
 }

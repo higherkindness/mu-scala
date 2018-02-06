@@ -34,41 +34,54 @@ object monixCalls {
 
   import freestyle.rpc.internal.converters._
 
-  def unaryMethod[F[_]: Effect, Req, Res](f: Req => F[Res]): UnaryMethod[Req, Res] =
+  def unaryMethod[F[_]: Effect, Req, Res](
+      f: Req => F[Res],
+      maybeCompression: Option[String]): UnaryMethod[Req, Res] =
     new UnaryMethod[Req, Res] {
-      override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit =
+      override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
+        addCompression(responseObserver, maybeCompression)
         Effect[F]
           .runAsync(f(request))(either => IO(completeObserver(responseObserver)(either)))
           .unsafeRunAsync(_ => ())
+      }
     }
 
-  def clientStreamingMethod[F[_]: Effect, Req, Res](f: Observable[Req] => F[Res])(
-      implicit S: Scheduler): ClientStreamingMethod[Req, Res] =
+  def clientStreamingMethod[F[_]: Effect, Req, Res](
+      f: Observable[Req] => F[Res],
+      maybeCompression: Option[String])(implicit S: Scheduler): ClientStreamingMethod[Req, Res] =
     new ClientStreamingMethod[Req, Res] {
 
-      override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] =
+      override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
+        addCompression(responseObserver, maybeCompression)
         transformStreamObserver[Req, Res](
           inputObservable => Observable.fromEffect(f(inputObservable)),
           responseObserver
         )
+      }
     }
 
-  def serverStreamingMethod[F[_]: Effect, Req, Res](f: Req => Observable[Res])(
-      implicit S: Scheduler): ServerStreamingMethod[Req, Res] =
+  def serverStreamingMethod[F[_]: Effect, Req, Res](
+      f: Req => Observable[Res],
+      maybeCompression: Option[String])(implicit S: Scheduler): ServerStreamingMethod[Req, Res] =
     new ServerStreamingMethod[Req, Res] {
 
       override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
+        addCompression(responseObserver, maybeCompression)
         f(request).subscribe(responseObserver.toSubscriber)
         ()
       }
     }
 
-  def bidiStreamingMethod[F[_]: Effect, Req, Res](f: Observable[Req] => Observable[Res])(
-      implicit S: Scheduler): BidiStreamingMethod[Req, Res] = new BidiStreamingMethod[Req, Res] {
+  def bidiStreamingMethod[F[_]: Effect, Req, Res](
+      f: Observable[Req] => Observable[Res],
+      maybeCompression: Option[String])(implicit S: Scheduler): BidiStreamingMethod[Req, Res] =
+    new BidiStreamingMethod[Req, Res] {
 
-    override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] =
-      transformStreamObserver(inputObservable => f(inputObservable), responseObserver)
-  }
+      override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
+        addCompression(responseObserver, maybeCompression)
+        transformStreamObserver(inputObservable => f(inputObservable), responseObserver)
+      }
+    }
 
   private[this] def completeObserver[A](observer: StreamObserver[A]): Either[Throwable, A] => Unit = {
     case Right(value) =>

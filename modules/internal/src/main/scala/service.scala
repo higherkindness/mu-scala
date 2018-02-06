@@ -149,6 +149,7 @@ private[internal] case class RPCRequest(
     algName: Type.Name,
     name: Term.Name,
     serialization: SerializationType,
+    compression: CompressionType,
     streamingType: Option[StreamingType],
     streamingImpl: Option[StreamingImpl],
     requestType: Type,
@@ -218,7 +219,11 @@ private[internal] case class RPCRequest(
 
   private[this] def serverCallsType(methodName: Term.Name): Term.Apply = {
     val calls = utils.StreamImpl.serverCalls(streamingImpl.getOrElse(MonixObservable))
-    q"$calls.$methodName(algebra.$name)"
+    val maybeAlg = compression match {
+      case Identity => q"None"
+      case Gzip     => q"""Some("gzip")"""
+    }
+    q"$calls.$methodName(algebra.$name, $maybeAlg)"
   }
 
   val call: Term.Tuple = {
@@ -263,17 +268,17 @@ private[internal] object utils {
 
   // format: OFF
   def buildRequests(algName: Type.Name, typeParam: Type.Param, stats: List[Stat]): List[RPCRequest] = stats.collect {
-    case q"@rpc($s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): ${StreamImpl(impl, response)}" =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(ResponseStreaming), Some(impl), paramTpe(request), response)
+    case q"@rpc(..$s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): ${StreamImpl(impl, response)}" =>
+      RPCRequest(algName, name, utils.serializationType(s.head), utils.compressionType(s.lastOption), Some(ResponseStreaming), Some(impl), paramTpe(request), response)
 
-    case q"@rpc($s) @stream[RequestStreaming.type] def $name[..$tparams]($paranName: ${Some(StreamImpl(impl, request))}): $typeParam[$response]" =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(RequestStreaming), Some(impl), request, response)
+    case q"@rpc(..$s) @stream[RequestStreaming.type] def $name[..$tparams]($paranName: ${Some(StreamImpl(impl, request))}): $typeParam[$response]" =>
+      RPCRequest(algName, name, utils.serializationType(s.head), utils.compressionType(s.lastOption), Some(RequestStreaming), Some(impl), request, response)
 
-    case q"@rpc($s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: ${Some(StreamImpl(implReq, request))}): ${StreamImpl(implResp, response)}" if implReq == implResp =>
-      RPCRequest(algName, name, utils.serializationType(s), Some(BidirectionalStreaming), Some(implReq), request, response)
+    case q"@rpc(..$s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: ${Some(StreamImpl(implReq, request))}): ${StreamImpl(implResp, response)}" if implReq == implResp =>
+      RPCRequest(algName, name, utils.serializationType(s.head), utils.compressionType(s.lastOption), Some(BidirectionalStreaming), Some(implReq), request, response)
 
-    case q"@rpc($s) def $name[..$tparams]($request): $typeParam[$response]" =>
-      RPCRequest(algName, name, utils.serializationType(s), None, None, paramTpe(request), response)
+    case q"@rpc(..$s) def $name[..$tparams]($request): $typeParam[$response]" =>
+      RPCRequest(algName, name, utils.serializationType(s.head), utils.compressionType(s.lastOption), None, None, paramTpe(request), response)
   }
   // format: ON
 
@@ -319,6 +324,13 @@ private[internal] object utils {
     case q"Protobuf" => Protobuf
     case q"Avro"     => Avro
   }
+
+  private[internal] def compressionType(s: Option[Term.Arg]): CompressionType =
+    s flatMap {
+      case q"Identity" => Some(Identity)
+      case q"Gzip"     => Some(Gzip)
+      case _           => None
+    } getOrElse Identity
 
 }
 
