@@ -54,10 +54,10 @@ trait CommonUtils {
     ChannelForAddress(SC.host, port)
 
   def createServerConf(grpcConfigs: List[GrpcConfig]): ServerW =
-    ServerW(SC.port, grpcConfigs)
+    ServerW.default(SC.port, grpcConfigs)
 
   def createServerConfOnRandomPort(grpcConfigs: List[GrpcConfig]): ServerW =
-    ServerW(pickUnusedPort, grpcConfigs)
+    ServerW.default(pickUnusedPort, grpcConfigs)
 
   def serverStart[F[_]: Functor](implicit S: GrpcServer[F]): F[Unit] =
     S.start().void
