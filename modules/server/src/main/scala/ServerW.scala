@@ -15,7 +15,19 @@
  */
 
 package freestyle.rpc
-package client
-package netty
+package server
 
-class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
+import freestyle.rpc.server.netty.{NettyServerConfig, NettyServerConfigBuilder}
+import io.grpc.Server
+
+case class ServerW(server: Server)
+
+object ServerW {
+
+  def apply(port: Int, configList: List[GrpcConfig]): ServerW =
+    ServerW(SServerBuilder(port, configList).build)
+
+  def apply(channelFor: ChannelFor, configList: List[NettyServerConfig]): ServerW =
+    ServerW(NettyServerConfigBuilder(channelFor, configList).build)
+
+}

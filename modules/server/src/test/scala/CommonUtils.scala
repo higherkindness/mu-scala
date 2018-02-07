@@ -21,7 +21,6 @@ import java.net.ServerSocket
 import cats.Functor
 import cats.syntax.functor._
 import freestyle.rpc.common._
-import freestyle.rpc.client._
 import freestyle.rpc.server._
 
 import scala.util.{Failure, Success, Try}
@@ -49,10 +48,10 @@ trait CommonUtils {
     val dResult33: D = D(33)
   }
 
-  def createManagedChannelFor: ManagedChannelFor = ManagedChannelForAddress(SC.host, SC.port)
+  def createChannelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
 
-  def createManagedChannelForPort(port: Int): ManagedChannelFor =
-    ManagedChannelForAddress(SC.host, port)
+  def createChannelForPort(port: Int): ChannelFor =
+    ChannelForAddress(SC.host, port)
 
   def createServerConf(grpcConfigs: List[GrpcConfig]): ServerW =
     ServerW(SC.port, grpcConfigs)
@@ -71,7 +70,7 @@ trait CommonUtils {
 
   implicit val S: monix.execution.Scheduler = monix.execution.Scheduler.Implicits.global
 
-  private[this] def pickUnusedPort: Int =
+  val pickUnusedPort: Int =
     Try {
       val serverSocket: ServerSocket = new ServerSocket(0)
       val port: Int                  = serverSocket.getLocalPort

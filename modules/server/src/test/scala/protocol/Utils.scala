@@ -352,7 +352,7 @@ object Utils extends CommonUtils {
     //////////////////////////////////
 
     implicit val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
-      RPCService.client[ConcurrentMonad](createManagedChannelFor)
+      RPCService.client[ConcurrentMonad](createChannelFor)
 
   }
 

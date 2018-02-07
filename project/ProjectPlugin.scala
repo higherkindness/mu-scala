@@ -153,6 +153,7 @@ object ProjectPlugin extends AutoPlugin {
         GitHubIssuesBadge.apply
       )
     ) ++ Seq(
+      fork in Test := true,
       addCompilerPlugin(%%("scalameta-paradise") cross CrossVersion.full),
       libraryDependencies ++= commonDeps ++ Seq(%%("scalameta", V.scalameta)),
       scalacOptions ++= Seq("-Ywarn-unused-import", "-Xplugin-require:macroparadise"),

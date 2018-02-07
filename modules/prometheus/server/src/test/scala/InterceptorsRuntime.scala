@@ -56,7 +56,7 @@ case class InterceptorsRuntime(
   //////////////////////////////////
 
   implicit lazy val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
-    RPCService.client[ConcurrentMonad](createManagedChannelForPort(serverW.port))
+    RPCService.client[ConcurrentMonad](createChannelForPort(pickUnusedPort))
 
   implicit lazy val freesRPCServiceClientHandler: FreesRPCServiceClientHandler[ConcurrentMonad] =
     new FreesRPCServiceClientHandler[ConcurrentMonad]

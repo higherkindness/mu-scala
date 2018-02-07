@@ -16,5 +16,6 @@
 
 package freestyle.rpc
 package client
+package okhttp
 
 class ManagedChannelInterpreterOkHttpTests extends ManagedChannelInterpreterTests

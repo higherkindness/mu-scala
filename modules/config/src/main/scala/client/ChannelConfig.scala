@@ -33,13 +33,12 @@ trait ChannelConfig {
   val defaultHost: String = "localhost"
   val defaultPort: Int    = freestyle.rpc.server.defaultPort
 
-  def loadChannelAddress(hostPath: String, portPath: String): FS[ManagedChannelForAddress] =
+  def loadChannelAddress(hostPath: String, portPath: String): FS[ChannelForAddress] =
     configM.load map (config =>
-      ManagedChannelForAddress(
+      ChannelForAddress(
         config.string(hostPath).getOrElse(defaultHost),
         config.int(portPath).getOrElse(defaultPort)))
 
-  def loadChannelTarget(targetPath: String): FS[ManagedChannelForTarget] =
-    configM.load map (config =>
-      ManagedChannelForTarget(config.string(targetPath).getOrElse("target")))
+  def loadChannelTarget(targetPath: String): FS[ChannelForTarget] =
+    configM.load map (config => ChannelForTarget(config.string(targetPath).getOrElse("target")))
 }

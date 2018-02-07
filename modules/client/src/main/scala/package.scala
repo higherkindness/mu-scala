@@ -27,16 +27,16 @@ package object client {
   type ManagedChannelOps[F[_], A] = Kleisli[F, ManagedChannel, A]
 
   class ManagedChannelInterpreter[F[_]](
-      initConfig: ManagedChannelFor,
+      initConfig: ChannelFor,
       configList: List[ManagedChannelConfig])
       extends (Kleisli[F, ManagedChannel, ?] ~> F) {
 
-    def build(
-        initConfig: ManagedChannelFor,
-        configList: List[ManagedChannelConfig]): ManagedChannel = {
+    def build(initConfig: ChannelFor, configList: List[ManagedChannelConfig]): ManagedChannel = {
       val builder: ManagedChannelBuilder[_] = initConfig match {
-        case ManagedChannelForAddress(name, port) => ManagedChannelBuilder.forAddress(name, port)
-        case ManagedChannelForTarget(target)      => ManagedChannelBuilder.forTarget(target)
+        case ChannelForAddress(name, port) => ManagedChannelBuilder.forAddress(name, port)
+        case ChannelForTarget(target)      => ManagedChannelBuilder.forTarget(target)
+        case e =>
+          throw new IllegalArgumentException(s"ManagedChannel not supported for $e")
       }
 
       configList

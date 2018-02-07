@@ -32,7 +32,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
     "build a io.grpc.ManagedChannel based on the specified configuration, for an address" in {
 
-      val channelFor: ManagedChannelFor = ManagedChannelForAddress(SC.host, SC.port)
+      val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
 
       val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
 
@@ -46,7 +46,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
     "build a io.grpc.ManagedChannel based on the specified configuration, for an target" in {
 
-      val channelFor: ManagedChannelFor = ManagedChannelForTarget(SC.host)
+      val channelFor: ChannelFor = ChannelForTarget(SC.host)
 
       val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
 
@@ -60,7 +60,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
     "apply should work as expected" in {
 
-      val channelFor: ManagedChannelFor = ManagedChannelForTarget(SC.host)
+      val channelFor: ChannelFor = ChannelForTarget(SC.host)
 
       val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
 

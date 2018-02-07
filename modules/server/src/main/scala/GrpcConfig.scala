@@ -57,9 +57,3 @@ final case class SServerBuilder(port: Int, grpcConfigList: List[GrpcConfig] = Ni
   }
 
 }
-
-case class ServerW(port: Int, configList: List[GrpcConfig]) {
-
-  lazy val server: Server = SServerBuilder(port, configList).build
-
-}

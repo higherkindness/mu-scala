@@ -21,10 +21,6 @@ import java.util.concurrent.{Executor, TimeUnit}
 
 import io.grpc._
 
-sealed trait ManagedChannelFor                               extends Product with Serializable
-case class ManagedChannelForAddress(host: String, port: Int) extends ManagedChannelFor
-case class ManagedChannelForTarget(target: String)           extends ManagedChannelFor
-
 sealed trait ManagedChannelConfig                                     extends Product with Serializable
 case object DirectExecutor                                            extends ManagedChannelConfig
 case class SetExecutor(executor: Executor)                            extends ManagedChannelConfig

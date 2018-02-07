@@ -49,7 +49,7 @@ object serviceImpl {
   private[this] def enrich(serviceAlg: RPCService, members: Seq[Stat]): Seq[Stat] =
     members ++
       serviceAlg.methodDescriptors ++
-      Seq(serviceAlg.serviceBindings, serviceAlg.clientClass, serviceAlg.clientInstance)
+      Seq(serviceAlg.serviceBindings, serviceAlg.clientClass) ++ serviceAlg.clientInstance
 }
 
 trait RPCService {
@@ -119,14 +119,14 @@ trait RPCService {
      """
   }
 
-  val clientInstance =
+  val clientInstance = Seq(
     q"""
        $wartSuppress
        def client[F[_]](
-         channelFor: _root_.freestyle.rpc.client.ManagedChannelFor,
+         channelFor: _root_.freestyle.rpc.ChannelFor,
          channelConfigList: List[_root_.freestyle.rpc.client.ManagedChannelConfig] = List(
            _root_.freestyle.rpc.client.UsePlaintext(true)),
-           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
        )(implicit
          F: _root_.cats.effect.Effect[F],
          S: _root_.monix.execution.Scheduler
@@ -134,8 +134,18 @@ trait RPCService {
          val managedChannelInterpreter =
            new _root_.freestyle.rpc.client.ManagedChannelInterpreter[F](channelFor, channelConfigList)
          new $clientCtor[F](managedChannelInterpreter.build(channelFor, channelConfigList), options)
-       }
+       }""",
+    q"""
+       $wartSuppress
+       def clientFromChannel[F[_]](
+         channel: _root_.io.grpc.Channel,
+         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+       )(implicit
+         F: _root_.cats.effect.Effect[F],
+         S: _root_.monix.execution.Scheduler
+        ): $clientName[F] = new $clientCtor[F](channel, options)
      """
+  )
 }
 
 case class ServiceAlg(defn: Defn) extends RPCService {
@@ -244,9 +254,10 @@ private[internal] case class RPCRequest(
 private[internal] object utils {
 
   def surpressWarts(warts: String*): Mod.Annot = {
-    val quote       = "\""
-    val wartsString = warts.map("org.wartremover.warts." + _).mkString(quote, quote + ",", quote)
-    mod"""@_root_.java.lang.SuppressWarnings(_root_.scala.Array($wartsString))"""
+    val wartsString = warts.toList.map(w => "org.wartremover.warts." + w)
+    val argList     = wartsString.map(ws => arg"$ws")
+
+    mod"""@_root_.java.lang.SuppressWarnings(_root_.scala.Array(..$argList))"""
   }
 
   def mkCompanion(name: Type.Name, stats: Seq[Stat]): Object = {

@@ -15,7 +15,11 @@
  */
 
 package freestyle.rpc
-package client
-package netty
 
-class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
+import java.net.SocketAddress
+
+sealed trait ChannelFor                                          extends Product with Serializable
+case class ChannelForPort(port: Int)                             extends ChannelFor
+case class ChannelForAddress(host: String, port: Int)            extends ChannelFor
+case class ChannelForSocketAddress(serverAddress: SocketAddress) extends ChannelFor
+case class ChannelForTarget(target: String)                      extends ChannelFor
