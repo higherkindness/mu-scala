@@ -25,4 +25,9 @@ package object config {
       implicit SC: ServerConfig[F]): F[ServerW] =
     SC.buildServer(portPath, configList)
 
+  def BuildNettyServerFromConfig[F[_]: Functor](
+      portPath: String,
+      configList: List[GrpcConfig] = Nil)(implicit SC: ServerConfig[F]): F[ServerW] =
+    SC.buildNettyServer(portPath, configList)
+
 }

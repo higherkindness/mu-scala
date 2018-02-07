@@ -22,7 +22,7 @@ import java.util.concurrent.Executor
 
 import io.grpc._
 
-sealed trait GrpcConfig                                                        extends Product with Serializable
+trait GrpcConfig                                                               extends Product with Serializable
 case object DirectExecutor                                                     extends GrpcConfig
 final case class SetExecutor(executor: Executor)                               extends GrpcConfig
 final case class AddService(service: ServerServiceDefinition)                  extends GrpcConfig
@@ -36,24 +36,6 @@ final case class SetCompressorRegistry(registry: CompressorRegistry)           e
 
 final case class SServerBuilder(port: Int, grpcConfigList: List[GrpcConfig] = Nil) {
 
-  protected[this] lazy val sb: ServerBuilder[_ <: ServerBuilder[_]] = ServerBuilder.forPort(port)
-
-  def build: Server = {
-    grpcConfigList
-      .foldLeft[ServerBuilder[_ <: ServerBuilder[_]]](sb)((acc, option) =>
-        option match {
-          case DirectExecutor                  => acc.directExecutor()
-          case SetExecutor(ex)                 => acc.executor(ex)
-          case AddService(srv)                 => acc.addService(srv)
-          case AddBindableService(srv)         => acc.addService(srv)
-          case AddTransportFilter(filter)      => acc.addTransportFilter(filter)
-          case AddStreamTracerFactory(factory) => acc.addStreamTracerFactory(factory)
-          case SetFallbackHandlerRegistry(fr)  => acc.fallbackHandlerRegistry(fr)
-          case UseTransportSecurity(cc, pk)    => acc.useTransportSecurity(cc, pk)
-          case SetDecompressorRegistry(dr)     => acc.decompressorRegistry(dr)
-          case SetCompressorRegistry(cr)       => acc.compressorRegistry(cr)
-      })
-      .build()
-  }
-
+  def build[SB <: ServerBuilder[SB]]: Server =
+    buildGrpcConfig[SB](ServerBuilder.forPort(port).asInstanceOf[SB], grpcConfigList)
 }

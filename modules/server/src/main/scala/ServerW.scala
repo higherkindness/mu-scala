@@ -17,7 +17,7 @@
 package freestyle.rpc
 package server
 
-import freestyle.rpc.server.netty.{NettyServerConfig, NettyServerConfigBuilder}
+import freestyle.rpc.server.netty.NettyServerConfigBuilder
 import io.grpc.Server
 
 case class ServerW(server: Server)
@@ -27,7 +27,7 @@ object ServerW {
   def apply(port: Int, configList: List[GrpcConfig]): ServerW =
     ServerW(SServerBuilder(port, configList).build)
 
-  def apply(channelFor: ChannelFor, configList: List[NettyServerConfig]): ServerW =
+  def apply(channelFor: ChannelFor, configList: List[GrpcConfig]): ServerW =
     ServerW(NettyServerConfigBuilder(channelFor, configList).build)
 
 }

@@ -18,7 +18,9 @@ package freestyle.rpc
 
 import cats.data.Kleisli
 import cats.~>
-import io.grpc._
+import freestyle.rpc.server.netty._
+import io.grpc.{ServerBuilder, _}
+import io.grpc.netty.NettyServerBuilder
 
 package object server {
 
@@ -31,5 +33,54 @@ package object server {
     override def apply[B](fa: Kleisli[F, Server, B]): F[B] =
       fa(server)
 
+  }
+
+  def buildGrpcConfig[SB <: ServerBuilder[SB]](acc: SB, configList: List[GrpcConfig]): Server = {
+    configList
+      .foldLeft(acc) { (acc, cfg) =>
+        SBuilder(acc)(cfg)
+      }
+      .build()
+  }
+
+  def buildNettyConfig(acc: NettyServerBuilder, configList: List[GrpcConfig]): Server = {
+    configList
+      .foldLeft(acc) { (acc, cfg) =>
+        (SBuilder(acc) orElse NettySBuilder(acc))(cfg)
+      }
+      .build()
+  }
+
+  def SBuilder[SB <: ServerBuilder[SB]](sb: SB): PartialFunction[GrpcConfig, SB] = {
+    case DirectExecutor                  => sb.directExecutor()
+    case SetExecutor(ex)                 => sb.executor(ex)
+    case AddService(srv)                 => sb.addService(srv)
+    case AddBindableService(srv)         => sb.addService(srv)
+    case AddTransportFilter(filter)      => sb.addTransportFilter(filter)
+    case AddStreamTracerFactory(factory) => sb.addStreamTracerFactory(factory)
+    case SetFallbackHandlerRegistry(fr)  => sb.fallbackHandlerRegistry(fr)
+    case UseTransportSecurity(cc, pk)    => sb.useTransportSecurity(cc, pk)
+    case SetDecompressorRegistry(dr)     => sb.decompressorRegistry(dr)
+    case SetCompressorRegistry(cr)       => sb.compressorRegistry(cr)
+  }
+
+  def NettySBuilder(nsb: NettyServerBuilder): PartialFunction[GrpcConfig, NettyServerBuilder] = {
+    case ChannelType(channelType)             => nsb.channelType(channelType)
+    case WithChildOption(option, value)       => nsb.withChildOption(option, value)
+    case BossEventLoopGroup(group)            => nsb.bossEventLoopGroup(group)
+    case WorkerEventLoopGroup(group)          => nsb.workerEventLoopGroup(group)
+    case SetSslContext(sslContext)            => nsb.sslContext(sslContext)
+    case SetProtocolNegotiator(pn)            => nsb.protocolNegotiator(pn)
+    case MaxConcurrentCallsPerConnection(mc)  => nsb.maxConcurrentCallsPerConnection(mc)
+    case FlowControlWindow(flowControlWindow) => nsb.flowControlWindow(flowControlWindow)
+    case MaxMessageSize(maxMessageSize)       => nsb.maxMessageSize(maxMessageSize)
+    case MaxHeaderListSize(maxHeaderListSize) => nsb.maxHeaderListSize(maxHeaderListSize)
+    case KeepAliveTime(kat, timeUnit)         => nsb.keepAliveTime(kat, timeUnit)
+    case KeepAliveTimeout(kato, timeUnit)     => nsb.keepAliveTimeout(kato, timeUnit)
+    case MaxConnectionIdle(mci, tu)           => nsb.maxConnectionIdle(mci, tu)
+    case MaxConnectionAge(mca, tu)            => nsb.maxConnectionAge(mca, tu)
+    case MaxConnectionAgeGrace(mcag, tu)      => nsb.maxConnectionAgeGrace(mcag, tu)
+    case PermitKeepAliveTime(kat, tu)         => nsb.permitKeepAliveTime(kat, tu)
+    case PermitKeepAliveWithoutCalls(permit)  => nsb.permitKeepAliveWithoutCalls(permit)
   }
 }
