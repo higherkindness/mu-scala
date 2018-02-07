@@ -97,6 +97,12 @@ lazy val testing = project
   .settings(moduleName := "frees-rpc-testing")
   .settings(testingSettings)
 
+lazy val ssl = project
+  .in(file("modules/ssl"))
+  .dependsOn(server % "test->test")
+  .settings(moduleName := "frees-rpc-netty-ssl")
+  .settings(nettySslSettings)
+
 //////////////////////////
 //// MODULES REGISTRY ////
 //////////////////////////

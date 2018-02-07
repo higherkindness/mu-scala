@@ -39,6 +39,7 @@ It's divided into multiple and different artifacts, grouped by scope:
 `frees-rpc-common` | Server/Client | Provided* | Common things that are used throughout the project.
 `frees-rpc-internal` | Server/Client | Provided* | Macros.
 `frees-rpc-async` | Server/Client | Provided* | Async instances useful for interacting with the RPC services on both sides, server and the client.
+`frees-rpc-netty-ssl` | Server/Client | No | It adds the `io.netty:netty-tcnative-boringssl-static:jar` dependency, aligned with the Netty version (if that's the case) used in the `frees-rpc` build. See [this section](https://github.com/grpc/grpc-java/blob/master/SECURITY.md#netty) for more information. Adding this you wouldn't need to figure out which would be the right version, `frees-rpc` gives you the right one.
 
 * `Yes*`: on the client-side, you must choose either `Netty` or `OkHttp` as the transport layer.
 * `Provided*`: you don't need to add it to your build, it'll be transitively provided when using other dependencies.
@@ -69,6 +70,9 @@ libraryDependencies += "io.frees" %% "frees-rpc-prometheus-client" % "0.10.0"
 // optional - for both server and client metrics reporting, using Dropwizard.
 libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-server" % "0.10.0"
 libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-client" % "0.10.0"
+
+// optional - for the communication between server and client by using SSL/TLS.
+libraryDependencies += "io.frees" %% "frees-rpc-netty-ssl" % "0.10.0"
 ```
 
 [comment]: # (End Replace)
