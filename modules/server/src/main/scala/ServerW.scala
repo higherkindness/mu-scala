@@ -24,10 +24,13 @@ case class ServerW(server: Server)
 
 object ServerW {
 
-  def apply(port: Int, configList: List[GrpcConfig]): ServerW =
+  def default(port: Int, configList: List[GrpcConfig]): ServerW =
     ServerW(SServerBuilder(port, configList).build)
 
-  def apply(channelFor: ChannelFor, configList: List[GrpcConfig]): ServerW =
+  def netty(port: Int, configList: List[GrpcConfig]): ServerW =
+    netty(ChannelForPort(port), configList)
+
+  def netty(channelFor: ChannelFor, configList: List[GrpcConfig]): ServerW =
     ServerW(NettyServerConfigBuilder(channelFor, configList).build)
 
 }

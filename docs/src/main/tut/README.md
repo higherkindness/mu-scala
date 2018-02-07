@@ -568,7 +568,7 @@ object gserver {
       AddService(Greeter.bindService[IO])
     )
 
-    implicit val serverW: ServerW = ServerW(8080, grpcConfigs)
+    implicit val serverW: ServerW = ServerW.default(8080, grpcConfigs)
   }
 
   object implicits extends Implicits
@@ -639,6 +639,7 @@ import cats.implicits._
 import cats.effect.IO
 import freestyle.free.config.implicits._
 import freestyle.async.catsEffect.implicits._
+import freestyle.rpc._
 import freestyle.rpc.client._
 import freestyle.rpc.client.config._
 import freestyle.rpc.client.implicits._
@@ -652,7 +653,7 @@ object gclient {
 
   trait Implicits extends CommonRuntime {
 
-    val channelFor: ManagedChannelFor =
+    val channelFor: ChannelFor =
       ConfigForAddress[Try]("rpc.host", "rpc.port") match {
         case Success(c) => c
         case Failure(e) =>
@@ -746,7 +747,7 @@ object InterceptingServerCalls extends CommonRuntime {
     AddService(Greeter.bindService[IO].interceptWith(monitorInterceptor))
   )
 
-  implicit val serverW: ServerW = ServerW(8080, grpcConfigs)
+  implicit val serverW: ServerW = ServerW.default(8080, grpcConfigs)
 
 }
 ```
@@ -760,6 +761,7 @@ import cats.implicits._
 import cats.effect.IO
 import freestyle.free.config.implicits._
 import freestyle.async.catsEffect.implicits._
+import freestyle.rpc._
 import freestyle.rpc.client._
 import freestyle.rpc.client.config._
 import freestyle.rpc.client.implicits._
@@ -774,7 +776,7 @@ import freestyle.rpc.prometheus.client.MonitoringClientInterceptor
 
 object InterceptingClientCalls extends CommonRuntime {
 
-  val channelFor: ManagedChannelFor =
+  val channelFor: ChannelFor =
     ConfigForAddress[Try]("rpc.host", "rpc.port") match {
       case Success(c) => c
       case Failure(e) =>
