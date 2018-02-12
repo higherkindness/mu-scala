@@ -391,7 +391,10 @@ The code might be explanatory by itself but let's review the different services 
 * `lotsOfGreetings `: Client streaming RPC, `@rpc` should be sorted by the `@stream[RequestStreaming.type]` annotation.
 * `bidiHello `: Bidirectional streaming RPC, where `@rpc` is accompanied by the `@stream[BidirectionalStreaming.type]` annotation.
 
-**Note**: in [frees-rpc], the streaming features have been implemented with `monix.reactive.Observable`, see the [Monix Docs](https://monix.io/docs/2x/reactive/observable.html) for a wider explanation. These monix extensions have been implemented on top of the [gRPC Java API](https://grpc.io/grpc-java/javadoc/) and the `StreamObserver` interface.
+**Notes**:
+
+* In [frees-rpc], the streaming features have been implemented with `monix.reactive.Observable`, see the [Monix Docs](https://monix.io/docs/2x/reactive/observable.html) for a wider explanation. These monix extensions have been implemented on top of the [gRPC Java API](https://grpc.io/grpc-java/javadoc/) and the `StreamObserver` interface.
+* After [this PR](https://github.com/frees-io/freestyle-rpc/pull/152), `fs2` streaming is also supported but it's considered experimental for now.
 
 ## Generating a .proto file
 

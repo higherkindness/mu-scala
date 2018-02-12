@@ -18,12 +18,12 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String             = "1.8.0"
-      val frees: String              = "0.6.3"
+      val frees: String              = "0.7.0"
       val fs2ReactiveStreams: String = "0.5.0"
       val grpc: String               = "1.9.0"
       val monix: String              = "3.0.0-M3"
       val pbdirect: String           = "0.0.8"
-      val prometheus: String         = "0.1.0"
+      val prometheus: String         = "0.2.0"
       val scalameta: String          = "1.8.0"
     }
 
@@ -98,7 +98,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val prometheusSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "io.prometheus" % "simpleclient" % V.prometheus
+        %("prometheus", V.prometheus)
       )
     )
 
