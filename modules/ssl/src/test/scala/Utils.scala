@@ -21,14 +21,12 @@ import java.io.File
 import java.security.cert.X509Certificate
 
 import cats.effect.Effect
-import freestyle.rpc.client.OverrideAuthority
-import freestyle.rpc.client.netty._
 import freestyle.rpc.common._
 import freestyle.rpc.protocol._
 import freestyle.rpc.server.netty.SetSslContext
 import freestyle.rpc.server.{AddService, GrpcConfig, ServerW}
 import io.grpc.internal.testing.TestUtils
-import io.grpc.netty.{GrpcSslContexts, NegotiationType}
+import io.grpc.netty.GrpcSslContexts
 import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}
 
 object Utils extends CommonUtils {
