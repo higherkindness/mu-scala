@@ -32,7 +32,12 @@ sealed trait SerializationType extends Product with Serializable
 case object Protobuf           extends SerializationType
 case object Avro               extends SerializationType
 
-class rpc(val serializationType: SerializationType)                   extends StaticAnnotation
+sealed abstract class CompressionType extends Product with Serializable
+case object Identity                  extends CompressionType
+case object Gzip                      extends CompressionType
+
+class rpc(val serializationType: SerializationType, val compressionType: CompressionType = Identity)
+    extends StaticAnnotation
 class stream[S <: StreamingType]                                      extends StaticAnnotation
 class message                                                         extends StaticAnnotation
 class option(val name: String, val value: String, val quote: Boolean) extends StaticAnnotation

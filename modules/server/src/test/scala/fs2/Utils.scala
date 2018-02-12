@@ -31,17 +31,31 @@ object Utils extends CommonUtils {
 
       @rpc(Avro) def unary(a: A): F[C]
 
+      @rpc(Avro, Gzip) def unaryCompressed(a: A): F[C]
+
       @rpc(Protobuf)
       @stream[ResponseStreaming.type]
       def serverStreaming(b: B): Stream[F, C]
+
+      @rpc(Protobuf, Gzip)
+      @stream[ResponseStreaming.type]
+      def serverStreamingCompressed(b: B): Stream[F, C]
 
       @rpc(Protobuf)
       @stream[RequestStreaming.type]
       def clientStreaming(oa: Stream[F, A]): F[D]
 
+      @rpc(Protobuf, Gzip)
+      @stream[RequestStreaming.type]
+      def clientStreamingCompressed(oa: Stream[F, A]): F[D]
+
       @rpc(Avro)
       @stream[BidirectionalStreaming.type]
       def biStreaming(oe: Stream[F, E]): Stream[F, E]
+
+      @rpc(Avro, Gzip)
+      @stream[BidirectionalStreaming.type]
+      def biStreamingCompressed(oe: Stream[F, E]): Stream[F, E]
 
     }
 
@@ -58,10 +72,14 @@ object Utils extends CommonUtils {
 
         def unary(a: A): F[C] = Effect[F].delay(c1)
 
+        def unaryCompressed(a: A): F[C] = unary(a)
+
         def serverStreaming(b: B): Stream[F, C] = {
           debug(s"[fs2 - SERVER] b -> $b")
           Stream.fromIterator(cList.iterator)
         }
+
+        def serverStreamingCompressed(b: B): Stream[F, C] = serverStreaming(b)
 
         def clientStreaming(oa: Stream[F, A]): F[D] =
           oa.compile.fold(D(0)) {
@@ -70,11 +88,15 @@ object Utils extends CommonUtils {
               D(current.bar + a.x + a.y)
           }
 
+        def clientStreamingCompressed(oa: Stream[F, A]): F[D] = clientStreaming(oa)
+
         def biStreaming(oe: Stream[F, E]): Stream[F, E] =
           oe.flatMap { e: E =>
             save(e)
             Stream.fromIterator(eList.iterator)
           }
+
+        def biStreamingCompressed(oe: Stream[F, E]): Stream[F, E] = biStreaming(oe)
 
         def save(e: E): E = e // do something else with e?
 

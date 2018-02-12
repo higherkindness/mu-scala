@@ -17,7 +17,7 @@
 package freestyle.rpc
 package internal
 
-import io.grpc.stub.StreamObserver
+import io.grpc.stub.{ServerCallStreamObserver, StreamObserver}
 import monix.execution.{Ack, Scheduler}
 import monix.reactive.{Observable, Observer, Pipe}
 import monix.reactive.observers.Subscriber
@@ -49,5 +49,13 @@ package object server {
       responseObserver: StreamObserver[Res]
   )(implicit S: Scheduler): StreamObserver[Req] =
     transform(transformer, responseObserver.toSubscriber).toStreamObserver
+
+  private[server] def addCompression[A](
+      observer: StreamObserver[A],
+      algorithm: Option[String]): Unit =
+    (observer, algorithm) match {
+      case (o: ServerCallStreamObserver[_], Some(alg)) => o.setCompression(alg)
+      case _                                           =>
+    }
 
 }
