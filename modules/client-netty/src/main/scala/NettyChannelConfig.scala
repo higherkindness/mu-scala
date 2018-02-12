@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit
 import io.netty.channel.{Channel, ChannelOption, EventLoopGroup}
 import io.netty.handler.ssl.SslContext
 
-sealed trait NettyChannelConfig                                        extends Product with Serializable
+sealed trait NettyChannelConfig                                        extends ManagedChannelConfig
 case class NettyChannelType(channelType: Class[_ <: Channel])          extends NettyChannelConfig
 case class NettyWithOption[T](option: ChannelOption[T], value: T)      extends NettyChannelConfig
 case class NettyNegotiationType(`type`: io.grpc.netty.NegotiationType) extends NettyChannelConfig

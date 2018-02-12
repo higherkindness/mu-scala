@@ -22,7 +22,7 @@ import io.grpc.netty.NettyChannelBuilder
 
 package object netty {
 
-  class NettyChannelInterpreter(initConfig: ChannelFor, configList: List[NettyChannelConfig]) {
+  class NettyChannelInterpreter(initConfig: ChannelFor, configList: List[ManagedChannelConfig]) {
 
     def build: ManagedChannel = {
       val builder: NettyChannelBuilder = initConfig match {
@@ -35,22 +35,25 @@ package object netty {
 
       configList
         .foldLeft(builder) { (acc, cfg) =>
-          cfg match {
-            case NettyChannelType(channelType)       => acc.channelType(channelType)
-            case NettyWithOption(option, value)      => acc.withOption(option, value)
-            case NettyNegotiationType(nt)            => acc.negotiationType(nt)
-            case NettyEventLoopGroup(eventLoopGroup) => acc.eventLoopGroup(eventLoopGroup)
-            case NettySslContext(sslContext)         => acc.sslContext(sslContext)
-            case NettyFlowControlWindow(fcw)         => acc.flowControlWindow(fcw)
-            case NettyMaxHeaderListSize(mhls)        => acc.maxHeaderListSize(mhls)
-            case NettyUsePlaintext(skipNegotiation)  => acc.usePlaintext(skipNegotiation)
-            case NettyUseTransportSecurity           => acc.useTransportSecurity()
-            case NettyKeepAliveTime(kat, tu)         => acc.keepAliveTime(kat, tu)
-            case NettyKeepAliveTimeout(kat, tu)      => acc.keepAliveTimeout(kat, tu)
-            case NettyKeepAliveWithoutCalls(enable)  => acc.keepAliveWithoutCalls(enable)
-          }
+          (ManagedChannelB(acc) orElse NettyChannelB(acc))(cfg)
         }
         .build()
     }
+  }
+
+  def NettyChannelB(
+      mcb: NettyChannelBuilder): PartialFunction[ManagedChannelConfig, NettyChannelBuilder] = {
+    case NettyChannelType(channelType)       => mcb.channelType(channelType)
+    case NettyWithOption(option, value)      => mcb.withOption(option, value)
+    case NettyNegotiationType(nt)            => mcb.negotiationType(nt)
+    case NettyEventLoopGroup(eventLoopGroup) => mcb.eventLoopGroup(eventLoopGroup)
+    case NettySslContext(sslContext)         => mcb.sslContext(sslContext)
+    case NettyFlowControlWindow(fcw)         => mcb.flowControlWindow(fcw)
+    case NettyMaxHeaderListSize(mhls)        => mcb.maxHeaderListSize(mhls)
+    case NettyUsePlaintext(skipNegotiation)  => mcb.usePlaintext(skipNegotiation)
+    case NettyUseTransportSecurity           => mcb.useTransportSecurity()
+    case NettyKeepAliveTime(kat, tu)         => mcb.keepAliveTime(kat, tu)
+    case NettyKeepAliveTimeout(kat, tu)      => mcb.keepAliveTimeout(kat, tu)
+    case NettyKeepAliveWithoutCalls(enable)  => mcb.keepAliveWithoutCalls(enable)
   }
 }

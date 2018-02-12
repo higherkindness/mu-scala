@@ -31,36 +31,42 @@ package object client {
       configList: List[ManagedChannelConfig])
       extends (Kleisli[F, ManagedChannel, ?] ~> F) {
 
-    def build(initConfig: ChannelFor, configList: List[ManagedChannelConfig]): ManagedChannel = {
-      val builder: ManagedChannelBuilder[_] = initConfig match {
-        case ChannelForAddress(name, port) => ManagedChannelBuilder.forAddress(name, port)
-        case ChannelForTarget(target)      => ManagedChannelBuilder.forTarget(target)
+    def build[T <: ManagedChannelBuilder[T]](
+        initConfig: ChannelFor,
+        configList: List[ManagedChannelConfig]): ManagedChannel = {
+      val builder: T = initConfig match {
+        case ChannelForAddress(name, port) =>
+          ManagedChannelBuilder.forAddress(name, port).asInstanceOf[T]
+        case ChannelForTarget(target) => ManagedChannelBuilder.forTarget(target).asInstanceOf[T]
         case e =>
           throw new IllegalArgumentException(s"ManagedChannel not supported for $e")
       }
 
       configList
         .foldLeft(builder) { (acc, cfg) =>
-          cfg match {
-            case DirectExecutor                    => acc.directExecutor()
-            case SetExecutor(executor)             => acc.executor(executor)
-            case AddInterceptorList(interceptors)  => acc.intercept(interceptors.asJava)
-            case AddInterceptor(interceptors @ _*) => acc.intercept(interceptors: _*)
-            case UserAgent(userAgent)              => acc.userAgent(userAgent)
-            case OverrideAuthority(authority)      => acc.overrideAuthority(authority)
-            case UsePlaintext(skipNegotiation)     => acc.usePlaintext(skipNegotiation)
-            case NameResolverFactory(rf)           => acc.nameResolverFactory(rf)
-            case LoadBalancerFactory(lbf)          => acc.loadBalancerFactory(lbf)
-            case SetDecompressorRegistry(registry) => acc.decompressorRegistry(registry)
-            case SetCompressorRegistry(registry)   => acc.compressorRegistry(registry)
-            case SetIdleTimeout(value, unit)       => acc.idleTimeout(value, unit)
-            case SetMaxInboundMessageSize(max)     => acc.maxInboundMessageSize(max)
-          }
+          ManagedChannelB(acc)(cfg)
         }
         .build()
     }
 
     override def apply[A](fa: Kleisli[F, ManagedChannel, A]): F[A] =
       fa(build(initConfig, configList))
+  }
+
+  def ManagedChannelB[T <: ManagedChannelBuilder[T]](
+      mcb: T): PartialFunction[ManagedChannelConfig, T] = {
+    case DirectExecutor                    => mcb.directExecutor()
+    case SetExecutor(executor)             => mcb.executor(executor)
+    case AddInterceptorList(interceptors)  => mcb.intercept(interceptors.asJava)
+    case AddInterceptor(interceptors @ _*) => mcb.intercept(interceptors: _*)
+    case UserAgent(userAgent)              => mcb.userAgent(userAgent)
+    case OverrideAuthority(authority)      => mcb.overrideAuthority(authority)
+    case UsePlaintext(skipNegotiation)     => mcb.usePlaintext(skipNegotiation)
+    case NameResolverFactory(rf)           => mcb.nameResolverFactory(rf)
+    case LoadBalancerFactory(lbf)          => mcb.loadBalancerFactory(lbf)
+    case SetDecompressorRegistry(registry) => mcb.decompressorRegistry(registry)
+    case SetCompressorRegistry(registry)   => mcb.compressorRegistry(registry)
+    case SetIdleTimeout(value, unit)       => mcb.idleTimeout(value, unit)
+    case SetMaxInboundMessageSize(max)     => mcb.maxInboundMessageSize(max)
   }
 }
