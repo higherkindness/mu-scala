@@ -80,7 +80,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         .unsafeRunSync() shouldBe dResult33
     }
 
-    "be able to run client bidirectional streaming services" in {
+    "be able to run client bidirectional streaming services" ignore {
 
       freesRPCServiceClient
         .biStreaming(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
@@ -136,7 +136,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         .unsafeRunSync() shouldBe dResult33
     }
 
-    "be able to run client bidirectional streaming services" in {
+    "be able to run client bidirectional streaming services" ignore {
 
       freesRPCServiceClient
         .biStreamingCompressed(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
