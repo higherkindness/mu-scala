@@ -184,6 +184,14 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     }
 
+    "be able to have non request methods" in {
+
+      def clientProgram[F[_]: cats.Functor](implicit client: service.RPCService.Client[F]): F[Int] =
+        client.sumA
+
+      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe 3000
+    }
+
   }
 
   "frees-rpc client with compression" should {
