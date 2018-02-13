@@ -83,7 +83,8 @@ object ProjectPlugin extends AutoPlugin {
         %%("frees-async-cats-effect", V.frees),
         %("grpc-core", V.grpc),
         %("grpc-netty", V.grpc),
-        %%("scalamockScalatest") % Test
+        %%("scalamockScalatest") % Test,
+        "io.netty"               % "netty-tcnative-boringssl-static" % V.netty % Test
       )
     )
 

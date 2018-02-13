@@ -18,22 +18,20 @@ package freestyle.rpc
 package client
 package netty
 
-import java.net.{InetSocketAddress, URI}
-import java.util.concurrent.{Executor, TimeUnit}
+import java.net.InetSocketAddress
+import java.util.concurrent.TimeUnit
 
 import freestyle.rpc.common.SC
-import freestyle.rpc.testing.client.FakeNameResolverFactory
-import freestyle.rpc.testing.interceptors.NoopInterceptor
+import io.grpc.ManagedChannel
 import io.grpc.internal.GrpcUtil
-import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.{GrpcSslContexts, NegotiationType, NettyChannelBuilder}
-import io.grpc.util.RoundRobinLoadBalancerFactory
-import io.grpc.{CompressorRegistry, DecompressorRegistry, ManagedChannel}
 import io.netty.channel.ChannelOption
 import io.netty.channel.local.LocalChannel
 import io.netty.channel.nio.NioEventLoopGroup
 
 class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests {
+
+  import implicits._
 
   "NettyChannelInterpreter" should {
 
@@ -65,26 +63,7 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
 
       val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
 
-      val channelConfigList: List[ManagedChannelConfig] = List(
-        // Managed Channel:
-        DirectExecutor,
-        SetExecutor(new Executor() {
-          override def execute(r: Runnable): Unit =
-            throw new RuntimeException("Test executor")
-        }),
-        AddInterceptorList(List(new NoopInterceptor())),
-        AddInterceptor(new NoopInterceptor()),
-        UserAgent("User-Agent"),
-        OverrideAuthority(TestUtils.TEST_SERVER_HOST),
-        UsePlaintext(true),
-        NameResolverFactory(
-          FakeNameResolverFactory(new URI("defaultscheme", "", "/[valid]", null).getScheme)),
-        LoadBalancerFactory(RoundRobinLoadBalancerFactory.getInstance()),
-        SetDecompressorRegistry(DecompressorRegistry.getDefaultInstance),
-        SetCompressorRegistry(CompressorRegistry.getDefaultInstance),
-        SetIdleTimeout(1, TimeUnit.MINUTES),
-        SetMaxInboundMessageSize(4096000),
-        // Netty specifics configurations:
+      val channelConfigList: List[ManagedChannelConfig] = managedChannelConfigAllList ++ List(
         NettyChannelType((new LocalChannel).getClass),
         NettyWithOption[Boolean](ChannelOption.valueOf("ALLOCATOR"), true),
         NettyNegotiationType(NegotiationType.PLAINTEXT),

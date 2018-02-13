@@ -84,25 +84,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
       val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
 
-      val channelConfigList: List[ManagedChannelConfig] = List(
-        DirectExecutor,
-        SetExecutor(new Executor() {
-          override def execute(r: Runnable): Unit =
-            throw new RuntimeException("Test executor")
-        }),
-        AddInterceptorList(List(new NoopInterceptor())),
-        AddInterceptor(new NoopInterceptor()),
-        UserAgent("User-Agent"),
-        OverrideAuthority(TestUtils.TEST_SERVER_HOST),
-        UsePlaintext(true),
-        NameResolverFactory(
-          FakeNameResolverFactory(new URI("defaultscheme", "", "/[valid]", null).getScheme)),
-        LoadBalancerFactory(RoundRobinLoadBalancerFactory.getInstance()),
-        SetDecompressorRegistry(DecompressorRegistry.getDefaultInstance),
-        SetCompressorRegistry(CompressorRegistry.getDefaultInstance),
-        SetIdleTimeout(1, TimeUnit.MINUTES),
-        SetMaxInboundMessageSize(4096000)
-      )
+      val channelConfigList: List[ManagedChannelConfig] = managedChannelConfigAllList
 
       val managedChannelInterpreter =
         new ManagedChannelInterpreter[Future](channelFor, channelConfigList)

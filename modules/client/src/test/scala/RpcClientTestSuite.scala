@@ -17,12 +17,17 @@
 package freestyle.rpc
 package client
 
-import java.util.concurrent.{Callable, Executors}
+import java.net.URI
+import java.util.concurrent.{Callable, Executor, Executors, TimeUnit}
 
 import com.google.common.util.concurrent.{ListenableFuture, ListeningExecutorService, MoreExecutors}
 import freestyle.rpc.client.utils.StringMarshaller
 import freestyle.rpc.common.{RpcBaseTestSuite, SC}
-import io.grpc.{ClientCall, ManagedChannel, MethodDescriptor}
+import freestyle.rpc.testing.client.FakeNameResolverFactory
+import freestyle.rpc.testing.interceptors.NoopInterceptor
+import io.grpc.internal.testing.TestUtils
+import io.grpc.util.RoundRobinLoadBalancerFactory
+import io.grpc._
 
 trait RpcClientTestSuite extends RpcBaseTestSuite {
 
@@ -44,6 +49,25 @@ trait RpcClientTestSuite extends RpcBaseTestSuite {
     val foo                    = "Bar"
     val failureMessage: String = "❗"
 
+    val managedChannelConfigAllList: List[ManagedChannelConfig] = List(
+      DirectExecutor,
+      SetExecutor(new Executor() {
+        override def execute(r: Runnable): Unit =
+          throw new RuntimeException("Test executor")
+      }),
+      AddInterceptorList(List(new NoopInterceptor())),
+      AddInterceptor(new NoopInterceptor()),
+      UserAgent("User-Agent"),
+      OverrideAuthority(TestUtils.TEST_SERVER_HOST),
+      UsePlaintext(true),
+      NameResolverFactory(
+        FakeNameResolverFactory(new URI("defaultscheme", "", "/[valid]", null).getScheme)),
+      LoadBalancerFactory(RoundRobinLoadBalancerFactory.getInstance()),
+      SetDecompressorRegistry(DecompressorRegistry.getDefaultInstance),
+      SetCompressorRegistry(CompressorRegistry.getDefaultInstance),
+      SetIdleTimeout(1, TimeUnit.MINUTES),
+      SetMaxInboundMessageSize(4096000)
+    )
   }
 
   object implicits extends Helpers with DummyData {
