@@ -1,5 +1,25 @@
 # Changelog
 
+## 02/13/2018 - Version 0.11.0
+
+Release changes:
+
+* Now the service requires an Effect instead of AsyncContext and `Task ~> M` ([#150](https://github.com/frees-io/freestyle-rpc/pull/150))
+* fs2.Stream Support ([#152](https://github.com/frees-io/freestyle-rpc/pull/152))
+* Updates build by using sbt-freestyle 0.13.16 ([#154](https://github.com/frees-io/freestyle-rpc/pull/154))
+* Upgrades fs2-reactive-streams lib ([#155](https://github.com/frees-io/freestyle-rpc/pull/155))
+* Change implicit StreamObserver conversions to syntax ([#157](https://github.com/frees-io/freestyle-rpc/pull/157))
+* Upgrades to fs2-reactive-streams 0.4.0 ([#158](https://github.com/frees-io/freestyle-rpc/pull/158))
+* Update fs2-reactive-streams ([#160](https://github.com/frees-io/freestyle-rpc/pull/160))
+* Refactor service macro ([#159](https://github.com/frees-io/freestyle-rpc/pull/159))
+* Build Upgrade ([#163](https://github.com/frees-io/freestyle-rpc/pull/163))
+* Allows adding compression at method level ([#161](https://github.com/frees-io/freestyle-rpc/pull/161))
+* Add non request statements to `Client` ([#165](https://github.com/frees-io/freestyle-rpc/pull/165))
+* SSL/TLS Encryption Support (Netty) ([#162](https://github.com/frees-io/freestyle-rpc/pull/162))
+* Update grpc to 1.9.1 ([#166](https://github.com/frees-io/freestyle-rpc/pull/166))
+* Releases frees-rpc 0.11.0 ([#167](https://github.com/frees-io/freestyle-rpc/pull/167))
+
+
 ## 01/18/2018 - Version 0.10.0
 
 Release changes:
