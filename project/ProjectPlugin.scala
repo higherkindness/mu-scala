@@ -22,7 +22,7 @@ object ProjectPlugin extends AutoPlugin {
       val fs2ReactiveStreams: String = "0.5.0"
       val grpc: String               = "1.9.0"
       val monix: String              = "3.0.0-M3"
-      val netty: String              = "2.0.7.Final"
+      val nettySSL: String           = "2.0.7.Final"
       val pbdirect: String           = "0.0.8"
       val prometheus: String         = "0.2.0"
       val scalameta: String          = "1.8.0"
@@ -68,7 +68,7 @@ object ProjectPlugin extends AutoPlugin {
     lazy val clientNettySettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %("grpc-netty", V.grpc),
-        "io.netty" % "netty-tcnative-boringssl-static" % V.netty % Test
+        "io.netty" % "netty-tcnative-boringssl-static" % V.nettySSL % Test
       )
     )
 
@@ -84,7 +84,7 @@ object ProjectPlugin extends AutoPlugin {
         %("grpc-core", V.grpc),
         %("grpc-netty", V.grpc),
         %%("scalamockScalatest") % Test,
-        "io.netty"               % "netty-tcnative-boringssl-static" % V.netty % Test
+        "io.netty"               % "netty-tcnative-boringssl-static" % V.nettySSL % Test
       )
     )
 
@@ -127,7 +127,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val nettySslSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "io.netty" % "netty-tcnative-boringssl-static" % V.netty
+        "io.netty" % "netty-tcnative-boringssl-static" % V.nettySSL
       )
     )
 

@@ -18,8 +18,8 @@ package freestyle.rpc
 
 import java.net.SocketAddress
 
-sealed trait ChannelFor                                          extends Product with Serializable
-case class ChannelForPort(port: Int)                             extends ChannelFor
-case class ChannelForAddress(host: String, port: Int)            extends ChannelFor
-case class ChannelForSocketAddress(serverAddress: SocketAddress) extends ChannelFor
-case class ChannelForTarget(target: String)                      extends ChannelFor
+sealed trait ChannelFor                                                extends Product with Serializable
+final case class ChannelForPort(port: Int)                             extends ChannelFor
+final case class ChannelForAddress(host: String, port: Int)            extends ChannelFor
+final case class ChannelForSocketAddress(serverAddress: SocketAddress) extends ChannelFor
+final case class ChannelForTarget(target: String)                      extends ChannelFor

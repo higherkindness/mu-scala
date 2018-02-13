@@ -24,17 +24,18 @@ import io.grpc.netty.NegotiationType
 import io.netty.channel.{Channel, ChannelOption, EventLoopGroup}
 import io.netty.handler.ssl.SslContext
 
-sealed trait NettyChannelConfig                                        extends ManagedChannelConfig
-case class NettyChannelType(channelType: Class[_ <: Channel])          extends NettyChannelConfig
-case class NettyWithOption[T](option: ChannelOption[T], value: T)      extends NettyChannelConfig
-case class NettyNegotiationType(`type`: NegotiationType)               extends NettyChannelConfig
-case class NettyEventLoopGroup(eventLoopGroup: EventLoopGroup)         extends NettyChannelConfig
-case class NettySslContext(sslContext: SslContext)                     extends NettyChannelConfig
-case class NettyFlowControlWindow(flowControlWindow: Int)              extends NettyChannelConfig
-case class NettyMaxHeaderListSize(maxHeaderListSize: Int)              extends NettyChannelConfig
-case class NettyUsePlaintext(skipNegotiation: Boolean)                 extends NettyChannelConfig
-case object NettyUseTransportSecurity                                  extends NettyChannelConfig
-case class NettyKeepAliveTime(keepAliveTime: Long, timeUnit: TimeUnit) extends NettyChannelConfig
-case class NettyKeepAliveTimeout(keepAliveTimeout: Long, timeUnit: TimeUnit)
+sealed trait NettyChannelConfig                                         extends ManagedChannelConfig
+final case class NettyChannelType(channelType: Class[_ <: Channel])     extends NettyChannelConfig
+final case class NettyWithOption[T](option: ChannelOption[T], value: T) extends NettyChannelConfig
+final case class NettyNegotiationType(`type`: NegotiationType)          extends NettyChannelConfig
+final case class NettyEventLoopGroup(eventLoopGroup: EventLoopGroup)    extends NettyChannelConfig
+final case class NettySslContext(sslContext: SslContext)                extends NettyChannelConfig
+final case class NettyFlowControlWindow(flowControlWindow: Int)         extends NettyChannelConfig
+final case class NettyMaxHeaderListSize(maxHeaderListSize: Int)         extends NettyChannelConfig
+final case class NettyUsePlaintext(skipNegotiation: Boolean)            extends NettyChannelConfig
+case object NettyUseTransportSecurity                                   extends NettyChannelConfig
+final case class NettyKeepAliveTime(keepAliveTime: Long, timeUnit: TimeUnit)
     extends NettyChannelConfig
-case class NettyKeepAliveWithoutCalls(enable: Boolean) extends NettyChannelConfig
+final case class NettyKeepAliveTimeout(keepAliveTimeout: Long, timeUnit: TimeUnit)
+    extends NettyChannelConfig
+final case class NettyKeepAliveWithoutCalls(enable: Boolean) extends NettyChannelConfig

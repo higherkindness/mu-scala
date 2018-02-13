@@ -26,24 +26,24 @@ import io.netty.handler.ssl.SslContext
 
 object netty {
 
-  case class ChannelType(channelType: Class[_ <: ServerChannel])            extends GrpcConfig
-  case class WithChildOption[T](option: ChannelOption[T], value: T)         extends GrpcConfig
-  case class BossEventLoopGroup(group: EventLoopGroup)                      extends GrpcConfig
-  case class WorkerEventLoopGroup(group: EventLoopGroup)                    extends GrpcConfig
-  case class SetSslContext(sslContext: SslContext)                          extends GrpcConfig
-  case class SetProtocolNegotiator(protocolNegotiator: ProtocolNegotiator)  extends GrpcConfig
-  case class MaxConcurrentCallsPerConnection(maxCalls: Int)                 extends GrpcConfig
-  case class FlowControlWindow(flowControlWindow: Int)                      extends GrpcConfig
-  case class MaxMessageSize(maxMessageSize: Int)                            extends GrpcConfig
-  case class MaxHeaderListSize(maxHeaderListSize: Int)                      extends GrpcConfig
-  case class KeepAliveTime(keepAliveTime: Long, timeUnit: TimeUnit)         extends GrpcConfig
-  case class KeepAliveTimeout(keepAliveTimeout: Long, timeUnit: TimeUnit)   extends GrpcConfig
-  case class MaxConnectionIdle(maxConnectionIdle: Long, timeUnit: TimeUnit) extends GrpcConfig
-  case class MaxConnectionAge(maxConnectionAge: Long, timeUnit: TimeUnit)   extends GrpcConfig
-  case class MaxConnectionAgeGrace(maxConnectionAgeGrace: Long, timeUnit: TimeUnit)
+  final case class ChannelType(channelType: Class[_ <: ServerChannel])            extends GrpcConfig
+  final case class WithChildOption[T](option: ChannelOption[T], value: T)         extends GrpcConfig
+  final case class BossEventLoopGroup(group: EventLoopGroup)                      extends GrpcConfig
+  final case class WorkerEventLoopGroup(group: EventLoopGroup)                    extends GrpcConfig
+  final case class SetSslContext(sslContext: SslContext)                          extends GrpcConfig
+  final case class SetProtocolNegotiator(protocolNegotiator: ProtocolNegotiator)  extends GrpcConfig
+  final case class MaxConcurrentCallsPerConnection(maxCalls: Int)                 extends GrpcConfig
+  final case class FlowControlWindow(flowControlWindow: Int)                      extends GrpcConfig
+  final case class MaxMessageSize(maxMessageSize: Int)                            extends GrpcConfig
+  final case class MaxHeaderListSize(maxHeaderListSize: Int)                      extends GrpcConfig
+  final case class KeepAliveTime(keepAliveTime: Long, timeUnit: TimeUnit)         extends GrpcConfig
+  final case class KeepAliveTimeout(keepAliveTimeout: Long, timeUnit: TimeUnit)   extends GrpcConfig
+  final case class MaxConnectionIdle(maxConnectionIdle: Long, timeUnit: TimeUnit) extends GrpcConfig
+  final case class MaxConnectionAge(maxConnectionAge: Long, timeUnit: TimeUnit)   extends GrpcConfig
+  final case class MaxConnectionAgeGrace(maxConnectionAgeGrace: Long, timeUnit: TimeUnit)
       extends GrpcConfig
-  case class PermitKeepAliveTime(keepAliveTime: Long, timeUnit: TimeUnit) extends GrpcConfig
-  case class PermitKeepAliveWithoutCalls(permit: Boolean)                 extends GrpcConfig
+  final case class PermitKeepAliveTime(keepAliveTime: Long, timeUnit: TimeUnit) extends GrpcConfig
+  final case class PermitKeepAliveWithoutCalls(permit: Boolean)                 extends GrpcConfig
 
   final case class NettyServerConfigBuilder(initConfig: ChannelFor, configList: List[GrpcConfig]) {
 
