@@ -24,12 +24,12 @@ import freestyle.rpc.common.{RpcBaseTestSuite, SC}
 import freestyle.rpc.server.netty._
 import io.grpc._
 import io.grpc.internal.GrpcUtil
-import io.grpc.netty.{GrpcSslContexts, ProtocolNegotiator, ProtocolNegotiators}
+import io.grpc.netty.{GrpcSslContexts, ProtocolNegotiators}
 import io.grpc.util.MutableHandlerRegistry
+import io.netty.channel.ChannelOption
 import io.netty.channel.local.LocalServerChannel
 import io.netty.channel.nio.NioEventLoopGroup
-import io.netty.channel.{ChannelOption, EventLoopGroup, ServerChannel}
-import io.netty.handler.ssl.{SslContext, SslContextBuilder}
+import io.netty.handler.ssl.SslContext
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.TimeUnit
@@ -68,8 +68,9 @@ trait RpcServerTestSuite extends RpcBaseTestSuite {
     (serverMock.awaitTermination(_: Long, _: TimeUnit)).when(timeout, timeoutUnit).returns(b)
     (serverMock.awaitTermination _: () => Unit).when().returns(unit)
 
-    import io.grpc.internal.testing.TestUtils
     import java.io.File
+
+    import io.grpc.internal.testing.TestUtils
 
     val cert: File         = TestUtils.loadCert("server1.pem")
     val key: File          = TestUtils.loadCert("server1.key")

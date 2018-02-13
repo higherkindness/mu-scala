@@ -17,16 +17,9 @@
 package freestyle.rpc
 package client
 
-import java.net.URI
-import java.util.concurrent.{Executor, TimeUnit}
-
 import cats.data.Kleisli
 import freestyle.rpc.common.SC
-import freestyle.rpc.testing.client.FakeNameResolverFactory
-import freestyle.rpc.testing.interceptors.NoopInterceptor
-import io.grpc.{CompressorRegistry, DecompressorRegistry, ManagedChannel}
-import io.grpc.internal.testing.TestUtils
-import io.grpc.util.RoundRobinLoadBalancerFactory
+import io.grpc.ManagedChannel
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
