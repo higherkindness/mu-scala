@@ -60,13 +60,15 @@ object ProjectPlugin extends AutoPlugin {
     lazy val clientCoreSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("frees-async-cats-effect", V.frees),
-        %%("scalamockScalatest") % Test
+        %%("scalamockScalatest") % Test,
+        %("grpc-netty", V.grpc)  % Test
       )
     )
 
     lazy val clientNettySettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %("grpc-netty", V.grpc)
+        %("grpc-netty", V.grpc),
+        "io.netty" % "netty-tcnative-boringssl-static" % V.netty % Test
       )
     )
 

@@ -18,4 +18,114 @@ package freestyle.rpc
 package client
 package netty
 
-class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
+import java.net.{InetSocketAddress, URI}
+import java.util.concurrent.{Executor, TimeUnit}
+
+import freestyle.rpc.common.SC
+import freestyle.rpc.testing.client.FakeNameResolverFactory
+import freestyle.rpc.testing.interceptors.NoopInterceptor
+import io.grpc.internal.GrpcUtil
+import io.grpc.internal.testing.TestUtils
+import io.grpc.netty.{GrpcSslContexts, NegotiationType, NettyChannelBuilder}
+import io.grpc.util.RoundRobinLoadBalancerFactory
+import io.grpc.{CompressorRegistry, DecompressorRegistry, ManagedChannel}
+import io.netty.channel.ChannelOption
+import io.netty.channel.local.LocalChannel
+import io.netty.channel.nio.NioEventLoopGroup
+
+class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests {
+
+  "NettyChannelInterpreter" should {
+
+    "build a io.grpc.ManagedChannel based on the specified configuration, for a Socket Address" in {
+
+      val channelFor: ChannelFor = ChannelForSocketAddress(new InetSocketAddress(SC.host, 45455))
+
+      val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
+
+      val interpreter = new NettyChannelInterpreter(channelFor, channelConfigList)
+
+      val mc: ManagedChannel = interpreter.build
+
+      mc shouldBe an[ManagedChannel]
+    }
+
+    "build a io.grpc.ManagedChannel based on the specified configuration, for Target" in {
+
+      val channelFor: ChannelFor = ChannelForTarget(SC.host)
+
+      val interpreter = new NettyChannelInterpreter(channelFor, Nil)
+
+      val mc: ManagedChannel = interpreter.build
+
+      mc shouldBe an[ManagedChannel]
+    }
+
+    "build a io.grpc.ManagedChannel based on any configuration combination" in {
+
+      val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
+
+      val channelConfigList: List[ManagedChannelConfig] = List(
+        // Managed Channel:
+        DirectExecutor,
+        SetExecutor(new Executor() {
+          override def execute(r: Runnable): Unit =
+            throw new RuntimeException("Test executor")
+        }),
+        AddInterceptorList(List(new NoopInterceptor())),
+        AddInterceptor(new NoopInterceptor()),
+        UserAgent("User-Agent"),
+        OverrideAuthority(TestUtils.TEST_SERVER_HOST),
+        UsePlaintext(true),
+        NameResolverFactory(
+          FakeNameResolverFactory(new URI("defaultscheme", "", "/[valid]", null).getScheme)),
+        LoadBalancerFactory(RoundRobinLoadBalancerFactory.getInstance()),
+        SetDecompressorRegistry(DecompressorRegistry.getDefaultInstance),
+        SetCompressorRegistry(CompressorRegistry.getDefaultInstance),
+        SetIdleTimeout(1, TimeUnit.MINUTES),
+        SetMaxInboundMessageSize(4096000),
+        // Netty specifics configurations:
+        NettyChannelType((new LocalChannel).getClass),
+        NettyWithOption[Boolean](ChannelOption.valueOf("ALLOCATOR"), true),
+        NettyNegotiationType(NegotiationType.PLAINTEXT),
+        NettyEventLoopGroup(new NioEventLoopGroup(0)),
+        NettySslContext(GrpcSslContexts.forClient.build),
+        NettyFlowControlWindow(NettyChannelBuilder.DEFAULT_FLOW_CONTROL_WINDOW),
+        NettyMaxHeaderListSize(GrpcUtil.DEFAULT_MAX_HEADER_LIST_SIZE),
+        NettyUsePlaintext(false),
+        NettyUseTransportSecurity,
+        NettyKeepAliveTime(1, TimeUnit.MINUTES),
+        NettyKeepAliveTimeout(1, TimeUnit.MINUTES),
+        NettyKeepAliveWithoutCalls(false)
+      )
+
+      val interpreter = new NettyChannelInterpreter(channelFor, channelConfigList)
+
+      val mc: ManagedChannel = interpreter.build
+
+      mc shouldBe an[ManagedChannel]
+    }
+
+    "throw an exception when configuration is not recognized" in {
+
+      val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
+
+      case object Unexpected extends ManagedChannelConfig
+      val channelConfigList: List[ManagedChannelConfig] = List(Unexpected)
+
+      val interpreter = new NettyChannelInterpreter(channelFor, channelConfigList)
+
+      an[MatchError] shouldBe thrownBy(interpreter.build)
+    }
+
+    "throw an exception when ChannelFor is not recognized" in {
+
+      val channelFor: ChannelFor = ChannelForPort(SC.port)
+
+      val interpreter = new NettyChannelInterpreter(channelFor, Nil)
+
+      an[IllegalArgumentException] shouldBe thrownBy(interpreter.build)
+    }
+  }
+
+}

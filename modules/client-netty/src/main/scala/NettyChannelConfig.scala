@@ -20,13 +20,14 @@ package netty
 
 import java.util.concurrent.TimeUnit
 
+import io.grpc.netty.NegotiationType
 import io.netty.channel.{Channel, ChannelOption, EventLoopGroup}
 import io.netty.handler.ssl.SslContext
 
 sealed trait NettyChannelConfig                                        extends ManagedChannelConfig
 case class NettyChannelType(channelType: Class[_ <: Channel])          extends NettyChannelConfig
 case class NettyWithOption[T](option: ChannelOption[T], value: T)      extends NettyChannelConfig
-case class NettyNegotiationType(`type`: io.grpc.netty.NegotiationType) extends NettyChannelConfig
+case class NettyNegotiationType(`type`: NegotiationType)               extends NettyChannelConfig
 case class NettyEventLoopGroup(eventLoopGroup: EventLoopGroup)         extends NettyChannelConfig
 case class NettySslContext(sslContext: SslContext)                     extends NettyChannelConfig
 case class NettyFlowControlWindow(flowControlWindow: Int)              extends NettyChannelConfig
