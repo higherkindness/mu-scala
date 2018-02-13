@@ -17,6 +17,9 @@
 package freestyle.rpc
 package internal
 
+import cats.instances.list._
+import cats.syntax.foldable._
+
 import freestyle.free.internal.ScalametaUtil
 import freestyle.rpc.protocol._
 
@@ -76,7 +79,7 @@ trait RPCService {
 
   val innerImports: List[Stat] = imports
 
-  private[this] val requests: List[RPCRequest] = buildRequests(algName, typeParam, noImports)
+  private[this] val (noRequests, requests) = buildRequests(algName, typeParam, noImports)
 
   val methodDescriptors: Seq[Defn.Val] = requests.map(_.methodDescriptor)
 
@@ -115,6 +118,7 @@ trait RPCService {
 
           ..$clientDefs
 
+          ..$noRequests
        }
      """
   }
@@ -266,8 +270,14 @@ private[internal] object utils {
     tpe
   }
 
+  def buildRequests(
+      algName: Type.Name,
+      typeParam: Type.Param,
+      stats: List[Stat]): (List[Stat], List[RPCRequest]) =
+    stats.partitionEither(stat => buildRequest(algName, typeParam, stat).toRight(stat))
+
   // format: OFF
-  def buildRequests(algName: Type.Name, typeParam: Type.Param, stats: List[Stat]): List[RPCRequest] = stats.collect {
+  def buildRequest(algName: Type.Name, typeParam: Type.Param, stat: Stat): Option[RPCRequest] = Option(stat).collect {
     case q"@rpc(..$s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): ${StreamImpl(impl, response)}" =>
       RPCRequest(algName, name, utils.serializationType(s.head), utils.compressionType(s.lastOption), Some(ResponseStreaming), Some(impl), paramTpe(request), response)
 

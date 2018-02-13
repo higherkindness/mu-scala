@@ -347,7 +347,7 @@ object service {
      */
     @rpc(Protobuf)
     @stream[ResponseStreaming.type]
-    def lotsOfReplies(request: HelloRequest): F[Observable[HelloResponse]]
+    def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
 
     /**
      * Client streaming RPCs where the client writes a sequence of messages and sends them to the server,
@@ -377,7 +377,7 @@ object service {
      */
     @rpc(Protobuf)
     @stream[BidirectionalStreaming.type]
-    def bidiHello(request: Observable[HelloRequest]): F[Observable[HelloResponse]]
+    def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
 
   }
 
@@ -483,8 +483,8 @@ class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
   override def sayHello(request: HelloRequest): F[HelloResponse] =
     HelloResponse(reply = "Good bye!").pure
 
-  override def lotsOfReplies(request: HelloRequest): F[Observable[HelloResponse]] =
-    dummyObservableResponse.pure
+  override def lotsOfReplies(request: HelloRequest): Observable[HelloResponse] =
+    dummyObservableResponse
 
   override def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse] =
     request
@@ -499,7 +499,7 @@ class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
       .map(_._2)
       .to[F]
 
-  override def bidiHello(request: Observable[HelloRequest]): F[Observable[HelloResponse]] =
+  override def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse] =
     request
       .flatMap { request: HelloRequest =>
         println(s"Saving $request...")
@@ -508,7 +508,6 @@ class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
       .onErrorHandle { e =>
         throw e
       }
-      .pure
 }
 ```
 

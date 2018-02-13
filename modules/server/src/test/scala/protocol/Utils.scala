@@ -95,6 +95,9 @@ object Utils extends CommonUtils {
 
       @rpc(Protobuf, Gzip)
       def scopeCompressed(empty: Empty.type): F[External]
+
+      def sumA(implicit F: cats.Functor[F]): F[Int] =
+        F.map(emptyParamResponse(Empty))(a => a.x + a.y)
     }
 
   }
