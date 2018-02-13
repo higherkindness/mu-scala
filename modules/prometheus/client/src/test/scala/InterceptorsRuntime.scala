@@ -52,7 +52,7 @@ case class InterceptorsRuntime(
 
   implicit lazy val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
     RPCService.client[ConcurrentMonad](
-      channelFor = createManagedChannelForPort(serverW.port),
+      channelFor = createChannelForPort(pickUnusedPort),
       channelConfigList = List(
         UsePlaintext(true),
         AddInterceptor(MonitoringClientInterceptor(configuration.withCollectorRegistry(cr)))

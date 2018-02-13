@@ -15,19 +15,17 @@
  */
 
 package freestyle.rpc
-package server
+package testing
 
-import cats.Functor
+import io.grpc._
 
-package object config {
+object interceptors {
 
-  def BuildServerFromConfig[F[_]: Functor](portPath: String, configList: List[GrpcConfig] = Nil)(
-      implicit SC: ServerConfig[F]): F[ServerW] =
-    SC.buildServer(portPath, configList)
-
-  def BuildNettyServerFromConfig[F[_]: Functor](
-      portPath: String,
-      configList: List[GrpcConfig] = Nil)(implicit SC: ServerConfig[F]): F[ServerW] =
-    SC.buildNettyServer(portPath, configList)
+  class NoopInterceptor extends ClientInterceptor {
+    def interceptCall[ReqT, RespT](
+        method: MethodDescriptor[ReqT, RespT],
+        callOptions: CallOptions,
+        next: Channel): ClientCall[ReqT, RespT] = next.newCall(method, callOptions)
+  }
 
 }

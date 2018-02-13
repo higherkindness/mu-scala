@@ -33,6 +33,11 @@ trait ServerConfig {
   def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): FS[ServerW] =
     configM.load.map { config =>
       val port = config.int(portPath).getOrElse(defaultPort)
-      ServerW(port, configList)
+      ServerW.default(port, configList)
+    }
+
+  def buildNettyServer(portPath: String, configList: List[GrpcConfig] = Nil): FS[ServerW] =
+    configM.load.map { config =>
+      ServerW.netty(ChannelForPort(config.int(portPath).getOrElse(defaultPort)), configList)
     }
 }

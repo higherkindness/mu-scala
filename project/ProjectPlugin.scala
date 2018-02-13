@@ -22,6 +22,7 @@ object ProjectPlugin extends AutoPlugin {
       val fs2ReactiveStreams: String = "0.5.0"
       val grpc: String               = "1.9.1"
       val monix: String              = "3.0.0-M3"
+      val nettySSL: String           = "2.0.7.Final"
       val pbdirect: String           = "0.0.8"
       val prometheus: String         = "0.2.0"
       val scalameta: String          = "1.8.0"
@@ -59,13 +60,15 @@ object ProjectPlugin extends AutoPlugin {
     lazy val clientCoreSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("frees-async-cats-effect", V.frees),
-        %%("scalamockScalatest") % Test
+        %%("scalamockScalatest") % Test,
+        %("grpc-netty", V.grpc)  % Test
       )
     )
 
     lazy val clientNettySettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %("grpc-netty", V.grpc)
+        %("grpc-netty", V.grpc),
+        "io.netty" % "netty-tcnative-boringssl-static" % V.nettySSL % Test
       )
     )
 
@@ -80,7 +83,8 @@ object ProjectPlugin extends AutoPlugin {
         %%("frees-async-cats-effect", V.frees),
         %("grpc-core", V.grpc),
         %("grpc-netty", V.grpc),
-        %%("scalamockScalatest") % Test
+        %%("scalamockScalatest") % Test,
+        "io.netty"               % "netty-tcnative-boringssl-static" % V.nettySSL % Test
       )
     )
 
@@ -121,6 +125,12 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+    lazy val nettySslSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        "io.netty" % "netty-tcnative-boringssl-static" % V.nettySSL
+      )
+    )
+
     lazy val docsSettings = Seq(
       // Pointing to https://github.com/frees-io/freestyle/tree/master/docs/src/main/tut/docs/rpc
       tutTargetDirectory := baseDirectory.value.getParentFile.getParentFile / "docs" / "src" / "main" / "tut" / "docs" / "rpc"
@@ -153,6 +163,7 @@ object ProjectPlugin extends AutoPlugin {
         GitHubIssuesBadge.apply
       )
     ) ++ Seq(
+      fork in Test := true,
       addCompilerPlugin(%%("scalameta-paradise") cross CrossVersion.full),
       libraryDependencies ++= commonDeps ++ Seq(%%("scalameta", V.scalameta)),
       scalacOptions ++= Seq("-Ywarn-unused-import", "-Xplugin-require:macroparadise"),

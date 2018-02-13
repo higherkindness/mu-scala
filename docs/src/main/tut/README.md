@@ -79,6 +79,7 @@ It's divided into multiple and different artifacts, grouped by scope:
 `frees-rpc-common` | Server/Client | Provided* | Common things that are used throughout the project.
 `frees-rpc-internal` | Server/Client | Provided* | Macros.
 `frees-rpc-async` | Server/Client | Provided* | Async instances useful for interacting with the RPC services on both sides, server and the client.
+`frees-rpc-netty-ssl` | Server/Client | No | It adds the `io.netty:netty-tcnative-boringssl-static:jar` dependency, aligned with the Netty version (if that's the case) used in the `frees-rpc` build. See [this section](https://github.com/grpc/grpc-java/blob/master/SECURITY.md#netty) for more information. Adding this you wouldn't need to figure out which would be the right version, `frees-rpc` gives you the right one.
 
 * `Yes*`: on the client-side, you must choose either `Netty` or `OkHttp` as the transport layer.
 * `Provided*`: you don't need to add it to your build, it'll be transitively provided when using other dependencies.
@@ -109,6 +110,9 @@ libraryDependencies += "io.frees" %% "frees-rpc-prometheus-client" % "0.10.0"
 // optional - for both server and client metrics reporting, using Dropwizard.
 libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-server" % "0.10.0"
 libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-client" % "0.10.0"
+
+// optional - for the communication between server and client by using SSL/TLS.
+libraryDependencies += "io.frees" %% "frees-rpc-netty-ssl" % "0.10.0"
 ```
 
 [comment]: # (End Replace)
@@ -567,7 +571,7 @@ object gserver {
       AddService(Greeter.bindService[IO])
     )
 
-    implicit val serverW: ServerW = ServerW(8080, grpcConfigs)
+    implicit val serverW: ServerW = ServerW.default(8080, grpcConfigs)
   }
 
   object implicits extends Implicits
@@ -638,6 +642,7 @@ import cats.implicits._
 import cats.effect.IO
 import freestyle.free.config.implicits._
 import freestyle.async.catsEffect.implicits._
+import freestyle.rpc._
 import freestyle.rpc.client._
 import freestyle.rpc.client.config._
 import freestyle.rpc.client.implicits._
@@ -651,7 +656,7 @@ object gclient {
 
   trait Implicits extends CommonRuntime {
 
-    val channelFor: ManagedChannelFor =
+    val channelFor: ChannelFor =
       ConfigForAddress[Try]("rpc.host", "rpc.port") match {
         case Success(c) => c
         case Failure(e) =>
@@ -745,7 +750,7 @@ object InterceptingServerCalls extends CommonRuntime {
     AddService(Greeter.bindService[IO].interceptWith(monitorInterceptor))
   )
 
-  implicit val serverW: ServerW = ServerW(8080, grpcConfigs)
+  implicit val serverW: ServerW = ServerW.default(8080, grpcConfigs)
 
 }
 ```
@@ -759,6 +764,7 @@ import cats.implicits._
 import cats.effect.IO
 import freestyle.free.config.implicits._
 import freestyle.async.catsEffect.implicits._
+import freestyle.rpc._
 import freestyle.rpc.client._
 import freestyle.rpc.client.config._
 import freestyle.rpc.client.implicits._
@@ -773,7 +779,7 @@ import freestyle.rpc.prometheus.client.MonitoringClientInterceptor
 
 object InterceptingClientCalls extends CommonRuntime {
 
-  val channelFor: ManagedChannelFor =
+  val channelFor: ChannelFor =
     ConfigForAddress[Try]("rpc.host", "rpc.port") match {
       case Success(c) => c
       case Failure(e) =>

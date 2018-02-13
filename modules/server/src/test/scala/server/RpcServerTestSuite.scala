@@ -17,11 +17,19 @@
 package freestyle.rpc
 package server
 
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.{Executor, TimeUnit}
 
 import cats.Applicative
 import freestyle.rpc.common.{RpcBaseTestSuite, SC}
-import io.grpc.{Server, ServerServiceDefinition}
+import freestyle.rpc.server.netty._
+import io.grpc._
+import io.grpc.internal.GrpcUtil
+import io.grpc.netty.{GrpcSslContexts, ProtocolNegotiators}
+import io.grpc.util.MutableHandlerRegistry
+import io.netty.channel.ChannelOption
+import io.netty.channel.local.LocalServerChannel
+import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.handler.ssl.SslContext
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.TimeUnit
@@ -59,6 +67,60 @@ trait RpcServerTestSuite extends RpcBaseTestSuite {
     (serverMock.isTerminated _: () => Boolean).when().returns(b)
     (serverMock.awaitTermination(_: Long, _: TimeUnit)).when(timeout, timeoutUnit).returns(b)
     (serverMock.awaitTermination _: () => Unit).when().returns(unit)
+
+    import java.io.File
+
+    import io.grpc.internal.testing.TestUtils
+
+    val cert: File         = TestUtils.loadCert("server1.pem")
+    val key: File          = TestUtils.loadCert("server1.key")
+    val sslCtx: SslContext = GrpcSslContexts.forServer(cert, key).build()
+
+    val grpcAllConfigList: List[GrpcConfig] = List(
+      AddService(sd1),
+      DirectExecutor,
+      SetExecutor(new Executor() {
+        override def execute(r: Runnable): Unit =
+          throw new RuntimeException("Test executor")
+      }),
+      AddBindableService(new BindableService {
+        override def bindService(): ServerServiceDefinition = sd1
+      }),
+      AddTransportFilter(new ServerTransportFilter() {
+        val key1: Attributes.Key[String] = Attributes.Key.of("key1")
+        val key2: Attributes.Key[String] = Attributes.Key.of("key2")
+        override def transportReady(attrs: Attributes): Attributes =
+          Attributes.newBuilder(attrs).set(key1, "foo").set(key2, "bar").build
+
+        override def transportTerminated(attrs: Attributes): Unit = (): Unit
+      }),
+      AddStreamTracerFactory(new ServerStreamTracer.Factory() {
+        override def newServerStreamTracer(fullMethodName: String, headers: Metadata) =
+          throw new UnsupportedOperationException
+      }),
+      SetFallbackHandlerRegistry(new MutableHandlerRegistry),
+      UseTransportSecurity(cert, key),
+      SetDecompressorRegistry(DecompressorRegistry.getDefaultInstance),
+      SetCompressorRegistry(CompressorRegistry.getDefaultInstance),
+      // Netty configurations:
+      ChannelType((new LocalServerChannel).getClass),
+      WithChildOption[Boolean](ChannelOption.valueOf("ALLOCATOR"), true),
+      BossEventLoopGroup(new NioEventLoopGroup(0)),
+      WorkerEventLoopGroup(new NioEventLoopGroup(0)),
+      SetSslContext(sslCtx),
+      SetProtocolNegotiator(ProtocolNegotiators.serverTls(sslCtx)),
+      MaxConcurrentCallsPerConnection(1000),
+      FlowControlWindow(5),
+      MaxMessageSize(GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE),
+      MaxHeaderListSize(GrpcUtil.DEFAULT_MAX_HEADER_LIST_SIZE),
+      KeepAliveTime(GrpcUtil.DEFAULT_KEEPALIVE_TIME_NANOS, TimeUnit.NANOSECONDS),
+      KeepAliveTimeout(GrpcUtil.DEFAULT_KEEPALIVE_TIMEOUT_NANOS, TimeUnit.NANOSECONDS),
+      MaxConnectionIdle(1000, TimeUnit.MILLISECONDS),
+      MaxConnectionAge(1000, TimeUnit.MILLISECONDS),
+      MaxConnectionAgeGrace(1000, TimeUnit.MILLISECONDS),
+      PermitKeepAliveTime(1000, TimeUnit.MILLISECONDS),
+      PermitKeepAliveWithoutCalls(true)
+    )
   }
 
   object implicits extends Helpers with DummyData {

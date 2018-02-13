@@ -17,17 +17,20 @@
 package freestyle.rpc
 package server
 
-import cats.Functor
+import freestyle.rpc.server.netty.NettyServerConfigBuilder
+import io.grpc.Server
 
-package object config {
+case class ServerW(server: Server)
 
-  def BuildServerFromConfig[F[_]: Functor](portPath: String, configList: List[GrpcConfig] = Nil)(
-      implicit SC: ServerConfig[F]): F[ServerW] =
-    SC.buildServer(portPath, configList)
+object ServerW {
 
-  def BuildNettyServerFromConfig[F[_]: Functor](
-      portPath: String,
-      configList: List[GrpcConfig] = Nil)(implicit SC: ServerConfig[F]): F[ServerW] =
-    SC.buildNettyServer(portPath, configList)
+  def default(port: Int, configList: List[GrpcConfig]): ServerW =
+    ServerW(SServerBuilder(port, configList).build)
+
+  def netty(port: Int, configList: List[GrpcConfig]): ServerW =
+    netty(ChannelForPort(port), configList)
+
+  def netty(channelFor: ChannelFor, configList: List[GrpcConfig]): ServerW =
+    ServerW(NettyServerConfigBuilder(channelFor, configList).build)
 
 }

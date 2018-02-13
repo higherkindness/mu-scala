@@ -15,19 +15,11 @@
  */
 
 package freestyle.rpc
-package server
 
-import cats.Functor
+import java.net.SocketAddress
 
-package object config {
-
-  def BuildServerFromConfig[F[_]: Functor](portPath: String, configList: List[GrpcConfig] = Nil)(
-      implicit SC: ServerConfig[F]): F[ServerW] =
-    SC.buildServer(portPath, configList)
-
-  def BuildNettyServerFromConfig[F[_]: Functor](
-      portPath: String,
-      configList: List[GrpcConfig] = Nil)(implicit SC: ServerConfig[F]): F[ServerW] =
-    SC.buildNettyServer(portPath, configList)
-
-}
+sealed trait ChannelFor                                                extends Product with Serializable
+final case class ChannelForPort(port: Int)                             extends ChannelFor
+final case class ChannelForAddress(host: String, port: Int)            extends ChannelFor
+final case class ChannelForSocketAddress(serverAddress: SocketAddress) extends ChannelFor
+final case class ChannelForTarget(target: String)                      extends ChannelFor

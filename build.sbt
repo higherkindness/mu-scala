@@ -97,6 +97,13 @@ lazy val testing = project
   .settings(moduleName := "frees-rpc-testing")
   .settings(testingSettings)
 
+lazy val ssl = project
+  .in(file("modules/ssl"))
+  .dependsOn(server % "test->test")
+  .dependsOn(`client-netty` % "compile->compile;test->test")
+  .settings(moduleName := "frees-rpc-netty-ssl")
+  .settings(nettySslSettings)
+
 //////////////////////////
 //// MODULES REGISTRY ////
 //////////////////////////
@@ -115,7 +122,8 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `prometheus-server`,
   `dropwizard-server`,
   `dropwizard-client`,
-  testing
+  testing,
+  ssl
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =

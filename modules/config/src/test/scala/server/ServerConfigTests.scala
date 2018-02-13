@@ -34,7 +34,8 @@ class ServerConfigTests extends RpcServerTestSuite {
       val serverConf: ServerW =
         BuildServerFromConfig[ConcurrentMonad]("rpc.server.port").unsafeRunSync()
 
-      serverConf.port shouldBe SC.port
+      serverConf.server.start().getPort shouldBe SC.port
+      serverConf.server.shutdownNow().awaitTermination()
     }
 
     "load the default port when the config port path is not found" in {
@@ -42,7 +43,8 @@ class ServerConfigTests extends RpcServerTestSuite {
       val serverConf: ServerW =
         BuildServerFromConfig[ConcurrentMonad]("rpc.wrong.path").unsafeRunSync()
 
-      serverConf.port shouldBe defaultPort
+      serverConf.server.start().getPort shouldBe defaultPort
+      serverConf.server.shutdownNow().awaitTermination()
     }
 
   }

@@ -32,7 +32,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
     "build a io.grpc.ManagedChannel based on the specified configuration, for an address" in {
 
-      val channelFor: ManagedChannelFor = ManagedChannelForAddress(SC.host, SC.port)
+      val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
 
       val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
 
@@ -46,7 +46,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
     "build a io.grpc.ManagedChannel based on the specified configuration, for an target" in {
 
-      val channelFor: ManagedChannelFor = ManagedChannelForTarget(SC.host)
+      val channelFor: ChannelFor = ChannelForTarget(SC.host)
 
       val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
 
@@ -60,7 +60,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
     "apply should work as expected" in {
 
-      val channelFor: ManagedChannelFor = ManagedChannelForTarget(SC.host)
+      val channelFor: ChannelFor = ChannelForTarget(SC.host)
 
       val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
 
@@ -73,6 +73,43 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
       Await.result(managedChannelInterpreter[String](kleisli), Duration.Inf) shouldBe foo
     }
 
-  }
+    "build a io.grpc.ManagedChannel based on any configuration combination" in {
 
+      val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
+
+      val channelConfigList: List[ManagedChannelConfig] = managedChannelConfigAllList
+
+      val managedChannelInterpreter =
+        new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
+
+      val mc: ManagedChannel = managedChannelInterpreter.build(channelFor, channelConfigList)
+
+      mc shouldBe an[ManagedChannel]
+    }
+
+    "throw an exception when configuration is not recognized" in {
+
+      val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
+
+      case object Unexpected extends ManagedChannelConfig
+      val channelConfigList: List[ManagedChannelConfig] = List(Unexpected)
+
+      val managedChannelInterpreter =
+        new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
+
+      an[MatchError] shouldBe thrownBy(
+        managedChannelInterpreter.build(channelFor, channelConfigList))
+    }
+
+    "throw an exception when ChannelFor is not recognized" in {
+
+      val channelFor: ChannelFor = ChannelForPort(SC.port)
+
+      val managedChannelInterpreter =
+        new ManagedChannelInterpreter[Future](channelFor, Nil)
+
+      an[IllegalArgumentException] shouldBe thrownBy(
+        managedChannelInterpreter.build(channelFor, Nil))
+    }
+  }
 }

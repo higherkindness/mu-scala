@@ -21,21 +21,20 @@ import java.util.concurrent.{Executor, TimeUnit}
 
 import io.grpc._
 
-sealed trait ManagedChannelFor                               extends Product with Serializable
-case class ManagedChannelForAddress(host: String, port: Int) extends ManagedChannelFor
-case class ManagedChannelForTarget(target: String)           extends ManagedChannelFor
-
-sealed trait ManagedChannelConfig                                     extends Product with Serializable
-case object DirectExecutor                                            extends ManagedChannelConfig
-case class SetExecutor(executor: Executor)                            extends ManagedChannelConfig
-case class AddInterceptorList(interceptors: List[ClientInterceptor])  extends ManagedChannelConfig
-case class AddInterceptor(interceptors: ClientInterceptor*)           extends ManagedChannelConfig
-case class UserAgent(userAgent: String)                               extends ManagedChannelConfig
-case class OverrideAuthority(authority: String)                       extends ManagedChannelConfig
-case class UsePlaintext(skipNegotiation: Boolean)                     extends ManagedChannelConfig
-case class NameResolverFactory(resolverFactory: NameResolver.Factory) extends ManagedChannelConfig
-case class LoadBalancerFactory(lbFactory: LoadBalancer.Factory)       extends ManagedChannelConfig
-case class SetDecompressorRegistry(registry: DecompressorRegistry)    extends ManagedChannelConfig
-case class SetCompressorRegistry(registry: CompressorRegistry)        extends ManagedChannelConfig
-case class SetIdleTimeout(value: Long, unit: TimeUnit)                extends ManagedChannelConfig
-case class SetMaxInboundMessageSize(max: Int)                         extends ManagedChannelConfig
+trait ManagedChannelConfig                       extends Product with Serializable
+case object DirectExecutor                       extends ManagedChannelConfig
+final case class SetExecutor(executor: Executor) extends ManagedChannelConfig
+final case class AddInterceptorList(interceptors: List[ClientInterceptor])
+    extends ManagedChannelConfig
+final case class AddInterceptor(interceptors: ClientInterceptor*) extends ManagedChannelConfig
+final case class UserAgent(userAgent: String)                     extends ManagedChannelConfig
+final case class OverrideAuthority(authority: String)             extends ManagedChannelConfig
+final case class UsePlaintext(skipNegotiation: Boolean)           extends ManagedChannelConfig
+final case class NameResolverFactory(resolverFactory: NameResolver.Factory)
+    extends ManagedChannelConfig
+final case class LoadBalancerFactory(lbFactory: LoadBalancer.Factory) extends ManagedChannelConfig
+final case class SetDecompressorRegistry(registry: DecompressorRegistry)
+    extends ManagedChannelConfig
+final case class SetCompressorRegistry(registry: CompressorRegistry) extends ManagedChannelConfig
+final case class SetIdleTimeout(value: Long, unit: TimeUnit)         extends ManagedChannelConfig
+final case class SetMaxInboundMessageSize(max: Int)                  extends ManagedChannelConfig

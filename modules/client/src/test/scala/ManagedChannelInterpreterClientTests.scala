@@ -15,19 +15,6 @@
  */
 
 package freestyle.rpc
-package server
+package client
 
-import cats.Functor
-
-package object config {
-
-  def BuildServerFromConfig[F[_]: Functor](portPath: String, configList: List[GrpcConfig] = Nil)(
-      implicit SC: ServerConfig[F]): F[ServerW] =
-    SC.buildServer(portPath, configList)
-
-  def BuildNettyServerFromConfig[F[_]: Functor](
-      portPath: String,
-      configList: List[GrpcConfig] = Nil)(implicit SC: ServerConfig[F]): F[ServerW] =
-    SC.buildNettyServer(portPath, configList)
-
-}
+class ManagedChannelInterpreterClientTests extends ManagedChannelInterpreterTests
