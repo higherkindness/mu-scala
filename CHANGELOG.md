@@ -1,5 +1,13 @@
 # Changelog
 
+## 02/14/2018 - Version 0.11.1
+
+Release changes:
+
+* Readd support for companion objects ([#172](https://github.com/frees-io/freestyle-rpc/pull/172))
+* Update fs2-reactive-streams and release 0.11.1 ([#173](https://github.com/frees-io/freestyle-rpc/pull/173))
+
+
 ## 02/13/2018 - Version 0.11.0
 
 Release changes:
