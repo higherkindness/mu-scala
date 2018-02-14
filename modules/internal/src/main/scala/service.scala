@@ -38,15 +38,26 @@ object serviceImpl {
         serviceExtras(cls.name, cls)
       case cls: Class if ScalametaUtil.isAbstract(cls) =>
         serviceExtras(cls.name, cls)
+      case Term.Block(Seq(cls: Trait, companion: Object)) =>
+        serviceExtras(cls.name, cls, Some(companion))
+      case Term.Block(Seq(cls: Class, companion: Object)) if ScalametaUtil.isAbstract(cls) =>
+        serviceExtras(cls.name, cls, Some(companion))
       case _ =>
         abort(s"$invalid. $abstractOnly")
     }
   }
 
-  private[this] def serviceExtras(name: Type.Name, alg: Defn): Term.Block = {
+  private[this] def serviceExtras(
+      name: Type.Name,
+      alg: Defn,
+      companion: Option[Object] = None): Term.Block = {
     import utils._
     val serviceAlg = ServiceAlg(alg)
-    Term.Block(alg +: Seq(mkCompanion(name, enrich(serviceAlg, serviceAlg.innerImports))))
+    val enrichedCompanion = {
+      val stats = enrich(serviceAlg, serviceAlg.innerImports)
+      companion.fold(mkCompanion(name, stats))(enrichCompanion(_, stats))
+    }
+    Term.Block(alg :: enrichedCompanion :: Nil)
   }
 
   private[this] def enrich(serviceAlg: RPCService, members: Seq[Stat]): Seq[Stat] =
@@ -265,14 +276,17 @@ private[internal] object utils {
   }
 
   def mkCompanion(name: Type.Name, stats: Seq[Stat]): Object = {
-    val warts = surpressWarts("Any", "NonUnitStatements", "StringPlusAny", "Throw")
-    val prot  = q"$warts object X {}"
+    val prot = q"object X {}"
+    val obj  = prot.copy(name = Term.Name(name.value))
+    enrichCompanion(obj, stats)
+  }
 
-    prot.copy(
-      name = Term.Name(name.value),
-      templ = prot.templ.copy(
-        stats = Some(stats)
-      ))
+  def enrichCompanion(companion: Defn.Object, stats: Seq[Stat]): Object = {
+    val warts = surpressWarts("Any", "NonUnitStatements", "StringPlusAny", "Throw")
+    import companion._
+    copy(
+      mods = warts +: mods,
+      templ = templ.copy(stats = Some(templ.stats.getOrElse(Nil) ++ stats)))
   }
 
   def paramTpe(param: Term.Param): Type = {
@@ -358,7 +372,7 @@ private[internal] object utils {
 private[internal] object errors {
   val invalid = "Invalid use of `@service`"
   val abstractOnly =
-    "`@service` can only annotate a trait or abstract class already annotated with @tagless"
+    "`@service` can only annotate a trait or abstract class"
 }
 
 // $COVERAGE-ON$
