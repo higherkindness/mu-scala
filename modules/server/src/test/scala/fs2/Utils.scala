@@ -59,6 +59,11 @@ object Utils extends CommonUtils {
 
     }
 
+    object RPCService {
+      // this companion object is here to make sure @service supports
+      // companion objects
+    }
+
   }
 
   object handlers {
