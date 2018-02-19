@@ -104,6 +104,22 @@ lazy val ssl = project
   .settings(moduleName := "frees-rpc-netty-ssl")
   .settings(nettySslSettings)
 
+lazy val `idlgen-core` = project
+  .in(file("modules/idlgen/core"))
+  .dependsOn(internal)
+  .dependsOn(client % "test->test")
+  .settings(moduleName := "frees-rpc-idlgen-core")
+
+lazy val `idlgen-sbt` = project
+  .in(file("modules/idlgen/plugin"))
+  .dependsOn(`idlgen-core` % "compile->compile;test->test")
+  .settings(moduleName := "frees-rpc-sbt-idlgen")
+  .settings(sbtPluginSettings)
+  .settings(sbtPlugin := true)
+  .enablePlugins(BuildInfoPlugin)
+  .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
+  .settings(buildInfoPackage := "freestyle.rpc.idlgen")
+
 //////////////////////////
 //// MODULES REGISTRY ////
 //////////////////////////
@@ -123,7 +139,9 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `dropwizard-server`,
   `dropwizard-client`,
   testing,
-  ssl
+  ssl,
+  `idlgen-core`,
+  `idlgen-sbt`
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =
