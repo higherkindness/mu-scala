@@ -113,9 +113,6 @@ libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-client" % "0.11.1"
 
 // optional - for the communication between server and client by using SSL/TLS.
 libraryDependencies += "io.frees" %% "frees-rpc-netty-ssl" % "0.11.1"
-
-// optional - for .proto file generation.
-libraryDependencies += "io.frees" %% "frees-rpc-sbt-idlgen" % "0.11.1"
 ```
 
 [comment]: # (End Replace)

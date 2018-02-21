@@ -24,7 +24,9 @@ class ProtoCodeGenTests extends RpcBaseTestSuite {
 
   s"$ProtoCodeGen.generate()" should {
     "generate a correct .proto file" in {
-      val baseDir       = "src/test"
+      // Clunky workaround for Travis CI env until we refactor Protogen to use classpath-provided streams
+      val baseDir = Option(System.getenv("TRAVIS_BUILD_DIR")).fold(".")(travisDir =>
+        s"$travisDir/frees-io/freestyle-rpc/modules/idlgen/core") + "/src/test"
       val srcDir        = s"$baseDir/scala"
       val dstDir        = s"$baseDir/proto"
       val output        = ProtoCodeGen.generate(new File(srcDir), new File(dstDir)).flatten

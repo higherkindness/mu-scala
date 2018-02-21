@@ -1,0 +1,24 @@
+// This file has been automatically generated for use by
+// the protoGen plugin, from frees-rpc service definitions.
+// Read more at: http://frees.io/docs/rpc/
+
+syntax = "proto3";
+
+option java_package = "quickstart";
+option java_multiple_files = true;
+option java_outer_classname = "Quickstart";
+
+message HelloRequest {
+    string greeting = 1;
+}
+
+message HelloResponse {
+    string reply = 1;
+}
+
+service Greeter {
+    rpc sayHello (HelloRequest) returns (HelloResponse) {}
+    rpc lotsOfReplies (HelloRequest) returns (stream HelloResponse) {}
+    rpc lotsOfGreetings (stream HelloRequest) returns (HelloResponse) {}
+    rpc bidiHello (stream HelloRequest) returns (stream HelloResponse) {}
+}
