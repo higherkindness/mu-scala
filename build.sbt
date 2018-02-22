@@ -112,14 +112,15 @@ lazy val `idlgen-core` = project
 
 lazy val `idlgen-sbt` = project
   .in(file("modules/idlgen/plugin"))
+  .aggregate(`idlgen-core`)
   .dependsOn(`idlgen-core` % "compile->compile;test->test")
   .settings(moduleName := "frees-rpc-sbt-idlgen")
   .settings(sbtPluginSettings)
   .settings(sbtPlugin := true)
+  .settings(crossScalaVersions := Seq(scalaVersion.value)) // org.scala-sbt:scripted-plugin not available in 2.11 for recent sbt
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
   .settings(buildInfoPackage := "freestyle.rpc.idlgen")
-  .settings(crossScalaVersions := Seq(scalaVersion.value))
 
 //////////////////////////
 //// MODULES REGISTRY ////

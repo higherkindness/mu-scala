@@ -416,6 +416,8 @@ addSbtPlugin("io.frees" % "frees-rpc-sbt-idlgen" % "0.11.1")
 ```
 [comment]: # (End Replace)
 
+Note that the plugin is only available for Scala 2.12.
+
 ### Plugin Settings
 
 There are a couple key settings that can be configured according to various needs:
