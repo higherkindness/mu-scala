@@ -1,3 +1,5 @@
+import sbtorgpolicies.model.scalac
+
 pgpPassphrase := Some(getEnvVar("PGP_PASSPHRASE").getOrElse("").toCharArray)
 pgpPublicRing := file(s"$gpgFolder/pubring.gpg")
 pgpSecretRing := file(s"$gpgFolder/secring.gpg")
@@ -117,7 +119,7 @@ lazy val `idlgen-sbt` = project
   .settings(moduleName := "frees-rpc-sbt-idlgen")
   .settings(sbtPluginSettings)
   .settings(sbtPlugin := true)
-  .settings(crossScalaVersions := Seq(scalaVersion.value)) // org.scala-sbt:scripted-plugin not available in 2.11 for recent sbt
+  .settings(crossScalaVersions := Seq(scalac.`2.12`)) // org.scala-sbt:scripted-plugin not available in 2.11 for recent sbt
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
   .settings(buildInfoPackage := "freestyle.rpc.idlgen")
@@ -141,9 +143,7 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `dropwizard-server`,
   `dropwizard-client`,
   testing,
-  ssl,
-  `idlgen-core`,
-  `idlgen-sbt`
+  ssl
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =

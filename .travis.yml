@@ -32,16 +32,24 @@ before_install:
 
 script:
 - sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
-- sbt ++$TRAVIS_SCALA_VERSION scripted
 
-after_success:
-- bash <(curl -s https://codecov.io/bash) -t 5b75b318-ab71-4fbc-9203-bfa7765cdbdc
+stages:
+- test
+- plugin
+- deploy
 
 jobs:
   include:
+    - stage: plugin
+      scala: 2.12.4
+      script:
+        - sbt ++$TRAVIS_SCALA_VERSION idlgen-core/test
+        - sbt ++$TRAVIS_SCALA_VERSION idlgen-sbt/test
+        - sbt ++$TRAVIS_SCALA_VERSION idlgen-sbt/scripted
     - stage: deploy
       scala: 2.12.4
       script:
+        - bash <(curl -s https://codecov.io/bash) -t 5b75b318-ab71-4fbc-9203-bfa7765cdbdc
         - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
             if grep -q "SNAPSHOT" version.sbt; then
               sbt ++$TRAVIS_SCALA_VERSION publish;
