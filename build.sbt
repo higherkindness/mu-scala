@@ -158,7 +158,8 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `dropwizard-server`,
   `dropwizard-client`,
   testing,
-  ssl
+  ssl,
+  `idlgen-core`
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =
