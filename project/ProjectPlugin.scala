@@ -3,9 +3,16 @@ import freestyle.FreestylePlugin
 import freestyle.FreestylePlugin.autoImport._
 import sbt.Keys._
 import sbt._
+import sbt.ScriptedPlugin.autoImport._
 import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
 import sbtorgpolicies.templates.badges._
 import sbtorgpolicies.runnable.syntax._
+import sbtrelease.ReleasePlugin.autoImport.{
+  releaseProcess,
+  releaseStepCommandAndRemaining,
+  ReleaseStep
+}
+import sbtrelease.ReleaseStateTransformations._
 import tut.TutPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
@@ -132,8 +139,20 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "org.scala-sbt" %% "scripted-plugin" % sbtVersion.value
+      scriptedLaunchOpts := {
+        scriptedLaunchOpts.value ++
+          Seq(
+            "-Xmx2048M",
+            "-XX:ReservedCodeCacheSize=256m",
+            "-XX:+UseConcMarkSweepGC",
+            "-Dplugin.version=" + version.value,
+            "-Dscala.version=" + scalaVersion.value
+          )
+      },
+      // Custom release process for the plugin:
+      releaseProcess := Seq[ReleaseStep](
+        releaseStepCommandAndRemaining("^ publishSigned"),
+        ReleaseStep(action = "sonatypeReleaseAll" :: _)
       )
     )
 
