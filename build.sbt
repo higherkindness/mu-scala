@@ -119,6 +119,7 @@ lazy val `idlgen-sbt` = project
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
   .settings(buildInfoPackage := "freestyle.rpc.idlgen")
+  .settings(crossScalaVersions := Seq(scalaVersion.value))
 
 //////////////////////////
 //// MODULES REGISTRY ////
