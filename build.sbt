@@ -116,7 +116,7 @@ lazy val `idlgen-sbt` = project
   .in(file("modules/idlgen/plugin"))
   .aggregate(`idlgen-core`)
   .dependsOn(`idlgen-core` % "compile->compile;test->test")
-  .settings(moduleName := "frees-rpc-sbt-idlgen")
+  .settings(moduleName := "sbt-frees-rpc-idlgen")
   .settings(sbtPluginSettings)
   .settings(sbtPlugin := true)
   .settings(crossScalaVersions := Seq(scalac.`2.12`)) // org.scala-sbt:scripted-plugin not available in 2.11 for recent sbt
