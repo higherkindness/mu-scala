@@ -45,7 +45,7 @@ jobs:
       script:
         - sbt ++$TRAVIS_SCALA_VERSION idlgen-core/test
         - sbt ++$TRAVIS_SCALA_VERSION idlgen-sbt/test
-        - sbt ++$TRAVIS_SCALA_VERSION idlgen-sbt/scripted
+        - sbt ++$TRAVIS_SCALA_VERSION idlgen-core/publishLocal idlgen-sbt/publishLocal idlgen-sbt/scripted
     - stage: deploy
       scala: 2.12.4
       script:
@@ -60,6 +60,7 @@ jobs:
               git checkout master;
               git pull origin master;
               sbt release;
+              sbt idlgen-sbt/release;
               sbt depUpdateDependencyIssues;
             fi
           fi

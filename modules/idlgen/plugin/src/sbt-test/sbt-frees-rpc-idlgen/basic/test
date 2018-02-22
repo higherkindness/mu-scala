@@ -1,0 +1,5 @@
+> protoGen
+
+$ exists src/main/proto/model.proto
+
+$ delete src/main/proto/model.proto
