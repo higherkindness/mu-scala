@@ -7,12 +7,8 @@ import sbt.ScriptedPlugin.autoImport._
 import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
 import sbtorgpolicies.templates.badges._
 import sbtorgpolicies.runnable.syntax._
-import sbtrelease.ReleasePlugin.autoImport.{
-  releaseProcess,
-  releaseStepCommandAndRemaining,
-  ReleaseStep
-}
-import sbtrelease.ReleaseStateTransformations._
+import sbtrelease.ReleasePlugin.autoImport._
+import scala.language.reflectiveCalls
 import tut.TutPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
@@ -145,8 +141,7 @@ object ProjectPlugin extends AutoPlugin {
             "-Xmx2048M",
             "-XX:ReservedCodeCacheSize=256m",
             "-XX:+UseConcMarkSweepGC",
-            "-Dplugin.version=" + version.value,
-            "-Dscala.version=" + scalaVersion.value
+            "-Dversion=" + version.value
           )
       },
       // Custom release process for the plugin:

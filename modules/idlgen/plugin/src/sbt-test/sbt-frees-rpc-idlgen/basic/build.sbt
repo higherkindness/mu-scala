@@ -1,7 +1,7 @@
-version := "1.0"
+version := sys.props("version")
 
 resolvers += Resolver.bintrayRepo("beyondthelines", "maven")
 
 libraryDependencies ++= Seq(
-  "io.frees" %% "frees-rpc-server" % "0.11.1"
+  "io.frees" %% "frees-rpc-server" % sys.props("version")
 )
