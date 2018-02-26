@@ -412,7 +412,7 @@ Add the following line to _project/plugins.sbt_:
 
 [comment]: # (Start Replace)
 ```scala
-addSbtPlugin("io.frees" % "frees-rpc-sbt-idlgen" % "0.11.1")
+addSbtPlugin("io.frees" % "sbt-frees-rpc-idlgen" % "0.11.1")
 ```
 [comment]: # (End Replace)
 
