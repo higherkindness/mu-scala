@@ -152,7 +152,7 @@ Likewise, you can define [gRPC] services in your proto files, with RPC method pa
 // The greeter service definition.
 service Greeter {
   // Sends a greeting
-  rpc SayHello (HelloRequest) returns (HelloReply) {}
+  rpc sayHello (HelloRequest) returns (HelloReply) {}
 }
 
 // The request message containing the user's name.
@@ -201,7 +201,7 @@ import freestyle.rpc.protocol._
 case class Person(name: String, id: Int, has_ponycopter: Boolean)
 ```
 
-As we can see, it’s quite simple since it’s just a Scala case class preceded by the `@message` annotation (`@message` is optional though and used exclusively by [sbt-freestyle-protogen](https://github.com/frees-io/sbt-freestyle-protogen)):
+As we can see, it’s quite simple since it’s just a Scala case class preceded by the `@message` annotation (`@message` is optional though and used exclusively by `protoGen`):
 
 By the same token, let’s see now how the `Greeter` service would be translated to the [frees-rpc] style (in your `.scala` file):
 
@@ -281,13 +281,13 @@ object protocol {
      * @param request Say Hello Request.
      * @return HelloReply.
      */
-    @rpc(Protobuf) def sayHello(request: HelloRequest): F[HelloReply]
+    @rpc(Protobuf) def SayHello(request: HelloRequest): F[HelloReply]
 
-    @rpc(Protobuf) def emptyResponse(request: HelloRequest): F[Empty.type]
+    @rpc(Protobuf) def EmptyResponse(request: HelloRequest): F[Empty.type]
 
-    @rpc(Protobuf) def emptyRequest(request: Empty.type): F[HelloReply]
+    @rpc(Protobuf) def EmptyRequest(request: Empty.type): F[HelloReply]
 
-    @rpc(Protobuf) def emptyRequestRespose(request: Empty.type): F[Empty.type]
+    @rpc(Protobuf) def EmptyRequestRespose(request: Empty.type): F[Empty.type]
   }
 }
 ```
@@ -404,15 +404,19 @@ The code might be explanatory by itself but let's review the different services 
 
 Before entering implementation details, we mentioned that the [frees-rpc] ecosystem brings the ability to generate `.proto` files from the Scala definition, in order to maintain compatibility with other languages and systems outside of Scala.
 
-This responsibility relies on [sbt-freestyle-protogen](https://github.com/frees-io/sbt-freestyle-protogen), an Sbt plugin to generate `.proto` files from the [frees-rpc] service definitions.
+This responsibility relies on `protoGen`, an Sbt plugin to generate `.proto` files from the [frees-rpc] service definitions.
 
 ### Plugin Installation
 
 Add the following line to _project/plugins.sbt_:
 
+[comment]: # (Start Replace)
 ```scala
-addSbtPlugin("io.frees" % "sbt-frees-protogen" % "0.0.14")
+addSbtPlugin("io.frees" % "sbt-frees-rpc-idlgen" % "0.11.1")
 ```
+[comment]: # (End Replace)
+
+Note that the plugin is only available for Scala 2.12.
 
 ### Plugin Settings
 
@@ -435,7 +439,7 @@ Using the example above, the result would be placed at `/src/main/proto/service.
 
 ```
 // This file has been automatically generated for use by
-// sbt-frees-protogen plugin, from freestyle-rpc service definitions
+// the protoGen plugin, from freestyle-rpc service definitions
 
 syntax = "proto3";
 

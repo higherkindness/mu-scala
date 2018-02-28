@@ -3,9 +3,12 @@ import freestyle.FreestylePlugin
 import freestyle.FreestylePlugin.autoImport._
 import sbt.Keys._
 import sbt._
+import sbt.ScriptedPlugin.autoImport._
 import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
 import sbtorgpolicies.templates.badges._
 import sbtorgpolicies.runnable.syntax._
+import sbtrelease.ReleasePlugin.autoImport._
+import scala.language.reflectiveCalls
 import tut.TutPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
@@ -128,6 +131,23 @@ object ProjectPlugin extends AutoPlugin {
     lazy val nettySslSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.netty" % "netty-tcnative-boringssl-static" % V.nettySSL
+      )
+    )
+
+    lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
+      scriptedLaunchOpts := {
+        scriptedLaunchOpts.value ++
+          Seq(
+            "-Xmx2048M",
+            "-XX:ReservedCodeCacheSize=256m",
+            "-XX:+UseConcMarkSweepGC",
+            "-Dversion=" + version.value
+          )
+      },
+      // Custom release process for the plugin:
+      releaseProcess := Seq[ReleaseStep](
+        releaseStepCommandAndRemaining("^ publishSigned"),
+        ReleaseStep(action = "sonatypeReleaseAll" :: _)
       )
     )
 

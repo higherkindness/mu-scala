@@ -90,7 +90,8 @@ trait RPCService {
 
   val innerImports: List[Stat] = imports
 
-  private[this] val (noRequests, requests) = buildRequests(algName, typeParam, noImports)
+  val (noRequests, requests): (List[Stat], List[RPCRequest]) =
+    buildRequests(algName, typeParam, noImports)
 
   val methodDescriptors: Seq[Defn.Val] = requests.map(_.methodDescriptor)
 
