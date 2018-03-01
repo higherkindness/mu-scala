@@ -53,7 +53,7 @@ class IdlGenTests extends RpcBaseTestSuite {
 
   s"${Parser.getClass.getSimpleName}.parse()" should {
     "generate correct RPC definitions from Scala source file" in {
-      val input = io.Source.fromResource("GreeterService.scala").mkString.parse[Source].get
+      val input = io.Source.fromInputStream(getClass.getResourceAsStream("/GreeterService.scala")).mkString.parse[Source].get
       val RpcDefinitions(options, messages, services) = Parser.parse(input)
       val RpcDefinitions(expectedOptions, expectedMessages, expectedServices) = greeterRpcs
       options shouldBe expectedOptions
@@ -64,7 +64,7 @@ class IdlGenTests extends RpcBaseTestSuite {
 
   s"${Generator.getClass.getSimpleName}.generateFrom()" should {
     "generate correct IDL syntax from RPC definitions" in {
-      val expectedProto = io.Source.fromResource("proto/GreeterService.proto").getLines.toList
+      val expectedProto = io.Source.fromInputStream(getClass.getResourceAsStream("/proto/GreeterService.proto")).getLines.toList
       val output = Generator.generateFrom(greeterRpcs)
       output.get(ProtoGenerator) should not be empty
       output(ProtoGenerator) shouldBe expectedProto
