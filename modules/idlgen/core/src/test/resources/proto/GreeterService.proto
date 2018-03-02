@@ -1,0 +1,29 @@
+// This file has been automatically generated for use by
+// the idlGen plugin, from frees-rpc service definitions.
+// Read more at: http://frees.io/docs/rpc/
+
+syntax = "proto3";
+
+option java_package = "quickstart";
+option java_multiple_files = true;
+option java_outer_classname = "Quickstart";
+
+message HelloRequest {
+  string greeting = 1;
+}
+
+message HellosRequest {
+  repeated string greetings = 1;
+}
+
+message HelloResponse {
+  string reply = 1;
+}
+
+service Greeter {
+  rpc SayHelloProto (HelloRequest) returns (HelloResponse);
+  rpc SayNothing (Empty) returns (Empty);
+  rpc LotsOfReplies (HelloRequest) returns (stream HelloResponse);
+  rpc LotsOfGreetings (stream HelloRequest) returns (HelloResponse);
+  rpc BidiHello (stream HelloRequest) returns (stream HelloResponse);
+}

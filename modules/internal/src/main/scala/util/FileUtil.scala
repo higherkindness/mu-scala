@@ -14,22 +14,33 @@
  * limitations under the License.
  */
 
-package freestyle
-package rpc
+package freestyle.rpc
+package internal
+package util
 
-import freestyle.rpc.internal.serviceImpl
+import java.io._
 
-import scala.annotation.{compileTimeOnly, StaticAnnotation}
+object FileUtil {
 
-// $COVERAGE-OFF$
-package object protocol {
+  implicit class FileOps(val file: File) extends AnyVal {
 
-  @compileTimeOnly("enable macro paradise to expand @service macro annotations")
-  class service extends StaticAnnotation {
-    import scala.meta._
+    def requireExisting: File = {
+      require(file.exists, s"$file doesn't exist")
+      file
+    }
 
-    inline def apply(defn: Any): Any = meta { serviceImpl.service(defn) }
+    def allMatching(f: File => Boolean): Seq[File] =
+      if (file.isDirectory) file.listFiles.flatMap(_.allMatching(f))
+      else Seq(file).filter(f)
+
+    def write(lines: Seq[String]): Unit = {
+      val writer = new PrintWriter(file)
+      try lines.foreach(writer.println(_))
+      finally writer.close()
+    }
+
+    def write(line: String): Unit = write(Seq(line))
+
   }
-}
 
-// $COVERAGE-ON$
+}

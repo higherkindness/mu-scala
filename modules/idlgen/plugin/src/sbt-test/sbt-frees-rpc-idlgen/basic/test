@@ -1,5 +1,5 @@
-> protoGen
+> idlGen
 
-$ exists src/main/proto/model.proto
+$ exists src/main/resources/proto/model.proto
 
-$ delete src/main/proto/model.proto
+$ delete src/main/resources/proto/model.proto

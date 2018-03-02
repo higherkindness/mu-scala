@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-package freestyle
-package rpc
+package freestyle.rpc
+package internal
+package util
 
-import freestyle.rpc.internal.serviceImpl
+object StringUtil {
 
-import scala.annotation.{compileTimeOnly, StaticAnnotation}
-
-// $COVERAGE-OFF$
-package object protocol {
-
-  @compileTimeOnly("enable macro paradise to expand @service macro annotations")
-  class service extends StaticAnnotation {
-    import scala.meta._
-
-    inline def apply(defn: Any): Any = meta { serviceImpl.service(defn) }
+  implicit class StringOps(val s: String) extends AnyVal {
+    def quoted: String   = '"' + s + '"'
+    def unquoted: String = s.replaceAll("^\"|\"$", "")
+    def trimAll: String  = s.replaceAll("\\s", "")
   }
 }
-
-// $COVERAGE-ON$

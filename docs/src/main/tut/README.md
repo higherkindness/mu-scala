@@ -21,10 +21,10 @@ Freestyle RPC is a purely functional library for building RPC endpoint-based ser
     - [gRPC](#grpc)
     - [frees-rpc](#frees-rpc)
   - [Service Methods](#service-methods)
-  - [Generating a .proto file](#generating-a-proto-file)
+  - [Generating IDL files](#generating-idl-files)
     - [Plugin Installation](#plugin-installation)
     - [Plugin Settings](#plugin-settings)
-    - [Generation with protoGen](#generation-with-protogen)
+    - [Generation with idlGen](#generation-with-idlgen)
   - [RPC Service Implementations](#rpc-service-implementations)
     - [Server](#server)
     - [Server Runtime](#server-runtime)
@@ -152,7 +152,7 @@ Likewise, you can define [gRPC] services in your proto files, with RPC method pa
 // The greeter service definition.
 service Greeter {
   // Sends a greeting
-  rpc sayHello (HelloRequest) returns (HelloReply) {}
+  rpc SayHello (HelloRequest) returns (HelloReply);
 }
 
 // The request message containing the user's name.
@@ -177,7 +177,7 @@ In the previous section, we’ve seen an overview of what [gRPC] offers for defi
 First things first, the main difference in respect to [gRPC] is that [frees-rpc] doesn’t need `.proto` files, but it still uses protobuf, thanks to the [PBDirect] library, which allows to read and write Scala objects directly to protobuf with no `.proto` file definitions. Therefore, in summary, we have:
 
 * Your protocols, both messages, and services, will reside with your business-logic in your Scala files using [scalameta] annotations to set them up. We’ll see more details on this shortly.
-* Instead of reading `.proto` files to set up the [RPC] messages and services, [frees-rpc] offers (as an optional feature) to generate them, based on your protocols defined in your Scala code. This feature is offered to maintain compatibility with other languages and systems outside of Scala. We'll check out this feature further in [this section](#generating-a-proto-file).
+* Instead of reading `.proto` files to set up the [RPC] messages and services, [frees-rpc] offers (as an optional feature) to generate them, based on your protocols defined in your Scala code. This feature is offered to maintain compatibility with other languages and systems outside of Scala. We'll check out this feature further in [this section](#generating-idl-files).
 
 Let’s start looking at how to define the `Person` message that we saw previously.
 Before starting, these are the Scala imports we need:
@@ -201,7 +201,7 @@ import freestyle.rpc.protocol._
 case class Person(name: String, id: Int, has_ponycopter: Boolean)
 ```
 
-As we can see, it’s quite simple since it’s just a Scala case class preceded by the `@message` annotation (`@message` is optional though and used exclusively by `protoGen`):
+As we can see, it’s quite simple since it’s just a Scala case class preceded by the `@message` annotation (`@message` is optional though and used exclusively by `idlGen`):
 
 By the same token, let’s see now how the `Greeter` service would be translated to the [frees-rpc] style (in your `.scala` file):
 
@@ -281,13 +281,13 @@ object protocol {
      * @param request Say Hello Request.
      * @return HelloReply.
      */
-    @rpc(Protobuf) def SayHello(request: HelloRequest): F[HelloReply]
+    @rpc(Protobuf) def sayHello(request: HelloRequest): F[HelloReply]
 
-    @rpc(Protobuf) def EmptyResponse(request: HelloRequest): F[Empty.type]
+    @rpc(Protobuf) def emptyResponse(request: HelloRequest): F[Empty.type]
 
-    @rpc(Protobuf) def EmptyRequest(request: Empty.type): F[HelloReply]
+    @rpc(Protobuf) def emptyRequest(request: Empty.type): F[HelloReply]
 
-    @rpc(Protobuf) def EmptyRequestRespose(request: Empty.type): F[Empty.type]
+    @rpc(Protobuf) def emptyRequestRespose(request: Empty.type): F[Empty.type]
   }
 }
 ```
@@ -295,8 +295,8 @@ object protocol {
 We are also using some additional annotations:
 
 * `@option`: used to define the equivalent headers in `.proto` files.
-* `@service`: it tags the `@free` algebra as an [RPC] service, in order to derive server and client code (macro expansion). **Important**: `@free` annotation should go first, followed by `@service` annotation, and not inversely.
-* `@rpc(Protobuf)`: this annotation indicates that the method is an RPC service. It receives as argument the type of serialization that will be used to encode/decode data, `Protocol Buffers` in the example. `Avro` is also supported as the another type of serialization.
+* `@service`: tags the trait as an [RPC] service, in order to derive server and client code (macro expansion).
+* `@rpc(Protobuf)`: indicates that the method is an RPC service. It receives as argument the type of serialization that will be used to encode/decode data, `Protocol Buffers` in the example. `Avro` is also supported as another type of serialization.
 
 We'll see more details about these and other annotations in the following sections.
 
@@ -329,24 +329,24 @@ object service {
   trait Greeter[F[_]] {
 
     /**
-     * Unary RPCs where the client sends a single request to the server and gets a single response back,
+     * Unary RPC where the client sends a single request to the server and gets a single response back,
      * just like a normal function call.
      *
      * https://grpc.io/docs/guides/concepts.html
      *
-     * @param request Client Request.
-     * @return Server Response.
+     * @param request Client request.
+     * @return Server response.
      */
     @rpc(Protobuf)
     def sayHello(request: HelloRequest): F[HelloResponse]
 
     /**
-     * Server streaming RPCs where the client sends a request to the server and gets a stream to read a
+     * Server streaming RPC where the client sends a request to the server and gets a stream to read a
      * sequence of messages back. The client reads from the returned stream until there are no more messages.
      *
      * https://grpc.io/docs/guides/concepts.html
      *
-     * @param request Client Request.
+     * @param request Single client request.
      * @return Stream of server responses.
      */
     @rpc(Protobuf)
@@ -354,21 +354,21 @@ object service {
     def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
 
     /**
-     * Client streaming RPCs where the client writes a sequence of messages and sends them to the server,
+     * Client streaming RPC where the client writes a sequence of messages and sends them to the server,
      * again using a provided stream. Once the client has finished writing the messages, it waits for
      * the server to read them and return its response.
      *
      * https://grpc.io/docs/guides/concepts.html
      *
-     * @param request Stream of requests.
-     * @return Single Server Response.
+     * @param request Stream of client requests.
+     * @return Single server response.
      */
     @rpc(Protobuf)
     @stream[RequestStreaming.type]
     def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse]
 
     /**
-     * Bidirectional streaming RPCs where both sides send a sequence of messages using a read-write stream.
+     * Bidirectional streaming RPC where both sides send a sequence of messages using a read-write stream.
      * The two streams operate independently, so clients and servers can read and write in whatever order
      * they like: for example, the server could wait to receive all the client messages before writing its
      * responses, or it could alternately read a message then write a message, or some other combination of
@@ -376,7 +376,7 @@ object service {
      *
      * https://grpc.io/docs/guides/concepts.html
      *
-     * @param request Stream of requests.
+     * @param request Stream of client requests.
      * @return Stream of server responses.
      */
     @rpc(Protobuf)
@@ -400,11 +400,11 @@ The code might be explanatory by itself but let's review the different services 
 * In [frees-rpc], the streaming features have been implemented with `monix.reactive.Observable`, see the [Monix Docs](https://monix.io/docs/2x/reactive/observable.html) for a wider explanation. These monix extensions have been implemented on top of the [gRPC Java API](https://grpc.io/grpc-java/javadoc/) and the `StreamObserver` interface.
 * After [this PR](https://github.com/frees-io/freestyle-rpc/pull/152), `fs2` streaming is also supported but it's considered experimental for now.
 
-## Generating a .proto file
+## Generating IDL files
 
 Before entering implementation details, we mentioned that the [frees-rpc] ecosystem brings the ability to generate `.proto` files from the Scala definition, in order to maintain compatibility with other languages and systems outside of Scala.
 
-This responsibility relies on `protoGen`, an Sbt plugin to generate `.proto` files from the [frees-rpc] service definitions.
+This responsibility relies on `idlGen`, an sbt plugin to generate IDL files from the [frees-rpc] service definitions.
 
 ### Plugin Installation
 
@@ -416,30 +416,31 @@ addSbtPlugin("io.frees" % "sbt-frees-rpc-idlgen" % "0.11.1")
 ```
 [comment]: # (End Replace)
 
-Note that the plugin is only available for Scala 2.12.
+Note that the plugin is only available for Scala 2.12, and currently only generates Protobuf `.proto` files. Avro IDL support is under consideration for development.
 
 ### Plugin Settings
 
 There are a couple key settings that can be configured according to various needs:
 
-* **`protoGenSourceDir`**: the Scala source directory, where your [frees-rpc] definitions are placed. By default: `baseDirectory.value / "src" / "main" / "scala"`.
-* **`protoGenTargetDir`**: The protobuf target directory, where the `protoGen` task will write the `.proto` files, based on [frees-rpc] service definitions. By default: `baseDirectory.value / "src" / "main" / "proto"`.
+* **`sourceDir`**: the Scala source directory, where your [frees-rpc] definitions are placed. By default: `baseDirectory.value / "src" / "main" / "scala"`.
+* **`targetDir`**: The IDL target directory, where the `idlGen` task will write the IDL files in subdirectories such as `proto` for Protobuf, based on [frees-rpc] service definitions. By default: `baseDirectory.value / "src" / "main" / "resources"`.
 
-Directories must exist; otherwise, the `protoGen` task will fail.
+Directories must exist; otherwise, the `idlGen` task will fail.
 
 ### Generation with protoGen
 
-At this point, each time you want to update your `.proto` files from the scala definition, you have to run the following sbt task:
+At this point, each time you want to update your IDL files from the scala definitions, you have to run the following sbt task:
 
 ```bash
-sbt protoGen
+sbt idlGen
 ```
 
-Using the example above, the result would be placed at `/src/main/proto/service.proto`, in the case that the scala file is named as `service.scala`. The content should be similar to:
+Using the example above, the result would be placed at `/src/main/resources/proto/service.proto`, in the case that the scala file is named as `service.scala`. The content should be similar to:
 
 ```
 // This file has been automatically generated for use by
-// the protoGen plugin, from freestyle-rpc service definitions
+// the idlGen plugin, from frees-rpc service definitions.
+// Read more at: http://frees.io/docs/rpc/
 
 syntax = "proto3";
 
@@ -448,18 +449,18 @@ option java_multiple_files = true;
 option java_outer_classname = "Quickstart";
 
 message HelloRequest {
-   string greeting = 1;
+  string greeting = 1;
 }
 
 message HelloResponse {
-   string reply = 1;
+  string reply = 1;
 }
 
 service Greeter {
-   rpc sayHello (HelloRequest) returns (HelloResponse) {}
-   rpc lotsOfReplies (HelloRequest) returns (stream HelloResponse) {}
-   rpc lotsOfGreetings (stream HelloRequest) returns (HelloResponse) {}
-   rpc bidiHello (stream HelloRequest) returns (stream HelloResponse) {}
+  rpc SayHello (HelloRequest) returns (HelloResponse);
+  rpc LotsOfReplies (HelloRequest) returns (stream HelloResponse);
+  rpc LotsOfGreetings (stream HelloRequest) returns (HelloResponse);
+  rpc BidiHello (stream HelloRequest) returns (stream HelloResponse);
 }
 ```
 
@@ -712,11 +713,11 @@ Provided below is a summary of all the current annotations that [frees-rpc] prov
 
 Annotation | Scope | Arguments | Description
 --- | --- | --- | ---
-@service | [@tagless algebra] | - | Tags the `@free` algebra as [RPC] service, in order to derive server and client code (macro expansion). **Important**: `@free` annotation should go first, followed by the `@service` annotation, and not inversely.
-@rpc | `Method` | (`SerializationType`) | Indicates the method is an RPC service. As `SerializationType` parameter value, `Protobuf` and `Avro` are the current supported serialization methods.
-@stream | `Method` | [`S <: StreamingType`] | There are three different types of streaming: server, client, and bidirectional. Hence, the `S` type parameter can be `ResponseStreaming`, `RequestStreaming`, or `BidirectionalStreaming`, respectively.
-@message | `Case Class` | - | Tags a case class a protobuf message.
-@option | `Object` | [name: String, value: String, quote: Boolean] | used to define the equivalent headers in `.proto` files
+@service | `Trait` | - | Tags the trait as an [RPC] service, in order to derive server and client code (macro expansion).
+@rpc | `Method` | (`SerializationType`) | Indicates the method is an RPC request. As `SerializationType` parameter value, `Protobuf` and `Avro` are the current supported serialization methods.
+@stream | `Method` | [`S <: StreamingType`] | Indicates the  method's streaming type: server, client, and bidirectional. Hence, the `S` type parameter can be `ResponseStreaming`, `RequestStreaming`, or `BidirectionalStreaming`, respectively.
+@message | `Case Class` | - | Tags a case class an RPC message.
+@option | `Object` | [name: String, value: String, quote: Boolean] | Used to define the equivalent headers in `.proto` files
 
 ## Metrics Reporting
 

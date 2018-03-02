@@ -14,46 +14,45 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen.protobuf
+package freestyle.rpc.idlgen
 
 import sbt._
 import sbt.Keys._
 
-object ProtoGenPlugin extends AutoPlugin {
+object IdlGenPlugin extends AutoPlugin {
 
   override def trigger: PluginTrigger = allRequirements
 
   object autoImport {
 
-    lazy val protoGen: TaskKey[Unit] =
-      taskKey[Unit]("Generates .proto files from freestyle-rpc service definitions")
+    lazy val idlGen: TaskKey[Unit] =
+      taskKey[Unit]("Generates IDL files from freestyle-rpc service definitions")
 
-    lazy val protoGenSourceDir: SettingKey[File] =
+    lazy val sourceDir: SettingKey[File] =
       settingKey[File](
         "The Scala source directory, where your freestyle-rpc service definitions are placed.")
 
-    lazy val protoGenTargetDir: SettingKey[File] =
-      settingKey[File](
-        "The Protocol Buffers target directory, where the `protoGen` task will " +
-          "write the `.proto` files, based on freestyle-rpc service definitions.")
+    lazy val targetDir: SettingKey[File] =
+      settingKey[File]("The IDL target directory, where the `idlGen` task will write the generated files " +
+        "in subdirectories such as `proto` for Protobuf, based on freestyle-rpc service definitions.")
   }
 
   import autoImport._
 
   lazy val defaultSettings: Seq[Def.Setting[_]] = Seq(
-    protoGenSourceDir := baseDirectory.value / "src" / "main" / "scala",
-    protoGenTargetDir := baseDirectory.value / "src" / "main" / "proto"
+    sourceDir := baseDirectory.value / "src" / "main" / "scala",
+    targetDir := baseDirectory.value / "src" / "main" / "resources"
   )
 
-  lazy val protoGenTaskSettings: Seq[Def.Setting[_]] = Seq(
-    protoGen := {
+  lazy val taskSettings: Seq[Def.Setting[_]] = Seq(
+    idlGen := {
       (runner in Compile).value
         .run(
-          mainClass = "freestyle.rpc.idlgen.protobuf.ProtoCodeGen",
+          mainClass = "freestyle.rpc.idlgen.Application",
           classpath = sbt.Attributed.data((fullClasspath in Compile).value),
           options = Seq(
-            protoGenSourceDir.value.absolutePath,
-            protoGenTargetDir.value.absolutePath
+            sourceDir.value.absolutePath,
+            targetDir.value.absolutePath
           ),
           log = streams.value.log
         )
@@ -62,7 +61,7 @@ object ProtoGenPlugin extends AutoPlugin {
   )
 
   override def projectSettings: Seq[Def.Setting[_]] =
-    defaultSettings ++ protoGenTaskSettings ++ Seq(
+    defaultSettings ++ taskSettings ++ Seq(
       libraryDependencies += "io.frees" %% "frees-rpc-idlgen-core" % freestyle.rpc.idlgen.BuildInfo.version
     )
 }
