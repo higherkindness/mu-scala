@@ -20,14 +20,14 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String             = "1.8.0"
+      val avro4s: String             = "1.8.3"
       val frees: String              = "0.7.0"
       val fs2ReactiveStreams: String = "0.5.1"
       val grpc: String               = "1.9.1"
       val monix: String              = "3.0.0-M3"
       val nettySSL: String           = "2.0.7.Final"
-      val pbdirect: String           = "0.0.8"
-      val prometheus: String         = "0.2.0"
+      val pbdirect: String           = "0.1.0"
+      val prometheus: String         = "0.3.0"
       val scalameta: String          = "1.8.0"
     }
 
