@@ -55,7 +55,7 @@ object encoders {
             Iterator.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray
           val in: ByteArrayInputStream        = new ByteArrayInputStream(bytes)
           val input: AvroBinaryInputStream[A] = AvroInputStream.binary[A](in)
-          input.iterator().toList.head
+          input.iterator.toList.head
         }
 
         override def stream(value: A): InputStream = {
