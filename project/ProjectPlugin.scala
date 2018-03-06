@@ -155,7 +155,7 @@ object ProjectPlugin extends AutoPlugin {
     scalaMetaSettings ++ sharedReleaseProcess ++ warnUnusedImport ++ Seq(
       libraryDependencies ++= commonDeps :+ %("slf4j-nop") % Test,
       Test / fork := true,
-      Tut / scalacOptions := (Compile / console / scalacOptions).value,
+      Tut / scalacOptions ~= (_.filterNot(_ == "-Ywarn-unused-import")),
       orgAfterCISuccessTaskListSetting ~= (_.filterNot(_ == defaultPublishMicrosite)),
       orgBadgeListSetting := List(
         TravisBadge.apply,
