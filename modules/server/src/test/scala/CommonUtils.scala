@@ -22,10 +22,13 @@ import cats.Functor
 import cats.syntax.functor._
 import freestyle.rpc.common._
 import freestyle.rpc.server._
+import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
 
 trait CommonUtils {
+
+  private lazy val logger = LoggerFactory.getLogger(getClass)
 
   object database {
 
@@ -65,8 +68,7 @@ trait CommonUtils {
   def serverStop[F[_]: Functor](implicit S: GrpcServer[F]): F[Unit] =
     S.shutdownNow().void
 
-  def debug(str: String): Unit =
-    println(s"\n\n$str\n\n")
+  def debug(str: String): Unit = logger.debug(str)
 
   implicit val S: monix.execution.Scheduler = monix.execution.Scheduler.Implicits.global
 

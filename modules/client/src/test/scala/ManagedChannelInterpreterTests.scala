@@ -42,9 +42,11 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
       val mc: ManagedChannel = managedChannelInterpreter.build(channelFor, channelConfigList)
 
       mc shouldBe an[ManagedChannel]
+
+      mc.shutdownNow()
     }
 
-    "build a io.grpc.ManagedChannel based on the specified configuration, for an target" in {
+    "build a io.grpc.ManagedChannel based on the specified configuration, for a target" in {
 
       val channelFor: ChannelFor = ChannelForTarget(SC.host)
 
@@ -55,7 +57,9 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
       val mc: ManagedChannel = managedChannelInterpreter.build(channelFor, channelConfigList)
 
-      mc shouldBe an[ManagedChannel]
+      mc shouldBe a[ManagedChannel]
+
+      mc.shutdownNow()
     }
 
     "apply should work as expected" in {
@@ -68,7 +72,10 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
         new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
 
       val kleisli: ManagedChannelOps[Future, String] =
-        Kleisli[Future, ManagedChannel, String]((_: ManagedChannel) => Future.successful(foo))
+        Kleisli[Future, ManagedChannel, String]((mc: ManagedChannel) => {
+          mc.shutdownNow()
+          Future.successful(foo)
+        })
 
       Await.result(managedChannelInterpreter[String](kleisli), Duration.Inf) shouldBe foo
     }
@@ -84,7 +91,9 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
       val mc: ManagedChannel = managedChannelInterpreter.build(channelFor, channelConfigList)
 
-      mc shouldBe an[ManagedChannel]
+      mc shouldBe a[ManagedChannel]
+
+      mc.shutdownNow()
     }
 
     "throw an exception when configuration is not recognized" in {
@@ -97,7 +106,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
       val managedChannelInterpreter =
         new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
 
-      an[MatchError] shouldBe thrownBy(
+      a[MatchError] shouldBe thrownBy(
         managedChannelInterpreter.build(channelFor, channelConfigList))
     }
 
