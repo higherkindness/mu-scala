@@ -1,12 +1,10 @@
-import dependencies.DependenciesPlugin.autoImport._
 import freestyle.FreestylePlugin
 import freestyle.FreestylePlugin.autoImport._
 import sbt.Keys._
-import sbt._
 import sbt.ScriptedPlugin.autoImport._
+import sbt._
 import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
 import sbtorgpolicies.templates.badges._
-import sbtorgpolicies.runnable.syntax._
 import sbtrelease.ReleasePlugin.autoImport._
 import scala.language.reflectiveCalls
 import tut.TutPlugin.autoImport._
@@ -21,14 +19,13 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String             = "1.8.3"
+      val catsEffect: String         = "0.9"
       val frees: String              = "0.7.0"
       val fs2ReactiveStreams: String = "0.5.1"
-      val grpc: String               = "1.9.1"
-      val monix: String              = "3.0.0-M3"
+      val grpc: String               = "1.10.0"
       val nettySSL: String           = "2.0.7.Final"
       val pbdirect: String           = "0.1.0"
       val prometheus: String         = "0.3.0"
-      val scalameta: String          = "1.8.0"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
@@ -40,8 +37,7 @@ object ProjectPlugin extends AutoPlugin {
         "-unchecked",
         "-language:higherKinds"),
       libraryDependencies ++= Seq(
-        %%("cats-effect")        % Test,
-        %%("cats-core")          % Test,
+        %%("cats-effect", V.catsEffect) % Test,
         %%("scalamockScalatest") % Test
       )
     )
@@ -50,9 +46,8 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %%("frees-async-cats-effect", V.frees),
         %%("frees-async-guava", V.frees) exclude ("com.google.guava", "guava"),
-        %("grpc-core", V.grpc),
         %("grpc-stub", V.grpc),
-        %%("monix", V.monix),
+        %%("monix"),
         %%("fs2-reactive-streams", V.fs2ReactiveStreams),
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
@@ -83,8 +78,6 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("frees-async-cats-effect", V.frees),
-        %("grpc-core", V.grpc),
         %("grpc-netty", V.grpc),
         %%("scalamockScalatest") % Test,
         "io.netty"               % "netty-tcnative-boringssl-static" % V.nettySSL % Test
@@ -158,37 +151,21 @@ object ProjectPlugin extends AutoPlugin {
 
   }
 
-  import autoImport._
-
   override def projectSettings: Seq[Def.Setting[_]] =
-    Seq(
-      resolvers += Resolver.bintrayRepo("beyondthelines", "maven"),
-      orgAfterCISuccessTaskListSetting := List(
-        depUpdateDependencyIssues.asRunnableItem,
-        orgPublishReleaseTask
-          .asRunnableItem(allModules = true, aggregated = false, crossScalaVersions = true),
-        orgUpdateDocFiles.asRunnableItem
-      ),
+    scalaMetaSettings ++ sharedReleaseProcess ++ warnUnusedImport ++ Seq(
+      libraryDependencies ++= commonDeps :+ %("slf4j-nop") % Test,
+      Test / fork := true,
+      Tut / scalacOptions := (Compile / console / scalacOptions).value,
+      orgAfterCISuccessTaskListSetting ~= (_.filterNot(_ == defaultPublishMicrosite)),
       orgBadgeListSetting := List(
         TravisBadge.apply,
-        CodecovBadge.apply, { info =>
-          MavenCentralBadge.apply(info.copy(libName = "frees"))
-        },
+        CodecovBadge.apply,
+        { info => MavenCentralBadge.apply(info.copy(libName = "frees-rpc")) },
         ScalaLangBadge.apply,
         LicenseBadge.apply,
         // Gitter badge (owner field) can be configured with default value if we migrate it to the frees-io organization
-        { info =>
-          GitterBadge.apply(info.copy(owner = "47deg", repo = "freestyle"))
-        },
+        { info => GitterBadge.apply(info.copy(owner = "47deg", repo = "freestyle")) },
         GitHubIssuesBadge.apply
       )
-    ) ++ Seq(
-      fork in Test := true,
-      addCompilerPlugin(%%("scalameta-paradise") cross CrossVersion.full),
-      libraryDependencies ++= commonDeps ++ Seq(%%("scalameta", V.scalameta)),
-      scalacOptions ++= Seq("-Ywarn-unused-import", "-Xplugin-require:macroparadise"),
-      scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains),
-      scalacOptions in (Compile, console) ~= (_ filterNot (_ contains "paradise")) // macroparadise plugin doesn't work in repl yet.
-    ) ++ scalaMetaSettings ++ sharedReleaseProcess
-
+    )
 }
