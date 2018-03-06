@@ -35,7 +35,7 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
 
   "NettyChannelInterpreter" should {
 
-    "build a io.grpc.ManagedChannel based on the specified configuration, for a Socket Address" in {
+    "build an io.grpc.ManagedChannel based on the specified configuration, for a Socket Address" in {
 
       val channelFor: ChannelFor = ChannelForSocketAddress(new InetSocketAddress(SC.host, 45455))
 
@@ -45,10 +45,12 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
 
       val mc: ManagedChannel = interpreter.build
 
-      mc shouldBe an[ManagedChannel]
+      mc shouldBe a[ManagedChannel]
+
+      mc.shutdownNow()
     }
 
-    "build a io.grpc.ManagedChannel based on the specified configuration, for Target" in {
+    "build an io.grpc.ManagedChannel based on the specified configuration, for a Target" in {
 
       val channelFor: ChannelFor = ChannelForTarget(SC.host)
 
@@ -56,10 +58,12 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
 
       val mc: ManagedChannel = interpreter.build
 
-      mc shouldBe an[ManagedChannel]
+      mc shouldBe a[ManagedChannel]
+
+      mc.shutdownNow()
     }
 
-    "build a io.grpc.ManagedChannel based on any configuration combination" in {
+    "build an io.grpc.ManagedChannel based on any configuration combination" in {
 
       val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
 
@@ -82,7 +86,9 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
 
       val mc: ManagedChannel = interpreter.build
 
-      mc shouldBe an[ManagedChannel]
+      mc shouldBe a[ManagedChannel]
+
+      mc.shutdownNow()
     }
 
     "throw an exception when configuration is not recognized" in {
@@ -94,7 +100,7 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
 
       val interpreter = new NettyChannelInterpreter(channelFor, channelConfigList)
 
-      an[MatchError] shouldBe thrownBy(interpreter.build)
+      a[MatchError] shouldBe thrownBy(interpreter.build)
     }
 
     "throw an exception when ChannelFor is not recognized" in {
