@@ -831,33 +831,3 @@ If you want to delve deeper into [frees-rpc], we have a complete example at the 
 This extra section is not specifically about [frees-rpc]. Very often our microservices architectures are based on `HTTP` where perhaps, it is not the best glue to connect them, and [RPC] services might fit better.
 
 [Metrifier] is a project where we compare, in different bounded ecosystems, `HTTP` and` RPC`. And it turns out RPC is usually faster than HTTP. If you're interested in learning more, we encourage to take a look at the documentation.
-
-# References
-
-* [Freestyle](http://frees.io/)
-* [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call)
-* [gRPC](https://grpc.io/)
-* [Protocol Buffers Docs](https://developers.google.com/protocol-buffers/docs/overview)
-* [scalameta](https://github.com/scalameta/scalameta)
-* [PBDirect](https://github.com/btlines/pbdirect)
-* [ScalaPB](https://scalapb.github.io/)
-* [Monix](https://monix.io)
-* [gRPC Java API](https://grpc.io/grpc-java/javadoc/)
-* [Metrifier](https://github.com/47deg/metrifier)
-
-
-[RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
-[HTTP/2]: https://http2.github.io/
-[gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/frees-io/freestyle-rpc
-[Java gRPC]: https://github.com/grpc/grpc-java
-[JSON]: https://en.wikipedia.org/wiki/JSON
-[gRPC guide]: https://grpc.io/docs/guides/
-[@tagless algebra]: http://frees.io/docs/core/algebras/
-[PBDirect]: https://github.com/btlines/pbdirect
-[scalameta]: https://github.com/scalameta/scalameta
-[Monix]: https://monix.io/
-[cats-effect]: https://github.com/typelevel/cats-effect
-[freestyle-rpc-examples]: https://github.com/frees-io/freestyle-rpc-examples
-[Metrifier]: https://github.com/47deg/metrifier
-[frees-config]: http://frees.io/docs/patterns/config/
