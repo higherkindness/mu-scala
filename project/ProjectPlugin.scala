@@ -20,7 +20,7 @@ object ProjectPlugin extends AutoPlugin {
     lazy val V = new {
       val avro4s: String             = "1.8.3"
       val catsEffect: String         = "0.9"
-      val frees: String              = "0.7.0"
+      val frees: String              = "0.8.0"
       val fs2ReactiveStreams: String = "0.5.1"
       val grpc: String               = "1.10.0"
       val nettySSL: String           = "2.0.7.Final"
@@ -38,7 +38,7 @@ object ProjectPlugin extends AutoPlugin {
         "-language:higherKinds"),
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect) % Test,
-        %%("scalamockScalatest") % Test
+        %%("scalamockScalatest")        % Test
       )
     )
 
@@ -152,6 +152,7 @@ object ProjectPlugin extends AutoPlugin {
   }
 
   override def projectSettings: Seq[Def.Setting[_]] =
+    // format: OFF
     scalaMetaSettings ++ sharedReleaseProcess ++ warnUnusedImport ++ Seq(
       libraryDependencies ++= commonDeps :+ %("slf4j-nop") % Test,
       Test / fork := true,
@@ -168,4 +169,5 @@ object ProjectPlugin extends AutoPlugin {
         GitHubIssuesBadge.apply
       )
     )
+  // format: ON
 }

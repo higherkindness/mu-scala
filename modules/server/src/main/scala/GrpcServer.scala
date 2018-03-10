@@ -22,7 +22,7 @@ import io.grpc._
 
 import scala.concurrent.duration.TimeUnit
 
-@tagless
+@tagless(true)
 trait GrpcServer {
 
   def start(): FS[Server]
