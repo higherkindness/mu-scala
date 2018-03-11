@@ -104,7 +104,7 @@ object Utils extends CommonUtils {
 
   object client {
 
-    @tagless
+    @tagless(true)
     trait MyRPCClient {
       def notAllowed(b: Boolean): FS[C]
       def empty: FS[Empty.type]
