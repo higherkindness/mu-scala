@@ -25,8 +25,8 @@ It's divided into multiple and different artifacts, grouped by scope:
 --- | --- | --- | ---
 `frees-rpc-server` | Server | Yes | Needed to attach RPC Services and spin-up an RPC Server.
 `frees-rpc-client-core` | Client | Yes | Mandatory to define protocols and auto-derived clients.
-`frees-rpc-client-netty` | Client | Yes* | Mandatory on the client side if we are using Netty in the server side.
-`frees-rpc-client-okhttp` | Client | Yes* | Optional if you use `Netty`, required from the client perspective.
+`frees-rpc-client-netty` | Client | Yes* | Mandatory on the client side if we are using `Netty` in the server side.
+`frees-rpc-client-okhttp` | Client | Yes* | Mandatory on the client side if we are using `OkHttp` in the server side.
 `frees-rpc-config` | Server/Client | No | It provides configuration helpers using [frees-config] to load the application configuration values.
 `frees-rpc-prometheus-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, on the _Server_ side.
 `frees-rpc-prometheus-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, on the _Client_ side.
