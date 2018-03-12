@@ -191,21 +191,19 @@ We'll see more details about these and other annotations in the following sectio
 
 ## Compression
 
-[frees-rpc] allows you to compress the datas in our services. We can enable this compression in the server or in the client side.
+[frees-rpc] allows you to compress the data whose we are sending in our services. We can enable this compression either on the server or client side.
 
-[frees-rpc] supports `Gzip` as compression format.
+[frees-rpc] supports only `Gzip` as compression format so far and the usage it's really easy. 
 
-The usage it is really easy. We only have to add the annotation `Gzip` to our defined services.
+On the server side, we only have to add the annotation `Gzip` in our defined services.
 
-Let's see an example over an unary service in the server side.
+Let's see an example of a unary service on the server side.
 
 ```tut:silent
 @option(name = "java_package", value = "quickstart", quote = true)
 @option(name = "java_multiple_files", value = "true", quote = false)
 @option(name = "java_outer_classname", value = "Quickstart", quote = true)
 object service {
-
-  import monix.reactive.Observable
 
   @service
   trait Greeter[F[_]] {
@@ -223,12 +221,43 @@ object service {
 }
 ```
 
-In the client side, we have available the same compression. To enable it, we only have to add an option as we can see in the follow example.
+On the client, to enable it, we only have to add an option to the client in the channel builder.
+
+Let's see an example of a client with the compression enabled.
 
 ```tut:silent
-RPCService.client[F](
-  ChannelForAddress("localhost", 8080),
-  options = CallOptions.DEFAULT.withCompression("gzip"))
+import cats.implicits._
+import cats.effect.IO
+import freestyle.free.config.implicits._
+import freestyle.async.catsEffect.implicits._
+import freestyle.rpc._
+import freestyle.rpc.client._
+import freestyle.rpc.client.config._
+import freestyle.rpc.client.implicits._
+import monix.eval.Task
+import io.grpc.ManagedChannel
+import service._
+
+import scala.util.{Failure, Success, Try}
+
+object gclient {
+
+  trait Implicits extends CommonRuntime {
+
+    val channelFor: ChannelFor =
+      ConfigForAddress[Try]("rpc.host", "rpc.port") match {
+        case Success(c) => c
+        case Failure(e) =>
+          e.printStackTrace()
+          throw new RuntimeException("Unable to load the client configuration", e)
+    }
+
+    implicit val serviceClient: Greeter.Client[Task] =
+      Greeter.client[Task](channelFor, options = CallOptions.DEFAULT.withCompression("gzip"))
+  }
+
+  object implicits extends Implicits
+}
 ```
 
 ## Service Methods
