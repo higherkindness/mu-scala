@@ -6,8 +6,6 @@ permalink: /docs/rpc/annotations
 
 # Annotations
 
-## frees-rpc annotations
-
 Provided below is a summary of all the current annotations that [frees-rpc] provides:
 
 Annotation | Scope | Arguments | Description

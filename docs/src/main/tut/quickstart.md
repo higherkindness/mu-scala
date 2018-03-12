@@ -75,3 +75,9 @@ libraryDependencies += "io.frees" %% "frees-rpc-netty-ssl" % "0.11.1"
 ```
 
 [comment]: # (End Replace)
+
+## Comparing HTTP and RPC
+
+This is not specifically about [frees-rpc]. Very often our microservices architectures are based on `HTTP` where perhaps, it is not the best glue to connect them, and [RPC] services might fit better.
+
+[Metrifier] is a project where we compare, in different bounded ecosystems, `HTTP` and `RPC`. And it turns out RPC is usually faster than HTTP. If you're interested in learning more, we encourage to take a look at the documentation.

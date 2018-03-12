@@ -189,16 +189,56 @@ We are also using some additional annotations:
 
 We'll see more details about these and other annotations in the following sections.
 
+## Compression
+
+[frees-rpc] allows you to compress the datas in our services. We can enable this compression in the server or in the client side.
+
+[frees-rpc] supports `Gzip` as compression format.
+
+The usage it is really easy. We only have to add the annotation `Gzip` to our defined services.
+
+Let's see an example over an unary service in the server side.
+
+```tut:silent
+@option(name = "java_package", value = "quickstart", quote = true)
+@option(name = "java_multiple_files", value = "true", quote = false)
+@option(name = "java_outer_classname", value = "Quickstart", quote = true)
+object service {
+
+  import monix.reactive.Observable
+
+  @service
+  trait Greeter[F[_]] {
+
+    /**
+     * Unary RPC with Gzip compression
+     *
+     * @param empty Client request.
+     * @return empty server response.
+     */
+    @rpc(Protobuf, Gzip) def emptyCompressed(empty: Empty.type): F[Empty.type] 
+
+  }
+
+}
+```
+
+In the client side, we have available the same compression. To enable it, we only have to add an option as we can see in the follow example.
+
+```tut:silent
+RPCService.client[F](
+  ChannelForAddress("localhost", 8080),
+  options = CallOptions.DEFAULT.withCompression("gzip"))
+```
+
 ## Service Methods
 
-As [gRPC], [frees-rpc] allows you to define four kinds of service methods:
+As [gRPC], [frees-rpc] allows you to define two main kinds of service methods:
 
 * **Unary RPC**: the simplest way of communication, one client request, and one server response.
-* **Server streaming RPC**: similar to the unary, but in this case, the server will send back a stream of responses for a client request.
-* **Client streaming RPC**: in this case is the client who sends a stream of requests. The server will respond with a single response.
-* **Bidirectional streaming RPC**: it would be a mix of server and client streaming since both sides will be sending a stream of data.
+* **Streaming RPC**: similar to the unary, but depending the kind of streaming, the client or server or both will send back a stream of responses. There are three kinds of streaming, server, client and bidirectional streaming.
 
-Let's complete our protocol's example with these four kinds of service methods:
+Let's complete our protocol's example with an unary service method:
 
 ```tut:silent
 @option(name = "java_package", value = "quickstart", quote = true)
@@ -229,49 +269,6 @@ object service {
     @rpc(Protobuf)
     def sayHello(request: HelloRequest): F[HelloResponse]
 
-    /**
-     * Server streaming RPC where the client sends a request to the server and gets a stream to read a
-     * sequence of messages back. The client reads from the returned stream until there are no more messages.
-     *
-     * https://grpc.io/docs/guides/concepts.html
-     *
-     * @param request Single client request.
-     * @return Stream of server responses.
-     */
-    @rpc(Protobuf)
-    @stream[ResponseStreaming.type]
-    def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
-
-    /**
-     * Client streaming RPC where the client writes a sequence of messages and sends them to the server,
-     * again using a provided stream. Once the client has finished writing the messages, it waits for
-     * the server to read them and return its response.
-     *
-     * https://grpc.io/docs/guides/concepts.html
-     *
-     * @param request Stream of client requests.
-     * @return Single server response.
-     */
-    @rpc(Protobuf)
-    @stream[RequestStreaming.type]
-    def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse]
-
-    /**
-     * Bidirectional streaming RPC where both sides send a sequence of messages using a read-write stream.
-     * The two streams operate independently, so clients and servers can read and write in whatever order
-     * they like: for example, the server could wait to receive all the client messages before writing its
-     * responses, or it could alternately read a message then write a message, or some other combination of
-     * reads and writes. The order of messages in each stream is preserved.
-     *
-     * https://grpc.io/docs/guides/concepts.html
-     *
-     * @param request Stream of client requests.
-     * @return Stream of server responses.
-     */
-    @rpc(Protobuf)
-    @stream[BidirectionalStreaming.type]
-    def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
-
   }
 
 }
@@ -280,11 +277,5 @@ object service {
 The code might be explanatory by itself but let's review the different services one by one:
 
 * `sayHello`: unary RPC, only the `@rpc` annotation would be needed in this case.
-* `lotsOfReplies `: Server streaming RPC, where `@rpc` and `@stream` annotations are needed here. However, there are three different types of streaming (server, client and bidirectional), that are specified by the type parameter required in the `@stream` annotation, `@stream[ResponseStreaming.type]` in this particular definition.
-* `lotsOfGreetings `: Client streaming RPC, `@rpc` should be sorted by the `@stream[RequestStreaming.type]` annotation.
-* `bidiHello `: Bidirectional streaming RPC, where `@rpc` is accompanied by the `@stream[BidirectionalStreaming.type]` annotation.
 
-**Notes**:
-
-* In [frees-rpc], the streaming features have been implemented with `monix.reactive.Observable`, see the [Monix Docs](https://monix.io/docs/2x/reactive/observable.html) for a wider explanation. These monix extensions have been implemented on top of the [gRPC Java API](https://grpc.io/grpc-java/javadoc/) and the `StreamObserver` interface.
-* After [this PR](https://github.com/frees-io/freestyle-rpc/pull/152), `fs2` streaming is also supported but it's considered experimental for now.
+In the follow section [Streaming], we are going to see the other three kinds of streaming methods.
