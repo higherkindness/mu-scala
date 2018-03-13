@@ -191,9 +191,9 @@ We'll see more details about these and other annotations in the following sectio
 
 ## Compression
 
-[frees-rpc] allows you to compress the data whose we are sending in our services. We can enable this compression either on the server or client side.
+[frees-rpc] allows us to compress the data we are sending in our services. We can enable this compression either on the server or the client side.
 
-[frees-rpc] supports only `Gzip` as compression format so far and the usage it's really easy. 
+[frees-rpc] supports `Gzip` as compression format.
 
 On the server side, we only have to add the annotation `Gzip` in our defined services.
 
