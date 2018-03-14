@@ -87,17 +87,77 @@ The code might be explanatory by itself but let's review the different services 
 * `lotsOfGreetings `: Client streaming RPC, `@rpc` should be sorted by the `@stream[RequestStreaming.type]` annotation.
 * `bidiHello `: Bidirectional streaming RPC, where `@rpc` is accompanied by the `@stream[BidirectionalStreaming.type]` annotation.
 
-
 [frees-rpc] provides the ability to combine [RPC] protocols, services, and clients in your `Freestyle` program, thanks to [gRPC]. Although it's fully integrated with [gRPC], there are some important differences when defining the protocols, as we’ll see later on, since [frees-rpc] follows the same philosophy as `Freestyle` core, being macro-powered.
 
 ## Integrations:
 
-In [frees-rpc], the streaming features have been implemented based in two libraries. 
+In [frees-rpc], the streaming features have been implemented based on two data types. You can choose one of them and start to use the data type that fits you better.
 
 ### Observable
 
-The first library is `monix.reactive.Observable`, see the [Monix Docs](https://monix.io/docs/2x/reactive/observable.html) for a wider explanation. These monix extensions have been implemented on top of the [gRPC Java API](https://grpc.io/grpc-java/javadoc/) and the `StreamObserver` interface.
+The first data type is `monix.reactive.Observable`, see the [Monix Docs](https://monix.io/docs/2x/reactive/observable.html) for a wider explanation. These monix extensions have been implemented on top of the [gRPC Java API](https://grpc.io/grpc-java/javadoc/) and the `StreamObserver` interface.
+
+In the above example, we can see an example of how to use this data type.
 
 ### FS2: Functional Streams
 
-The second library is `fs2` streaming, see the [FS2 Docs](https://github.com/functional-streams-for-scala/fs2) It's considered experimental for now but it works fine.
+It's considered experimental for now but it works fine and it is stable.
+
+The second data type is `fs2.Stream` streaming, see the [FS2 Docs](https://github.com/functional-streams-for-scala/fs2) for a wider explanation. 
+
+Thanks to this new data type, [frees-rpc] supports `fs2.Stream[F, ?]` for all the types of streaming, mentioned before.
+
+Let's keep going to compare our previous protocol's using `fs2.Stream` against `Observable` and we will see how the service is really similar to the Observable service.
+
+```tut:silent
+@option(name = "java_package", value = "quickstart", quote = true)
+@option(name = "java_multiple_files", value = "true", quote = false)
+@option(name = "java_outer_classname", value = "Quickstart", quote = true)
+object service {
+
+  // We have to import the Stream dependency against Observable
+  import fs2.Stream
+
+  @message
+  case class HelloRequest(greeting: String)
+
+  @message
+  case class HelloResponse(reply: String)
+
+  @service
+  trait Greeter[F[_]] {
+
+    /**
+     * Server streaming RPC 
+     *
+     * @param request Single client request.
+     * @return Stream of server responses.
+     */
+    @rpc(Protobuf)
+    @stream[ResponseStreaming.type]
+    def lotsOfReplies(request: HelloRequest): Stream[F, HelloResponse]
+
+    /**
+     * Client streaming RPC 
+     *
+     * @param request Stream of client requests.
+     * @return Single server response.
+     */
+    @rpc(Protobuf)
+    @stream[RequestStreaming.type]
+    def lotsOfGreetings(request: Stream[F, HelloRequest]): F[HelloResponse]
+
+    /**
+     * Bidirectional streaming RPC 
+     *
+     * @param request Stream of client requests.
+     * @return Stream of server responses.
+     */
+    @rpc(Protobuf)
+    @stream[BidirectionalStreaming.type]
+    def bidiHello(request: Stream[F, HelloRequest]): Stream[F, HelloResponse]
+
+  }
+
+}
+```
