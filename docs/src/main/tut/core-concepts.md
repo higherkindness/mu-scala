@@ -66,7 +66,7 @@ In the previous section, we’ve seen an overview of what [gRPC] offers for defi
 First things first, the main difference in respect to [gRPC] is that [frees-rpc] doesn’t need `.proto` files, but it still uses protobuf, thanks to the [PBDirect] library, which allows to read and write Scala objects directly to protobuf with no `.proto` file definitions. Therefore, in summary, we have:
 
 * Your protocols, both messages, and services, will reside with your business-logic in your Scala files using [scalameta] annotations to set them up. We’ll see more details on this shortly.
-* Instead of reading `.proto` files to set up the [RPC] messages and services, [frees-rpc] offers (as an optional feature) to generate them, based on your protocols defined in your Scala code. This feature is offered to maintain compatibility with other languages and systems outside of Scala. We'll check out this feature further in [this section](#generating-idl-files).
+* Instead of reading `.proto` files to set up the [RPC] messages and services, [frees-rpc] offers (as an optional feature) to generate them, based on your protocols defined in your Scala code. This feature is offered to maintain compatibility with other languages and systems outside of Scala. We'll check out this feature further in [this section](/docs/rpc/idl-generation).
 
 Let’s start looking at how to define the `Person` message that we saw previously.
 Before starting, these are the Scala imports we need:
@@ -129,7 +129,7 @@ object protocols {
 }
 ```
 
-Naturally, the [RPC] services are grouped in a [@tagless algebra]. Therefore, we are following one of the primary principles of Freestyle; you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.
+Naturally, the [RPC] services are grouped in a [@tagless algebra](/docs/core/algebras/). Therefore, we are following one of the primary principles of Freestyle; you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.
 
 In the above example, we can see that `sayHello` returns a `FS[HelloReply]`. However, very often the services might:
 

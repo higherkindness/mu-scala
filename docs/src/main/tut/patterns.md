@@ -6,7 +6,7 @@ permalink: /docs/rpc/patterns
 
 # Patterns
 
-So far so good, not too much code, no business logic, just a protocol definition with Scala annotations. Conversely, in this section, we are going to see how to complete our quickstart example. We'll take a look at both sides, the server and the client.
+So far so good, not too much code, no business logic, just a protocol definition with Scala annotations and generation IDL files from the scala definitions. Conversely, in this section, we are going to see how to complete our quickstart example. We'll take a look at both sides, the server and the client.
 
 ## Server
 
@@ -62,7 +62,7 @@ class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
 
 That's all. We have exposed a potential implementation on the server side.
 
-## Server Runtime
+### Server Runtime
 
 As you can see, the generic handler above requires `F` as the type parameter, which corresponds with our target `Monad` when interpreting our program. In this section, we will satisfy all the runtime requirements, in order to make our server runnable.
 
@@ -131,7 +131,7 @@ Here are a few additional notes related to the previous snippet of code:
 	* `F[_]` would be our algebra, which matches with our `Greeter` service definition.
 	* `M[_]`, the target monad, in our example: `cats.effects.IO`.
 
-## Server Bootstrap
+### Server Bootstrap
 
 What else is needed? We just need to define a `main` method:
 
@@ -159,7 +159,7 @@ Fortunately, once all the runtime requirements are in place (**`import gserver.i
 
 You will need to add either `frees-rpc-client-netty` or `frees-rpc-client-okhttp` to your build.
 
-## Client Runtime
+### Client Runtime
 
 Similarly in this section, as we saw for the server case, we are defining all the client runtime configurations needed for communication with the server.
 
@@ -222,7 +222,7 @@ object gclient {
 * `host` and `port` would be read from the application configuration file.
 * To be able to use the `ConfigForAddress` helper, you need to add the `frees-rpc-config` dependency to your build.
 
-## Client Program
+### Client Program
 
 Once we have our runtime configuration defined as above, everything gets easier. This is an example of a client application, following our dummy quickstart:
 
