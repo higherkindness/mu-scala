@@ -24,15 +24,17 @@ On the server and client side, we will need two files to configure the `SslConte
 
 ## Usage
 
-The first step to do, in order to start to secure ours `freestyle-rpc` services, is use the artifacts `frees-rpc-netty-ssl` and `frees-rpc-client-netty` in our `build.sbt`.
+The first step to securing our `freestyle-rpc services` is to add the library dependencies frees-rpc-netty-ssl` and `frees-rpc-client-netty` in our `build.sbt`.
+
 
 In second place, we will have to move to our `resources` folder both server/client certificates and private keys. 
 
-In our tests, the certificates have been extracted from [here](https://github.com/grpc/grpc-java/tree/master/testing/src/main/resources/certs). It could be a good point to start to check that our application works meanwhile we generate or obtain our own certificates.
+If we haven't yet generated or obtained our own certificates, we can test using certificates found [here](https://github.com/grpc/grpc-java/tree/master/testing/src/main/resources/certs).
 
 Thirdly, let's see a piece of code where we will explain line by line, what we are doing on the server side.
 
-We are going to ignore the explanations related to create the `RPCService`, `ServerRPCService` and runtime implicits. If you have any doubt about it, please, take a look at the [Patterns](/docs/rpc/patterns) section.
+We won't cover the details regarding creation of `RPCService`, `ServerRPCService` and runtime implicits. You can find more information about these in the [Patterns](/docs/rpc/patterns) section.
+
 
 ```tut:silent
 import java.io.File
@@ -146,8 +148,8 @@ object MainApp {
 
 	// Important, the channel interpreter have to be NettyChannelInterpreter.
 
-	// In this case, we are creating the channel interpreter with a specifics ManagedChannelConfig
-	// These configs allow us encrypted the connection with the server.
+	// In this case, we are creating the channel interpreter with a specific ManagedChannelConfig
+	// These configs allow us to encrypt the connection with the server.
 
 	val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
   		ChannelForAddress("localhost", "8080"),
