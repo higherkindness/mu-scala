@@ -52,7 +52,8 @@ jobs:
         - bash <(curl -s https://codecov.io/bash) -t 5b75b318-ab71-4fbc-9203-bfa7765cdbdc
         - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
             if grep -q "SNAPSHOT" version.sbt; then
-              sbt ++$TRAVIS_SCALA_VERSION publish;
+              sbt +publish;
+              sbt idlgen-sbt/publish;
             else
               sbt orgUpdateDocFiles;
               git reset --hard HEAD;
