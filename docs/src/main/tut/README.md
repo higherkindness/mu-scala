@@ -14,10 +14,10 @@ Freestyle RPC is a purely functional library for building RPC endpoint-based ser
 
 * [Quickstart](/docs/rpc/quickstart)
 * [Core concepts](/docs/rpc/core-concepts)
+* [Streaming](/docs/rpc/streaming)
 * [IDL Generation](/docs/rpc/idl-generation)
 * [Annotations](/docs/rpc/annotations)
 * [Patterns](/docs/rpc/patterns)
-* [Streaming](/docs/rpc/streaming)
 * [SSL/TLS Generation](/docs/rpc/ssl-tls)
 * [Metrics Reporting](/docs/rpc/metrics-reporting)
 * [References](/docs/rpc/references)
