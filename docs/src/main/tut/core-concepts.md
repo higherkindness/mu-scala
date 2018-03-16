@@ -315,3 +315,19 @@ The code might be explanatory by itself but let's review the different services 
 * `sayHello`: unary RPC, only the `@rpc` annotation would be needed in this case.
 
 In the follow section [Streaming], we are going to see the other three kinds of streaming methods.
+
+[RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
+[HTTP/2]: https://http2.github.io/
+[gRPC]: https://grpc.io/
+[frees-rpc]: https://github.com/frees-io/freestyle-rpc
+[Java gRPC]: https://github.com/grpc/grpc-java
+[JSON]: https://en.wikipedia.org/wiki/JSON
+[gRPC guide]: https://grpc.io/docs/guides/
+[@tagless algebra]: http://frees.io/docs/core/algebras/
+[PBDirect]: https://github.com/btlines/pbdirect
+[scalameta]: https://github.com/scalameta/scalameta
+[Monix]: https://monix.io/
+[cats-effect]: https://github.com/typelevel/cats-effect
+[freestyle-rpc-examples]: https://github.com/frees-io/freestyle-rpc-examples
+[Metrifier]: https://github.com/47deg/metrifier
+[frees-config]: http://frees.io/docs/patterns/config/

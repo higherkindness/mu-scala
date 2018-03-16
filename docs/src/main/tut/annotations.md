@@ -15,3 +15,19 @@ Annotation | Scope | Arguments | Description
 @stream | `Method` | [`S <: StreamingType`] | Indicates the  method's streaming type: server, client, and bidirectional. Hence, the `S` type parameter can be `ResponseStreaming`, `RequestStreaming`, or `BidirectionalStreaming`, respectively.
 @message | `Case Class` | - | Tags a case class an RPC message.
 @option | `Object` | [name: String, value: String, quote: Boolean] | Used to define the equivalent headers in `.proto` files
+
+[RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
+[HTTP/2]: https://http2.github.io/
+[gRPC]: https://grpc.io/
+[frees-rpc]: https://github.com/frees-io/freestyle-rpc
+[Java gRPC]: https://github.com/grpc/grpc-java
+[JSON]: https://en.wikipedia.org/wiki/JSON
+[gRPC guide]: https://grpc.io/docs/guides/
+[@tagless algebra]: http://frees.io/docs/core/algebras/
+[PBDirect]: https://github.com/btlines/pbdirect
+[scalameta]: https://github.com/scalameta/scalameta
+[Monix]: https://monix.io/
+[cats-effect]: https://github.com/typelevel/cats-effect
+[freestyle-rpc-examples]: https://github.com/frees-io/freestyle-rpc-examples
+[Metrifier]: https://github.com/47deg/metrifier
+[frees-config]: http://frees.io/docs/patterns/config/
