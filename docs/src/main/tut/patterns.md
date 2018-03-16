@@ -6,13 +6,13 @@ permalink: /docs/rpc/patterns
 
 # Patterns
 
-So far so good, not too much code, no business logic, just a protocol definition with Scala annotations and generation IDL files from the scala definitions. Conversely, in this section, we are going to see how to complete our quickstart example. We'll take a look at both sides, the server and the client.
+So far so good, not too much code, no business logic, in the previous sections we have seen just some protocol definitions with Scala annotations and generation IDL files from the scala definitions. Conversely, in this section, we are going to see how to complete our quickstart example. We'll take a look at both sides, the server and the client.
 
 ## Server
 
 Predictably, generating the server code is just implementing a service [Handler](http://frees.io/docs/core/interpreters/).
 
-Next, our dummy `Greeter` server implementation:
+First of all, our `Greeter` RPC protocol definition:
 
 ```tut:invisible
 import freestyle.free._
@@ -69,6 +69,8 @@ object service {
 
 }
 ```
+
+Next, our dummy `Greeter` server implementation:
 
 ```tut:silent
 import cats.effect.Async
@@ -138,7 +140,7 @@ trait CommonRuntime {
 }
 ```
 
-As a side note, `CommonRuntime` will also be used later on for the client program.
+As a side note, `CommonRuntime` will also be used later on for the client example program.
 
 ### Runtime Implicits
 
@@ -149,7 +151,7 @@ Now, we need to implicitly provide two things:
 * A runtime interpreter of our `ServiceHandler` tied to a specific type. In our case, we'll use `cats.effects.IO`.
 * A `ServerW` implicit evidence, compounded by:
 	* RPC port where the server will bootstrap.
-	* The set of configurations we want to add to our [gRPC] server, like our `Greeter` service definition. All these configurations are aggregated in a `List[GrpcConfig]`. Later on, an internal builder will build the final server based on this list. The full available list of settings are exposed in [this file](https://github.com/frees-io/freestyle-rpc/blob/master/rpc/src/main/scala/server/GrpcConfig.scala).
+	* The set of configurations we want to add to our [gRPC] server, like our `Greeter` service definition. All these configurations are aggregated in a `List[GrpcConfig]`. Later on, an internal builder will build the final server based on this list. The full available list of settings are exposed in [this file](https://github.com/frees-io/freestyle-rpc/blob/master/modules/server/src/main/scala/GrpcConfig.scala).
 
 In summary, the result would be as follows:
 
@@ -183,9 +185,7 @@ object gserver {
 Here are a few additional notes related to the previous snippet of code:
 
 * The Server will bootstrap on port `8080`.
-* `Greeter.bindService` is an auto-derived method which creates, behind the scenes, the binding service for [gRPC]. It requires two type parameters, `F[_]` and `M[_]`.
-	* `F[_]` would be our algebra, which matches with our `Greeter` service definition.
-	* `M[_]`, the target monad, in our example: `cats.effects.IO`.
+* `Greeter.bindService` is an auto-derived method which creates, behind the scenes, the binding service for [gRPC]. It requires `F[_]` as the type parameter, the target/concurrent monad, in our example: `cats.effects.IO`.
 
 ### Server Bootstrap
 

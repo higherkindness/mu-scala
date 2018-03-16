@@ -17,9 +17,11 @@ This responsibility relies on `idlGen`, an sbt plugin to generate IDL files from
 Add the following line to _project/plugins.sbt_:
 
 [comment]: # (Start Replace)
+
 ```scala
 addSbtPlugin("io.frees" % "sbt-frees-rpc-idlgen" % "0.11.1")
 ```
+
 [comment]: # (End Replace)
 
 Note that the plugin is only available for Scala 2.12, and currently only generates Protobuf `.proto` files. Avro IDL support is under consideration for development.
@@ -33,7 +35,7 @@ There are a couple key settings that can be configured according to various need
 
 Directories must exist; otherwise, the `idlGen` task will fail.
 
-### Generation with protoGen
+### Generation with idlGen
 
 At this point, each time you want to update your IDL files from the scala definitions, you have to run the following sbt task:
 
