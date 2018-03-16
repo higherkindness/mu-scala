@@ -310,7 +310,7 @@ object service {
 }
 ```
 
-The code might be explanatory by itself but, but `sayHello` would be our unary RPC, where only the `@rpc` annotation would be needed in this case.
+Here `sayHello` is our unary RPC, where only the `@rpc` annotation is needed.
 
 In the `Streaming` section, we are going to see all the streaming options.
 

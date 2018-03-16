@@ -6,7 +6,7 @@ permalink: /docs/rpc/streaming
 
 # Streaming
 
-In the previous section, we saw that [frees-rpc] allows you to define unary services, but additionally supports the next streaming options:
+In the previous section, we saw that [frees-rpc] allows you to define unary services. It additionally supports the following streaming options:
 
 * **Server streaming RPC**: similar to the unary, but in this case, the server will send back a stream of responses for a client request.
 * **Client streaming RPC**: in this case is the client who sends a stream of requests. The server will respond with a single response.
