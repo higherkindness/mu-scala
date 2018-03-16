@@ -6,9 +6,7 @@ permalink: /docs/rpc/streaming
 
 # Streaming
 
-In the previous section, we saw that [frees-rpc] allows you to define unary or streaming service methods.
-
-The streaming service methods are the next:
+In the previous section, we saw that [frees-rpc] allows you to define unary services. It additionally supports the following streaming options:
 
 * **Server streaming RPC**: similar to the unary, but in this case, the server will send back a stream of responses for a client request.
 * **Client streaming RPC**: in this case is the client who sends a stream of requests. The server will respond with a single response.
@@ -90,9 +88,7 @@ The code might be explanatory by itself but let's review the different services 
 * `lotsOfGreetings `: Client streaming RPC, `@rpc` should be sorted by the `@stream[RequestStreaming.type]` annotation.
 * `bidiHello `: Bidirectional streaming RPC, where `@rpc` is accompanied by the `@stream[BidirectionalStreaming.type]` annotation.
 
-[frees-rpc] provides the ability to combine [RPC] protocols, services, and clients in your `Freestyle` program, thanks to [gRPC]. Although it's fully integrated with [gRPC], there are some important differences when defining the protocols, as we’ll see later on, since [frees-rpc] follows the same philosophy as `Freestyle` core, being macro-powered.
-
-## Integrations:
+## Integrations
 
 In [frees-rpc], the streaming features have been implemented based on two data types. You can choose one of them and start to use the data type that fits you better.
 
@@ -100,17 +96,17 @@ In [frees-rpc], the streaming features have been implemented based on two data t
 
 The first data type is `monix.reactive.Observable`, see the [Monix Docs](https://monix.io/docs/2x/reactive/observable.html) for a wider explanation. These monix extensions have been implemented on top of the [gRPC Java API](https://grpc.io/grpc-java/javadoc/) and the `StreamObserver` interface.
 
-In the above example, we can see an example of how to use this data type.
+In the above example, we can see an example of how to use this data type for streaming.
 
 ### FS2: Functional Streams
 
-It's considered experimental for now but it works fine and it is stable.
+_Disclaimer_: it's considered experimental for now.
 
 The second data type is `fs2.Stream` streaming, see the [FS2 Docs](https://github.com/functional-streams-for-scala/fs2) for a wider explanation. 
 
 Thanks to this new data type, [frees-rpc] supports `fs2.Stream[F, ?]` for all the types of streaming, mentioned before.
 
-Let's keep going to compare our previous protocol's using `fs2.Stream` against `Observable` and we will see how the service is really similar to the Observable service.
+Let's compare our previous protocol's using `fs2.Stream` instead of `Observable`.
 
 ```tut:silent
 import freestyle.free._
@@ -121,7 +117,6 @@ import freestyle.rpc.protocol._
 @option(name = "java_outer_classname", value = "Quickstart", quote = true)
 object service {
 
-  // We have to import the Stream dependency against Observable
   import fs2.Stream
 
   @message
@@ -167,6 +162,8 @@ object service {
 
 }
 ```
+
+As you can see, it is really similar to the Observable service.
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/

@@ -310,11 +310,9 @@ object service {
 }
 ```
 
-The code might be explanatory by itself but let's review the different services one by one:
+Here `sayHello` is our unary RPC, where only the `@rpc` annotation is needed.
 
-* `sayHello`: unary RPC, only the `@rpc` annotation would be needed in this case.
-
-In the follow section [Streaming], we are going to see the other three kinds of streaming methods.
+In the `Streaming` section, we are going to see all the streaming options.
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
