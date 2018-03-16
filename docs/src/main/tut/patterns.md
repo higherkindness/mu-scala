@@ -15,12 +15,8 @@ Predictably, generating the server code is just implementing a service [Handler]
 First of all, our `Greeter` RPC protocol definition:
 
 ```tut:invisible
-import freestyle.free._
 import freestyle.rpc.protocol._
 
-@option(name = "java_package", value = "quickstart", quote = true)
-@option(name = "java_multiple_files", value = "true", quote = false)
-@option(name = "java_outer_classname", value = "Quickstart", quote = true)
 object service {
 
   import monix.reactive.Observable

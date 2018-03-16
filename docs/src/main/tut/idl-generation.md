@@ -10,7 +10,7 @@ permalink: /docs/rpc/idl-generation
 
 Before entering implementation details, we mentioned that the [frees-rpc] ecosystem brings the ability to generate `.proto` files from the Scala definition, in order to maintain compatibility with other languages and systems outside of Scala.
 
-This responsibility relies on `idlGen`, an sbt plugin to generate IDL files from the [frees-rpc] service definitions.
+This responsibility relies on `idlGen`, an sbt plugin to generate Protobuf and Avro IDL files from the [frees-rpc] service definitions.
 
 ### Plugin Installation
 
@@ -24,16 +24,16 @@ addSbtPlugin("io.frees" % "sbt-frees-rpc-idlgen" % "0.11.1")
 
 [comment]: # (End Replace)
 
-Note that the plugin is only available for Scala 2.12, and currently only generates Protobuf `.proto` files. Avro IDL support is under consideration for development.
+Note that the plugin is only available for Scala 2.12.
 
 ### Plugin Settings
 
 There are a couple key settings that can be configured according to various needs:
 
 * **`sourceDir`**: the Scala source directory, where your [frees-rpc] definitions are placed. By default: `baseDirectory.value / "src" / "main" / "scala"`.
-* **`targetDir`**: The IDL target directory, where the `idlGen` task will write the IDL files in subdirectories such as `proto` for Protobuf, based on [frees-rpc] service definitions. By default: `baseDirectory.value / "src" / "main" / "resources"`.
+* **`targetDir`**: The IDL target directory, where the `idlGen` task will write the IDL files in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on [frees-rpc] service definitions. By default: `baseDirectory.value / "src" / "main" / "resources"`.
 
-Directories must exist; otherwise, the `idlGen` task will fail.
+Base directories must exist, otherwise, the `idlGen` task will fail. Subdirectories will be created upon generation.
 
 ### Generation with idlGen
 
@@ -43,7 +43,51 @@ At this point, each time you want to update your IDL files from the scala defini
 sbt idlGen
 ```
 
-Using the example above, the result would be placed at `/src/main/resources/proto/service.proto`, in the case that the scala file is named as `service.scala`. The content should be similar to:
+Let's take our previous service, and add an Avro-specific request and some useful annotations described in the [Annotations section](/docs/rpc/annotations):
+```tut:silent
+import freestyle.rpc.protocol._
+
+@option(name = "java_multiple_files", value = true)
+@option(name = "java_outer_classname", value = "Quickstart")
+@outputName("GreeterService")
+@outputPackage("quickstart")
+object service {
+
+  import monix.reactive.Observable
+
+  @message
+  case class HelloRequest(greeting: String)
+
+  @message
+  case class HelloResponse(reply: String)
+
+  @service
+  trait Greeter[F[_]] {
+
+    @rpc(Protobuf)
+    def sayHello(request: HelloRequest): F[HelloResponse]
+     
+    @rpc(Avro)
+    def sayHelloAvro(request: HelloRequest): F[HelloResponse]
+
+    @rpc(Protobuf)
+    @stream[ResponseStreaming.type]
+    def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
+
+    @rpc(Protobuf)
+    @stream[RequestStreaming.type]
+    def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse]
+
+    @rpc(Protobuf)
+    @stream[BidirectionalStreaming.type]
+    def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
+    
+  }
+  
+}
+```
+
+Using this example, the resulting Protobuf IDL would be generated in `/src/main/resources/proto/service.proto`, in the case that the scala file is named `service.scala`. The content should be similar to:
 
 ```
 // This file has been automatically generated for use by
@@ -54,7 +98,8 @@ syntax = "proto3";
 
 option java_package = "quickstart";
 option java_multiple_files = true;
-option java_outer_classname = "Quickstart";
+
+package quickstart;
 
 message HelloRequest {
   string greeting = 1;
@@ -71,6 +116,50 @@ service Greeter {
   rpc BidiHello (stream HelloRequest) returns (stream HelloResponse);
 }
 ```
+
+And the resulting Avro IDL would be generated in `/src/main/resources/avro/service.avpr`:
+
+```
+{
+  "namespace" : "quickstart",
+  "protocol" : "GreeterService",
+  "types" : [
+    {
+      "name" : "HelloRequest",
+      "type" : "record",
+      "fields" : [
+        {
+          "name" : "greeting",
+          "type" : "string"
+        }
+      ]
+    },
+    {
+      "name" : "HelloResponse",
+      "type" : "record",
+      "fields" : [
+        {
+          "name" : "reply",
+          "type" : "string"
+        }
+      ]
+    }
+  ],
+  "messages" : {
+    "sayHelloAvro" : {
+      "request" : [
+        {
+          "name" : "arg",
+          "type" : "HelloRequest"
+        }
+      ],
+      "response" : "HelloResponse"
+    }
+  }
+}
+```
+
+Note that due to limitations in the Avro IDL, currently only unary RPC services are converted (client- and/or server-streaming services are ignored).
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/

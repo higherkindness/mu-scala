@@ -69,10 +69,9 @@ First things first, the main difference in respect to [gRPC] is that [frees-rpc]
 * Instead of reading `.proto` files to set up the [RPC] messages and services, [frees-rpc] offers (as an optional feature) to generate them, based on your protocols defined in your Scala code. This feature is offered to maintain compatibility with other languages and systems outside of Scala. We'll check out this feature further in [this section](/docs/rpc/idl-generation).
 
 Let’s start looking at how to define the `Person` message that we saw previously.
-Before starting, these are the Scala imports we need:
+Before starting, this is the Scala import we need:
 
 ```tut:silent
-import freestyle.free._
 import freestyle.rpc.protocol._
 ```
 
@@ -95,9 +94,6 @@ As we can see, it’s quite simple since it’s just a Scala case class preceded
 By the same token, let’s see now how the `Greeter` service would be translated to the [frees-rpc] style (in your `.scala` file):
 
 ```tut:silent
-@option(name = "java_package", value = "quickstart", quote = true)
-@option(name = "java_multiple_files", value = "true", quote = false)
-@option(name = "java_outer_classname", value = "Quickstart", quote = true)
 object protocol {
 
   /**
@@ -131,7 +127,7 @@ object protocol {
 
 Naturally, the [RPC] services are grouped in a [@tagless algebra](/docs/core/algebras/). Therefore, we are following one of the primary principles of Freestyle; you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.
 
-In the above example, we can see that `sayHello` returns a `FS[HelloReply]`. However, very often the services might:
+In the above example, we can see that `sayHello` returns an `F[HelloReply]`. However, very often the services might:
 
 * Return an empty response.
 * Receive an empty request.
@@ -142,9 +138,6 @@ In the above example, we can see that `sayHello` returns a `FS[HelloReply]`. How
 For instance:
 
 ```tut:silent
-@option(name = "java_package", value = "quickstart", quote = true)
-@option(name = "java_multiple_files", value = "true", quote = false)
-@option(name = "java_outer_classname", value = "Quickstart", quote = true)
 object protocol {
 
   /**
@@ -183,7 +176,6 @@ object protocol {
 
 We are also using some additional annotations:
 
-* `@option`: used to define the equivalent headers in `.proto` files.
 * `@service`: tags the trait as an [RPC] service, in order to derive server and client code (macro expansion).
 * `@rpc(Protobuf)`: indicates that the method is an RPC service. It receives as argument the type of serialization that will be used to encode/decode data, `Protocol Buffers` in the example. `Avro` is also supported as another type of serialization.
 
@@ -200,9 +192,6 @@ On the server side, we only have to add the annotation `Gzip` in our defined ser
 Let's see an example of a unary service on the server side.
 
 ```tut:silent
-@option(name = "java_package", value = "quickstart", quote = true)
-@option(name = "java_multiple_files", value = "true", quote = false)
-@option(name = "java_outer_classname", value = "Quickstart", quote = true)
 object service {
 
   @service
@@ -277,9 +266,6 @@ As [gRPC], [frees-rpc] allows you to define two main kinds of service methods:
 Let's complete our protocol's example with an unary service method:
 
 ```tut:silent
-@option(name = "java_package", value = "quickstart", quote = true)
-@option(name = "java_multiple_files", value = "true", quote = false)
-@option(name = "java_outer_classname", value = "Quickstart", quote = true)
 object service {
 
   import monix.reactive.Observable
