@@ -205,9 +205,9 @@ As we can see, it’s quite simple since it’s just a Scala case class preceded
 By the same token, let’s see now how the `Greeter` service would be translated to the [frees-rpc] style (in your `.scala` file):
 
 ```tut:silent
-@option(name = "java_package", value = "quickstart", quote = true)
-@option(name = "java_multiple_files", value = "true", quote = false)
-@option(name = "java_outer_classname", value = "Quickstart", quote = true)
+@option(name = "java_package", value = "quickstart")
+@option(name = "java_multiple_files", value = true)
+@option(name = "java_outer_classname", value = "Quickstart")
 object protocol {
 
   /**
@@ -241,7 +241,7 @@ object protocol {
 
 Naturally, the [RPC] services are grouped in a [@tagless algebra]. Therefore, we are following one of the primary principles of Freestyle; you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.
 
-In the above example, we can see that `sayHello` returns a `FS[HelloReply]`. However, very often the services might:
+In the above example, we can see that `sayHello` returns an `F[HelloReply]`. However, very often the services might:
 
 * Return an empty response.
 * Receive an empty request.
@@ -545,6 +545,9 @@ class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
   override def sayHello(request: HelloRequest): F[HelloResponse] =
     HelloResponse(reply = "Good bye!").pure
 
+  override def sayHelloAvro(request: HelloRequest): F[HelloResponse] =
+    HelloResponse(reply = "Good bye from Avro!").pure
+    
   override def lotsOfReplies(request: HelloRequest): Observable[HelloResponse] =
     dummyObservableResponse
 
