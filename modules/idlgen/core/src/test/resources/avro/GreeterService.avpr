@@ -1,0 +1,70 @@
+{
+  "namespace" : "foo.bar",
+  "protocol" : "MyGreeterService",
+  "types" : [
+    {
+      "name" : "HelloRequest",
+      "type" : "record",
+      "fields" : [
+        {
+          "name" : "arg1",
+          "type" : "string"
+        },
+        {
+          "name" : "arg2",
+          "type" : [
+            "null",
+            "string"
+          ]
+        },
+        {
+          "name" : "arg3",
+          "type" : {
+            "type" : "array",
+            "items" : "string"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "HelloResponse",
+      "type" : "record",
+      "fields" : [
+        {
+          "name" : "arg1",
+          "type" : "string"
+        },
+        {
+          "name" : "arg2",
+          "type" : [
+            "null",
+            "string"
+          ]
+        },
+        {
+          "name" : "arg3",
+          "type" : {
+            "type" : "array",
+            "items" : "string"
+          }
+        }
+      ]
+    }
+  ],
+  "messages" : {
+    "sayHelloAvro" : {
+      "request" : [
+        {
+          "name" : "arg",
+          "type" : "HelloRequest"
+        }
+      ],
+      "response" : "HelloResponse"
+    },
+    "sayNothingAvro" : {
+      "request" : [
+      ],
+      "response" : "null"
+    }
+  }
+}

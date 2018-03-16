@@ -21,11 +21,13 @@ import freestyle.rpc.internal.util.StringUtil._
 import scala.meta._
 
 case class RpcDefinitions(
+    outputName: String,
+    outputPackage: Option[String],
     options: Seq[RpcOption],
     messages: Seq[RpcMessage],
     services: Seq[RpcService])
 
-case class RpcOption(name: String, value: String, quote: Boolean)
+case class RpcOption(name: String, value: String)
 
 case class RpcMessage(name: String, params: Seq[Term.Param]) {
   // Workaround for `Term.Param` using referential equality; needed mostly for unit testing

@@ -21,6 +21,7 @@ import freestyle.rpc.protocol._
 import org.scalactic._
 import scala.compat.Platform
 import scala.io
+import scala.io.BufferedSource
 import scala.meta._
 
 class IdlGenTests extends RpcBaseTestSuite {
@@ -30,45 +31,64 @@ class IdlGenTests extends RpcBaseTestSuite {
   }
 
   val greeterRpcs = RpcDefinitions(
+    "MyGreeterService",
+    Some("foo.bar"),
     Seq(
-      RpcOption("java_package"        , "quickstart", quote = true),
-      RpcOption("java_multiple_files" , "true",       quote = false),
-      RpcOption("java_outer_classname", "Quickstart", quote = true)
+      RpcOption("java_multiple_files" , "true"),
+      RpcOption("java_outer_classname", "\"Quickstart\"")
     ),
     Seq(
-      RpcMessage("HelloRequest",  Seq(param"greeting: String")),
-      RpcMessage("HellosRequest", Seq(param"greetings: List [String]")),
-      RpcMessage("HelloResponse", Seq(param"reply: String"))
+      RpcMessage("HelloRequest",  Seq(param"arg1: String", param"arg2: Option[String]", param"arg3: List[String]")),
+      RpcMessage("HelloResponse", Seq(param"arg1: String", param"arg2: Option[String]", param"arg3: List[String]"))
     ),
-    Seq(
-    RpcService("Greeter", Seq(
-      RpcRequest(Avro,     "sayHelloAvro"   , t"HelloRequest", t"HelloResponse", None),
-      RpcRequest(Protobuf, "sayHelloProto"  , t"HelloRequest", t"HelloResponse", None),
-      RpcRequest(Protobuf, "sayNothing"     , t"Empty.type"  , t"Empty.type"   , None),
-      RpcRequest(Protobuf, "lotsOfReplies"  , t"HelloRequest", t"HelloResponse", Some(ResponseStreaming)),
-      RpcRequest(Protobuf, "lotsOfGreetings", t"HelloRequest", t"HelloResponse", Some(RequestStreaming)),
-      RpcRequest(Protobuf, "bidiHello"      , t"HelloRequest", t"HelloResponse", Some(BidirectionalStreaming))
+    Seq(RpcService("Greeter", Seq(
+      RpcRequest(Avro    , "sayHelloAvro"        , t"HelloRequest", t"HelloResponse", None),
+      RpcRequest(Protobuf, "sayHelloProto"       , t"HelloRequest", t"HelloResponse", None),
+      RpcRequest(Avro    , "sayNothingAvro"      , t"Empty.type"  , t"Empty.type"   , None),
+      RpcRequest(Protobuf, "sayNothingProto"     , t"Empty.type"  , t"Empty.type"   , None),
+      RpcRequest(Avro    , "lotsOfRepliesAvro"   , t"HelloRequest", t"HelloResponse", Some(ResponseStreaming)),
+      RpcRequest(Protobuf, "lotsOfRepliesProto"  , t"HelloRequest", t"HelloResponse", Some(ResponseStreaming)),
+      RpcRequest(Avro    , "lotsOfGreetingsAvro" , t"HelloRequest", t"HelloResponse", Some(RequestStreaming)),
+      RpcRequest(Protobuf, "lotsOfGreetingsProto", t"HelloRequest", t"HelloResponse", Some(RequestStreaming)),
+      RpcRequest(Avro    , "bidiHelloAvro"       , t"HelloRequest", t"HelloResponse", Some(BidirectionalStreaming)),
+      RpcRequest(Protobuf, "bidiHelloProto"      , t"HelloRequest", t"HelloResponse", Some(BidirectionalStreaming)),
+      RpcRequest(Avro    , "bidiHelloFs2Avro"    , t"HelloRequest", t"HelloResponse", Some(BidirectionalStreaming)),
+      RpcRequest(Protobuf, "bidiHelloFs2Proto"   , t"HelloRequest", t"HelloResponse", Some(BidirectionalStreaming))
     )))
   )
 
-  s"${Parser.getClass.getSimpleName}.parse()" should {
+  "Parser.parse()" should {
     "generate correct RPC definitions from Scala source file" in {
-      val input = io.Source.fromInputStream(getClass.getResourceAsStream("/GreeterService.scala")).mkString.parse[Source].get
-      val RpcDefinitions(options, messages, services) = Parser.parse(input)
-      val RpcDefinitions(expectedOptions, expectedMessages, expectedServices) = greeterRpcs
+      val input = resource("/GreeterService.scala").mkString.parse[Source].get
+      val RpcDefinitions(pkg, name, options, messages, services) = Parser.parse(input, "GreeterService")
+      val RpcDefinitions(expectedPkg, expectedName, expectedOptions, expectedMessages, expectedServices) = greeterRpcs
+      pkg shouldBe expectedPkg
+      name shouldBe expectedName
       options shouldBe expectedOptions
       messages shouldBe expectedMessages
       services shouldBe expectedServices
     }
   }
 
-  s"${Generator.getClass.getSimpleName}.generateFrom()" should {
-    "generate correct IDL syntax from RPC definitions" in {
-      val expectedProto = io.Source.fromInputStream(getClass.getResourceAsStream("/proto/GreeterService.proto")).getLines.toList
+  "$Generator.generateFrom()" should {
+    "generate correct Protobuf syntax from RPC definitions" in {
+      val expected = resource("/proto/GreeterService.proto").getLines.toList
       val output = Generator.generateFrom(greeterRpcs)
       output.get(ProtoGenerator) should not be empty
-      output(ProtoGenerator) shouldBe expectedProto
+      output(ProtoGenerator).toList shouldBe expected
     }
   }
+
+  "Generator.generateFrom()" should {
+    "generate correct Avro syntax from RPC definitions" in {
+      val expected = resource("/avro/GreeterService.avpr").getLines.toList
+      val output = Generator.generateFrom(greeterRpcs)
+      output.get(AvroGenerator) should not be empty
+      output(AvroGenerator).toList shouldBe expected
+    }
+  }
+
+  private def resource(path: String): BufferedSource = io.Source.fromInputStream(getClass.getResourceAsStream(path))
+
   // format: ON
 }

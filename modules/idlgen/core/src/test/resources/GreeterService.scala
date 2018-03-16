@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-@option(name = "java_package", value = "quickstart", quote = true)
-@option(name = "java_multiple_files", value = "true", quote = false)
-@option(name = "java_outer_classname", value = "Quickstart", quote = true)
+import freestyle.rpc.protocol._
+
+@outputName("MyGreeterService")
+@outputPackage("foo.bar")
+@option("java_multiple_files", true)
+@option(name = "java_outer_classname", value = "Quickstart")
 object GreeterService {
 
-  @message case class HelloRequest(greeting: String)
+  @message case class HelloRequest(arg1: String, arg2: Option[String], arg3: List[String])
 
-  @message case class HellosRequest(greetings: List[ String ])
-
-  @message case class HelloResponse(reply: String)
+  @message case class HelloResponse(arg1: String, arg2: Option[String], arg3: List[String])
 
   @service trait Greeter[F[_]] {
 
@@ -33,20 +34,43 @@ object GreeterService {
     @rpc(Protobuf)
     def sayHelloProto(request: HelloRequest): F[HelloResponse]
 
+    @rpc(Avro)
+    def sayNothingAvro(request: Empty.type): F[Empty.type]
+
     @rpc(Protobuf)
-    def sayNothing(request: Empty.type): F[Empty.type]
+    def sayNothingProto(request: Empty.type): F[Empty.type]
+
+    @rpc(Avro)
+    @stream[ResponseStreaming.type]
+    def lotsOfRepliesAvro(request: HelloRequest): Observable[HelloResponse]
 
     @rpc(Protobuf)
     @stream[ResponseStreaming.type]
-    def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
+    def lotsOfRepliesProto(request: HelloRequest): Observable[HelloResponse]
+
+    @rpc(Avro)
+    @stream[RequestStreaming.type]
+    def lotsOfGreetingsAvro(request: Observable[HelloRequest]): F[HelloResponse]
 
     @rpc(Protobuf)
     @stream[RequestStreaming.type]
-    def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse]
+    def lotsOfGreetingsProto(request: Observable[HelloRequest]): F[HelloResponse]
+
+    @rpc(Avro)
+    @stream[BidirectionalStreaming.type]
+    def bidiHelloAvro(request: Observable[HelloRequest]): Observable[HelloResponse]
 
     @rpc(Protobuf)
     @stream[BidirectionalStreaming.type]
-    def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
+    def bidiHelloProto(request: Observable[HelloRequest]): Observable[HelloResponse]
+
+    @rpc(Avro)
+    @stream[BidirectionalStreaming.type]
+    def bidiHelloFs2Avro(request: Stream[F, HelloRequest]): Stream[F, HelloResponse]
+
+    @rpc(Protobuf)
+    @stream[BidirectionalStreaming.type]
+    def bidiHelloFs2Proto(request: Stream[F, HelloRequest]): Stream[F, HelloResponse]
 
   }
 

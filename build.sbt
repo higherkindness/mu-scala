@@ -126,6 +126,7 @@ lazy val `idlgen-core` = project
   .dependsOn(internal)
   .dependsOn(client % "test->test")
   .settings(moduleName := "frees-rpc-idlgen-core")
+  .settings(idlGenSettings)
   .disablePlugins(ScriptedPlugin)
 
 lazy val `idlgen-sbt` = project

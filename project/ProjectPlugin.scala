@@ -127,6 +127,12 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+    lazy val idlGenSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("circe-generic")
+      )
+    )
+
     lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
       scriptedLaunchOpts := {
         scriptedLaunchOpts.value ++

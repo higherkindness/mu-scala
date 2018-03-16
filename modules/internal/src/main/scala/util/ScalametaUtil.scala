@@ -65,12 +65,14 @@ object ScalametaUtil {
     }
 
     def annotations: Seq[Annotation] = modifiers.collect {
-      case Annot(Ctor.Ref.Name(name)) => Annotation(name)
+      case Annot(Ctor.Ref.Name(name)) => NoParamAnnotation(name)
       case Annot(Apply(Ctor.Ref.Name(name), args)) =>
-        Annotation(name, args.collect {
-          case Term.Arg.Named(Term.Name(argName), value) => argName          -> value
-          case unnamed                                   => unnamed.toString -> unnamed // single unnamed arg
-        }.toMap)
+        val namedArgs = args.collect {
+          case Term.Arg.Named(Term.Name(argName), value) => argName -> value
+        }
+        if (namedArgs.size == args.size)
+          AllNamedArgsAnnotation(name, namedArgs.toMap) // to lookup by name
+        else UnnamedArgsAnnotation(name, args) // to lookup by param order
     }
 
     def annotationsNamed(name: String): Seq[Annotation] = annotations.filter(_.name == name)
@@ -79,4 +81,21 @@ object ScalametaUtil {
   }
 }
 
-case class Annotation(name: String, args: Map[String, Term.Arg] = Map.empty)
+sealed trait Annotation {
+  def name: String
+  def firstArg: Option[Term.Arg] = this match {
+    case NoParamAnnotation(_)            => None
+    case UnnamedArgsAnnotation(_, args)  => args.headOption
+    case AllNamedArgsAnnotation(_, args) => args.headOption.map(_._2)
+  }
+  def withArgsNamed(names: String*): Option[Seq[Term.Arg]] = this match {
+    case NoParamAnnotation(_)            => counted(names, Seq.empty)
+    case UnnamedArgsAnnotation(_, args)  => counted(names, args)
+    case AllNamedArgsAnnotation(_, args) => counted(names, names.flatMap(args.get))
+  }
+  private def counted(names: Seq[String], args: Seq[Term.Arg]): Option[Seq[Term.Arg]] =
+    Some(args).filter(_.size >= names.size)
+}
+case class NoParamAnnotation(name: String)                                   extends Annotation
+case class UnnamedArgsAnnotation(name: String, args: Seq[Term.Arg])          extends Annotation
+case class AllNamedArgsAnnotation(name: String, args: Map[String, Term.Arg]) extends Annotation

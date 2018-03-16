@@ -15,12 +15,8 @@ In the previous section, we saw that [frees-rpc] allows you to define unary serv
 Let's keep going completing our protocol's example with the three streaming service methods:
 
 ```tut:silent
-import freestyle.free._
 import freestyle.rpc.protocol._
 
-@option(name = "java_package", value = "quickstart", quote = true)
-@option(name = "java_multiple_files", value = "true", quote = false)
-@option(name = "java_outer_classname", value = "Quickstart", quote = true)
 object service {
 
   import monix.reactive.Observable
@@ -109,12 +105,8 @@ Thanks to this new data type, [frees-rpc] supports `fs2.Stream[F, ?]` for all th
 Let's compare our previous protocol's using `fs2.Stream` instead of `Observable`.
 
 ```tut:silent
-import freestyle.free._
 import freestyle.rpc.protocol._
 
-@option(name = "java_package", value = "quickstart", quote = true)
-@option(name = "java_multiple_files", value = "true", quote = false)
-@option(name = "java_outer_classname", value = "Quickstart", quote = true)
 object service {
 
   import fs2.Stream
