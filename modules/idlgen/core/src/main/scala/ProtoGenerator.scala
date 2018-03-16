@@ -17,7 +17,6 @@
 package freestyle.rpc.idlgen
 
 import freestyle.rpc.protocol._
-import freestyle.rpc.internal.util.StringUtil._
 import scala.meta._
 
 object ProtoGenerator extends Generator {
@@ -26,18 +25,28 @@ object ProtoGenerator extends Generator {
   val outputSubdir: String                 = "proto"
   val fileExtension: String                = ".proto"
 
+  private val ProtoEmpty = "google.protobuf.Empty"
+
   private val HeaderLines = Seq(
-    "This file has been automatically generated for use by",
-    "the idlGen plugin, from frees-rpc service definitions.",
-    "Read more at: http://frees.io/docs/rpc/"
-  ).map("// " + _) ++ Seq("", "syntax = \"proto3\";", "")
+    "// This file has been automatically generated for use by",
+    "// the idlGen plugin, from frees-rpc service definitions.",
+    "// Read more at: http://frees.io/docs/rpc/",
+    "",
+    "syntax = \"proto3\";",
+    ""
+  )
 
   protected def generateFrom(
+      outputName: String,
+      outputPackage: Option[String],
       options: Seq[RpcOption],
       messages: Seq[RpcMessage],
       services: Seq[RpcService]): Seq[String] = {
+
+    val packageLines = outputPackage.map(pkg => Seq(s"package $pkg;", "")).getOrElse(Seq.empty)
+
     val optionLines = options.map {
-      case RpcOption(name, value, quote) => s"option $name = ${if (quote) value.quoted else value};"
+      case RpcOption(name, value) => s"option $name = $value;"
     } :+ ""
     val messageLines = messages.flatMap {
       case RpcMessage(name, params) => textBlock("message", name, messageFields(params)) :+ ""
@@ -45,7 +54,12 @@ object ProtoGenerator extends Generator {
     val serviceLines = services.flatMap {
       case RpcService(name, requests) => textBlock("service", name, requestFields(requests))
     }
-    HeaderLines ++ optionLines ++ messageLines ++ serviceLines
+    val importLines =
+      if (serviceLines.exists(_.contains(ProtoEmpty)))
+        Seq("import \"google/protobuf/empty.proto\";", "")
+      else Seq.empty
+
+    HeaderLines ++ packageLines ++ importLines ++ optionLines ++ messageLines ++ serviceLines
   }
 
   private def textBlock(blockType: String, name: String, contents: Seq[String]) =
@@ -75,8 +89,9 @@ object ProtoGenerator extends Generator {
       t: Type,
       streamingType: Option[StreamingType],
       matchingStreamingTypes: StreamingType*): String = {
-    val reqType = mappedType(t)
-    if (streamingType.exists(matchingStreamingTypes.contains)) s"stream $reqType" else reqType
+    val sType = t.toString
+    val pType = if (sType == "Empty.type") ProtoEmpty else sType
+    if (streamingType.exists(matchingStreamingTypes.contains)) s"stream $pType" else pType
   }
 
   private def mappedType(typeArg: Type.Arg): String = typeArg match {
@@ -87,7 +102,7 @@ object ProtoGenerator extends Generator {
     case targ"Double"      => "double"
     case targ"String"      => "string"
     case targ"Array[Byte]" => "bytes"
-    case targ"Empty.type"  => "Empty"
+    case targ"Option[$t]"  => mappedType(t)
     case targ"List[$t]"    => s"repeated ${mappedType(t)}"
     case _                 => typeArg.toString
   }

@@ -38,9 +38,11 @@ case object Gzip                      extends CompressionType
 
 class rpc(val serializationType: SerializationType, val compressionType: CompressionType = Identity)
     extends StaticAnnotation
-class stream[S <: StreamingType]                                      extends StaticAnnotation
-class message                                                         extends StaticAnnotation
-class option(val name: String, val value: String, val quote: Boolean) extends StaticAnnotation
+class stream[S <: StreamingType]       extends StaticAnnotation
+class message                          extends StaticAnnotation
+class option(name: String, value: Any) extends StaticAnnotation
+class outputPackage(value: String)     extends StaticAnnotation
+class outputName(value: String)        extends StaticAnnotation
 
 @message
 object Empty

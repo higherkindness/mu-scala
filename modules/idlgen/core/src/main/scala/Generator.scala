@@ -19,7 +19,7 @@ package freestyle.rpc.idlgen
 import freestyle.rpc.protocol.SerializationType
 
 object Generator {
-  val generators = Seq(ProtoGenerator)
+  val generators = Seq(ProtoGenerator, AvroGenerator)
 
   def generateFrom(rpc: RpcDefinitions): Map[Generator, Seq[String]] =
     generators.flatMap(generator => generator.generateFrom(rpc).map(generator -> _)).toMap
@@ -32,14 +32,16 @@ trait Generator {
   def fileExtension: String
 
   def generateFrom(rpc: RpcDefinitions): Option[Seq[String]] = {
-    val options  = rpc.options
     val messages = rpc.messages
     val services = filterServices(rpc.services)
-    if (messages.nonEmpty || services.nonEmpty) Some(generateFrom(options, messages, services))
+    if (messages.nonEmpty || services.nonEmpty)
+      Some(generateFrom(rpc.outputName, rpc.outputPackage, rpc.options, messages, services))
     else None
   }
 
   protected def generateFrom(
+      outputName: String,
+      outputPackage: Option[String],
       options: Seq[RpcOption],
       messages: Seq[RpcMessage],
       services: Seq[RpcService]): Seq[String]

@@ -23,18 +23,24 @@ import scala.meta._
 
 object Parser {
 
-  def parse(input: Source): RpcDefinitions = {
+  def parse(input: Source, inputName: String): RpcDefinitions = {
     val definitions = input.collect { case defn: Defn => defn }
 
     // format: OFF
+    def annotationValue(name: String): Option[String] = (for {
+      defn <- definitions
+      annotation <- defn.annotationsNamed(name)
+      firstArg <- annotation.firstArg
+    } yield firstArg).headOption.map(_.toString.unquoted)
+
+    val outputName = annotationValue("outputName").getOrElse(inputName)
+    val outputPackage = annotationValue("outputPackage")
+
     val options: Seq[RpcOption] = for {
-      defn   <- definitions
+      defn  <- definitions
       option <- defn.annotationsNamed("option")
-      args = option.args.mapValues(_.toString.unquoted)
-      name  <- args.get("name")
-      value <- args.get("value")
-      quote <- args.get("quote").map(_.toBoolean)
-    } yield RpcOption(name, value, quote)
+      Seq(name, value) <- option.withArgsNamed("name", "value")
+    } yield RpcOption(name.toString.unquoted, value.toString) // keep value quoting as-is
 
     val messages: Seq[RpcMessage] = definitions.filter(_.hasAnnotation("message")).map { defn =>
       RpcMessage(defn.name, defn.params)
@@ -46,6 +52,6 @@ object Parser {
     }
     // format: ON
 
-    RpcDefinitions(options, messages, services)
+    RpcDefinitions(outputName, outputPackage, options, messages, services)
   }
 }

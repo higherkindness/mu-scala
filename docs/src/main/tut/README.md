@@ -180,10 +180,9 @@ First things first, the main difference in respect to [gRPC] is that [frees-rpc]
 * Instead of reading `.proto` files to set up the [RPC] messages and services, [frees-rpc] offers (as an optional feature) to generate them, based on your protocols defined in your Scala code. This feature is offered to maintain compatibility with other languages and systems outside of Scala. We'll check out this feature further in [this section](#generating-idl-files).
 
 Let’s start looking at how to define the `Person` message that we saw previously.
-Before starting, these are the Scala imports we need:
+Before starting, this is the Scala import we need:
 
 ```tut:silent
-import freestyle.free._
 import freestyle.rpc.protocol._
 ```
 
@@ -209,7 +208,7 @@ By the same token, let’s see now how the `Greeter` service would be translated
 @option(name = "java_package", value = "quickstart", quote = true)
 @option(name = "java_multiple_files", value = "true", quote = false)
 @option(name = "java_outer_classname", value = "Quickstart", quote = true)
-object protocols {
+object protocol {
 
   /**
    * The request message containing the user's name.
@@ -253,9 +252,9 @@ In the above example, we can see that `sayHello` returns a `FS[HelloReply]`. How
 For instance:
 
 ```tut:silent
-@option(name = "java_package", value = "quickstart", quote = true)
-@option(name = "java_multiple_files", value = "true", quote = false)
-@option(name = "java_outer_classname", value = "Quickstart", quote = true)
+@option(name = "java_package", value = "quickstart")
+@option(name = "java_multiple_files", value = true)
+@option(name = "java_outer_classname", value = "Quickstart")
 object protocol {
 
   /**
@@ -312,9 +311,12 @@ As [gRPC], [frees-rpc] allows you to define four kinds of service methods:
 Let's complete our protocol's example with these four kinds of service methods:
 
 ```tut:silent
-@option(name = "java_package", value = "quickstart", quote = true)
-@option(name = "java_multiple_files", value = "true", quote = false)
-@option(name = "java_outer_classname", value = "Quickstart", quote = true)
+import freestyle.rpc.protocol._
+
+@option(name = "java_multiple_files", value = true)
+@option(name = "java_outer_classname", value = "Quickstart")
+@outputName("GreeterService")
+@outputPackage("quickstart")
 object service {
 
   import monix.reactive.Observable
@@ -339,6 +341,12 @@ object service {
      */
     @rpc(Protobuf)
     def sayHello(request: HelloRequest): F[HelloResponse]
+
+    /**
+     * As above, but with Avro serialization.
+     */
+    @rpc(Avro)
+    def sayHelloAvro(request: HelloRequest): F[HelloResponse]
 
     /**
      * Server streaming RPC where the client sends a request to the server and gets a stream to read a
@@ -416,7 +424,7 @@ addSbtPlugin("io.frees" % "sbt-frees-rpc-idlgen" % "0.11.1")
 ```
 [comment]: # (End Replace)
 
-Note that the plugin is only available for Scala 2.12, and currently only generates Protobuf `.proto` files. Avro IDL support is under consideration for development.
+Note that the plugin is only available for Scala 2.12.
 
 ### Plugin Settings
 
@@ -435,7 +443,7 @@ At this point, each time you want to update your IDL files from the scala defini
 sbt idlGen
 ```
 
-Using the example above, the result would be placed at `/src/main/resources/proto/service.proto`, in the case that the scala file is named as `service.scala`. The content should be similar to:
+Using the example above, the resulting Protobuf IDL would be placed at `/src/main/resources/proto/service.proto`, in the case that the scala file is named as `service.scala`. The content should be similar to:
 
 ```
 // This file has been automatically generated for use by
@@ -444,7 +452,8 @@ Using the example above, the result would be placed at `/src/main/resources/prot
 
 syntax = "proto3";
 
-option java_package = "quickstart";
+package quickstart;
+
 option java_multiple_files = true;
 option java_outer_classname = "Quickstart";
 
@@ -463,6 +472,50 @@ service Greeter {
   rpc BidiHello (stream HelloRequest) returns (stream HelloResponse);
 }
 ```
+
+And the resulting Avro IDL would be placed at `/src/main/resources/avro/service.avpr`:
+
+```
+{
+  "namespace" : "quickstart",
+  "protocol" : "GreeterService",
+  "types" : [
+    {
+      "name" : "HelloRequest",
+      "type" : "record",
+      "fields" : [
+        {
+          "name" : "greeting",
+          "type" : "string"
+        }
+      ]
+    },
+    {
+      "name" : "HelloResponse",
+      "type" : "record",
+      "fields" : [
+        {
+          "name" : "reply",
+          "type" : "string"
+        }
+      ]
+    }
+  ],
+  "messages" : {
+    "sayHelloAvro" : {
+      "request" : [
+        {
+          "name" : "arg",
+          "type" : "HelloRequest"
+        }
+      ],
+      "response" : "HelloResponse"
+    }
+  }
+}
+```
+
+Note that due to limitations in the Avro IDL, currently only unary RPC services are converted (client- and/or server-streaming services are ignored).
 
 ## RPC Service Implementations
 
@@ -715,9 +768,9 @@ Annotation | Scope | Arguments | Description
 --- | --- | --- | ---
 @service | `Trait` | - | Tags the trait as an [RPC] service, in order to derive server and client code (macro expansion).
 @rpc | `Method` | (`SerializationType`) | Indicates the method is an RPC request. As `SerializationType` parameter value, `Protobuf` and `Avro` are the current supported serialization methods.
-@stream | `Method` | [`S <: StreamingType`] | Indicates the  method's streaming type: server, client, and bidirectional. Hence, the `S` type parameter can be `ResponseStreaming`, `RequestStreaming`, or `BidirectionalStreaming`, respectively.
-@message | `Case Class` | - | Tags a case class an RPC message.
-@option | `Object` | [name: String, value: String, quote: Boolean] | Used to define the equivalent headers in `.proto` files
+@stream | `Method` | [`S <: StreamingType`] | Indicates the method's streaming type: server, client, and bidirectional. Hence, the `S` type parameter can be `ResponseStreaming`, `RequestStreaming`, or `BidirectionalStreaming`, respectively.
+@message | `Case Class` | - | Tags the case class as an RPC message.
+@option | `Object` | [name: String, value: Any] | Used to define the equivalent headers in `.proto` files.
 
 ## Metrics Reporting
 

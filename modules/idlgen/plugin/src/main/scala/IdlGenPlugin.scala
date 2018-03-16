@@ -33,8 +33,9 @@ object IdlGenPlugin extends AutoPlugin {
         "The Scala source directory, where your freestyle-rpc service definitions are placed.")
 
     lazy val targetDir: SettingKey[File] =
-      settingKey[File]("The IDL target directory, where the `idlGen` task will write the generated files " +
-        "in subdirectories such as `proto` for Protobuf, based on freestyle-rpc service definitions.")
+      settingKey[File](
+        "The IDL target directory, where the `idlGen` task will write the generated files " +
+          "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on freestyle-rpc service definitions.")
   }
 
   import autoImport._

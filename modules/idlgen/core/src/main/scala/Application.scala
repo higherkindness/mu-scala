@@ -32,12 +32,11 @@ object Application {
     val inputPath  = new File(args(0)).requireExisting
     val outputPath = new File(args(1)).requireExisting
     inputPath.allMatching(_.getName.endsWith(ScalaFileExtension)).foreach { inputFile =>
-      Generator.generateFrom(Parser.parse(inputFile.parse[Source].get)).foreach {
+      val outputName = inputFile.getName.replaceAll(ScalaFileExtension, "")
+      Generator.generateFrom(Parser.parse(inputFile.parse[Source].get, outputName)).foreach {
         case (generator, output) =>
-          val outputDir = new File(outputPath, generator.outputSubdir)
-          val outputFile = new File(
-            outputDir,
-            inputFile.getName.replaceAll(ScalaFileExtension, generator.fileExtension))
+          val outputDir  = new File(outputPath, generator.outputSubdir)
+          val outputFile = new File(outputDir, outputName + generator.fileExtension)
           outputDir.mkdir()
           outputFile.write(output)
           println(Separator)

@@ -25,7 +25,7 @@ object FileUtil {
   implicit class FileOps(val file: File) extends AnyVal {
 
     def requireExisting: File = {
-      require(file.exists, s"$file doesn't exist")
+      require(file.exists, s"${file.getAbsolutePath} doesn't exist")
       file
     }
 
