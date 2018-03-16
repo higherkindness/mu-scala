@@ -12,6 +12,60 @@ permalink: /docs/rpc/metrics-reporting
 
 In order to monitor the RPC calls on the server side, it's necessary to intercept them. We'll see how to do this in the next code fragment:
 
+```tut:invisible
+import monix.execution.Scheduler
+
+trait CommonRuntime {
+
+  implicit val S: Scheduler = monix.execution.Scheduler.Implicits.global
+
+}
+```
+
+```tut:invisible
+import freestyle.free._
+import freestyle.rpc.protocol._
+import monix.execution.Scheduler
+
+@option(name = "java_package", value = "quickstart", quote = true)
+@option(name = "java_multiple_files", value = "true", quote = false)
+@option(name = "java_outer_classname", value = "Quickstart", quote = true)
+object service {
+
+  import monix.reactive.Observable
+
+  @message
+  case class HelloRequest(greeting: String)
+
+  @message
+  case class HelloResponse(reply: String)
+
+  @service
+  trait Greeter[F[_]] {
+    @rpc(Protobuf)
+    def sayHello(request: HelloRequest): F[HelloResponse]
+  }
+}
+```
+
+```tut:invisible
+import cats.effect.Async
+import cats.syntax.applicative._
+import freestyle.free._
+import freestyle.rpc.server.implicits._
+import monix.execution.Scheduler
+import monix.eval.Task
+import monix.reactive.Observable
+import service._
+
+class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
+
+  override def sayHello(request: service.HelloRequest): F[service.HelloResponse] =
+    HelloResponse(reply = "Good bye!").pure
+
+}
+```
+
 ```tut:silent
 import cats.~>
 import cats.effect.IO
@@ -19,11 +73,10 @@ import freestyle.rpc.server._
 import freestyle.rpc.server.handlers._
 import freestyle.rpc.server.implicits._
 import freestyle.async.catsEffect.implicits._
-import service._
-
-import io.prometheus.client.CollectorRegistry
 import freestyle.rpc.prometheus.shared.Configuration
 import freestyle.rpc.prometheus.server.MonitoringServerInterceptor
+import io.prometheus.client.CollectorRegistry
+import service._
 
 object InterceptingServerCalls extends CommonRuntime {
 
@@ -36,6 +89,7 @@ object InterceptingServerCalls extends CommonRuntime {
 
   implicit val greeterServiceHandler: ServiceHandler[IO] = new ServiceHandler[IO]
 
+  // The Greeter service is the service defined in the Core concepts section
   val grpcConfigs: List[GrpcConfig] = List(
     AddService(Greeter.bindService[IO].interceptWith(monitorInterceptor))
   )

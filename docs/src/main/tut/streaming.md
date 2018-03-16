@@ -17,6 +17,9 @@ The streaming service methods are the next:
 Let's keep going completing our protocol's example with the three streaming service methods:
 
 ```tut:silent
+import freestyle.free._
+import freestyle.rpc.protocol._
+
 @option(name = "java_package", value = "quickstart", quote = true)
 @option(name = "java_multiple_files", value = "true", quote = false)
 @option(name = "java_outer_classname", value = "Quickstart", quote = true)
@@ -110,6 +113,9 @@ Thanks to this new data type, [frees-rpc] supports `fs2.Stream[F, ?]` for all th
 Let's keep going to compare our previous protocol's using `fs2.Stream` against `Observable` and we will see how the service is really similar to the Observable service.
 
 ```tut:silent
+import freestyle.free._
+import freestyle.rpc.protocol._
+
 @option(name = "java_package", value = "quickstart", quote = true)
 @option(name = "java_multiple_files", value = "true", quote = false)
 @option(name = "java_outer_classname", value = "Quickstart", quote = true)

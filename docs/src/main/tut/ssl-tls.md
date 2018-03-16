@@ -35,13 +35,66 @@ Thirdly, let's see a piece of code where we will explain line by line, what we a
 
 We won't cover the details regarding creation of `RPCService`, `ServerRPCService` and runtime implicits. You can find more information about these in the [Patterns](/docs/rpc/patterns) section.
 
+```tut:invisible
+import monix.execution.Scheduler
+
+trait CommonRuntime {
+
+  implicit val S: Scheduler = monix.execution.Scheduler.Implicits.global
+
+}
+```
+
+```tut:invisible
+import freestyle.free._
+import freestyle.rpc.protocol._
+import monix.execution.Scheduler
+
+@option(name = "java_package", value = "quickstart", quote = true)
+@option(name = "java_multiple_files", value = "true", quote = false)
+@option(name = "java_outer_classname", value = "Quickstart", quote = true)
+object service {
+
+  import monix.reactive.Observable
+
+  @message
+  case class HelloRequest(greeting: String)
+
+  @message
+  case class HelloResponse(reply: String)
+
+  @service
+  trait Greeter[F[_]] {
+    @rpc(Protobuf)
+    def sayHello(request: HelloRequest): F[HelloResponse]
+  }
+}
+```
+
+```tut:invisible
+import cats.effect.Async
+import cats.syntax.applicative._
+import freestyle.free._
+import freestyle.rpc.server.implicits._
+import monix.execution.Scheduler
+import monix.eval.Task
+import monix.reactive.Observable
+import service._
+
+class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
+
+  override def sayHello(request: service.HelloRequest): F[service.HelloResponse] =
+    HelloResponse(reply = "Good bye!").pure
+
+}
+```
 
 ```tut:silent
 import java.io.File
 import java.security.cert.X509Certificate
 
+import cats.effect.IO
 import cats.effect.Effect
-import freestyle.rpc.common._
 import freestyle.rpc.protocol._
 import freestyle.rpc.server.netty.SetSslContext
 import freestyle.rpc.server.{AddService, GrpcConfig, ServerW}
@@ -49,30 +102,10 @@ import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.GrpcSslContexts
 import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}
 
-object service {
+trait Runtime extends CommonRuntime{
 
-    @service
-    trait RPCService[F[_]] {
-      @rpc(Avro) def unary(a: A): F[C]
-    }
-
-}
-
-object handlers {
-
-    class ServerRPCService[F[_]: Effect] extends RPCService[F] {
-    	def unary(a: A): F[C] = Effect[F].delay(c1)
-    }
-
-}
-
-trait Runtime {
-
-	import service._
-    import handlers._
-
-    implicit val freesRPCHandler: ServerRPCService[ConcurrentMonad] =
-      new ServerRPCService[ConcurrentMonad]
+    implicit val freesRPCHandler: ServiceHandler[IO] =
+      new ServiceHandler[IO]
 
     // First of all, we have to load the certs into files. These files has to be locally in our
     // module in the resources folder.
@@ -98,13 +131,13 @@ trait Runtime {
 
     val grpcConfigs: List[GrpcConfig] = List(
       SetSslContext(serverSslContext),
-      AddService(RPCService.bindService[ConcurrentMonad])
+      AddService(Greeter.bindService[IO])
     )
 
     // Important. We have to create the server with Netty. OkHttp is not supported for the Ssl 
     // encryption in frees-rpc.
 
-    implicit val serverW: ServerW = ServerW.netty(SC.port, grpcConfigs)
+    implicit val serverW: ServerW = ServerW.netty(8080, grpcConfigs)
 
 }
 
@@ -116,7 +149,7 @@ object implicits extends Runtime
 Lastly, as we did before with the server side, let's see what happens on the client side.
 
 ```tut:silent
-
+import freestyle.rpc.ChannelForAddress
 import freestyle.rpc.client.OverrideAuthority
 import freestyle.rpc.client.netty.{
   NettyChannelInterpreter,
@@ -124,6 +157,7 @@ import freestyle.rpc.client.netty.{
   NettySslContext,
   NettyUsePlaintext
 }
+import io.grpc.netty.NegotiationType
 
 object client {
 
@@ -142,7 +176,7 @@ object client {
         .build()
 }
 
-object MainApp {
+object MainApp extends CommonRuntime{
 
 	import client._
 
@@ -152,7 +186,7 @@ object MainApp {
 	// These configs allow us to encrypt the connection with the server.
 
 	val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
-  		ChannelForAddress("localhost", "8080"),
+  		ChannelForAddress("localhost", 8080),
         List(
           OverrideAuthority(TestUtils.TEST_SERVER_HOST),
           NettyUsePlaintext(false),
@@ -161,8 +195,8 @@ object MainApp {
         )
     )
 
-    val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] = 
-    	RPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+    val freesRPCServiceClient: Greeter.Client[IO] = 
+    	Greeter.clientFromChannel[IO](channelInterpreter.build)
 
 }
 

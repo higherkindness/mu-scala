@@ -98,7 +98,7 @@ By the same token, let’s see now how the `Greeter` service would be translated
 @option(name = "java_package", value = "quickstart", quote = true)
 @option(name = "java_multiple_files", value = "true", quote = false)
 @option(name = "java_outer_classname", value = "Quickstart", quote = true)
-object protocols {
+object protocol {
 
   /**
    * The request message containing the user's name.
@@ -225,9 +225,18 @@ On the client, to enable it, we only have to add an option to the client in the 
 
 Let's see an example of a client with the compression enabled.
 
+```tut:invisible
+import monix.execution.Scheduler
+
+trait CommonRuntime {
+
+  implicit val S: Scheduler = monix.execution.Scheduler.Implicits.global
+
+}
+```
+
 ```tut:silent
 import cats.implicits._
-import cats.effect.IO
 import freestyle.free.config.implicits._
 import freestyle.async.catsEffect.implicits._
 import freestyle.rpc._
@@ -235,29 +244,27 @@ import freestyle.rpc.client._
 import freestyle.rpc.client.config._
 import freestyle.rpc.client.implicits._
 import monix.eval.Task
+import io.grpc.CallOptions
 import io.grpc.ManagedChannel
 import service._
-
 import scala.util.{Failure, Success, Try}
 
-object gclient {
+trait Implicits extends CommonRuntime {
 
-  trait Implicits extends CommonRuntime {
-
-    val channelFor: ChannelFor =
-      ConfigForAddress[Try]("rpc.host", "rpc.port") match {
-        case Success(c) => c
-        case Failure(e) =>
-          e.printStackTrace()
-          throw new RuntimeException("Unable to load the client configuration", e)
+  val channelFor: ChannelFor =
+    ConfigForAddress[Try]("rpc.host", "rpc.port") match {
+      case Success(c) => c
+      case Failure(e) =>
+        e.printStackTrace()
+        throw new RuntimeException("Unable to load the client configuration", e)
     }
 
-    implicit val serviceClient: Greeter.Client[Task] =
-      Greeter.client[Task](channelFor, options = CallOptions.DEFAULT.withCompression("gzip"))
-  }
-
-  object implicits extends Implicits
+  implicit val serviceClient: Greeter.Client[Task] =
+    Greeter.client[Task](channelFor, options = CallOptions.DEFAULT.withCompression("gzip"))
 }
+
+object implicits extends Implicits
+
 ```
 
 ## Service Methods

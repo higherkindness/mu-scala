@@ -14,6 +14,62 @@ Predictably, generating the server code is just implementing a service [Handler]
 
 Next, our dummy `Greeter` server implementation:
 
+```tut:invisible
+import freestyle.free._
+import freestyle.rpc.protocol._
+
+@option(name = "java_package", value = "quickstart", quote = true)
+@option(name = "java_multiple_files", value = "true", quote = false)
+@option(name = "java_outer_classname", value = "Quickstart", quote = true)
+object service {
+
+  import monix.reactive.Observable
+
+  @message
+  case class HelloRequest(greeting: String)
+
+  @message
+  case class HelloResponse(reply: String)
+
+  @service
+  trait Greeter[F[_]] {
+
+    /**
+     * @param request Client request.
+     * @return Server response.
+     */
+    @rpc(Protobuf)
+    def sayHello(request: HelloRequest): F[HelloResponse]
+
+    /**
+     * @param request Single client request.
+     * @return Stream of server responses.
+     */
+    @rpc(Protobuf)
+    @stream[ResponseStreaming.type]
+    def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
+
+    /**
+     * @param request Stream of client requests.
+     * @return Single server response.
+     */
+    @rpc(Protobuf)
+    @stream[RequestStreaming.type]
+    def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse]
+
+    /**
+     * @param request Stream of client requests.
+     * @return Stream of server responses.
+     */
+    @rpc(Protobuf)
+    @stream[BidirectionalStreaming.type]
+    def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
+
+  }
+
+}
+```
+
 ```tut:silent
 import cats.effect.Async
 import cats.syntax.applicative._
