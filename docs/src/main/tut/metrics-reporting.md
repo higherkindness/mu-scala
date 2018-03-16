@@ -6,7 +6,7 @@ permalink: /docs/rpc/metrics-reporting
 
 # Metrics Reporting
 
-[frees-rpc] currently provides two different ways to monitor [gRPC] services: `Prometheus` and `Dropwizard` (using the `Prometheus` extension). The usage is quite similar for both.
+Currently, [frees-rpc] provides two different ways to monitor [gRPC] services: `Prometheus` and `Dropwizard` (using the `Prometheus` extension). The usage is quite similar for both.
 
 ## Monitor Server Calls
 

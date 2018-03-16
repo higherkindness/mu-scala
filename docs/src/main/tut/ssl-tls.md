@@ -10,9 +10,7 @@ permalink: /docs/rpc/ssl-tls
 
 [frees-rpc] allows you to encrypt the connection between the server and the client through SSL/TLS. The main goal of using SSL is to protect your sensitive information and keeps your data secure between servers and clients.
 
-As we mentioned in the [Quickstart](/docs/rpc/quickstart) section, we can choose and configure our client with `OkHttp` or `Netty` but if we want to encrypt our service, it's mandatory to use `Netty`.
-
-[frees-rpc] only supports encryptation over *Netty*.
+As we mentioned in the [Quickstart](/docs/rpc/quickstart) section, we can choose and configure our client with `OkHttp` or `Netty` but if we want to encrypt our service, it's mandatory to use `Netty` because currently, [frees-rpc] only supports encryption over *Netty*.
 
 ## Requirements 
 
@@ -24,10 +22,9 @@ On the server and client side, we will need two files to configure the `SslConte
 
 ## Usage
 
-The first step to securing our `freestyle-rpc services` is to add the library dependencies frees-rpc-netty-ssl` and `frees-rpc-client-netty` in our `build.sbt`.
+The first step to secure our [frees-rpc] services is adding the library dependencies `frees-rpc-netty-ssl` and `frees-rpc-client-netty` in your build.
 
-
-In second place, we will have to move to our `resources` folder both server/client certificates and private keys. 
+In second place, we have to move both server/client certificates and private keys to the `resources` folder.
 
 If we haven't yet generated or obtained our own certificates, we can test using certificates found [here](https://github.com/grpc/grpc-java/tree/master/testing/src/main/resources/certs).
 
@@ -102,13 +99,12 @@ import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.GrpcSslContexts
 import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}
 
-trait Runtime extends CommonRuntime{
+trait Runtime extends CommonRuntime {
 
     implicit val freesRPCHandler: ServiceHandler[IO] =
       new ServiceHandler[IO]
 
-    // First of all, we have to load the certs into files. These files has to be locally in our
-    // module in the resources folder.
+    // First of all, we have to load the certs into files. These files have to be placed in the resources folder.
 
     val serverCertFile: File                         = TestUtils.loadCert("server1.pem")
     val serverPrivateKeyFile: File                   = TestUtils.loadCert("server1.key")
@@ -126,8 +122,7 @@ trait Runtime extends CommonRuntime{
         .clientAuth(ClientAuth.REQUIRE)
         .build()
 
-    // Adding to the GrpConfig our SslContext with SetSslContext, when we will create implicitly our 
-    // server with ServerW.netty, our server will require SSL encryption in the client side.
+    // Adding to the GrpConfig list the SslContext:
 
     val grpcConfigs: List[GrpcConfig] = List(
       SetSslContext(serverSslContext),
@@ -135,7 +130,7 @@ trait Runtime extends CommonRuntime{
     )
 
     // Important. We have to create the server with Netty. OkHttp is not supported for the Ssl 
-    // encryption in frees-rpc.
+    // encryption in frees-rpc at this moment.
 
     implicit val serverW: ServerW = ServerW.netty(8080, grpcConfigs)
 
@@ -161,7 +156,7 @@ import io.grpc.netty.NegotiationType
 
 object client {
 
-    // First of all, we have to load the certs into files.
+    // First of all, we have to load the certs files.
 
     val clientCertChainFile: File                    = TestUtils.loadCert("client.pem")
     val clientPrivateKeyFile: File                   = TestUtils.loadCert("client.key")
@@ -176,7 +171,7 @@ object client {
         .build()
 }
 
-object MainApp extends CommonRuntime{
+object MainApp extends CommonRuntime {
 
 	import client._
 
