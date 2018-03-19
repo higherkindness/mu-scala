@@ -4,7 +4,7 @@ title: SSL/TLS
 permalink: /docs/rpc/ssl-tls
 ---
 
-# SSL/TLS Encryption
+# SSL/TLS Encryption
 
 > [gRPC](https://grpc.io/docs/guides/auth.html) has SSL/TLS integration and promotes the use of SSL/TLS to authenticate the server, and encrypt all the data exchanged between the client and the server. Optional mechanisms are available for clients to provide certificates for mutual authentication.
 
