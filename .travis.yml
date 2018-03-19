@@ -61,7 +61,7 @@ jobs:
               git checkout master;
               git pull origin master;
               sbt release;
-              sbt idlgen-sbt/release;
+              sbt ";project idlgen-sbt;release";
               sbt depUpdateDependencyIssues;
             fi
           fi
