@@ -1,5 +1,21 @@
 # Changelog
 
+## 03/19/2018 - Version 0.12.0
+
+Release changes:
+
+* Merge sbt-freestyle-protogen into freestyle-rpc codebase, and update @rpc processing to handle latest `freestyle-rpc syntax ([#184](https://github.com/frees-io/freestyle-rpc/pull/184))
+* IdlGen refactoring to prepare for eventual Avro support, with Proto generation style fixes ([#186](https://github.com/frees-io/freestyle-rpc/pull/186))
+* Project Upgrade ([#187](https://github.com/frees-io/freestyle-rpc/pull/187))
+* Fixed stacktraces in tests caused by unclosed channels ([#189](https://github.com/frees-io/freestyle-rpc/pull/189))
+* sbt build config refactoring, with dependency updates ([#188](https://github.com/frees-io/freestyle-rpc/pull/188))
+* Upgrades to Freestyle 0.8.0 ([#193](https://github.com/frees-io/freestyle-rpc/pull/193))
+* Fixes Snapshot Publish ([#194](https://github.com/frees-io/freestyle-rpc/pull/194))
+* [Docs] Split into different sections ([#190](https://github.com/frees-io/freestyle-rpc/pull/190))
+* Avro IDL Support ([#195](https://github.com/frees-io/freestyle-rpc/pull/195))
+* Releases frees-rpc 0.12.0 ([#198](https://github.com/frees-io/freestyle-rpc/pull/198))
+
+
 ## 02/14/2018 - Version 0.11.1
 
 Release changes:
