@@ -140,6 +140,14 @@ lazy val `idlgen-sbt` = project
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
   .settings(buildInfoPackage := "freestyle.rpc.idlgen")
 
+lazy val `http-server` =  project
+  .in(file("modules/http/server"))
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(internal)
+  .settings(moduleName := "frees-rpc-http-server")
+  .settings(rpcHttpServerSettings)
+  .disablePlugins(ScriptedPlugin)
+
 //////////////////////////
 //// MODULES REGISTRY ////
 //////////////////////////
@@ -160,7 +168,8 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `dropwizard-client`,
   testing,
   ssl,
-  `idlgen-core`
+  `idlgen-core`,
+  `http-server`
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =

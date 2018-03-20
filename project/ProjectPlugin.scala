@@ -23,6 +23,7 @@ object ProjectPlugin extends AutoPlugin {
       val frees: String              = "0.8.0"
       val fs2ReactiveStreams: String = "0.5.1"
       val grpc: String               = "1.10.0"
+      val http4s                     = "0.18.3"
       val nettySSL: String           = "2.0.7.Final"
       val pbdirect: String           = "0.1.0"
       val prometheus: String         = "0.3.0"
@@ -147,6 +148,15 @@ object ProjectPlugin extends AutoPlugin {
       releaseProcess := Seq[ReleaseStep](
         releaseStepCommandAndRemaining("^ publishSigned"),
         ReleaseStep(action = "sonatypeReleaseAll" :: _)
+      )
+    )
+
+    lazy val rpcHttpServerSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("http4s-dsl", V.http4s),
+        %%("http4s-blaze-server", V.http4s),
+        %%("http4s-circe", V.http4s),
+        %%("http4s-blaze-client", V.http4s) % Test
       )
     )
 
