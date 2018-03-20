@@ -174,6 +174,14 @@ lazy val `idlgen-sbt` = project
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
   .settings(buildInfoPackage := "freestyle.rpc.idlgen")
 
+lazy val `http-server` =  project
+  .in(file("modules/http/server"))
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(internal)
+  .settings(moduleName := "frees-rpc-http-server")
+  .settings(rpcHttpServerSettings)
+  .disablePlugins(ScriptedPlugin)
+
 //////////////////
 //// EXAMPLES ////
 //////////////////
@@ -304,6 +312,7 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   testing,
   ssl,
   `idlgen-core`,
+  `http-server`,
   `marshallers-jodatime`,
   `example-routeguide-protocol`,
   `example-routeguide-common`,
