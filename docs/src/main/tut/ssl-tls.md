@@ -12,7 +12,7 @@ permalink: /docs/rpc/ssl-tls
 
 As we mentioned in the [Quickstart](/docs/rpc/quickstart) section, we can choose and configure our client with `OkHttp` or `Netty` but if we want to encrypt our service, it's mandatory to use `Netty` because currently, [frees-rpc] only supports encryption over *Netty*.
 
-## Requirements 
+## Requirements 
 
 On the server and client side, we will need two files to configure the `SslContext` in `gRPC`:
 
@@ -20,7 +20,7 @@ On the server and client side, we will need two files to configure the `SslConte
 
 * Server/Client private key file: The private key is a separate file that is used in the encryption of data sent between your server and the clients. All SSL certificates require a private key to work.
 
-## Usage
+## Usage
 
 The first step to secure our [frees-rpc] services is adding the library dependencies `frees-rpc-netty-ssl` and `frees-rpc-client-netty` in your build.
 
@@ -135,7 +135,6 @@ trait Runtime extends CommonRuntime {
 object implicits extends Runtime
 
 ```
-
 
 Lastly, as we did before with the server side, let's see what happens on the client side.
 
