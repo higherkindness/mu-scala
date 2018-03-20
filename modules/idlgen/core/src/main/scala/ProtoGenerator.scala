@@ -30,7 +30,7 @@ object ProtoGenerator extends Generator {
   private val HeaderLines = Seq(
     "// This file has been automatically generated for use by",
     "// the idlGen plugin, from frees-rpc service definitions.",
-    "// Read more at: http://frees.io/docs/rpc/",
+    "// Read more at: http://frees.io/docs/rpc",
     "",
     "syntax = \"proto3\";",
     ""

@@ -181,7 +181,7 @@ We are also using some additional annotations:
 
 We'll see more details about these and other annotations in the following sections.
 
-## Compression
+### Compression
 
 [frees-rpc] allows us to compress the data we are sending in our services. We can enable this compression either on the server or the client side.
 
@@ -256,7 +256,7 @@ object implicits extends Implicits
 
 ```
 
-## Service Methods
+### Service Methods
 
 As [gRPC], [frees-rpc] allows you to define two main kinds of service methods:
 
