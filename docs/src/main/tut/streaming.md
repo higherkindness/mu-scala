@@ -88,7 +88,7 @@ The code might be explanatory by itself but let's review the different services 
 
 In [frees-rpc], the streaming features have been implemented based on two data types. You can choose one of them and start to use the data type that fits you better.
 
-### Observable
+### Observable
 
 The first data type is `monix.reactive.Observable`, see the [Monix Docs](https://monix.io/docs/2x/reactive/observable.html) for a wider explanation. These monix extensions have been implemented on top of the [gRPC Java API](https://grpc.io/grpc-java/javadoc/) and the `StreamObserver` interface.
 
