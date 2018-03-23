@@ -31,16 +31,26 @@ object GreeterService {
     @rpc(Avro)
     def sayHelloAvro(request: HelloRequest): F[HelloResponse]
 
+    @rpc(AvroWithSchema)
+    def sayHelloAvro(request: HelloRequest): F[HelloResponse]
+
     @rpc(Protobuf)
     def sayHelloProto(request: HelloRequest): F[HelloResponse]
 
     @rpc(Avro)
     def sayNothingAvro(request: Empty.type): F[Empty.type]
 
+    @rpc(AvroWithSchema)
+    def sayNothingAvro(request: Empty.type): F[Empty.type]
+
     @rpc(Protobuf)
     def sayNothingProto(request: Empty.type): F[Empty.type]
 
     @rpc(Avro)
+    @stream[ResponseStreaming.type]
+    def lotsOfRepliesAvro(request: HelloRequest): Observable[HelloResponse]
+
+    @rpc(AvroWithSchema)
     @stream[ResponseStreaming.type]
     def lotsOfRepliesAvro(request: HelloRequest): Observable[HelloResponse]
 
@@ -52,6 +62,10 @@ object GreeterService {
     @stream[RequestStreaming.type]
     def lotsOfGreetingsAvro(request: Observable[HelloRequest]): F[HelloResponse]
 
+    @rpc(AvroWithSchema)
+    @stream[RequestStreaming.type]
+    def lotsOfGreetingsAvro(request: Observable[HelloRequest]): F[HelloResponse]
+
     @rpc(Protobuf)
     @stream[RequestStreaming.type]
     def lotsOfGreetingsProto(request: Observable[HelloRequest]): F[HelloResponse]
@@ -60,11 +74,19 @@ object GreeterService {
     @stream[BidirectionalStreaming.type]
     def bidiHelloAvro(request: Observable[HelloRequest]): Observable[HelloResponse]
 
+    @rpc(AvroWithSchema)
+    @stream[BidirectionalStreaming.type]
+    def bidiHelloAvro(request: Observable[HelloRequest]): Observable[HelloResponse]
+
     @rpc(Protobuf)
     @stream[BidirectionalStreaming.type]
     def bidiHelloProto(request: Observable[HelloRequest]): Observable[HelloResponse]
 
     @rpc(Avro)
+    @stream[BidirectionalStreaming.type]
+    def bidiHelloFs2Avro(request: Stream[F, HelloRequest]): Stream[F, HelloResponse]
+
+    @rpc(AvroWithSchema)
     @stream[BidirectionalStreaming.type]
     def bidiHelloFs2Avro(request: Stream[F, HelloRequest]): Stream[F, HelloResponse]
 

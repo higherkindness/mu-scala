@@ -22,11 +22,15 @@ import io.circe.syntax._
 import io.circe._
 import scala.meta._
 
-object AvroGenerator extends Generator {
+object AvroGenerator extends AvroGenerator { val serializationType: SerializationType = Avro }
+object AvroWithSchemaGenerator extends AvroGenerator {
+  val serializationType: SerializationType = AvroWithSchema
+}
 
-  val serializationType: SerializationType = Avro
-  val outputSubdir: String                 = "avro"
-  val fileExtension: String                = ".avpr"
+trait AvroGenerator extends Generator {
+
+  val outputSubdir: String  = "avro"
+  val fileExtension: String = ".avpr"
 
   // Note: don't use the object directly as the implicit value unless moving it here, or circe will give invalid output
   implicit private val avroTypeEncoder: Encoder[AvroType] = AvroTypeEncoder

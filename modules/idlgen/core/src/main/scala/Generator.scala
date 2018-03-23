@@ -19,7 +19,7 @@ package freestyle.rpc.idlgen
 import freestyle.rpc.protocol.SerializationType
 
 object Generator {
-  val generators = Seq(ProtoGenerator, AvroGenerator)
+  val generators = Seq(ProtoGenerator, AvroGenerator, AvroWithSchemaGenerator)
 
   def generateFrom(rpc: RpcDefinitions): Map[Generator, Seq[String]] =
     generators.flatMap(generator => generator.generateFrom(rpc).map(generator -> _)).toMap
