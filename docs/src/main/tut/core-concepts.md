@@ -181,7 +181,7 @@ We are also using some additional annotations:
 
 We'll see more details about these and other annotations in the following sections.
 
-### Compression
+## Compression
 
 [frees-rpc] allows us to compress the data we are sending in our services. We can enable this compression either on the server or the client side.
 
