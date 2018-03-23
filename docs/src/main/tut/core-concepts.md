@@ -256,7 +256,7 @@ object implicits extends Implicits
 
 ```
 
-### Service Methods
+## Service Methods
 
 As [gRPC], [frees-rpc] allows you to define two main kinds of service methods:
 
