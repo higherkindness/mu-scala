@@ -38,6 +38,8 @@ object Utils extends CommonUtils {
 
       @rpc(Avro) def unary(a: A): F[C]
 
+      @rpc(AvroWithSchema) def unaryWithSchema(a: A): F[C]
+
     }
 
   }
@@ -52,6 +54,8 @@ object Utils extends CommonUtils {
       class ServerRPCService[F[_]: Effect] extends RPCService[F] {
 
         def unary(a: A): F[C] = Effect[F].delay(c1)
+
+        def unaryWithSchema(a: A): F[C] = Effect[F].delay(c1)
 
       }
 
