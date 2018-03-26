@@ -10,7 +10,7 @@ permalink: /docs/rpc/idl-generation
 
 Before entering implementation details, we mentioned that the [frees-rpc] ecosystem brings the ability to generate `.proto` files from the Scala definition, in order to maintain compatibility with other languages and systems outside of Scala.
 
-This responsibility relies on `idlGen`, an sbt plugin to generate Protobuf and Avro IDL files from the [frees-rpc] service definitions.
+This relies on `idlGen`, an sbt plugin to generate Protobuf and Avro IDL files from the [frees-rpc] service definitions.
 
 ### Plugin Installation
 
@@ -47,8 +47,8 @@ Let's take our previous service, and add an Avro-specific request and some usefu
 ```tut:silent
 import freestyle.rpc.protocol._
 
-@option(name = "java_multiple_files", value = true)
-@option(name = "java_outer_classname", value = "Quickstart")
+@option("java_multiple_files", true)
+@option("java_outer_classname", "Quickstart")
 @outputName("GreeterService")
 @outputPackage("quickstart")
 object service {
@@ -96,8 +96,8 @@ Using this example, the resulting Protobuf IDL would be generated in `/src/main/
 
 syntax = "proto3";
 
-option java_package = "quickstart";
 option java_multiple_files = true;
+option java_outer_class_name = "Quickstart";
 
 package quickstart;
 

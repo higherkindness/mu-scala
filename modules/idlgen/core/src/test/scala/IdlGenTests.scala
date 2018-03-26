@@ -70,7 +70,7 @@ class IdlGenTests extends RpcBaseTestSuite {
     }
   }
 
-  "$Generator.generateFrom()" should {
+  "Generator.generateFrom()" should {
     "generate correct Protobuf syntax from RPC definitions" in {
       val expected = resource("/proto/GreeterService.proto").getLines.toList
       val output = Generator.generateFrom(greeterRpcs)

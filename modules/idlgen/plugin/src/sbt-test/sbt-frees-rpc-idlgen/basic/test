@@ -3,3 +3,7 @@
 $ exists src/main/resources/proto/model.proto
 
 $ delete src/main/resources/proto/model.proto
+
+$ exists src/main/resources/avro/model.avpr
+
+$ delete src/main/resources/avro/model.avpr

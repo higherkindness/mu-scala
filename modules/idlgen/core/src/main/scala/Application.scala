@@ -28,7 +28,7 @@ object Application {
   val Separator: String  = "-" * 80
 
   def main(args: Array[String]): Unit = {
-    require(args.length >= 2, s"Usage: ${getClass.getName} inputPath outputPath")
+    require(args.length >= 2, s"\nUsage: ${getClass.getName.replace("$", "")} inputPath outputPath")
     val inputPath  = new File(args(0)).requireExisting
     val outputPath = new File(args(1)).requireExisting
     inputPath.allMatching(_.getName.endsWith(ScalaFileExtension)).foreach { inputFile =>
