@@ -16,8 +16,8 @@
 
 package freestyle.rpc.idlgen
 
-import freestyle.rpc.protocol._
 import freestyle.rpc.internal.util.StringUtil._
+import freestyle.rpc.protocol._
 import scala.meta._
 
 case class RpcDefinitions(

@@ -1,2 +1,2 @@
-src/main/resources/proto/
-src/main/resources/avro/
+src/main/resources
+target

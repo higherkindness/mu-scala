@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package freestyle.rpc
 
-import java.io.File
+import freestyle.rpc.idlgen.avro._
+import freestyle.rpc.idlgen.proto.ProtoIdlGenerator
 
-trait Generator {
+package object idlgen {
 
-  def idlType: String
+  val DefaultRequestParamName = "arg"
+  val EmptyType               = "Empty.type"
 
-  def inputFiles(inputPath: File): Seq[File]
+  val ScalaFileExtension = ".scala"
+  val Separator: String  = "-" * 80
 
-  def generateFrom(inputFile: File, options: String*): Option[(String, Seq[String])]
+  val idlGenerators: Map[String, IdlGenerator] = Seq(ProtoIdlGenerator, AvroIdlGenerator)
+    .map(g => g.idlType -> g)
+    .toMap
+
+  val srcGenerators: Map[String, SrcGenerator] = Seq(AvroSrcGenerator)
+    .map(g => g.idlType -> g)
+    .toMap
 }

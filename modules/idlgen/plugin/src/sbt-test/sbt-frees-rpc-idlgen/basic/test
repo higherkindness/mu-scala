@@ -1,9 +1,14 @@
+> 'set idlType := "proto"'
 > idlGen
-
 $ exists src/main/resources/proto/model.proto
-
 $ delete src/main/resources/proto/model.proto
 
+> 'set idlType := "avro"'
+> idlGen
 $ exists src/main/resources/avro/model.avpr
-
 $ delete src/main/resources/avro/model.avpr
+
+> 'set idlType := "avro"'
+> srcGen
+$ exists target/scala-2.12/src_managed/main/model.scala
+$ delete target/scala-2.12/src_managed/main/model.scala

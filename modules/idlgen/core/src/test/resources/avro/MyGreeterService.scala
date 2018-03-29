@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package foo.bar
 
-import java.io.File
+import freestyle.rpc.protocol._
 
-trait Generator {
+@message case class HelloRequest(arg1: String, arg2: Option[String], arg3: List[String])
 
-  def idlType: String
+@message case class HelloResponse(arg1: String, arg2: Option[String], arg3: List[String])
 
-  def inputFiles(inputPath: File): Seq[File]
+@service trait MyGreeterService[F[_]] {
 
-  def generateFrom(inputFile: File, options: String*): Option[(String, Seq[String])]
+  @rpc(Avro, Gzip)
+  def sayHelloAvro(arg: foo.bar.HelloRequest): F[foo.bar.HelloResponse]
+
+  @rpc(Avro, Gzip)
+  def sayNothingAvro(arg: Empty.type): F[Empty.type]
+
 }
