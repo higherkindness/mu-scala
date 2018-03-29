@@ -26,6 +26,7 @@ import java.io.File
 import org.apache.avro._
 import org.log4s._
 import scala.collection.JavaConverters._
+import scala.util.Right
 
 object AvroSrcGenerator extends SrcGenerator {
 
@@ -61,7 +62,10 @@ object AvroSrcGenerator extends SrcGenerator {
       options: Seq[String]): Option[(String, Seq[String])] =
     Some(schemasOrProtocols)
       .filter(_.nonEmpty)
-      .flatMap(_.last.toOption)
+      .flatMap(_.last match {
+        case Right(p) => Some(p)
+        case _        => None
+      })
       .map(generateFrom(_, options))
 
   def generateFrom(protocol: Protocol, options: Seq[String]): (String, Seq[String]) = {
