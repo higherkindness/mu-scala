@@ -18,21 +18,22 @@ package freestyle.rpc.idlgen
 
 import freestyle.rpc.internal.util.FileUtil._
 import java.io.File
+import org.log4s.getLogger
 
 abstract class GeneratorApplication[T <: Generator](generators: T*) {
   // Code covered by plugin tests
   // $COVERAGE-OFF$
+
+  private[this] val logger = getLogger
+
   private lazy val generatorsByType = generators.map(gen => gen.idlType -> gen).toMap
   private lazy val idlTypes         = generatorsByType.keySet
 
-  def generateFrom(args: Array[String]): Unit = {
+  def generateFrom(args: Array[String]): Seq[File] = {
     validate(
       args.length >= 3,
       s"Usage: ${getClass.getName.dropRight(1)} idlType inputPath outputPath [option1 option2 ...]")
-    val idlType = args(0)
-    validate(
-      idlTypes.contains(idlType),
-      s"Unknown IDL type '$idlType'. Valid values: ${idlTypes.mkString(", ")}")
+    val idlType   = args(0)
     val inputPath = new File(args(1))
     validate(
       inputPath.exists,
@@ -40,25 +41,25 @@ abstract class GeneratorApplication[T <: Generator](generators: T*) {
     )
     val outputDir = new File(args(2))
     val options   = args.drop(3)
-    val generator = generatorsByType(idlType)
-    generator
-      .inputFiles(inputPath)
-      .foreach { inputFile =>
-        println(Separator)
-        println(s"Input : $inputFile")
-        generator.generateFrom(inputFile, options: _*) match {
-          case Some((outputFilePath, output)) =>
-            val outputFile = new File(outputDir, outputFilePath)
-            println(s"Output: $outputFile")
-            println(Separator)
-            Option(outputFile.getParentFile).foreach(_.mkdirs())
-            outputFile.write(output)
-            output.foreach(println)
-          case None =>
-            println("Output: none")
-            println(Separator)
-        }
-      }
+    generateFrom(idlType, inputPath.allFiles.toSet, outputDir, options: _*)
+  }
+
+  def generateFrom(
+      idlType: String,
+      inputFiles: Set[File],
+      outputDir: File,
+      options: String*): Seq[File] = {
+    validate(
+      idlTypes.contains(idlType),
+      s"Unknown IDL type '$idlType'. Valid values: ${idlTypes.mkString(", ")}")
+    generatorsByType(idlType).generateFrom(inputFiles, options: _*).map {
+      case (inputFile, outputFilePath, output) =>
+        val outputFile = new File(outputDir, outputFilePath)
+        logger.info(s"$inputFile -> $outputFile")
+        Option(outputFile.getParentFile).foreach(_.mkdirs())
+        outputFile.write(output)
+        outputFile
+    }
   }
 
   private def validate(requirement: Boolean, message: => Any): Unit =

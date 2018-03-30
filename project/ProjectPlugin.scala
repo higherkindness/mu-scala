@@ -131,8 +131,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val idlGenSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "com.julianpeeters" %% "avrohugger-core"       % V.avrohugger,
-        "com.julianpeeters" %% "avrohugger-filesorter" % V.avrohugger,
+        "com.julianpeeters" %% "avrohugger-core" % V.avrohugger,
         %%("circe-generic")
       )
     )

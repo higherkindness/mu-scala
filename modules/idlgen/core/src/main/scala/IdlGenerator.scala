@@ -16,7 +16,6 @@
 
 package freestyle.rpc.idlgen
 
-import freestyle.rpc.internal.util.FileUtil._
 import freestyle.rpc.protocol.SerializationType
 import java.io.File
 import scala.meta._
@@ -27,8 +26,8 @@ trait IdlGenerator extends Generator {
   def outputSubdir: String
   def fileExtension: String
 
-  def inputFiles(inputPath: File): Seq[File] =
-    inputPath.allMatching(_.getName.endsWith(ScalaFileExtension))
+  def inputFiles(files: Set[File]): Seq[File] =
+    files.filter(_.getName.endsWith(ScalaFileExtension)).toSeq
 
   def generateFrom(inputFile: File, options: String*): Option[(String, Seq[String])] = {
     val inputName   = inputFile.getName.replaceAll(ScalaFileExtension, "")

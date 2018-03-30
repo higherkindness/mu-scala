@@ -108,7 +108,7 @@ To generate Avro IDL instead, use:
 ```bash
 sbt "idlGen avro"
 ```
-And the resulting Avro IDL would be generated in `/src/main/resources/avro/service.avpr`:
+And the resulting Avro IDL would be generated in `target/scala-2.12/resource_managed/main/avro/service.avpr`:
 
 ```
 {
@@ -157,8 +157,8 @@ Note that due to limitations in the Avro IDL, currently only unary RPC services 
 When using `idlGen`, there are a couple key settings that can be configured according to various needs:
 
 * **`idlType`**: the type of IDL to be generated, either `proto` or `avro`.
-* **`idlGenSourceDir`**: the Scala source base directory, where your [frees-rpc] definitions are placed. By default: `baseDirectory.value / "src" / "main" / "scala"`.
-* **`idlGenTargetDir`**: the IDL target base directory, where the `idlGen` task will write the IDL files in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on [frees-rpc] service definitions. By default: `baseDirectory.value / "src" / "main" / "resources"`.
+* **`idlGenSourceDir`**: the Scala source base directory, where your [frees-rpc] definitions are placed. By default: `Compile / sourceDirectory`, typically `src/main/scala/`.
+* **`idlGenTargetDir`**: the IDL target base directory, where the `idlGen` task will write the IDL files in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on [frees-rpc] service definitions. By default: `Compile / resourceManaged`, typically `target/scala-2.12/resource_managed/main/`.
 
 The source directory must exist, otherwise, the `idlGen` task will fail. Target directories will be created upon generation.
 
@@ -188,13 +188,19 @@ import freestyle.rpc.protocol._
 
 }
 ```
+
+You can also integrate this source generation in your compile process by adding this setting to your module:
+```
+sourceGenerators in Compile += (srcGen in Compile).taskValue)
+```
+
 ### Plugin Settings
 
 Just like `idlGen`, `srcGen` has some configurable settings:
 
 * **`idlType`**: the type of IDL to generate from, currently only `avro`.
-* **`srcGenSourceDir`**: the IDL source base directory, where your IDL files are placed. By default: `baseDirectory.value / "src" / "main" / "resources"`.
-* **`srcGenTargetDir`**: the Scala target base directory, where the `srcGen` task will write the Scala files in subdirectories/packages based on the namespaces of the IDL files. By default: `baseDirectory.value / "target" / "scala-2.12" / "src_managed" / "main"`.
+* **`srcGenSourceDir`**: the IDL source base directory, where your IDL files are placed. By default: `Compile / resourceDirectory`, typically `src/main/resources/`.
+* **`srcGenTargetDir`**: the Scala target base directory, where the `srcGen` task will write the Scala files in subdirectories/packages based on the namespaces of the IDL files. By default: `Compile / sourceManaged`, typically `target/scala-2.12/src_managed/main/`.
 * **`genOptions`**: additional options to add to the generated `@rpc` annotations, after the IDL type. Currently only supports `"Gzip"`.
 
 The source directory must exist, otherwise, the `srcGen` task will fail. Target directories will be created upon generation.

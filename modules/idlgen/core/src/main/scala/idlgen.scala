@@ -25,7 +25,6 @@ package object idlgen {
   val EmptyType               = "Empty.type"
 
   val ScalaFileExtension = ".scala"
-  val Separator: String  = "-" * 80
 
   val idlGenerators: Map[String, IdlGenerator] = Seq(ProtoIdlGenerator, AvroIdlGenerator)
     .map(g => g.idlType -> g)

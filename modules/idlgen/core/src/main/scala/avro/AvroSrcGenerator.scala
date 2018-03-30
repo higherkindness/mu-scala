@@ -17,11 +17,9 @@
 package freestyle.rpc.idlgen.avro
 
 import avrohugger.Generator
-import avrohugger.filesorter.AvdlFileSorter
 import avrohugger.format.Standard
 import avrohugger.types._
 import freestyle.rpc.idlgen._
-import freestyle.rpc.internal.util.FileUtil._
 import java.io.File
 import org.apache.avro._
 import org.log4s._
@@ -38,12 +36,18 @@ object AvroSrcGenerator extends SrcGenerator {
 
   val idlType: String = avro.IdlType
 
-  def inputFiles(inputPath: File): Seq[File] = {
-    val avprFiles = inputPath.allMatching(_.getName.endsWith(AvprExtension))
-    val avdlFiles = inputPath.allMatching(_.getName.endsWith(AvdlExtension))
-    // Watch out: FileSorter requires canonical files and goes into an infinite loop on unresolved imports (!)
-    avprFiles ++ AvdlFileSorter.sortSchemaFiles(avdlFiles.map(_.getCanonicalFile))
+  def inputFiles(files: Set[File]): Seq[File] = {
+    val avprFiles = files.filter(_.getName.endsWith(AvprExtension))
+    val avdlFiles = files.filter(_.getName.endsWith(AvdlExtension))
+    // Using custom FileSorter that can process imports outside the initial fileset
+    // Note: this will add all imported files to our fileset, even those from other modules
+    avprFiles.toSeq ++ AvdlFileSorter.sortSchemaFiles(avdlFiles)
   }
+
+  // We must process all inputs including imported files from outside our initial fileset,
+  // so we then reduce our output to that based on this fileset
+  override def generateFrom(files: Set[File], options: String*): Seq[(File, String, Seq[String])] =
+    super.generateFrom(files, options: _*).filter(output => files.contains(output._1))
 
   def generateFrom(inputFile: File, options: String*): Option[(String, Seq[String])] =
     generateFrom(
