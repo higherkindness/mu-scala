@@ -42,8 +42,7 @@ object AvdlFileSorter {
             addFiles(processedFiles, t :+ h)
       }
     }
-    val result = addFiles(Seq.empty, importsMap.keys.toList)
-    result //todo but don't start src-generating the imports! what if just existence check; not same as fyll domain
+    addFiles(Seq.empty, importsMap.keys.toList)
   }
 
   private[this] val importPattern = """\s*import\s+idl\s+"([^"]+)"\s*;\s*""".r
