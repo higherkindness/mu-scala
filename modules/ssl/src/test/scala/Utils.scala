@@ -55,7 +55,7 @@ object Utils extends CommonUtils {
 
         def unary(a: A): F[C] = Effect[F].delay(c1)
 
-        def unaryWithSchema(a: A): F[C] = Effect[F].delay(c1)
+        def unaryWithSchema(a: A): F[C] = unary(a)
 
       }
 
