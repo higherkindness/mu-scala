@@ -40,7 +40,11 @@ object Utils extends CommonUtils {
 
       @rpc(Avro) def unary(a: A): F[C]
 
+      @rpc(AvroWithSchema) def unaryWithSchema(a: A): F[C]
+
       @rpc(Avro, Gzip) def unaryCompressed(a: A): F[C]
+
+      @rpc(AvroWithSchema, Gzip) def unaryCompressedWithSchema(a: A): F[C]
 
       @rpc(Protobuf) def empty(empty: Empty.type): F[Empty.type]
 
@@ -56,15 +60,28 @@ object Utils extends CommonUtils {
 
       @rpc(Avro) def emptyAvro(empty: Empty.type): F[Empty.type]
 
+      @rpc(AvroWithSchema) def emptyAvroWithSchema(empty: Empty.type): F[Empty.type]
+
       @rpc(Avro, Gzip) def emptyAvroCompressed(empty: Empty.type): F[Empty.type]
+
+      @rpc(AvroWithSchema, Gzip) def emptyAvroWithSchemaCompressed(empty: Empty.type): F[Empty.type]
 
       @rpc(Avro) def emptyAvroParam(a: A): F[Empty.type]
 
+      @rpc(AvroWithSchema) def emptyAvroWithSchemaParam(a: A): F[Empty.type]
+
       @rpc(Avro, Gzip) def emptyAvroParamCompressed(a: A): F[Empty.type]
+
+      @rpc(AvroWithSchema, Gzip) def emptyAvroWithSchemaParamCompressed(a: A): F[Empty.type]
 
       @rpc(Avro) def emptyAvroParamResponse(empty: Empty.type): F[A]
 
+      @rpc(AvroWithSchema) def emptyAvroWithSchemaParamResponse(empty: Empty.type): F[A]
+
       @rpc(Avro, Gzip) def emptyAvroParamResponseCompressed(empty: Empty.type): F[A]
+
+      @rpc(AvroWithSchema, Gzip) def emptyAvroWithSchemaParamResponseCompressed(
+          empty: Empty.type): F[A]
 
       @rpc(Protobuf)
       @stream[ResponseStreaming.type]
@@ -86,9 +103,17 @@ object Utils extends CommonUtils {
       @stream[BidirectionalStreaming.type]
       def biStreaming(oe: Observable[E]): Observable[E]
 
+      @rpc(AvroWithSchema)
+      @stream[BidirectionalStreaming.type]
+      def biStreamingWithSchema(oe: Observable[E]): Observable[E]
+
       @rpc(Avro, Gzip)
       @stream[BidirectionalStreaming.type]
       def biStreamingCompressed(oe: Observable[E]): Observable[E]
+
+      @rpc(AvroWithSchema, Gzip)
+      @stream[BidirectionalStreaming.type]
+      def biStreamingCompressedWithSchema(oe: Observable[E]): Observable[E]
 
       @rpc(Protobuf)
       def scope(empty: Empty.type): F[External]
@@ -111,12 +136,17 @@ object Utils extends CommonUtils {
       def emptyParam(a: A): FS[Empty.type]
       def emptyParamResponse: FS[A]
       def emptyAvro: FS[Empty.type]
+      def emptyAvroWithSchema: FS[Empty.type]
       def emptyAvroParam(a: A): FS[Empty.type]
+      def emptyAvroWithSchemaParam(a: A): FS[Empty.type]
       def emptyAvroParamResponse: FS[A]
+      def emptyAvroWithSchemaParamResponse: FS[A]
       def u(x: Int, y: Int): FS[C]
+      def uws(x: Int, y: Int): FS[C]
       def ss(a: Int, b: Int): FS[List[C]]
       def cs(cList: List[C], bar: Int): FS[D]
       def bs(eList: List[E]): FS[E]
+      def bsws(eList: List[E]): FS[E]
     }
 
   }
@@ -141,11 +171,20 @@ object Utils extends CommonUtils {
 
         def emptyAvro(empty: Empty.type): F[Empty.type] = Empty.pure
 
+        def emptyAvroWithSchema(empty: Empty.type): F[Empty.type] = emptyAvro(empty)
+
         def emptyAvroParam(a: A): F[Empty.type] = Empty.pure
+
+        def emptyAvroWithSchemaParam(a: A): F[Empty.type] = emptyAvroParam(a)
 
         def emptyAvroParamResponse(empty: Empty.type): F[A] = a4.pure
 
+        def emptyAvroWithSchemaParamResponse(empty: Empty.type): F[A] =
+          emptyAvroParamResponse(empty)
+
         def unary(a: A): F[C] = c1.pure
+
+        def unaryWithSchema(a: A): F[C] = unary(a)
 
         def serverStreaming(b: B): Observable[C] = {
           debug(s"[SERVER] b -> $b")
@@ -167,6 +206,8 @@ object Utils extends CommonUtils {
             Observable.fromIterable(eList)
           }
 
+        def biStreamingWithSchema(oe: Observable[E]): Observable[E] = biStreaming(oe)
+
         def save(e: E) = e // do something else with e?
 
         def notAllowedCompressed(b: Boolean): F[C] = notAllowed(b)
@@ -179,18 +220,31 @@ object Utils extends CommonUtils {
 
         def emptyAvroCompressed(empty: Empty.type): F[Empty.type] = emptyAvro(empty)
 
+        def emptyAvroWithSchemaCompressed(empty: Empty.type): F[Empty.type] =
+          emptyAvroCompressed(empty)
+
         def emptyAvroParamCompressed(a: A): F[Empty.type] = emptyAvroParam(a)
+
+        def emptyAvroWithSchemaParamCompressed(a: A): F[Empty.type] = emptyAvroParamCompressed(a)
 
         def emptyAvroParamResponseCompressed(empty: Empty.type): F[A] =
           emptyAvroParamResponse(empty)
 
+        def emptyAvroWithSchemaParamResponseCompressed(empty: Empty.type): F[A] =
+          emptyAvroParamResponseCompressed(empty)
+
         def unaryCompressed(a: A): F[C] = unary(a)
+
+        def unaryCompressedWithSchema(a: A): F[C] = unaryCompressed(a)
 
         def serverStreamingCompressed(b: B): Observable[C] = serverStreaming(b)
 
         def clientStreamingCompressed(oa: Observable[A]): F[D] = clientStreaming(oa)
 
         def biStreamingCompressed(oe: Observable[E]): Observable[E] = biStreaming(oe)
+
+        def biStreamingCompressedWithSchema(oe: Observable[E]): Observable[E] =
+          biStreamingCompressed(oe)
 
         import ExternalScope._
 
@@ -227,14 +281,26 @@ object Utils extends CommonUtils {
         override def emptyAvro: F[Empty.type] =
           client.emptyAvro(protocol.Empty)
 
+        override def emptyAvroWithSchema: F[Empty.type] =
+          client.emptyAvroWithSchema(protocol.Empty)
+
         override def emptyAvroParam(a: A): F[Empty.type] =
           client.emptyAvroParam(a)
+
+        override def emptyAvroWithSchemaParam(a: A): F[Empty.type] =
+          client.emptyAvroWithSchemaParam(a)
 
         override def emptyAvroParamResponse: F[A] =
           client.emptyAvroParamResponse(protocol.Empty)
 
+        override def emptyAvroWithSchemaParamResponse: F[A] =
+          client.emptyAvroWithSchemaParamResponse(protocol.Empty)
+
         override def u(x: Int, y: Int): F[C] =
           client.unary(A(x, y))
+
+        override def uws(x: Int, y: Int): F[C] =
+          client.unaryWithSchema(A(x, y))
 
         override def ss(a: Int, b: Int): F[List[C]] =
           client
@@ -255,6 +321,19 @@ object Utils extends CommonUtils {
         override def bs(eList: List[E]): F[E] =
           client
             .biStreaming(Observable.fromIterable(eList))
+            .zipWithIndex
+            .map {
+              case (c, i) =>
+                debug(s"[CLIENT] Result #$i: $c")
+                c
+            }
+            .toListL
+            .to[F]
+            .map(_.head)
+
+        override def bsws(eList: List[E]): F[E] =
+          client
+            .biStreamingWithSchema(Observable.fromIterable(eList))
             .zipWithIndex
             .map {
               case (c, i) =>
@@ -287,14 +366,26 @@ object Utils extends CommonUtils {
         override def emptyAvro: F[Empty.type] =
           client.emptyAvroCompressed(protocol.Empty)
 
+        override def emptyAvroWithSchema: F[Empty.type] =
+          client.emptyAvroWithSchemaCompressed(protocol.Empty)
+
         override def emptyAvroParam(a: A): F[Empty.type] =
           client.emptyAvroParamCompressed(a)
+
+        override def emptyAvroWithSchemaParam(a: A): F[Empty.type] =
+          client.emptyAvroWithSchemaParamCompressed(a)
 
         override def emptyAvroParamResponse: F[A] =
           client.emptyAvroParamResponseCompressed(protocol.Empty)
 
+        override def emptyAvroWithSchemaParamResponse: F[A] =
+          client.emptyAvroWithSchemaParamResponseCompressed(protocol.Empty)
+
         override def u(x: Int, y: Int): F[C] =
           client.unaryCompressed(A(x, y))
+
+        override def uws(x: Int, y: Int): F[C] =
+          client.unaryCompressedWithSchema(A(x, y))
 
         override def ss(a: Int, b: Int): F[List[C]] =
           client
@@ -315,6 +406,19 @@ object Utils extends CommonUtils {
         override def bs(eList: List[E]): F[E] =
           client
             .biStreamingCompressed(Observable.fromIterable(eList))
+            .zipWithIndex
+            .map {
+              case (c, i) =>
+                debug(s"[CLIENT] Result #$i: $c")
+                c
+            }
+            .toListL
+            .to[F]
+            .map(_.head)
+
+        override def bsws(eList: List[E]): F[E] =
+          client
+            .biStreamingCompressedWithSchema(Observable.fromIterable(eList))
             .zipWithIndex
             .map {
               case (c, i) =>

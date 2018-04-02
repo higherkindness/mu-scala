@@ -83,6 +83,15 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     }
 
+    "be able to run unary services with avro schema" in {
+
+      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[C] =
+        APP.uws(a1.x, a1.y)
+
+      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe c1
+
+    }
+
     "be able to run server streaming services" in {
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[List[C]] =
@@ -109,18 +118,29 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     }
 
+    "be able to run client bidirectional streaming services with avro schema" in {
+
+      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[E] =
+        APP.bsws(eList)
+
+      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe e1
+
+    }
+
     "be able to run rpc services monadically" in {
 
-      def clientProgram[F[_]: Monad](implicit APP: MyRPCClient[F]): F[(C, List[C], D, E)] = {
+      def clientProgram[F[_]: Monad](implicit APP: MyRPCClient[F]): F[(C, C, List[C], D, E, E)] = {
         for {
-          w <- APP.u(a1.x, a1.y)
-          x <- APP.ss(a2.x, a2.y)
-          y <- APP.cs(cList, i)
-          z <- APP.bs(eList)
-        } yield (w, x, y, z)
+          u <- APP.u(a1.x, a1.y)
+          v <- APP.uws(a1.x, a1.y)
+          w <- APP.ss(a2.x, a2.y)
+          x <- APP.cs(cList, i)
+          y <- APP.bs(eList)
+          z <- APP.bsws(eList)
+        } yield (u, v, w, x, y, z)
       }
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe ((c1, cList, dResult, e1))
+      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe ((c1, c1, cList, dResult, e1, e1))
 
     }
 
@@ -150,6 +170,14 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
     }
 
+    "empty for avro with schema" in {
+
+      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
+        APP.emptyAvroWithSchema
+
+      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
+    }
+
     "#71 issue - empty response with one param for avro" in {
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
@@ -158,10 +186,27 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
     }
 
+    "empty response with one param for avro with schema" in {
+
+      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
+        APP.emptyAvroWithSchemaParam(a4)
+
+      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
+    }
+
     "#71 issue - response with empty params for avro" in {
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[A] =
         APP.emptyAvroParamResponse
+
+      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe a4
+
+    }
+
+    "response with empty params for avro with schema" in {
+
+      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[A] =
+        APP.emptyAvroWithSchemaParamResponse
 
       clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe a4
 
@@ -209,6 +254,15 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     }
 
+    "be able to run unary services with avro schema" in {
+
+      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[C] =
+        APP.uws(a1.x, a1.y)
+
+      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe c1
+
+    }
+
     "be able to run server streaming services" in {
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[List[C]] =
@@ -235,18 +289,29 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     }
 
+    "be able to run client bidirectional streaming services with avro schema" in {
+
+      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[E] =
+        APP.bsws(eList)
+
+      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe e1
+
+    }
+
     "be able to run rpc services monadically" in {
 
-      def clientProgram[F[_]: Monad](implicit APP: MyRPCClient[F]): F[(C, List[C], D, E)] = {
+      def clientProgram[F[_]: Monad](implicit APP: MyRPCClient[F]): F[(C, C, List[C], D, E, E)] = {
         for {
-          w <- APP.u(a1.x, a1.y)
-          x <- APP.ss(a2.x, a2.y)
-          y <- APP.cs(cList, i)
-          z <- APP.bs(eList)
-        } yield (w, x, y, z)
+          u <- APP.u(a1.x, a1.y)
+          v <- APP.uws(a1.x, a1.y)
+          w <- APP.ss(a2.x, a2.y)
+          x <- APP.cs(cList, i)
+          y <- APP.bs(eList)
+          z <- APP.bsws(eList)
+        } yield (u, v, w, x, y, z)
       }
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe ((c1, cList, dResult, e1))
+      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe ((c1, c1, cList, dResult, e1, e1))
 
     }
 
@@ -276,6 +341,14 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
     }
 
+    "empty for avro with schema" in {
+
+      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
+        APP.emptyAvroWithSchema
+
+      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
+    }
+
     "#71 issue - empty response with one param for avro" in {
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
@@ -284,10 +357,27 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
     }
 
+    "empty response with one param for avro with schema" in {
+
+      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
+        APP.emptyAvroWithSchemaParam(a4)
+
+      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
+    }
+
     "#71 issue - response with empty params for avro" in {
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[A] =
         APP.emptyAvroParamResponse
+
+      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe a4
+
+    }
+
+    "response with empty params for avro with schema" in {
+
+      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[A] =
+        APP.emptyAvroWithSchemaParamResponse
 
       clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe a4
 
