@@ -60,8 +60,8 @@ jobs:
               git clean -f;
               git checkout master;
               git pull origin master;
-              sbt release;
               sbt ";project idlgen-sbt;release";
+              sbt release;
               sbt depUpdateDependencyIssues;
             fi
           fi
