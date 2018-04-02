@@ -1,0 +1,9 @@
+@namespace("")
+protocol model {
+
+  record Person {
+    long id;
+    string name;
+    union { null, string } email;
+  }
+}

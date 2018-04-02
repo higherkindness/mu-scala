@@ -16,20 +16,9 @@
 
 package freestyle.rpc.idlgen
 
-import java.io.File
+import freestyle.rpc.idlgen.avro.AvroIdlGenerator
+import freestyle.rpc.idlgen.proto.ProtoIdlGenerator
 
-trait Generator {
-
-  def idlType: String
-
-  def generateFrom(files: Set[File], options: String*): Seq[(File, String, Seq[String])] =
-    inputFiles(files).flatMap(inputFile =>
-      generateFrom(inputFile, options: _*).map {
-        case (outputPath, output) =>
-          (inputFile, outputPath, output)
-    })
-
-  protected def inputFiles(files: Set[File]): Seq[File]
-
-  protected def generateFrom(inputFile: File, options: String*): Option[(String, Seq[String])]
+object IdlGenApplication extends GeneratorApplication(ProtoIdlGenerator, AvroIdlGenerator) {
+  def main(args: Array[String]): Unit = generateFrom(args)
 }
