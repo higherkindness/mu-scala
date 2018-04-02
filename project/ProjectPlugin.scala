@@ -20,11 +20,13 @@ object ProjectPlugin extends AutoPlugin {
     lazy val V = new {
       val avro4s: String             = "1.8.3"
       val avrohugger: String         = "1.0.0-RC4"
-      val catsEffect: String         = "0.9"
+      val catsEffect: String         = "0.10"
+      val circe: String              = "0.9.3"
       val frees: String              = "0.8.0"
       val fs2ReactiveStreams: String = "0.5.1"
-      val grpc: String               = "1.10.0"
-      val nettySSL: String           = "2.0.7.Final"
+      val grpc: String               = "1.11.0"
+      val log4s: String              = "1.6.1"
+      val nettySSL: String           = "2.0.8.Final"
       val pbdirect: String           = "0.1.0"
       val prometheus: String         = "0.3.0"
     }
@@ -52,7 +54,7 @@ object ProjectPlugin extends AutoPlugin {
         %%("fs2-reactive-streams", V.fs2ReactiveStreams),
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
-        %%("log4s"),
+        %%("log4s", V.log4s),
         %%("scalamockScalatest") % Test
       )
     )
@@ -132,7 +134,7 @@ object ProjectPlugin extends AutoPlugin {
     lazy val idlGenSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "com.julianpeeters" %% "avrohugger-core" % V.avrohugger,
-        %%("circe-generic")
+        %%("circe-generic", V.circe)
       )
     )
 
