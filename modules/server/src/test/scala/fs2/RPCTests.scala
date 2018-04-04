@@ -108,7 +108,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     }
 
-    "be able to run multiple rpc services" in {
+    "be able to run multiple rpc services" ignore {
 
       val tuple =
         (
@@ -186,7 +186,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     }
 
-    "be able to run multiple rpc services" in {
+    "be able to run multiple rpc services" ignore {
 
       val tuple =
         (
