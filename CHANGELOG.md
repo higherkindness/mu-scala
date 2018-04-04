@@ -1,5 +1,19 @@
 # Changelog
 
+## 04/02/2018 - Version 0.13.0
+
+Release changes:
+
+* Fixes title formatting in SSL/TLS ([#202](https://github.com/frees-io/freestyle-rpc/pull/202))
+* Fixes `idlgen-sbt` release Process in Travis ([#204](https://github.com/frees-io/freestyle-rpc/pull/204))
+* Solves encoding issues in docs ([#207](https://github.com/frees-io/freestyle-rpc/pull/207))
+* Fixes in idlGen header, docs and tests ([#208](https://github.com/frees-io/freestyle-rpc/pull/208))
+* Ignore intermittently-failing tests on Travis ([#209](https://github.com/frees-io/freestyle-rpc/pull/209))
+* Scala source generation from Avro IDL ([#210](https://github.com/frees-io/freestyle-rpc/pull/210))
+* Dependency updates ([#211](https://github.com/frees-io/freestyle-rpc/pull/211))
+* Release 0.13.0 ([#212](https://github.com/frees-io/freestyle-rpc/pull/212))
+
+
 ## 03/19/2018 - Version 0.12.0
 
 Release changes:

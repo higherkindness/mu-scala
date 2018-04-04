@@ -16,20 +16,8 @@
 
 package freestyle.rpc.idlgen
 
-import java.io.File
-
-trait Generator {
-
-  def idlType: String
-
-  def generateFrom(files: Set[File], options: String*): Seq[(File, String, Seq[String])] =
-    inputFiles(files).flatMap(inputFile =>
-      generateFrom(inputFile, options: _*).map {
-        case (outputPath, output) =>
-          (inputFile, outputPath, output)
-    })
-
-  protected def inputFiles(files: Set[File]): Seq[File]
-
-  protected def generateFrom(inputFile: File, options: String*): Option[(String, Seq[String])]
+package object proto {
+  val IdlType        = "proto"
+  val ProtoExtension = ".proto"
+  val ProtoEmpty     = "google.protobuf.Empty"
 }

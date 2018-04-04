@@ -29,6 +29,8 @@ object FileUtil {
       file
     }
 
+    def allFiles: Seq[File] = allMatching(_ => true)
+
     def allMatching(f: File => Boolean): Seq[File] =
       if (file.isDirectory) file.listFiles.flatMap(_.allMatching(f))
       else Seq(file).filter(f)

@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package freestyle.rpc.idlgen.proto
 
+import freestyle.rpc.idlgen._
 import freestyle.rpc.protocol._
 import scala.meta._
 
-object ProtoGenerator extends Generator {
+object ProtoIdlGenerator extends IdlGenerator {
 
+  val idlType: String                      = IdlType
   val serializationType: SerializationType = Protobuf
   val outputSubdir: String                 = "proto"
-  val fileExtension: String                = ".proto"
-
-  private val ProtoEmpty = "google.protobuf.Empty"
+  val fileExtension: String                = ProtoExtension
 
   private val HeaderLines = Seq(
     "// This file has been automatically generated for use by",
     "// the idlGen plugin, from frees-rpc service definitions.",
-    "// Read more at: http://frees.io/docs/rpc/",
+    "// Read more at: http://frees.io/docs/rpc",
     "",
     "syntax = \"proto3\";",
     ""
@@ -90,7 +90,7 @@ object ProtoGenerator extends Generator {
       streamingType: Option[StreamingType],
       matchingStreamingTypes: StreamingType*): String = {
     val sType = t.toString
-    val pType = if (sType == "Empty.type") ProtoEmpty else sType
+    val pType = if (sType == EmptyType) ProtoEmpty else sType
     if (streamingType.exists(matchingStreamingTypes.contains)) s"stream $pType" else pType
   }
 

@@ -1,5 +1,17 @@
+$ exists src/main/scala/model.scala
+> 'set idlType := "proto"'
 > idlGen
+$ exists target/scala-2.12/resource_managed/main/proto/model.proto
+$ delete target/scala-2.12/resource_managed/main/proto/model.proto
 
-$ exists src/main/resources/proto/model.proto
+$ exists src/main/scala/model.scala
+> 'set idlType := "avro"'
+> idlGen
+$ exists target/scala-2.12/resource_managed/main/avro/model.avpr
+$ delete target/scala-2.12/resource_managed/main/avro/model.avpr
 
-$ delete src/main/resources/proto/model.proto
+$ exists src/main/resources/model.avdl
+> 'set idlType := "avro"'
+> srcGen
+$ exists target/scala-2.12/src_managed/main/model.scala
+$ delete target/scala-2.12/src_managed/main/model.scala

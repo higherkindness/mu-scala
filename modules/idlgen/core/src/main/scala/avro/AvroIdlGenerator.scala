@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package freestyle.rpc.idlgen.avro
 
+import freestyle.rpc.idlgen._
 import freestyle.rpc.protocol._
+import io.circe._
 import io.circe.generic.auto._
 import io.circe.syntax._
-import io.circe._
 import scala.meta._
 
-object AvroGenerator extends AvroGenerator { val serializationType: SerializationType = Avro }
-object AvroWithSchemaGenerator extends AvroGenerator {
+object AvroIdlGenerator extends AvroIdlGenerator { val serializationType: SerializationType = Avro }
+object AvroWithSchemaIdlGenerator extends AvroIdlGenerator {
   val serializationType: SerializationType = AvroWithSchema
 }
 
-trait AvroGenerator extends Generator {
+trait AvroIdlGenerator extends IdlGenerator {
 
-  val outputSubdir: String  = "avro"
-  val fileExtension: String = ".avpr"
+  val idlType: String                      = avro.IdlType
+  val outputSubdir: String                 = "avro"
+  val fileExtension: String                = AvprExtension
 
   // Note: don't use the object directly as the implicit value unless moving it here, or circe will give invalid output
   implicit private val avroTypeEncoder: Encoder[AvroType] = AvroTypeEncoder
@@ -54,7 +56,8 @@ trait AvroGenerator extends Generator {
       .map {
         case RpcRequest(_, name, reqType, respType, _) =>
           name -> AvroMessage(
-            Seq(AvroField("arg", mappedType(reqType))).filterNot(_.`type` == AvroEmpty),
+            Seq(AvroField(DefaultRequestParamName, mappedType(reqType)))
+              .filterNot(_.`type` == AvroEmpty),
             mappedType(respType))
       }
       .toMap

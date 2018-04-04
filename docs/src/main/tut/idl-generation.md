@@ -6,49 +6,32 @@ permalink: /docs/rpc/idl-generation
 
 # IDL Generation
 
-## Generating IDL files
-
 Before entering implementation details, we mentioned that the [frees-rpc] ecosystem brings the ability to generate `.proto` files from the Scala definition, in order to maintain compatibility with other languages and systems outside of Scala.
 
-This responsibility relies on `idlGen`, an sbt plugin to generate Protobuf and Avro IDL files from the [frees-rpc] service definitions.
+This relies on `idlGen`, an sbt plugin to generate Protobuf and Avro IDL files from the [frees-rpc] service definitions.
 
-### Plugin Installation
+## Plugin Installation
 
 Add the following line to _project/plugins.sbt_:
 
 [comment]: # (Start Replace)
 
 ```scala
-addSbtPlugin("io.frees" % "sbt-frees-rpc-idlgen" % "0.12.0")
+addSbtPlugin("io.frees" % "sbt-frees-rpc-idlgen" % "0.13.0")
 ```
 
 [comment]: # (End Replace)
 
 Note that the plugin is only available for Scala 2.12.
 
-### Plugin Settings
-
-There are a couple key settings that can be configured according to various needs:
-
-* **`sourceDir`**: the Scala source directory, where your [frees-rpc] definitions are placed. By default: `baseDirectory.value / "src" / "main" / "scala"`.
-* **`targetDir`**: The IDL target directory, where the `idlGen` task will write the IDL files in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on [frees-rpc] service definitions. By default: `baseDirectory.value / "src" / "main" / "resources"`.
-
-Base directories must exist, otherwise, the `idlGen` task will fail. Subdirectories will be created upon generation.
-
-### Generation with idlGen
-
-At this point, each time you want to update your IDL files from the scala definitions, you have to run the following sbt task:
-
-```bash
-sbt idlGen
-```
+## Generating IDL files from source
 
 Let's take our previous service, and add an Avro-specific request and some useful annotations described in the [Annotations section](/docs/rpc/annotations):
 ```tut:silent
 import freestyle.rpc.protocol._
 
-@option(name = "java_multiple_files", value = true)
-@option(name = "java_outer_classname", value = "Quickstart")
+@option("java_multiple_files", true)
+@option("java_outer_classname", "Quickstart")
 @outputName("GreeterService")
 @outputPackage("quickstart")
 object service {
@@ -87,6 +70,10 @@ object service {
 }
 ```
 
+At this point, each time you want to update your `.proto` IDL files from the scala definitions, you have to run the following sbt task:
+```bash
+sbt "idlGen proto"
+```
 Using this example, the resulting Protobuf IDL would be generated in `/src/main/resources/proto/service.proto`, in the case that the scala file is named `service.scala`. The content should be similar to:
 
 ```
@@ -96,8 +83,8 @@ Using this example, the resulting Protobuf IDL would be generated in `/src/main/
 
 syntax = "proto3";
 
-option java_package = "quickstart";
 option java_multiple_files = true;
+option java_outer_class_name = "Quickstart";
 
 package quickstart;
 
@@ -117,7 +104,11 @@ service Greeter {
 }
 ```
 
-And the resulting Avro IDL would be generated in `/src/main/resources/avro/service.avpr`:
+To generate Avro IDL instead, use:
+```bash
+sbt "idlGen avro"
+```
+And the resulting Avro IDL would be generated in `target/scala-2.12/resource_managed/main/avro/service.avpr`:
 
 ```
 {
@@ -161,6 +152,59 @@ And the resulting Avro IDL would be generated in `/src/main/resources/avro/servi
 
 Note that due to limitations in the Avro IDL, currently only unary RPC services are converted (client- and/or server-streaming services are ignored).
 
+### Plugin Settings
+
+When using `idlGen`, there are a couple key settings that can be configured according to various needs:
+
+* **`idlType`**: the type of IDL to be generated, either `proto` or `avro`.
+* **`idlGenSourceDir`**: the Scala source base directory, where your [frees-rpc] definitions are placed. By default: `Compile / sourceDirectory`, typically `src/main/scala/`.
+* **`idlGenTargetDir`**: the IDL target base directory, where the `idlGen` task will write the IDL files in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on [frees-rpc] service definitions. By default: `Compile / resourceManaged`, typically `target/scala-2.12/resource_managed/main/`.
+
+The source directory must exist, otherwise, the `idlGen` task will fail. Target directories will be created upon generation.
+
+## Generating source files from IDL
+
+You can also use this process in reverse and generate [frees-rpc] Scala classes from IDL definitions. Currently only Avro is supported, in both `.avpr` (JSON) and `.avdl` (Avro IDL) formats.
+The plugin's implementation basically wraps the [avrohugger] library and adds some freestyle-specific extensions.
+
+To use it, run:
+```bash
+sbt "srcGen avro"
+```
+In the case of the `.avpr` file we generated above, the file `GreeterService.scala` would be generated in `target/scala-2.12/src_managed/main/quickstart`:
+```
+package quickstart
+
+import freestyle.rpc.protocol._
+
+@message case class HelloRequest(greeting: String)
+
+@message case class HelloResponse(reply: String)
+
+@service trait GreeterService[F[_]] {
+
+  @rpc(Avro)
+  def sayHelloAvro(arg: foo.bar.HelloRequest): F[foo.bar.HelloResponse]
+
+}
+```
+
+You can also integrate this source generation in your compile process by adding this setting to your module:
+```
+sourceGenerators in Compile += (srcGen in Compile).taskValue)
+```
+
+### Plugin Settings
+
+Just like `idlGen`, `srcGen` has some configurable settings:
+
+* **`idlType`**: the type of IDL to generate from, currently only `avro`.
+* **`srcGenSourceDir`**: the IDL source base directory, where your IDL files are placed. By default: `Compile / resourceDirectory`, typically `src/main/resources/`.
+* **`srcGenTargetDir`**: the Scala target base directory, where the `srcGen` task will write the Scala files in subdirectories/packages based on the namespaces of the IDL files. By default: `Compile / sourceManaged`, typically `target/scala-2.12/src_managed/main/`.
+* **`genOptions`**: additional options to add to the generated `@rpc` annotations, after the IDL type. Currently only supports `"Gzip"`.
+
+The source directory must exist, otherwise, the `srcGen` task will fail. Target directories will be created upon generation.
+
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
@@ -176,3 +220,4 @@ Note that due to limitations in the Avro IDL, currently only unary RPC services 
 [freestyle-rpc-examples]: https://github.com/frees-io/freestyle-rpc-examples
 [Metrifier]: https://github.com/47deg/metrifier
 [frees-config]: http://frees.io/docs/patterns/config/
+[avrohugger]: https://github.com/julianpeeters/avrohugger

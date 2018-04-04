@@ -18,8 +18,11 @@ package freestyle.rpc
 package common
 
 import cats.data.Kleisli
+import org.scalactic.Prettifier
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, OneInstancePerTest, WordSpec}
+import org.scalatest._
+import scala.compat.Platform
+import scala.io._
 
 trait RpcBaseTestSuite extends WordSpec with Matchers with OneInstancePerTest with MockFactory {
 
@@ -29,4 +32,12 @@ trait RpcBaseTestSuite extends WordSpec with Matchers with OneInstancePerTest wi
       kleisli.run(v)
 
   }
+
+  implicit val prettifier: Prettifier = Prettifier {
+    case x: Any =>
+      Platform.EOL + Prettifier.default(x) // initial linebreak makes expected/actual results line up nicely
+  }
+
+  def resource(path: String): BufferedSource =
+    Source.fromInputStream(getClass.getResourceAsStream(path))
 }

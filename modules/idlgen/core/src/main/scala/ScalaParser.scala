@@ -21,7 +21,7 @@ import freestyle.rpc.internal.util.ScalametaUtil._
 import freestyle.rpc.internal.util.StringUtil._
 import scala.meta._
 
-object Parser {
+object ScalaParser {
 
   def parse(input: Source, inputName: String): RpcDefinitions = {
     val definitions = input.collect { case defn: Defn => defn }

@@ -16,8 +16,9 @@
 
 package freestyle.rpc.idlgen
 
-import sbt._
+import java.io.File
 import sbt.Keys._
+import sbt._
 
 object IdlGenPlugin extends AutoPlugin {
 
@@ -25,41 +26,75 @@ object IdlGenPlugin extends AutoPlugin {
 
   object autoImport {
 
-    lazy val idlGen: TaskKey[Unit] =
-      taskKey[Unit]("Generates IDL files from freestyle-rpc service definitions")
+    lazy val idlGen: TaskKey[Seq[File]] =
+      taskKey[Seq[File]]("Generates IDL files from freestyle-rpc service definitions")
 
-    lazy val sourceDir: SettingKey[File] =
+    lazy val srcGen: TaskKey[Seq[File]] =
+      taskKey[Seq[File]]("Generates freestyle-rpc Scala files from IDL definitions")
+
+    lazy val idlType: SettingKey[String] =
+      settingKey[String]("The IDL type to work with, such as avro or proto")
+
+    lazy val idlGenSourceDir: SettingKey[File] =
       settingKey[File](
         "The Scala source directory, where your freestyle-rpc service definitions are placed.")
 
-    lazy val targetDir: SettingKey[File] =
+    lazy val idlGenTargetDir: SettingKey[File] =
       settingKey[File](
         "The IDL target directory, where the `idlGen` task will write the generated files " +
           "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on freestyle-rpc service definitions.")
+
+    lazy val srcGenSourceDir: SettingKey[File] =
+      settingKey[File]("The IDL directory, where your IDL definitions are placed.")
+
+    lazy val srcGenTargetDir: SettingKey[File] =
+      settingKey[File](
+        "The Scala target directory, where the `srcGen` task will write the generated files " +
+          "in subpackages based on the namespaces declared in the IDL files.")
+
+    lazy val genOptions: SettingKey[Seq[String]] =
+      settingKey[Seq[String]](
+        "Options for the generator, such as additional @rpc annotation parameters in srcGen.")
   }
 
-  import autoImport._
+  import freestyle.rpc.idlgen.IdlGenPlugin.autoImport._
 
   lazy val defaultSettings: Seq[Def.Setting[_]] = Seq(
-    sourceDir := baseDirectory.value / "src" / "main" / "scala",
-    targetDir := baseDirectory.value / "src" / "main" / "resources"
+    idlType := "(missing arg)",
+    idlGenSourceDir := (Compile / sourceDirectory).value,
+    idlGenTargetDir := (Compile / resourceManaged).value,
+    srcGenSourceDir := (Compile / resourceDirectory).value,
+    srcGenTargetDir := (Compile / sourceManaged).value,
+    genOptions := Seq.empty
   )
 
-  lazy val taskSettings: Seq[Def.Setting[_]] = Seq(
-    idlGen := {
-      (runner in Compile).value
-        .run(
-          mainClass = "freestyle.rpc.idlgen.Application",
-          classpath = sbt.Attributed.data((fullClasspath in Compile).value),
-          options = Seq(
-            sourceDir.value.absolutePath,
-            targetDir.value.absolutePath
-          ),
-          log = streams.value.log
-        )
-      (): Unit
+  lazy val taskSettings: Seq[Def.Setting[_]] = {
+    Seq(
+      idlGen := idlGenTask(
+        IdlGenApplication,
+        idlType.value,
+        genOptions.value,
+        idlGenTargetDir.value,
+        target.value / "idlGen")(idlGenSourceDir.value.allPaths.get.toSet).toSeq,
+      srcGen := idlGenTask(
+        SrcGenApplication,
+        idlType.value,
+        genOptions.value,
+        srcGenTargetDir.value,
+        target.value / "srcGen")(srcGenSourceDir.value.allPaths.get.toSet).toSeq
+    )
+  }
+
+  private def idlGenTask(
+      generator: GeneratorApplication[_],
+      idlType: String,
+      options: Seq[String],
+      targetDir: File,
+      cacheDir: File): Set[File] => Set[File] =
+    FileFunction.cached(cacheDir, FilesInfo.lastModified, FilesInfo.exists) {
+      (inputFiles: Set[File]) =>
+        generator.generateFrom(idlType, inputFiles, targetDir, options: _*).toSet
     }
-  )
 
   override def projectSettings: Seq[Def.Setting[_]] =
     defaultSettings ++ taskSettings ++ Seq(

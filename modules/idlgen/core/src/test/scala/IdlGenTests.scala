@@ -17,18 +17,13 @@
 package freestyle.rpc.idlgen
 
 import freestyle.rpc.common.RpcBaseTestSuite
+import freestyle.rpc.idlgen.avro.AvroIdlGenerator
+import freestyle.rpc.idlgen.proto.ProtoIdlGenerator
 import freestyle.rpc.protocol._
-import org.scalactic._
-import scala.compat.Platform
-import scala.io
-import scala.io.BufferedSource
 import scala.meta._
 
 class IdlGenTests extends RpcBaseTestSuite {
   // format: OFF
-  implicit private val prettifier = Prettifier { case x: Any =>
-    Platform.EOL + Prettifier.default(x) // initial linebreak makes expected/actual results line up nicely
-  }
 
   val greeterRpcs = RpcDefinitions(
     "MyGreeterService",
@@ -63,10 +58,10 @@ class IdlGenTests extends RpcBaseTestSuite {
     )))
   )
 
-  "Parser.parse()" should {
+  "Scala Parser" should {
     "generate correct RPC definitions from Scala source file" in {
       val input = resource("/GreeterService.scala").mkString.parse[Source].get
-      val RpcDefinitions(pkg, name, options, messages, services) = Parser.parse(input, "GreeterService")
+      val RpcDefinitions(pkg, name, options, messages, services) = ScalaParser.parse(input, "GreeterService")
       val RpcDefinitions(expectedPkg, expectedName, expectedOptions, expectedMessages, expectedServices) = greeterRpcs
       pkg shouldBe expectedPkg
       name shouldBe expectedName
@@ -76,25 +71,23 @@ class IdlGenTests extends RpcBaseTestSuite {
     }
   }
 
-  "$Generator.generateFrom()" should {
+  "Proto IDL Generator" should {
     "generate correct Protobuf syntax from RPC definitions" in {
       val expected = resource("/proto/GreeterService.proto").getLines.toList
-      val output = Generator.generateFrom(greeterRpcs)
-      output.get(ProtoGenerator) should not be empty
-      output(ProtoGenerator).toList shouldBe expected
+      val output = ProtoIdlGenerator.generateFrom(greeterRpcs)
+      output should not be empty
+      output.get.toList shouldBe expected
     }
   }
 
-  "Generator.generateFrom()" should {
+  "Avro IDL Generator" should {
     "generate correct Avro syntax from RPC definitions" in {
       val expected = resource("/avro/GreeterService.avpr").getLines.toList
-      val output = Generator.generateFrom(greeterRpcs)
-      output.get(AvroWithSchemaGenerator) should not be empty
-      output(AvroWithSchemaGenerator).toList shouldBe expected
+      val output = AvroIdlGenerator.generateFrom(greeterRpcs)
+      output should not be empty
+      output.get.toList shouldBe expected
     }
   }
-
-  private def resource(path: String): BufferedSource = io.Source.fromInputStream(getClass.getResourceAsStream(path))
 
   // format: ON
 }
