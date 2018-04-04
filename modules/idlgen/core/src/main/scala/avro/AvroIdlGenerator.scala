@@ -30,9 +30,9 @@ object AvroWithSchemaIdlGenerator extends AvroIdlGenerator {
 
 trait AvroIdlGenerator extends IdlGenerator {
 
-  val idlType: String                      = avro.IdlType
-  val outputSubdir: String                 = "avro"
-  val fileExtension: String                = AvprExtension
+  val idlType: String       = avro.IdlType
+  val outputSubdir: String  = "avro"
+  val fileExtension: String = AvprExtension
 
   // Note: don't use the object directly as the implicit value unless moving it here, or circe will give invalid output
   implicit private val avroTypeEncoder: Encoder[AvroType] = AvroTypeEncoder

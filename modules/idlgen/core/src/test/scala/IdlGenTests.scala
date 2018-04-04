@@ -17,7 +17,7 @@
 package freestyle.rpc.idlgen
 
 import freestyle.rpc.common.RpcBaseTestSuite
-import freestyle.rpc.idlgen.avro.AvroIdlGenerator
+import freestyle.rpc.idlgen.avro.{AvroIdlGenerator, AvroWithSchemaIdlGenerator}
 import freestyle.rpc.idlgen.proto.ProtoIdlGenerator
 import freestyle.rpc.protocol._
 import scala.meta._
@@ -84,6 +84,15 @@ class IdlGenTests extends RpcBaseTestSuite {
     "generate correct Avro syntax from RPC definitions" in {
       val expected = resource("/avro/GreeterService.avpr").getLines.toList
       val output = AvroIdlGenerator.generateFrom(greeterRpcs)
+      output should not be empty
+      output.get.toList shouldBe expected
+    }
+  }
+
+  "Avro With Schema IDL Generator" should {
+    "generate correct Avro syntax from RPC definitions" in {
+      val expected = resource("/avro/GreeterService.avpr").getLines.toList
+      val output = AvroWithSchemaIdlGenerator.generateFrom(greeterRpcs)
       output should not be empty
       output.get.toList shouldBe expected
     }
