@@ -29,16 +29,19 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfter {
 
   "frees-rpc client using avro serialization with schemas" should {
 
-    def runTestProgram[T](implicit serverW: ServerW) = {
-      serverStart[ConcurrentMonad].unsafeRunSync
-      try {
-        freesRPCServiceClient.get(request).unsafeRunSync() shouldBe response
-        freesRPCServiceClient
-          .getCoproduct(requestCoproduct(request))
-          .unsafeRunSync() shouldBe responseCoproduct(response)
+    def runTestProgram[T](implicit SW: ServerW): Assertion = {
+      val (r1, r2) = try {
+        (for {
+          _          <- serverStart[ConcurrentMonad]
+          assertion1 <- freesRPCServiceClient.get(request)
+          assertion2 <- freesRPCServiceClient.getCoproduct(requestCoproduct(request))
+        } yield (assertion1, assertion2)).unsafeRunSync
       } finally {
         serverStop[ConcurrentMonad].unsafeRunSync
       }
+
+      r1 shouldBe response
+      r2 shouldBe responseCoproduct(response)
     }
 
     "be able to respond to a request" in {
