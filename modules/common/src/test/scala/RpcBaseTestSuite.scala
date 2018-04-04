@@ -33,6 +33,8 @@ trait RpcBaseTestSuite extends WordSpec with Matchers with OneInstancePerTest wi
 
   }
 
+  object LocalOnly extends Tag("LocalOnly")
+
   implicit val prettifier: Prettifier = Prettifier {
     case x: Any =>
       Platform.EOL + Prettifier.default(x) // initial linebreak makes expected/actual results line up nicely

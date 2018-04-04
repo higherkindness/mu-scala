@@ -107,7 +107,7 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
     }
 
     // TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/168 is fixed
-    "work for client streaming RPC metrics" ignore {
+    "work for client streaming RPC metrics" taggedAs LocalOnly in {
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[D] =
         APP.cs(cList, i)

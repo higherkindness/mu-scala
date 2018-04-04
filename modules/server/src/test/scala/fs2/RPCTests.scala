@@ -80,7 +80,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         .unsafeRunSync() shouldBe dResult33
     }
 
-    "be able to run client bidirectional streaming services" ignore {
+    "be able to run client bidirectional streaming services" in {
 
       freesRPCServiceClient
         .biStreaming(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
@@ -91,7 +91,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     }
 
-    "be able to run multiple rpc services" ignore {
+    "be able to run multiple rpc services" in {
 
       val tuple =
         (
@@ -136,7 +136,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         .unsafeRunSync() shouldBe dResult33
     }
 
-    "be able to run client bidirectional streaming services" ignore {
+    "be able to run client bidirectional streaming services" in {
 
       freesRPCServiceClient
         .biStreamingCompressed(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
@@ -147,7 +147,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     }
 
-    "be able to run multiple rpc services" ignore {
+    "be able to run multiple rpc services" in {
 
       val tuple =
         (
