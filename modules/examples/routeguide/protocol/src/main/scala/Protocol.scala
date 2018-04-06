@@ -1,4 +1,4 @@
-package routeguide.protocol
+package example.routeguide.protocol
 
 
 class Protocol {

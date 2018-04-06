@@ -1,4 +1,4 @@
-package routeguide.client
+package example.routeguide.client
 
 
 class Client {

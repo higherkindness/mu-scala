@@ -1,4 +1,4 @@
-package routeguide.server
+package example.routeguide.server
 
 
 class Server {
