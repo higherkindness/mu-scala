@@ -130,7 +130,7 @@ object InterceptingClientCalls extends CommonRuntime {
     Greeter.client[Task](
       channelFor = channelFor,
       channelConfigList = List(
-        UsePlaintext(true),
+        UsePlaintext(),
         AddInterceptor(
           MonitoringClientInterceptor(
             Configuration.defaultBasicMetrics

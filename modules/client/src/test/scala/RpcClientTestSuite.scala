@@ -59,7 +59,7 @@ trait RpcClientTestSuite extends RpcBaseTestSuite {
       AddInterceptor(new NoopInterceptor()),
       UserAgent("User-Agent"),
       OverrideAuthority(TestUtils.TEST_SERVER_HOST),
-      UsePlaintext(true),
+      UsePlaintext(),
       NameResolverFactory(
         FakeNameResolverFactory(new URI("defaultscheme", "", "/[valid]", null).getScheme)),
       LoadBalancerFactory(RoundRobinLoadBalancerFactory.getInstance()),

@@ -34,7 +34,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
       val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
 
-      val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
+      val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext())
 
       val managedChannelInterpreter =
         new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
@@ -50,7 +50,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
       val channelFor: ChannelFor = ChannelForTarget(SC.host)
 
-      val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
+      val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext())
 
       val managedChannelInterpreter =
         new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
@@ -66,7 +66,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
       val channelFor: ChannelFor = ChannelForTarget(SC.host)
 
-      val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
+      val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext())
 
       val managedChannelInterpreter =
         new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
