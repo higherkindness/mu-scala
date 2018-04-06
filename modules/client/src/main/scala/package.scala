@@ -61,7 +61,7 @@ package object client {
     case AddInterceptor(interceptors @ _*) => mcb.intercept(interceptors: _*)
     case UserAgent(userAgent)              => mcb.userAgent(userAgent)
     case OverrideAuthority(authority)      => mcb.overrideAuthority(authority)
-    case UsePlaintext(skipNegotiation)     => mcb.usePlaintext(skipNegotiation)
+    case UsePlaintext()                    => mcb.usePlaintext()
     case NameResolverFactory(rf)           => mcb.nameResolverFactory(rf)
     case LoadBalancerFactory(lbf)          => mcb.loadBalancerFactory(lbf)
     case SetDecompressorRegistry(registry) => mcb.decompressorRegistry(registry)

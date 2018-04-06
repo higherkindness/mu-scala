@@ -50,7 +50,7 @@ package object netty {
     case NettySslContext(sslContext)         => mcb.sslContext(sslContext)
     case NettyFlowControlWindow(fcw)         => mcb.flowControlWindow(fcw)
     case NettyMaxHeaderListSize(mhls)        => mcb.maxHeaderListSize(mhls)
-    case NettyUsePlaintext(skipNegotiation)  => mcb.usePlaintext(skipNegotiation)
+    case NettyUsePlaintext()                 => mcb.usePlaintext()
     case NettyUseTransportSecurity           => mcb.useTransportSecurity()
     case NettyKeepAliveTime(kat, tu)         => mcb.keepAliveTime(kat, tu)
     case NettyKeepAliveTimeout(kat, tu)      => mcb.keepAliveTimeout(kat, tu)
