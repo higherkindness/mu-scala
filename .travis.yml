@@ -40,9 +40,6 @@ stages:
 
 jobs:
   include:
-    - stage: test
-      script:
-        - sbt ++$TRAVIS_SCALA_VERSION "testOnly -- -l LocalOnly"
     - stage: plugin
       scala: 2.12.4
       script:
