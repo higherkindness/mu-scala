@@ -228,7 +228,7 @@ First of all, we need to configure how the client will reach the server in terms
 * By Address (host/port): brings the ability to create a channel with the target's address and port number.
 * By Target: it can create a channel with a target string, which can be either a valid [NameResolver](https://grpc.io/grpc-java/javadoc/io/grpc/NameResolver.html)-compliant URI or an authority string.
 
-Additionally, we can add more optional configurations that can be used when the connection is occurring. All the options are available [here](https://github.com/frees-io/freestyle-rpc/blob/6b0e926a5a14fbe3d9282e8c78340f2d9a0421f3/rpc/src/main/scala/client/ChannelConfig.scala#L33-L46). As we will see shortly in our example, we are going to skip the negotiation (`UsePlaintext(true)`).
+Additionally, we can add more optional configurations that can be used when the connection is occurring. All the options are available [here](https://github.com/frees-io/freestyle-rpc/blob/6b0e926a5a14fbe3d9282e8c78340f2d9a0421f3/rpc/src/main/scala/client/ChannelConfig.scala#L33-L46). As we will see shortly in our example, we are going to skip the negotiation (`UsePlaintext()`).
 
 Given the transport settings and a list of optional configurations, we can create the [ManagedChannel.html](https://grpc.io/grpc-java/javadoc/io/grpc/ManagedChannel.html) object, using the `ManagedChannelInterpreter` builder.
 

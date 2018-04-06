@@ -141,7 +141,7 @@ trait RPCService {
        def client[F[_]](
          channelFor: _root_.freestyle.rpc.ChannelFor,
          channelConfigList: List[_root_.freestyle.rpc.client.ManagedChannelConfig] = List(
-           _root_.freestyle.rpc.client.UsePlaintext(true)),
+           _root_.freestyle.rpc.client.UsePlaintext()),
          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
        )(implicit
          F: _root_.cats.effect.Effect[F],

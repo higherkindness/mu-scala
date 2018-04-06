@@ -54,7 +54,7 @@ case class InterceptorsRuntime(
     RPCService.client[ConcurrentMonad](
       channelFor = createChannelForPort(pickUnusedPort),
       channelConfigList = List(
-        UsePlaintext(true),
+        UsePlaintext(),
         AddInterceptor(MonitoringClientInterceptor(configuration.withCollectorRegistry(cr)))
       )
     )

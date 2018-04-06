@@ -179,7 +179,7 @@ object MainApp extends CommonRuntime {
   		ChannelForAddress("localhost", 8080),
         List(
           OverrideAuthority(TestUtils.TEST_SERVER_HOST),
-          NettyUsePlaintext(false),
+          NettyUsePlaintext(),
           NettyNegotiationType(NegotiationType.TLS),
           NettySslContext(clientSslContext)
         )
