@@ -29,7 +29,7 @@ final case class AddInterceptorList(interceptors: List[ClientInterceptor])
 final case class AddInterceptor(interceptors: ClientInterceptor*) extends ManagedChannelConfig
 final case class UserAgent(userAgent: String)                     extends ManagedChannelConfig
 final case class OverrideAuthority(authority: String)             extends ManagedChannelConfig
-final case class UsePlaintext(skipNegotiation: Boolean)           extends ManagedChannelConfig
+final case class UsePlaintext()                                   extends ManagedChannelConfig
 final case class NameResolverFactory(resolverFactory: NameResolver.Factory)
     extends ManagedChannelConfig
 final case class LoadBalancerFactory(lbFactory: LoadBalancer.Factory) extends ManagedChannelConfig
