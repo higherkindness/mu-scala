@@ -34,9 +34,14 @@ trait RpcBaseTestSuite extends WordSpec with Matchers with OneInstancePerTest wi
   }
 
   implicit val prettifier: Prettifier = Prettifier {
-    case x: Any =>
+    case x => // includes null
       Platform.EOL + Prettifier.default(x) // initial linebreak makes expected/actual results line up nicely
   }
+
+  // delegating the check to a def gets its name used in the cancellation message (cleaner than the boolean comparison result)
+  private[this] def runningLocally: Boolean = System.getenv("TRAVIS") != "true"
+
+  def ignoreOnTravis(msg: => String): Unit = assume(runningLocally, msg)
 
   def resource(path: String): BufferedSource =
     Source.fromInputStream(getClass.getResourceAsStream(path))
