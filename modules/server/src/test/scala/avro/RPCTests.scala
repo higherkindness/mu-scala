@@ -22,7 +22,7 @@ import freestyle.rpc.server.ServerW
 import freestyle.rpc.server.implicits._
 import org.scalatest._
 
-class RPCTests extends RpcBaseTestSuite with BeforeAndAfter {
+class RPCTests extends RpcBaseTestSuite {
 
   import freestyle.rpc.avro.Utils._
   import freestyle.rpc.avro.Utils.implicits._
@@ -37,7 +37,9 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfter {
           assertion2 <- freesRPCServiceClient.getCoproduct(requestCoproduct(request))
         } yield (assertion1, assertion2)).unsafeRunSync
       } finally {
-        serverStop[ConcurrentMonad].unsafeRunSync
+        serverStop[ConcurrentMonad]
+          .flatMap(_ => serverAwaitTermination[ConcurrentMonad])
+          .unsafeRunSync
       }
 
       r1 shouldBe response
