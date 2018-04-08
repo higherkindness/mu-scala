@@ -108,7 +108,10 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     }
 
-    "be able to run multiple rpc services" ignore {
+    "be able to run multiple rpc services" in {
+
+      ignoreOnTravis(
+        "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/164 is fixed")
 
       val tuple =
         (
@@ -186,7 +189,10 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     }
 
-    "be able to run multiple rpc services" ignore {
+    "be able to run multiple rpc services" in {
+
+      ignoreOnTravis(
+        "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/164 is fixed")
 
       val tuple =
         (

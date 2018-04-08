@@ -17,7 +17,7 @@ Add the following line to _project/plugins.sbt_:
 [comment]: # (Start Replace)
 
 ```scala
-addSbtPlugin("io.frees" % "sbt-frees-rpc-idlgen" % "0.13.0")
+addSbtPlugin("io.frees" % "sbt-frees-rpc-idlgen" % "0.13.1")
 ```
 
 [comment]: # (End Replace)
@@ -171,6 +171,28 @@ To use it, run:
 ```bash
 sbt "srcGen avro"
 ```
+
+You could even use `IDL` definitions packaged into artifacts, within your classpath. In that particular situation, you need to setup `srcJarNames`, specifying the artifacts names that will be unzipped to extract the `IDL` files. You need to run:
+```bash
+sbt "srcGenFromJars"
+```
+
+`srcGenFromJars` can very useful when you want to distribute your `IDL` files without binary code (to prevent binary conflicts in clients). In that case, you might want to include some additional settings in the build where your `IDL` files are placed, like for instance:
+```
+//...
+.settings(
+  Seq(
+    publishMavenStyle := true,
+    mappings in (Compile, packageBin) ~= { _.filter(!_._1.getName.endsWith(".class")) },
+    idlType := "avro",
+    srcGenSourceDir := (Compile / resourceDirectory).value,
+    srcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
+    sourceGenerators in Compile += (srcGen in Compile).taskValue
+  )
+)
+//...
+```
+
 In the case of the `.avpr` file we generated above, the file `GreeterService.scala` would be generated in `target/scala-2.12/src_managed/main/quickstart`:
 ```
 package quickstart
@@ -193,12 +215,17 @@ You can also integrate this source generation in your compile process by adding 
 ```
 sourceGenerators in Compile += (srcGen in Compile).taskValue)
 ```
+or,
+```
+sourceGenerators in Compile += (srcGenFromJars in Compile).taskValue)
+```
 
 ### Plugin Settings
 
-Just like `idlGen`, `srcGen` has some configurable settings:
+Just like `idlGen`, `srcGen` and `srcGenFromJars` has some configurable settings:
 
 * **`idlType`**: the type of IDL to generate from, currently only `avro`.
+* **`srcJarNames`**: the list of jar names containing the IDL definitions that will be used at compilation time by `srcGenFromJars` to generate the Scala Sources. By default, this sequence is empty.
 * **`srcGenSourceDir`**: the IDL source base directory, where your IDL files are placed. By default: `Compile / resourceDirectory`, typically `src/main/resources/`.
 * **`srcGenTargetDir`**: the Scala target base directory, where the `srcGen` task will write the Scala files in subdirectories/packages based on the namespaces of the IDL files. By default: `Compile / sourceManaged`, typically `target/scala-2.12/src_managed/main/`.
 * **`genOptions`**: additional options to add to the generated `@rpc` annotations, after the IDL type. Currently only supports `"Gzip"`.

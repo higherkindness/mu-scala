@@ -1,5 +1,14 @@
 # Changelog
 
+## 04/08/2018 - Version 0.13.1
+
+Release changes:
+
+* Releases the plugin first, then the core ([#214](https://github.com/frees-io/freestyle-rpc/pull/214))
+* Enable conditionally disabling certain tests in Travis ([#216](https://github.com/frees-io/freestyle-rpc/pull/216))
+* Support for packaged Avdl into jar dependencies ([#224](https://github.com/frees-io/freestyle-rpc/pull/224))
+
+
 ## 04/02/2018 - Version 0.13.0
 
 Release changes:
