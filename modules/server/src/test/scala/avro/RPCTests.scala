@@ -17,9 +17,13 @@
 package freestyle.rpc
 package avro
 
+import java.util.concurrent.TimeUnit
+import java.util.UUID
+
+import io.grpc.{ManagedChannel, Server, ServerServiceDefinition}
+import io.grpc.inprocess.{InProcessChannelBuilder, InProcessServerBuilder}
+import io.grpc.util.MutableHandlerRegistry
 import freestyle.rpc.common._
-import freestyle.rpc.server.ServerW
-import freestyle.rpc.server.implicits._
 import org.scalatest._
 
 class RPCTests extends RpcBaseTestSuite {
@@ -29,17 +33,48 @@ class RPCTests extends RpcBaseTestSuite {
 
   "frees-rpc client using avro serialization with schemas" should {
 
-    def runTestProgram[T](implicit SW: ServerW): Assertion = {
-      val (r1, r2) = try {
+    def runTestProgram[T](ssd: ServerServiceDefinition): Assertion = {
+
+      val serviceRegistry = new MutableHandlerRegistry
+
+      val serverName = UUID.randomUUID.toString
+      val serverBuilder: InProcessServerBuilder =
+        InProcessServerBuilder
+          .forName(serverName)
+          .fallbackHandlerRegistry(serviceRegistry)
+          .directExecutor()
+
+      serverBuilder.addService(ssd)
+
+      val server: Server = serverBuilder.build().start()
+
+      val channelBuilder: InProcessChannelBuilder = InProcessChannelBuilder.forName(serverName)
+
+      val channel: ManagedChannel = channelBuilder.directExecutor.build
+
+      val rpcServiceClient: service.RPCService.Client[ConcurrentMonad] =
+        service.RPCService.clientFromChannel[ConcurrentMonad](channel)
+
+      val (r1, r2) = {
         (for {
-          _          <- serverStart[ConcurrentMonad]
-          assertion1 <- freesRPCServiceClient.get(request)
-          assertion2 <- freesRPCServiceClient.getCoproduct(requestCoproduct(request))
+          assertion1 <- rpcServiceClient.get(request)
+          assertion2 <- rpcServiceClient.getCoproduct(requestCoproduct(request))
         } yield (assertion1, assertion2)).unsafeRunSync
+      }
+
+      channel.shutdown
+      server.shutdown
+
+      try {
+        channel.awaitTermination(1, TimeUnit.MINUTES)
+        server.awaitTermination(1, TimeUnit.MINUTES)
+      } catch {
+        case e: InterruptedException =>
+          Thread.currentThread.interrupt()
+          throw new RuntimeException(e)
       } finally {
-        serverStop[ConcurrentMonad]
-          .flatMap(_ => serverAwaitTermination[ConcurrentMonad])
-          .unsafeRunSync
+        channel.shutdownNow
+        server.shutdownNow
       }
 
       r1 shouldBe response
@@ -47,58 +82,49 @@ class RPCTests extends RpcBaseTestSuite {
     }
 
     "be able to respond to a request" in {
-      implicit val serverW = createServerConf(rpcServiceConfigs)
-      runTestProgram
+      runTestProgram(rpcServiceDef)
     }
 
     "be able to respond to a request when the request model has added a boolean field" in {
-      implicit val serverW = createServerConf(rpcServiceRequestAddedBooleanConfigs)
-      runTestProgram
+      runTestProgram(rpcServiceRequestAddedBooleanDef)
     }
 
     "be able to respond to a request when the request model has added a string field" in {
-      implicit val serverW = createServerConf(rpcServiceRequestAddedStringConfigs)
-      runTestProgram
+      runTestProgram(rpcServiceRequestAddedStringDef)
     }
 
     "be able to respond to a request when the request model has added an int field" in {
-      implicit val serverW = createServerConf(rpcServiceRequestAddedIntConfigs)
-      runTestProgram
+      runTestProgram(rpcServiceRequestAddedIntDef)
+
     }
 
     "be able to respond to a request when the request model has added a field that is a case class" in {
-      implicit val serverW = createServerConf(rpcServiceRequestAddedNestedRequestConfigs)
-      runTestProgram
+      runTestProgram(rpcServiceRequestAddedNestedRequestDef)
     }
 
     "be able to respond to a request when the request model has dropped a field" in {
-      implicit val serverW = createServerConf(rpcServiceRequestDroppedFieldConfigs)
-      runTestProgram
+      runTestProgram(rpcServiceRequestDroppedFieldDef)
     }
 
     "be able to respond to a request when the response model has added a boolean field" in {
-      implicit val serverW = createServerConf(rpcServiceResponseAddedBooleanConfigs)
-      runTestProgram
+      runTestProgram(rpcServiceResponseAddedBooleanDef)
     }
 
     "be able to respond to a request when the response model has added a string field" in {
-      implicit val serverW = createServerConf(rpcServiceResponseAddedStringConfigs)
-      runTestProgram
+      runTestProgram(rpcServiceResponseAddedStringDef)
+
     }
 
     "be able to respond to a request when the response model has added an int field" in {
-      implicit val serverW = createServerConf(rpcServiceResponseAddedIntConfigs)
-      runTestProgram
+      runTestProgram(rpcServiceResponseAddedIntDef)
     }
 
     "be able to respond to a request when the response model has added a field that is a case class" in {
-      implicit val serverW = createServerConf(rpcServiceResponseAddedNestedResponseConfigs)
-      runTestProgram
+      runTestProgram(rpcServiceResponseAddedNestedResponseDef)
     }
 
     "be able to respond to a request when the response model has dropped a field" in {
-      implicit val serverW = createServerConf(rpcServiceResponseDroppedFieldConfigs)
-      runTestProgram
+      runTestProgram(rpcServiceResponseDroppedFieldDef)
     }
   }
 
