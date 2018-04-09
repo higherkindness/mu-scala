@@ -20,7 +20,6 @@ package avro
 import freestyle.rpc.common._
 import freestyle.rpc.protocol._
 import cats.effect.Effect
-import io.grpc.ServerServiceDefinition
 import shapeless.{:+:, CNil, Coproduct}
 
 object Utils extends CommonUtils {
@@ -248,7 +247,6 @@ object Utils extends CommonUtils {
   trait FreesRuntime {
 
     import handlers._
-    import freestyle.rpc.server._
 
     //////////////////////////////////
     // Server Runtime Configuration //
@@ -296,38 +294,6 @@ object Utils extends CommonUtils {
     implicit val responseDroppedFieldRPCServiceHandler: serviceResponseDroppedField.RPCService[
       ConcurrentMonad] =
       new ResponseDroppedFieldRPCServiceHandler[ConcurrentMonad]
-
-    val rpcServiceDef: ServerServiceDefinition = service.RPCService.bindService[ConcurrentMonad]
-
-    val rpcServiceRequestAddedBooleanDef: ServerServiceDefinition =
-      serviceRequestAddedBoolean.RPCService.bindService[ConcurrentMonad]
-
-    val rpcServiceRequestAddedStringDef: ServerServiceDefinition =
-      serviceRequestAddedString.RPCService.bindService[ConcurrentMonad]
-
-    val rpcServiceRequestAddedIntDef: ServerServiceDefinition =
-      serviceRequestAddedInt.RPCService.bindService[ConcurrentMonad]
-
-    val rpcServiceRequestAddedNestedRequestDef: ServerServiceDefinition =
-      serviceRequestAddedNestedRequest.RPCService.bindService[ConcurrentMonad]
-
-    val rpcServiceRequestDroppedFieldDef: ServerServiceDefinition =
-      serviceRequestDroppedField.RPCService.bindService[ConcurrentMonad]
-
-    val rpcServiceResponseAddedBooleanDef: ServerServiceDefinition =
-      serviceResponseAddedBoolean.RPCService.bindService[ConcurrentMonad]
-
-    val rpcServiceResponseAddedStringDef: ServerServiceDefinition =
-      serviceResponseAddedString.RPCService.bindService[ConcurrentMonad]
-
-    val rpcServiceResponseAddedIntDef: ServerServiceDefinition =
-      serviceResponseAddedInt.RPCService.bindService[ConcurrentMonad]
-
-    val rpcServiceResponseAddedNestedResponseDef: ServerServiceDefinition =
-      serviceResponseAddedNestedResponse.RPCService.bindService[ConcurrentMonad]
-
-    val rpcServiceResponseDroppedFieldDef: ServerServiceDefinition =
-      serviceResponseDroppedField.RPCService.bindService[ConcurrentMonad]
 
     //////////////////////////////////
     // Client Runtime Configuration //

@@ -17,13 +17,9 @@
 package freestyle.rpc
 package avro
 
-import java.util.concurrent.TimeUnit
-import java.util.UUID
-
-import io.grpc.{ManagedChannel, Server, ServerServiceDefinition}
-import io.grpc.inprocess.{InProcessChannelBuilder, InProcessServerBuilder}
-import io.grpc.util.MutableHandlerRegistry
 import freestyle.rpc.common._
+import freestyle.rpc.testing.ServerChannel.WithServerChannel
+import io.grpc.ServerServiceDefinition
 import org.scalatest._
 
 class RPCTests extends RpcBaseTestSuite {
@@ -35,96 +31,67 @@ class RPCTests extends RpcBaseTestSuite {
 
     def runTestProgram[T](ssd: ServerServiceDefinition): Assertion = {
 
-      val serviceRegistry = new MutableHandlerRegistry
+      WithServerChannel(ssd) { sc =>
+        val rpcServiceClient: service.RPCService.Client[ConcurrentMonad] =
+          service.RPCService.clientFromChannel[ConcurrentMonad](sc.channel)
 
-      val serverName = UUID.randomUUID.toString
-      val serverBuilder: InProcessServerBuilder =
-        InProcessServerBuilder
-          .forName(serverName)
-          .fallbackHandlerRegistry(serviceRegistry)
-          .directExecutor()
+        val (r1, r2) = {
+          (for {
+            assertion1 <- rpcServiceClient.get(request)
+            assertion2 <- rpcServiceClient.getCoproduct(requestCoproduct(request))
+          } yield (assertion1, assertion2)).unsafeRunSync
+        }
 
-      serverBuilder.addService(ssd)
-
-      val server: Server = serverBuilder.build().start()
-
-      val channelBuilder: InProcessChannelBuilder = InProcessChannelBuilder.forName(serverName)
-
-      val channel: ManagedChannel = channelBuilder.directExecutor.build
-
-      val rpcServiceClient: service.RPCService.Client[ConcurrentMonad] =
-        service.RPCService.clientFromChannel[ConcurrentMonad](channel)
-
-      val (r1, r2) = {
-        (for {
-          assertion1 <- rpcServiceClient.get(request)
-          assertion2 <- rpcServiceClient.getCoproduct(requestCoproduct(request))
-        } yield (assertion1, assertion2)).unsafeRunSync
+        r1 shouldBe response
+        r2 shouldBe responseCoproduct(response)
       }
 
-      channel.shutdown
-      server.shutdown
-
-      try {
-        channel.awaitTermination(1, TimeUnit.MINUTES)
-        server.awaitTermination(1, TimeUnit.MINUTES)
-      } catch {
-        case e: InterruptedException =>
-          Thread.currentThread.interrupt()
-          throw new RuntimeException(e)
-      } finally {
-        channel.shutdownNow
-        server.shutdownNow
-      }
-
-      r1 shouldBe response
-      r2 shouldBe responseCoproduct(response)
     }
 
     "be able to respond to a request" in {
-      runTestProgram(rpcServiceDef)
+      runTestProgram(service.RPCService.bindService[ConcurrentMonad])
     }
 
     "be able to respond to a request when the request model has added a boolean field" in {
-      runTestProgram(rpcServiceRequestAddedBooleanDef)
+      runTestProgram(serviceRequestAddedBoolean.RPCService.bindService[ConcurrentMonad])
     }
 
     "be able to respond to a request when the request model has added a string field" in {
-      runTestProgram(rpcServiceRequestAddedStringDef)
+      runTestProgram(serviceRequestAddedString.RPCService.bindService[ConcurrentMonad])
     }
 
     "be able to respond to a request when the request model has added an int field" in {
-      runTestProgram(rpcServiceRequestAddedIntDef)
+      runTestProgram(serviceRequestAddedInt.RPCService.bindService[ConcurrentMonad])
 
     }
 
     "be able to respond to a request when the request model has added a field that is a case class" in {
-      runTestProgram(rpcServiceRequestAddedNestedRequestDef)
+      runTestProgram(serviceRequestAddedNestedRequest.RPCService.bindService[ConcurrentMonad])
     }
 
     "be able to respond to a request when the request model has dropped a field" in {
-      runTestProgram(rpcServiceRequestDroppedFieldDef)
+      runTestProgram(serviceRequestDroppedField.RPCService.bindService[ConcurrentMonad])
     }
 
     "be able to respond to a request when the response model has added a boolean field" in {
-      runTestProgram(rpcServiceResponseAddedBooleanDef)
+      runTestProgram(serviceResponseAddedBoolean.RPCService.bindService[ConcurrentMonad])
     }
 
     "be able to respond to a request when the response model has added a string field" in {
-      runTestProgram(rpcServiceResponseAddedStringDef)
+      runTestProgram(serviceResponseAddedString.RPCService.bindService[ConcurrentMonad])
 
     }
 
     "be able to respond to a request when the response model has added an int field" in {
-      runTestProgram(rpcServiceResponseAddedIntDef)
+      runTestProgram(serviceResponseAddedInt.RPCService.bindService[ConcurrentMonad])
     }
 
     "be able to respond to a request when the response model has added a field that is a case class" in {
-      runTestProgram(rpcServiceResponseAddedNestedResponseDef)
+      runTestProgram(serviceResponseAddedNestedResponse.RPCService.bindService[ConcurrentMonad])
     }
 
     "be able to respond to a request when the response model has dropped a field" in {
-      runTestProgram(rpcServiceResponseDroppedFieldDef)
+      runTestProgram(serviceResponseDroppedField.RPCService.bindService[ConcurrentMonad])
     }
   }
 
