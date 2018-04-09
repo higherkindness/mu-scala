@@ -143,11 +143,6 @@ object ProjectPlugin extends AutoPlugin {
     lazy val exampleRouteguideProtocolSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("monix"),
-        %%("log4s", V.log4s),
-        %("logback-classic", V.logback),
-        %%("circe-core", V.circe),
-        %%("circe-generic", V.circe),
-        %%("circe-parser", V.circe)
       )
     )
 
