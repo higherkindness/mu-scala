@@ -68,6 +68,9 @@ trait CommonUtils {
   def serverStop[F[_]: Functor](implicit S: GrpcServer[F]): F[Unit] =
     S.shutdownNow().void
 
+  def serverAwaitTermination[F[_]: Functor](implicit S: GrpcServer[F]): F[Unit] =
+    S.awaitTermination()
+
   def debug(str: String): Unit = logger.debug(str)
 
   implicit val S: monix.execution.Scheduler = monix.execution.Scheduler.Implicits.global

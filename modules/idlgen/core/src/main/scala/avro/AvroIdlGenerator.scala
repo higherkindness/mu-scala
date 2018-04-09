@@ -23,12 +23,16 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import scala.meta._
 
-object AvroIdlGenerator extends IdlGenerator {
+object AvroIdlGenerator extends AvroIdlGenerator { val serializationType: SerializationType = Avro }
+object AvroWithSchemaIdlGenerator extends AvroIdlGenerator {
+  val serializationType: SerializationType = AvroWithSchema
+}
 
-  val idlType: String                      = avro.IdlType
-  val serializationType: SerializationType = Avro
-  val outputSubdir: String                 = "avro"
-  val fileExtension: String                = AvprExtension
+trait AvroIdlGenerator extends IdlGenerator {
+
+  val idlType: String       = avro.IdlType
+  val outputSubdir: String  = "avro"
+  val fileExtension: String = AvprExtension
 
   // Note: don't use the object directly as the implicit value unless moving it here, or circe will give invalid output
   implicit private val avroTypeEncoder: Encoder[AvroType] = AvroTypeEncoder
