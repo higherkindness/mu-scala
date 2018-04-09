@@ -179,7 +179,6 @@ lazy val `idlgen-sbt` = project
 lazy val `example-routeguide-protocol` = project
   .in(file("modules/examples/routeguide/protocol"))
   .dependsOn(client)
-  .dependsOn(config)
   .settings(moduleName := "frees-rpc-example-routeguide-protocol")
   .disablePlugins(ScriptedPlugin)
 
@@ -192,7 +191,8 @@ lazy val `example-routeguide-runtime` = project
 lazy val `example-routeguide-common` = project
   .in(file("modules/examples/routeguide/common"))
   .dependsOn(`example-routeguide-protocol`)
-  .settings(moduleName := "frees-rpc-example-routeguide-common")
+    .dependsOn(config)
+    .settings(moduleName := "frees-rpc-example-routeguide-common")
   .settings(exampleRouteguideCommonSettings)
   .disablePlugins(ScriptedPlugin)
 

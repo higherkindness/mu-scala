@@ -154,7 +154,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       ignoreOnTravis(
         "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/164 is fixed")
-      
+
       val tuple =
         (
           freesRPCServiceClient.unaryCompressed(a1),
