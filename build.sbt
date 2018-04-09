@@ -178,8 +178,9 @@ lazy val `idlgen-sbt` = project
 
 lazy val `example-routeguide-protocol` = project
   .in(file("modules/examples/routeguide/protocol"))
-  .dependsOn(common)
+  .dependsOn(client)
   .settings(moduleName := "frees-rpc-example-routeguide-protocol")
+  .settings(exampleRouteguideProtocolSettings)
   .disablePlugins(ScriptedPlugin)
 
 lazy val `example-routeguide-service` = project
