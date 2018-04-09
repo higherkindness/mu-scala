@@ -142,7 +142,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val exampleRouteguideProtocolSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("monix"),
+        %%("monix")
       )
     )
 
