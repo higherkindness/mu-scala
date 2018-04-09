@@ -178,26 +178,36 @@ lazy val `idlgen-sbt` = project
 
 lazy val `example-routeguide-protocol` = project
   .in(file("modules/examples/routeguide/protocol"))
-  .dependsOn(common)
+  .dependsOn(client)
+  .dependsOn(config)
   .settings(moduleName := "frees-rpc-example-routeguide-protocol")
   .disablePlugins(ScriptedPlugin)
 
-lazy val `example-routeguide-service` = project
-  .in(file("modules/examples/routeguide/service"))
+lazy val `example-routeguide-runtime` = project
+  .in(file("modules/examples/routeguide/runtime"))
+  .settings(moduleName := "frees-rpc-example-routeguide-runtime")
+  .settings(exampleRouteguideRuntimeSettings)
+  .disablePlugins(ScriptedPlugin)
+
+lazy val `example-routeguide-common` = project
+  .in(file("modules/examples/routeguide/common"))
   .dependsOn(`example-routeguide-protocol`)
-  .settings(moduleName := "frees-rpc-example-routeguide-service")
+  .settings(moduleName := "frees-rpc-example-routeguide-common")
+  .settings(exampleRouteguideCommonSettings)
   .disablePlugins(ScriptedPlugin)
 
 lazy val `example-routeguide-server` = project
   .in(file("modules/examples/routeguide/server"))
-  .dependsOn(`example-routeguide-service`)
+  .dependsOn(`example-routeguide-common`)
+  .dependsOn(`example-routeguide-runtime`)
   .dependsOn(server)
   .settings(moduleName := "frees-rpc-example-routeguide-server")
   .disablePlugins(ScriptedPlugin)
 
 lazy val `example-routeguide-client` = project
   .in(file("modules/examples/routeguide/client"))
-  .dependsOn(`example-routeguide-protocol`)
+  .dependsOn(`example-routeguide-common`)
+  .dependsOn(`example-routeguide-runtime`)
   .dependsOn(`client-netty`)
   .settings(moduleName := "frees-rpc-example-routeguide-client")
   .disablePlugins(ScriptedPlugin)
@@ -224,7 +234,8 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   ssl,
   `idlgen-core`,
   `example-routeguide-protocol`,
-  `example-routeguide-service`,
+  `example-routeguide-common`,
+  `example-routeguide-runtime`,
   `example-routeguide-server`,
   `example-routeguide-client`
 )

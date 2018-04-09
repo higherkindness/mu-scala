@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2018 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package example.routeguide.runtime
 
 import cats.effect.IO
 import cats.~>
@@ -30,24 +32,5 @@ trait RouteGuide {
   implicit def T2Task(implicit S: Scheduler): Task ~> Task = new (Task ~> Task) {
     override def apply[A](fa: Task[A]) = fa
   }
-
-}
-
-object server {
-
-  trait Implicits extends RouteGuide {
-
-    implicit val routeGuideServiceHandler: RouteGuideService[IO] =
-      new RouteGuideServiceHandler[IO]
-
-    val grpcConfigs: List[GrpcConfig] = List(
-      AddService(RouteGuideService.bindService[IO])
-    )
-
-    implicit val serverW: ServerW = BuildServerFromConfig[IO]("rpc.server.port", grpcConfigs).unsafeRunSync()
-
-  }
-
-  object implicits extends Implicits
 
 }
