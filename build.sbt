@@ -191,8 +191,8 @@ lazy val `example-routeguide-runtime` = project
 lazy val `example-routeguide-common` = project
   .in(file("modules/examples/routeguide/common"))
   .dependsOn(`example-routeguide-protocol`)
-    .dependsOn(config)
-    .settings(moduleName := "frees-rpc-example-routeguide-common")
+  .dependsOn(config)
+  .settings(moduleName := "frees-rpc-example-routeguide-common")
   .settings(exampleRouteguideCommonSettings)
   .disablePlugins(ScriptedPlugin)
 
