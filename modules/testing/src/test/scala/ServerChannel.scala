@@ -26,9 +26,9 @@ import io.grpc.util.MutableHandlerRegistry
 
 final case class ServerChannel(server: Server, channel: ManagedChannel) {
 
-  def shutdown: Boolean = {
-    channel.shutdown
-    server.shutdown
+  def shutdown(): Boolean = {
+    channel.shutdown()
+    server.shutdown()
 
     try {
       channel.awaitTermination(1, TimeUnit.MINUTES)
@@ -38,8 +38,8 @@ final case class ServerChannel(server: Server, channel: ManagedChannel) {
         Thread.currentThread.interrupt()
         throw new RuntimeException(e)
     } finally {
-      channel.shutdownNow
-      server.shutdownNow
+      channel.shutdownNow()
+      server.shutdownNow()
       (): Unit
     }
   }
@@ -65,11 +65,11 @@ object ServerChannel {
     ServerChannel(serverBuilder.build().start(), channelBuilder.directExecutor.build)
   }
 
-  def WithServerChannel[A](ssds: ServerServiceDefinition*)(f: ServerChannel => A): A = {
+  def withServerChannel[A](services: ServerServiceDefinition*)(f: ServerChannel => A): A = {
 
-    val sc: ServerChannel = apply(ssds: _*)
+    val sc: ServerChannel = apply(services: _*)
     val result: A         = f(sc)
-    sc.shutdown
+    sc.shutdown()
 
     result
   }

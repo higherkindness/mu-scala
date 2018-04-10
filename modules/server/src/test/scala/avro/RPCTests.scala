@@ -17,8 +17,9 @@
 package freestyle.rpc
 package avro
 
+import cats.Apply
 import freestyle.rpc.common._
-import freestyle.rpc.testing.ServerChannel.WithServerChannel
+import freestyle.rpc.testing.ServerChannel.withServerChannel
 import io.grpc.ServerServiceDefinition
 import org.scalatest._
 
@@ -31,16 +32,15 @@ class RPCTests extends RpcBaseTestSuite {
 
     def runTestProgram[T](ssd: ServerServiceDefinition): Assertion = {
 
-      WithServerChannel(ssd) { sc =>
+      withServerChannel(ssd) { sc =>
         val rpcServiceClient: service.RPCService.Client[ConcurrentMonad] =
           service.RPCService.clientFromChannel[ConcurrentMonad](sc.channel)
 
-        val (r1, r2) = {
-          (for {
-            assertion1 <- rpcServiceClient.get(request)
-            assertion2 <- rpcServiceClient.getCoproduct(requestCoproduct(request))
-          } yield (assertion1, assertion2)).unsafeRunSync
-        }
+        val (r1, r2) = Apply[ConcurrentMonad]
+          .product(
+            rpcServiceClient.get(request),
+            rpcServiceClient.getCoproduct(requestCoproduct(request)))
+          .unsafeRunSync()
 
         r1 shouldBe response
         r2 shouldBe responseCoproduct(response)
