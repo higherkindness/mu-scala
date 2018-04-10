@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package example.routeguide.server.io
 
 import cats.effect.IO
@@ -25,22 +24,18 @@ import example.routeguide.server.handlers.RouteGuideServiceHandler
 import example.routeguide.protocol.Protocols.RouteGuideService
 import example.routeguide.runtime._
 
-object ServerIO {
+trait Implicits extends RouteGuide {
 
-  trait Implicits extends RouteGuide {
+  implicit val routeGuideServiceHandler: RouteGuideService[IO] =
+    new RouteGuideServiceHandler[IO]
 
-    implicit val routeGuideServiceHandler: RouteGuideService[IO] =
-      new RouteGuideServiceHandler[IO]
+  val grpcConfigs: List[GrpcConfig] = List(
+    AddService(RouteGuideService.bindService[IO])
+  )
 
-    val grpcConfigs: List[GrpcConfig] = List(
-      AddService(RouteGuideService.bindService[IO])
-    )
-
-    implicit val serverW: ServerW =
-      BuildServerFromConfig[IO]("rpc.server.port", grpcConfigs).unsafeRunSync()
-
-  }
-
-  object implicits extends Implicits
+  implicit val serverW: ServerW =
+    BuildServerFromConfig[IO]("rpc.server.port", grpcConfigs).unsafeRunSync()
 
 }
+
+object implicits extends Implicits
