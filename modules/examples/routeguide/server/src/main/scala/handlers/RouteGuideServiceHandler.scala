@@ -16,12 +16,12 @@
 package example.routeguide.server.handlers
 
 import java.util.concurrent.atomic.AtomicReference
+import java.util.function.UnaryOperator
 
 import cats.{~>, Applicative}
 import monix.eval.Task
 import monix.reactive.Observable
 import org.log4s._
-import example.routeguide.protocol.Protocols
 import example.routeguide.protocol.Protocols._
 import example.routeguide.common.Utils._
 
@@ -36,13 +36,13 @@ class RouteGuideServiceHandler[F[_]](implicit A: Applicative[F], T2F: Task ~> F)
 
   val logger = getLogger
 
-  override def getFeature(point: Protocols.Point): F[Feature] =
+  override def getFeature(point: Point): F[Feature] =
     A.pure {
       logger.info(s"Fetching feature at ${point.pretty} ...")
       point.findFeatureIn(features)
     }
 
-  override def listFeatures(rectangle: Protocols.Rectangle): Observable[Feature] = {
+  override def listFeatures(rectangle: Rectangle): Observable[Feature] = {
     val left   = Math.min(rectangle.lo.longitude, rectangle.hi.longitude)
     val right  = Math.max(rectangle.lo.longitude, rectangle.hi.longitude)
     val top    = Math.max(rectangle.lo.latitude, rectangle.hi.latitude)
@@ -62,7 +62,7 @@ class RouteGuideServiceHandler[F[_]](implicit A: Applicative[F], T2F: Task ~> F)
     observable
   }
 
-  override def recordRoute(points: Observable[Protocols.Point]): F[RouteSummary] =
+  override def recordRoute(points: Observable[Point]): F[RouteSummary] =
     // For each point after the first, add the incremental distance from the previous point to
     // the total distance value. We're starting
 
@@ -86,7 +86,7 @@ class RouteGuideServiceHandler[F[_]](implicit A: Applicative[F], T2F: Task ~> F)
         .map(_._1)
     )
 
-  override def routeChat(routeNotes: Observable[Protocols.RouteNote]): Observable[RouteNote] =
+  override def routeChat(routeNotes: Observable[RouteNote]): Observable[RouteNote] =
     routeNotes
       .flatMap { note: RouteNote =>
         logger.info(s"Got route note $note, adding it... ")
@@ -100,10 +100,12 @@ class RouteGuideServiceHandler[F[_]](implicit A: Applicative[F], T2F: Task ~> F)
       }
 
   private[this] def addNote(note: RouteNote): Unit =
-    routeNotes.updateAndGet { notes: Map[Point, List[RouteNote]] =>
-      val newRouteNotes = notes.getOrElse(note.location, Nil) :+ note
-      notes + (note.location -> newRouteNotes)
-    }
+    routeNotes.updateAndGet(new UnaryOperator[Map[Point, List[RouteNote]]] {
+      override def apply(notes: Map[Point, List[RouteNote]]) = {
+        val newRouteNotes = notes.getOrElse(note.location, Nil) :+ note
+        notes + (note.location -> newRouteNotes)
+      }
+    })
 
   private[this] def getOrCreateNotes(point: Point): List[RouteNote] =
     routeNotes.get.getOrElse(point, Nil)
