@@ -14,6 +14,21 @@
  * limitations under the License.
  */
 
-package example.routeguide.service
+package example.routeguide.common
 
-class Service {}
+import io.circe._
+import io.circe.generic.semiauto._
+import example.routeguide.protocol.Protocols._
+
+object Codecs {
+
+  implicit val pointDecoder: Decoder[Point] = deriveDecoder[Point]
+  implicit val pointEncoder: Encoder[Point] = deriveEncoder[Point]
+
+  implicit val featureDecoder: Decoder[Feature] = deriveDecoder[Feature]
+  implicit val featureEncoder: Encoder[Feature] = deriveEncoder[Feature]
+
+  implicit val featureDBDecoder: Decoder[FeatureDatabase] = deriveDecoder[FeatureDatabase]
+  implicit val featureDBEncoder: Encoder[FeatureDatabase] = deriveEncoder[FeatureDatabase]
+
+}
