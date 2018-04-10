@@ -190,6 +190,8 @@ private[internal] case class RPCRequest(
         q"import _root_.freestyle.rpc.internal.encoders.pbd._"
       case Avro =>
         q"import _root_.freestyle.rpc.internal.encoders.avro._"
+      case AvroWithSchema =>
+        q"import _root_.freestyle.rpc.internal.encoders.avrowithschema._"
     }
 
     q"""
@@ -357,8 +359,9 @@ private[internal] object utils {
   }
 
   private[internal] def serializationType(s: Term.Arg): SerializationType = s match {
-    case q"Protobuf" => Protobuf
-    case q"Avro"     => Avro
+    case q"Protobuf"       => Protobuf
+    case q"Avro"           => Avro
+    case q"AvroWithSchema" => AvroWithSchema
   }
 
   private[internal] def compressionType(s: Option[Term.Arg]): CompressionType =

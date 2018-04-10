@@ -86,6 +86,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         RPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
 
       freesRPCServiceClient.unary(a1).unsafeRunSync() shouldBe c1
+      freesRPCServiceClient.unaryWithSchema(a1).unsafeRunSync() shouldBe c1
 
     }
 
@@ -106,6 +107,9 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
         freesRPCServiceClient.unary(a1).unsafeRunSync())
 
+      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
+        freesRPCServiceClient.unaryWithSchema(a1).unsafeRunSync())
+
     }
 
     "io.grpc.StatusRuntimeException is thrown when negotiation is skipped" in {
@@ -124,6 +128,9 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
         freesRPCServiceClient.unary(a1).unsafeRunSync())
+
+      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
+        freesRPCServiceClient.unaryWithSchema(a1).unsafeRunSync())
 
     }
 

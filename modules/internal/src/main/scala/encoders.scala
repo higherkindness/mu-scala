@@ -70,4 +70,36 @@ object encoders {
       }
   }
 
+  object avrowithschema {
+
+    import com.sksamuel.avro4s._
+    import org.apache.avro.file.DataFileStream
+    import org.apache.avro.generic.{GenericDatumReader, GenericRecord}
+
+    implicit val emptyMarshallers: Marshaller[Empty.type] = new Marshaller[Empty.type] {
+      override def parse(stream: InputStream) = Empty
+      override def stream(value: Empty.type)  = new ByteArrayInputStream(Array.empty)
+    }
+
+    implicit def avroMarshallers[A: ToRecord](
+        implicit schemaFor: SchemaFor[A],
+        fromRecord: FromRecord[A]): Marshaller[A] = new Marshaller[A] {
+
+      override def parse(stream: InputStream): A = {
+        val dfs = new DataFileStream(stream, new GenericDatumReader[GenericRecord](schemaFor()))
+        fromRecord(dfs.next())
+      }
+
+      override def stream(value: A): InputStream = {
+        val baos: ByteArrayOutputStream     = new ByteArrayOutputStream()
+        val output: AvroDataOutputStream[A] = AvroOutputStream.data[A](baos)
+        output.write(value)
+        output.close()
+
+        new ByteArrayInputStream(baos.toByteArray)
+      }
+
+    }
+  }
+
 }
