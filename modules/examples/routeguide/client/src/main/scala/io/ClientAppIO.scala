@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package example.routeguide.client.io
 
 import cats.effect.IO
 import org.log4s._
-import example.routeguide.client.io.clientIO.implicits._
+import example.routeguide.client.io.implicits._
 import example.routeguide.client.ClientProgram._
 
 object ClientAppIO {

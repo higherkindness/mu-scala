@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package example.routeguide.client.task
 
 import monix.eval.Task
 import org.log4s._
 import example.routeguide.client.ClientProgram._
-import example.routeguide.client.task.clientTask.implicits._
+import example.routeguide.client.task.implicits._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
