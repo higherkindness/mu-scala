@@ -52,7 +52,7 @@ object IdlGenPlugin extends AutoPlugin {
       settingKey[String](
         "The serialization type when generating Scala sources from the IDL definitions." +
           "Protobuf, Avro or AvroWithSchema are the current supported serialization types. " +
-          "The serialization type by default is 'Avro'")
+          "By default, the serialization type is 'Avro'.")
 
     lazy val srcGenSourceDir: SettingKey[File] =
       settingKey[File]("The IDL directory, where your IDL definitions are placed.")
