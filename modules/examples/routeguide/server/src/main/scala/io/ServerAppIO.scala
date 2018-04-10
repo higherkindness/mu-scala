@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package example.routeguide.server.io
 
 import cats.effect.IO
 import freestyle.rpc.server.implicits._
 import org.log4s._
-import example.routeguide.server.io.ServerIO.implicits._
+import example.routeguide.server.io.implicits._
 
 object ServerAppIO {
 
