@@ -22,14 +22,20 @@ trait Generator {
 
   def idlType: String
 
-  def generateFrom(files: Set[File], options: String*): Seq[(File, String, Seq[String])] =
+  def generateFrom(
+      files: Set[File],
+      serializationType: String,
+      options: String*): Seq[(File, String, Seq[String])] =
     inputFiles(files).flatMap(inputFile =>
-      generateFrom(inputFile, options: _*).map {
+      generateFrom(inputFile, serializationType, options: _*).map {
         case (outputPath, output) =>
           (inputFile, outputPath, output)
     })
 
   protected def inputFiles(files: Set[File]): Seq[File]
 
-  protected def generateFrom(inputFile: File, options: String*): Option[(String, Seq[String])]
+  protected def generateFrom(
+      inputFile: File,
+      serializationType: String,
+      options: String*): Option[(String, Seq[String])]
 }
