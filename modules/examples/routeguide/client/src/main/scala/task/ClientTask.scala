@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package example.routeguide.client.task
 
 import example.routeguide.client.handlers.RouteGuideClientHandler
@@ -22,17 +21,13 @@ import example.routeguide.runtime._
 import example.routeguide.client.runtime._
 import monix.eval.Task
 
-object clientTask {
+trait Implicits extends RouteGuide with ClientConf {
 
-  trait Implicits extends RouteGuide with ClientConf {
+  implicit val routeGuideServiceClient: RouteGuideService.Client[Task] =
+    RouteGuideService.client[Task](channelFor)
 
-    implicit val routeGuideServiceClient: RouteGuideService.Client[Task] =
-      RouteGuideService.client[Task](channelFor)
-
-    implicit val routeGuideClientHandler: RouteGuideClientHandler[Task] =
-      new RouteGuideClientHandler[Task]
-  }
-
-  object implicits extends Implicits
-
+  implicit val routeGuideClientHandler: RouteGuideClientHandler[Task] =
+    new RouteGuideClientHandler[Task]
 }
+
+object implicits extends Implicits
