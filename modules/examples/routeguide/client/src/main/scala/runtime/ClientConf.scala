@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
-package example.routeguide.client
+package example.routeguide.client.runtime
 
-class Client {}
+import cats.effect.IO
+import freestyle.rpc.ChannelFor
+import freestyle.rpc.client.config.ConfigForAddress
+import freestyle.tagless.config.implicits._
+
+trait ClientConf {
+
+  val channelFor: ChannelFor =
+    ConfigForAddress[IO]("rpc.client.host", "rpc.client.port").unsafeRunSync()
+
+}
