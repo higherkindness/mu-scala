@@ -210,6 +210,14 @@ lazy val `example-routeguide-client` = project
   .dependsOn(`example-routeguide-runtime`)
   .dependsOn(`client-netty`)
   .settings(moduleName := "frees-rpc-example-routeguide-client")
+  .settings(
+    Compile / unmanagedSourceDirectories ++= Seq(
+      baseDirectory.value / "src" / "main" / "io",
+      baseDirectory.value / "src" / "main" / "task"
+    )
+  )
+  .settings(addCommandAlias("runClientIO", "runMain example.routeguide.client.io.ClientAppIO"))
+  .settings(addCommandAlias("runClientTask", "runMain example.routeguide.client.task.ClientAppTask"))
   .disablePlugins(ScriptedPlugin)
 
 //////////////////////////
