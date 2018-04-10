@@ -247,7 +247,6 @@ object Utils extends CommonUtils {
   trait FreesRuntime {
 
     import handlers._
-    import freestyle.rpc.server._
 
     //////////////////////////////////
     // Server Runtime Configuration //
@@ -295,50 +294,6 @@ object Utils extends CommonUtils {
     implicit val responseDroppedFieldRPCServiceHandler: serviceResponseDroppedField.RPCService[
       ConcurrentMonad] =
       new ResponseDroppedFieldRPCServiceHandler[ConcurrentMonad]
-
-    val rpcServiceConfigs: List[GrpcConfig] = List(
-      AddService(service.RPCService.bindService[ConcurrentMonad])
-    )
-
-    val rpcServiceRequestAddedBooleanConfigs: List[GrpcConfig] = List(
-      AddService(serviceRequestAddedBoolean.RPCService.bindService[ConcurrentMonad])
-    )
-
-    val rpcServiceRequestAddedStringConfigs: List[GrpcConfig] = List(
-      AddService(serviceRequestAddedString.RPCService.bindService[ConcurrentMonad])
-    )
-
-    val rpcServiceRequestAddedIntConfigs: List[GrpcConfig] = List(
-      AddService(serviceRequestAddedInt.RPCService.bindService[ConcurrentMonad])
-    )
-
-    val rpcServiceRequestAddedNestedRequestConfigs: List[GrpcConfig] = List(
-      AddService(serviceRequestAddedNestedRequest.RPCService.bindService[ConcurrentMonad])
-    )
-
-    val rpcServiceRequestDroppedFieldConfigs: List[GrpcConfig] = List(
-      AddService(serviceRequestDroppedField.RPCService.bindService[ConcurrentMonad])
-    )
-
-    val rpcServiceResponseAddedBooleanConfigs: List[GrpcConfig] = List(
-      AddService(serviceResponseAddedBoolean.RPCService.bindService[ConcurrentMonad])
-    )
-
-    val rpcServiceResponseAddedStringConfigs: List[GrpcConfig] = List(
-      AddService(serviceResponseAddedString.RPCService.bindService[ConcurrentMonad])
-    )
-
-    val rpcServiceResponseAddedIntConfigs: List[GrpcConfig] = List(
-      AddService(serviceResponseAddedInt.RPCService.bindService[ConcurrentMonad])
-    )
-
-    val rpcServiceResponseAddedNestedResponseConfigs: List[GrpcConfig] = List(
-      AddService(serviceResponseAddedNestedResponse.RPCService.bindService[ConcurrentMonad])
-    )
-
-    val rpcServiceResponseDroppedFieldConfigs: List[GrpcConfig] = List(
-      AddService(serviceResponseDroppedField.RPCService.bindService[ConcurrentMonad])
-    )
 
     //////////////////////////////////
     // Client Runtime Configuration //
