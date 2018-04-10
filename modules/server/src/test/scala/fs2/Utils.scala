@@ -31,7 +31,11 @@ object Utils extends CommonUtils {
 
       @rpc(Avro) def unary(a: A): F[C]
 
+      @rpc(AvroWithSchema) def unaryWithSchema(a: A): F[C]
+
       @rpc(Avro, Gzip) def unaryCompressed(a: A): F[C]
+
+      @rpc(AvroWithSchema, Gzip) def unaryCompressedWithSchema(a: A): F[C]
 
       @rpc(Protobuf)
       @stream[ResponseStreaming.type]
@@ -53,9 +57,17 @@ object Utils extends CommonUtils {
       @stream[BidirectionalStreaming.type]
       def biStreaming(oe: Stream[F, E]): Stream[F, E]
 
+      @rpc(AvroWithSchema)
+      @stream[BidirectionalStreaming.type]
+      def biStreamingWithSchema(oe: Stream[F, E]): Stream[F, E]
+
       @rpc(Avro, Gzip)
       @stream[BidirectionalStreaming.type]
       def biStreamingCompressed(oe: Stream[F, E]): Stream[F, E]
+
+      @rpc(AvroWithSchema, Gzip)
+      @stream[BidirectionalStreaming.type]
+      def biStreamingCompressedWithSchema(oe: Stream[F, E]): Stream[F, E]
 
     }
 
@@ -77,7 +89,11 @@ object Utils extends CommonUtils {
 
         def unary(a: A): F[C] = Effect[F].delay(c1)
 
+        def unaryWithSchema(a: A): F[C] = unary(a)
+
         def unaryCompressed(a: A): F[C] = unary(a)
+
+        def unaryCompressedWithSchema(a: A): F[C] = unaryCompressed(a)
 
         def serverStreaming(b: B): Stream[F, C] = {
           debug(s"[fs2 - SERVER] b -> $b")
@@ -101,7 +117,12 @@ object Utils extends CommonUtils {
             Stream.fromIterator(eList.iterator)
           }
 
+        def biStreamingWithSchema(oe: Stream[F, E]): Stream[F, E] = biStreaming(oe)
+
         def biStreamingCompressed(oe: Stream[F, E]): Stream[F, E] = biStreaming(oe)
+
+        def biStreamingCompressedWithSchema(oe: Stream[F, E]): Stream[F, E] =
+          biStreamingCompressed(oe)
 
         def save(e: E): E = e // do something else with e?
 

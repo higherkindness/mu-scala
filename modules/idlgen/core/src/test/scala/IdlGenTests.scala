@@ -17,7 +17,7 @@
 package freestyle.rpc.idlgen
 
 import freestyle.rpc.common.RpcBaseTestSuite
-import freestyle.rpc.idlgen.avro.AvroIdlGenerator
+import freestyle.rpc.idlgen.avro.{AvroIdlGenerator, AvroWithSchemaIdlGenerator}
 import freestyle.rpc.idlgen.proto.ProtoIdlGenerator
 import freestyle.rpc.protocol._
 import scala.meta._
@@ -37,18 +37,24 @@ class IdlGenTests extends RpcBaseTestSuite {
       RpcMessage("HelloResponse", Seq(param"arg1: String", param"arg2: Option[String]", param"arg3: List[String]"))
     ),
     Seq(RpcService("Greeter", Seq(
-      RpcRequest(Avro    , "sayHelloAvro"        , t"HelloRequest", t"HelloResponse", None),
-      RpcRequest(Protobuf, "sayHelloProto"       , t"HelloRequest", t"HelloResponse", None),
-      RpcRequest(Avro    , "sayNothingAvro"      , t"Empty.type"  , t"Empty.type"   , None),
-      RpcRequest(Protobuf, "sayNothingProto"     , t"Empty.type"  , t"Empty.type"   , None),
-      RpcRequest(Avro    , "lotsOfRepliesAvro"   , t"HelloRequest", t"HelloResponse", Some(ResponseStreaming)),
-      RpcRequest(Protobuf, "lotsOfRepliesProto"  , t"HelloRequest", t"HelloResponse", Some(ResponseStreaming)),
-      RpcRequest(Avro    , "lotsOfGreetingsAvro" , t"HelloRequest", t"HelloResponse", Some(RequestStreaming)),
-      RpcRequest(Protobuf, "lotsOfGreetingsProto", t"HelloRequest", t"HelloResponse", Some(RequestStreaming)),
-      RpcRequest(Avro    , "bidiHelloAvro"       , t"HelloRequest", t"HelloResponse", Some(BidirectionalStreaming)),
-      RpcRequest(Protobuf, "bidiHelloProto"      , t"HelloRequest", t"HelloResponse", Some(BidirectionalStreaming)),
-      RpcRequest(Avro    , "bidiHelloFs2Avro"    , t"HelloRequest", t"HelloResponse", Some(BidirectionalStreaming)),
-      RpcRequest(Protobuf, "bidiHelloFs2Proto"   , t"HelloRequest", t"HelloResponse", Some(BidirectionalStreaming))
+      RpcRequest(Avro          , "sayHelloAvro"        , t"HelloRequest", t"HelloResponse", None),
+      RpcRequest(AvroWithSchema, "sayHelloAvro"        , t"HelloRequest", t"HelloResponse", None),
+      RpcRequest(Protobuf      , "sayHelloProto"       , t"HelloRequest", t"HelloResponse", None),
+      RpcRequest(Avro          , "sayNothingAvro"      , t"Empty.type"  , t"Empty.type"   , None),
+      RpcRequest(AvroWithSchema, "sayNothingAvro"      , t"Empty.type"  , t"Empty.type"   , None),
+      RpcRequest(Protobuf      , "sayNothingProto"     , t"Empty.type"  , t"Empty.type"   , None),
+      RpcRequest(Avro          , "lotsOfRepliesAvro"   , t"HelloRequest", t"HelloResponse", Some(ResponseStreaming)),
+      RpcRequest(AvroWithSchema, "lotsOfRepliesAvro"   , t"HelloRequest", t"HelloResponse", Some(ResponseStreaming)),
+      RpcRequest(Protobuf      , "lotsOfRepliesProto"  , t"HelloRequest", t"HelloResponse", Some(ResponseStreaming)),
+      RpcRequest(Avro          , "lotsOfGreetingsAvro" , t"HelloRequest", t"HelloResponse", Some(RequestStreaming)),
+      RpcRequest(AvroWithSchema, "lotsOfGreetingsAvro" , t"HelloRequest", t"HelloResponse", Some(RequestStreaming)),
+      RpcRequest(Protobuf      , "lotsOfGreetingsProto", t"HelloRequest", t"HelloResponse", Some(RequestStreaming)),
+      RpcRequest(Avro          , "bidiHelloAvro"       , t"HelloRequest", t"HelloResponse", Some(BidirectionalStreaming)),
+      RpcRequest(AvroWithSchema, "bidiHelloAvro"       , t"HelloRequest", t"HelloResponse", Some(BidirectionalStreaming)),
+      RpcRequest(Protobuf      , "bidiHelloProto"      , t"HelloRequest", t"HelloResponse", Some(BidirectionalStreaming)),
+      RpcRequest(Avro          , "bidiHelloFs2Avro"    , t"HelloRequest", t"HelloResponse", Some(BidirectionalStreaming)),
+      RpcRequest(AvroWithSchema, "bidiHelloFs2Avro"    , t"HelloRequest", t"HelloResponse", Some(BidirectionalStreaming)),
+      RpcRequest(Protobuf      , "bidiHelloFs2Proto"   , t"HelloRequest", t"HelloResponse", Some(BidirectionalStreaming))
     )))
   )
 
@@ -78,6 +84,15 @@ class IdlGenTests extends RpcBaseTestSuite {
     "generate correct Avro syntax from RPC definitions" in {
       val expected = resource("/avro/GreeterService.avpr").getLines.toList
       val output = AvroIdlGenerator.generateFrom(greeterRpcs)
+      output should not be empty
+      output.get.toList shouldBe expected
+    }
+  }
+
+  "Avro With Schema IDL Generator" should {
+    "generate correct Avro syntax from RPC definitions" in {
+      val expected = resource("/avro/GreeterService.avpr").getLines.toList
+      val output = AvroWithSchemaIdlGenerator.generateFrom(greeterRpcs)
       output should not be empty
       output.get.toList shouldBe expected
     }
