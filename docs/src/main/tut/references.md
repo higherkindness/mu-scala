@@ -27,7 +27,7 @@ This is not specifically about [frees-rpc]. Very often our microservices archite
 
 ## Next Steps
 
-If you want to delve deeper into [frees-rpc], we have a complete example at the [examples](https://github.com/frees-io/freestyle-rpc/modules/examples) module, which is based on the [Route Guide Demo](https://grpc.io/docs/tutorials/basic/java.html#generating-client-and-server-code) originally shared by the [gRPC Java Project](https://github.com/grpc/grpc-java/tree/6ea2b8aacb0a193ac727e061bc228b40121460e3/examples/src/main/java/io/grpc/examples/routeguide).
+If you want to delve deeper into [frees-rpc], we have a complete example at the [examples](modules/examples) module, which is based on the [Route Guide Demo](https://grpc.io/docs/tutorials/basic/java.html#generating-client-and-server-code) originally shared by the [gRPC Java Project](https://github.com/grpc/grpc-java/tree/6ea2b8aacb0a193ac727e061bc228b40121460e3/examples/src/main/java/io/grpc/examples/routeguide).
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
@@ -41,6 +41,6 @@ If you want to delve deeper into [frees-rpc], we have a complete example at the 
 [scalameta]: https://github.com/scalameta/scalameta
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
-[freestyle-rpc-examples]: https://github.com/frees-io/freestyle-rpc/modules/examples
+[]: https://github.com/frees-io/freestyle-rpc/modules/examples
 [Metrifier]: https://github.com/47deg/metrifier
 [frees-config]: http://frees.io/docs/patterns/config/

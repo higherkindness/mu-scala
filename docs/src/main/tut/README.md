@@ -34,6 +34,6 @@ Freestyle RPC is a purely functional library for building RPC endpoint-based ser
 [scalameta]: https://github.com/scalameta/scalameta
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
-[freestyle-rpc-examples]: https://github.com/frees-io/freestyle-rpc/modules/examples
+[]: https://github.com/frees-io/freestyle-rpc/modules/examples
 [Metrifier]: https://github.com/47deg/metrifier
 [frees-config]: http://frees.io/docs/patterns/config/

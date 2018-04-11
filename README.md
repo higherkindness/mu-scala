@@ -83,7 +83,7 @@ The full documentation is available at the [frees-rpc](http://frees.io/docs/rpc)
 
 ## Demo
 
-See the [examples](https://github.com/frees-io/freestyle-rpc/modules/examples) module.
+See the [examples](modules/examples) module.
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
