@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package example.routeguide.server.io
+package example.routeguide.server
 
 import cats.effect.IO
 import freestyle.rpc.server._
@@ -25,7 +25,7 @@ import example.routeguide.server.handlers.RouteGuideServiceHandler
 import example.routeguide.protocol.Protocols.RouteGuideService
 import example.routeguide.runtime._
 
-trait Implicits extends RouteGuide {
+trait ServerImplicits extends RouteGuide {
 
   implicit val routeGuideServiceHandler: RouteGuideService[IO] =
     new RouteGuideServiceHandler[IO]
@@ -39,4 +39,4 @@ trait Implicits extends RouteGuide {
 
 }
 
-object implicits extends Implicits
+object implicits extends ServerImplicits

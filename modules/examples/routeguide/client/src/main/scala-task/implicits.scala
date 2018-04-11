@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-package example.routeguide.server.io
+package example.routeguide.client.task
 
-import cats.effect.IO
-import freestyle.rpc.server.implicits._
-import org.log4s._
-import example.routeguide.server.io.implicits._
+import example.routeguide.client.handlers.RouteGuideClientHandler
+import example.routeguide.protocol.Protocols._
+import example.routeguide.runtime._
+import example.routeguide.client.runtime._
+import monix.eval.Task
 
-object ServerAppIO {
+trait ClientTaskImplicits extends RouteGuide with ClientConf {
 
-  val logger = getLogger
+  implicit val routeGuideServiceClient: RouteGuideService.Client[Task] =
+    RouteGuideService.client[Task](channelFor)
 
-  def main(args: Array[String]): Unit = {
-
-    logger.info(s"Server is starting ...")
-
-    server[IO].unsafeRunSync()
-
-  }
-
+  implicit val routeGuideClientHandler: RouteGuideClientHandler[Task] =
+    new RouteGuideClientHandler[Task]
 }
+
+object implicits extends ClientTaskImplicits

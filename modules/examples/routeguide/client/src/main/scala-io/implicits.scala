@@ -22,7 +22,7 @@ import example.routeguide.protocol.Protocols._
 import example.routeguide.runtime._
 import example.routeguide.client.runtime._
 
-trait Implicits extends RouteGuide with ClientConf {
+trait ClientIOImplicits extends RouteGuide with ClientConf {
 
   implicit val routeGuideServiceClient: RouteGuideService.Client[IO] =
     RouteGuideService.client[IO](channelFor)
@@ -30,4 +30,4 @@ trait Implicits extends RouteGuide with ClientConf {
   implicit val routeGuideClientHandler: RouteGuideClientHandler[IO] =
     new RouteGuideClientHandler[IO]
 }
-object implicits extends Implicits
+object implicits extends ClientIOImplicits

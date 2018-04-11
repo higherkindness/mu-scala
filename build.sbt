@@ -212,8 +212,8 @@ lazy val `example-routeguide-client` = project
   .settings(moduleName := "frees-rpc-example-routeguide-client")
   .settings(
     Compile / unmanagedSourceDirectories ++= Seq(
-      baseDirectory.value / "src" / "main" / "io",
-      baseDirectory.value / "src" / "main" / "task"
+      baseDirectory.value / "src" / "main" / "scala-io",
+      baseDirectory.value / "src" / "main" / "scala-task"
     )
   )
   .settings(addCommandAlias("runClientIO", "runMain example.routeguide.client.io.ClientAppIO"))
