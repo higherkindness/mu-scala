@@ -41,6 +41,5 @@ If you want to delve deeper into [frees-rpc], we have a complete example at the 
 [scalameta]: https://github.com/scalameta/scalameta
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
-[]: https://github.com/frees-io/freestyle-rpc/modules/examples
 [Metrifier]: https://github.com/47deg/metrifier
 [frees-config]: http://frees.io/docs/patterns/config/
