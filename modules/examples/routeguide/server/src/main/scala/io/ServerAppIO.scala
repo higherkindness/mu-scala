@@ -14,6 +14,23 @@
  * limitations under the License.
  */
 
-package example.routeguide.server
+package example.routeguide.server.io
 
-class Server {}
+import cats.effect.IO
+import freestyle.rpc.server.implicits._
+import org.log4s._
+import example.routeguide.server.io.implicits._
+
+object ServerAppIO {
+
+  val logger = getLogger
+
+  def main(args: Array[String]): Unit = {
+
+    logger.info(s"Server is starting ...")
+
+    server[IO].unsafeRunSync()
+
+  }
+
+}

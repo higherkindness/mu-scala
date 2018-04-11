@@ -202,6 +202,7 @@ lazy val `example-routeguide-server` = project
   .dependsOn(`example-routeguide-runtime`)
   .dependsOn(server)
   .settings(moduleName := "frees-rpc-example-routeguide-server")
+  .settings(addCommandAlias("runServerIO", "runMain example.routeguide.server.io.ServerAppIO"))
   .disablePlugins(ScriptedPlugin)
 
 lazy val `example-routeguide-client` = project
