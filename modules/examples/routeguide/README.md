@@ -1,5 +1,5 @@
 
-# Routeguide-example
+# Route Guide Example
 
 This module shows a simple example using [freestyle-rpc](https://github.com/frees-io/freestyle-rpc), based on the Route Guide Demo (using Scala annotations for service definitions),
 from [this example in grpc-java](https://github.com/grpc/grpc-java/tree/v1.10.x/examples/src/main/java/io/grpc/examples/routeguide).
@@ -9,30 +9,20 @@ from [this example in grpc-java](https://github.com/grpc/grpc-java/tree/v1.10.x/
 Run server (interpreted to `cats.effect.IO` in this case):
 
 ```bash
-sbt example-routeguide-server/runServer
+sbt "project example-routeguide-server" "run"
 ```
 
 Run client interpreting to `cats.effect.IO`:
 
 ```bash
-sbt example-routeguide-client/runClientIO
+sbt "project example-routeguide-client" "runClientIO"
 ```
 
 Run client interpreting to `monix.eval.Task`:
 
 ```bash
-sbt example-routeguide-client/runClientTask
+sbt "project example-routeguide-client" "runClientTask"
 ```
-
-## Generating the IDL files
-
-```bash
-sbt example-routeguide-protocol/idlGen
-```
-
-The previous command will overwrite [this proto file](protocol/src/main/resources/proto/service.proto).
-
-(It will also generate [this Avro file](protocol/src/main/resources/avro/service.avpr) which will contain the messages but no RPC services since ours are annotated with `Protobuf`.)
 
 [comment]: # (Start Copyright)
 # Copyright
