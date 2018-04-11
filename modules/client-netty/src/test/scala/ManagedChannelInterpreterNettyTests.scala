@@ -39,7 +39,7 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
 
       val channelFor: ChannelFor = ChannelForSocketAddress(new InetSocketAddress(SC.host, 45455))
 
-      val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext(true))
+      val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext())
 
       val interpreter = new NettyChannelInterpreter(channelFor, channelConfigList)
 
@@ -75,7 +75,7 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
         NettySslContext(GrpcSslContexts.forClient.build),
         NettyFlowControlWindow(NettyChannelBuilder.DEFAULT_FLOW_CONTROL_WINDOW),
         NettyMaxHeaderListSize(GrpcUtil.DEFAULT_MAX_HEADER_LIST_SIZE),
-        NettyUsePlaintext(false),
+        NettyUsePlaintext(),
         NettyUseTransportSecurity,
         NettyKeepAliveTime(1, TimeUnit.MINUTES),
         NettyKeepAliveTimeout(1, TimeUnit.MINUTES),

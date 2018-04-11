@@ -4,6 +4,10 @@ pgpPassphrase := Some(getEnvVar("PGP_PASSPHRASE").getOrElse("").toCharArray)
 pgpPublicRing := file(s"$gpgFolder/pubring.gpg")
 pgpSecretRing := file(s"$gpgFolder/secring.gpg")
 
+////////////////
+//// COMMON ////
+////////////////
+
 lazy val common = project
   .in(file("modules/common"))
   .settings(moduleName := "frees-rpc-common")
@@ -17,6 +21,34 @@ lazy val internal = project
   .settings(moduleName := "frees-rpc-internal")
   .settings(internalSettings)
   .disablePlugins(ScriptedPlugin)
+
+lazy val testing = project
+  .in(file("modules/testing"))
+  .settings(moduleName := "frees-rpc-testing")
+  .settings(testingSettings)
+  .disablePlugins(ScriptedPlugin)
+
+lazy val ssl = project
+  .in(file("modules/ssl"))
+  .dependsOn(server % "test->test")
+  .dependsOn(`client-netty` % "compile->compile;test->test")
+  .settings(moduleName := "frees-rpc-netty-ssl")
+  .settings(nettySslSettings)
+  .disablePlugins(ScriptedPlugin)
+
+lazy val config = project
+  .in(file("modules/config"))
+  .dependsOn(common % "test->test")
+  .dependsOn(client % "compile->compile;test->test")
+  .dependsOn(server % "compile->compile;test->test")
+  .dependsOn(testing % "test->test")
+  .settings(moduleName := "frees-rpc-config")
+  .settings(configSettings)
+  .disablePlugins(ScriptedPlugin)
+
+////////////////
+//// CLIENT ////
+////////////////
 
 lazy val client = project
   .in(file("modules/client"))
@@ -41,6 +73,10 @@ lazy val `client-okhttp` = project
   .settings(clientOkHttpSettings)
   .disablePlugins(ScriptedPlugin)
 
+////////////////
+//// SERVER ////
+////////////////
+
 lazy val server = project
   .in(file("modules/server"))
   .dependsOn(common % "compile->compile;test->test")
@@ -51,21 +87,19 @@ lazy val server = project
   .settings(serverSettings)
   .disablePlugins(ScriptedPlugin)
 
-lazy val config = project
-  .in(file("modules/config"))
-  .dependsOn(common % "test->test")
-  .dependsOn(client % "compile->compile;test->test")
-  .dependsOn(server % "compile->compile;test->test")
-  .dependsOn(testing % "test->test")
-  .settings(moduleName := "frees-rpc-config")
-  .settings(configSettings)
-  .disablePlugins(ScriptedPlugin)
+//////////////////////
+//// INTERCEPTORS ////
+//////////////////////
 
 lazy val interceptors = project
   .in(file("modules/interceptors"))
   .settings(moduleName := "frees-rpc-interceptors")
   .settings(interceptorsSettings)
   .disablePlugins(ScriptedPlugin)
+
+////////////////////
+//// PROMETHEUS ////
+////////////////////
 
 lazy val `prometheus-shared` = project
   .in(file("modules/prometheus/shared"))
@@ -90,6 +124,10 @@ lazy val `prometheus-client` = project
   .settings(prometheusClientSettings)
   .disablePlugins(ScriptedPlugin)
 
+////////////////////
+//// DROPWIZARD ////
+////////////////////
+
 lazy val `dropwizard-server` = project
   .in(file("modules/dropwizard/server"))
   .dependsOn(`prometheus-server` % "compile->compile;test->test")
@@ -107,19 +145,9 @@ lazy val `dropwizard-client` = project
   .settings(dropwizardSettings)
   .disablePlugins(ScriptedPlugin)
 
-lazy val testing = project
-  .in(file("modules/testing"))
-  .settings(moduleName := "frees-rpc-testing")
-  .settings(testingSettings)
-  .disablePlugins(ScriptedPlugin)
-
-lazy val ssl = project
-  .in(file("modules/ssl"))
-  .dependsOn(server % "test->test")
-  .dependsOn(`client-netty` % "compile->compile;test->test")
-  .settings(moduleName := "frees-rpc-netty-ssl")
-  .settings(nettySslSettings)
-  .disablePlugins(ScriptedPlugin)
+////////////////
+//// IDLGEN ////
+////////////////
 
 lazy val `idlgen-core` = project
   .in(file("modules/idlgen/core"))
@@ -139,6 +167,58 @@ lazy val `idlgen-sbt` = project
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
   .settings(buildInfoPackage := "freestyle.rpc.idlgen")
+
+//////////////////
+//// EXAMPLES ////
+//////////////////
+
+////////////////////
+//// ROUTEGUIDE ////
+////////////////////
+
+lazy val `example-routeguide-protocol` = project
+  .in(file("modules/examples/routeguide/protocol"))
+  .dependsOn(client)
+  .settings(moduleName := "frees-rpc-example-routeguide-protocol")
+  .disablePlugins(ScriptedPlugin)
+
+lazy val `example-routeguide-runtime` = project
+  .in(file("modules/examples/routeguide/runtime"))
+  .settings(moduleName := "frees-rpc-example-routeguide-runtime")
+  .settings(exampleRouteguideRuntimeSettings)
+  .disablePlugins(ScriptedPlugin)
+
+lazy val `example-routeguide-common` = project
+  .in(file("modules/examples/routeguide/common"))
+  .dependsOn(`example-routeguide-protocol`)
+  .dependsOn(config)
+  .settings(moduleName := "frees-rpc-example-routeguide-common")
+  .settings(exampleRouteguideCommonSettings)
+  .disablePlugins(ScriptedPlugin)
+
+lazy val `example-routeguide-server` = project
+  .in(file("modules/examples/routeguide/server"))
+  .dependsOn(`example-routeguide-common`)
+  .dependsOn(`example-routeguide-runtime`)
+  .dependsOn(server)
+  .settings(moduleName := "frees-rpc-example-routeguide-server")
+  .disablePlugins(ScriptedPlugin)
+
+lazy val `example-routeguide-client` = project
+  .in(file("modules/examples/routeguide/client"))
+  .dependsOn(`example-routeguide-common`)
+  .dependsOn(`example-routeguide-runtime`)
+  .dependsOn(`client-netty`)
+  .settings(moduleName := "frees-rpc-example-routeguide-client")
+  .settings(
+    Compile / unmanagedSourceDirectories ++= Seq(
+      baseDirectory.value / "src" / "main" / "scala-io",
+      baseDirectory.value / "src" / "main" / "scala-task"
+    )
+  )
+  .settings(addCommandAlias("runClientIO", "runMain example.routeguide.client.io.ClientAppIO"))
+  .settings(addCommandAlias("runClientTask", "runMain example.routeguide.client.task.ClientAppTask"))
+  .disablePlugins(ScriptedPlugin)
 
 //////////////////////////
 //// MODULES REGISTRY ////
@@ -160,7 +240,12 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `dropwizard-client`,
   testing,
   ssl,
-  `idlgen-core`
+  `idlgen-core`,
+  `example-routeguide-protocol`,
+  `example-routeguide-common`,
+  `example-routeguide-runtime`,
+  `example-routeguide-server`,
+  `example-routeguide-client`
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =

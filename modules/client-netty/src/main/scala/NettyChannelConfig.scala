@@ -32,7 +32,7 @@ final case class NettyEventLoopGroup(eventLoopGroup: EventLoopGroup)    extends 
 final case class NettySslContext(sslContext: SslContext)                extends NettyChannelConfig
 final case class NettyFlowControlWindow(flowControlWindow: Int)         extends NettyChannelConfig
 final case class NettyMaxHeaderListSize(maxHeaderListSize: Int)         extends NettyChannelConfig
-final case class NettyUsePlaintext(skipNegotiation: Boolean)            extends NettyChannelConfig
+final case class NettyUsePlaintext()                                    extends NettyChannelConfig
 case object NettyUseTransportSecurity                                   extends NettyChannelConfig
 final case class NettyKeepAliveTime(keepAliveTime: Long, timeUnit: TimeUnit)
     extends NettyChannelConfig

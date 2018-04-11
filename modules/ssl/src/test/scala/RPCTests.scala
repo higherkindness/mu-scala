@@ -76,7 +76,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         createChannelFor,
         List(
           OverrideAuthority(TestUtils.TEST_SERVER_HOST),
-          NettyUsePlaintext(false),
+          NettyUsePlaintext(),
           NettyNegotiationType(NegotiationType.TLS),
           NettySslContext(clientSslContext)
         )
@@ -96,7 +96,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         createChannelFor,
         List(
           OverrideAuthority(TestUtils.TEST_SERVER_HOST),
-          NettyUsePlaintext(false),
+          NettyUsePlaintext(),
           NettyNegotiationType(NegotiationType.TLS)
         )
       )
@@ -118,7 +118,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         createChannelFor,
         List(
           OverrideAuthority(TestUtils.TEST_SERVER_HOST),
-          NettyUsePlaintext(true),
+          NettyUsePlaintext(),
           NettySslContext(clientSslContext)
         )
       )

@@ -6,6 +6,7 @@ import sbt._
 import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
 import sbtorgpolicies.templates.badges._
 import sbtrelease.ReleasePlugin.autoImport._
+
 import scala.language.reflectiveCalls
 import tut.TutPlugin.autoImport._
 
@@ -26,6 +27,7 @@ object ProjectPlugin extends AutoPlugin {
       val fs2ReactiveStreams: String = "0.5.1"
       val grpc: String               = "1.11.0"
       val log4s: String              = "1.6.1"
+      val logback: String            = "1.2.3"
       val nettySSL: String           = "2.0.8.Final"
       val pbdirect: String           = "0.1.0"
       val prometheus: String         = "0.3.0"
@@ -135,6 +137,22 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         "com.julianpeeters" %% "avrohugger-core" % V.avrohugger,
         %%("circe-generic", V.circe)
+      )
+    )
+
+    lazy val exampleRouteguideRuntimeSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("monix")
+      )
+    )
+
+    lazy val exampleRouteguideCommonSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("circe-core", V.circe),
+        %%("circe-generic", V.circe),
+        %%("circe-parser", V.circe),
+        %%("log4s", V.log4s),
+        %("logback-classic", V.logback)
       )
     )
 
