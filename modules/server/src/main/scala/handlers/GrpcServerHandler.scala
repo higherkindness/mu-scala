@@ -27,16 +27,15 @@ import scala.concurrent.duration.TimeUnit
 
 class GrpcServerHandler[F[_]: Applicative] extends GrpcServer.Handler[GrpcServerOps[F, ?]] {
 
-  def start: GrpcServerOps[F, Server] = {
-
+  def start: GrpcServerOps[F, Server] = captureWithServer { server =>
     Runtime.getRuntime.addShutdownHook(new Thread() {
       override def run(): Unit = {
-        shutdown
+        server.shutdown()
         (): Unit
       }
     })
 
-    captureWithServer(_.start())
+    server.start()
   }
 
   def getPort: GrpcServerOps[F, Int] = captureWithServer(_.getPort)
