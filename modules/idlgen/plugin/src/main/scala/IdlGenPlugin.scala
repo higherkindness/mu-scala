@@ -48,8 +48,12 @@ object IdlGenPlugin extends AutoPlugin {
         "The IDL target directory, where the `idlGen` task will write the generated files " +
           "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on freestyle-rpc service definitions.")
 
-    lazy val srcGenSourceDir: SettingKey[File] =
-      settingKey[File]("The IDL directory, where your IDL definitions are placed.")
+    lazy val srcGenSourceDir: SettingKey[Seq[File]] =
+      settingKey[Seq[File]]("The IDL directory, where your IDL definitions are placed.")
+
+    lazy val srcGenSourceFromJarsDir: SettingKey[File] =
+      settingKey[File]("The IDL from jars directory, where your IDL definitions" +
+          " extracted from jars are placed.")
 
     lazy val srcJarNames: SettingKey[Seq[String]] =
       settingKey[Seq[String]](
@@ -72,7 +76,8 @@ object IdlGenPlugin extends AutoPlugin {
     idlType := "(missing arg)",
     idlGenSourceDir := (Compile / sourceDirectory).value,
     idlGenTargetDir := (Compile / resourceManaged).value,
-    srcGenSourceDir := (Compile / resourceDirectory).value,
+    srcGenSourceFromJarsDir := idlGenTargetDir.value / idlType.value,
+    srcGenSourceDir := Seq((Compile / resourceDirectory).value, srcGenSourceFromJarsDir.value),
     srcJarNames := Seq.empty,
     srcGenTargetDir := (Compile / sourceManaged).value,
     genOptions := Seq.empty
@@ -96,7 +101,7 @@ object IdlGenPlugin extends AutoPlugin {
         Def
           .sequential(Def.task {
             (dependencyClasspath in Compile).value.map(entry =>
-              extractIDLDefinitionsFromJar(entry, srcJarNames.value, srcGenSourceDir.value))
+              extractIDLDefinitionsFromJar(entry, srcJarNames.value, srcGenSourceFromJarsDir.value))
           }, srcGen)
           .value
       }
