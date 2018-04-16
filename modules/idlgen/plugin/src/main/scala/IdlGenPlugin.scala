@@ -54,8 +54,6 @@ object IdlGenPlugin extends AutoPlugin {
           "Protobuf, Avro or AvroWithSchema are the current supported serialization types. " +
           "By default, the serialization type is 'Avro'.")
 
-    lazy val srcGenSourceDir: SettingKey[File] =
-      settingKey[File]("The IDL directory, where your IDL definitions are placed.")
     lazy val srcGenSourceDir: SettingKey[Seq[File]] =
       settingKey[Seq[File]]("The IDL directory, where your IDL definitions are placed.")
 
@@ -88,7 +86,6 @@ object IdlGenPlugin extends AutoPlugin {
     srcGenSourceFromJarsDir := idlGenTargetDir.value / idlType.value,
     srcGenSourceDir := Seq((Compile / resourceDirectory).value, srcGenSourceFromJarsDir.value),
     srcJarNames := Seq.empty,
-    srcGenSourceDir := (Compile / resourceDirectory).value,
     srcGenTargetDir := (Compile / sourceManaged).value,
     genOptions := Seq.empty
   )
