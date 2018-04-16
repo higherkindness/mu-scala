@@ -17,7 +17,7 @@ Add the following line to _project/plugins.sbt_:
 [comment]: # (Start Replace)
 
 ```scala
-addSbtPlugin("io.frees" % "sbt-frees-rpc-idlgen" % "0.13.1")
+addSbtPlugin("io.frees" % "sbt-frees-rpc-idlgen" % "0.13.2")
 ```
 
 [comment]: # (End Replace)
@@ -225,6 +225,7 @@ sourceGenerators in Compile += (srcGenFromJars in Compile).taskValue)
 Just like `idlGen`, `srcGen` and `srcGenFromJars` has some configurable settings:
 
 * **`idlType`**: the type of IDL to generate from, currently only `avro`.
+* **`srcGenSerializationType`**: the serialization type when generating Scala sources from the IDL definitions. `Protobuf`, `Avro` or `AvroWithSchema` are the current supported serialization types. By default, the serialization type is `Avro`.
 * **`srcJarNames`**: the list of jar names containing the IDL definitions that will be used at compilation time by `srcGenFromJars` to generate the Scala Sources. By default, this sequence is empty.
 * **`srcGenSourceDir`**: the IDL source base directory, where your IDL files are placed. By default: `Compile / resourceDirectory`, typically `src/main/resources/`.
 * **`srcGenTargetDir`**: the Scala target base directory, where the `srcGen` task will write the Scala files in subdirectories/packages based on the namespaces of the IDL files. By default: `Compile / sourceManaged`, typically `target/scala-2.12/src_managed/main/`.

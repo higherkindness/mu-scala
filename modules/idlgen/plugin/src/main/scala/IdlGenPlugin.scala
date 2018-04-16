@@ -48,6 +48,14 @@ object IdlGenPlugin extends AutoPlugin {
         "The IDL target directory, where the `idlGen` task will write the generated files " +
           "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on freestyle-rpc service definitions.")
 
+    lazy val srcGenSerializationType: SettingKey[String] =
+      settingKey[String](
+        "The serialization type when generating Scala sources from the IDL definitions." +
+          "Protobuf, Avro or AvroWithSchema are the current supported serialization types. " +
+          "By default, the serialization type is 'Avro'.")
+
+    lazy val srcGenSourceDir: SettingKey[File] =
+      settingKey[File]("The IDL directory, where your IDL definitions are placed.")
     lazy val srcGenSourceDir: SettingKey[Seq[File]] =
       settingKey[Seq[File]]("The IDL directory, where your IDL definitions are placed.")
 
@@ -76,9 +84,11 @@ object IdlGenPlugin extends AutoPlugin {
     idlType := "(missing arg)",
     idlGenSourceDir := (Compile / sourceDirectory).value,
     idlGenTargetDir := (Compile / resourceManaged).value,
+    srcGenSerializationType := "Avro",
     srcGenSourceFromJarsDir := idlGenTargetDir.value / idlType.value,
     srcGenSourceDir := Seq((Compile / resourceDirectory).value, srcGenSourceFromJarsDir.value),
     srcJarNames := Seq.empty,
+    srcGenSourceDir := (Compile / resourceDirectory).value,
     srcGenTargetDir := (Compile / sourceManaged).value,
     genOptions := Seq.empty
   )
@@ -88,12 +98,14 @@ object IdlGenPlugin extends AutoPlugin {
       idlGen := idlGenTask(
         IdlGenApplication,
         idlType.value,
+        srcGenSerializationType.value,
         genOptions.value,
         idlGenTargetDir.value,
         target.value / "idlGen")(idlGenSourceDir.value.allPaths.get.toSet).toSeq,
       srcGen := idlGenTask(
         SrcGenApplication,
         idlType.value,
+        srcGenSerializationType.value,
         genOptions.value,
         srcGenTargetDir.value,
         target.value / "srcGen")(srcGenSourceDir.value.allPaths.get.toSet).toSeq,
@@ -111,12 +123,13 @@ object IdlGenPlugin extends AutoPlugin {
   private def idlGenTask(
       generator: GeneratorApplication[_],
       idlType: String,
+      serializationType: String,
       options: Seq[String],
       targetDir: File,
       cacheDir: File): Set[File] => Set[File] =
     FileFunction.cached(cacheDir, FilesInfo.lastModified, FilesInfo.exists) {
       (inputFiles: Set[File]) =>
-        generator.generateFrom(idlType, inputFiles, targetDir, options: _*).toSet
+        generator.generateFrom(idlType, serializationType, inputFiles, targetDir, options: _*).toSet
     }
 
   private def extractIDLDefinitionsFromJar(

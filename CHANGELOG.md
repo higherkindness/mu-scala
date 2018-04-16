@@ -1,5 +1,15 @@
 # Changelog
 
+## 04/10/2018 - Version 0.13.2
+
+Release changes:
+
+* Avro Messages Serialized With Schemas ([#215](https://github.com/frees-io/freestyle-rpc/pull/215))
+* Spins up gRPC Servers forName ([#230](https://github.com/frees-io/freestyle-rpc/pull/230))
+* SBT - Adds AvroWithSchema Support ([#233](https://github.com/frees-io/freestyle-rpc/pull/233))
+* Releases Freestyle RPC 0.13.2 ([#234](https://github.com/frees-io/freestyle-rpc/pull/234))
+
+
 ## 04/08/2018 - Version 0.13.1
 
 Release changes:

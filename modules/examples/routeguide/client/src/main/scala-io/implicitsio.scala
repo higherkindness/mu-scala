@@ -14,28 +14,20 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package example.routeguide.client.io
 
-import java.io.File
+import cats.effect.IO
+import example.routeguide.client.handlers.RouteGuideClientHandler
+import example.routeguide.protocol.Protocols._
+import example.routeguide.runtime._
+import example.routeguide.client.runtime._
 
-trait Generator {
+trait ClientIOImplicits extends RouteGuide with ClientConf {
 
-  def idlType: String
+  implicit val routeGuideServiceClient: RouteGuideService.Client[IO] =
+    RouteGuideService.client[IO](channelFor)
 
-  def generateFrom(
-      files: Set[File],
-      serializationType: String,
-      options: String*): Seq[(File, String, Seq[String])] =
-    inputFiles(files).flatMap(inputFile =>
-      generateFrom(inputFile, serializationType, options: _*).map {
-        case (outputPath, output) =>
-          (inputFile, outputPath, output)
-    })
-
-  protected def inputFiles(files: Set[File]): Seq[File]
-
-  protected def generateFrom(
-      inputFile: File,
-      serializationType: String,
-      options: String*): Option[(String, Seq[String])]
+  implicit val routeGuideClientHandler: RouteGuideClientHandler[IO] =
+    new RouteGuideClientHandler[IO]
 }
+object implicits extends ClientIOImplicits

@@ -46,23 +46,37 @@ object AvroSrcGenerator extends SrcGenerator {
 
   // We must process all inputs including imported files from outside our initial fileset,
   // so we then reduce our output to that based on this fileset
-  override def generateFrom(files: Set[File], options: String*): Seq[(File, String, Seq[String])] =
-    super.generateFrom(files, options: _*).filter(output => files.contains(output._1))
+  override def generateFrom(
+      files: Set[File],
+      serializationType: String,
+      options: String*): Seq[(File, String, Seq[String])] =
+    super
+      .generateFrom(files, serializationType: String, options: _*)
+      .filter(output => files.contains(output._1))
 
-  def generateFrom(inputFile: File, options: String*): Option[(String, Seq[String])] =
-    generateFrom(
+  def generateFrom(
+      inputFile: File,
+      serializationType: String,
+      options: String*): Option[(String, Seq[String])] =
+    generateFromSchemaProtocols(
       mainGenerator.fileParser
         .getSchemaOrProtocols(inputFile, mainGenerator.format, mainGenerator.classStore),
+      serializationType,
       options)
 
-  def generateFrom(input: String, options: String*): Option[(String, Seq[String])] =
-    generateFrom(
+  def generateFrom(
+      input: String,
+      serializationType: String,
+      options: String*): Option[(String, Seq[String])] =
+    generateFromSchemaProtocols(
       mainGenerator.stringParser
         .getSchemaOrProtocols(input, mainGenerator.schemaStore),
+      serializationType,
       options)
 
-  private def generateFrom(
+  private def generateFromSchemaProtocols(
       schemasOrProtocols: List[Either[Schema, Protocol]],
+      serializationType: String,
       options: Seq[String]): Option[(String, Seq[String])] =
     Some(schemasOrProtocols)
       .filter(_.nonEmpty)
@@ -70,9 +84,12 @@ object AvroSrcGenerator extends SrcGenerator {
         case Right(p) => Some(p)
         case _        => None
       })
-      .map(generateFrom(_, options))
+      .map(generateFrom(_, serializationType, options))
 
-  def generateFrom(protocol: Protocol, options: Seq[String]): (String, Seq[String]) = {
+  def generateFrom(
+      protocol: Protocol,
+      serializationType: String,
+      options: Seq[String]): (String, Seq[String]) = {
 
     val outputPath =
       s"${protocol.getNamespace.replace('.', '/')}/${protocol.getName}$ScalaFileExtension"
@@ -93,7 +110,7 @@ object AvroSrcGenerator extends SrcGenerator {
     val messageLines = schemaLines.tail.map(line =>
       if (line.contains("case class")) s"@message $line" else line) :+ "" // note: can be "final case class"
 
-    val rpcAnnotation = s"  @rpc(${("Avro" +: options).mkString(", ")})"
+    val rpcAnnotation = s"  @rpc(${(serializationType +: options).mkString(", ")})"
     val requestLines = protocol.getMessages.asScala.toSeq.flatMap {
       case (name, message) =>
         val comment = Seq(Option(message.getDoc).map(doc => s"  /** $doc */")).flatten

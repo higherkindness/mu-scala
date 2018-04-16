@@ -33,16 +33,25 @@ class SrcGenTests extends RpcBaseTestSuite {
         "/avro/GreeterService.avdl",
         "/avro/MyGreeterService.scala",
         "foo/bar/MyGreeterService.scala")
+
+    "generate correct Scala classes from .avdl for AvroWithSchema serialization type" in
+      test(
+        "/avro/GreeterService.avdl",
+        "/avro/MyGreeterWithSchemaService.scala",
+        "foo/bar/MyGreeterService.scala",
+        "AvroWithSchema")
   }
 
   private def test(
       inputResourcePath: String,
       outputResourcePath: String,
-      outputFilePath: String): Unit = {
+      outputFilePath: String,
+      serializationType: String = "Avro"): Unit = {
     val expectedOutput = resource(outputResourcePath).getLines.toList
       .dropWhile(line => line.startsWith("/*") || line.startsWith(" *"))
       .tail
-    val output = AvroSrcGenerator.generateFrom(resource(inputResourcePath).mkString, "Gzip")
+    val output =
+      AvroSrcGenerator.generateFrom(resource(inputResourcePath).mkString, serializationType, "Gzip")
     output should not be empty
     val (filePath, contents) = output.get
     filePath shouldBe outputFilePath

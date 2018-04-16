@@ -29,7 +29,10 @@ trait IdlGenerator extends Generator {
   def inputFiles(files: Set[File]): Seq[File] =
     files.filter(_.getName.endsWith(ScalaFileExtension)).toSeq
 
-  def generateFrom(inputFile: File, options: String*): Option[(String, Seq[String])] = {
+  def generateFrom(
+      inputFile: File,
+      serializationType: String,
+      options: String*): Option[(String, Seq[String])] = {
     val inputName   = inputFile.getName.replaceAll(ScalaFileExtension, "")
     val definitions = ScalaParser.parse(inputFile.parse[Source].get, inputName)
     generateFrom(definitions).map(output => s"$outputSubdir/$inputName$fileExtension" -> output)

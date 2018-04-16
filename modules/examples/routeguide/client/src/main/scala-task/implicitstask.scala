@@ -14,28 +14,21 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package example.routeguide.client.task
 
-import java.io.File
+import example.routeguide.client.handlers.RouteGuideClientHandler
+import example.routeguide.protocol.Protocols._
+import example.routeguide.runtime._
+import example.routeguide.client.runtime._
+import monix.eval.Task
 
-trait Generator {
+trait ClientTaskImplicits extends RouteGuide with ClientConf {
 
-  def idlType: String
+  implicit val routeGuideServiceClient: RouteGuideService.Client[Task] =
+    RouteGuideService.client[Task](channelFor)
 
-  def generateFrom(
-      files: Set[File],
-      serializationType: String,
-      options: String*): Seq[(File, String, Seq[String])] =
-    inputFiles(files).flatMap(inputFile =>
-      generateFrom(inputFile, serializationType, options: _*).map {
-        case (outputPath, output) =>
-          (inputFile, outputPath, output)
-    })
-
-  protected def inputFiles(files: Set[File]): Seq[File]
-
-  protected def generateFrom(
-      inputFile: File,
-      serializationType: String,
-      options: String*): Option[(String, Seq[String])]
+  implicit val routeGuideClientHandler: RouteGuideClientHandler[Task] =
+    new RouteGuideClientHandler[Task]
 }
+
+object implicits extends ClientTaskImplicits
