@@ -18,12 +18,27 @@ package freestyle.rpc
 package internal
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
-import freestyle.rpc.protocol._
+
 import _root_.io.grpc.MethodDescriptor.Marshaller
+import com.google.common.io.ByteStreams
+import freestyle.rpc.protocol._
+import freestyle.rpc.internal.util.BigDecimalUtil
 
 object encoders {
 
-  object pbd {
+  trait Marshallers {
+
+    implicit val bigDecimalMarshaller: Marshaller[BigDecimal] = new Marshaller[BigDecimal] {
+      override def stream(value: BigDecimal): InputStream =
+        new ByteArrayInputStream(BigDecimalUtil.bigDecimalToByte(value))
+
+      override def parse(stream: InputStream): BigDecimal =
+        BigDecimalUtil.byteToBigDecimal(ByteStreams.toByteArray(stream))
+    }
+
+  }
+
+  object pbd extends Marshallers {
 
     import pbdirect._
 
@@ -38,7 +53,7 @@ object encoders {
       }
   }
 
-  object avro {
+  object avro extends Marshallers {
 
     import com.sksamuel.avro4s._
 
@@ -70,7 +85,7 @@ object encoders {
       }
   }
 
-  object avrowithschema {
+  object avrowithschema extends Marshallers {
 
     import com.sksamuel.avro4s._
     import org.apache.avro.file.DataFileStream
