@@ -39,6 +39,12 @@ object IdlGenPlugin extends AutoPlugin {
     lazy val idlType: SettingKey[String] =
       settingKey[String]("The IDL type to work with, such as avro or proto")
 
+    lazy val srcGenSerializationType: SettingKey[String] =
+      settingKey[String](
+        "The serialization type when generating Scala sources from the IDL definitions." +
+          "Protobuf, Avro or AvroWithSchema are the current supported serialization types. " +
+          "By default, the serialization type is 'Avro'.")
+
     lazy val idlGenSourceDir: SettingKey[File] =
       settingKey[File](
         "The Scala source directory, where your freestyle-rpc service definitions are placed.")
@@ -48,18 +54,17 @@ object IdlGenPlugin extends AutoPlugin {
         "The IDL target directory, where the `idlGen` task will write the generated files " +
           "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on freestyle-rpc service definitions.")
 
-    lazy val srcGenSerializationType: SettingKey[String] =
-      settingKey[String](
-        "The serialization type when generating Scala sources from the IDL definitions." +
-          "Protobuf, Avro or AvroWithSchema are the current supported serialization types. " +
-          "By default, the serialization type is 'Avro'.")
-
-    lazy val srcGenSourceDirs : SettingKey[Seq[File]] =
-      settingKey[Seq[File]]("The IDL directories, where your IDL definitions are placed.")
-
     lazy val srcGenSourceFromJarsDir: SettingKey[File] =
-      settingKey[File]("The IDL from jars directory, where your IDL definitions" +
+      settingKey[File](
+        "The IDL from jars directory, where your IDL definitions" +
           " extracted from jars are placed.")
+
+    @deprecated("This settings is deprecated in favor of srcGenSourceDirs", "0.14.0")
+    lazy val srcGenSourceDir: SettingKey[File] =
+      settingKey[File]("The IDL directory, where your IDL definitions are placed.")
+
+    lazy val srcGenSourceDirs: SettingKey[Seq[File]] =
+      settingKey[Seq[File]]("The IDL directories, where your IDL definitions are placed.")
 
     lazy val srcJarNames: SettingKey[Seq[String]] =
       settingKey[Seq[String]](
@@ -80,11 +85,12 @@ object IdlGenPlugin extends AutoPlugin {
 
   lazy val defaultSettings: Seq[Def.Setting[_]] = Seq(
     idlType := "(missing arg)",
+    srcGenSerializationType := "Avro",
     idlGenSourceDir := (Compile / sourceDirectory).value,
     idlGenTargetDir := (Compile / resourceManaged).value,
     srcGenSourceFromJarsDir := idlGenTargetDir.value / idlType.value,
-    srcGenSourceDirs := Seq((Compile / resourceDirectory).value, srcGenSourceFromJarsDir.value),
-    srcGenSerializationType := "Avro",
+    srcGenSourceDir := (Compile / resourceDirectory).value,
+    srcGenSourceDirs := Seq(srcGenSourceDir.value, srcGenSourceFromJarsDir.value),
     srcJarNames := Seq.empty,
     srcGenTargetDir := (Compile / sourceManaged).value,
     genOptions := Seq.empty
