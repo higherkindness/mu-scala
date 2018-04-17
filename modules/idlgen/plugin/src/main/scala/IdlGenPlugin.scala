@@ -88,7 +88,7 @@ object IdlGenPlugin extends AutoPlugin {
     srcGenSerializationType := "Avro",
     idlGenSourceDir := (Compile / sourceDirectory).value,
     idlGenTargetDir := (Compile / resourceManaged).value,
-    srcGenSourceFromJarsDir := idlGenTargetDir.value / idlType.value,
+    srcGenSourceFromJarsDir := (Compile / resourceManaged).value / idlType.value,
     srcGenSourceDir := (Compile / resourceDirectory).value,
     srcGenSourceDirs := Seq(srcGenSourceDir.value, srcGenSourceFromJarsDir.value),
     srcJarNames := Seq.empty,
