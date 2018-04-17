@@ -56,8 +56,7 @@ object IdlGenPlugin extends AutoPlugin {
 
     lazy val srcGenSourceFromJarsDir: SettingKey[File] =
       settingKey[File](
-        "The IDL from jars directory, where your IDL definitions" +
-          " extracted from jars are placed.")
+        "The list of directories where your IDL files are placed")
 
     @deprecated("This settings is deprecated in favor of srcGenSourceDirs", "0.14.0")
     lazy val srcGenSourceDir: SettingKey[File] =
