@@ -54,8 +54,12 @@ object IdlGenPlugin extends AutoPlugin {
           "Protobuf, Avro or AvroWithSchema are the current supported serialization types. " +
           "By default, the serialization type is 'Avro'.")
 
-    lazy val srcGenSourceDir: SettingKey[File] =
-      settingKey[File]("The IDL directory, where your IDL definitions are placed.")
+    lazy val srcGenSourceDirs : SettingKey[Seq[File]] =
+      settingKey[Seq[File]]("The IDL directories, where your IDL definitions are placed.")
+
+    lazy val srcGenSourceFromJarsDir: SettingKey[File] =
+      settingKey[File]("The IDL from jars directory, where your IDL definitions" +
+          " extracted from jars are placed.")
 
     lazy val srcJarNames: SettingKey[Seq[String]] =
       settingKey[Seq[String]](
@@ -79,8 +83,9 @@ object IdlGenPlugin extends AutoPlugin {
     idlGenSourceDir := (Compile / sourceDirectory).value,
     idlGenTargetDir := (Compile / resourceManaged).value,
     srcGenSerializationType := "Avro",
+    srcGenSourceFromJarsDir := idlGenTargetDir.value / idlType.value,
+    srcGenSourceDirs := Seq((Compile / resourceDirectory).value, srcGenSourceFromJarsDir.value),
     srcJarNames := Seq.empty,
-    srcGenSourceDir := (Compile / resourceDirectory).value,
     srcGenTargetDir := (Compile / sourceManaged).value,
     genOptions := Seq.empty
   )
@@ -100,12 +105,12 @@ object IdlGenPlugin extends AutoPlugin {
         srcGenSerializationType.value,
         genOptions.value,
         srcGenTargetDir.value,
-        target.value / "srcGen")(srcGenSourceDir.value.allPaths.get.toSet).toSeq,
+        target.value / "srcGen")(srcGenSourceDirs.value.allPaths.get.toSet).toSeq,
       srcGenFromJars := {
         Def
           .sequential(Def.task {
             (dependencyClasspath in Compile).value.map(entry =>
-              extractIDLDefinitionsFromJar(entry, srcJarNames.value, srcGenSourceDir.value))
+              extractIDLDefinitionsFromJar(entry, srcJarNames.value, srcGenSourceFromJarsDir.value))
           }, srcGen)
           .value
       }
