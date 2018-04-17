@@ -41,6 +41,16 @@ class BigDecimalUtilTest extends WordSpec with Matchers with Checkers {
 
   "BigDecimalUtil" should {
 
+    "allow to convert BigDecimals for and from byte arrays" in {
+      check {
+        forAll { bd: BigDecimal =>
+          val array = BigDecimalUtil.bigDecimalToByte(bd)
+          BigDecimalUtil.byteToBigDecimal(array) shouldBe bd
+          BigDecimalUtil.byteToBigDecimal(array) == bd
+        }
+      }
+    }
+
     "allow to convert BigDecimals created from doubles for and from byte arrays" in {
       checkAll[Double](BigDecimal.decimal)
     }
