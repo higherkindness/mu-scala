@@ -233,9 +233,9 @@ Just like `idlGen`, `srcGen` and `srcGenFromJars` has some configurable settings
 * **`srcGenTargetDir`**: the Scala target base directory, where the `srcGen` task will write the Scala files in subdirectories/packages based on the namespaces of the IDL files. By default: `Compile / sourceManaged`, typically `target/scala-2.12/src_managed/main/`.
 * **`genOptions`**: additional options to add to the generated `@rpc` annotations, after the IDL type. Currently only supports `"Gzip"`.
 
-*Note*: regarding `srcGenSourceDirs`, all the directories configured as the source, will be distributed in the resulting jar artifact preserving the same folder structure as in the source.
-
 The source directory must exist, otherwise, the `srcGen` task will fail. Target directories will be created upon generation.
+
+*Note*: regarding `srcGenSourceDirs`, all the directories configured as the source, will be distributed in the resulting jar artifact preserving the same folder structure as in the source.
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
