@@ -1,0 +1,16 @@
+@namespace("foo.bar")
+protocol Domain {
+
+  record DomainRequest {
+    string arg1;
+    union { null, string } arg2;
+    array<string> arg3;
+  }
+
+  record DomainResponse {
+    string arg1;
+    union { null, string } arg2;
+    array<string>  arg3;
+  }
+
+}
