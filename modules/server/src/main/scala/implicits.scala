@@ -17,9 +17,9 @@
 package freestyle.rpc
 package server
 
-import cats.{Applicative, Apply}
-import cats.syntax.apply._
-import cats.syntax.functor._
+import cats.{Applicative, Monad}
+import cats.syntax.applicative._
+import cats.syntax.flatMap._
 import freestyle.rpc.internal.TaskImplicits
 import freestyle.rpc.server.handlers.GrpcServerHandler
 
@@ -32,8 +32,8 @@ trait ServerImplicits {
 
 trait Helpers {
 
-  def server[F[_]: Apply](implicit S: GrpcServer[F]): F[Unit] =
-    S.start() *> S.awaitTermination().void
+  def server[F[_]: Monad](implicit S: GrpcServer[F]): F[Unit] =
+    S.start().flatMap(_.awaitTermination().pure)
 
 }
 
