@@ -60,7 +60,8 @@ object IdlGenPlugin extends AutoPlugin {
           "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on freestyle-rpc service definitions.")
 
     lazy val srcGenSourceFromJarsDir: SettingKey[File] =
-      settingKey[File]("The list of directories where your IDL files are placed")
+      settingKey[File](
+        "The list of directories where your IDL files are placed")
 
     @deprecated("This settings is deprecated in favor of srcGenSourceDirs", "0.14.0")
     lazy val srcGenSourceDir: SettingKey[File] =
@@ -88,10 +89,10 @@ object IdlGenPlugin extends AutoPlugin {
 
   lazy val defaultSettings: Seq[Def.Setting[_]] = Seq(
     idlType := "(missing arg)",
+    srcGenSerializationType := "Avro",
     idlExtension := (if (idlType.value == "avro") "avdl"
                      else if (idlType.value == "proto") "proto"
                      else "unknown"),
-    srcGenSerializationType := "Avro",
     idlGenSourceDir := (Compile / sourceDirectory).value,
     idlGenTargetDir := (Compile / resourceManaged).value,
     srcGenSourceFromJarsDir := (Compile / resourceManaged).value / idlType.value,
