@@ -58,6 +58,8 @@ object Utils extends CommonUtils {
 
       @rpc(Protobuf, Gzip) def emptyParamResponseCompressed(empty: Empty.type): F[A]
 
+      @rpc(Protobuf) def bigDecimalParamResponse(bd: BigDecimal): F[BigDecimal]
+
       @rpc(Avro) def emptyAvro(empty: Empty.type): F[Empty.type]
 
       @rpc(AvroWithSchema) def emptyAvroWithSchema(empty: Empty.type): F[Empty.type]
@@ -82,6 +84,10 @@ object Utils extends CommonUtils {
 
       @rpc(AvroWithSchema, Gzip) def emptyAvroWithSchemaParamResponseCompressed(
           empty: Empty.type): F[A]
+
+      @rpc(Avro) def bigDecimalAvroParam(bd: BigDecimal): F[BigDecimal]
+
+      @rpc(AvroWithSchema) def bigDecimalAvroWithSchemaParam(bd: BigDecimal): F[BigDecimal]
 
       @rpc(Protobuf)
       @stream[ResponseStreaming.type]
@@ -130,23 +136,26 @@ object Utils extends CommonUtils {
   object client {
 
     @tagless(true)
-    trait MyRPCClient {
-      def notAllowed(b: Boolean): FS[C]
-      def empty: FS[Empty.type]
-      def emptyParam(a: A): FS[Empty.type]
-      def emptyParamResponse: FS[A]
-      def emptyAvro: FS[Empty.type]
-      def emptyAvroWithSchema: FS[Empty.type]
-      def emptyAvroParam(a: A): FS[Empty.type]
-      def emptyAvroWithSchemaParam(a: A): FS[Empty.type]
-      def emptyAvroParamResponse: FS[A]
-      def emptyAvroWithSchemaParamResponse: FS[A]
-      def u(x: Int, y: Int): FS[C]
-      def uws(x: Int, y: Int): FS[C]
-      def ss(a: Int, b: Int): FS[List[C]]
-      def cs(cList: List[C], bar: Int): FS[D]
-      def bs(eList: List[E]): FS[E]
-      def bsws(eList: List[E]): FS[E]
+    trait MyRPCClient[F[_]] {
+      def notAllowed(b: Boolean): F[C]
+      def empty: F[Empty.type]
+      def emptyParam(a: A): F[Empty.type]
+      def emptyParamResponse: F[A]
+      def bigDecimalParamResponse(bd: BigDecimal): F[BigDecimal]
+      def emptyAvro: F[Empty.type]
+      def emptyAvroWithSchema: F[Empty.type]
+      def emptyAvroParam(a: A): F[Empty.type]
+      def emptyAvroWithSchemaParam(a: A): F[Empty.type]
+      def emptyAvroParamResponse: F[A]
+      def emptyAvroWithSchemaParamResponse: F[A]
+      def bigDecimalAvroParam(bd: BigDecimal): F[BigDecimal]
+      def bigDecimalAvroWithSchemaParam(bd: BigDecimal): F[BigDecimal]
+      def u(x: Int, y: Int): F[C]
+      def uws(x: Int, y: Int): F[C]
+      def ss(a: Int, b: Int): F[List[C]]
+      def cs(cList: List[C], bar: Int): F[D]
+      def bs(eList: List[E]): F[E]
+      def bsws(eList: List[E]): F[E]
     }
 
   }
@@ -168,6 +177,8 @@ object Utils extends CommonUtils {
         def emptyParam(a: A): F[Empty.type] = Empty.pure
 
         def emptyParamResponse(empty: Empty.type): F[A] = a4.pure
+
+        def bigDecimalParamResponse(bd: BigDecimal): F[BigDecimal] = bd.pure
 
         def emptyAvro(empty: Empty.type): F[Empty.type] = Empty.pure
 
@@ -233,6 +244,10 @@ object Utils extends CommonUtils {
         def emptyAvroWithSchemaParamResponseCompressed(empty: Empty.type): F[A] =
           emptyAvroParamResponseCompressed(empty)
 
+        def bigDecimalAvroParam(bd: BigDecimal): F[BigDecimal] = bd.pure
+
+        def bigDecimalAvroWithSchemaParam(bd: BigDecimal): F[BigDecimal] = bd.pure
+
         def unaryCompressed(a: A): F[C] = unary(a)
 
         def unaryCompressedWithSchema(a: A): F[C] = unaryCompressed(a)
@@ -278,6 +293,9 @@ object Utils extends CommonUtils {
         override def emptyParamResponse: F[A] =
           client.emptyParamResponse(protocol.Empty)
 
+        override def bigDecimalParamResponse(bd: BigDecimal): F[BigDecimal] =
+          client.bigDecimalParamResponse(bd)
+
         override def emptyAvro: F[Empty.type] =
           client.emptyAvro(protocol.Empty)
 
@@ -295,6 +313,12 @@ object Utils extends CommonUtils {
 
         override def emptyAvroWithSchemaParamResponse: F[A] =
           client.emptyAvroWithSchemaParamResponse(protocol.Empty)
+
+        override def bigDecimalAvroParam(bd: BigDecimal): F[BigDecimal] =
+          client.bigDecimalAvroParam(bd)
+
+        override def bigDecimalAvroWithSchemaParam(bd: BigDecimal): F[BigDecimal] =
+          client.bigDecimalAvroWithSchemaParam(bd)
 
         override def u(x: Int, y: Int): F[C] =
           client.unary(A(x, y))
@@ -363,6 +387,9 @@ object Utils extends CommonUtils {
         override def emptyParamResponse: F[A] =
           client.emptyParamResponseCompressed(protocol.Empty)
 
+        override def bigDecimalParamResponse(bd: BigDecimal): F[BigDecimal] =
+          client.bigDecimalParamResponse(bd)
+
         override def emptyAvro: F[Empty.type] =
           client.emptyAvroCompressed(protocol.Empty)
 
@@ -380,6 +407,12 @@ object Utils extends CommonUtils {
 
         override def emptyAvroWithSchemaParamResponse: F[A] =
           client.emptyAvroWithSchemaParamResponseCompressed(protocol.Empty)
+
+        override def bigDecimalAvroParam(bd: BigDecimal): F[BigDecimal] =
+          client.bigDecimalAvroParam(bd)
+
+        override def bigDecimalAvroWithSchemaParam(bd: BigDecimal): F[BigDecimal] =
+          client.bigDecimalAvroWithSchemaParam(bd)
 
         override def u(x: Int, y: Int): F[C] =
           client.unaryCompressed(A(x, y))
