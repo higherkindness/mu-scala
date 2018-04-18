@@ -14,7 +14,7 @@ lazy val domain = project
     idlType := "avro",
     srcGenSourceDir := (Compile / resourceDirectory).value,
     srcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
-    sourceGenerators in Compile += (srcGen in Compile).taskValue,
+    sourceGenerators in Compile += (Compile / srcGen).taskValue,
     libraryDependencies ++= Seq(
       "com.chuusai" %% "shapeless" % "2.3.2"
     )
@@ -28,9 +28,9 @@ lazy val root = project
     resolvers += Resolver.bintrayRepo("beyondthelines", "maven"),
     idlType := "avro",
     srcJarNames := Seq("domain"),
-    srcGenSourceFromJarsDir := (Compile / sourceManaged).value / "avro",
+    srcGenIDLTargetDir := (Compile / sourceManaged).value / "avro",
     srcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
-    sourceGenerators in Compile += (srcGenFromJars in Compile).taskValue,
+    sourceGenerators in Compile += (Compile / srcGen).taskValue,
     libraryDependencies ++= Seq(
       "foo.bar" %% "domain" % "1.0.0",
       "io.frees" %% "frees-rpc-server" % sys.props("version")

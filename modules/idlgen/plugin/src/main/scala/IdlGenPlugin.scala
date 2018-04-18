@@ -20,6 +20,7 @@ import java.io.File
 
 import sbt.Keys._
 import sbt._
+import sbt.io.{Path, PathFinder}
 
 object IdlGenPlugin extends AutoPlugin {
 
@@ -33,11 +34,16 @@ object IdlGenPlugin extends AutoPlugin {
     lazy val srcGen: TaskKey[Seq[File]] =
       taskKey[Seq[File]]("Generates freestyle-rpc Scala files from IDL definitions")
 
+    @deprecated("This setting has been deprecated in favor of srcGen", "0.13.3")
     val srcGenFromJars =
       taskKey[Seq[File]]("Unzip IDL definitions from the given jar files")
 
     lazy val idlType: SettingKey[String] =
       settingKey[String]("The IDL type to work with, such as avro or proto")
+
+    lazy val idlExtension: SettingKey[String] =
+      settingKey[String](
+        "The IDL extension to work with, files with a different extension will be omitted. By default 'avdl' for avro and 'proto' for proto")
 
     lazy val srcGenSerializationType: SettingKey[String] =
       settingKey[String](
@@ -54,11 +60,7 @@ object IdlGenPlugin extends AutoPlugin {
         "The IDL target directory, where the `idlGen` task will write the generated files " +
           "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on freestyle-rpc service definitions.")
 
-    lazy val srcGenSourceFromJarsDir: SettingKey[File] =
-      settingKey[File](
-        "The list of directories where your IDL files are placed")
-
-    @deprecated("This settings is deprecated in favor of srcGenSourceDirs", "0.14.0")
+    @deprecated("This setting has been deprecated in favor of srcGenSourceDirs", "0.13.3")
     lazy val srcGenSourceDir: SettingKey[File] =
       settingKey[File]("The IDL directory, where your IDL definitions are placed.")
 
@@ -69,6 +71,10 @@ object IdlGenPlugin extends AutoPlugin {
       settingKey[Seq[String]](
         "The names of those jars containing IDL definitions that will be used at " +
           "compilation time to generate the Scala Sources. By default, this sequence is empty.")
+
+    lazy val srcGenIDLTargetDir: SettingKey[File] =
+      settingKey[File](
+        "The target directory where all the IDL files especified in 'srcGenSourceDirs' will be copied.")
 
     lazy val srcGenTargetDir: SettingKey[File] =
       settingKey[File](
@@ -84,13 +90,16 @@ object IdlGenPlugin extends AutoPlugin {
 
   lazy val defaultSettings: Seq[Def.Setting[_]] = Seq(
     idlType := "(missing arg)",
+    idlExtension := (if (idlType.value == "avro") "avdl"
+                     else if (idlType.value == "proto") "proto"
+                     else "unknown"),
     srcGenSerializationType := "Avro",
     idlGenSourceDir := (Compile / sourceDirectory).value,
     idlGenTargetDir := (Compile / resourceManaged).value,
-    srcGenSourceFromJarsDir := (Compile / resourceManaged).value / idlType.value,
     srcGenSourceDir := (Compile / resourceDirectory).value,
-    srcGenSourceDirs := Seq(srcGenSourceDir.value, srcGenSourceFromJarsDir.value),
     srcJarNames := Seq.empty,
+    srcGenSourceDirs := Seq((Compile / resourceDirectory).value),
+    srcGenIDLTargetDir := (Compile / resourceManaged).value / idlType.value,
     srcGenTargetDir := (Compile / sourceManaged).value,
     genOptions := Seq.empty
   )
@@ -104,23 +113,54 @@ object IdlGenPlugin extends AutoPlugin {
         genOptions.value,
         idlGenTargetDir.value,
         target.value / "idlGen")(idlGenSourceDir.value.allPaths.get.toSet).toSeq,
-      srcGen := idlGenTask(
-        SrcGenApplication,
-        idlType.value,
-        srcGenSerializationType.value,
-        genOptions.value,
-        srcGenTargetDir.value,
-        target.value / "srcGen")(srcGenSourceDirs.value.allPaths.get.toSet).toSeq,
-      srcGenFromJars := {
-        Def
-          .sequential(Def.task {
-            (dependencyClasspath in Compile).value.map(entry =>
-              extractIDLDefinitionsFromJar(entry, srcJarNames.value, srcGenSourceFromJarsDir.value))
-          }, srcGen)
-          .value
-      }
+      srcGen := Def
+        .sequential(
+          Def.task {
+            (Compile / dependencyClasspath).value.map(
+              entry =>
+                extractIDLDefinitionsFromJar(
+                  entry,
+                  srcJarNames.value,
+                  srcGenIDLTargetDir.value,
+                  idlExtension.value))
+          },
+          Def.task {
+            srcGenSourceDirs.value.toSet
+              .foreach { (f: File) =>
+                IO.copyDirectory(
+                  f,
+                  srcGenIDLTargetDir.value,
+                  CopyOptions(
+                    overwrite = true,
+                    preserveLastModified = true,
+                    preserveExecutable = true))
+              }
+          },
+          Def.task {
+            idlGenTask(
+              SrcGenApplication,
+              idlType.value,
+              srcGenSerializationType.value,
+              genOptions.value,
+              srcGenTargetDir.value,
+              target.value / "srcGen")(srcGenIDLTargetDir.value.allPaths.get.toSet).toSeq
+          }
+        )
+        .value,
+      srcGenFromJars := srcGen.value
     )
   }
+
+  lazy val packagingSettings: Seq[Def.Setting[_]] = Seq(
+    mappings in (Compile, packageSrc) ++= {
+      val allIDLDefinitions = ((Compile / srcGenIDLTargetDir).value ** "*") filter { _.isFile }
+      val idlMappings = allIDLDefinitions.get pair Path
+        .rebase((Compile / srcGenIDLTargetDir).value, (Compile / classDirectory).value)
+      IO.copy(idlMappings, overwrite = true, preserveLastModified = true, preserveExecutable = true)
+
+      idlMappings.map { case (f1, f2) => (f1, f2.getAbsolutePath) }
+    },
+  )
 
   private def idlGenTask(
       generator: GeneratorApplication[_],
@@ -137,15 +177,29 @@ object IdlGenPlugin extends AutoPlugin {
   private def extractIDLDefinitionsFromJar(
       classpathEntry: Attributed[File],
       jarNames: Seq[String],
-      target: File): File = {
+      target: File,
+      idlExtension: String): File = {
+
+    val nameFilter: NameFilter = new NameFilter {
+      override def accept(name: String): Boolean =
+        name.toLowerCase.endsWith("." + idlExtension)
+    }
+
     classpathEntry.get(artifact.key).fold((): Unit) { entryArtifact =>
       if (jarNames.exists(entryArtifact.name.startsWith)) {
         IO.withTemporaryDirectory { tmpDir =>
-          IO.unzip(classpathEntry.data, tmpDir)
-          IO.copyDirectory(
-            tmpDir,
-            target
-          )
+          if (classpathEntry.data.isDirectory) {
+            val sources = PathFinder(classpathEntry.data).allPaths pair Path
+              .rebase(classpathEntry.data, target)
+            IO.copy(
+              sources.filter(tuple => nameFilter.accept(tuple._2)),
+              overwrite = true,
+              preserveLastModified = true,
+              preserveExecutable = true)
+          } else {
+            IO.unzip(classpathEntry.data, tmpDir, nameFilter)
+            IO.copyDirectory(tmpDir, target)
+          }
         }
       }
     }
@@ -153,7 +207,7 @@ object IdlGenPlugin extends AutoPlugin {
   }
 
   override def projectSettings: Seq[Def.Setting[_]] =
-    defaultSettings ++ taskSettings ++ Seq(
+    defaultSettings ++ taskSettings ++ packagingSettings ++ Seq(
       libraryDependencies += "io.frees" %% "frees-rpc-idlgen-core" % freestyle.rpc.idlgen.BuildInfo.version
     )
 }
