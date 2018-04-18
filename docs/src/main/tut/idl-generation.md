@@ -234,7 +234,7 @@ The source directory must exist, otherwise, the `srcGen` task will fail. Target 
 
 *Note*: regarding `srcGenSourceDirs`, all the directories configured as the source, will be distributed in the resulting jar artifact preserving the same folder structure as in the source.
 
-The following piece of sbt settings is showing an example about how to set up an "IDL dependency" with another another artifact named `foo-domain`:
+The following example shows how to set up a dependency with another artifact or sbt module containing the IDL definitions (`foo-domain`):
 
 ```
 //...
@@ -242,7 +242,6 @@ The following piece of sbt settings is showing an example about how to set up an
   Seq(
       resolvers += Resolver.bintrayRepo("beyondthelines", "maven"),
       publishMavenStyle := true,
-      mappings in (Compile, packageBin) ~= { _.filter(!_._1.getName.endsWith(".class")) },
       idlType := "avro",
       srcGenSerializationType := "AvroWithSchema",
       srcJarNames := Seq("foo-domain"),
