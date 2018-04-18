@@ -1,0 +1,16 @@
+@namespace("foo.bar")
+protocol Protocol {
+
+  record ProtocolRequest {
+    string arg1;
+    union { null, string } arg2;
+    array<string> arg3;
+  }
+
+  record ProtocolResponse {
+    string arg1;
+    union { null, string } arg2;
+    array<string>  arg3;
+  }
+
+}

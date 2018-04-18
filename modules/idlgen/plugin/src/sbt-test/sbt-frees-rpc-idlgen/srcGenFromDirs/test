@@ -1,0 +1,9 @@
+> publishLocal
+$ exists target/scala-2.12/classes/domain/Domain.avdl
+$ exists target/scala-2.12/classes/protocol/Protocol.avdl
+$ exists target/scala-2.12/src_managed/main/compiled_avro/foo/bar/Domain.scala
+$ exists target/scala-2.12/src_managed/main/compiled_avro/foo/bar/Protocol.scala
+$ delete target/scala-2.12/classes/domain/Domain.avdl
+$ delete target/scala-2.12/classes/protocol/Protocol.avdl
+$ delete target/scala-2.12/src_managed/main/compiled_avro/foo/bar/Domain.scala
+$ delete target/scala-2.12/src_managed/main/compiled_avro/foo/bar/Protocol.scala

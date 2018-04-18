@@ -227,11 +227,15 @@ Just like `idlGen`, `srcGen` and `srcGenFromJars` has some configurable settings
 * **`idlType`**: the type of IDL to generate from, currently only `avro`.
 * **`srcGenSerializationType`**: the serialization type when generating Scala sources from the IDL definitions. `Protobuf`, `Avro` or `AvroWithSchema` are the current supported serialization types. By default, the serialization type is `Avro`.
 * **`srcJarNames`**: the list of jar names containing the IDL definitions that will be used at compilation time by `srcGenFromJars` to generate the Scala Sources. By default, this sequence is empty.
+* **`srcGenSourceFromJarsDir`**: the directory where the IDL files extracted from the different `jar` files will be placed.. By default is `(Compile / resourceManaged) / idlType`, typically `target/scala-2.12/src_managed/main/avro`
 * **`srcGenSourceDir`**: the IDL source base directory, where your IDL files are placed. By default: `Compile / resourceDirectory`, typically `src/main/resources/`.
+* **`srcGenSourceDirs`**: the list of directories where your IDL files are placed. By default, it contains `srcGenSourceDir.value` and `srcGenSourceFromJarsDir.value` folders.
 * **`srcGenTargetDir`**: the Scala target base directory, where the `srcGen` task will write the Scala files in subdirectories/packages based on the namespaces of the IDL files. By default: `Compile / sourceManaged`, typically `target/scala-2.12/src_managed/main/`.
 * **`genOptions`**: additional options to add to the generated `@rpc` annotations, after the IDL type. Currently only supports `"Gzip"`.
 
 The source directory must exist, otherwise, the `srcGen` task will fail. Target directories will be created upon generation.
+
+*Note*: regarding `srcGenSourceDirs`, all the directories configured as the source, will be distributed in the resulting jar artifact preserving the same folder structure as in the source.
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/

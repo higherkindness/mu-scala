@@ -39,6 +39,12 @@ object IdlGenPlugin extends AutoPlugin {
     lazy val idlType: SettingKey[String] =
       settingKey[String]("The IDL type to work with, such as avro or proto")
 
+    lazy val srcGenSerializationType: SettingKey[String] =
+      settingKey[String](
+        "The serialization type when generating Scala sources from the IDL definitions." +
+          "Protobuf, Avro or AvroWithSchema are the current supported serialization types. " +
+          "By default, the serialization type is 'Avro'.")
+
     lazy val idlGenSourceDir: SettingKey[File] =
       settingKey[File](
         "The Scala source directory, where your freestyle-rpc service definitions are placed.")
@@ -48,14 +54,16 @@ object IdlGenPlugin extends AutoPlugin {
         "The IDL target directory, where the `idlGen` task will write the generated files " +
           "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on freestyle-rpc service definitions.")
 
-    lazy val srcGenSerializationType: SettingKey[String] =
-      settingKey[String](
-        "The serialization type when generating Scala sources from the IDL definitions." +
-          "Protobuf, Avro or AvroWithSchema are the current supported serialization types. " +
-          "By default, the serialization type is 'Avro'.")
+    lazy val srcGenSourceFromJarsDir: SettingKey[File] =
+      settingKey[File](
+        "The list of directories where your IDL files are placed")
 
+    @deprecated("This settings is deprecated in favor of srcGenSourceDirs", "0.14.0")
     lazy val srcGenSourceDir: SettingKey[File] =
       settingKey[File]("The IDL directory, where your IDL definitions are placed.")
+
+    lazy val srcGenSourceDirs: SettingKey[Seq[File]] =
+      settingKey[Seq[File]]("The IDL directories, where your IDL definitions are placed.")
 
     lazy val srcJarNames: SettingKey[Seq[String]] =
       settingKey[Seq[String]](
@@ -76,11 +84,13 @@ object IdlGenPlugin extends AutoPlugin {
 
   lazy val defaultSettings: Seq[Def.Setting[_]] = Seq(
     idlType := "(missing arg)",
+    srcGenSerializationType := "Avro",
     idlGenSourceDir := (Compile / sourceDirectory).value,
     idlGenTargetDir := (Compile / resourceManaged).value,
-    srcGenSerializationType := "Avro",
-    srcJarNames := Seq.empty,
+    srcGenSourceFromJarsDir := (Compile / resourceManaged).value / idlType.value,
     srcGenSourceDir := (Compile / resourceDirectory).value,
+    srcGenSourceDirs := Seq(srcGenSourceDir.value, srcGenSourceFromJarsDir.value),
+    srcJarNames := Seq.empty,
     srcGenTargetDir := (Compile / sourceManaged).value,
     genOptions := Seq.empty
   )
@@ -100,12 +110,12 @@ object IdlGenPlugin extends AutoPlugin {
         srcGenSerializationType.value,
         genOptions.value,
         srcGenTargetDir.value,
-        target.value / "srcGen")(srcGenSourceDir.value.allPaths.get.toSet).toSeq,
+        target.value / "srcGen")(srcGenSourceDirs.value.allPaths.get.toSet).toSeq,
       srcGenFromJars := {
         Def
           .sequential(Def.task {
             (dependencyClasspath in Compile).value.map(entry =>
-              extractIDLDefinitionsFromJar(entry, srcJarNames.value, srcGenSourceDir.value))
+              extractIDLDefinitionsFromJar(entry, srcJarNames.value, srcGenSourceFromJarsDir.value))
           }, srcGen)
           .value
       }
