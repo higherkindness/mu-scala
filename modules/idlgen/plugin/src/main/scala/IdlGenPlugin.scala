@@ -34,6 +34,7 @@ object IdlGenPlugin extends AutoPlugin {
     lazy val srcGen: TaskKey[Seq[File]] =
       taskKey[Seq[File]]("Generates freestyle-rpc Scala files from IDL definitions")
 
+    @deprecated("This setting has been deprecated in favor of srcGen", "0.13.3")
     val srcGenFromJars =
       taskKey[Seq[File]]("Unzip IDL definitions from the given jar files")
 
@@ -59,10 +60,7 @@ object IdlGenPlugin extends AutoPlugin {
         "The IDL target directory, where the `idlGen` task will write the generated files " +
           "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on freestyle-rpc service definitions.")
 
-    lazy val srcGenSourceFromJarsDir: SettingKey[File] =
-      settingKey[File]("The list of directories where your IDL files are placed")
-
-    @deprecated("This settings is deprecated in favor of srcGenSourceDirs", "0.14.0")
+    @deprecated("This setting has been deprecated in favor of srcGenSourceDirs", "0.13.3")
     lazy val srcGenSourceDir: SettingKey[File] =
       settingKey[File]("The IDL directory, where your IDL definitions are placed.")
 
@@ -73,6 +71,10 @@ object IdlGenPlugin extends AutoPlugin {
       settingKey[Seq[String]](
         "The names of those jars containing IDL definitions that will be used at " +
           "compilation time to generate the Scala Sources. By default, this sequence is empty.")
+
+    lazy val srcGenIDLTargetDir: SettingKey[File] =
+      settingKey[File](
+        "The target directory where all the IDL files especified in 'srcGenSourceDirs' will be copied.")
 
     lazy val srcGenTargetDir: SettingKey[File] =
       settingKey[File](
@@ -94,10 +96,10 @@ object IdlGenPlugin extends AutoPlugin {
     srcGenSerializationType := "Avro",
     idlGenSourceDir := (Compile / sourceDirectory).value,
     idlGenTargetDir := (Compile / resourceManaged).value,
-    srcGenSourceFromJarsDir := (Compile / resourceManaged).value / idlType.value,
     srcGenSourceDir := (Compile / resourceDirectory).value,
-    srcGenSourceDirs := Seq(srcGenSourceDir.value, srcGenSourceFromJarsDir.value),
     srcJarNames := Seq.empty,
+    srcGenSourceDirs := Seq((Compile / resourceDirectory).value),
+    srcGenIDLTargetDir := (Compile / resourceManaged).value / idlType.value,
     srcGenTargetDir := (Compile / sourceManaged).value,
     genOptions := Seq.empty
   )
@@ -111,29 +113,41 @@ object IdlGenPlugin extends AutoPlugin {
         genOptions.value,
         idlGenTargetDir.value,
         target.value / "idlGen")(idlGenSourceDir.value.allPaths.get.toSet).toSeq,
-      srcGen := idlGenTask(
-        SrcGenApplication,
-        idlType.value,
-        srcGenSerializationType.value,
-        genOptions.value,
-        srcGenTargetDir.value,
-        target.value / "srcGen")(srcGenSourceDirs.value.allPaths.get.toSet).toSeq,
-      srcGenFromJars := {
-        Def
-          .sequential(
-            Def.task {
-              (dependencyClasspath in Compile).value.map(
-                entry =>
-                  extractIDLDefinitionsFromJar(
-                    entry,
-                    srcJarNames.value,
-                    srcGenSourceFromJarsDir.value,
-                    idlExtension.value))
-            },
-            srcGen
-          )
-          .value
-      }
+      srcGen := Def
+        .sequential(
+          Def.task {
+            (dependencyClasspath in Compile).value.map(
+              entry =>
+                extractIDLDefinitionsFromJar(
+                  entry,
+                  srcJarNames.value,
+                  srcGenIDLTargetDir.value,
+                  idlExtension.value))
+          },
+          Def.task {
+            srcGenSourceDirs.value.toSet
+              .foreach { (f: File) =>
+                IO.copyDirectory(
+                  f,
+                  srcGenIDLTargetDir.value,
+                  CopyOptions(
+                    overwrite = true,
+                    preserveLastModified = true,
+                    preserveExecutable = true))
+              }
+          },
+          Def.task {
+            idlGenTask(
+              SrcGenApplication,
+              idlType.value,
+              srcGenSerializationType.value,
+              genOptions.value,
+              srcGenTargetDir.value,
+              target.value / "srcGen")(srcGenIDLTargetDir.value.allPaths.get.toSet).toSeq
+          }
+        )
+        .value,
+      srcGenFromJars := srcGen.value
     )
   }
 
