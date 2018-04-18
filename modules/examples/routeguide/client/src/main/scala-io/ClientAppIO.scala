@@ -33,8 +33,8 @@ object ClientAppIO {
 
     logger.info(s"${Thread.currentThread().getName} Finishing program interpretation ...")
 
-    (): Unit
     System.in.read()
+    (): Unit
   }
 
 }

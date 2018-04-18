@@ -29,11 +29,12 @@ class HelperTests extends RpcServerTestSuite with Helpers {
 
     "work as expected" in {
 
-      server[ConcurrentMonad](Monad[ConcurrentMonad], grpcServerHandlerTests)
+      val grpcServer: GrpcServer[ConcurrentMonad] = grpcServerHandlerTests[ConcurrentMonad]
+
+      server[ConcurrentMonad](Monad[ConcurrentMonad], grpcServer)
         .unsafeRunSync() shouldBe ((): Unit)
 
       (serverMock.start _: () => Server).verify()
-      (serverMock.awaitTermination _: () => Unit).verify()
     }
 
   }
