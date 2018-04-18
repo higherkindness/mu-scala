@@ -1,5 +1,17 @@
 # Changelog
 
+## 04/18/2018 - Version 0.13.3
+
+Release changes:
+
+* Add route guide example ([#236](https://github.com/frees-io/freestyle-rpc/pull/236))
+* fixing shutdown hook to run shutdown of server ([#238](https://github.com/frees-io/freestyle-rpc/pull/238))
+* Adds support for Marshalling/Unmarshalling BigDecimals ([#244](https://github.com/frees-io/freestyle-rpc/pull/244))
+* Allow a sequence of source generated directories ([#243](https://github.com/frees-io/freestyle-rpc/pull/243))
+* Code Generation from IDL definitions placed in different sources ([#248](https://github.com/frees-io/freestyle-rpc/pull/248))
+* Fixes Server Helper. Releases 0.13.3. ([#249](https://github.com/frees-io/freestyle-rpc/pull/249))
+
+
 ## 04/10/2018 - Version 0.13.2
 
 Release changes:
