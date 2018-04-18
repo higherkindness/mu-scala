@@ -116,7 +116,7 @@ object IdlGenPlugin extends AutoPlugin {
       srcGen := Def
         .sequential(
           Def.task {
-            (dependencyClasspath in Compile).value.map(
+            (Compile / dependencyClasspath).value.map(
               entry =>
                 extractIDLDefinitionsFromJar(
                   entry,
@@ -150,6 +150,17 @@ object IdlGenPlugin extends AutoPlugin {
       srcGenFromJars := srcGen.value
     )
   }
+
+  lazy val packagingSettings: Seq[Def.Setting[_]] = Seq(
+    mappings in (Compile, packageSrc) ++= {
+      val allIDLDefinitions = ((Compile / srcGenIDLTargetDir).value ** "*") filter { _.isFile }
+      val idlMappings = allIDLDefinitions.get pair Path
+        .rebase((Compile / srcGenIDLTargetDir).value, (Compile / classDirectory).value)
+      IO.copy(idlMappings, overwrite = true, preserveLastModified = true, preserveExecutable = true)
+
+      idlMappings.map { case (f1, f2) => (f1, f2.getAbsolutePath) }
+    },
+  )
 
   private def idlGenTask(
       generator: GeneratorApplication[_],
@@ -196,7 +207,7 @@ object IdlGenPlugin extends AutoPlugin {
   }
 
   override def projectSettings: Seq[Def.Setting[_]] =
-    defaultSettings ++ taskSettings ++ Seq(
+    defaultSettings ++ taskSettings ++ packagingSettings ++ Seq(
       libraryDependencies += "io.frees" %% "frees-rpc-idlgen-core" % freestyle.rpc.idlgen.BuildInfo.version
     )
 }
