@@ -9,7 +9,7 @@ lazy val root = project
       srcGenSourceDirs := Seq((Compile / resourceDirectory).value / "domain",
         (Compile / resourceDirectory).value / "protocol"),
       srcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
-      sourceGenerators in Compile += (srcGen in Compile).taskValue,
+      sourceGenerators in Compile += (Compile / srcGen).taskValue,
       libraryDependencies ++= Seq(
         "com.chuusai" %% "shapeless" % "2.3.2"
       )
