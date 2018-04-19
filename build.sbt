@@ -230,6 +230,14 @@ lazy val `example-todolist-protocol` = project
   .settings(moduleName := "frees-rpc-example-todolist-protocol")
   .disablePlugins(ScriptedPlugin)
 
+lazy val `example-todolist-common` = project
+  .in(file("modules/examples/todolist/common"))
+  .dependsOn(`example-todolist-protocol`)
+  .dependsOn(config)
+  .settings(moduleName := "frees-rpc-example-todolist-common")
+  .settings(exampleTodolistCommonSettings)
+  .disablePlugins(ScriptedPlugin)
+
 //////////////////////////
 //// MODULES REGISTRY ////
 //////////////////////////
@@ -256,7 +264,8 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `example-routeguide-runtime`,
   `example-routeguide-server`,
   `example-routeguide-client`,
-  `example-todolist-protocol`
+  `example-todolist-protocol`,
+  `example-todolist-common`
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =
