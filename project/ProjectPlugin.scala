@@ -28,7 +28,7 @@ object ProjectPlugin extends AutoPlugin {
       val fs2: String                = "0.10.5"
       val fs2ReactiveStreams: String = "0.5.1"
       val grpc: String               = "1.11.0"
-      val http4s                     = "0.18.3"
+      val http4s                     = "0.18.9"
       val log4s: String              = "1.6.1"
       val logback: String            = "1.2.3"
       val monix: String              = "3.0.0-RC1"
@@ -202,6 +202,7 @@ object ProjectPlugin extends AutoPlugin {
         %%("http4s-dsl", V.http4s),
         %%("http4s-blaze-server", V.http4s),
         %%("http4s-circe", V.http4s),
+        %%("circe-generic"),
         %%("http4s-blaze-client", V.http4s) % Test
       )
     )
