@@ -16,20 +16,10 @@
 
 package examples.todolist.runtime
 
-import cats.effect.IO
-import cats.~>
-import monix.eval.Task
 import monix.execution.Scheduler
 
 trait PingPong {
 
   implicit val S: Scheduler = Scheduler.Implicits.global
 
-  implicit def T2IO(implicit S: Scheduler): Task ~> IO = new (Task ~> IO) {
-    override def apply[A](fa: Task[A]): IO[A] = fa.toIO
-  }
-
-  implicit def T2Task(implicit S: Scheduler): Task ~> Task = new (Task ~> Task) {
-    override def apply[A](fa: Task[A]) = fa
-  }
 }

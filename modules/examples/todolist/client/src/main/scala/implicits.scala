@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package examples.todolist.client.task
+package examples.todolist.client
 
+import cats.effect.IO
 import examples.todolist.client.handlers.PingPongClientHandler
 import examples.todolist.client.runtime._
 import examples.todolist.protocol.Protocols._
-import examples.todolist.runtime._
-import monix.eval.Task
+import examples.todolist.runtime.PingPong
 
+trait ClientImplicits extends ClientConf with PingPong {
 
-trait ClientTaskImplicits extends PingPong with ClientConf {
+  implicit val pingPongServiceClient: PingPongService.Client[IO] =
+    PingPongService.client[IO](channelFor)
 
-  implicit val pingPongServiceClient: PingPongService.Client[Task] =
-    PingPongService.client[Task](channelFor)
+  implicit val pingPongClientHandler: PingPongClientHandler[IO] =
+    new PingPongClientHandler[IO]
 
-  implicit val pingPongClientHandler: PingPongClientHandler[Task] =
-    new PingPongClientHandler[Task]
 }
 
-object implicits extends ClientTaskImplicits
+object implicits extends ClientImplicits

@@ -17,18 +17,14 @@
 package examples.todolist.client
 package handlers
 
-import cats.{~>, Monad}
+import cats.Monad
 import cats.Monad.ops._
 import examples.todolist.client.PingPongClient
 import examples.todolist.protocol.Protocols.PingPongService
 import freestyle.rpc.protocol.Empty
-import monix.eval.Task
 import org.log4s._
 
-class PingPongClientHandler[F[_]](
-    implicit M: Monad[F],
-    client: PingPongService.Client[F],
-    T2F: Task ~> F)
+class PingPongClientHandler[F[_]](implicit M: Monad[F], client: PingPongService.Client[F])
     extends PingPongClient.Handler[F] {
 
   val logger: Logger = getLogger

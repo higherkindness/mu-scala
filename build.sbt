@@ -254,14 +254,6 @@ lazy val `example-todolist-client` = project
   .dependsOn(config)
   .settings(moduleName := "frees-rpc-example-todolist-client")
   .settings(exampleTodolistCommonSettings)
-  .settings(
-    Compile / unmanagedSourceDirectories ++= Seq(
-      baseDirectory.value / "src" / "main" / "scala-io",
-      baseDirectory.value / "src" / "main" / "scala-task"
-    )
-  )
-  .settings(addCommandAlias("runClientIO", "runMain examples.todolist.client.io.ClientAppIO"))
-  .settings(addCommandAlias("runClientTask", "runMain examples.todolist.client.task.ClientAppTask"))
   .disablePlugins(ScriptedPlugin)
 
 //////////////////////////

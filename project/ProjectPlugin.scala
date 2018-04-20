@@ -164,9 +164,6 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val exampleTodolistCommonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("circe-core", V.circe),
-        %%("circe-generic", V.circe),
-        %%("circe-parser", V.circe),
         %%("log4s", V.log4s),
         %("logback-classic", V.logback)
       )

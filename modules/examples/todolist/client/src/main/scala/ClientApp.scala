@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
-package examples.todolist.client.io
+package examples.todolist.client
 
 import cats.effect.IO
-import examples.todolist.client.handlers.PingPongClientHandler
-import examples.todolist.client.runtime._
-import examples.todolist.protocol.Protocols._
-import examples.todolist.runtime._
+import examples.todolist.client.ClientProgram._
+import examples.todolist.client.implicits._
+import org.log4s._
 
-trait ClientIOImplicits extends PingPong with ClientConf {
+import scala.io.StdIn
 
-  implicit val pingPongServiceClient: PingPongService.Client[IO] =
-    PingPongService.client[IO](channelFor)
+object ClientApp {
 
-  implicit val pingPongClientHandler: PingPongClientHandler[IO] =
-    new PingPongClientHandler[IO]
+  def main(args: Array[String]): Unit = {
+
+    val logger: Logger = getLogger
+
+    logger.info(s"${Thread.currentThread().getName} Starting client...")
+
+    clientProgram[IO].unsafeRunSync()
+
+    logger.info(s"${Thread.currentThread().getName} Closing client...")
+
+    StdIn.readLine()
+    (): Unit
+  }
 
 }
-
-object implicits extends ClientIOImplicits
