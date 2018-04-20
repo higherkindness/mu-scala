@@ -17,9 +17,10 @@
 package examples.todolist.client.io
 
 import cats.effect.IO
-import org.log4s._
-import examples.todolist.client.io.implicits._
 import examples.todolist.client.ClientProgram._
+import examples.todolist.client.io.implicits._
+import org.log4s._
+import scala.io.StdIn
 
 object ClientAppIO {
 
@@ -33,7 +34,7 @@ object ClientAppIO {
 
     logger.info(s"${Thread.currentThread().getName} Closing client...")
 
-    System.in.read()
+    StdIn.readLine()
     (): Unit
   }
 
