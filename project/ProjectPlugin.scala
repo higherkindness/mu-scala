@@ -156,6 +156,12 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+    lazy val exampleTodolistRuntimeSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("monix")
+      )
+    )
+
     lazy val exampleTodolistCommonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("circe-core", V.circe),
