@@ -14,22 +14,28 @@
  * limitations under the License.
  */
 
-package examples.todolist.runtime
+package examples.todolist.client
+package handlers
 
-import cats.effect.IO
-import cats.~>
+import cats.{~>, Monad}
+import cats.Monad.ops._
+import examples.todolist.client.PingPongClient
+import examples.todolist.protocol.Protocols.PingPongService
+import freestyle.rpc.protocol.Empty
 import monix.eval.Task
-import monix.execution.Scheduler
+import org.log4s._
 
-trait PingPong {
+class PingPongClientHandler[F[_]](
+    implicit M: Monad[F],
+    client: PingPongService.Client[F],
+    T2F: Task ~> F)
+    extends PingPongClient.Handler[F] {
 
-  implicit val S: Scheduler = Scheduler.Implicits.global
+  val logger: Logger = getLogger
 
-  implicit def T2IO(implicit S: Scheduler): Task ~> IO = new (Task ~> IO) {
-    override def apply[A](fa: Task[A]): IO[A] = fa.toIO
-  }
+  override def ping(): F[Unit] =
+    client
+      .ping(Empty)
+      .map(p => logger.info(s"Pong received with timestamp: ${p.time}"))
 
-  implicit def T2Task(implicit S: Scheduler): Task ~> Task = new (Task ~> Task) {
-    override def apply[A](fa: Task[A]) = fa
-  }
 }

@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package examples.todolist.runtime
+package examples.todolist.client
 
-import cats.effect.IO
-import cats.~>
-import monix.eval.Task
-import monix.execution.Scheduler
+import cats.Monad
+import cats.syntax.functor._
+import freestyle.tagless._
+import org.log4s.getLogger
 
-trait PingPong {
+@tagless(true)
+trait PingPongClient[F[_]] {
+  def ping(): F[Unit]
+}
 
-  implicit val S: Scheduler = Scheduler.Implicits.global
+object ClientProgram {
 
-  implicit def T2IO(implicit S: Scheduler): Task ~> IO = new (Task ~> IO) {
-    override def apply[A](fa: Task[A]): IO[A] = fa.toIO
-  }
+  val logger = getLogger
 
-  implicit def T2Task(implicit S: Scheduler): Task ~> Task = new (Task ~> Task) {
-    override def apply[A](fa: Task[A]) = fa
+  def clientProgram[M[_]: Monad](implicit client: PingPongClient[M]): M[Unit] = {
+    for {
+      _ <- client.ping()
+    } yield ()
+
   }
 }

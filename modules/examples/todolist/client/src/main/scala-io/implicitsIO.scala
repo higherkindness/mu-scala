@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package examples.todolist.runtime
+package examples.todolist.client.io
 
 import cats.effect.IO
-import cats.~>
-import monix.eval.Task
-import monix.execution.Scheduler
+import examples.todolist.client.handlers.PingPongClientHandler
+import examples.todolist.client.runtime._
+import examples.todolist.protocol.Protocols._
+import examples.todolist.runtime._
 
-trait PingPong {
+trait ClientIOImplicits extends PingPong with ClientConf {
 
-  implicit val S: Scheduler = Scheduler.Implicits.global
+  implicit val pingPongServiceClient: PingPongService.Client[IO] =
+    PingPongService.client[IO](channelFor)
 
-  implicit def T2IO(implicit S: Scheduler): Task ~> IO = new (Task ~> IO) {
-    override def apply[A](fa: Task[A]): IO[A] = fa.toIO
-  }
+  implicit val pingPongClientHandler: PingPongClientHandler[IO] =
+    new PingPongClientHandler[IO]
 
-  implicit def T2Task(implicit S: Scheduler): Task ~> Task = new (Task ~> Task) {
-    override def apply[A](fa: Task[A]) = fa
-  }
 }
+
+object implicits extends ClientIOImplicits

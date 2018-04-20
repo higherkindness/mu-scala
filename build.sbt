@@ -252,6 +252,22 @@ lazy val `example-todolist-server` = project
   .settings(moduleName := "frees-rpc-example-todolist-server")
   .disablePlugins(ScriptedPlugin)
 
+lazy val `example-todolist-client` = project
+  .in(file("modules/examples/todolist/client"))
+  .dependsOn(`example-todolist-common`)
+  .dependsOn(`example-todolist-runtime`)
+  .dependsOn(`client-netty`)
+  .settings(moduleName := "frees-rpc-example-todolist-client")
+  .settings(
+    Compile / unmanagedSourceDirectories ++= Seq(
+      baseDirectory.value / "src" / "main" / "scala-io",
+      baseDirectory.value / "src" / "main" / "scala-task"
+    )
+  )
+  .settings(addCommandAlias("runClientIO", "runMain examples.todolist.client.io.ClientAppIO"))
+  .settings(addCommandAlias("runClientTask", "runMain examples.todolist.client.task.ClientAppTask"))
+  .disablePlugins(ScriptedPlugin)
+
 //////////////////////////
 //// MODULES REGISTRY ////
 //////////////////////////
@@ -281,7 +297,8 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `example-todolist-protocol`,
   `example-todolist-common`,
   `example-todolist-runtime`,
-  `example-todolist-server`
+  `example-todolist-server`,
+  `example-todolist-client`
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =

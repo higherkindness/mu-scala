@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package examples.todolist.runtime
+package examples.todolist.client
+package runtime
 
 import cats.effect.IO
-import cats.~>
-import monix.eval.Task
-import monix.execution.Scheduler
+import freestyle.rpc.ChannelFor
+import freestyle.rpc.client.config.ConfigForAddress
+import freestyle.tagless.config.implicits._
 
-trait PingPong {
+trait ClientConf {
 
-  implicit val S: Scheduler = Scheduler.Implicits.global
+  val channelFor: ChannelFor =
+    ConfigForAddress[IO]("rpc.client.host", "rpc.client.port").unsafeRunSync()
 
-  implicit def T2IO(implicit S: Scheduler): Task ~> IO = new (Task ~> IO) {
-    override def apply[A](fa: Task[A]): IO[A] = fa.toIO
-  }
-
-  implicit def T2Task(implicit S: Scheduler): Task ~> Task = new (Task ~> Task) {
-    override def apply[A](fa: Task[A]) = fa
-  }
 }
