@@ -236,28 +236,24 @@ lazy val `example-todolist-runtime` = project
   .settings(exampleTodolistRuntimeSettings)
   .disablePlugins(ScriptedPlugin)
 
-lazy val `example-todolist-common` = project
-  .in(file("modules/examples/todolist/common"))
-  .dependsOn(`example-todolist-protocol`)
-  .dependsOn(config)
-  .settings(moduleName := "frees-rpc-example-todolist-common")
-  .settings(exampleTodolistCommonSettings)
-  .disablePlugins(ScriptedPlugin)
-
 lazy val `example-todolist-server` = project
   .in(file("modules/examples/todolist/server"))
-  .dependsOn(`example-todolist-common`)
+  .dependsOn(`example-todolist-protocol`)
   .dependsOn(`example-todolist-runtime`)
   .dependsOn(server)
+  .dependsOn(config)
   .settings(moduleName := "frees-rpc-example-todolist-server")
+  .settings(exampleTodolistCommonSettings)
   .disablePlugins(ScriptedPlugin)
 
 lazy val `example-todolist-client` = project
   .in(file("modules/examples/todolist/client"))
-  .dependsOn(`example-todolist-common`)
+  .dependsOn(`example-todolist-protocol`)
   .dependsOn(`example-todolist-runtime`)
   .dependsOn(`client-netty`)
+  .dependsOn(config)
   .settings(moduleName := "frees-rpc-example-todolist-client")
+  .settings(exampleTodolistCommonSettings)
   .settings(
     Compile / unmanagedSourceDirectories ++= Seq(
       baseDirectory.value / "src" / "main" / "scala-io",
@@ -295,7 +291,6 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `example-routeguide-server`,
   `example-routeguide-client`,
   `example-todolist-protocol`,
-  `example-todolist-common`,
   `example-todolist-runtime`,
   `example-todolist-server`,
   `example-todolist-client`
