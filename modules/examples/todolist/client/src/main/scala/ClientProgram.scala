@@ -17,7 +17,6 @@
 package examples.todolist.client
 
 import cats.Monad
-import cats.syntax.functor._
 import freestyle.tagless._
 import org.log4s.getLogger
 
@@ -30,10 +29,6 @@ object ClientProgram {
 
   val logger = getLogger
 
-  def clientProgram[M[_]: Monad](implicit client: PingPongClient[M]): M[Unit] = {
-    for {
-      _ <- client.ping()
-    } yield ()
-
-  }
+  def clientProgram[M[_]: Monad](implicit client: PingPongClient[M]): M[Unit] =
+    client.ping()
 }
