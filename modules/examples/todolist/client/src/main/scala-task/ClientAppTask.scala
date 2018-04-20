@@ -22,6 +22,7 @@ import monix.eval.Task
 import org.log4s._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+import scala.io.StdIn
 
 object ClientAppTask {
 
@@ -35,7 +36,7 @@ object ClientAppTask {
 
     logger.info(s"${Thread.currentThread().getName} Closing client...")
 
-    System.in.read()
+    StdIn.readLine()
     (): Unit
 
   }
