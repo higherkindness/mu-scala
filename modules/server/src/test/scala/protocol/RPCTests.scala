@@ -17,16 +17,13 @@
 package freestyle.rpc
 package protocol
 
-import cats.Monad
+import cats.{Monad, MonadError}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import com.google.protobuf.InvalidProtocolBufferException
 import org.scalatest._
 import freestyle.rpc.common._
-import freestyle.rpc.protocol.Utils.handlers.client.{
-  FreesRPCServiceClientCompressedHandler,
-  FreesRPCServiceClientHandler
-}
+import freestyle.rpc.protocol.Utils.handlers.client._
 import freestyle.rpc.server._
 
 class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
@@ -84,6 +81,22 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     }
 
+    "handle errors in unary services" in {
+
+      def clientProgram[F[_]](
+          errorCode: String)(implicit APP: MyRPCClient[F], M: MonadError[F, Throwable]): F[C] =
+        M.handleError(APP.uwe(a1, errorCode))(ex => C(ex.getMessage, a1))
+
+      clientProgram[ConcurrentMonad]("SE")
+        .unsafeRunSync() shouldBe C("INVALID_ARGUMENT: SE", a1)
+      clientProgram[ConcurrentMonad]("SRE")
+        .unsafeRunSync() shouldBe C("INVALID_ARGUMENT: SRE", a1)
+      clientProgram[ConcurrentMonad]("RTE")
+        .unsafeRunSync() shouldBe C("INTERNAL: RTE", a1)
+      clientProgram[ConcurrentMonad]("Thrown")
+        .unsafeRunSync() shouldBe C("UNKNOWN", a1)
+    }
+
     "be able to run unary services with avro schema" in {
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[C] =
@@ -100,6 +113,23 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe cList
 
+    }
+
+    "handle errors in server streaming services" in {
+
+      def clientProgram[F[_]](errorCode: String)(
+          implicit APP: MyRPCClient[F],
+          M: MonadError[F, Throwable]): F[List[C]] =
+        M.handleError(APP.sswe(a1, errorCode))(ex => List(C(ex.getMessage, a1)))
+
+      clientProgram[ConcurrentMonad]("SE")
+        .unsafeRunSync() shouldBe List(C("INVALID_ARGUMENT: SE", a1))
+      clientProgram[ConcurrentMonad]("SRE")
+        .unsafeRunSync() shouldBe List(C("INVALID_ARGUMENT: SRE", a1))
+      clientProgram[ConcurrentMonad]("RTE")
+        .unsafeRunSync() shouldBe List(C("UNKNOWN", a1)) //todo: consider preserving the exception as is done for unary
+      clientProgram[ConcurrentMonad]("Thrown")
+        .unsafeRunSync() shouldBe List(C("UNKNOWN", a1))
     }
 
     "be able to run client streaming services" in {

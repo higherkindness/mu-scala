@@ -26,7 +26,7 @@ import io.grpc.stub.ServerCalls.{
   UnaryMethod
 }
 import io.grpc.stub.StreamObserver
-import io.grpc.{Status, StatusException}
+import io.grpc.{Status, StatusException, StatusRuntimeException}
 import monix.execution.Scheduler
 import monix.reactive.Observable
 
@@ -88,6 +88,8 @@ object monixCalls {
       observer.onNext(value)
       observer.onCompleted()
     case Left(s: StatusException) =>
+      observer.onError(s)
+    case Left(s: StatusRuntimeException) =>
       observer.onError(s)
     case Left(e) =>
       observer.onError(
