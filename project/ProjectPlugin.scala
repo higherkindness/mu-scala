@@ -156,6 +156,19 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+    lazy val exampleTodolistRuntimeSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("monix")
+      )
+    )
+
+    lazy val exampleTodolistCommonSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("log4s", V.log4s),
+        %("logback-classic", V.logback)
+      )
+    )
+
     lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
       scriptedLaunchOpts := {
         scriptedLaunchOpts.value ++

@@ -220,6 +220,42 @@ lazy val `example-routeguide-client` = project
   .settings(addCommandAlias("runClientTask", "runMain example.routeguide.client.task.ClientAppTask"))
   .disablePlugins(ScriptedPlugin)
 
+////////////////////
+////  TODOLIST  ////
+////////////////////
+
+lazy val `example-todolist-protocol` = project
+  .in(file("modules/examples/todolist/protocol"))
+  .dependsOn(client)
+  .settings(moduleName := "frees-rpc-example-todolist-protocol")
+  .disablePlugins(ScriptedPlugin)
+
+lazy val `example-todolist-runtime` = project
+  .in(file("modules/examples/todolist/runtime"))
+  .settings(moduleName := "frees-rpc-example-todolist-runtime")
+  .settings(exampleTodolistRuntimeSettings)
+  .disablePlugins(ScriptedPlugin)
+
+lazy val `example-todolist-server` = project
+  .in(file("modules/examples/todolist/server"))
+  .dependsOn(`example-todolist-protocol`)
+  .dependsOn(`example-todolist-runtime`)
+  .dependsOn(server)
+  .dependsOn(config)
+  .settings(moduleName := "frees-rpc-example-todolist-server")
+  .settings(exampleTodolistCommonSettings)
+  .disablePlugins(ScriptedPlugin)
+
+lazy val `example-todolist-client` = project
+  .in(file("modules/examples/todolist/client"))
+  .dependsOn(`example-todolist-protocol`)
+  .dependsOn(`example-todolist-runtime`)
+  .dependsOn(`client-netty`)
+  .dependsOn(config)
+  .settings(moduleName := "frees-rpc-example-todolist-client")
+  .settings(exampleTodolistCommonSettings)
+  .disablePlugins(ScriptedPlugin)
+
 //////////////////////////
 //// MODULES REGISTRY ////
 //////////////////////////
@@ -245,7 +281,11 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `example-routeguide-common`,
   `example-routeguide-runtime`,
   `example-routeguide-server`,
-  `example-routeguide-client`
+  `example-routeguide-client`,
+  `example-todolist-protocol`,
+  `example-todolist-runtime`,
+  `example-todolist-server`,
+  `example-todolist-client`
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =
