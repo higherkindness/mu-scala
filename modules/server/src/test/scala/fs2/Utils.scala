@@ -21,6 +21,7 @@ import freestyle.rpc.common._
 import freestyle.rpc.protocol._
 import _root_.fs2._
 import cats.effect.Effect
+import io.grpc.Status
 
 object Utils extends CommonUtils {
 
@@ -40,6 +41,10 @@ object Utils extends CommonUtils {
       @rpc(Protobuf)
       @stream[ResponseStreaming.type]
       def serverStreaming(b: B): Stream[F, C]
+
+      @rpc(Protobuf)
+      @stream[ResponseStreaming.type]
+      def serverStreamingWithError(e: E): Stream[F, C]
 
       @rpc(Protobuf, Gzip)
       @stream[ResponseStreaming.type]
@@ -98,6 +103,17 @@ object Utils extends CommonUtils {
         def serverStreaming(b: B): Stream[F, C] = {
           debug(s"[fs2 - SERVER] b -> $b")
           Stream.fromIterator(cList.iterator)
+        }
+
+        def serverStreamingWithError(e: E): Stream[F, C] = e.foo match {
+          case "SE" =>
+            Stream.raiseError(Status.INVALID_ARGUMENT.withDescription(e.foo).asException)
+          case "SRE" =>
+            Stream.raiseError(Status.INVALID_ARGUMENT.withDescription(e.foo).asRuntimeException)
+          case "RTE" =>
+            Stream.raiseError(new IllegalArgumentException(e.foo))
+          case _ =>
+            sys.error(e.foo)
         }
 
         def serverStreamingCompressed(b: B): Stream[F, C] = serverStreaming(b)

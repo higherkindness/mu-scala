@@ -75,8 +75,25 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run server streaming services" in {
 
-      freesRPCServiceClient.serverStreaming(b1).compile.toList.unsafeRunSync shouldBe cList
+      freesRPCServiceClient.serverStreaming(b1).compile.toList.unsafeRunSync() shouldBe cList
 
+    }
+
+    "handle errors in server streaming services" in {
+
+      def clientProgram(errorCode: String): Stream[ConcurrentMonad, C] =
+        freesRPCServiceClient
+          .serverStreamingWithError(E(a1, errorCode))
+          .handleErrorWith(ex => Stream(C(ex.getMessage, a1)))
+
+      clientProgram("SE").compile.toList
+        .unsafeRunSync() shouldBe List(C("INVALID_ARGUMENT: SE", a1))
+      clientProgram("SRE").compile.toList
+        .unsafeRunSync() shouldBe List(C("INVALID_ARGUMENT: SRE", a1))
+      clientProgram("RTE").compile.toList
+        .unsafeRunSync() shouldBe List(C("UNKNOWN", a1)) //todo: consider preserving the exception as is done for unary
+      clientProgram("Thrown").compile.toList
+        .unsafeRunSync() shouldBe List(C("UNKNOWN", a1))
     }
 
     "be able to run client streaming services" in {

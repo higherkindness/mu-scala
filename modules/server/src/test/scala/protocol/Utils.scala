@@ -23,6 +23,7 @@ import cats.syntax.applicative._
 import freestyle.rpc.common._
 import freestyle.rpc.server.implicits._
 import freestyle.tagless.tagless
+import io.grpc.Status
 import monix.reactive.Observable
 
 object Utils extends CommonUtils {
@@ -40,9 +41,13 @@ object Utils extends CommonUtils {
 
       @rpc(Avro) def unary(a: A): F[C]
 
+      @rpc(Avro) def unaryWithError(e: E): F[C]
+
       @rpc(AvroWithSchema) def unaryWithSchema(a: A): F[C]
 
       @rpc(Avro, Gzip) def unaryCompressed(a: A): F[C]
+
+      @rpc(Avro, Gzip) def unaryCompressedWithError(e: E): F[C]
 
       @rpc(AvroWithSchema, Gzip) def unaryCompressedWithSchema(a: A): F[C]
 
@@ -93,9 +98,17 @@ object Utils extends CommonUtils {
       @stream[ResponseStreaming.type]
       def serverStreaming(b: B): Observable[C]
 
+      @rpc(Protobuf)
+      @stream[ResponseStreaming.type]
+      def serverStreamingWithError(e: E): Observable[C]
+
       @rpc(Protobuf, Gzip)
       @stream[ResponseStreaming.type]
       def serverStreamingCompressed(b: B): Observable[C]
+
+      @rpc(Protobuf, Gzip)
+      @stream[ResponseStreaming.type]
+      def serverStreamingCompressedWithError(e: E): Observable[C]
 
       @rpc(Protobuf)
       @stream[RequestStreaming.type]
@@ -152,7 +165,9 @@ object Utils extends CommonUtils {
       def bigDecimalAvroWithSchemaParam(bd: BigDecimal): F[BigDecimal]
       def u(x: Int, y: Int): F[C]
       def uws(x: Int, y: Int): F[C]
+      def uwe(a: A, err: String): F[C]
       def ss(a: Int, b: Int): F[List[C]]
+      def sswe(a: A, err: String): F[List[C]]
       def cs(cList: List[C], bar: Int): F[D]
       def bs(eList: List[E]): F[E]
       def bsws(eList: List[E]): F[E]
@@ -168,7 +183,8 @@ object Utils extends CommonUtils {
       import service._
       import freestyle.rpc.protocol._
 
-      class ServerRPCService[F[_]: Async] extends RPCService[F] {
+      class ServerRPCService[F[_]: Async](implicit M: MonadError[F, Throwable])
+          extends RPCService[F] {
 
         def notAllowed(b: Boolean): F[C] = c1.pure
 
@@ -195,11 +211,33 @@ object Utils extends CommonUtils {
 
         def unary(a: A): F[C] = c1.pure
 
+        def unaryWithError(e: E): F[C] = e.foo match {
+          case "SE" =>
+            M.raiseError(Status.INVALID_ARGUMENT.withDescription(e.foo).asException)
+          case "SRE" =>
+            M.raiseError(Status.INVALID_ARGUMENT.withDescription(e.foo).asRuntimeException)
+          case "RTE" =>
+            M.raiseError(new IllegalArgumentException(e.foo))
+          case _ =>
+            sys.error(e.foo)
+        }
+
         def unaryWithSchema(a: A): F[C] = unary(a)
 
         def serverStreaming(b: B): Observable[C] = {
           debug(s"[SERVER] b -> $b")
           Observable.fromIterable(cList)
+        }
+
+        def serverStreamingWithError(e: E): Observable[C] = e.foo match {
+          case "SE" =>
+            Observable.raiseError(Status.INVALID_ARGUMENT.withDescription(e.foo).asException)
+          case "SRE" =>
+            Observable.raiseError(Status.INVALID_ARGUMENT.withDescription(e.foo).asRuntimeException)
+          case "RTE" =>
+            Observable.raiseError(new IllegalArgumentException(e.foo))
+          case _ =>
+            sys.error(e.foo)
         }
 
         def clientStreaming(oa: Observable[A]): F[D] =
@@ -252,7 +290,11 @@ object Utils extends CommonUtils {
 
         def unaryCompressedWithSchema(a: A): F[C] = unaryCompressed(a)
 
+        def unaryCompressedWithError(e: E): F[C] = unaryWithError(e)
+
         def serverStreamingCompressed(b: B): Observable[C] = serverStreaming(b)
+
+        def serverStreamingCompressedWithError(e: E): Observable[C] = serverStreamingWithError(e)
 
         def clientStreamingCompressed(oa: Observable[A]): F[D] = clientStreaming(oa)
 
@@ -326,9 +368,24 @@ object Utils extends CommonUtils {
         override def uws(x: Int, y: Int): F[C] =
           client.unaryWithSchema(A(x, y))
 
+        override def uwe(a: A, err: String): F[C] =
+          client.unaryWithError(E(a, err))
+
         override def ss(a: Int, b: Int): F[List[C]] =
           client
             .serverStreaming(B(A(a, a), A(b, b)))
+            .zipWithIndex
+            .map {
+              case (c, i) =>
+                debug(s"[CLIENT] Result #$i: $c")
+                c
+            }
+            .toListL
+            .to[F]
+
+        override def sswe(a: A, err: String): F[List[C]] =
+          client
+            .serverStreamingWithError(E(a, err))
             .zipWithIndex
             .map {
               case (c, i) =>
@@ -417,12 +474,27 @@ object Utils extends CommonUtils {
         override def u(x: Int, y: Int): F[C] =
           client.unaryCompressed(A(x, y))
 
+        override def uwe(a: A, err: String): F[C] =
+          client.unaryCompressedWithError(E(a, err))
+
         override def uws(x: Int, y: Int): F[C] =
           client.unaryCompressedWithSchema(A(x, y))
 
         override def ss(a: Int, b: Int): F[List[C]] =
           client
             .serverStreamingCompressed(B(A(a, a), A(b, b)))
+            .zipWithIndex
+            .map {
+              case (c, i) =>
+                debug(s"[CLIENT] Result #$i: $c")
+                c
+            }
+            .toListL
+            .to[F]
+
+        override def sswe(a: A, err: String): F[List[C]] =
+          client
+            .serverStreamingCompressedWithError(E(a, err))
             .zipWithIndex
             .map {
               case (c, i) =>
