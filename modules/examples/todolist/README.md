@@ -5,13 +5,13 @@
 Running the server:
 
 ```bash
-sbt example-todolist-server run
+sbt example-todolist-server/run
 ```
 
 Running the client:
 
 ```bash
-sbt example-todolist-client run
+sbt example-todolist-client/run
 ```
 
 [comment]: # (Start Copyright)
