@@ -23,7 +23,7 @@ object ProjectPlugin extends AutoPlugin {
       val avrohugger: String         = "1.0.0-RC4"
       val catsEffect: String         = "0.10.1"
       val circe: String              = "0.9.3"
-      val frees: String              = "0.8.0"
+      val frees: String              = "0.8.1-SNAPSHOT"
       val fs2ReactiveStreams: String = "0.5.1"
       val grpc: String               = "1.11.0"
       val log4s: String              = "1.6.1"
