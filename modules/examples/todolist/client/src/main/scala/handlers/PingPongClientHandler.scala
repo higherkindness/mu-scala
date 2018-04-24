@@ -19,7 +19,7 @@ package handlers
 
 import cats.Monad
 import cats.Monad.ops._
-import examples.todolist.client.PingPongClient
+import examples.todolist.client.clients.PingPongClient
 import examples.todolist.protocol.Protocols.PingPongService
 import freestyle.rpc.protocol.Empty
 import org.log4s._

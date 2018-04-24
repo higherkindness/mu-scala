@@ -15,15 +15,11 @@
  */
 
 package examples.todolist.client
+package clients
 
-import cats.Monad
-import examples.todolist.client.clients.{PingPongClient, TagClient}
-import org.log4s.getLogger
+import freestyle.tagless.tagless
 
-object ClientProgram {
-
-  val logger = getLogger
-
-  def pongProgram[M[_]: Monad](implicit client: PingPongClient[M]): M[Unit] =
-    client.ping()
+@tagless(true)
+trait PingPongClient[F[_]] {
+  def ping(): F[Unit]
 }
