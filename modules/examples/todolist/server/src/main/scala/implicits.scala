@@ -17,24 +17,58 @@
 package examples.todolist.server
 
 import cats.effect.IO
-import examples.todolist.protocol.Protocols.PingPongService
+import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
+import doobie.hikari.HikariTransactor
+import doobie.util.transactor.Transactor
+import examples.todolist.persistence.runtime.TagRepositoryHandler
+import examples.todolist.persistence.TagRepository
+import examples.todolist.protocol.Protocols._
 import examples.todolist.runtime.PingPong
-import examples.todolist.server.handlers.PingPongServiceHandler
+import examples.todolist.server.handlers._
 import freestyle.rpc.server._
 import freestyle.rpc.server.config.BuildServerFromConfig
 import freestyle.rpc.server.{AddService, GrpcConfig, ServerW}
 import freestyle.tagless.config.implicits._
+import freestyle.tagless.loggingJVM.log4s.implicits._
+import java.util.Properties
 
-trait ServerImplicits extends PingPong {
+trait ServerImplicits extends PingPong with RepositoriesImplicits {
 
   implicit val pingPongServiceHandler: PingPongServiceHandler[IO] =
     new PingPongServiceHandler[IO]()
 
-  val gprcConfigs: List[GrpcConfig] =
-    List(AddService(PingPongService.bindService[IO]))
+  implicit val tagRpcServiceHandler: TagRpcServiceHandler[IO] =
+    new TagRpcServiceHandler[IO]()
+
+  val grpcConfigs: List[GrpcConfig] =
+    List(
+      AddService(PingPongService.bindService[IO]),
+      AddService(TagRpcService.bindService[IO])
+    )
 
   implicit val serverW: ServerW =
-    BuildServerFromConfig[IO]("rpc.server.port", gprcConfigs).unsafeRunSync()
+    BuildServerFromConfig[IO]("rpc.server.port", grpcConfigs).unsafeRunSync()
+}
+
+trait RepositoriesImplicits {
+
+  implicit val xa: HikariTransactor[IO] =
+    HikariTransactor[IO](new HikariDataSource(new HikariConfig(new Properties {
+      setProperty("driverClassName", "org.h2.Driver")
+      setProperty("jdbcUrl", "jdbc:h2:mem:todo")
+      setProperty("username", "sa")
+      setProperty("password", "")
+      setProperty("maximumPoolSize", "10")
+      setProperty("minimumIdle", "10")
+      setProperty("idleTimeout", "600000")
+      setProperty("connectionTimeout", "30000")
+      setProperty("connectionTestQuery", "SELECT 1")
+      setProperty("maxLifetime", "1800000")
+      setProperty("autoCommit", "true")
+    })))
+
+  implicit def tagRepositoryHandler(implicit T: Transactor[IO]): TagRepository.Handler[IO] =
+    new TagRepositoryHandler[IO]
 }
 
 object implicits extends ServerImplicits
