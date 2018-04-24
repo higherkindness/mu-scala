@@ -17,24 +17,19 @@
 package freestyle.rpc.http
 
 import cats.effect._
-import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import freestyle.rpc.protocol.Empty
 import fs2.Stream
-import jawn.ParseException
-import io.circe._
+import io.circe.Decoder
 import io.circe.generic.auto._
-import io.circe.jawn.CirceSupportParser.facade
 import io.circe.syntax._
-import jawnfs2._
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
-class GreeterRestService[F[_]: Sync](handler: Greeter[F]) extends Http4sDsl[F] {
+class UnaryGreeterRestService[F[_]: Sync](handler: UnaryGreeter[F]) extends Http4sDsl[F] {
 
-  import freestyle.rpc.http.GreeterRestService._
+  import freestyle.rpc.protocol.Empty
 
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
 
@@ -47,6 +42,16 @@ class GreeterRestService[F[_]: Sync](handler: Greeter[F]) extends Http4sDsl[F] {
         request  <- msg.as[HelloRequest]
         response <- Ok(handler.sayHello(request).map(_.asJson))
       } yield response
+  }
+}
+
+class Fs2GreeterRestService[F[_]: Sync](handler: Fs2Greeter[F]) extends Http4sDsl[F] {
+
+  import freestyle.rpc.http.RestService._
+
+  private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
+
+  def service: HttpService[F] = HttpService[F] {
 
     case msg @ POST -> Root / "sayHellos" =>
       for {
@@ -65,13 +70,50 @@ class GreeterRestService[F[_]: Sync](handler: Greeter[F]) extends Http4sDsl[F] {
         requests  <- msg.asStream[HelloRequest]
         responses <- Ok(handler.sayHellosAll(requests).map(_.asJson))
       } yield responses
-
   }
 }
 
-object GreeterRestService {
+class MonixGreeterRestService[F[_]: Effect](handler: MonixGreeter[F])(
+    implicit sc: monix.execution.Scheduler)
+    extends Http4sDsl[F] {
+
+  import freestyle.rpc.http.RestService._
+  import freestyle.rpc.http.Util._
+
+  private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
+
+  def service: HttpService[F] = HttpService[F] {
+
+    case msg @ POST -> Root / "sayHellos" =>
+      for {
+        requests <- msg.asStream[HelloRequest]
+        observable = requests.toObservable
+        response <- Ok(handler.sayHellos(observable).map(_.asJson))
+      } yield response
+
+    case msg @ POST -> Root / "sayHelloAll" =>
+      for {
+        request   <- msg.as[HelloRequest]
+        responses <- Ok(handler.sayHelloAll(request).map(_.asJson).toStream)
+      } yield responses
+
+    case msg @ POST -> Root / "sayHellosAll" =>
+      for {
+        requests <- msg.asStream[HelloRequest]
+        obsResponses = handler.sayHellosAll(requests.toObservable).map(_.asJson)
+        responses <- Ok(obsResponses.toStream)
+      } yield responses
+  }
+}
+
+object RestService {
 
   implicit class RequestOps[F[_]: Sync](request: Request[F]) {
+
+    import cats.syntax.applicative._
+    import io.circe.jawn.CirceSupportParser.facade
+    import jawnfs2._
+    import _root_.jawn.ParseException
 
     def asStream[A](implicit decoder: Decoder[A]): F[Stream[F, A]] =
       request.body.chunks.parseJsonStream

@@ -17,19 +17,25 @@
 package freestyle.rpc.http
 
 import freestyle.rpc.protocol._
-import fs2.Stream
 
 @message case class HelloRequest(hello: String)
 
 @message case class HelloResponse(hello: String)
 
-@service trait Greeter[F[_]] {
+// We don't actually need to split the various streaming types into their own services,
+// but this allows for more specific dependencies and type constraints (Sync, Async, Effect...) in their implementations.
+
+@service trait UnaryGreeter[F[_]] {
 
   @rpc(Avro)
   def getHello(request: Empty.type): F[HelloResponse]
 
   @rpc(Avro)
   def sayHello(request: HelloRequest): F[HelloResponse]
+}
+
+import fs2.Stream
+@service trait Fs2Greeter[F[_]] {
 
   @rpc(Avro) @stream[RequestStreaming.type]
   def sayHellos(requests: Stream[F, HelloRequest]): F[HelloResponse]
@@ -39,4 +45,17 @@ import fs2.Stream
 
   @rpc(Avro) @stream[BidirectionalStreaming.type]
   def sayHellosAll(requests: Stream[F, HelloRequest]): Stream[F, HelloResponse]
+}
+
+import monix.reactive.Observable
+@service trait MonixGreeter[F[_]] {
+
+  @rpc(Avro) @stream[RequestStreaming.type]
+  def sayHellos(requests: Observable[HelloRequest]): F[HelloResponse]
+
+  @rpc(Avro) @stream[ResponseStreaming.type]
+  def sayHelloAll(request: HelloRequest): Observable[HelloResponse]
+
+  @rpc(Avro) @stream[BidirectionalStreaming.type]
+  def sayHellosAll(requests: Observable[HelloRequest]): Observable[HelloResponse]
 }

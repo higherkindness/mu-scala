@@ -16,16 +16,22 @@
 
 package freestyle.rpc.http
 
+import cats.Applicative
 import cats.effect._
-import cats.syntax.applicative._
-import freestyle.rpc.protocol._
-import fs2.Stream
 
-class GreeterHandler[F[_]: Sync] extends Greeter[F] {
+class UnaryGreeterHandler[F[_]: Applicative] extends UnaryGreeter[F] {
+
+  import cats.syntax.applicative._
+  import freestyle.rpc.protocol.Empty
 
   def getHello(request: Empty.type): F[HelloResponse] = HelloResponse("hey").pure
 
   def sayHello(request: HelloRequest): F[HelloResponse] = HelloResponse(request.hello).pure
+}
+
+class Fs2GreeterHandler[F[_]: Sync] extends Fs2Greeter[F] {
+
+  import fs2.Stream
 
   def sayHellos(requests: Stream[F, HelloRequest]): F[HelloResponse] =
     requests.compile.fold(HelloResponse("")) {
@@ -35,8 +41,30 @@ class GreeterHandler[F[_]: Sync] extends Greeter[F] {
     }
 
   def sayHelloAll(request: HelloRequest): Stream[F, HelloResponse] =
-    fs2.Stream(HelloResponse(request.hello), HelloResponse(request.hello))
+    Stream(HelloResponse(request.hello), HelloResponse(request.hello))
 
   def sayHellosAll(requests: Stream[F, HelloRequest]): Stream[F, HelloResponse] =
+    requests.map(request => HelloResponse(request.hello))
+}
+
+class MonixGreeterHandler[F[_]: Async](implicit sc: monix.execution.Scheduler)
+    extends MonixGreeter[F] {
+
+  import freestyle.rpc.server.implicits._
+  import monix.reactive.Observable
+
+  def sayHellos(requests: Observable[HelloRequest]): F[HelloResponse] =
+    requests
+      .foldLeftL(HelloResponse("")) {
+        case (response, request) =>
+          HelloResponse(
+            if (response.hello.isEmpty) request.hello else s"${response.hello}, ${request.hello}")
+      }
+      .to[F]
+
+  def sayHelloAll(request: HelloRequest): Observable[HelloResponse] =
+    Observable(HelloResponse(request.hello), HelloResponse(request.hello))
+
+  def sayHellosAll(requests: Observable[HelloRequest]): Observable[HelloResponse] =
     requests.map(request => HelloResponse(request.hello))
 }

@@ -179,6 +179,7 @@ lazy val `http-server` =  project
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(internal)
   .dependsOn(client % "test->test")
+  .dependsOn(server % "test->test")
   .settings(moduleName := "frees-rpc-http-server")
   .settings(rpcHttpServerSettings)
   .disablePlugins(ScriptedPlugin)
