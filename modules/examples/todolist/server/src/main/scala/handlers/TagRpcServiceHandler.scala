@@ -29,23 +29,33 @@ class TagRpcServiceHandler[F[_]](implicit M: Monad[F], service: TagService[F])
 
   import TagConversions._
 
-  def reset(empty: Empty.type): F[Int] =
-    service.reset
+  def reset(empty: Empty.type): F[IntClass] =
+    service.reset.map(IntClass)
 
-  def insert(tagRequest: TagRequest): F[Option[RpcTag]] =
-    service.insert(tagRequest.toTag).map(_.map(_.toRpcTag))
+  def insert(tagRequest: TagRequest): F[TagResponse] =
+    service
+      .insert(tagRequest.toTag)
+      .map(v => TagResponse(v.map(_.toRpcTag)))
 
-  def retrieve(id: Int): F[Option[RpcTag]] =
-    service.retrieve(id).map(_.map(_.toRpcTag))
+  def retrieve(id: IntClass): F[TagResponse] =
+    service
+      .retrieve(id.i)
+      .map(v => TagResponse(v.map(_.toRpcTag)))
 
   def list(empty: Empty.type): F[TagList] =
-    service.list.map(_.map(_.toRpcTag)).map(TagList)
+    service.list
+      .map(_.map(_.toRpcTag))
+      .map(TagList)
 
-  def update(tag: RpcTag): F[Option[RpcTag]] =
-    service.update(tag.toTag).map(_.map(_.toRpcTag))
+  def update(tag: RpcTag): F[TagResponse] =
+    service
+      .update(tag.toTag)
+      .map(v => TagResponse(v.map(_.toRpcTag)))
 
-  def destroy(id: Int): F[Int] =
-    service.destroy(id)
+  def destroy(id: IntClass): F[IntClass] =
+    service
+      .destroy(id.i)
+      .map(IntClass)
 }
 
 object TagConversions {

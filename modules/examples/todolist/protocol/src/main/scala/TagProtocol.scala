@@ -21,35 +21,37 @@ import freestyle.rpc.protocol._
 
 trait TagProtocol {
 
-  @message
+  case class IntClass(i: Int)
+
   case class TagRequest(name: String)
 
-  @message
   case class Tag(name: String, id: Int)
 
-  @message
   case class TagList(list: List[Tag])
+
+  case class TagResponse(tag: Option[Tag])
 
   @service
   trait TagRpcService[F[_]] {
 
     @rpc(Protobuf)
-    def reset(empty: Empty.type): F[Int]
+    def reset(empty: Empty.type): F[IntClass]
 
     @rpc(Protobuf)
-    def insert(tagRequest: TagRequest): F[Option[Tag]]
+    def insert(tagRequest: TagRequest): F[TagResponse]
 
     @rpc(Protobuf)
-    def retrieve(id: Int): F[Option[Tag]]
+    def retrieve(id: IntClass): F[TagResponse]
 
     @rpc(Protobuf)
     def list(empty: Empty.type): F[TagList]
 
     @rpc(Protobuf)
-    def update(tag: Tag): F[Option[Tag]]
+    def update(tag: Tag): F[TagResponse]
 
     @rpc(Protobuf)
-    def destroy(id: Int): F[Int]
+    def destroy(id: IntClass): F[IntClass]
+
   }
 
 }
