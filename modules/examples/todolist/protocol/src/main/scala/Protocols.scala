@@ -46,8 +46,13 @@ trait PingPongProtocol {
 
 trait TagProtocol {
 
+  import monix.reactive.Observable
+
   @message
-  case class Tag(name: String, id: Option[Int])
+  case class TagRequest(name: String)
+
+  @message
+  case class Tag(name: String, id: Int)
 
   @service
   trait TagRpcService[F[_]] {
@@ -56,13 +61,14 @@ trait TagProtocol {
     def reset(empty: Empty.type): F[Int]
 
     @rpc(Protobuf)
-    def insert(tag: Tag): F[Option[Tag]]
+    def insert(tagRequest: TagRequest): F[Option[Tag]]
 
     @rpc(Protobuf)
     def retrieve(id: Int): F[Option[Tag]]
 
     @rpc(Protobuf)
-    def list(empty: Empty.type): F[List[Tag]]
+    @stream[ResponseStreaming.type]
+    def list(empty: Empty.type): Observable[Tag]
 
     @rpc(Protobuf)
     def update(tag: Tag): F[Option[Tag]]
