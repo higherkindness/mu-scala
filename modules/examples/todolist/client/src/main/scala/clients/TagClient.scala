@@ -15,29 +15,24 @@
  */
 
 package examples.todolist.client
+package clients
 
-import cats.Monad
-import cats.Monad.ops._
-import examples.todolist.client.clients.{PingPongClient, TagClient}
 import examples.todolist.protocol.Protocols._
-import org.log4s.getLogger
+import freestyle.tagless.tagless
 
-object ClientProgram {
+@tagless(true)
+trait TagClient[F[_]] {
 
-  val logger = getLogger
+  def reset(): F[Int]
 
-  def pongProgram[M[_]: Monad](implicit client: PingPongClient[M]): M[Unit] =
-    client.ping()
+  def insert(request: TagRequest): F[Option[Tag]]
 
-  def tagProgram[M[_]: Monad](implicit tagClient: TagClient[M]): M[Unit] =
-    for {
-      _         <- tagClient.reset()
-      optionTag <- tagClient.insert(TagRequest("tag"))
-    } yield {
-      //println(s">>> $optionTag")
-      optionTag.foreach { tag =>
-        logger.debug(s"Inserted tag with id (${tag.id}) and name (${tag.name})")
-        tagClient.destroy(tag.id)
-      }
-    }
+  def retrieve(id: Int): F[Option[Tag]]
+
+  def list(): F[TagList]
+
+  def update(tag: Tag): F[Option[Tag]]
+
+  def destroy(id: Int): F[Int]
+
 }
