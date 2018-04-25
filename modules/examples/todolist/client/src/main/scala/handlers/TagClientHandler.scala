@@ -34,7 +34,7 @@ class TagClientHandler[F[_]](
     for {
       _ <- log.debug(s"Calling to restart tags data")
       r <- client.reset(Empty)
-    } yield r.i
+    } yield r.value
 
   override def insert(request: TagRequest): F[Option[Tag]] =
     for {
@@ -45,7 +45,7 @@ class TagClientHandler[F[_]](
   override def retrieve(id: Int): F[Option[Tag]] =
     for {
       _ <- log.debug(s"Calling to get tag with id: $id")
-      r <- client.retrieve(IntClass(id))
+      r <- client.retrieve(IntMessage(id))
     } yield r.tag
 
   override def list(): F[TagList] =
@@ -63,6 +63,6 @@ class TagClientHandler[F[_]](
   override def destroy(id: Int): F[Int] =
     for {
       _ <- log.debug(s"Calling to delete tag with id: $id")
-      r <- client.destroy(IntClass(id))
-    } yield r.i
+      r <- client.destroy(IntMessage(id))
+    } yield r.value
 }
