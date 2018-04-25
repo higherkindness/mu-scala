@@ -34,7 +34,6 @@ object ClientProgram {
       _         <- tagClient.reset()
       optionTag <- tagClient.insert(TagRequest("tag"))
     } yield {
-      //println(s">>> $optionTag")
       optionTag.foreach { tag =>
         logger.debug(s"Inserted tag with id (${tag.id}) and name (${tag.name})")
         tagClient.destroy(tag.id)
