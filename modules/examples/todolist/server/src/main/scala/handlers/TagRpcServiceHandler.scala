@@ -19,8 +19,8 @@ package handlers
 
 import cats.Monad
 import cats.Monad.ops._
-import examples.todolist.Tag
-import examples.todolist.protocol.Protocols.{Tag => RpcTag, _}
+import examples.todolist.{Tag => LibTag}
+import examples.todolist.protocol.Protocols._
 import examples.todolist.service.TagService
 import freestyle.rpc.protocol.Empty
 
@@ -29,17 +29,17 @@ class TagRpcServiceHandler[F[_]](implicit M: Monad[F], service: TagService[F])
 
   import TagConversions._
 
-  def reset(empty: Empty.type): F[IntClass] =
-    service.reset.map(IntClass)
+  def reset(empty: Empty.type): F[IntMessage] =
+    service.reset.map(IntMessage)
 
   def insert(tagRequest: TagRequest): F[TagResponse] =
     service
       .insert(tagRequest.toTag)
       .map(v => TagResponse(v.map(_.toRpcTag)))
 
-  def retrieve(id: IntClass): F[TagResponse] =
+  def retrieve(id: IntMessage): F[TagResponse] =
     service
-      .retrieve(id.i)
+      .retrieve(id.value)
       .map(v => TagResponse(v.map(_.toRpcTag)))
 
   def list(empty: Empty.type): F[TagList] =
@@ -47,28 +47,28 @@ class TagRpcServiceHandler[F[_]](implicit M: Monad[F], service: TagService[F])
       .map(_.map(_.toRpcTag))
       .map(TagList)
 
-  def update(tag: RpcTag): F[TagResponse] =
+  def update(tag: Tag): F[TagResponse] =
     service
       .update(tag.toTag)
       .map(v => TagResponse(v.map(_.toRpcTag)))
 
-  def destroy(id: IntClass): F[IntClass] =
+  def destroy(id: IntMessage): F[IntMessage] =
     service
-      .destroy(id.i)
-      .map(IntClass)
+      .destroy(id.value)
+      .map(IntMessage)
 }
 
 object TagConversions {
 
   implicit class TagRequestToTag(tr: TagRequest) {
-    def toTag: Tag = Tag(tr.name)
+    def toTag: LibTag = LibTag(tr.name)
   }
 
-  implicit class RpcTagToTag(t: RpcTag) {
-    def toTag: Tag = Tag(t.name, Option(t.id))
+  implicit class RpcTagToTag(t: Tag) {
+    def toTag: LibTag = LibTag(t.name, Option(t.id))
   }
 
-  implicit class TagToRpcTag(t: Tag) {
-    def toRpcTag: RpcTag = RpcTag(t.name, t.id.get)
+  implicit class TagToRpcTag(t: LibTag) {
+    def toRpcTag: Tag = Tag(t.name, t.id.get)
   }
 }
