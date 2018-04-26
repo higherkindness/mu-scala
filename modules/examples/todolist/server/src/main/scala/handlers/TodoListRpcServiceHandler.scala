@@ -19,12 +19,12 @@ package handlers
 
 import cats.Monad
 import cats.Monad.ops._
-import examples.todolist.TodoList
-import examples.todolist.protocol.Protocols._
-import examples.todolist.protocol.common._
-import examples.todolist.service.TodoListService
-import freestyle.rpc.protocol.Empty
 import cats.syntax.option._
+import examples.todolist.protocol.common._
+import examples.todolist.protocol.Protocols._
+import examples.todolist.service.TodoListService
+import examples.todolist.TodoList
+import freestyle.rpc.protocol.Empty
 
 class TodoListRpcServiceHandler[F[_]](implicit M: Monad[F], service: TodoListService[F])
     extends TodoListRpcService[F] {

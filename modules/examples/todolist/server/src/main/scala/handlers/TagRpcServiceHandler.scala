@@ -19,10 +19,10 @@ package handlers
 
 import cats.Monad
 import cats.Monad.ops._
-import examples.todolist.Tag
-import examples.todolist.protocol.Protocols._
 import examples.todolist.protocol.common._
+import examples.todolist.protocol.Protocols._
 import examples.todolist.service.TagService
+import examples.todolist.Tag
 import freestyle.rpc.protocol.Empty
 
 class TagRpcServiceHandler[F[_]](implicit M: Monad[F], service: TagService[F])
@@ -74,6 +74,6 @@ object TagConversions {
 
   implicit class TagToTagMessage(t: Tag) {
     def toTagMessage: Option[TagMessage] =
-      t.id.map(id => TagMessage(t.name, id))
+      t.id.map(TagMessage(t.name, _))
   }
 }
