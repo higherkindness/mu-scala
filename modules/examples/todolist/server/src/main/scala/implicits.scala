@@ -20,8 +20,8 @@ import cats.effect.IO
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import doobie.hikari.HikariTransactor
 import doobie.util.transactor.Transactor
-import examples.todolist.persistence.runtime.TagRepositoryHandler
-import examples.todolist.persistence.TagRepository
+import examples.todolist.persistence.runtime._
+import examples.todolist.persistence._
 import examples.todolist.protocol.Protocols._
 import examples.todolist.runtime.PingPong
 import examples.todolist.server.handlers._
@@ -40,10 +40,18 @@ trait ServerImplicits extends PingPong with RepositoriesImplicits {
   implicit val tagRpcServiceHandler: TagRpcServiceHandler[IO] =
     new TagRpcServiceHandler[IO]()
 
+  implicit val todoListRpcServiceHandler: TodoListRpcServiceHandler[IO] =
+    new TodoListRpcServiceHandler[IO]()
+
+  implicit val todoItemmRpcServiceHandler: TodoItemRpcServiceHandler[IO] =
+    new TodoItemRpcServiceHandler[IO] {}
+
   val grpcConfigs: List[GrpcConfig] =
     List(
       AddService(PingPongService.bindService[IO]),
-      AddService(TagRpcService.bindService[IO])
+      AddService(TagRpcService.bindService[IO]),
+      AddService(TodoListRpcService.bindService[IO]),
+      AddService(TodoItemRpcService.bindService[IO])
     )
 
   implicit val serverW: ServerW =
@@ -69,6 +77,14 @@ trait RepositoriesImplicits {
 
   implicit def tagRepositoryHandler(implicit T: Transactor[IO]): TagRepository.Handler[IO] =
     new TagRepositoryHandler[IO]
+
+  implicit def todoListRepositoryHandler(
+      implicit T: Transactor[IO]): TodoListRepository.Handler[IO] =
+    new TodoListRepositoryHandler[IO]
+
+  implicit def todoItemRespositoryHandler(
+      implicit T: Transactor[IO]): TodoItemRepository.Handler[IO] =
+    new TodoItemRepositoryHandler[IO]
 }
 
 object implicits extends ServerImplicits

@@ -19,9 +19,10 @@ package handlers
 
 import cats.Monad
 import cats.Monad.ops._
-import examples.todolist.{Tag => LibTag}
+import examples.todolist.protocol.common._
 import examples.todolist.protocol.Protocols._
 import examples.todolist.service.TagService
+import examples.todolist.Tag
 import freestyle.rpc.protocol.Empty
 
 class TagRpcServiceHandler[F[_]](implicit M: Monad[F], service: TagService[F])
@@ -35,22 +36,25 @@ class TagRpcServiceHandler[F[_]](implicit M: Monad[F], service: TagService[F])
   def insert(tagRequest: TagRequest): F[TagResponse] =
     service
       .insert(tagRequest.toTag)
-      .map(v => TagResponse(v.map(_.toRpcTag)))
+      .map(_.flatMap(_.toTagMessage))
+      .map(TagResponse)
 
   def retrieve(id: IntMessage): F[TagResponse] =
     service
       .retrieve(id.value)
-      .map(v => TagResponse(v.map(_.toRpcTag)))
+      .map(_.flatMap(_.toTagMessage))
+      .map(TagResponse)
 
   def list(empty: Empty.type): F[TagList] =
     service.list
-      .map(_.map(_.toRpcTag))
+      .map(_.flatMap(_.toTagMessage))
       .map(TagList)
 
-  def update(tag: Tag): F[TagResponse] =
+  def update(tag: TagMessage): F[TagResponse] =
     service
       .update(tag.toTag)
-      .map(v => TagResponse(v.map(_.toRpcTag)))
+      .map(_.flatMap(_.toTagMessage))
+      .map(TagResponse)
 
   def destroy(id: IntMessage): F[IntMessage] =
     service
@@ -61,14 +65,15 @@ class TagRpcServiceHandler[F[_]](implicit M: Monad[F], service: TagService[F])
 object TagConversions {
 
   implicit class TagRequestToTag(tr: TagRequest) {
-    def toTag: LibTag = LibTag(tr.name)
+    def toTag: Tag = Tag(tr.name)
   }
 
-  implicit class RpcTagToTag(t: Tag) {
-    def toTag: LibTag = LibTag(t.name, Option(t.id))
+  implicit class TagMessageToTag(t: TagMessage) {
+    def toTag: Tag = Tag(t.name, Option(t.id))
   }
 
-  implicit class TagToRpcTag(t: LibTag) {
-    def toRpcTag: Tag = Tag(t.name, t.id.get)
+  implicit class TagToTagMessage(t: Tag) {
+    def toTagMessage: Option[TagMessage] =
+      t.id.map(TagMessage(t.name, _))
   }
 }

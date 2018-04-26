@@ -20,33 +20,33 @@ package protocol
 import examples.todolist.protocol.common._
 import freestyle.rpc.protocol._
 
-trait TagProtocol {
+trait TodoListProtocol {
 
-  case class TagRequest(name: String)
+  case class TodoListMessage(title: String, tagId: Int, id: Int)
 
-  case class TagMessage(name: String, id: Int)
+  case class TodoListRequest(title: String, tagId: Int)
 
-  case class TagList(list: List[TagMessage])
+  case class TodoListList(list: List[TodoListMessage])
 
-  case class TagResponse(tag: Option[TagMessage])
+  case class TodoListResponse(msg: Option[TodoListMessage])
 
   @service
-  trait TagRpcService[F[_]] {
+  trait TodoListRpcService[F[_]] {
 
     @rpc(Avro)
     def reset(empty: Empty.type): F[IntMessage]
 
     @rpc(Avro)
-    def insert(tagRequest: TagRequest): F[TagResponse]
+    def insert(item: TodoListRequest): F[TodoListResponse]
 
     @rpc(Avro)
-    def retrieve(id: IntMessage): F[TagResponse]
+    def retrieve(id: IntMessage): F[TodoListResponse]
 
     @rpc(Avro)
-    def list(empty: Empty.type): F[TagList]
+    def list(empty: Empty.type): F[TodoListList]
 
     @rpc(Avro)
-    def update(tag: TagMessage): F[TagResponse]
+    def update(item: TodoListMessage): F[TodoListResponse]
 
     @rpc(Avro)
     def destroy(id: IntMessage): F[IntMessage]

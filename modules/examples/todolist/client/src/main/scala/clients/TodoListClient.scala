@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
-package examples.todolist
-package protocol
+package examples.todolist.client
+package clients
 
-import freestyle.rpc.protocol._
+import freestyle.tagless.tagless
 
-@outputPackage("todolist")
-@outputName("TodoListService")
-@option("java_multiple_files", true)
-@option("java_outer_classname", "TodoListProtoc")
-@option("objc_class_prefix", "TL")
-object Protocols
-    extends PingPongProtocol
-    with TagProtocol
-    with TodoListProtocol
-    with TodoItemProtocol
+import examples.todolist.protocol.Protocols._
+
+@tagless(true)
+trait TodoListClient[F[_]] {
+
+  def reset(): F[Int]
+
+  def insert(request: TodoListRequest): F[Option[TodoListMessage]]
+
+  def retrieve(id: Int): F[Option[TodoListMessage]]
+
+  def list(): F[TodoListList]
+
+  def update(todoList: TodoListMessage): F[Option[TodoListMessage]]
+
+  def remove(id: Int): F[Int]
+
+}

@@ -25,14 +25,14 @@ trait TagClient[F[_]] {
 
   def reset(): F[Int]
 
-  def insert(request: TagRequest): F[Option[Tag]]
+  def insert(request: TagRequest): F[Option[TagMessage]]
 
-  def retrieve(id: Int): F[Option[Tag]]
+  def retrieve(id: Int): F[Option[TagMessage]]
 
   def list(): F[TagList]
 
-  def update(tag: Tag): F[Option[Tag]]
+  def update(tag: TagMessage): F[Option[TagMessage]]
 
-  def destroy(id: Int): F[Int]
+  def remove(id: Int): F[Int]
 
 }

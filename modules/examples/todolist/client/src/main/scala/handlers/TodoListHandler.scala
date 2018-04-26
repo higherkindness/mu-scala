@@ -19,47 +19,49 @@ package handlers
 
 import cats.Monad
 import cats.Monad.ops._
-import examples.todolist.client.clients.TagClient
-import examples.todolist.protocol.common._
+import examples.todolist.client.clients.TodoListClient
 import examples.todolist.protocol.Protocols._
+import examples.todolist.protocol.common._
 import freestyle.rpc.protocol.Empty
 import freestyle.tagless.logging.LoggingM
 
-class TagClientHandler[F[_]](
+class TodoListClientHandler[F[_]](
     implicit M: Monad[F],
     log: LoggingM[F],
-    client: TagRpcService.Client[F])
-    extends TagClient.Handler[F] {
+    client: TodoListRpcService.Client[F])
+    extends TodoListClient.Handler[F] {
 
   override def reset(): F[Int] =
     for {
-      _ <- log.debug(s"Calling to restart tags data")
+      _ <- log.debug(s"Calling to restart todo list data")
       r <- client.reset(Empty)
     } yield r.value
 
-  override def insert(request: TagRequest): F[Option[TagMessage]] =
+  override def insert(request: TodoListRequest): F[Option[TodoListMessage]] =
     for {
-      _ <- log.debug(s"Calling to insert tag with name: ${request.name}")
+      _ <- log.debug(
+        s"Calling to insert todo list with name: ${request.title} and id: ${request.tagId}")
       t <- client.insert(request)
-    } yield t.tag
+    } yield t.msg
 
-  override def retrieve(id: Int): F[Option[TagMessage]] =
+  override def retrieve(id: Int): F[Option[TodoListMessage]] =
     for {
-      _ <- log.debug(s"Calling to get tag with id: $id")
+      _ <- log.debug(s"Calling to get todo list with id: $id")
       r <- client.retrieve(IntMessage(id))
-    } yield r.tag
+    } yield r.msg
 
-  override def list(): F[TagList] =
+  override def list(): F[TodoListList] =
     for {
-      _ <- log.debug(s"Calling to get all tags")
+      _ <- log.debug(s"Calling to get all todo lists")
       r <- client.list(Empty)
     } yield r
 
-  override def update(tag: TagMessage): F[Option[TagMessage]] =
+  override def update(todoList: TodoListMessage): F[Option[TodoListMessage]] =
     for {
-      _ <- log.debug(s"Calling to update tag ${tag.id} with name ${tag.name}")
-      r <- client.update(tag)
-    } yield r.tag
+      _ <- log.debug(
+        s"Calling to update todo list with title: ${todoList.title}, tagId: ${todoList.tagId} and id: ${todoList.id}")
+      r <- client.update(todoList)
+    } yield r.msg
 
   override def remove(id: Int): F[Int] =
     for {
