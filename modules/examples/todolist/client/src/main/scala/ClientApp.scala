@@ -32,7 +32,7 @@ object ClientApp {
 
     logger.info(s"${Thread.currentThread().getName} Starting client...")
 
-    (pongProgram[IO] *> tagProgram[IO]).unsafeRunSync()
+    (pongProgram[IO] *> exampleProgram[IO]).unsafeRunSync()
 
     logger.info(s"${Thread.currentThread().getName} Closing client...")
 

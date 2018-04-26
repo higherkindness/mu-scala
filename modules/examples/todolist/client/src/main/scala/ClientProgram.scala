@@ -17,8 +17,10 @@
 package examples.todolist.client
 
 import cats.Monad
-import cats.Monad.ops._
-import examples.todolist.client.clients.{PingPongClient, TagClient}
+import examples.todolist.client.clients.TodoItemClient
+//import cats.Monad.ops._
+import cats.implicits._
+import examples.todolist.client.clients.{PingPongClient, TagClient, TodoListClient}
 import examples.todolist.protocol.Protocols._
 import org.log4s.getLogger
 
@@ -29,14 +31,24 @@ object ClientProgram {
   def pongProgram[M[_]: Monad](implicit client: PingPongClient[M]): M[Unit] =
     client.ping()
 
-  def tagProgram[M[_]: Monad](implicit tagClient: TagClient[M]): M[Unit] =
+  def exampleProgram[M[_]: Monad](
+      implicit tagClient: TagClient[M],
+      todoListClient: TodoListClient[M],
+      todoItemClient: TodoItemClient[M]): M[Unit] =
     for {
-      _         <- tagClient.reset()
-      optionTag <- tagClient.insert(TagRequest("tag"))
+      _      <- tagClient.reset()
+      _      <- todoListClient.reset()
+      _      <- todoItemClient.reset()
+      optTag <- tagClient.insert(TagRequest("tag"))
+      optList <- optTag
+        .map(tg => todoListClient.insert(TodoListRequest("list", tg.id)))
+        .sequence
+        .map(_.flatten)
+      _ <- optList
+        .map(tl => todoItemClient.insert(TodoItemRequest("item", tl.id)))
+        .sequence
+        .map(_.flatten)
     } yield {
-      optionTag.foreach { tag =>
-        logger.debug(s"Inserted tag with id (${tag.id}) and name (${tag.name})")
-        tagClient.destroy(tag.id)
-      }
+      logger.debug("Example program executed properly")
     }
 }
