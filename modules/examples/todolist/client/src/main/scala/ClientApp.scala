@@ -17,6 +17,7 @@
 package examples.todolist.client
 
 import cats.effect.IO
+import cats.syntax.apply._
 import examples.todolist.client.ClientProgram._
 import examples.todolist.client.implicits._
 import org.log4s._
@@ -31,8 +32,7 @@ object ClientApp {
 
     logger.info(s"${Thread.currentThread().getName} Starting client...")
 
-    pongProgram[IO].unsafeRunSync()
-    tagProgram[IO].unsafeRunSync()
+    (pongProgram[IO] *> tagProgram[IO]).unsafeRunSync()
 
     logger.info(s"${Thread.currentThread().getName} Closing client...")
 
