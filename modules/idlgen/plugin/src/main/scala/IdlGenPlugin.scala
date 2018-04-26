@@ -207,7 +207,5 @@ object IdlGenPlugin extends AutoPlugin {
   }
 
   override def projectSettings: Seq[Def.Setting[_]] =
-    defaultSettings ++ taskSettings ++ packagingSettings ++ Seq(
-      libraryDependencies += "io.frees" %% "frees-rpc-idlgen-core" % freestyle.rpc.idlgen.BuildInfo.version
-    )
+    defaultSettings ++ taskSettings ++ packagingSettings
 }
