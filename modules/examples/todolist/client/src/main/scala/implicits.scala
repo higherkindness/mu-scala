@@ -17,7 +17,7 @@
 package examples.todolist.client
 
 import cats.effect.IO
-import examples.todolist.client.handlers.{PingPongClientHandler, TagClientHandler}
+import examples.todolist.client.handlers._
 import examples.todolist.client.runtime._
 import examples.todolist.protocol.Protocols._
 import freestyle.tagless.loggingJVM.log4s.implicits._
@@ -36,6 +36,12 @@ trait ClientImplicits extends ClientConf with PingPong {
 
   implicit val tagClientHandler: TagClientHandler[IO] =
     new TagClientHandler[IO]
+
+  implicit val todoListRpcServiceClient: TodoListRpcService.Client[IO] =
+    TodoListRpcService.client[IO](channelFor)
+
+  implicit val todoListClientHandler: TodoListClientHandler[IO] =
+    new TodoListClientHandler[IO]
 
 }
 
