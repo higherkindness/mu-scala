@@ -67,7 +67,8 @@ class TodoItemRpcServiceHandler[F[_]](implicit M: Monad[F], service: TodoItemSer
 object TodoItemConversions {
 
   implicit class TodoItemRequestToTodoItem(it: TodoItemRequest) {
-    def toTodoItem: TodoItem = TodoItem(it.item, None, completed = false, it.todoListId.some)
+    def toTodoItem: TodoItem =
+      TodoItem(item = it.item, todoListId = it.todoListId.some, completed = false, id = None)
   }
 
   implicit class TodoItemToTodoItemMessage(it: TodoItem) {
