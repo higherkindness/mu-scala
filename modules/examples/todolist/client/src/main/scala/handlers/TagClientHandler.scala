@@ -21,6 +21,7 @@ import cats.Monad
 import cats.Monad.ops._
 import examples.todolist.client.clients.TagClient
 import examples.todolist.protocol.Protocols._
+import examples.todolist.protocol.common._
 import freestyle.rpc.protocol.Empty
 import freestyle.tagless.logging.LoggingM
 

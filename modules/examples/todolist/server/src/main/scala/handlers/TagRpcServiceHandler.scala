@@ -21,6 +21,7 @@ import cats.Monad
 import cats.Monad.ops._
 import examples.todolist.{Tag => LibTag}
 import examples.todolist.protocol.Protocols._
+import examples.todolist.protocol.common._
 import examples.todolist.service.TagService
 import freestyle.rpc.protocol.Empty
 
