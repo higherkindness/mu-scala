@@ -12,10 +12,11 @@ lazy val domain = project
     publishMavenStyle := true,
     mappings in (Compile, packageBin) ~= { _.filter(!_._1.getName.endsWith(".class")) },
     idlType := "avro",
-    srcGenSourceDir := (Compile / resourceDirectory).value,
+    srcGenSourceDirs := Seq((Compile / resourceDirectory).value),
     srcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
     sourceGenerators in Compile += (Compile / srcGen).taskValue,
     libraryDependencies ++= Seq(
+      "io.frees"    %% "frees-rpc-client-core" % sys.props("version"),
       "com.chuusai" %% "shapeless" % "2.3.2"
     )
   ))
