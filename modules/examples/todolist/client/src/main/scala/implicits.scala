@@ -43,6 +43,12 @@ trait ClientImplicits extends ClientConf with PingPong {
   implicit val todoListClientHandler: TodoListClientHandler[IO] =
     new TodoListClientHandler[IO]
 
+  implicit val todoItemRpcServiceClient: TodoItemRpcService.Client[IO] =
+    TodoItemRpcService.client[IO](channelFor)
+
+  implicit val todoItemClientHandler: TodoItemClientHandler[IO] =
+    new TodoItemClientHandler[IO]
+
 }
 
 object implicits extends ClientImplicits
