@@ -19,9 +19,39 @@ package protocol
 
 import freestyle.rpc.protocol._
 
-@outputPackage("todolist")
-@outputName("TodoListService")
-@option("java_multiple_files", true)
-@option("java_outer_classname", "TodoListProtoc")
-@option("objc_class_prefix", "TL")
-object Protocols extends PingPongProtocol with TagProtocol
+trait TagProtocol {
+
+  case class IntMessage(value: Int)
+
+  case class TagRequest(name: String)
+
+  case class Tag(name: String, id: Int)
+
+  case class TagList(list: List[Tag])
+
+  case class TagResponse(tag: Option[Tag])
+
+  @service
+  trait TagRpcService[F[_]] {
+
+    @rpc(Avro)
+    def reset(empty: Empty.type): F[IntMessage]
+
+    @rpc(Avro)
+    def insert(tagRequest: TagRequest): F[TagResponse]
+
+    @rpc(Avro)
+    def retrieve(id: IntMessage): F[TagResponse]
+
+    @rpc(Avro)
+    def list(empty: Empty.type): F[TagList]
+
+    @rpc(Avro)
+    def update(tag: Tag): F[TagResponse]
+
+    @rpc(Avro)
+    def destroy(id: IntMessage): F[IntMessage]
+
+  }
+
+}

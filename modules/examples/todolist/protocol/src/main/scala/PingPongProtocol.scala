@@ -14,30 +14,32 @@
  * limitations under the License.
  */
 
-package examples.todolist.client
+package examples.todolist
+package protocol
 
-import cats.effect.IO
-import cats.syntax.apply._
-import examples.todolist.client.ClientProgram._
-import examples.todolist.client.implicits._
-import org.log4s._
+import freestyle.rpc.protocol._
 
-import scala.io.StdIn
+trait PingPongProtocol {
 
-object ClientApp {
+  /**
+   * Pong response with current timestamp
+   *
+   * @param time Current timestamp.
+   */
+  @message
+  case class Pong(time: Long = System.currentTimeMillis() / 1000L)
 
-  def main(args: Array[String]): Unit = {
+  @service
+  trait PingPongService[F[_]] {
 
-    val logger: Logger = getLogger
+    /**
+     * A simple ping-pong rpc.
+     *
+     * @param empty
+     * @return Pong response with current timestamp.
+     */
+    @rpc(Protobuf)
+    def ping(empty: Empty.type): F[Pong]
 
-    logger.info(s"${Thread.currentThread().getName} Starting client...")
-
-    (pongProgram[IO] *> tagProgram[IO]).unsafeRunSync()
-
-    logger.info(s"${Thread.currentThread().getName} Closing client...")
-
-    StdIn.readLine()
-    (): Unit
   }
-
 }

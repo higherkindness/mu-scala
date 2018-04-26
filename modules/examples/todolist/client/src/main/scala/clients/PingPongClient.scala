@@ -15,29 +15,11 @@
  */
 
 package examples.todolist.client
+package clients
 
-import cats.effect.IO
-import cats.syntax.apply._
-import examples.todolist.client.ClientProgram._
-import examples.todolist.client.implicits._
-import org.log4s._
+import freestyle.tagless.tagless
 
-import scala.io.StdIn
-
-object ClientApp {
-
-  def main(args: Array[String]): Unit = {
-
-    val logger: Logger = getLogger
-
-    logger.info(s"${Thread.currentThread().getName} Starting client...")
-
-    (pongProgram[IO] *> tagProgram[IO]).unsafeRunSync()
-
-    logger.info(s"${Thread.currentThread().getName} Closing client...")
-
-    StdIn.readLine()
-    (): Unit
-  }
-
+@tagless(true)
+trait PingPongClient[F[_]] {
+  def ping(): F[Unit]
 }

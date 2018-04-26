@@ -164,6 +164,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val exampleTodolistCommonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
+        "io.frees" %% "frees-todolist-lib" % "0.8.1-SNAPSHOT",
         %%("log4s", V.log4s),
         %("logback-classic", V.logback)
       )
