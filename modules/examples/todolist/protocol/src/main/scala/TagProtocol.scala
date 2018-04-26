@@ -24,11 +24,11 @@ trait TagProtocol {
 
   case class TagRequest(name: String)
 
-  case class Tag(name: String, id: Int)
+  case class TagMessage(name: String, id: Int)
 
-  case class TagList(list: List[Tag])
+  case class TagList(list: List[TagMessage])
 
-  case class TagResponse(tag: Option[Tag])
+  case class TagResponse(tag: Option[TagMessage])
 
   @service
   trait TagRpcService[F[_]] {
@@ -46,7 +46,7 @@ trait TagProtocol {
     def list(empty: Empty.type): F[TagList]
 
     @rpc(Avro)
-    def update(tag: Tag): F[TagResponse]
+    def update(tag: TagMessage): F[TagResponse]
 
     @rpc(Avro)
     def destroy(id: IntMessage): F[IntMessage]

@@ -37,13 +37,13 @@ class TagClientHandler[F[_]](
       r <- client.reset(Empty)
     } yield r.value
 
-  override def insert(request: TagRequest): F[Option[Tag]] =
+  override def insert(request: TagRequest): F[Option[TagMessage]] =
     for {
       _ <- log.debug(s"Calling to insert tag with name: ${request.name}")
       t <- client.insert(request)
     } yield t.tag
 
-  override def retrieve(id: Int): F[Option[Tag]] =
+  override def retrieve(id: Int): F[Option[TagMessage]] =
     for {
       _ <- log.debug(s"Calling to get tag with id: $id")
       r <- client.retrieve(IntMessage(id))
@@ -55,7 +55,7 @@ class TagClientHandler[F[_]](
       r <- client.list(Empty)
     } yield r
 
-  override def update(tag: Tag): F[Option[Tag]] =
+  override def update(tag: TagMessage): F[Option[TagMessage]] =
     for {
       _ <- log.debug(s"Calling to update tag ${tag.id} with name ${tag.name}")
       r <- client.update(tag)
