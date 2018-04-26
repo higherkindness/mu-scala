@@ -36,22 +36,25 @@ class TagRpcServiceHandler[F[_]](implicit M: Monad[F], service: TagService[F])
   def insert(tagRequest: TagRequest): F[TagResponse] =
     service
       .insert(tagRequest.toTag)
-      .map(v => TagResponse(v.map(_.toRpcTag)))
+      .map(_.flatMap(_.toRpcTag))
+      .map(TagResponse)
 
   def retrieve(id: IntMessage): F[TagResponse] =
     service
       .retrieve(id.value)
-      .map(v => TagResponse(v.map(_.toRpcTag)))
+      .map(_.flatMap(_.toRpcTag))
+      .map(TagResponse)
 
   def list(empty: Empty.type): F[TagList] =
     service.list
-      .map(_.map(_.toRpcTag))
+      .map(_.flatMap(_.toRpcTag))
       .map(TagList)
 
   def update(tag: Tag): F[TagResponse] =
     service
       .update(tag.toTag)
-      .map(v => TagResponse(v.map(_.toRpcTag)))
+      .map(_.flatMap(_.toRpcTag))
+      .map(TagResponse)
 
   def destroy(id: IntMessage): F[IntMessage] =
     service
@@ -70,6 +73,7 @@ object TagConversions {
   }
 
   implicit class TagToRpcTag(t: LibTag) {
-    def toRpcTag: Tag = Tag(t.name, t.id.get)
+    def toRpcTag: Option[Tag] =
+      t.id.map(id => Tag(t.name, id))
   }
 }
