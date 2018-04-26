@@ -34,6 +34,6 @@ trait TodoListClient[F[_]] {
 
   def update(todoList: TodoListMessage): F[Option[TodoListMessage]]
 
-  def destroy(id: Int): F[Int]
+  def remove(id: Int): F[Int]
 
 }

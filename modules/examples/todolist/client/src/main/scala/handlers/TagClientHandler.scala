@@ -61,7 +61,7 @@ class TagClientHandler[F[_]](
       r <- client.update(tag)
     } yield r.tag
 
-  override def destroy(id: Int): F[Int] =
+  override def remove(id: Int): F[Int] =
     for {
       _ <- log.debug(s"Calling to delete tag with id: $id")
       r <- client.destroy(IntMessage(id))

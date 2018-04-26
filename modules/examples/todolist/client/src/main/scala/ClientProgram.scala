@@ -16,10 +16,9 @@
 
 package examples.todolist.client
 
-import cats.Monad
-import examples.todolist.client.clients.TodoItemClient
 import cats.implicits._
-import examples.todolist.client.clients.{PingPongClient, TagClient, TodoListClient}
+import cats.Monad
+import examples.todolist.client.clients._
 import examples.todolist.protocol.Protocols._
 import org.log4s.getLogger
 

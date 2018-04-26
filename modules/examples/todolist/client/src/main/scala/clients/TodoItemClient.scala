@@ -33,6 +33,6 @@ trait TodoItemClient[F[_]] {
 
   def update(tag: TodoItemMessage): F[Option[TodoItemMessage]]
 
-  def destroy(id: Int): F[Int]
+  def remove(id: Int): F[Int]
 
 }

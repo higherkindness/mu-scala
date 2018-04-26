@@ -63,7 +63,7 @@ class TodoItemClientHandler[F[_]](
       r <- client.update(todoItem)
     } yield r.msg
 
-  override def destroy(id: Int): F[Int] =
+  override def remove(id: Int): F[Int] =
     for {
       _ <- log.debug(s"Calling to delete todo item with id: $id")
       r <- client.destroy(IntMessage(id))

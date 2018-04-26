@@ -33,6 +33,6 @@ trait TagClient[F[_]] {
 
   def update(tag: TagMessage): F[Option[TagMessage]]
 
-  def destroy(id: Int): F[Int]
+  def remove(id: Int): F[Int]
 
 }
