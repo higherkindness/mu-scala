@@ -23,7 +23,7 @@ import doobie.util.transactor.Transactor
 import examples.todolist.persistence.runtime._
 import examples.todolist.persistence._
 import examples.todolist.protocol.Protocols._
-import examples.todolist.runtime.PingPong
+import examples.todolist.runtime.CommonRuntime
 import examples.todolist.server.handlers._
 import freestyle.rpc.server._
 import freestyle.rpc.server.config.BuildServerFromConfig
@@ -32,7 +32,7 @@ import freestyle.tagless.config.implicits._
 import freestyle.tagless.loggingJVM.log4s.implicits._
 import java.util.Properties
 
-trait ServerImplicits extends PingPong with RepositoriesImplicits {
+trait ServerImplicits extends CommonRuntime with RepositoriesImplicits {
 
   implicit val pingPongServiceHandler: PingPongServiceHandler[IO] =
     new PingPongServiceHandler[IO]()

@@ -26,8 +26,7 @@ trait PingPongProtocol {
    *
    * @param time Current timestamp.
    */
-  @message
-  case class Pong(time: Long = System.currentTimeMillis() / 1000L)
+  final case class Pong(time: Long = System.currentTimeMillis() / 1000L)
 
   @service
   trait PingPongService[F[_]] {

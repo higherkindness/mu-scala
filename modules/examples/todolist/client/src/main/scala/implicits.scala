@@ -18,12 +18,17 @@ package examples.todolist.client
 
 import cats.effect.IO
 import examples.todolist.client.handlers._
-import examples.todolist.client.runtime._
 import examples.todolist.protocol.Protocols._
 import freestyle.tagless.loggingJVM.log4s.implicits._
-import examples.todolist.runtime.PingPong
+import freestyle.tagless.config.implicits._
+import examples.todolist.runtime.CommonRuntime
+import freestyle.rpc.ChannelFor
+import freestyle.rpc.client.config.ConfigForAddress
 
-trait ClientImplicits extends ClientConf with PingPong {
+trait ClientImplicits extends CommonRuntime {
+
+  val channelFor: ChannelFor =
+    ConfigForAddress[IO]("rpc.client.host", "rpc.client.port").unsafeRunSync()
 
   implicit val pingPongServiceClient: PingPongService.Client[IO] =
     PingPongService.client[IO](channelFor)

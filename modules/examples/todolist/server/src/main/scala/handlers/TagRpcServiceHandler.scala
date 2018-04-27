@@ -19,7 +19,7 @@ package handlers
 
 import cats.Monad
 import cats.Monad.ops._
-import examples.todolist.protocol.common._
+import examples.todolist.protocol._
 import examples.todolist.protocol.Protocols._
 import examples.todolist.service.TagService
 import examples.todolist.Tag
@@ -30,8 +30,8 @@ class TagRpcServiceHandler[F[_]](implicit M: Monad[F], service: TagService[F])
 
   import TagConversions._
 
-  def reset(empty: Empty.type): F[IntMessage] =
-    service.reset.map(IntMessage)
+  def reset(empty: Empty.type): F[MessageId] =
+    service.reset.map(MessageId)
 
   def insert(tagRequest: TagRequest): F[TagResponse] =
     service
@@ -39,7 +39,7 @@ class TagRpcServiceHandler[F[_]](implicit M: Monad[F], service: TagService[F])
       .map(_.flatMap(_.toTagMessage))
       .map(TagResponse)
 
-  def retrieve(id: IntMessage): F[TagResponse] =
+  def retrieve(id: MessageId): F[TagResponse] =
     service
       .retrieve(id.value)
       .map(_.flatMap(_.toTagMessage))
@@ -56,10 +56,10 @@ class TagRpcServiceHandler[F[_]](implicit M: Monad[F], service: TagService[F])
       .map(_.flatMap(_.toTagMessage))
       .map(TagResponse)
 
-  def destroy(id: IntMessage): F[IntMessage] =
+  def destroy(id: MessageId): F[MessageId] =
     service
       .destroy(id.value)
-      .map(IntMessage)
+      .map(MessageId)
 }
 
 object TagConversions {

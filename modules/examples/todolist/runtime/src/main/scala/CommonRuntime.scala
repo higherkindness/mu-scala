@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package examples.todolist
-package protocol
+package examples.todolist.runtime
 
-package object common {
-  case class IntMessage(value: Int)
+import monix.execution.Scheduler
+
+trait CommonRuntime {
+
+  implicit val S: Scheduler = Scheduler.Implicits.global
+
 }

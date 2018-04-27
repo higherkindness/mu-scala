@@ -17,30 +17,30 @@
 package examples.todolist
 package protocol
 
-import examples.todolist.protocol.common._
+import examples.todolist.protocol.MessageId
 import freestyle.rpc.protocol._
 
 trait TagProtocol {
 
-  case class TagRequest(name: String)
+  final case class TagRequest(name: String)
 
-  case class TagMessage(name: String, id: Int)
+  final case class TagMessage(name: String, id: Int)
 
-  case class TagList(list: List[TagMessage])
+  final case class TagList(list: List[TagMessage])
 
-  case class TagResponse(tag: Option[TagMessage])
+  final case class TagResponse(tag: Option[TagMessage])
 
   @service
   trait TagRpcService[F[_]] {
 
     @rpc(Avro)
-    def reset(empty: Empty.type): F[IntMessage]
+    def reset(empty: Empty.type): F[MessageId]
 
     @rpc(Avro)
     def insert(tagRequest: TagRequest): F[TagResponse]
 
     @rpc(Avro)
-    def retrieve(id: IntMessage): F[TagResponse]
+    def retrieve(id: MessageId): F[TagResponse]
 
     @rpc(Avro)
     def list(empty: Empty.type): F[TagList]
@@ -49,7 +49,7 @@ trait TagProtocol {
     def update(tag: TagMessage): F[TagResponse]
 
     @rpc(Avro)
-    def destroy(id: IntMessage): F[IntMessage]
+    def destroy(id: MessageId): F[MessageId]
 
   }
 
