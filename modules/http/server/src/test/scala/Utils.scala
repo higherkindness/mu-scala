@@ -73,8 +73,9 @@ object Utils {
 
   implicit class Fs2StreamOps[F[_], A](stream: Stream[F, A]) {
 
-    implicit private val throwableEncoder: Encoder[Throwable] =
-      (ex: Throwable) => (ex.getClass.getName, ex.getMessage).asJson
+    implicit private val throwableEncoder: Encoder[Throwable] = new Encoder[Throwable] {
+      def apply(ex: Throwable): Json = (ex.getClass.getName, ex.getMessage).asJson
+    }
 
     def asJsonEither(implicit encoder: Encoder[A]): Stream[F, Json] = stream.attempt.map(_.asJson)
 
