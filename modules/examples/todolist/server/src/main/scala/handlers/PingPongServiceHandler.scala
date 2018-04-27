@@ -17,13 +17,14 @@
 package examples.todolist.server
 package handlers
 
-import cats.Monad
+import cats.Applicative
+import cats.syntax.applicative._
 import examples.todolist.protocol.Protocols.{PingPongService, Pong}
 import freestyle.rpc.protocol.Empty
 
-class PingPongServiceHandler[F[_]](implicit M: Monad[F]) extends PingPongService[F] {
+class PingPongServiceHandler[F[_]](implicit M: Applicative[F]) extends PingPongService[F] {
 
   override def ping(empty: Empty.type): F[Pong] =
-    M.pure(Pong())
+    Pong().pure[F]
 
 }

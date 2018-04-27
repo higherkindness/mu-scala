@@ -33,30 +33,30 @@
 package examples.todolist
 package protocol
 
-import examples.todolist.protocol.common._
+import examples.todolist.protocol.MessageId
 import freestyle.rpc.protocol._
 
 trait TodoItemProtocol {
 
-  case class TodoItemMessage(item: String, todoListId: Int, completed: Boolean, id: Int)
+  final case class TodoItemMessage(item: String, todoListId: Int, completed: Boolean, id: Int)
 
-  case class TodoItemRequest(item: String, todoListId: Int)
+  final case class TodoItemRequest(item: String, todoListId: Int)
 
-  case class TodoItemList(list: List[TodoItemMessage])
+  final case class TodoItemList(list: List[TodoItemMessage])
 
-  case class TodoItemResponse(msg: Option[TodoItemMessage])
+  final case class TodoItemResponse(msg: Option[TodoItemMessage])
 
   @service
   trait TodoItemRpcService[F[_]] {
 
     @rpc(Avro)
-    def reset(empty: Empty.type): F[IntMessage]
+    def reset(empty: Empty.type): F[MessageId]
 
     @rpc(Avro)
     def insert(item: TodoItemRequest): F[TodoItemResponse]
 
     @rpc(Avro)
-    def retrieve(id: IntMessage): F[TodoItemResponse]
+    def retrieve(id: MessageId): F[TodoItemResponse]
 
     @rpc(Avro)
     def list(empty: Empty.type): F[TodoItemList]
@@ -65,7 +65,7 @@ trait TodoItemProtocol {
     def update(item: TodoItemMessage): F[TodoItemResponse]
 
     @rpc(Avro)
-    def destroy(id: IntMessage): F[IntMessage]
+    def destroy(id: MessageId): F[MessageId]
 
   }
 

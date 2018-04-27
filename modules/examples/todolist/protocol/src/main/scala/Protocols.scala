@@ -17,13 +17,6 @@
 package examples.todolist
 package protocol
 
-import freestyle.rpc.protocol._
-
-@outputPackage("todolist")
-@outputName("TodoListService")
-@option("java_multiple_files", true)
-@option("java_outer_classname", "TodoListProtoc")
-@option("objc_class_prefix", "TL")
 object Protocols
     extends PingPongProtocol
     with TagProtocol

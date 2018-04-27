@@ -20,7 +20,7 @@ package handlers
 import cats.Monad
 import cats.Monad.ops._
 import cats.syntax.option._
-import examples.todolist.protocol.common._
+import examples.todolist.protocol._
 import examples.todolist.protocol.Protocols._
 import examples.todolist.service.TodoListService
 import examples.todolist.TodoList
@@ -31,15 +31,15 @@ class TodoListRpcServiceHandler[F[_]](implicit M: Monad[F], service: TodoListSer
 
   import TodoListConversions._
 
-  override def reset(empty: Empty.type): F[IntMessage] =
-    service.reset.map(IntMessage)
+  override def reset(empty: Empty.type): F[MessageId] =
+    service.reset.map(MessageId)
 
   override def insert(item: TodoListRequest): F[TodoListResponse] =
     service
       .insert(item.toTodoList)
       .map(_.toTodoList)
 
-  override def retrieve(id: IntMessage): F[TodoListResponse] =
+  override def retrieve(id: MessageId): F[TodoListResponse] =
     service
       .retrieve(id.value)
       .map(_.toTodoList)
@@ -54,10 +54,10 @@ class TodoListRpcServiceHandler[F[_]](implicit M: Monad[F], service: TodoListSer
       .update(item.toTodoList)
       .map(_.toTodoList)
 
-  override def destroy(id: IntMessage): F[IntMessage] =
+  override def destroy(id: MessageId): F[MessageId] =
     service
       .destroy(id.value)
-      .map(IntMessage)
+      .map(MessageId)
 }
 
 object TodoListConversions {

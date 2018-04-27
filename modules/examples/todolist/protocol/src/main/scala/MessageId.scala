@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-package examples.todolist.client
-package runtime
+package examples.todolist
+package protocol
 
-import cats.effect.IO
-import freestyle.rpc.ChannelFor
-import freestyle.rpc.client.config.ConfigForAddress
-import freestyle.tagless.config.implicits._
-
-trait ClientConf {
-
-  val channelFor: ChannelFor =
-    ConfigForAddress[IO]("rpc.client.host", "rpc.client.port").unsafeRunSync()
-
-}
+final case class MessageId(value: Int)

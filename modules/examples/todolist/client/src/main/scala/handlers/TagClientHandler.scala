@@ -20,7 +20,7 @@ package handlers
 import cats.Monad
 import cats.Monad.ops._
 import examples.todolist.client.clients.TagClient
-import examples.todolist.protocol.common._
+import examples.todolist.protocol._
 import examples.todolist.protocol.Protocols._
 import freestyle.rpc.protocol.Empty
 import freestyle.tagless.logging.LoggingM
@@ -46,7 +46,7 @@ class TagClientHandler[F[_]](
   override def retrieve(id: Int): F[Option[TagMessage]] =
     for {
       _ <- log.debug(s"Calling to get tag with id: $id")
-      r <- client.retrieve(IntMessage(id))
+      r <- client.retrieve(MessageId(id))
     } yield r.tag
 
   override def list(): F[TagList] =
@@ -64,6 +64,6 @@ class TagClientHandler[F[_]](
   override def remove(id: Int): F[Int] =
     for {
       _ <- log.debug(s"Calling to delete tag with id: $id")
-      r <- client.destroy(IntMessage(id))
+      r <- client.destroy(MessageId(id))
     } yield r.value
 }

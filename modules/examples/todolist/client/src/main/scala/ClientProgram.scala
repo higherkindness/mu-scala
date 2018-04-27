@@ -20,11 +20,11 @@ import cats.implicits._
 import cats.Monad
 import examples.todolist.client.clients._
 import examples.todolist.protocol.Protocols._
-import org.log4s.getLogger
+import org.log4s.{getLogger, Logger}
 
 object ClientProgram {
 
-  val logger = getLogger
+  val logger: Logger = getLogger
 
   def pongProgram[M[_]: Monad](implicit client: PingPongClient[M]): M[Unit] =
     client.ping()
@@ -46,7 +46,5 @@ object ClientProgram {
         .map(tl => todoItemClient.insert(TodoItemRequest("item", tl.id)))
         .sequence
         .map(_.flatten)
-    } yield {
-      logger.debug("Example program executed properly")
-    }
+    } yield logger.debug("Example program executed properly")
 }

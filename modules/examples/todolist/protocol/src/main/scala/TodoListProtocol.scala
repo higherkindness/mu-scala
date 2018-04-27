@@ -17,30 +17,30 @@
 package examples.todolist
 package protocol
 
-import examples.todolist.protocol.common._
+import examples.todolist.protocol.MessageId
 import freestyle.rpc.protocol._
 
 trait TodoListProtocol {
 
-  case class TodoListMessage(title: String, tagId: Int, id: Int)
+  final case class TodoListMessage(title: String, tagId: Int, id: Int)
 
-  case class TodoListRequest(title: String, tagId: Int)
+  final case class TodoListRequest(title: String, tagId: Int)
 
-  case class TodoListList(list: List[TodoListMessage])
+  final case class TodoListList(list: List[TodoListMessage])
 
-  case class TodoListResponse(msg: Option[TodoListMessage])
+  final case class TodoListResponse(msg: Option[TodoListMessage])
 
   @service
   trait TodoListRpcService[F[_]] {
 
     @rpc(Avro)
-    def reset(empty: Empty.type): F[IntMessage]
+    def reset(empty: Empty.type): F[MessageId]
 
     @rpc(Avro)
     def insert(item: TodoListRequest): F[TodoListResponse]
 
     @rpc(Avro)
-    def retrieve(id: IntMessage): F[TodoListResponse]
+    def retrieve(id: MessageId): F[TodoListResponse]
 
     @rpc(Avro)
     def list(empty: Empty.type): F[TodoListList]
@@ -49,7 +49,7 @@ trait TodoListProtocol {
     def update(item: TodoListMessage): F[TodoListResponse]
 
     @rpc(Avro)
-    def destroy(id: IntMessage): F[IntMessage]
+    def destroy(id: MessageId): F[MessageId]
 
   }
 

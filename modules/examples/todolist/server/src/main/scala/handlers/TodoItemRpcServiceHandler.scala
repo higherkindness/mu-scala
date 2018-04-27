@@ -23,7 +23,7 @@ import cats.syntax.option._
 import examples.todolist.service.TodoItemService
 import examples.todolist.TodoItem
 import examples.todolist.protocol.Protocols._
-import examples.todolist.protocol.common._
+import examples.todolist.protocol._
 import freestyle.rpc.protocol.Empty
 
 class TodoItemRpcServiceHandler[F[_]](implicit M: Monad[F], service: TodoItemService[F])
@@ -31,8 +31,8 @@ class TodoItemRpcServiceHandler[F[_]](implicit M: Monad[F], service: TodoItemSer
 
   import TodoItemConversions._
 
-  override def reset(empty: Empty.type): F[IntMessage] =
-    service.reset.map(IntMessage)
+  override def reset(empty: Empty.type): F[MessageId] =
+    service.reset.map(MessageId)
 
   override def insert(item: TodoItemRequest): F[TodoItemResponse] =
     service
@@ -40,7 +40,7 @@ class TodoItemRpcServiceHandler[F[_]](implicit M: Monad[F], service: TodoItemSer
       .map(_.flatMap(_.toTodoItemMessage))
       .map(TodoItemResponse)
 
-  override def retrieve(id: IntMessage): F[TodoItemResponse] =
+  override def retrieve(id: MessageId): F[TodoItemResponse] =
     service
       .retrieve(id.value)
       .map(_.flatMap(_.toTodoItemMessage))
@@ -57,10 +57,10 @@ class TodoItemRpcServiceHandler[F[_]](implicit M: Monad[F], service: TodoItemSer
       .map(_.flatMap(_.toTodoItemMessage))
       .map(TodoItemResponse)
 
-  override def destroy(id: IntMessage): F[IntMessage] =
+  override def destroy(id: MessageId): F[MessageId] =
     service
       .destroy(id.value)
-      .map(IntMessage)
+      .map(MessageId)
 
 }
 
