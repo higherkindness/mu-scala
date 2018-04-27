@@ -16,17 +16,26 @@
 
 package freestyle.rpc.http
 
-import cats.Applicative
+import cats.{Applicative, MonadError}
 import cats.effect._
 
-class UnaryGreeterHandler[F[_]: Applicative] extends UnaryGreeter[F] {
+class UnaryGreeterHandler[F[_]: Applicative](implicit F: MonadError[F, Throwable])
+    extends UnaryGreeter[F] {
 
   import cats.syntax.applicative._
   import freestyle.rpc.protocol.Empty
+  import io.grpc.Status._
 
   def getHello(request: Empty.type): F[HelloResponse] = HelloResponse("hey").pure
 
-  def sayHello(request: HelloRequest): F[HelloResponse] = HelloResponse(request.hello).pure
+  def sayHello(request: HelloRequest): F[HelloResponse] = request.hello match {
+    case "SE"  => F.raiseError(INVALID_ARGUMENT.withDescription("SE").asException)
+    case "SRE" => F.raiseError(INVALID_ARGUMENT.withDescription("SRE").asRuntimeException)
+    case "RTE" => F.raiseError(new IllegalArgumentException("RTE"))
+    case "TR"  => throw new IllegalArgumentException("Thrown")
+    case other => HelloResponse(other).pure
+  }
+
 }
 
 class Fs2GreeterHandler[F[_]: Sync] extends Fs2Greeter[F] {
@@ -41,7 +50,8 @@ class Fs2GreeterHandler[F[_]: Sync] extends Fs2Greeter[F] {
     }
 
   def sayHelloAll(request: HelloRequest): Stream[F, HelloResponse] =
-    Stream(HelloResponse(request.hello), HelloResponse(request.hello))
+    if (request.hello.isEmpty) Stream.raiseError(new IllegalArgumentException("empty greeting"))
+    else Stream(HelloResponse(request.hello), HelloResponse(request.hello))
 
   def sayHellosAll(requests: Stream[F, HelloRequest]): Stream[F, HelloResponse] =
     requests.map(request => HelloResponse(request.hello))
@@ -63,7 +73,8 @@ class MonixGreeterHandler[F[_]: Async](implicit sc: monix.execution.Scheduler)
       .to[F]
 
   def sayHelloAll(request: HelloRequest): Observable[HelloResponse] =
-    Observable(HelloResponse(request.hello), HelloResponse(request.hello))
+    if (request.hello.isEmpty) Observable.raiseError(new IllegalArgumentException("empty greeting"))
+    else Observable(HelloResponse(request.hello), HelloResponse(request.hello))
 
   def sayHellosAll(requests: Observable[HelloRequest]): Observable[HelloResponse] =
     requests.map(request => HelloResponse(request.hello))
