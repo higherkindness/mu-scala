@@ -1,5 +1,16 @@
 # Changelog
 
+## 05/02/2018 - Version 0.13.4
+
+Release changes:
+
+* Added tests for RPC error handling, and a fix for StatusRuntimeException ([#252](https://github.com/frees-io/freestyle-rpc/pull/252))
+* Removes the IDL core Dependency ([#254](https://github.com/frees-io/freestyle-rpc/pull/254))
+* Check if file exists before unzipping in idlgen plugin ([#259](https://github.com/frees-io/freestyle-rpc/pull/259))
+* New example: TodoList application ([#256](https://github.com/frees-io/freestyle-rpc/pull/256))
+* Releases 0.13.4 ([#260](https://github.com/frees-io/freestyle-rpc/pull/260))
+
+
 ## 04/18/2018 - Version 0.13.3
 
 Release changes:
