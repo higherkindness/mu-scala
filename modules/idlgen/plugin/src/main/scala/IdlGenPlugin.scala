@@ -196,7 +196,7 @@ object IdlGenPlugin extends AutoPlugin {
               overwrite = true,
               preserveLastModified = true,
               preserveExecutable = true)
-          } else {
+          } else if (classpathEntry.data.exists) {
             IO.unzip(classpathEntry.data, tmpDir, nameFilter)
             IO.copyDirectory(tmpDir, target)
           }
