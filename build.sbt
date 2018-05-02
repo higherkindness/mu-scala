@@ -179,11 +179,13 @@ lazy val `idlgen-sbt` = project
 lazy val `example-routeguide-protocol` = project
   .in(file("modules/examples/routeguide/protocol"))
   .dependsOn(client)
+  .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-routeguide-protocol")
   .disablePlugins(ScriptedPlugin)
 
 lazy val `example-routeguide-runtime` = project
   .in(file("modules/examples/routeguide/runtime"))
+  .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-routeguide-runtime")
   .settings(exampleRouteguideRuntimeSettings)
   .disablePlugins(ScriptedPlugin)
@@ -192,6 +194,7 @@ lazy val `example-routeguide-common` = project
   .in(file("modules/examples/routeguide/common"))
   .dependsOn(`example-routeguide-protocol`)
   .dependsOn(config)
+  .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-routeguide-common")
   .settings(exampleRouteguideCommonSettings)
   .disablePlugins(ScriptedPlugin)
@@ -201,6 +204,7 @@ lazy val `example-routeguide-server` = project
   .dependsOn(`example-routeguide-common`)
   .dependsOn(`example-routeguide-runtime`)
   .dependsOn(server)
+  .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-routeguide-server")
   .disablePlugins(ScriptedPlugin)
 
@@ -209,6 +213,7 @@ lazy val `example-routeguide-client` = project
   .dependsOn(`example-routeguide-common`)
   .dependsOn(`example-routeguide-runtime`)
   .dependsOn(`client-netty`)
+  .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-routeguide-client")
   .settings(
     Compile / unmanagedSourceDirectories ++= Seq(
@@ -227,11 +232,13 @@ lazy val `example-routeguide-client` = project
 lazy val `example-todolist-protocol` = project
   .in(file("modules/examples/todolist/protocol"))
   .dependsOn(client)
+  .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-todolist-protocol")
   .disablePlugins(ScriptedPlugin)
 
 lazy val `example-todolist-runtime` = project
   .in(file("modules/examples/todolist/runtime"))
+  .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-todolist-runtime")
   .settings(exampleTodolistRuntimeSettings)
   .disablePlugins(ScriptedPlugin)
@@ -242,6 +249,7 @@ lazy val `example-todolist-server` = project
   .dependsOn(`example-todolist-runtime`)
   .dependsOn(server)
   .dependsOn(config)
+  .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-todolist-server")
   .settings(exampleTodolistCommonSettings)
   .disablePlugins(ScriptedPlugin)
@@ -252,6 +260,7 @@ lazy val `example-todolist-client` = project
   .dependsOn(`example-todolist-runtime`)
   .dependsOn(`client-netty`)
   .dependsOn(config)
+  .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-todolist-client")
   .settings(exampleTodolistCommonSettings)
   .disablePlugins(ScriptedPlugin)
