@@ -1,7 +1,7 @@
 
 [comment]: # (Start Badges)
 
-[![Build Status](https://travis-ci.org/frees-io/freestyle-rpc.svg?branch=master)](https://travis-ci.org/frees-io/freestyle-rpc) [![codecov.io](http://codecov.io/github/frees-io/freestyle-rpc/coverage.svg?branch=master)](http://codecov.io/github/frees-io/freestyle-rpc?branch=master) [![Maven Central](https://img.shields.io/badge/maven%20central-0.13.3-green.svg)](https://oss.sonatype.org/#nexus-search;gav~io.frees~frees-rpc*) [![Latest version](https://img.shields.io/badge/freestyle--rpc-0.13.3-green.svg)](https://index.scala-lang.org/frees-io/freestyle-rpc) [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/frees-io/freestyle-rpc/master/LICENSE) [![Join the chat at https://gitter.im/47deg/freestyle](https://badges.gitter.im/47deg/freestyle.svg)](https://gitter.im/47deg/freestyle?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![GitHub Issues](https://img.shields.io/github/issues/frees-io/freestyle-rpc.svg)](https://github.com/frees-io/freestyle-rpc/issues)
+[![Build Status](https://travis-ci.org/frees-io/freestyle-rpc.svg?branch=master)](https://travis-ci.org/frees-io/freestyle-rpc) [![codecov.io](http://codecov.io/github/frees-io/freestyle-rpc/coverage.svg?branch=master)](http://codecov.io/github/frees-io/freestyle-rpc?branch=master) [![Maven Central](https://img.shields.io/badge/maven%20central-0.13.4-green.svg)](https://oss.sonatype.org/#nexus-search;gav~io.frees~frees-rpc*) [![Latest version](https://img.shields.io/badge/freestyle--rpc-0.13.4-green.svg)](https://index.scala-lang.org/frees-io/freestyle-rpc) [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/frees-io/freestyle-rpc/master/LICENSE) [![Join the chat at https://gitter.im/47deg/freestyle](https://badges.gitter.im/47deg/freestyle.svg)](https://gitter.im/47deg/freestyle?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![GitHub Issues](https://img.shields.io/github/issues/frees-io/freestyle-rpc.svg)](https://github.com/frees-io/freestyle-rpc/issues)
 
 [comment]: # (End Badges)
 
@@ -50,29 +50,29 @@ You can install any of these dependencies in your build as follows:
 
 ```scala
 // required for the RPC Server:
-libraryDependencies += "io.frees" %% "frees-rpc-server"            % "0.13.3"
+libraryDependencies += "io.frees" %% "frees-rpc-server"            % "0.13.4"
 
 // required for a protocol definition:
-libraryDependencies += "io.frees" %% "frees-rpc-client-core"       % "0.13.3"
+libraryDependencies += "io.frees" %% "frees-rpc-client-core"       % "0.13.4"
 
 // required for the use of the derived RPC Client/s, using either Netty or OkHttp as transport layer:
-libraryDependencies += "io.frees" %% "frees-rpc-client-netty"      % "0.13.3"
+libraryDependencies += "io.frees" %% "frees-rpc-client-netty"      % "0.13.4"
 // or:
-libraryDependencies += "io.frees" %% "frees-rpc-client-okhttp"     % "0.13.3"
+libraryDependencies += "io.frees" %% "frees-rpc-client-okhttp"     % "0.13.4"
 
 // optional - for both server and client configuration.
-libraryDependencies += "io.frees" %% "frees-rpc-config"            % "0.13.3"
+libraryDependencies += "io.frees" %% "frees-rpc-config"            % "0.13.4"
 
 // optional - for both server and client metrics reporting, using Prometheus.
-libraryDependencies += "io.frees" %% "frees-rpc-prometheus-server" % "0.13.3"
-libraryDependencies += "io.frees" %% "frees-rpc-prometheus-client" % "0.13.3"
+libraryDependencies += "io.frees" %% "frees-rpc-prometheus-server" % "0.13.4"
+libraryDependencies += "io.frees" %% "frees-rpc-prometheus-client" % "0.13.4"
 
 // optional - for both server and client metrics reporting, using Dropwizard.
-libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-server" % "0.13.3"
-libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-client" % "0.13.3"
+libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-server" % "0.13.4"
+libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-client" % "0.13.4"
 
 // optional - for the communication between server and client by using SSL/TLS.
-libraryDependencies += "io.frees" %% "frees-rpc-netty-ssl" % "0.13.3"
+libraryDependencies += "io.frees" %% "frees-rpc-netty-ssl" % "0.13.4"
 ```
 
 [comment]: # (End Replace)
