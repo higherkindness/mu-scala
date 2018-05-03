@@ -18,9 +18,9 @@ package freestyle.rpc.http
 
 import freestyle.rpc.protocol._
 
-@message case class HelloRequest(hello: String)
+@message final case class HelloRequest(hello: String)
 
-@message case class HelloResponse(hello: String)
+@message final case class HelloResponse(hello: String)
 
 // We don't actually need to split the various streaming types into their own services,
 // but this allows for more specific dependencies and type constraints (Sync, Async, Effect...) in their implementations.

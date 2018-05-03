@@ -16,12 +16,12 @@
 
 package freestyle.rpc.http
 
-import _root_.jawn.ParseException
 import cats.effect._
 import cats.implicits._
 import fs2.Stream
 import fs2.interop.reactivestreams._
 import io.grpc.Status.Code._
+import jawn.ParseException
 import io.circe._
 import io.circe.generic.auto._
 import io.circe.jawn.CirceSupportParser.facade
@@ -37,13 +37,13 @@ import scala.util.control.NoStackTrace
 
 object Utils {
 
-  implicit class MessageOps[F[_]](message: Message[F]) {
+  private[http] implicit class MessageOps[F[_]](message: Message[F]) {
 
     def jsonBodyAsStream[A](implicit decoder: Decoder[A]): Stream[F, A] =
       message.body.chunks.parseJsonStream.map(_.as[A]).rethrow
   }
 
-  implicit class RequestOps[F[_]](request: Request[F]) {
+  private[http] implicit class RequestOps[F[_]](request: Request[F]) {
 
     def asStream[A](implicit decoder: Decoder[A]): Stream[F, A] =
       request
@@ -54,7 +54,7 @@ object Utils {
         }
   }
 
-  implicit class ResponseOps[F[_]](response: Response[F]) {
+  private[http] implicit class ResponseOps[F[_]](response: Response[F]) {
 
     implicit private val throwableDecoder: Decoder[Throwable] =
       Decoder.decodeTuple2[String, String].map {
@@ -71,7 +71,7 @@ object Utils {
       else response.jsonBodyAsStream[Either[Throwable, A]].rethrow
   }
 
-  implicit class Fs2StreamOps[F[_], A](stream: Stream[F, A]) {
+  private[http] implicit class Fs2StreamOps[F[_], A](stream: Stream[F, A]) {
 
     implicit private val throwableEncoder: Encoder[Throwable] = new Encoder[Throwable] {
       def apply(ex: Throwable): Json = (ex.getClass.getName, ex.getMessage).asJson
@@ -83,13 +83,14 @@ object Utils {
       Observable.fromReactivePublisher(stream.toUnicastPublisher)
   }
 
-  implicit class MonixStreamOps[A](stream: Observable[A]) {
+  private[http] implicit class MonixStreamOps[A](stream: Observable[A]) {
 
     def toFs2Stream[F[_]](implicit F: Effect[F], sc: Scheduler): Stream[F, A] =
       stream.toReactivePublisher.toStream[F]
   }
 
-  implicit class FResponseOps[F[_]: Sync](response: F[Response[F]]) extends Http4sDsl[F] {
+  private[http] implicit class FResponseOps[F[_]: Sync](response: F[Response[F]])
+      extends Http4sDsl[F] {
 
     def adaptErrors: F[Response[F]] = response.handleErrorWith {
       case se: StatusException         => errorFromStatus(se.getStatus, se.getMessage)
@@ -108,11 +109,11 @@ object Utils {
       }
   }
 
-  def handleResponseError[F[_]: Sync](errorResponse: Response[F]): F[Throwable] =
+  private[http] def handleResponseError[F[_]: Sync](errorResponse: Response[F]): F[Throwable] =
     errorResponse.bodyAsText.compile.foldMonoid.map(body =>
       ResponseError(errorResponse.status, Some(body).filter(_.nonEmpty)))
 }
 
-case class ResponseError(status: Status, msg: Option[String] = None)
+final case class ResponseError(status: Status, msg: Option[String] = None)
     extends RuntimeException(status + msg.fold("")(": " + _))
     with NoStackTrace

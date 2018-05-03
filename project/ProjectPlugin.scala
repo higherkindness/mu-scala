@@ -27,6 +27,7 @@ object ProjectPlugin extends AutoPlugin {
       val nettySSL: String           = "2.0.7.Final"
       val pbdirect: String           = "0.1.0"
       val prometheus: String         = "0.3.0"
+      val scalacheck: String         = "1.14.0"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
@@ -157,7 +158,9 @@ object ProjectPlugin extends AutoPlugin {
         %%("http4s-blaze-server", V.http4s),
         %%("http4s-circe", V.http4s),
         %%("circe-generic"),
-        %%("http4s-blaze-client", V.http4s) % Test
+        %%("http4s-blaze-client", V.http4s) % Test,
+        %%("scalacheck", V.scalacheck) % Test,
+        "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
       )
     )
 
@@ -171,7 +174,7 @@ object ProjectPlugin extends AutoPlugin {
   override def projectSettings: Seq[Def.Setting[_]] =
     // format: OFF
     scalaMetaSettings ++ sharedReleaseProcess ++ warnUnusedImport ++ Seq(
-      libraryDependencies ++= commonDeps :+ %("slf4j-nop") % Test,
+      libraryDependencies ++= commonDeps, // :+ %("slf4j-nop") % Test,
       Test / fork := true,
       Tut / scalacOptions -= "-Ywarn-unused-import",
       orgAfterCISuccessTaskListSetting ~= (_.filterNot(_ == defaultPublishMicrosite)),
