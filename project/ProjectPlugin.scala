@@ -36,6 +36,7 @@ object ProjectPlugin extends AutoPlugin {
       val pbdirect: String           = "0.1.0"
       val prometheus: String         = "0.3.0"
       val monocle: String            = "1.5.0-cats"
+      val scalacheck: String         = "1.14.0"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
@@ -203,7 +204,9 @@ object ProjectPlugin extends AutoPlugin {
         %%("http4s-blaze-server", V.http4s),
         %%("http4s-circe", V.http4s),
         %%("circe-generic"),
-        %%("http4s-blaze-client", V.http4s) % Test
+        %%("http4s-blaze-client", V.http4s) % Test,
+        %%("scalacheck", V.scalacheck) % Test,
+        "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
       )
     )
 

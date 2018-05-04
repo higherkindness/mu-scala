@@ -17,6 +17,7 @@
 package freestyle.rpc.http
 
 import cats.effect._
+import freestyle.rpc.http.Utils._
 import fs2.Stream
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -25,31 +26,29 @@ import org.http4s.circe._
 import org.http4s.client._
 import org.http4s.dsl.io._
 
-class UnaryGreeterRestClient[F[_]: Effect](uri: Uri) {
+class UnaryGreeterRestClient[F[_]: Sync](uri: Uri) {
 
   private implicit val responseDecoder: EntityDecoder[F, HelloResponse] = jsonOf[F, HelloResponse]
 
   def getHello()(implicit client: Client[F]): F[HelloResponse] = {
     val request = Request[F](Method.GET, uri / "getHello")
-    client.expect[HelloResponse](request)
+    client.expectOr[HelloResponse](request)(handleResponseError)
   }
 
   def sayHello(arg: HelloRequest)(implicit client: Client[F]): F[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHello")
-    client.expect[HelloResponse](request.withBody(arg.asJson))
+    client.expectOr[HelloResponse](request.withBody(arg.asJson))(handleResponseError)
   }
 
 }
 
-class Fs2GreeterRestClient[F[_]: Effect](uri: Uri) {
-
-  import freestyle.rpc.http.RestClient._
+class Fs2GreeterRestClient[F[_]: Sync](uri: Uri) {
 
   private implicit val responseDecoder: EntityDecoder[F, HelloResponse] = jsonOf[F, HelloResponse]
 
   def sayHellos(arg: Stream[F, HelloRequest])(implicit client: Client[F]): F[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellos")
-    client.expect[HelloResponse](request.withBody(arg.map(_.asJson)))
+    client.expectOr[HelloResponse](request.withBody(arg.map(_.asJson)))(handleResponseError)
   }
 
   def sayHelloAll(arg: HelloRequest)(implicit client: Client[F]): Stream[F, HelloResponse] = {
@@ -67,15 +66,15 @@ class Fs2GreeterRestClient[F[_]: Effect](uri: Uri) {
 
 class MonixGreeterRestClient[F[_]: Effect](uri: Uri)(implicit sc: monix.execution.Scheduler) {
 
-  import freestyle.rpc.http.RestClient._
-  import freestyle.rpc.http.Util._
+  import freestyle.rpc.http.Utils._
   import monix.reactive.Observable
 
   private implicit val responseDecoder: EntityDecoder[F, HelloResponse] = jsonOf[F, HelloResponse]
 
   def sayHellos(arg: Observable[HelloRequest])(implicit client: Client[F]): F[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellos")
-    client.expect[HelloResponse](request.withBody(arg.toStream.map(_.asJson)))
+    client.expectOr[HelloResponse](request.withBody(arg.toFs2Stream.map(_.asJson)))(
+      handleResponseError)
   }
 
   def sayHelloAll(arg: HelloRequest)(implicit client: Client[F]): Observable[HelloResponse] = {
@@ -87,22 +86,8 @@ class MonixGreeterRestClient[F[_]: Effect](uri: Uri)(implicit sc: monix.executio
       implicit client: Client[F]): Observable[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellosAll")
     client
-      .streaming(request.withBody(arg.toStream.map(_.asJson)))(_.asStream[HelloResponse])
+      .streaming(request.withBody(arg.toFs2Stream.map(_.asJson)))(_.asStream[HelloResponse])
       .toObservable
   }
 
-}
-
-object RestClient {
-
-  import io.circe.Decoder
-  import io.circe.jawn.CirceSupportParser.facade
-  import jawnfs2._
-
-  implicit class ResponseOps[F[_]](response: Response[F]) {
-
-    def asStream[A](implicit decoder: Decoder[A]): Stream[F, A] =
-      if (response.status.code != 200) throw UnexpectedStatus(response.status)
-      else response.body.chunks.parseJsonStream.map(_.as[A]).rethrow
-  }
 }

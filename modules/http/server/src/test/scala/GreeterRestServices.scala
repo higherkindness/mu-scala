@@ -16,18 +16,20 @@
 
 package freestyle.rpc.http
 
+import cats.MonadError
 import cats.effect._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import fs2.Stream
-import io.circe.Decoder
+import freestyle.rpc.http.Utils._
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
-class UnaryGreeterRestService[F[_]: Sync](handler: UnaryGreeter[F]) extends Http4sDsl[F] {
+class UnaryGreeterRestService[F[_]: Sync](handler: UnaryGreeter[F])(
+    implicit F: MonadError[F, Throwable])
+    extends Http4sDsl[F] {
 
   import freestyle.rpc.protocol.Empty
 
@@ -40,36 +42,30 @@ class UnaryGreeterRestService[F[_]: Sync](handler: UnaryGreeter[F]) extends Http
     case msg @ POST -> Root / "sayHello" =>
       for {
         request  <- msg.as[HelloRequest]
-        response <- Ok(handler.sayHello(request).map(_.asJson))
+        response <- Ok(handler.sayHello(request).map(_.asJson)).adaptErrors
       } yield response
   }
 }
 
 class Fs2GreeterRestService[F[_]: Sync](handler: Fs2Greeter[F]) extends Http4sDsl[F] {
 
-  import freestyle.rpc.http.RestService._
-
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
 
   def service: HttpService[F] = HttpService[F] {
 
     case msg @ POST -> Root / "sayHellos" =>
-      for {
-        requests <- msg.asStream[HelloRequest]
-        response <- Ok(handler.sayHellos(requests).map(_.asJson))
-      } yield response
+      val requests = msg.asStream[HelloRequest]
+      Ok(handler.sayHellos(requests).map(_.asJson))
 
     case msg @ POST -> Root / "sayHelloAll" =>
       for {
         request   <- msg.as[HelloRequest]
-        responses <- Ok(handler.sayHelloAll(request).map(_.asJson))
+        responses <- Ok(handler.sayHelloAll(request).asJsonEither)
       } yield responses
 
     case msg @ POST -> Root / "sayHellosAll" =>
-      for {
-        requests  <- msg.asStream[HelloRequest]
-        responses <- Ok(handler.sayHellosAll(requests).map(_.asJson))
-      } yield responses
+      val requests = msg.asStream[HelloRequest]
+      Ok(handler.sayHellosAll(requests).asJsonEither)
   }
 }
 
@@ -77,52 +73,22 @@ class MonixGreeterRestService[F[_]: Effect](handler: MonixGreeter[F])(
     implicit sc: monix.execution.Scheduler)
     extends Http4sDsl[F] {
 
-  import freestyle.rpc.http.RestService._
-  import freestyle.rpc.http.Util._
-
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
 
   def service: HttpService[F] = HttpService[F] {
 
     case msg @ POST -> Root / "sayHellos" =>
-      for {
-        requests <- msg.asStream[HelloRequest]
-        observable = requests.toObservable
-        response <- Ok(handler.sayHellos(observable).map(_.asJson))
-      } yield response
+      val requests = msg.asStream[HelloRequest]
+      Ok(handler.sayHellos(requests.toObservable).map(_.asJson))
 
     case msg @ POST -> Root / "sayHelloAll" =>
       for {
         request   <- msg.as[HelloRequest]
-        responses <- Ok(handler.sayHelloAll(request).map(_.asJson).toStream)
+        responses <- Ok(handler.sayHelloAll(request).toFs2Stream.asJsonEither)
       } yield responses
 
     case msg @ POST -> Root / "sayHellosAll" =>
-      for {
-        requests <- msg.asStream[HelloRequest]
-        obsResponses = handler.sayHellosAll(requests.toObservable).map(_.asJson)
-        responses <- Ok(obsResponses.toStream)
-      } yield responses
-  }
-}
-
-object RestService {
-
-  implicit class RequestOps[F[_]: Sync](request: Request[F]) {
-
-    import cats.syntax.applicative._
-    import io.circe.jawn.CirceSupportParser.facade
-    import jawnfs2._
-    import _root_.jawn.ParseException
-
-    def asStream[A](implicit decoder: Decoder[A]): F[Stream[F, A]] =
-      request.body.chunks.parseJsonStream
-        .map(_.as[A])
-        .handleErrorWith {
-          case ex: ParseException =>
-            throw MalformedMessageBodyFailure(ex.getMessage, Some(ex)) // will return 400 instead of 500
-        }
-        .rethrow
-        .pure
+      val requests = msg.asStream[HelloRequest]
+      Ok(handler.sayHellosAll(requests.toObservable).toFs2Stream.asJsonEither)
   }
 }
