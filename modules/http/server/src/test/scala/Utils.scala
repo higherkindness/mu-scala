@@ -27,8 +27,9 @@ import io.circe.generic.auto._
 import io.circe.jawn.CirceSupportParser.facade
 import io.circe.syntax._
 import io.grpc.{Status => _, _}
+import java.util.concurrent._
 import jawnfs2._
-import monix.execution.Scheduler
+import monix.execution._
 import monix.reactive.Observable
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
@@ -36,6 +37,9 @@ import scala.concurrent.ExecutionContext
 import scala.util.control.NoStackTrace
 
 object Utils {
+
+  private[http] val singleThreadedEC =
+    ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor)
 
   private[http] implicit class MessageOps[F[_]](message: Message[F]) {
 
@@ -86,7 +90,9 @@ object Utils {
   private[http] implicit class MonixStreamOps[A](stream: Observable[A]) {
 
     def toFs2Stream[F[_]](implicit F: Effect[F], sc: Scheduler): Stream[F, A] =
-      stream.toReactivePublisher.toStream[F]
+      stream.toReactivePublisher
+        .toStream[F]()(F, singleThreadedEC)
+    // singleThreadedEC, because tests intermittently hang on socket reads when using the default Monix Scheduler
   }
 
   private[http] implicit class FResponseOps[F[_]: Sync](response: F[Response[F]])
