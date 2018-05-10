@@ -19,6 +19,7 @@ package internal
 
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
 import io.grpc.stub.ClientCalls
+import monix.execution.rstreams.Subscription
 import org.reactivestreams.{Publisher, Subscriber}
 
 package object client {
@@ -33,6 +34,7 @@ package object client {
     new Publisher[Res] {
       override def subscribe(s: Subscriber[_ >: Res]): Unit = {
         val subscriber: Subscriber[Res] = s.asInstanceOf[Subscriber[Res]]
+        s.onSubscribe(Subscription.empty)
         ClientCalls.asyncServerStreamingCall(
           channel.newCall[Req, Res](descriptor, options),
           request,

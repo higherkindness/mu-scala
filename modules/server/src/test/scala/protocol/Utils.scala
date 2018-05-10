@@ -167,6 +167,7 @@ object Utils extends CommonUtils {
       def uws(x: Int, y: Int): F[C]
       def uwe(a: A, err: String): F[C]
       def ss(a: Int, b: Int): F[List[C]]
+      def ss192(a: Int, b: Int): F[List[C]]
       def sswe(a: A, err: String): F[List[C]]
       def cs(cList: List[C], bar: Int): F[D]
       def bs(eList: List[E]): F[E]
@@ -383,6 +384,12 @@ object Utils extends CommonUtils {
             .toListL
             .to[F]
 
+        override def ss192(a: Int, b: Int): F[List[C]] =
+          client
+            .serverStreaming(B(A(a, a), A(b, b)))
+            .toListL
+            .to[F]
+
         override def sswe(a: A, err: String): F[List[C]] =
           client
             .serverStreamingWithError(E(a, err))
@@ -489,6 +496,12 @@ object Utils extends CommonUtils {
                 debug(s"[CLIENT] Result #$i: $c")
                 c
             }
+            .toListL
+            .to[F]
+
+        override def ss192(a: Int, b: Int): F[List[C]] =
+          client
+            .serverStreamingCompressed(B(A(a, a), A(b, b)))
             .toListL
             .to[F]
 
