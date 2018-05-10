@@ -467,6 +467,15 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     }
 
+    "#192 issue - be able to run server streaming services using .toListL without mapping" in {
+
+      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[List[C]] =
+        APP.ss192(a2.x, a2.y)
+
+      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe cList
+
+    }
+
   }
 
 }
