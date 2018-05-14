@@ -209,28 +209,32 @@ Fortunately, once all the runtime requirements are in place (**`import gserver.i
 
 Thanks to `withServerChannel` from the package `freestyle.rpc.testing.servers`, you will be able to run in-memory instances of the server, which is very convenient for testing purpose. Below, a very simple property-based test for proving `Greeter.sayHello`:
 
-```scala
+```tut:silent
 import freestyle.rpc.testing.servers.withServerChannel
+import org.scalatest.prop.Checkers
+import org.scalatest.{FunSuite, Matchers, OneInstancePerTest, Assertion}
+import org.scalacheck.Gen
+import org.scalacheck.Prop.forAll
+import service._
 
-class RPCServiceSpec extends FunSuite with Matchers with Checkers with OneInstancePerTest {
+class ServiceSpec extends FunSuite with Matchers with Checkers with OneInstancePerTest {
 
-  import implicits._
-
-  def sayHelloTest(request: HelloRequest, expected: HelloResponse) = {
+  import gserver.implicits._
+  
+  def sayHelloTest(requestGen: Gen[HelloRequest], expected: HelloResponse): Assertion =
     withServerChannel(Greeter.bindService[IO]) { sc =>
-      val client = Greeter.clientFromChannel[IO](sc.channel)
-      client.sayHello(request).unsafeRunSync() == expected
+        val client = Greeter.clientFromChannel[IO](sc.channel)
+        check {
+          forAll(requestGen) { request =>
+            client.sayHello(request).unsafeRunSync() == expected
+          }
+        }
     }
-  }
 
-  val requestGen: Gen[HelloRequest]
+  val requestGen: Gen[HelloRequest] = Gen.alphaStr map HelloRequest
 
   test("Get a valid response when a proper request is passed") {
-    check {
-      forAll(requestGen) { request =>
-        sayHelloTest(request, HelloResponse(reply = "Good bye!"))
-      }
-    }
+    sayHelloTest(requestGen, HelloResponse(reply = "Good bye!"))
   }
 
 }

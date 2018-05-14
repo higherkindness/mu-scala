@@ -189,7 +189,8 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val docsSettings = Seq(
       // Pointing to https://github.com/frees-io/freestyle/tree/master/docs/src/main/tut/docs/rpc
-      tutTargetDirectory := baseDirectory.value.getParentFile.getParentFile / "docs" / "src" / "main" / "tut" / "docs" / "rpc"
+      tutTargetDirectory := baseDirectory.value.getParentFile.getParentFile / "docs" / "src" / "main" / "tut" / "docs" / "rpc",
+      libraryDependencies ++= Seq(%%("scalamockScalatest") % "tut")
     )
 
   }
