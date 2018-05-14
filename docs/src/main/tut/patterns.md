@@ -212,7 +212,7 @@ Thanks to `withServerChannel` from the package `freestyle.rpc.testing.servers`, 
 ```tut:silent
 import freestyle.rpc.testing.servers.withServerChannel
 import org.scalatest.prop.Checkers
-import org.scalatest.{FunSuite, Matchers, OneInstancePerTest, Assertion}
+import org.scalatest._
 import org.scalacheck.Gen
 import org.scalacheck.Prop.forAll
 import service._
@@ -238,7 +238,15 @@ class ServiceSpec extends FunSuite with Matchers with Checkers with OneInstanceP
   }
 
 }
+
 ```
+
+Passing the test:
+
+```tut
+run(new ServiceSpec)
+```
+
 
 ## Client
 
