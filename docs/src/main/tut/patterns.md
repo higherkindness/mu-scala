@@ -207,7 +207,7 @@ Fortunately, once all the runtime requirements are in place (**`import gserver.i
 
 ### Service testing
 
-Thanks to `withServerChannel` from the package `freestyle.rpc.testing.servers`, you will be able to run in-memory instances of the server, which is very convenient for testing purpose. Below, a very simple property-based test for proving `Greeter.sayHello`:
+Thanks to `withServerChannel` from the package `freestyle.rpc.testing.servers`, you will be able to run in-memory instances of the server, which is very convenient for testing purposes. Below, a very simple property-based test for proving `Greeter.sayHello`:
 
 ```tut:silent
 import freestyle.rpc.testing.servers.withServerChannel
@@ -241,7 +241,7 @@ class ServiceSpec extends FunSuite with Matchers with Checkers with OneInstanceP
 
 ```
 
-Passing the test:
+Running the test:
 
 ```tut
 run(new ServiceSpec)
