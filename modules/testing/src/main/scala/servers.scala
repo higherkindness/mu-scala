@@ -17,8 +17,13 @@
 package freestyle.rpc
 package testing
 
+import java.util.UUID
+import java.util.concurrent.TimeUnit
+
+import io.grpc.inprocess.{InProcessChannelBuilder, InProcessServerBuilder}
 import io.grpc.internal.NoopServerCall.NoopServerCallListener
-import io.grpc.{Metadata, ServerCall, ServerCallHandler, ServerServiceDefinition}
+import io.grpc.util.MutableHandlerRegistry
+import io.grpc._
 
 object servers {
 
@@ -36,6 +41,58 @@ object servers {
       ssdBuilder.addMethod(methods.voidMethod(Some(methodName)), serverCallHandler[Void, Void])
     }
     ssdBuilder.build()
+  }
+
+  def withServerChannel[A](services: ServerServiceDefinition*)(f: ServerChannel => A): A = {
+
+    val sc: ServerChannel = ServerChannel(services: _*)
+    val result: A         = f(sc)
+    sc.shutdown()
+
+    result
+  }
+
+  final case class ServerChannel(server: Server, channel: ManagedChannel) {
+
+    def shutdown(): Boolean = {
+      channel.shutdown()
+      server.shutdown()
+
+      try {
+        channel.awaitTermination(1, TimeUnit.MINUTES)
+        server.awaitTermination(1, TimeUnit.MINUTES)
+      } catch {
+        case e: InterruptedException =>
+          Thread.currentThread.interrupt()
+          throw new RuntimeException(e)
+      } finally {
+        channel.shutdownNow()
+        server.shutdownNow()
+        (): Unit
+      }
+    }
+  }
+
+  object ServerChannel {
+
+    def apply(serverServiceDefinitions: ServerServiceDefinition*): ServerChannel = {
+      val serviceRegistry =
+        new MutableHandlerRegistry
+      val serverName: String =
+        UUID.randomUUID.toString
+      val serverBuilder: InProcessServerBuilder =
+        InProcessServerBuilder
+          .forName(serverName)
+          .fallbackHandlerRegistry(serviceRegistry)
+          .directExecutor()
+      val channelBuilder: InProcessChannelBuilder =
+        InProcessChannelBuilder.forName(serverName)
+
+      serverServiceDefinitions.toList.map(serverBuilder.addService)
+
+      ServerChannel(serverBuilder.build().start(), channelBuilder.directExecutor.build)
+    }
+
   }
 
 }

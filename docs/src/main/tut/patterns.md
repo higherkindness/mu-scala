@@ -205,6 +205,49 @@ object RPCServer {
 
 Fortunately, once all the runtime requirements are in place (**`import gserver.implicits._`**), we only have to write the previous piece of code, which primarily, should be the same in all cases (except if your target Monad is different from `cats.effects.IO`).
 
+### Service testing
+
+Thanks to `withServerChannel` from the package `freestyle.rpc.testing.servers`, you will be able to run in-memory instances of the server, which is very convenient for testing purposes. Below, a very simple property-based test for proving `Greeter.sayHello`:
+
+```tut:silent
+import freestyle.rpc.testing.servers.withServerChannel
+import org.scalatest.prop.Checkers
+import org.scalatest._
+import org.scalacheck.Gen
+import org.scalacheck.Prop.forAll
+import service._
+
+class ServiceSpec extends FunSuite with Matchers with Checkers with OneInstancePerTest {
+
+  import gserver.implicits._
+  
+  def sayHelloTest(requestGen: Gen[HelloRequest], expected: HelloResponse): Assertion =
+    withServerChannel(Greeter.bindService[IO]) { sc =>
+        val client = Greeter.clientFromChannel[IO](sc.channel)
+        check {
+          forAll(requestGen) { request =>
+            client.sayHello(request).unsafeRunSync() == expected
+          }
+        }
+    }
+
+  val requestGen: Gen[HelloRequest] = Gen.alphaStr map HelloRequest
+
+  test("Get a valid response when a proper request is passed") {
+    sayHelloTest(requestGen, HelloResponse(reply = "Good bye!"))
+  }
+
+}
+
+```
+
+Running the test:
+
+```tut
+run(new ServiceSpec)
+```
+
+
 ## Client
 
 [frees-rpc] derives a client automatically based on the protocol. This is especially useful because you can distribute it depending on the protocol/service definitions. If you change something in your protocol definition, you will get a new client for free without having to write anything.

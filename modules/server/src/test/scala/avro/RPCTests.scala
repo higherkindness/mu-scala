@@ -19,7 +19,7 @@ package avro
 
 import cats.Apply
 import freestyle.rpc.common._
-import freestyle.rpc.testing.ServerChannel.withServerChannel
+import freestyle.rpc.testing.servers.withServerChannel
 import io.grpc.ServerServiceDefinition
 import org.scalatest._
 
