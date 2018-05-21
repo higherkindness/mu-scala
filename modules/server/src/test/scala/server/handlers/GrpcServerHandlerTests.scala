@@ -20,11 +20,12 @@ package server.handlers
 import freestyle.rpc.common.{ConcurrentMonad, SC}
 import freestyle.rpc.server.RpcServerTestSuite
 import io.grpc.{Server, ServerServiceDefinition}
+import org.scalatest.OneInstancePerTest
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.TimeUnit
 
-class GrpcServerHandlerTests extends RpcServerTestSuite {
+class GrpcServerHandlerTests extends RpcServerTestSuite with OneInstancePerTest {
 
   implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
 

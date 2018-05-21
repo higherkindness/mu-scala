@@ -199,7 +199,6 @@ object ProjectPlugin extends AutoPlugin {
     // format: OFF
     scalaMetaSettings ++ sharedReleaseProcess ++ warnUnusedImport ++ Seq(
       libraryDependencies ++= commonDeps :+ %("slf4j-nop") % Test,
-      Test / fork := true,
       Tut / scalacOptions -= "-Ywarn-unused-import",
       orgAfterCISuccessTaskListSetting ~= (_.filterNot(_ == defaultPublishMicrosite)),
       orgBadgeListSetting := List(
