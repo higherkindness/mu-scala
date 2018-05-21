@@ -108,8 +108,8 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
 
     "work for client streaming RPC metrics" in {
 
-      ignoreOnTravis(
-        "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/168 is fixed")
+//      ignoreOnTravis(
+//        "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/168 is fixed")
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[D] =
         APP.cs(cList, i)

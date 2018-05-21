@@ -24,7 +24,7 @@ import org.scalatest._
 import scala.compat.Platform
 import scala.io._
 
-trait RpcBaseTestSuite extends WordSpec with Matchers with OneInstancePerTest with MockFactory {
+trait RpcBaseTestSuite extends WordSpec with Matchers with MockFactory {
 
   trait Helpers {
 
