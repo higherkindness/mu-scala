@@ -43,7 +43,8 @@ object ProjectPlugin extends AutoPlugin {
         "-language:higherKinds"),
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect) % Test,
-        %%("scalamockScalatest")        % Test
+        %%("scalamockScalatest")        % Test,
+        %%("scheckToolboxDatetime")     % Test
       )
     )
 
