@@ -18,6 +18,7 @@ package freestyle.rpc
 package protocol
 
 import cats.Applicative
+import cats.syntax.applicative._
 import org.scalatest._
 import freestyle.rpc.common._
 import freestyle.rpc.testing.servers.withServerChannel
@@ -46,22 +47,22 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
     }
 
-    class RPCServiceDefImpl[F[_]](implicit A: Applicative[F]) extends RPCServiceDef[F] {
+    class RPCServiceDefImpl[F[_]: Applicative] extends RPCServiceDef[F] {
 
-      def bigDecimalProto(bd: BigDecimal): F[BigDecimal] = A.pure(bd)
+      def bigDecimalProto(bd: BigDecimal): F[BigDecimal] = bd.pure
 
       def bigDecimalProtoWrapper(req: Request): F[Response] =
-        A.pure(Response(req.bigDecimal, req.label, check = true))
+        Response(req.bigDecimal, req.label, check = true).pure
 
-      def bigDecimalAvro(bd: BigDecimal): F[BigDecimal] = A.pure(bd)
+      def bigDecimalAvro(bd: BigDecimal): F[BigDecimal] = bd.pure
 
       def bigDecimalAvroWrapper(req: Request): F[Response] =
-        A.pure(Response(req.bigDecimal, req.label, check = true))
+        Response(req.bigDecimal, req.label, check = true).pure
 
-      def bigDecimalAvroWithSchema(bd: BigDecimal): F[BigDecimal] = A.pure(bd)
+      def bigDecimalAvroWithSchema(bd: BigDecimal): F[BigDecimal] = bd.pure
 
       def bigDecimalAvroWithSchemaWrapper(req: Request): F[Response] =
-        A.pure(Response(req.bigDecimal, req.label, check = true))
+        Response(req.bigDecimal, req.label, check = true).pure
     }
 
   }

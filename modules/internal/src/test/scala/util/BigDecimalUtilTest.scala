@@ -30,36 +30,36 @@ class BigDecimalUtilTest extends WordSpec with Matchers with Checkers {
     implicit val bigDecimalArbitrary: Arbitrary[BigDecimal] =
       Arbitrary(Gen.posNum[T].map(f))
 
-    check {
+    check(
       forAll { bd: BigDecimal =>
         val array = BigDecimalUtil.bigDecimalToByte(bd)
-        BigDecimalUtil.byteToBigDecimal(array) shouldBe bd
         BigDecimalUtil.byteToBigDecimal(array) == bd
-      }
-    }
+      },
+      MinSuccessful(1000)
+    )
   }
 
   "BigDecimalUtil" should {
 
-    "allow to convert BigDecimals for and from byte arrays" in {
-      check {
+    "allow to convert BigDecimals to and from byte arrays" in {
+      check(
         forAll { bd: BigDecimal =>
           val array = BigDecimalUtil.bigDecimalToByte(bd)
-          BigDecimalUtil.byteToBigDecimal(array) shouldBe bd
           BigDecimalUtil.byteToBigDecimal(array) == bd
-        }
-      }
+        },
+        MinSuccessful(1000)
+      )
     }
 
-    "allow to convert BigDecimals created from doubles for and from byte arrays" in {
+    "allow to convert BigDecimals created from doubles to and from byte arrays" in {
       checkAll[Double](BigDecimal.decimal)
     }
 
-    "allow to convert BigDecimals created from floats for and from byte arrays" in {
+    "allow to convert BigDecimals created from floats to and from byte arrays" in {
       checkAll[Float](BigDecimal.decimal)
     }
 
-    "allow to convert BigDecimals created from longs for and from byte arrays" in {
+    "allow to convert BigDecimals created from longs to and from byte arrays" in {
       checkAll[Long](BigDecimal.decimal)
     }
   }
