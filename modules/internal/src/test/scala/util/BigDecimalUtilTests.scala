@@ -24,7 +24,7 @@ import org.scalatest._
 import org.scalacheck.Prop._
 import org.scalatest.prop.Checkers
 
-class BigDecimalUtilTest extends WordSpec with Matchers with Checkers {
+class BigDecimalUtilTests extends WordSpec with Matchers with Checkers {
 
   def checkAll[T](f: T => BigDecimal)(implicit N: Numeric[T], C: Choose[T]): Assertion = {
     implicit val bigDecimalArbitrary: Arbitrary[BigDecimal] =
