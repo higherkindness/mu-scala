@@ -26,7 +26,7 @@ import com.google.protobuf.{CodedInputStream, CodedOutputStream}
 import freestyle.rpc.protocol._
 import freestyle.rpc.internal.util.{BigDecimalUtil, JavaTimeUtil}
 import io.grpc.MethodDescriptor.Marshaller
-import org.apache.avro.{Schema, SchemaBuilder}
+import org.apache.avro.Schema
 
 object encoders {
 
@@ -57,7 +57,6 @@ object encoders {
     implicit object LocalDateTimeWriter extends PBWriter[LocalDateTime] {
       override def writeTo(index: Int, value: LocalDateTime, out: CodedOutputStream): Unit =
         out.writeByteArray(index, JavaTimeUtil.localDateTimeToByteArray(value))
-
     }
 
     implicit object LocalDateTimeReader extends PBReader[LocalDateTime] {
@@ -85,9 +84,8 @@ object encoders {
       override def stream(value: Empty.type)              = new ByteArrayInputStream(Array.empty)
     }
 
-    implicit object bigDecimalSchemaFor extends SchemaFor[BigDecimal] {
-      private val schema: Schema = SchemaBuilder.builder().bytesType()
-      def apply(): Schema        = schema
+    implicit object bigDecimalToSchema extends ToSchema[BigDecimal] {
+      override val schema: Schema = Schema.create(Schema.Type.BYTES)
     }
 
     implicit object bigDecimalFromValue extends FromValue[BigDecimal] {
@@ -98,6 +96,34 @@ object encoders {
     implicit object bigDecimalToValue extends ToValue[BigDecimal] {
       override def apply(value: BigDecimal): ByteBuffer =
         ByteBuffer.wrap(BigDecimalUtil.bigDecimalToByte(value))
+    }
+
+    implicit object localDateToSchema extends ToSchema[LocalDate] {
+      override val schema: Schema = Schema.create(Schema.Type.INT)
+    }
+
+    implicit object localDateFromValue extends FromValue[LocalDate] {
+      def apply(value: Any, field: Schema.Field): LocalDate =
+        JavaTimeUtil.intToLocalDate(value.asInstanceOf[Int])
+    }
+
+    implicit object localDateToValue extends ToValue[LocalDate] {
+      override def apply(value: LocalDate): Int =
+        JavaTimeUtil.localDateToInt(value)
+    }
+
+    implicit object localDateTimeToSchema extends ToSchema[LocalDateTime] {
+      override val schema: Schema = Schema.create(Schema.Type.LONG)
+    }
+
+    implicit object localDateTimeFromValue extends FromValue[LocalDateTime] {
+      def apply(value: Any, field: Schema.Field): LocalDateTime =
+        JavaTimeUtil.longToLocalDateTime(value.asInstanceOf[Long])
+    }
+
+    implicit object localDateTimeToValue extends ToValue[LocalDateTime] {
+      override def apply(value: LocalDateTime): Long =
+        JavaTimeUtil.localDateTimeToLong(value)
     }
 
     implicit val bigDecimalMarshaller: Marshaller[BigDecimal] = new Marshaller[BigDecimal] {
