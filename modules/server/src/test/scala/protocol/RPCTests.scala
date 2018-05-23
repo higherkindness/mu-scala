@@ -271,39 +271,6 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe 3000
     }
 
-    "BigDecimal param with Proto" in {
-
-      val bd: BigDecimal = BigDecimal(scala.util.Random.nextDouble())
-
-      def clientProgram[F[_]: cats.Functor](
-          implicit client: service.RPCService.Client[F]): F[BigDecimal] =
-        client.bigDecimalParamResponse(bd)
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe bd
-    }
-
-    "BigDecimal param with Avro" in {
-
-      val bd: BigDecimal = BigDecimal(scala.util.Random.nextDouble())
-
-      def clientProgram[F[_]: cats.Functor](
-          implicit client: service.RPCService.Client[F]): F[BigDecimal] =
-        client.bigDecimalAvroParam(bd)
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe bd
-    }
-
-    "BigDecimal param with AvroWithSchema" in {
-
-      val bd: BigDecimal = BigDecimal(scala.util.Random.nextDouble())
-
-      def clientProgram[F[_]: cats.Functor](
-          implicit client: service.RPCService.Client[F]): F[BigDecimal] =
-        client.bigDecimalAvroWithSchemaParam(bd)
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe bd
-    }
-
   }
 
   "frees-rpc client with compression" should {

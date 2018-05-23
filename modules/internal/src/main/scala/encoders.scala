@@ -18,29 +18,30 @@ package freestyle.rpc
 package internal
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
+import java.nio.ByteBuffer
 
-import _root_.io.grpc.MethodDescriptor.Marshaller
 import com.google.common.io.ByteStreams
+import com.google.protobuf.{CodedInputStream, CodedOutputStream}
 import freestyle.rpc.protocol._
 import freestyle.rpc.internal.util.BigDecimalUtil
+import io.grpc.MethodDescriptor.Marshaller
+import org.apache.avro.{Schema, SchemaBuilder}
 
 object encoders {
 
-  trait Marshallers {
-
-    implicit val bigDecimalMarshaller: Marshaller[BigDecimal] = new Marshaller[BigDecimal] {
-      override def stream(value: BigDecimal): InputStream =
-        new ByteArrayInputStream(BigDecimalUtil.bigDecimalToByte(value))
-
-      override def parse(stream: InputStream): BigDecimal =
-        BigDecimalUtil.byteToBigDecimal(ByteStreams.toByteArray(stream))
-    }
-
-  }
-
-  object pbd extends Marshallers {
+  object pbd {
 
     import pbdirect._
+
+    implicit object BigDecimalWriter extends PBWriter[BigDecimal] {
+      override def writeTo(index: Int, value: BigDecimal, out: CodedOutputStream): Unit =
+        out.writeByteArray(index, BigDecimalUtil.bigDecimalToByte(value))
+    }
+
+    implicit object BigDecimalReader extends PBReader[BigDecimal] {
+      override def read(input: CodedInputStream): BigDecimal =
+        BigDecimalUtil.byteToBigDecimal(input.readByteArray())
+    }
 
     implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader]: Marshaller[A] =
       new Marshaller[A] {
@@ -53,14 +54,42 @@ object encoders {
       }
   }
 
-  object avro extends Marshallers {
+  trait AvroMarshallers {
 
     import com.sksamuel.avro4s._
 
     implicit val emptyMarshallers: Marshaller[Empty.type] = new Marshaller[Empty.type] {
-      override def parse(stream: InputStream) = Empty
-      override def stream(value: Empty.type)  = new ByteArrayInputStream(Array.empty)
+      override def parse(stream: InputStream): Empty.type = Empty
+      override def stream(value: Empty.type)              = new ByteArrayInputStream(Array.empty)
     }
+
+    implicit object bigDecimalSchemaFor extends SchemaFor[BigDecimal] {
+      private val schema: Schema = SchemaBuilder.builder().bytesType()
+      def apply(): Schema        = schema
+    }
+
+    implicit object bigDecimalFromValue extends FromValue[BigDecimal] {
+      def apply(value: Any, field: Schema.Field): BigDecimal =
+        BigDecimalUtil.byteToBigDecimal(value.asInstanceOf[ByteBuffer].array())
+    }
+
+    implicit object bigDecimalToValue extends ToValue[BigDecimal] {
+      override def apply(value: BigDecimal): ByteBuffer =
+        ByteBuffer.wrap(BigDecimalUtil.bigDecimalToByte(value))
+    }
+
+    implicit val bigDecimalMarshaller: Marshaller[BigDecimal] = new Marshaller[BigDecimal] {
+      override def stream(value: BigDecimal): InputStream =
+        new ByteArrayInputStream(BigDecimalUtil.bigDecimalToByte(value))
+
+      override def parse(stream: InputStream): BigDecimal =
+        BigDecimalUtil.byteToBigDecimal(ByteStreams.toByteArray(stream))
+    }
+  }
+
+  object avro extends AvroMarshallers {
+
+    import com.sksamuel.avro4s._
 
     implicit def avroMarshallers[A: SchemaFor: FromRecord: ToRecord]: Marshaller[A] =
       new Marshaller[A] {
@@ -85,16 +114,11 @@ object encoders {
       }
   }
 
-  object avrowithschema extends Marshallers {
+  object avrowithschema extends AvroMarshallers {
 
     import com.sksamuel.avro4s._
     import org.apache.avro.file.DataFileStream
     import org.apache.avro.generic.{GenericDatumReader, GenericRecord}
-
-    implicit val emptyMarshallers: Marshaller[Empty.type] = new Marshaller[Empty.type] {
-      override def parse(stream: InputStream) = Empty
-      override def stream(value: Empty.type)  = new ByteArrayInputStream(Array.empty)
-    }
 
     implicit def avroMarshallers[A: ToRecord](
         implicit schemaFor: SchemaFor[A],
