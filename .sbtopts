@@ -1,0 +1,7 @@
+-J-Xmx5g
+-J-XX:+CMSClassUnloadingEnabled
+-J-XX:MaxMetaspaceSize=1g
+-J-XX:+HeapDumpOnOutOfMemoryError
+-Djava.awt.headless=true
+-Dfile.encoding=utf8
+-Duser.timezone=UTC
