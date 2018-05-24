@@ -44,6 +44,17 @@ class JavaTimeUtilTests extends WordSpec with Matchers with Checkers {
       }
     }
 
+    "allow to convert LocalDate to and from byte array" in {
+      import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.days
+      check {
+        forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
+          val date  = zdt.toLocalDate
+          val value = JavaTimeUtil.localDateToByteArray(date)
+          JavaTimeUtil.byteArrayToLocalDate(value) == date
+        }
+      }
+    }
+
     "allow to convert LocalDateTime to and from long" in {
       import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.seconds
       check {
@@ -51,6 +62,17 @@ class JavaTimeUtilTests extends WordSpec with Matchers with Checkers {
           val date  = zdt.toLocalDateTime
           val value = JavaTimeUtil.localDateTimeToLong(date)
           JavaTimeUtil.longToLocalDateTime(value) == date
+        }
+      }
+    }
+
+    "allow to convert LocalDateTime to and from byte array" in {
+      import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.seconds
+      check {
+        forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
+          val date  = zdt.toLocalDateTime
+          val value = JavaTimeUtil.localDateTimeToByteArray(date)
+          JavaTimeUtil.byteArrayToLocalDateTime(value) == date
         }
       }
     }
