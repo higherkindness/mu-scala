@@ -26,13 +26,11 @@ object JodaTimeUtil {
 
   def jodaLocalDateToInt(value: LocalDate): Int =
     Days
-      .daysBetween(
-        DateTime.now(DateTimeZone.UTC).withMillis(0),
-        value.toDateTimeAtStartOfDay(DateTimeZone.UTC))
+      .daysBetween(initialDate, value.toDateTimeAtStartOfDay(DateTimeZone.UTC))
       .getDays
 
   def intToJodaLocalDate(value: Int): LocalDate =
-    DateTime.now().withMillis(0).plusDays(value).toLocalDate
+    initialDate.plusDays(value).toLocalDate
 
   def JodaLocalDatetimeToLong(value: LocalDateTime): Long =
     value.toDateTime(DateTimeZone.UTC).getMillis
