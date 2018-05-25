@@ -265,6 +265,21 @@ lazy val `example-todolist-client` = project
   .settings(exampleTodolistCommonSettings)
   .disablePlugins(ScriptedPlugin)
 
+/////////////////////
+//// MARSHALLERS ////
+/////////////////////
+
+lazy val `marshallers-jodatime` = project
+  .in(file("modules/marshallers/jodatime"))
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(client % "compile->compile;test->test")
+  .dependsOn(server % "compile->compile;test->test")
+  .dependsOn(testing % "test->test")
+  .settings(moduleName := "frees-rpc-marshallers-jodatime")
+  .settings(libraryDependencies += "joda-time" % "joda-time" % "2.9.9")
+  .settings(libraryDependencies += "com.47deg" %% "scalacheck-toolbox-datetime" % "0.2.4" % "test")
+  .disablePlugins(ScriptedPlugin)
+
 //////////////////////////
 //// MODULES REGISTRY ////
 //////////////////////////
@@ -286,6 +301,7 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   testing,
   ssl,
   `idlgen-core`,
+  `marshallers-jodatime`,
   `example-routeguide-protocol`,
   `example-routeguide-common`,
   `example-routeguide-runtime`,
