@@ -24,7 +24,7 @@ import java.time.{LocalDate, LocalDateTime}
 import com.google.common.io.ByteStreams
 import com.google.protobuf.{CodedInputStream, CodedOutputStream}
 import freestyle.rpc.protocol._
-import freestyle.rpc.internal.util.{BigDecimalUtil, JavaTimeUtil}
+import freestyle.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTimeUtil}
 import io.grpc.MethodDescriptor.Marshaller
 import org.apache.avro.Schema
 
@@ -46,22 +46,24 @@ object encoders {
 
     implicit object LocalDateWriter extends PBWriter[LocalDate] {
       override def writeTo(index: Int, value: LocalDate, out: CodedOutputStream): Unit =
-        out.writeByteArray(index, JavaTimeUtil.localDateToByteArray(value))
+        out.writeByteArray(index, EncoderUtil.intToByteArray(JavaTimeUtil.localDateToInt(value)))
     }
 
     implicit object LocalDateReader extends PBReader[LocalDate] {
       override def read(input: CodedInputStream): LocalDate =
-        JavaTimeUtil.byteArrayToLocalDate(input.readByteArray())
+        JavaTimeUtil.intToLocalDate(EncoderUtil.byteArrayToInt(input.readByteArray()))
     }
 
     implicit object LocalDateTimeWriter extends PBWriter[LocalDateTime] {
       override def writeTo(index: Int, value: LocalDateTime, out: CodedOutputStream): Unit =
-        out.writeByteArray(index, JavaTimeUtil.localDateTimeToByteArray(value))
+        out.writeByteArray(
+          index,
+          EncoderUtil.longToByteArray(JavaTimeUtil.localDateTimeToLong(value)))
     }
 
     implicit object LocalDateTimeReader extends PBReader[LocalDateTime] {
       override def read(input: CodedInputStream): LocalDateTime =
-        JavaTimeUtil.byteArrayToLocalDateTime(input.readByteArray())
+        JavaTimeUtil.longToLocalDateTime(EncoderUtil.byteArrayToLong(input.readByteArray()))
     }
 
     implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader]: Marshaller[A] =
@@ -136,19 +138,22 @@ object encoders {
 
     implicit val localDateMarshaller: Marshaller[LocalDate] = new Marshaller[LocalDate] {
       override def stream(value: LocalDate): InputStream =
-        new ByteArrayInputStream(JavaTimeUtil.localDateToByteArray(value))
+        new ByteArrayInputStream(EncoderUtil.intToByteArray(JavaTimeUtil.localDateToInt(value)))
 
       override def parse(stream: InputStream): LocalDate =
-        JavaTimeUtil.byteArrayToLocalDate(ByteStreams.toByteArray(stream))
+        JavaTimeUtil.intToLocalDate(EncoderUtil.byteArrayToInt(ByteStreams.toByteArray(stream)))
+
     }
 
     implicit val localDateTimeMarshaller: Marshaller[LocalDateTime] =
       new Marshaller[LocalDateTime] {
         override def stream(value: LocalDateTime): InputStream =
-          new ByteArrayInputStream(JavaTimeUtil.localDateTimeToByteArray(value))
+          new ByteArrayInputStream(
+            EncoderUtil.longToByteArray(JavaTimeUtil.localDateTimeToLong(value)))
 
         override def parse(stream: InputStream): LocalDateTime =
-          JavaTimeUtil.byteArrayToLocalDateTime(ByteStreams.toByteArray(stream))
+          JavaTimeUtil.longToLocalDateTime(
+            EncoderUtil.byteArrayToLong(ByteStreams.toByteArray(stream)))
       }
   }
 

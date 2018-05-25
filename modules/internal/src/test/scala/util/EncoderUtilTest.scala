@@ -31,7 +31,6 @@ class EncoderUtilTest extends WordSpec with Matchers with Checkers {
         { n: Int =>
           val value: Array[Byte] = EncoderUtil.intToByteArray(n)
 
-          EncoderUtil.byteArrayToInt(value) shouldBe n
           EncoderUtil.byteArrayToInt(value) == n
 
         }
@@ -43,7 +42,6 @@ class EncoderUtilTest extends WordSpec with Matchers with Checkers {
         { n: Long =>
           val value: Array[Byte] = EncoderUtil.longToByteArray(n)
 
-          EncoderUtil.byteArrayToLong(value) shouldBe n
           EncoderUtil.byteArrayToLong(value) == n
 
         }

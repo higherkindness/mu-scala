@@ -22,6 +22,8 @@ import org.joda.time._
 
 object JodaTimeUtil {
 
+  private[this] val initialDate = DateTime.now(DateTimeZone.UTC).withMillis(0)
+
   def jodaLocalDateToInt(value: LocalDate): Int =
     Days
       .daysBetween(

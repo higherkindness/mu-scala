@@ -49,8 +49,9 @@ class JavaTimeUtilTests extends WordSpec with Matchers with Checkers {
       check {
         forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
           val date  = zdt.toLocalDate
-          val value = JavaTimeUtil.localDateToByteArray(date)
-          JavaTimeUtil.byteArrayToLocalDate(value) == date
+          val value = EncoderUtil.intToByteArray(JavaTimeUtil.localDateToInt(date))
+          JavaTimeUtil.intToLocalDate(EncoderUtil.byteArrayToInt(value)) == date
+
         }
       }
     }
@@ -71,8 +72,8 @@ class JavaTimeUtilTests extends WordSpec with Matchers with Checkers {
       check {
         forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
           val date  = zdt.toLocalDateTime
-          val value = JavaTimeUtil.localDateTimeToByteArray(date)
-          JavaTimeUtil.byteArrayToLocalDateTime(value) == date
+          val value = EncoderUtil.longToByteArray(JavaTimeUtil.localDateTimeToLong(date))
+          JavaTimeUtil.longToLocalDateTime(EncoderUtil.byteArrayToLong(value)) == date
         }
       }
     }

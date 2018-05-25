@@ -41,7 +41,6 @@ class JodaTimeUtilTest extends WordSpec with Matchers with Checkers {
           val date: LocalDate = dt.toLocalDate
           val value: Int      = JodaTimeUtil.jodaLocalDateToInt(date)
 
-          JodaTimeUtil.intToJodaLocalDate(value) shouldBe date
           JodaTimeUtil.intToJodaLocalDate(value) == date
         }
       }
@@ -54,7 +53,6 @@ class JodaTimeUtilTest extends WordSpec with Matchers with Checkers {
           val date: LocalDateTime = dt.toDateTime(DateTimeZone.UTC).toLocalDateTime
           val value: Long         = JodaTimeUtil.JodaLocalDatetimeToLong(date)
 
-          JodaTimeUtil.longToJodaLocalDateTime(value) shouldBe date
           JodaTimeUtil.longToJodaLocalDateTime(value) == date
         }
       }
