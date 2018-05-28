@@ -32,7 +32,7 @@ object JodaTimeUtil {
   def intToJodaLocalDate(value: Int): LocalDate =
     initialDate.plusDays(value).toLocalDate
 
-  def JodaLocalDatetimeToLong(value: LocalDateTime): Long =
+  def jodaLocalDatetimeToLong(value: LocalDateTime): Long =
     value.toDateTime(DateTimeZone.UTC).getMillis
 
   def longToJodaLocalDateTime(value: Long): LocalDateTime =
