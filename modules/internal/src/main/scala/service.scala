@@ -93,7 +93,7 @@ trait RPCService {
   val (noRequests, requests): (List[Stat], List[RPCRequest]) =
     buildRequests(algName, typeParam, noImports)
 
-  val methodDescriptors: Seq[Defn.Val] = requests.map(_.methodDescriptor)
+  val methodDescriptors: Seq[Defn.Def] = requests.map(_.methodDescriptor)
 
   val serviceBindings: Defn.Def = {
     val args: Seq[Term.Tuple] = requests.map(_.call)
@@ -196,14 +196,14 @@ private[internal] case class RPCRequest(
 
     q"""
        $wartSuppress
-       val ${Pat.Var.Term(descriptorName)}: _root_.io.grpc.MethodDescriptor[$requestType, $responseType] = {
+       def $descriptorName(
+         implicit ReqM: _root_.io.grpc.MethodDescriptor.Marshaller[$requestType],
+         ResM: _root_.io.grpc.MethodDescriptor.Marshaller[$responseType]): _root_.io.grpc.MethodDescriptor[$requestType, $responseType] = {
 
          $encodersImport
 
          _root_.io.grpc.MethodDescriptor
-           .newBuilder(
-             implicitly[_root_.io.grpc.MethodDescriptor.Marshaller[$requestType]],
-             implicitly[_root_.io.grpc.MethodDescriptor.Marshaller[$responseType]])
+           .newBuilder()
            .setType(${utils.methodType(streamingType)})
            .setFullMethodName(
              _root_.io.grpc.MethodDescriptor.generateFullMethodName(${Lit.String(algName.value)}, ${Lit
