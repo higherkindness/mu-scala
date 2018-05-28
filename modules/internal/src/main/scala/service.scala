@@ -32,16 +32,17 @@ object serviceImpl {
 
   import errors._
 
-  def service(defn: Any): Stat = {
+  def service(defn: Any, serializationType: SerializationType): Stat = {
+
     defn match {
       case cls: Trait =>
-        serviceExtras(cls.name, cls)
+        serviceExtras(cls.name, cls, serializationType)
       case cls: Class if ScalametaUtil.isAbstract(cls) =>
-        serviceExtras(cls.name, cls)
+        serviceExtras(cls.name, cls, serializationType)
       case Term.Block(Seq(cls: Trait, companion: Object)) =>
-        serviceExtras(cls.name, cls, Some(companion))
+        serviceExtras(cls.name, cls, serializationType, Some(companion))
       case Term.Block(Seq(cls: Class, companion: Object)) if ScalametaUtil.isAbstract(cls) =>
-        serviceExtras(cls.name, cls, Some(companion))
+        serviceExtras(cls.name, cls, serializationType, Some(companion))
       case _ =>
         abort(s"$invalid. $abstractOnly")
     }
@@ -50,9 +51,10 @@ object serviceImpl {
   private[this] def serviceExtras(
       name: Type.Name,
       alg: Defn,
+      serializationType: SerializationType,
       companion: Option[Object] = None): Term.Block = {
     import utils._
-    val serviceAlg = ServiceAlg(alg)
+    val serviceAlg = ServiceAlg(alg, serializationType)
     val enrichedCompanion = {
       val stats = enrich(serviceAlg, serviceAlg.innerImports)
       companion.fold(mkCompanion(name, stats))(enrichCompanion(_, stats))
@@ -62,6 +64,7 @@ object serviceImpl {
 
   private[this] def enrich(serviceAlg: RPCService, members: Seq[Stat]): Seq[Stat] =
     members ++
+      Seq(serviceAlg.encodersImport) ++
       serviceAlg.methodDescriptors ++
       Seq(serviceAlg.serviceBindings, serviceAlg.clientClass) ++ serviceAlg.clientInstance
 }
@@ -70,6 +73,8 @@ trait RPCService {
   import utils._
 
   def defn: Defn
+
+  def serialization: SerializationType
 
   def typeParam: Type.Param
 
@@ -92,6 +97,15 @@ trait RPCService {
 
   val (noRequests, requests): (List[Stat], List[RPCRequest]) =
     buildRequests(algName, typeParam, noImports)
+
+  val encodersImport: Import = serialization match {
+    case Protobuf =>
+      q"import _root_.freestyle.rpc.internal.encoders.pbd._"
+    case Avro =>
+      q"import _root_.freestyle.rpc.internal.encoders.avro._"
+    case AvroWithSchema =>
+      q"import _root_.freestyle.rpc.internal.encoders.avrowithschema._"
+  }
 
   val methodDescriptors: Seq[Defn.Def] = requests.map(_.methodDescriptor)
 
@@ -164,7 +178,7 @@ trait RPCService {
   )
 }
 
-case class ServiceAlg(defn: Defn) extends RPCService {
+case class ServiceAlg(defn: Defn, serialization: SerializationType) extends RPCService {
   val typeParam: Type.Param = (defn match {
     case c: Class => c.tparams.headOption
     case t: Trait => t.tparams.headOption
@@ -174,7 +188,6 @@ case class ServiceAlg(defn: Defn) extends RPCService {
 private[internal] case class RPCRequest(
     algName: Type.Name,
     name: Term.Name,
-    serialization: SerializationType,
     compression: CompressionType,
     streamingType: Option[StreamingType],
     streamingImpl: Option[StreamingImpl],
@@ -183,24 +196,14 @@ private[internal] case class RPCRequest(
 
   private[this] val descriptorName: Term.Name = name.copy(value = name.value + "MethodDescriptor")
 
-  def methodDescriptor = {
+  val methodDescriptor: Defn.Def = {
     val wartSuppress = utils.surpressWarts("Null", "ExplicitImplicitTypes")
-    val encodersImport: Import = serialization match {
-      case Protobuf =>
-        q"import _root_.freestyle.rpc.internal.encoders.pbd._"
-      case Avro =>
-        q"import _root_.freestyle.rpc.internal.encoders.avro._"
-      case AvroWithSchema =>
-        q"import _root_.freestyle.rpc.internal.encoders.avrowithschema._"
-    }
 
     q"""
        $wartSuppress
        def $descriptorName(
          implicit ReqM: _root_.io.grpc.MethodDescriptor.Marshaller[$requestType],
          ResM: _root_.io.grpc.MethodDescriptor.Marshaller[$responseType]): _root_.io.grpc.MethodDescriptor[$requestType, $responseType] = {
-
-         $encodersImport
 
          _root_.io.grpc.MethodDescriptor
            .newBuilder()
@@ -306,17 +309,28 @@ private[internal] object utils {
 
   // format: OFF
   def buildRequest(algName: Type.Name, typeParam: Type.Param, stat: Stat): Option[RPCRequest] = Option(stat).collect {
-    case q"@rpc(..$s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): ${StreamImpl(impl, response)}" =>
-      RPCRequest(algName, name, utils.serializationType(s.head), utils.compressionType(s.lastOption), Some(ResponseStreaming), Some(impl), paramTpe(request), response)
+    case q"@rpc @stream[ResponseStreaming.type] def $name[..$tparams]($request): ${StreamImpl(impl, response)}" =>
+      RPCRequest(algName, name, Identity, Some(ResponseStreaming), Some(impl), paramTpe(request), response)
 
-    case q"@rpc(..$s) @stream[RequestStreaming.type] def $name[..$tparams]($paranName: ${Some(StreamImpl(impl, request))}): $typeParam[$response]" =>
-      RPCRequest(algName, name, utils.serializationType(s.head), utils.compressionType(s.lastOption), Some(RequestStreaming), Some(impl), request, response)
+    case q"@rpc($s) @stream[ResponseStreaming.type] def $name[..$tparams]($request): ${StreamImpl(impl, response)}" =>
+      RPCRequest(algName, name, utils.compressionType(s), Some(ResponseStreaming), Some(impl), paramTpe(request), response)
 
-    case q"@rpc(..$s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: ${Some(StreamImpl(implReq, request))}): ${StreamImpl(implResp, response)}" if implReq == implResp =>
-      RPCRequest(algName, name, utils.serializationType(s.head), utils.compressionType(s.lastOption), Some(BidirectionalStreaming), Some(implReq), request, response)
+    case q"@rpc @stream[RequestStreaming.type] def $name[..$tparams]($paranName: ${Some(StreamImpl(impl, request))}): $typeParam[$response]" =>
+      RPCRequest(algName, name, Identity, Some(RequestStreaming), Some(impl), request, response)
 
-    case q"@rpc(..$s) def $name[..$tparams]($request): $typeParam[$response]" =>
-      RPCRequest(algName, name, utils.serializationType(s.head), utils.compressionType(s.lastOption), None, None, paramTpe(request), response)
+    case q"@rpc($s) @stream[RequestStreaming.type] def $name[..$tparams]($paranName: ${Some(StreamImpl(impl, request))}): $typeParam[$response]" =>
+      RPCRequest(algName, name, utils.compressionType(s), Some(RequestStreaming), Some(impl), request, response)
+
+    case q"@rpc @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: ${Some(StreamImpl(implReq, request))}): ${StreamImpl(implResp, response)}" if implReq == implResp =>
+      RPCRequest(algName, name, Identity, Some(BidirectionalStreaming), Some(implReq), request, response)
+    case q"@rpc($s) @stream[BidirectionalStreaming.type] def $name[..$tparams]($paranName: ${Some(StreamImpl(implReq, request))}): ${StreamImpl(implResp, response)}" if implReq == implResp =>
+      RPCRequest(algName, name, utils.compressionType(s), Some(BidirectionalStreaming), Some(implReq), request, response)
+
+    case q"@rpc def $name[..$tparams]($request): $typeParam[$response]" =>
+      RPCRequest(algName, name, Identity, None, None, paramTpe(request), response)
+
+    case q"@rpc($s) def $name[..$tparams]($request): $typeParam[$response]" =>
+      RPCRequest(algName, name, utils.compressionType(s), None, None, paramTpe(request), response)
   }
   // format: ON
 
@@ -358,18 +372,11 @@ private[internal] object utils {
     q"_root_.io.grpc.MethodDescriptor.MethodType.$suffix"
   }
 
-  private[internal] def serializationType(s: Term.Arg): SerializationType = s match {
-    case q"Protobuf"       => Protobuf
-    case q"Avro"           => Avro
-    case q"AvroWithSchema" => AvroWithSchema
-  }
-
-  private[internal] def compressionType(s: Option[Term.Arg]): CompressionType =
-    s flatMap {
-      case q"Identity" => Some(Identity)
-      case q"Gzip"     => Some(Gzip)
-      case _           => None
-    } getOrElse Identity
+  private[internal] def compressionType(s: Term.Arg): CompressionType =
+    s match {
+      case q"Identity" => Identity
+      case q"Gzip"     => Gzip
+    }
 
 }
 

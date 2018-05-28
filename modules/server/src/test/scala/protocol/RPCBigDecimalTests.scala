@@ -33,21 +33,29 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
     case class Response(bigDecimal: BigDecimal, result: String, check: Boolean)
 
-    @service
-    trait RPCServiceDef[F[_]] {
+    @service(Protobuf)
+    trait RPCProtobufServiceDef[F[_]] {
+      @rpc def bigDecimalProto(bd: BigDecimal): F[BigDecimal]
+      @rpc def bigDecimalProtoWrapper(req: Request): F[Response]
+    }
 
-      @rpc(Protobuf) def bigDecimalProto(bd: BigDecimal): F[BigDecimal]
-      @rpc(Protobuf) def bigDecimalProtoWrapper(req: Request): F[Response]
+    @service(Avro)
+    trait RPCAvroServiceDef[F[_]] {
+      @rpc def bigDecimalAvro(bd: BigDecimal): F[BigDecimal]
+      @rpc def bigDecimalAvroWrapper(req: Request): F[Response]
+    }
 
-      @rpc(Avro) def bigDecimalAvro(bd: BigDecimal): F[BigDecimal]
-      @rpc(Avro) def bigDecimalAvroWrapper(req: Request): F[Response]
-
-      @rpc(AvroWithSchema) def bigDecimalAvroWithSchema(bd: BigDecimal): F[BigDecimal]
-      @rpc(AvroWithSchema) def bigDecimalAvroWithSchemaWrapper(req: Request): F[Response]
+    @service(AvroWithSchema)
+    trait RPCAvroWithSchemaServiceDef[F[_]] {
+      @rpc def bigDecimalAvroWithSchema(bd: BigDecimal): F[BigDecimal]
+      @rpc def bigDecimalAvroWithSchemaWrapper(req: Request): F[Response]
 
     }
 
-    class RPCServiceDefImpl[F[_]: Applicative] extends RPCServiceDef[F] {
+    class RPCServiceDefImpl[F[_]: Applicative]
+        extends RPCProtobufServiceDef[F]
+        with RPCAvroServiceDef[F]
+        with RPCAvroWithSchemaServiceDef[F] {
 
       def bigDecimalProto(bd: BigDecimal): F[BigDecimal] = bd.pure
 
@@ -72,13 +80,13 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
     import RPCService._
     import monix.execution.Scheduler.Implicits.global
 
-    implicit val H: RPCServiceDef[ConcurrentMonad] = new RPCServiceDefImpl[ConcurrentMonad]
+    implicit val H: RPCServiceDefImpl[ConcurrentMonad] = new RPCServiceDefImpl[ConcurrentMonad]
 
     "be able to serialize and deserialize BigDecimal using proto format" in {
 
-      withServerChannel(RPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: RPCServiceDef.Client[ConcurrentMonad] =
-          RPCServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+      withServerChannel(RPCProtobufServiceDef.bindService[ConcurrentMonad]) { sc =>
+        val client: RPCProtobufServiceDef.Client[ConcurrentMonad] =
+          RPCProtobufServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
 
         check {
           forAll { bd: BigDecimal =>
@@ -92,9 +100,9 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
     "be able to serialize and deserialize BigDecimal in a Request using proto format" in {
 
-      withServerChannel(RPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: RPCServiceDef.Client[ConcurrentMonad] =
-          RPCServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+      withServerChannel(RPCProtobufServiceDef.bindService[ConcurrentMonad]) { sc =>
+        val client: RPCProtobufServiceDef.Client[ConcurrentMonad] =
+          RPCProtobufServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
 
         check {
           forAll { (bd: BigDecimal, s: String) =>
@@ -111,9 +119,9 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
     "be able to serialize and deserialize BigDecimal using avro format" in {
 
-      withServerChannel(RPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: RPCServiceDef.Client[ConcurrentMonad] =
-          RPCServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+      withServerChannel(RPCAvroServiceDef.bindService[ConcurrentMonad]) { sc =>
+        val client: RPCAvroServiceDef.Client[ConcurrentMonad] =
+          RPCAvroServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
 
         check {
           forAll { bd: BigDecimal =>
@@ -127,9 +135,9 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
     "be able to serialize and deserialize BigDecimal in a Request using avro format" in {
 
-      withServerChannel(RPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: RPCServiceDef.Client[ConcurrentMonad] =
-          RPCServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+      withServerChannel(RPCAvroServiceDef.bindService[ConcurrentMonad]) { sc =>
+        val client: RPCAvroServiceDef.Client[ConcurrentMonad] =
+          RPCAvroServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
 
         check {
           forAll { (bd: BigDecimal, s: String) =>
@@ -146,9 +154,9 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
     "be able to serialize and deserialize BigDecimal using avro with schema format" in {
 
-      withServerChannel(RPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: RPCServiceDef.Client[ConcurrentMonad] =
-          RPCServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+      withServerChannel(RPCAvroWithSchemaServiceDef.bindService[ConcurrentMonad]) { sc =>
+        val client: RPCAvroWithSchemaServiceDef.Client[ConcurrentMonad] =
+          RPCAvroWithSchemaServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
 
         check {
           forAll { bd: BigDecimal =>
@@ -162,9 +170,9 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
     "be able to serialize and deserialize BigDecimal in a Request using avro with schema format" in {
 
-      withServerChannel(RPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: RPCServiceDef.Client[ConcurrentMonad] =
-          RPCServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+      withServerChannel(RPCAvroWithSchemaServiceDef.bindService[ConcurrentMonad]) { sc =>
+        val client: RPCAvroWithSchemaServiceDef.Client[ConcurrentMonad] =
+          RPCAvroWithSchemaServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
 
         check {
           forAll { (bd: BigDecimal, s: String) =>

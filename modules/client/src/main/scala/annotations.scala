@@ -20,15 +20,26 @@ package rpc
 import freestyle.rpc.internal.serviceImpl
 
 import scala.annotation.{compileTimeOnly, StaticAnnotation}
+import scala.meta._
 
 // $COVERAGE-OFF$
 package object protocol {
 
   @compileTimeOnly("enable macro paradise to expand @service macro annotations")
-  class service extends StaticAnnotation {
+  class service(serializationType: SerializationType) extends StaticAnnotation {
     import scala.meta._
 
-    inline def apply(defn: Any): Any = meta { serviceImpl.service(defn) }
+    inline def apply(defn: Any): Any = meta {
+
+      val serType: SerializationType = this match {
+        case q"new $_(Avro)"           => Avro
+        case q"new $_(AvroWithSchema)" => AvroWithSchema
+        case q"new $_(Protobuf)"       => Protobuf
+        case _                         => abort("Invalid serialization type")
+      }
+
+      serviceImpl.service(defn, serType)
+    }
   }
 }
 

@@ -27,56 +27,76 @@ object Utils extends CommonUtils {
 
   object service {
 
-    @service
-    trait RPCService[F[_]] {
+    @service(Avro)
+    trait RPCAvroService[F[_]] {
 
-      @rpc(Avro) def unary(a: A): F[C]
+      @rpc def unary(a: A): F[C]
 
-      @rpc(AvroWithSchema) def unaryWithSchema(a: A): F[C]
+      @rpc(Gzip) def unaryCompressed(a: A): F[C]
 
-      @rpc(Avro, Gzip) def unaryCompressed(a: A): F[C]
-
-      @rpc(AvroWithSchema, Gzip) def unaryCompressedWithSchema(a: A): F[C]
-
-      @rpc(Protobuf)
-      @stream[ResponseStreaming.type]
-      def serverStreaming(b: B): Stream[F, C]
-
-      @rpc(Protobuf)
-      @stream[ResponseStreaming.type]
-      def serverStreamingWithError(e: E): Stream[F, C]
-
-      @rpc(Protobuf, Gzip)
-      @stream[ResponseStreaming.type]
-      def serverStreamingCompressed(b: B): Stream[F, C]
-
-      @rpc(Protobuf)
-      @stream[RequestStreaming.type]
-      def clientStreaming(oa: Stream[F, A]): F[D]
-
-      @rpc(Protobuf, Gzip)
-      @stream[RequestStreaming.type]
-      def clientStreamingCompressed(oa: Stream[F, A]): F[D]
-
-      @rpc(Avro)
+      @rpc
       @stream[BidirectionalStreaming.type]
       def biStreaming(oe: Stream[F, E]): Stream[F, E]
 
-      @rpc(AvroWithSchema)
-      @stream[BidirectionalStreaming.type]
-      def biStreamingWithSchema(oe: Stream[F, E]): Stream[F, E]
-
-      @rpc(Avro, Gzip)
+      @rpc(Gzip)
       @stream[BidirectionalStreaming.type]
       def biStreamingCompressed(oe: Stream[F, E]): Stream[F, E]
 
-      @rpc(AvroWithSchema, Gzip)
+    }
+
+    object RPCAvroService {
+      // this companion object is here to make sure @service supports
+      // companion objects
+    }
+
+    @service(AvroWithSchema)
+    trait RPCAvroWithSchemaService[F[_]] {
+
+      @rpc def unaryWithSchema(a: A): F[C]
+
+      @rpc(Gzip) def unaryCompressedWithSchema(a: A): F[C]
+
+      @rpc
+      @stream[BidirectionalStreaming.type]
+      def biStreamingWithSchema(oe: Stream[F, E]): Stream[F, E]
+
+      @rpc(Gzip)
       @stream[BidirectionalStreaming.type]
       def biStreamingCompressedWithSchema(oe: Stream[F, E]): Stream[F, E]
 
     }
 
-    object RPCService {
+    object RPCAvroWithSchemaService {
+      // this companion object is here to make sure @service supports
+      // companion objects
+    }
+
+    @service(Protobuf)
+    trait RPCProtobufService[F[_]] {
+
+      @rpc
+      @stream[ResponseStreaming.type]
+      def serverStreaming(b: B): Stream[F, C]
+
+      @rpc
+      @stream[ResponseStreaming.type]
+      def serverStreamingWithError(e: E): Stream[F, C]
+
+      @rpc(Gzip)
+      @stream[ResponseStreaming.type]
+      def serverStreamingCompressed(b: B): Stream[F, C]
+
+      @rpc
+      @stream[RequestStreaming.type]
+      def clientStreaming(oa: Stream[F, A]): F[D]
+
+      @rpc(Gzip)
+      @stream[RequestStreaming.type]
+      def clientStreamingCompressed(oa: Stream[F, A]): F[D]
+
+    }
+
+    object RPCProtobufService {
       // this companion object is here to make sure @service supports
       // companion objects
     }
@@ -90,7 +110,10 @@ object Utils extends CommonUtils {
       import database._
       import service._
 
-      class ServerRPCService[F[_]: Effect] extends RPCService[F] {
+      class ServerRPCService[F[_]: Effect]
+          extends RPCAvroService[F]
+          with RPCAvroWithSchemaService[F]
+          with RPCProtobufService[F] {
 
         def unary(a: A): F[C] = Effect[F].delay(c1)
 
@@ -162,7 +185,9 @@ object Utils extends CommonUtils {
       new ServerRPCService[ConcurrentMonad]
 
     val grpcConfigs: List[GrpcConfig] = List(
-      AddService(RPCService.bindService[ConcurrentMonad])
+      AddService(RPCAvroService.bindService[ConcurrentMonad]),
+      AddService(RPCAvroWithSchemaService.bindService[ConcurrentMonad]),
+      AddService(RPCProtobufService.bindService[ConcurrentMonad])
     )
 
     implicit val serverW: ServerW = createServerConf(grpcConfigs)
@@ -171,8 +196,14 @@ object Utils extends CommonUtils {
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    implicit val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
-      RPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val avroClient: RPCAvroService.Client[ConcurrentMonad] =
+      RPCAvroService.client[ConcurrentMonad](createChannelFor)
+
+    implicit val avroWithSchemaClient: RPCAvroWithSchemaService.Client[ConcurrentMonad] =
+      RPCAvroWithSchemaService.client[ConcurrentMonad](createChannelFor)
+
+    implicit val protobufClient: RPCProtobufService.Client[ConcurrentMonad] =
+      RPCProtobufService.client[ConcurrentMonad](createChannelFor)
 
   }
 
