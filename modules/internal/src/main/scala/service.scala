@@ -206,7 +206,7 @@ private[internal] case class RPCRequest(
          ResM: _root_.io.grpc.MethodDescriptor.Marshaller[$responseType]): _root_.io.grpc.MethodDescriptor[$requestType, $responseType] = {
 
          _root_.io.grpc.MethodDescriptor
-           .newBuilder()
+           .newBuilder(ReqM, ResM)
            .setType(${utils.methodType(streamingType)})
            .setFullMethodName(
              _root_.io.grpc.MethodDescriptor.generateFullMethodName(${Lit.String(algName.value)}, ${Lit
