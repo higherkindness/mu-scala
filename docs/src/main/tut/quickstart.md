@@ -28,7 +28,7 @@ It's divided into multiple and different artifacts, grouped by scope:
 `frees-rpc-client-netty` | Client | Yes* | Mandatory on the client side if we are using `Netty` in the server side.
 `frees-rpc-client-okhttp` | Client | Yes* | Mandatory on the client side if we are using `OkHttp` in the server side.
 `frees-rpc-config` | Server/Client | No | Provides configuration helpers using [frees-config] to load the application configuration values.
-`frees-rpc-marshallers` | Server/Client | No | Provides marshallers for serializing and deserializing the `LocalDate` and `LocalDateTime` joda instances.
+`frees-rpc-marshallers-jodatime` | Server/Client | No | Provides marshallers for serializing and deserializing the `LocalDate` and `LocalDateTime` joda instances.
 `frees-rpc-prometheus-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, on the _Server_ side.
 `frees-rpc-prometheus-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, on the _Client_ side.
 `frees-rpc-prometheus-shared` | Server/Client | No | Common code for both the client and the server in the prometheus scope.
