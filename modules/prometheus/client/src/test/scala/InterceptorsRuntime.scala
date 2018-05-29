@@ -40,7 +40,9 @@ case class InterceptorsRuntime(
   //////////////////////////////////
 
   lazy val grpcConfigs: List[GrpcConfig] = List(
-    AddService(RPCService.bindService[ConcurrentMonad])
+    AddService(RPCAvroService.bindService[ConcurrentMonad]),
+    AddService(RPCAvroWithSchemaService.bindService[ConcurrentMonad]),
+    AddService(RPCProtobufService.bindService[ConcurrentMonad])
   )
 
   implicit lazy val serverW: ServerW = createServerConfOnRandomPort(grpcConfigs)
@@ -50,8 +52,27 @@ case class InterceptorsRuntime(
 
   implicit val CR: CollectorRegistry = cr
 
-  implicit lazy val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
-    RPCService.client[ConcurrentMonad](
+  implicit lazy val freesRPCAvroServiceClient: RPCAvroService.Client[ConcurrentMonad] =
+    RPCAvroService.client[ConcurrentMonad](
+      channelFor = createChannelForPort(pickUnusedPort),
+      channelConfigList = List(
+        UsePlaintext(),
+        AddInterceptor(MonitoringClientInterceptor(configuration.withCollectorRegistry(cr)))
+      )
+    )
+
+  implicit lazy val freesRPCAvroWithSchemaServiceClient: RPCAvroWithSchemaService.Client[
+    ConcurrentMonad] =
+    RPCAvroWithSchemaService.client[ConcurrentMonad](
+      channelFor = createChannelForPort(pickUnusedPort),
+      channelConfigList = List(
+        UsePlaintext(),
+        AddInterceptor(MonitoringClientInterceptor(configuration.withCollectorRegistry(cr)))
+      )
+    )
+
+  implicit lazy val freesRPCProtobufServiceClient: RPCProtobufService.Client[ConcurrentMonad] =
+    RPCProtobufService.client[ConcurrentMonad](
       channelFor = createChannelForPort(pickUnusedPort),
       channelConfigList = List(
         UsePlaintext(),

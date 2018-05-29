@@ -75,7 +75,7 @@ object ProtoIdlGenerator extends IdlGenerator {
 
   private def requestFields(requests: Seq[RpcRequest]): Seq[String] =
     requests.map {
-      case RpcRequest(_, name, reqType, retType, streamingType) =>
+      case RpcRequest(name, reqType, retType, streamingType) =>
         s"  rpc ${name.capitalize} (${requestType(reqType, streamingType)}) returns (${responseType(retType, streamingType)});"
     }
 

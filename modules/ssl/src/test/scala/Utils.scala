@@ -33,13 +33,14 @@ object Utils extends CommonUtils {
 
   object service {
 
-    @service
-    trait RPCService[F[_]] {
+    @service(Avro)
+    trait RPCAvroService[F[_]] {
+      @rpc def unary(a: A): F[C]
+    }
 
-      @rpc(Avro) def unary(a: A): F[C]
-
-      @rpc(AvroWithSchema) def unaryWithSchema(a: A): F[C]
-
+    @service(AvroWithSchema)
+    trait RPCAvroWithSchemaService[F[_]] {
+      @rpc def unaryWithSchema(a: A): F[C]
     }
 
   }
@@ -51,7 +52,9 @@ object Utils extends CommonUtils {
       import database._
       import service._
 
-      class ServerRPCService[F[_]: Effect] extends RPCService[F] {
+      class ServerRPCService[F[_]: Effect]
+          extends RPCAvroService[F]
+          with RPCAvroWithSchemaService[F] {
 
         def unary(a: A): F[C] = Effect[F].delay(c1)
 
@@ -90,7 +93,8 @@ object Utils extends CommonUtils {
 
     val grpcConfigs: List[GrpcConfig] = List(
       SetSslContext(serverSslContext),
-      AddService(RPCService.bindService[ConcurrentMonad])
+      AddService(RPCAvroService.bindService[ConcurrentMonad]),
+      AddService(RPCAvroWithSchemaService.bindService[ConcurrentMonad])
     )
 
     implicit val serverW: ServerW = ServerW.netty(SC.port, grpcConfigs)

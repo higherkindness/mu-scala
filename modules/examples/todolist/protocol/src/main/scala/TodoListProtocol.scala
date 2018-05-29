@@ -30,25 +30,25 @@ trait TodoListProtocol {
 
   final case class TodoListResponse(msg: Option[TodoListMessage])
 
-  @service
+  @service(Avro)
   trait TodoListRpcService[F[_]] {
 
-    @rpc(Avro)
+    @rpc
     def reset(empty: Empty.type): F[MessageId]
 
-    @rpc(Avro)
+    @rpc
     def insert(item: TodoListRequest): F[TodoListResponse]
 
-    @rpc(Avro)
+    @rpc
     def retrieve(id: MessageId): F[TodoListResponse]
 
-    @rpc(Avro)
+    @rpc
     def list(empty: Empty.type): F[TodoListList]
 
-    @rpc(Avro)
+    @rpc
     def update(item: TodoListMessage): F[TodoListResponse]
 
-    @rpc(Avro)
+    @rpc
     def destroy(id: MessageId): F[MessageId]
 
   }
