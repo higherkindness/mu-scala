@@ -1,5 +1,21 @@
 # Changelog
 
+## 05/29/2018 - Version 0.13.5
+
+Release changes:
+
+* noPublishSettings for RPC examples ([#264](https://github.com/frees-io/freestyle-rpc/pull/264))
+* Fix #192 (crash with some server stream transformations) ([#266](https://github.com/frees-io/freestyle-rpc/pull/266))
+* Exposing ServerChannel ([#268](https://github.com/frees-io/freestyle-rpc/pull/268))
+* BigDecimal serialization in protobuf and avro ([#271](https://github.com/frees-io/freestyle-rpc/pull/271))
+* Adds a java time util for serializing dates ([#272](https://github.com/frees-io/freestyle-rpc/pull/272))
+* Support for serializing LocalDate and LocalDateTime values ([#273](https://github.com/frees-io/freestyle-rpc/pull/273))
+* Bump avrohugger to 1.0.0-RC9 ([#274](https://github.com/frees-io/freestyle-rpc/pull/274))
+* Update avro4s and avrohugger ([#280](https://github.com/frees-io/freestyle-rpc/pull/280))
+* Rename srcJarNames to srcGenJarNames and fix deprecations ([#277](https://github.com/frees-io/freestyle-rpc/pull/277))
+* Release 0.13.5 ([#275](https://github.com/frees-io/freestyle-rpc/pull/275))
+
+
 ## 05/02/2018 - Version 0.13.4
 
 Release changes:
