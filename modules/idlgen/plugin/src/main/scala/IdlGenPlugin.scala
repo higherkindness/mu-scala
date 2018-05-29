@@ -67,14 +67,20 @@ object IdlGenPlugin extends AutoPlugin {
     lazy val srcGenSourceDirs: SettingKey[Seq[File]] =
       settingKey[Seq[File]]("The IDL directories, where your IDL definitions are placed.")
 
+    @deprecated("This setting has been deprecated in favor of srcGenJarNames", "0.13.5")
     lazy val srcJarNames: SettingKey[Seq[String]] =
+      settingKey[Seq[String]](
+        "The names of those jars containing IDL definitions that will be used at " +
+          "compilation time to generate the Scala Sources. By default, this sequence is empty.")
+
+    lazy val srcGenJarNames: SettingKey[Seq[String]] =
       settingKey[Seq[String]](
         "The names of those jars containing IDL definitions that will be used at " +
           "compilation time to generate the Scala Sources. By default, this sequence is empty.")
 
     lazy val srcGenIDLTargetDir: SettingKey[File] =
       settingKey[File](
-        "The target directory where all the IDL files especified in 'srcGenSourceDirs' will be copied.")
+        "The target directory where all the IDL files specified in 'srcGenSourceDirs' will be copied.")
 
     lazy val srcGenTargetDir: SettingKey[File] =
       settingKey[File](
@@ -98,7 +104,8 @@ object IdlGenPlugin extends AutoPlugin {
     idlGenTargetDir := (Compile / resourceManaged).value,
     srcGenSourceDir := (Compile / resourceDirectory).value,
     srcJarNames := Seq.empty,
-    srcGenSourceDirs := Seq((Compile / resourceDirectory).value),
+    srcGenJarNames := srcJarNames.value,
+    srcGenSourceDirs := Seq(srcGenSourceDir.value),
     srcGenIDLTargetDir := (Compile / resourceManaged).value / idlType.value,
     srcGenTargetDir := (Compile / sourceManaged).value,
     genOptions := Seq.empty
@@ -120,13 +127,13 @@ object IdlGenPlugin extends AutoPlugin {
               entry =>
                 extractIDLDefinitionsFromJar(
                   entry,
-                  srcJarNames.value,
+                  srcGenJarNames.value,
                   srcGenIDLTargetDir.value,
                   idlExtension.value))
           },
           Def.task {
             srcGenSourceDirs.value.toSet
-              .foreach { (f: File) =>
+              .foreach { f: File =>
                 IO.copyDirectory(
                   f,
                   srcGenIDLTargetDir.value,
@@ -170,7 +177,7 @@ object IdlGenPlugin extends AutoPlugin {
       targetDir: File,
       cacheDir: File): Set[File] => Set[File] =
     FileFunction.cached(cacheDir, FilesInfo.lastModified, FilesInfo.exists) {
-      (inputFiles: Set[File]) =>
+      inputFiles: Set[File] =>
         generator.generateFrom(idlType, serializationType, inputFiles, targetDir, options: _*).toSet
     }
 
