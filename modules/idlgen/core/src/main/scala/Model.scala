@@ -42,7 +42,6 @@ case class RpcMessage(name: String, params: Seq[Term.Param]) {
 case class RpcService(name: String, requests: Seq[RpcRequest])
 
 case class RpcRequest(
-    serializationType: SerializationType,
     name: String,
     requestType: Type,
     responseType: Type,
@@ -50,8 +49,7 @@ case class RpcRequest(
   // Workaround for `Type` using referential equality; needed mostly for unit testing
   override def equals(other: Any): Boolean = other match {
     case that: RpcRequest =>
-      this.serializationType == that.serializationType &&
-        this.name == that.name &&
+      this.name == that.name &&
         this.requestType.toString.trimAll == that.requestType.toString.trimAll &&
         this.responseType.toString.trimAll == that.responseType.toString.trimAll &&
         this.streamingType == that.streamingType

@@ -30,25 +30,25 @@ trait TagProtocol {
 
   final case class TagResponse(tag: Option[TagMessage])
 
-  @service
+  @service(Avro)
   trait TagRpcService[F[_]] {
 
-    @rpc(Avro)
+    @rpc
     def reset(empty: Empty.type): F[MessageId]
 
-    @rpc(Avro)
+    @rpc
     def insert(tagRequest: TagRequest): F[TagResponse]
 
-    @rpc(Avro)
+    @rpc
     def retrieve(id: MessageId): F[TagResponse]
 
-    @rpc(Avro)
+    @rpc
     def list(empty: Empty.type): F[TagList]
 
-    @rpc(Avro)
+    @rpc
     def update(tag: TagMessage): F[TagResponse]
 
-    @rpc(Avro)
+    @rpc
     def destroy(id: MessageId): F[MessageId]
 
   }

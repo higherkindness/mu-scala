@@ -19,6 +19,8 @@ package freestyle.rpc.idlgen
 import freestyle.rpc.internal.ServiceAlg
 import freestyle.rpc.internal.util.ScalametaUtil._
 import freestyle.rpc.internal.util.StringUtil._
+import freestyle.rpc.protocol.Avro
+
 import scala.meta._
 
 object ScalaParser {
@@ -47,8 +49,8 @@ object ScalaParser {
     }
 
     val services: Seq[RpcService] = definitions.filter(_.hasAnnotation("service")).map { defn =>
-      RpcService(defn.name, ServiceAlg(defn).requests.map(req =>
-        RpcRequest(req.serialization, req.name.value, req.requestType, req.responseType, req.streamingType)))
+      RpcService(defn.name, ServiceAlg(defn, Avro).requests.map(req =>
+        RpcRequest(req.name.value, req.requestType, req.responseType, req.streamingType)))
     }
     // format: ON
 
