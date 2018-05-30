@@ -128,10 +128,7 @@ object Utils extends CommonUtils {
         def clientStreamingCompressed(oa: Stream[F, A]): F[D] = clientStreaming(oa)
 
         def biStreaming(oe: Stream[F, E]): Stream[F, E] =
-          oe.flatMap { e: E =>
-            save(e)
-            Stream.fromIterator(eList.iterator)
-          }
+          Stream.fromIterator(eList.iterator)
 
         def biStreamingWithSchema(oe: Stream[F, E]): Stream[F, E] = biStreaming(oe)
 
