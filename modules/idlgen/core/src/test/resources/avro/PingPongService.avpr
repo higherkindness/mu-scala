@@ -1,0 +1,48 @@
+{
+  "protocol" : "PingPongService",
+  "namespace" : "ping.pong",
+  "types" : [ {
+    "type" : "record",
+    "name" : "PingRequest",
+    "namespace" : "ping.pong.protocol",
+    "fields" : [ {
+      "name" : "arg1",
+      "type" : "string"
+    }, {
+      "name" : "arg2",
+      "type" : [ "null", "string" ]
+    }, {
+      "name" : "arg3",
+      "type" : {
+        "type" : "array",
+        "items" : "string"
+      }
+    } ]
+  }, {
+    "type" : "record",
+    "name" : "PongResponse",
+    "namespace" : "ping.pong.protocol",
+    "fields" : [ {
+      "name" : "arg1",
+      "type" : "string"
+    }, {
+      "name" : "arg2",
+      "type" : [ "null", "string" ]
+    }, {
+      "name" : "arg3",
+      "type" : {
+        "type" : "array",
+        "items" : "string"
+      }
+    } ]
+  } ],
+  "messages" : {
+    "sayPing" : {
+      "request" : [ {
+        "name" : "msg",
+        "type" : "ping.pong.protocol.PingRequest"
+      } ],
+      "response" : "ping.pong.protocol.PongResponse"
+    }
+  }
+}
