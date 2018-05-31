@@ -116,9 +116,11 @@ object AvroSrcGenerator extends SrcGenerator {
     val rpcAnnotation = s"  @rpc(${(serializationType +: options).mkString(", ")})"
     val parsedMsgs: List[CompleteParsedMsg] = protocol.getMessages.asScala.toList.map {
       case (name, message) =>
-        val comment: List[String] = List(Option(message.getDoc).map(doc => s"  /** $doc */")).flatten
+        val comment: List[String] =
+          List(Option(message.getDoc).map(doc => s"  /** $doc */")).flatten
         try {
-          val parse = parseMessage(name, message.getRequest, message.getResponse, protocol.getNamespace)
+          val parse =
+            parseMessage(name, message.getRequest, message.getResponse, protocol.getNamespace)
           CompleteParsedMsg(comment ++ List(rpcAnnotation, parse.param, ""), parse.imports)
         } catch {
           case ParseException(msg) =>

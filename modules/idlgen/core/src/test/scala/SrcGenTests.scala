@@ -16,33 +16,51 @@
 
 package freestyle.rpc.idlgen
 
+import java.io.File
 import freestyle.rpc.common.RpcBaseTestSuite
 import freestyle.rpc.idlgen.avro._
 
 class SrcGenTests extends RpcBaseTestSuite {
 
-  "Avro Scala Generator" should {
+  "Avro string Scala Generator" should {
     "generate correct Scala classes from .avpr" in
-      test(
+      testAsString(
         "/avro/GreeterService.avpr",
         "/avro/MyGreeterService.scala",
         "foo/bar/MyGreeterService.scala")
 
     "generate correct Scala classes from .avdl" in
-      test(
+      testAsString(
         "/avro/GreeterService.avdl",
         "/avro/MyGreeterService.scala",
         "foo/bar/MyGreeterService.scala")
 
     "generate correct Scala classes from .avdl for AvroWithSchema serialization type" in
-      test(
+      testAsString(
         "/avro/GreeterService.avdl",
         "/avro/MyGreeterWithSchemaService.scala",
         "foo/bar/MyGreeterService.scala",
         "AvroWithSchema")
   }
 
-  private def test(
+  "Avro file Scala Generator" should {
+    "generate correct scala from .avdl" in
+      testAsFile(
+        resourceAsFile("avro/PingPongService.avdl"),
+        "/avro/PingPongService.scala",
+        "ping/pong/PingPongService.scala"
+      )
+
+    "generate correct scala from .avdl for AvroWithSchema serialization type" in
+      testAsFile(
+        resourceAsFile("avro/PingPongService.avdl"),
+        "/avro/PingPongWithSchemaService.scala",
+        "ping/pong/PingPongService.scala",
+        "AvroWithSchema"
+      )
+  }
+
+  private def testAsString(
       inputResourcePath: String,
       outputResourcePath: String,
       outputFilePath: String,
@@ -51,7 +69,25 @@ class SrcGenTests extends RpcBaseTestSuite {
       .dropWhile(line => line.startsWith("/*") || line.startsWith(" *"))
       .tail
     val output =
-      AvroSrcGenerator.generateFrom(resource(inputResourcePath).mkString, serializationType, "Gzip")
+      AvroSrcGenerator
+        .generateFrom(resource(inputResourcePath).mkString, serializationType, "Gzip")
+    output should not be empty
+    val (filePath, contents) = output.get
+    filePath shouldBe outputFilePath
+    contents.toList shouldBe expectedOutput
+  }
+
+  private def testAsFile(
+      inputResourcePath: File,
+      outputResourcePath: String,
+      outputFilePath: String,
+      serializationType: String = "Avro"): Unit = {
+    val expectedOutput = resource(outputResourcePath).getLines.toList
+      .dropWhile(line => line.startsWith("/*") || line.startsWith(" *"))
+      .tail
+    val output =
+      AvroSrcGenerator
+        .generateFrom(inputResourcePath, serializationType, "Gzip")
     output should not be empty
     val (filePath, contents) = output.get
     filePath shouldBe outputFilePath

@@ -18,6 +18,7 @@ package freestyle.rpc
 package common
 
 import cats.data.Kleisli
+import java.io.File
 import org.scalactic.Prettifier
 import org.scalamock.scalatest.MockFactory
 import org.scalatest._
@@ -45,4 +46,7 @@ trait RpcBaseTestSuite extends WordSpec with Matchers with OneInstancePerTest wi
 
   def resource(path: String): BufferedSource =
     Source.fromInputStream(getClass.getResourceAsStream(path))
+
+  def resourceAsFile(path: String): File =
+    new File(getClass.getClassLoader.getResource(path).toURI)
 }
