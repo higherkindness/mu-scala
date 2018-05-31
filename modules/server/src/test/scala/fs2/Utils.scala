@@ -20,6 +20,10 @@ package fs2
 import freestyle.rpc.common._
 import freestyle.rpc.protocol._
 import _root_.fs2._
+import cats.instances.list._
+import cats.syntax.traverse._
+import cats.syntax.apply._
+import cats.syntax.flatMap._
 import cats.effect.Effect
 import io.grpc.Status
 
@@ -128,7 +132,9 @@ object Utils extends CommonUtils {
         def clientStreamingCompressed(oa: Stream[F, A]): F[D] = clientStreaming(oa)
 
         def biStreaming(oe: Stream[F, E]): Stream[F, E] =
-          Stream.fromIterator(eList.iterator)
+          Stream.eval(oe.compile.toList flatTap { list =>
+            list.traverse(save)
+          }) *> Stream.fromIterator(eList.iterator)
 
         def biStreamingWithSchema(oe: Stream[F, E]): Stream[F, E] = biStreaming(oe)
 
@@ -137,7 +143,8 @@ object Utils extends CommonUtils {
         def biStreamingCompressedWithSchema(oe: Stream[F, E]): Stream[F, E] =
           biStreamingCompressed(oe)
 
-        def save(e: E): E = e // do something else with e?
+        def save(e: E): F[E] =
+          Effect[F].pure(e) // do something else with e?
 
       }
 
