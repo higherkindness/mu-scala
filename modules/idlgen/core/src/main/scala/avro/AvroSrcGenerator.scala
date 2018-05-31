@@ -16,8 +16,8 @@
 
 package freestyle.rpc.idlgen.avro
 
-import avrohugger.Generator
 import avrohugger.format.Standard
+import avrohugger.Generator
 import avrohugger.types._
 import freestyle.rpc.idlgen._
 import java.io.File
@@ -33,6 +33,9 @@ object AvroSrcGenerator extends SrcGenerator {
   private val mainGenerator = Generator(Standard)
   private val adtGenerator = mainGenerator.copy(avroScalaCustomTypes =
     Some(AvroScalaTypes.defaults.copy(protocol = ScalaADT))) // ScalaADT: sealed trait hierarchies
+
+  private case class ParsedMsg(param: String, imports: List[String])
+  private case class CompleteParsedMsg(params: List[String] = Nil, imports: List[String] = Nil)
 
   val idlType: String = avro.IdlType
 
@@ -111,46 +114,63 @@ object AvroSrcGenerator extends SrcGenerator {
       if (line.contains("case class")) s"@message $line" else line) :+ "" // note: can be "final case class"
 
     val rpcAnnotation = s"  @rpc(${(serializationType +: options).mkString(", ")})"
-    val requestLines = protocol.getMessages.asScala.toSeq.flatMap {
+    val parsedMsgs: List[CompleteParsedMsg] = protocol.getMessages.asScala.toList.map {
       case (name, message) =>
-        val comment = Seq(Option(message.getDoc).map(doc => s"  /** $doc */")).flatten
-        try comment ++ Seq(
-          rpcAnnotation,
-          parseMessage(name, message.getRequest, message.getResponse),
-          "")
-        catch {
+        val comment: List[String] = List(Option(message.getDoc).map(doc => s"  /** $doc */")).flatten
+        try {
+          val parse = parseMessage(name, message.getRequest, message.getResponse, protocol.getNamespace)
+          CompleteParsedMsg(comment ++ List(rpcAnnotation, parse.param, ""), parse.imports)
+        } catch {
           case ParseException(msg) =>
             logger.warn(s"$msg, cannot be converted to freestyle-rpc: $message")
-            Seq.empty
+            CompleteParsedMsg()
         }
     }
+
+    val requestLines = parsedMsgs.flatMap(_.params)
+    val allImports   = (importLines ++ parsedMsgs.flatMap(_.imports)).distinct.sorted
 
     val serviceLines =
       if (requestLines.isEmpty) Seq.empty
       else Seq(s"@service trait ${protocol.getName}[F[_]] {", "") ++ requestLines :+ "}"
 
-    outputPath -> (packageLines ++ importLines ++ messageLines ++ serviceLines)
+    outputPath -> (packageLines ++ allImports ++ messageLines ++ serviceLines)
   }
 
-  private def parseMessage(name: String, request: Schema, response: Schema): String = {
+  private def parseMessage(
+      name: String,
+      request: Schema,
+      response: Schema,
+      pkg: String): ParsedMsg = {
     val args = request.getFields.asScala
     if (args.size > 1)
       throw ParseException("RPC method has more than 1 request parameter")
     val requestParam = {
       if (args.isEmpty)
-        s"$DefaultRequestParamName: $EmptyType"
+        ParsedMsg(s"$DefaultRequestParamName: $EmptyType", Nil)
       else {
         val arg = args.head
         if (arg.schema.getType != Schema.Type.RECORD)
           throw ParseException("RPC method request parameter is not a record type")
-        s"${arg.name}: ${arg.schema.getFullName}"
+        ParsedMsg(
+          param = s"${arg.name}: ${arg.schema.getName}",
+          imports =
+            if (arg.schema.getNamespace.equals(pkg)) Nil
+            else s"import ${arg.schema.getFullName}" :: Nil)
       }
     }
     val responseParam = {
-      if (response.getType == Schema.Type.NULL) EmptyType
-      else s"${response.getNamespace}.${response.getName}"
+      if (response.getType == Schema.Type.NULL) ParsedMsg(EmptyType, Nil)
+      else
+        ParsedMsg(
+          param = response.getName,
+          imports =
+            if (response.getNamespace.equals(pkg)) Nil
+            else s"import ${response.getNamespace}.${response.getName}" :: Nil)
     }
-    s"  def $name($requestParam): F[$responseParam]"
+    ParsedMsg(
+      s"  def $name(${requestParam.param}): F[${responseParam.param}]",
+      requestParam.imports ++ responseParam.imports)
   }
 
   private case class ParseException(msg: String) extends Exception
