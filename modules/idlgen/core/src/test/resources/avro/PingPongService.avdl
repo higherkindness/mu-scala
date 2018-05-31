@@ -1,0 +1,7 @@
+@namespace("ping.pong")
+protocol PingPongService {
+
+  import idl "PingPongProtocol.avdl";
+
+  ping.pong.protocol.PongResponse sayPing(ping.pong.protocol.PingRequest msg);
+}

@@ -1,0 +1,14 @@
+@namespace("ping.pong.protocol")
+protocol PingPongProtocol {
+  record PingRequest {
+    string arg1;
+    union { null, string } arg2;
+    array<string> arg3;
+  }
+
+  record PongResponse {
+    string arg1;
+    union { null, string } arg2;
+    array<string>  arg3;
+  }
+}
