@@ -25,7 +25,7 @@ import freestyle.rpc.protocol._
 @service trait MyGreeterService[F[_]] {
 
   @rpc(AvroWithSchema, Gzip)
-  def sayHelloAvro(arg: foo.bar.HelloRequest): F[foo.bar.HelloResponse]
+  def sayHelloAvro(arg: HelloRequest): F[HelloResponse]
 
   @rpc(AvroWithSchema, Gzip)
   def sayNothingAvro(arg: Empty.type): F[Empty.type]
