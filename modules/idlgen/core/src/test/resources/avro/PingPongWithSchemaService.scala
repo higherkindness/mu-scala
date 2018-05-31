@@ -17,8 +17,7 @@
 package ping.pong
 
 import freestyle.rpc.protocol._
-import ping.pong.protocol.PingRequest
-import ping.pong.protocol.PongResponse
+import ping.pong.protocol.{PingRequest, PongResponse}
 
 
 @service trait PingPongService[F[_]] {
