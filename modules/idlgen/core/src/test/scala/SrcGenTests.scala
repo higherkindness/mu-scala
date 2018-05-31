@@ -44,6 +44,12 @@ class SrcGenTests extends RpcBaseTestSuite {
   }
 
   "Avro file Scala Generator" should {
+    "generate correct Scala classes from .avpr" in
+      testAsFile(
+        resourceAsFile("avro/PingPongService.avpr"),
+        "/avro/PingPongService.scala",
+        "ping/pong/PingPongService.scala")
+
     "generate correct scala from .avdl" in
       testAsFile(
         resourceAsFile("avro/PingPongService.avdl"),
