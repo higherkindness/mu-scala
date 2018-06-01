@@ -129,14 +129,35 @@ object AvroSrcGenerator extends SrcGenerator {
         }
     }
 
-    val requestLines = parsedMsgs.flatMap(_.params)
-    val allImports   = (importLines ++ parsedMsgs.flatMap(_.imports)).distinct.sorted
+    val requestLines     = parsedMsgs.flatMap(_.params)
+    val allImports       = (importLines ++ groupImports(parsedMsgs.flatMap(_.imports))).distinct.sorted
+    val filteredMessages = messageLines.filterNot(allImports.contains)
 
     val serviceLines =
       if (requestLines.isEmpty) Seq.empty
       else Seq(s"@service trait ${protocol.getName}[F[_]] {", "") ++ requestLines :+ "}"
 
-    outputPath -> (packageLines ++ allImports ++ messageLines ++ serviceLines)
+    outputPath -> (packageLines ++ allImports ++ filteredMessages ++ serviceLines)
+  }
+
+  def groupImports(imports: List[String]): List[String] = {
+
+    def splitImport(i: String): Option[(String, String)] =
+      i.lastIndexOf('.') match {
+        case n if n > 0 && !i.endsWith(".") => Some(i.splitAt(n + 1))
+        case _                              => None
+      }
+
+    imports.sorted
+      .flatMap(splitImport)
+      .groupBy(_._1)
+      .map {
+        case (prefix, list) =>
+          val suffixes = list.map(_._2).sorted.mkString(", ")
+          s"$prefix{$suffixes}"
+      }
+      .toList
+
   }
 
   private def parseMessage(
