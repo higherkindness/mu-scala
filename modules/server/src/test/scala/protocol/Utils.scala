@@ -141,7 +141,7 @@ object Utils extends CommonUtils {
 
   object client {
 
-    trait MyRPCClient[F[_]] { self =>
+    trait MyRPCClient[F[_]] {
       def notAllowed(b: Boolean): F[C]
       def empty: F[Empty.type]
       def emptyParam(a: A): F[Empty.type]
@@ -161,14 +161,6 @@ object Utils extends CommonUtils {
       def cs(cList: List[C], bar: Int): F[D]
       def bs(eList: List[E]): F[E]
       def bsws(eList: List[E]): F[E]
-    }
-
-    object MyRPCClient {
-
-      trait Handler[G[_]] extends MyRPCClient[G]
-
-      def apply[F[_]](implicit F: MyRPCClient[F]): MyRPCClient[F] = F
-
     }
 
   }
@@ -313,7 +305,7 @@ object Utils extends CommonUtils {
       class FreesRPCServiceClientHandler[F[_]: Async](
           implicit client: RPCService.Client[F],
           M: MonadError[F, Throwable])
-          extends MyRPCClient.Handler[F] {
+          extends MyRPCClient[F] {
 
         override def notAllowed(b: Boolean): F[C] =
           client.notAllowed(b)
@@ -419,7 +411,7 @@ object Utils extends CommonUtils {
       class FreesRPCServiceClientCompressedHandler[F[_]: Async](
           implicit client: RPCService.Client[F],
           M: MonadError[F, Throwable])
-          extends MyRPCClient.Handler[F] {
+          extends MyRPCClient[F] {
 
         override def notAllowed(b: Boolean): F[C] =
           client.notAllowedCompressed(b)
