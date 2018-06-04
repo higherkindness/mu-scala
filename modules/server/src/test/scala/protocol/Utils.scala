@@ -22,7 +22,6 @@ import cats.effect.Async
 import cats.syntax.applicative._
 import freestyle.rpc.common._
 import freestyle.rpc.server.implicits._
-import freestyle.tagless.tagless
 import io.grpc.Status
 import monix.reactive.Observable
 
@@ -142,8 +141,7 @@ object Utils extends CommonUtils {
 
   object client {
 
-    @tagless(true)
-    trait MyRPCClient[F[_]] {
+    trait MyRPCClient[F[_]] { self =>
       def notAllowed(b: Boolean): F[C]
       def empty: F[Empty.type]
       def emptyParam(a: A): F[Empty.type]
@@ -163,6 +161,14 @@ object Utils extends CommonUtils {
       def cs(cList: List[C], bar: Int): F[D]
       def bs(eList: List[E]): F[E]
       def bsws(eList: List[E]): F[E]
+    }
+
+    object MyRPCClient {
+
+      trait Handler[G[_]] extends MyRPCClient[G]
+
+      def apply[F[_]](implicit F: MyRPCClient[F]): MyRPCClient[F] = F
+
     }
 
   }

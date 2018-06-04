@@ -18,9 +18,7 @@ package examples.todolist.client
 package clients
 
 import examples.todolist.protocol.Protocols._
-import freestyle.tagless.tagless
 
-@tagless(true)
 trait TodoItemClient[F[_]] {
 
   def reset(): F[Int]
@@ -35,4 +33,8 @@ trait TodoItemClient[F[_]] {
 
   def remove(id: Int): F[Int]
 
+}
+
+object TodoItemClient {
+  trait Handler[G[_]] extends TodoItemClient[G]
 }
