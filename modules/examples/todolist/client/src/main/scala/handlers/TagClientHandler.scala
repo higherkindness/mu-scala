@@ -29,7 +29,7 @@ class TagClientHandler[F[_]](
     implicit M: Monad[F],
     log: LoggingM[F],
     client: TagRpcService.Client[F])
-    extends TagClient.Handler[F] {
+    extends TagClient[F] {
 
   override def reset(): F[Int] =
     for {

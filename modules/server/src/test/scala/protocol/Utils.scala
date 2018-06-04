@@ -22,7 +22,6 @@ import cats.effect.Async
 import cats.syntax.applicative._
 import freestyle.rpc.common._
 import freestyle.rpc.server.implicits._
-import freestyle.tagless.tagless
 import io.grpc.Status
 import monix.reactive.Observable
 
@@ -142,7 +141,6 @@ object Utils extends CommonUtils {
 
   object client {
 
-    @tagless(true)
     trait MyRPCClient[F[_]] {
       def notAllowed(b: Boolean): F[C]
       def empty: F[Empty.type]
@@ -307,7 +305,7 @@ object Utils extends CommonUtils {
       class FreesRPCServiceClientHandler[F[_]: Async](
           implicit client: RPCService.Client[F],
           M: MonadError[F, Throwable])
-          extends MyRPCClient.Handler[F] {
+          extends MyRPCClient[F] {
 
         override def notAllowed(b: Boolean): F[C] =
           client.notAllowed(b)
@@ -413,7 +411,7 @@ object Utils extends CommonUtils {
       class FreesRPCServiceClientCompressedHandler[F[_]: Async](
           implicit client: RPCService.Client[F],
           M: MonadError[F, Throwable])
-          extends MyRPCClient.Handler[F] {
+          extends MyRPCClient[F] {
 
         override def notAllowed(b: Boolean): F[C] =
           client.notAllowedCompressed(b)

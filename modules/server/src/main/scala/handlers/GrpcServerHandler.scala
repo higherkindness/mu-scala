@@ -25,7 +25,7 @@ import io.grpc.{Server, ServerServiceDefinition}
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.TimeUnit
 
-class GrpcServerHandler[F[_]: Applicative] extends GrpcServer.Handler[GrpcServerOps[F, ?]] {
+class GrpcServerHandler[F[_]: Applicative] extends GrpcServer[GrpcServerOps[F, ?]] {
 
   def start: GrpcServerOps[F, Server] = captureWithServer { server =>
     Runtime.getRuntime.addShutdownHook(new Thread() {

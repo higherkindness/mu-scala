@@ -29,7 +29,7 @@ class TodoListClientHandler[F[_]](
     implicit M: Monad[F],
     log: LoggingM[F],
     client: TodoListRpcService.Client[F])
-    extends TodoListClient.Handler[F] {
+    extends TodoListClient[F] {
 
   override def reset(): F[Int] =
     for {

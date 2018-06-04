@@ -17,11 +17,8 @@
 package examples.todolist.client
 package clients
 
-import freestyle.tagless.tagless
-
 import examples.todolist.protocol.Protocols._
 
-@tagless(true)
 trait TodoListClient[F[_]] {
 
   def reset(): F[Int]

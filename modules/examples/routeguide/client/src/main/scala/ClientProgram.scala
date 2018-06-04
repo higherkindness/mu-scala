@@ -19,11 +19,9 @@ package example.routeguide.client
 import cats.Monad
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import freestyle.tagless._
 import example.routeguide.protocol.Protocols._
 import example.routeguide.common.Utils
 
-@tagless(false)
 trait RouteGuideClient[F[_]] {
   def getFeature(lat: Int, lon: Int): F[Unit]
   def listFeatures(lowLat: Int, lowLon: Int, hiLat: Int, hiLon: Int): F[Unit]

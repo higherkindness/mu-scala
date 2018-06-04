@@ -25,7 +25,7 @@ import freestyle.rpc.protocol.Empty
 import org.log4s._
 
 class PingPongClientHandler[F[_]](implicit M: Functor[F], client: PingPongService.Client[F])
-    extends PingPongClient.Handler[F] {
+    extends PingPongClient[F] {
 
   val logger: Logger = getLogger
 

@@ -17,13 +17,12 @@
 package freestyle.rpc
 package server
 
-import freestyle.tagless.tagless
+import cats.~>
 import io.grpc._
 
 import scala.concurrent.duration.TimeUnit
 
-@tagless(true)
-trait GrpcServer[F[_]] {
+trait GrpcServer[F[_]] { self =>
 
   def start(): F[Server]
 
@@ -47,4 +46,32 @@ trait GrpcServer[F[_]] {
 
   def awaitTermination(): F[Unit]
 
+  def mapK[G[_]](fk: F ~> G): GrpcServer[G] = new GrpcServer[G] {
+    def start(): G[Server] = fk(self.start)
+
+    def getPort: G[Int] = fk(self.getPort)
+
+    def getServices: G[List[ServerServiceDefinition]] = fk(self.getServices)
+
+    def getImmutableServices: G[List[ServerServiceDefinition]] = fk(self.getImmutableServices)
+
+    def getMutableServices: G[List[ServerServiceDefinition]] = fk(self.getMutableServices)
+
+    def shutdown(): G[Server] = fk(self.shutdown)
+
+    def shutdownNow(): G[Server] = fk(self.shutdownNow)
+
+    def isShutdown: G[Boolean] = fk(self.isShutdown)
+
+    def isTerminated: G[Boolean] = fk(self.isTerminated)
+
+    def awaitTerminationTimeout(timeout: Long, unit: TimeUnit): G[Boolean] =
+      fk(self.awaitTerminationTimeout(timeout, unit))
+
+    def awaitTermination(): G[Unit] = fk(self.awaitTermination)
+  }
+}
+
+object GrpcServer {
+  def apply[F[_]](implicit F: GrpcServer[F]): GrpcServer[F] = F
 }
