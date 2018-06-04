@@ -34,7 +34,3 @@ trait TodoItemClient[F[_]] {
   def remove(id: Int): F[Int]
 
 }
-
-object TodoItemClient {
-  trait Handler[G[_]] extends TodoItemClient[G]
-}

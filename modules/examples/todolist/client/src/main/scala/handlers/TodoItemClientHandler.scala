@@ -29,7 +29,7 @@ class TodoItemClientHandler[F[_]](
     implicit M: Monad[F],
     log: LoggingM[F],
     client: TodoItemRpcService.Client[F])
-    extends TodoItemClient.Handler[F] {
+    extends TodoItemClient[F] {
 
   override def reset(): F[Int] =
     for {

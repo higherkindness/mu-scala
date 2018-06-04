@@ -32,7 +32,7 @@ class RouteGuideClientHandler[F[_]: Monad](
     implicit client: RouteGuideService.Client[F],
     M: MonadError[F, Throwable],
     T2F: Task ~> F)
-    extends RouteGuideClient.Handler[F] {
+    extends RouteGuideClient[F] {
 
   val logger = getLogger
 

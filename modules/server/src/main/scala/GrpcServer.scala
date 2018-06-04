@@ -17,7 +17,6 @@
 package freestyle.rpc
 package server
 
-import freestyle.tagless.tagless
 import cats.~>
 import io.grpc._
 
@@ -74,9 +73,5 @@ trait GrpcServer[F[_]] { self =>
 }
 
 object GrpcServer {
-
-  trait Handler[G[_]] extends GrpcServer[G]
-
   def apply[F[_]](implicit F: GrpcServer[F]): GrpcServer[F] = F
-
 }

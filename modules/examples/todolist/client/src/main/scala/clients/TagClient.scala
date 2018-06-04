@@ -34,7 +34,3 @@ trait TagClient[F[_]] {
   def remove(id: Int): F[Int]
 
 }
-
-object TagClient {
-  trait Handler[G[_]] extends TagClient[G]
-}

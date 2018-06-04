@@ -19,7 +19,6 @@ package example.routeguide.client
 import cats.Monad
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import freestyle.tagless._
 import example.routeguide.protocol.Protocols._
 import example.routeguide.common.Utils
 
@@ -28,10 +27,6 @@ trait RouteGuideClient[F[_]] {
   def listFeatures(lowLat: Int, lowLon: Int, hiLat: Int, hiLon: Int): F[Unit]
   def recordRoute(features: List[Feature], numPoints: Int): F[Unit]
   def routeChat: F[Unit]
-}
-
-object RouteGuideClient {
-  trait Handler[G[_]] extends RouteGuideClient[G]
 }
 
 object ClientProgram {

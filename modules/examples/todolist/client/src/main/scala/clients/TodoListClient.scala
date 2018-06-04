@@ -34,7 +34,3 @@ trait TodoListClient[F[_]] {
   def remove(id: Int): F[Int]
 
 }
-
-object TodoListClient {
-  trait Handler[G[_]] extends TodoListClient[G]
-}
