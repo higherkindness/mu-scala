@@ -92,7 +92,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val configSettings = Seq(
       libraryDependencies ++= Seq(
-        %%("frees-config", V.frees)
+        %%("pureconfig")
       )
     )
 
