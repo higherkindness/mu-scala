@@ -51,7 +51,6 @@ object ProjectPlugin extends AutoPlugin {
     lazy val internalSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("frees-async-cats-effect", V.frees),
-        %%("frees-async-guava", V.frees) exclude ("com.google.guava", "guava"),
         %("grpc-stub", V.grpc),
         %%("monix"),
         %%("fs2-reactive-streams", V.fs2ReactiveStreams),

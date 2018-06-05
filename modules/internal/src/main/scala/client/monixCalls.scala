@@ -19,12 +19,13 @@ package internal
 package client
 
 import cats.effect.{Async, LiftIO}
-import freestyle.async.guava.implicits._
-import freestyle.async.catsEffect.implicits._
-import io.grpc.{CallOptions, Channel, MethodDescriptor}
+import com.google.common.util.concurrent._
 import io.grpc.stub.{ClientCalls, StreamObserver}
+import io.grpc.{CallOptions, Channel, MethodDescriptor}
+import java.util.concurrent.{Executor => JavaExecutor}
 import monix.execution.Scheduler
 import monix.reactive.Observable
+import scala.concurrent.ExecutionContext
 
 object monixCalls {
 
@@ -79,4 +80,20 @@ object monixCalls {
             outputObserver
         ))
     )
+
+  private[this] def listenableFuture2Async[F[_], A](
+      fa: => ListenableFuture[A])(implicit F: Async[F], E: ExecutionContext): F[A] =
+    F.async { cb =>
+      Futures.addCallback(
+        fa,
+        new FutureCallback[A] {
+          override def onSuccess(result: A): Unit = cb(Right(result))
+
+          override def onFailure(t: Throwable): Unit = cb(Left(t))
+        },
+        new JavaExecutor {
+          override def execute(command: Runnable): Unit = E.execute(command)
+        }
+      )
+    }
 }
