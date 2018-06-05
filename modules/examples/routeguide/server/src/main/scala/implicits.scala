@@ -20,7 +20,6 @@ import cats.effect.IO
 import freestyle.rpc.server._
 import freestyle.rpc.server.config.BuildServerFromConfig
 import freestyle.rpc.server.{AddService, GrpcConfig, ServerW}
-import freestyle.tagless.config.implicits._
 import example.routeguide.server.handlers.RouteGuideServiceHandler
 import example.routeguide.protocol.Protocols.RouteGuideService
 import example.routeguide.runtime._

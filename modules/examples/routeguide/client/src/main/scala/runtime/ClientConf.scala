@@ -19,7 +19,6 @@ package example.routeguide.client.runtime
 import cats.effect.IO
 import freestyle.rpc.ChannelFor
 import freestyle.rpc.client.config.ConfigForAddress
-import freestyle.tagless.config.implicits._
 
 trait ClientConf {
 
