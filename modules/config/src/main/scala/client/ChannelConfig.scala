@@ -18,27 +18,46 @@ package freestyle.rpc
 package client
 package config
 
-import cats.Functor
-import cats.syntax.either._
+import cats.effect.Sync
 import cats.syntax.functor._
-import freestyle.tagless._
-import freestyle.tagless.config.ConfigM
+import cats.syntax.flatMap._
+import cats.syntax.either._
 
-@module
-trait ChannelConfig {
+import freestyle.rpc.config.ConfigM
 
-  implicit val functor: Functor
+import com.typesafe.config.ConfigException.Missing
 
-  val configM: ConfigM
+trait ChannelConfig[F[_]] {
+
+  implicit def sync: Sync[F]
+  implicit def configM: ConfigM[F]
+
   val defaultHost: String = "localhost"
   val defaultPort: Int    = freestyle.rpc.server.defaultPort
 
-  def loadChannelAddress(hostPath: String, portPath: String): FS[ChannelForAddress] =
-    configM.load map (config =>
-      ChannelForAddress(
-        config.string(hostPath).getOrElse(defaultHost),
-        config.int(portPath).getOrElse(defaultPort)))
+  def loadChannelAddress(hostPath: String, portPath: String): F[ChannelForAddress] =
+    for {
+      config <- configM.load
+      host <- sync.pure(
+        Either
+          .catchOnly[Missing](config.getString(hostPath)))
+      port <- sync.pure(Either.catchOnly[Missing](config.getInt(portPath)))
+    } yield ChannelForAddress(host.getOrElse(defaultHost), port.getOrElse(defaultPort))
 
-  def loadChannelTarget(targetPath: String): FS[ChannelForTarget] =
-    configM.load map (config => ChannelForTarget(config.string(targetPath).getOrElse("target")))
+  def loadChannelTarget(targetPath: String): F[ChannelForTarget] =
+    for {
+      config <- configM.load
+      target <- sync.pure(Either.catchOnly[Missing](config.getString(targetPath)))
+    } yield ChannelForTarget(target.getOrElse("target"))
+
+}
+
+object ChannelConfig {
+  def apply[F[_]](implicit S: Sync[F], C: ConfigM[F]): ChannelConfig[F] = new ChannelConfig[F] {
+    def sync    = S
+    def configM = C
+  }
+
+  implicit def defaultChannelConfig[F[_]](implicit S: Sync[F], C: ConfigM[F]): ChannelConfig[F] =
+    apply[F](S, C)
 }

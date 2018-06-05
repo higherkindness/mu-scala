@@ -15,26 +15,19 @@
  */
 
 package freestyle.rpc
-package client
-package config
 
-import freestyle.rpc.common.{ConcurrentMonad, SC}
+import cats.effect.Sync
+import pureconfig._
+import com.typesafe.config.{Config, ConfigFactory}
 
-class ChannelConfigTests extends RpcClientTestSuite {
+object config {
 
-  "ChannelConfig" should {
+  trait ConfigM[F[_]] {
+    def load: F[Config]
+  }
 
-    "for Address [host, port] work as expected" in {
-      ConfigForAddress[ConcurrentMonad](SC.host, SC.port.toString).unsafeRunSync shouldBe ChannelForAddress(
-        "localhost",
-        50051)
-    }
-
-    "for Target work as expected" in {
-
-      ConfigForTarget[ConcurrentMonad](SC.host).unsafeRunSync shouldBe ChannelForTarget("target")
-    }
-
+  implicit def syncConfigM[F[_]](implicit F: Sync[F]): ConfigM[F] = new ConfigM[F] {
+    def load: F[Config] = F.delay(loadConfigOrThrow[Config](ConfigFactory.load()))
   }
 
 }
