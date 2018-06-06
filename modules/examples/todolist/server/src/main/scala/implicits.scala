@@ -28,7 +28,6 @@ import examples.todolist.server.handlers._
 import freestyle.rpc.server._
 import freestyle.rpc.server.config.BuildServerFromConfig
 import freestyle.rpc.server.{AddService, GrpcConfig, ServerW}
-import freestyle.tagless.config.implicits._
 import freestyle.tagless.loggingJVM.log4s.implicits._
 import java.util.Properties
 

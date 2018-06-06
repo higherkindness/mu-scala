@@ -23,7 +23,7 @@ object ProjectPlugin extends AutoPlugin {
       val avrohugger: String         = "1.0.0-RC10"
       val catsEffect: String         = "0.10.1"
       val circe: String              = "0.9.3"
-      val frees: String              = "0.8.0"
+      val frees: String              = "0.8.1"
       val fs2ReactiveStreams: String = "0.5.1"
       val grpc: String               = "1.11.0"
       val log4s: String              = "1.6.1"
@@ -92,7 +92,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val configSettings = Seq(
       libraryDependencies ++= Seq(
-        %%("frees-config", V.frees)
+        %%("pureconfig")
       )
     )
 
@@ -164,7 +164,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val exampleTodolistCommonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "io.frees" %% "frees-todolist-lib" % "0.8.1-SNAPSHOT",
+        "io.frees" %% "frees-todolist-lib" % V.frees,
         %%("log4s", V.log4s),
         %("logback-classic", V.logback)
       )

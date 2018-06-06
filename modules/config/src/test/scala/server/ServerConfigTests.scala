@@ -18,7 +18,6 @@ package freestyle.rpc
 package server
 package config
 
-import freestyle.tagless.config.implicits._
 import freestyle.rpc.common.{ConcurrentMonad, SC}
 
 import scala.concurrent.ExecutionContext
@@ -27,7 +26,7 @@ class ServerConfigTests extends RpcServerTestSuite {
 
   implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
-  "ServerConfig.Op" should {
+  "ServerConfig" should {
 
     "load the port specified in the config file" in {
 
