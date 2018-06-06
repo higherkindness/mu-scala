@@ -157,7 +157,6 @@ import cats.effect.IO
 import freestyle.rpc.server._
 import freestyle.rpc.server.handlers._
 import freestyle.rpc.server.implicits._
-import freestyle.async.catsEffect.implicits._
 import service._
 
 object gserver {
@@ -280,7 +279,6 @@ So, taking into account all we have just said, how would our code look?
 ```tut:silent
 import cats.implicits._
 import cats.effect.IO
-import freestyle.async.catsEffect.implicits._
 import freestyle.rpc._
 import freestyle.rpc.config._
 import freestyle.rpc.client._

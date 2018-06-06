@@ -67,7 +67,6 @@ import cats.effect.IO
 import freestyle.rpc.server._
 import freestyle.rpc.server.handlers._
 import freestyle.rpc.server.implicits._
-import freestyle.async.catsEffect.implicits._
 import freestyle.rpc.prometheus.shared.Configuration
 import freestyle.rpc.prometheus.server.MonitoringServerInterceptor
 import io.prometheus.client.CollectorRegistry
@@ -101,7 +100,6 @@ In this case, in order to intercept the client calls we need additional configur
 ```tut:silent
 import cats.implicits._
 import cats.effect.IO
-import freestyle.async.catsEffect.implicits._
 import freestyle.rpc._
 import freestyle.rpc.config._
 import freestyle.rpc.client._
