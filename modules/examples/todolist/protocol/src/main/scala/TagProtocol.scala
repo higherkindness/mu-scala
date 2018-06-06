@@ -17,7 +17,6 @@
 package examples.todolist
 package protocol
 
-import examples.todolist.protocol.MessageId
 import freestyle.rpc.protocol._
 
 trait TagProtocol {

@@ -227,7 +227,6 @@ trait CommonRuntime {
 ```tut:silent
 import cats.effect.IO
 import cats.implicits._
-import freestyle.async.catsEffect.implicits._
 import freestyle.rpc._
 import freestyle.rpc.config._
 import freestyle.rpc.client._

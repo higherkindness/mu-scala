@@ -20,7 +20,7 @@ package internal
 import cats.instances.list._
 import cats.syntax.foldable._
 
-import freestyle.free.internal.ScalametaUtil
+import freestyle.rpc.internal.util.ScalametaUtil
 import freestyle.rpc.protocol._
 
 import scala.collection.immutable.Seq

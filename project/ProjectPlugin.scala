@@ -50,7 +50,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val internalSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("frees-async-cats-effect", V.frees),
+        %%("cats-effect", V.catsEffect),
         %("grpc-stub", V.grpc),
         %%("monix"),
         %%("fs2-reactive-streams", V.fs2ReactiveStreams),
@@ -63,7 +63,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val clientCoreSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("frees-async-cats-effect", V.frees),
+        %%("cats-effect", V.catsEffect),
         %%("scalamockScalatest") % Test,
         %("grpc-netty", V.grpc)  % Test
       )
