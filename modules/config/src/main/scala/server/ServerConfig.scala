@@ -27,35 +27,28 @@ import freestyle.rpc.config.ConfigM
 
 import com.typesafe.config.ConfigException.Missing
 
-trait ServerConfig[F[_]] {
-
-  implicit def sync: Sync[F]
-  implicit def configM: ConfigM[F]
+class ServerConfig[F[_]](implicit S: Sync[F], C: ConfigM[F]) {
 
   def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): F[ServerW] =
     for {
-      config <- configM.load
-      port <- sync.pure(
+      config <- C.load
+      port <- S.pure(
         Either
           .catchOnly[Missing](config.getInt(portPath)))
     } yield ServerW.default(port.getOrElse(defaultPort), configList)
 
   def buildNettyServer(portPath: String, configList: List[GrpcConfig] = Nil): F[ServerW] =
     for {
-      config <- configM.load
-      port <- sync.pure(
+      config <- C.load
+      port <- S.pure(
         Either
           .catchOnly[Missing](config.getInt(portPath)))
     } yield ServerW.netty(ChannelForPort(port.getOrElse(defaultPort)), configList)
 }
 
 object ServerConfig {
-  def apply[F[_]](implicit S: Sync[F], C: ConfigM[F]): ServerConfig[F] = new ServerConfig[F] {
-    def sync    = S
-    def configM = C
-  }
+  def apply[F[_]](implicit S: Sync[F], C: ConfigM[F]): ServerConfig[F] = new ServerConfig[F]
 
   implicit def defaultServerConfig[F[_]](implicit S: Sync[F], C: ConfigM[F]): ServerConfig[F] =
     apply[F](S, C)
-
 }
