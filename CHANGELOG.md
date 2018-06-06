@@ -1,5 +1,17 @@
 # Changelog
 
+## 06/06/2018 - Version 0.13.6
+
+Release changes:
+
+* Ignoring new bidirectional FS2 tests on Travis ([#281](https://github.com/frees-io/freestyle-rpc/pull/281))
+* Re-ignoring failing tests, with reference to new issue ([#283](https://github.com/frees-io/freestyle-rpc/pull/283))
+* replace all occurrences of @tagless annotation with the manual impl ([#296](https://github.com/frees-io/freestyle-rpc/pull/296))
+* Decouple frees config ([#300](https://github.com/frees-io/freestyle-rpc/pull/300))
+* decouple from frees-async ([#297](https://github.com/frees-io/freestyle-rpc/pull/297))
+* Downgrade avro4s to 1.8.3 ([#301](https://github.com/frees-io/freestyle-rpc/pull/301))
+
+
 ## 05/29/2018 - Version 0.13.5
 
 Release changes:
