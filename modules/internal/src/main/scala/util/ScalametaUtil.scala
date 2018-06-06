@@ -20,9 +20,15 @@ package util
 
 import scala.meta.Mod.Annot
 import scala.meta.Term.Apply
+import scala.meta.Defn.Class
 import scala.meta._
 
 object ScalametaUtil {
+
+  def isAbstract(cls: Class): Boolean = cls.mods.exists {
+    case Mod.Abstract() => true
+    case _              => false
+  }
 
   implicit class DefnOps(val defn: Defn) extends AnyVal {
 
