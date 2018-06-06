@@ -225,10 +225,11 @@ trait CommonRuntime {
 ```
 
 ```tut:silent
+import cats.effect.IO
 import cats.implicits._
-import freestyle.free.config.implicits._
 import freestyle.async.catsEffect.implicits._
 import freestyle.rpc._
+import freestyle.rpc.config._
 import freestyle.rpc.client._
 import freestyle.rpc.client.config._
 import freestyle.rpc.client.implicits._
@@ -241,12 +242,7 @@ import scala.util.{Failure, Success, Try}
 trait Implicits extends CommonRuntime {
 
   val channelFor: ChannelFor =
-    ConfigForAddress[Try]("rpc.host", "rpc.port") match {
-      case Success(c) => c
-      case Failure(e) =>
-        e.printStackTrace()
-        throw new RuntimeException("Unable to load the client configuration", e)
-    }
+    ConfigForAddress[IO]("rpc.host", "rpc.port").unsafeRunSync
 
   implicit val serviceClient: Greeter.Client[Task] =
     Greeter.client[Task](channelFor, options = CallOptions.DEFAULT.withCompression("gzip"))
