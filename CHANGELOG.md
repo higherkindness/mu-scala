@@ -1,5 +1,15 @@
 # Changelog
 
+## 06/07/2018 - Version 0.13.7
+
+Release changes:
+
+* Decouples frees-async-cats-effect ([#302](https://github.com/frees-io/freestyle-rpc/pull/302))
+* Upgrades Scala and Sbt versions ([#304](https://github.com/frees-io/freestyle-rpc/pull/304))
+* Update Scala to 2.12.6 in TravisCI ([#306](https://github.com/frees-io/freestyle-rpc/pull/306))
+* Releases 0.13.7 ([#308](https://github.com/frees-io/freestyle-rpc/pull/308))
+
+
 ## 06/06/2018 - Version 0.13.6
 
 Release changes:
