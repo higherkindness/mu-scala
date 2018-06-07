@@ -20,7 +20,7 @@ package server
 
 import _root_.fs2.Stream
 import _root_.fs2.interop.reactivestreams._
-import cats.effect.Effect
+import cats.effect.{ConcurrentEffect, Timer}
 import io.grpc.stub.ServerCalls._
 import io.grpc.stub.StreamObserver
 import monix.execution.Scheduler
@@ -30,12 +30,12 @@ object fs2Calls {
 
   import freestyle.rpc.internal.converters._
 
-  def unaryMethod[F[_]: Effect, Req, Res](
+  def unaryMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Req => F[Res],
       maybeCompression: Option[String]): UnaryMethod[Req, Res] =
     monixCalls.unaryMethod(f, maybeCompression)
 
-  def clientStreamingMethod[F[_]: Effect, Req, Res](
+  def clientStreamingMethod[F[_]: ConcurrentEffect: Timer, Req, Res](
       f: Stream[F, Req] => F[Res],
       maybeCompression: Option[String])(implicit S: Scheduler): ClientStreamingMethod[Req, Res] =
     new ClientStreamingMethod[Req, Res] {
@@ -50,7 +50,7 @@ object fs2Calls {
       }
     }
 
-  def serverStreamingMethod[F[_]: Effect, Req, Res](
+  def serverStreamingMethod[F[_]: ConcurrentEffect: Timer, Req, Res](
       f: Req => Stream[F, Res],
       maybeCompression: Option[String])(implicit S: Scheduler): ServerStreamingMethod[Req, Res] =
     new ServerStreamingMethod[Req, Res] {
@@ -61,7 +61,7 @@ object fs2Calls {
       }
     }
 
-  def bidiStreamingMethod[F[_]: Effect, Req, Res](
+  def bidiStreamingMethod[F[_]: ConcurrentEffect: Timer, Req, Res](
       f: Stream[F, Req] => Stream[F, Res],
       maybeCompression: Option[String])(implicit S: Scheduler): BidiStreamingMethod[Req, Res] =
     new BidiStreamingMethod[Req, Res] {

@@ -99,9 +99,10 @@ trait RPCService {
     val args: Seq[Term.Tuple] = requests.map(_.call)
     q"""
        def bindService[F[_]](implicit
-         F: _root_.cats.effect.Effect[F],
+         F: _root_.cats.effect.ConcurrentEffect[F],
          algebra: $algName[F],
-         S: _root_.monix.execution.Scheduler
+         S: _root_.monix.execution.Scheduler,
+         T: _root_.cats.effect.Timer[F]
        ): _root_.io.grpc.ServerServiceDefinition =
            new _root_.freestyle.rpc.internal.service.GRPCServiceDefBuilder(${Lit.String(
       algName.value)}, ..$args).apply
@@ -121,8 +122,9 @@ trait RPCService {
          channel: _root_.io.grpc.Channel,
          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
        )(implicit
-         F: _root_.cats.effect.Effect[F],
-         S: _root_.monix.execution.Scheduler
+         F: _root_.cats.effect.ConcurrentEffect[F],
+         S: _root_.monix.execution.Scheduler,
+         T: _root_.cats.effect.Timer[F]
        ) extends _root_.io.grpc.stub.AbstractStub[$clientName[F]](channel, options) {
 
           override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $clientName[F] =
@@ -144,8 +146,9 @@ trait RPCService {
            _root_.freestyle.rpc.client.UsePlaintext()),
          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
        )(implicit
-         F: _root_.cats.effect.Effect[F],
-         S: _root_.monix.execution.Scheduler
+         F: _root_.cats.effect.ConcurrentEffect[F],
+         S: _root_.monix.execution.Scheduler,
+         T: _root_.cats.effect.Timer[F]
        ): $clientName[F] = {
          val managedChannelInterpreter =
            new _root_.freestyle.rpc.client.ManagedChannelInterpreter[F](channelFor, channelConfigList)
@@ -157,8 +160,9 @@ trait RPCService {
          channel: _root_.io.grpc.Channel,
          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
        )(implicit
-         F: _root_.cats.effect.Effect[F],
-         S: _root_.monix.execution.Scheduler
+         F: _root_.cats.effect.ConcurrentEffect[F],
+         S: _root_.monix.execution.Scheduler,
+         T: _root_.cats.effect.Timer[F]
         ): $clientName[F] = new $clientCtor[F](channel, options)
      """
   )

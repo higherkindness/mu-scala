@@ -18,7 +18,7 @@ package freestyle.rpc
 package internal
 package client
 
-import cats.effect.Effect
+import cats.effect.{ConcurrentEffect, Timer}
 import _root_.fs2._
 import _root_.fs2.interop.reactivestreams._
 import monix.execution.Scheduler
@@ -27,14 +27,14 @@ import monix.reactive.Observable
 
 object fs2Calls {
 
-  def unary[F[_]: Effect, Req, Res](
+  def unary[F[_]: ConcurrentEffect, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
       options: CallOptions)(implicit S: Scheduler): F[Res] =
     monixCalls.unary(request, descriptor, channel, options)
 
-  def serverStreaming[F[_]: Effect, Req, Res](
+  def serverStreaming[F[_]: ConcurrentEffect: Timer, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
@@ -44,7 +44,7 @@ object fs2Calls {
       .toReactivePublisher
       .toStream[F]
 
-  def clientStreaming[F[_]: Effect, Req, Res](
+  def clientStreaming[F[_]: ConcurrentEffect: Timer, Req, Res](
       input: Stream[F, Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
@@ -56,7 +56,7 @@ object fs2Calls {
       channel,
       options)
 
-  def bidiStreaming[F[_]: Effect, Req, Res](
+  def bidiStreaming[F[_]: ConcurrentEffect: Timer, Req, Res](
       input: Stream[F, Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
