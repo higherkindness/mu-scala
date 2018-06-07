@@ -24,7 +24,7 @@ object ProjectPlugin extends AutoPlugin {
       val catsEffect: String         = "0.10.1"
       val circe: String              = "0.9.3"
       val frees: String              = "0.8.1"
-      val fs2ReactiveStreams: String = "0.5.1"
+      val fs2ReactiveStreams: String = "0.6.0"
       val grpc: String               = "1.11.0"
       val log4s: String              = "1.6.1"
       val logback: String            = "1.2.3"
