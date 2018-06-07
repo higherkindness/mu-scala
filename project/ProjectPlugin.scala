@@ -21,13 +21,14 @@ object ProjectPlugin extends AutoPlugin {
     lazy val V = new {
       val avro4s: String             = "1.8.3"
       val avrohugger: String         = "1.0.0-RC10"
-      val catsEffect: String         = "0.10.1"
+      val catsEffect: String         = "1.0.0-RC2"
       val circe: String              = "0.9.3"
       val frees: String              = "0.8.1"
       val fs2ReactiveStreams: String = "0.6.0"
       val grpc: String               = "1.11.0"
       val log4s: String              = "1.6.1"
       val logback: String            = "1.2.3"
+      val monix: String              = "3.0.0-RC1"
       val nettySSL: String           = "2.0.8.Final"
       val pbdirect: String           = "0.1.0"
       val prometheus: String         = "0.3.0"
@@ -52,7 +53,7 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect),
         %("grpc-stub", V.grpc),
-        %%("monix"),
+        %%("monix", V.monix) excludeAll ("org.typelevel" %% "cats-effect"),
         %%("fs2-reactive-streams", V.fs2ReactiveStreams),
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
@@ -142,7 +143,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val exampleRouteguideRuntimeSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("monix")
+        %%("monix", V.monix) excludeAll ("org.typelevel" %% "cats-effect")
       )
     )
 
@@ -158,7 +159,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val exampleTodolistRuntimeSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("monix")
+        %%("monix", V.monix) excludeAll ("org.typelevel" %% "cats-effect")
       )
     )
 
