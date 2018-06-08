@@ -118,7 +118,7 @@ trait RPCService {
     q"""
        $wartSuppress
        class $clientName[F[_]](
-         channel: _root_.io.grpc.Channel,
+         channel: _root_.io.grpc.ManagedChannel,
          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
        )(implicit
          F: _root_.cats.effect.Effect[F],
@@ -126,7 +126,13 @@ trait RPCService {
        ) extends _root_.io.grpc.stub.AbstractStub[$clientName[F]](channel, options) {
 
           override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $clientName[F] =
-              new $clientCtor[F](channel, options)
+              new $clientCtor[F](channel.asInstanceOf[_root_.io.grpc.ManagedChannel], options)
+
+          def buildBracket(channel: F[_root_.io.grpc.ManagedChannel], options: _root_.io.grpc.CallOptions): F[$clientName[F]] = F.bracket(channel) { ch =>
+            F.delay(build(ch, options))
+          } { ch =>
+            F.delay(ch.shutdown())
+          }
 
           ..$clientDefs
 
@@ -146,20 +152,20 @@ trait RPCService {
        )(implicit
          F: _root_.cats.effect.Effect[F],
          S: _root_.monix.execution.Scheduler
-       ): $clientName[F] = {
+       ): F[$clientName[F]] = {
          val managedChannelInterpreter =
            new _root_.freestyle.rpc.client.ManagedChannelInterpreter[F](channelFor, channelConfigList)
-         new $clientCtor[F](managedChannelInterpreter.build(channelFor, channelConfigList), options)
+         F.bracket(managedChannelInterpreter.build(channelFor, channelConfigList))(ch => F.delay(new $clientCtor[F](ch, options)))(ch => F.delay(ch.shutdown()))
        }""",
     q"""
        $wartSuppress
        def clientFromChannel[F[_]](
-         channel: _root_.io.grpc.Channel,
+         channel: F[_root_.io.grpc.ManagedChannel],
          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
        )(implicit
          F: _root_.cats.effect.Effect[F],
          S: _root_.monix.execution.Scheduler
-        ): $clientName[F] = new $clientCtor[F](channel, options)
+        ): F[$clientName[F]] = F.bracket(channel)(ch => F.delay(new $clientCtor[F](ch, options)))(ch => F.delay(ch.shutdown()))
      """
   )
 }
