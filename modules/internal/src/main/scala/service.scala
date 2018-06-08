@@ -184,44 +184,51 @@ object serviceImpl {
       private val Client                        = TypeName("Client")
       val clientClass: ClassDef =
         q"""
-        class $Client[$F_](
-          channel: _root_.io.grpc.Channel,
+        class $Client[F[_]](
+          channel: _root_.io.grpc.ManagedChannel,
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit
-          F: _root_.cats.effect.ConcurrentEffect[$F],
+          F: _root_.cats.effect.ConcurrentEffect[F],
           EC: _root_.scala.concurrent.ExecutionContext
-        ) extends _root_.io.grpc.stub.AbstractStub[$Client[$F]](channel, options) {
+        ) extends _root_.io.grpc.stub.AbstractStub[$Client[F]](channel, options) {
           override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $Client[F] =
-              new $Client[$F](channel, options)
+              new $Client[F](channel.asInstanceOf[_root_.io.grpc.ManagedChannel], options)
+
+           def buildBracket(channel: F[_root_.io.grpc.ManagedChannel], options: _root_.io.grpc.CallOptions): F[$Client[F]] = F.bracket(channel) { ch =>
+             F.delay(build(ch, options))
+           } { ch =>
+             F.delay(ch.shutdown())
+           }
+
           ..$clientCallMethods
           ..$nonRpcDefs
         }""".supressWarts("DefaultArguments")
 
       val client: DefDef =
         q"""
-        def client[$F_](
+        def client[F[_]](
           channelFor: _root_.mu.rpc.ChannelFor,
           channelConfigList: List[_root_.mu.rpc.client.ManagedChannelConfig] = List(
             _root_.mu.rpc.client.UsePlaintext()),
             options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
           )(implicit
-          F: _root_.cats.effect.ConcurrentEffect[$F],
+          F: _root_.cats.effect.ConcurrentEffect[F],
           EC: _root_.scala.concurrent.ExecutionContext
-        ): $Client[$F] = {
+        ): F[$Client[F]] = {
           val managedChannelInterpreter =
             new _root_.mu.rpc.client.ManagedChannelInterpreter[F](channelFor, channelConfigList)
-          new $Client[$F](managedChannelInterpreter.build(channelFor, channelConfigList), options)
+          F.bracket(managedChannelInterpreter.build(channelFor, channelConfigList))(ch => F.delay(new $Client[F](ch, options)))(ch => F.delay(ch.shutdown()))
         }""".supressWarts("DefaultArguments")
 
       val clientFromChannel: DefDef =
         q"""
-        def clientFromChannel[$F_](
-          channel: _root_.io.grpc.Channel,
+        def clientFromChannel[F[_]](
+          channel: F[_root_.io.grpc.ManagedChannel],
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit
           F: _root_.cats.effect.ConcurrentEffect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
-        ): $Client[$F] = new $Client[$F](channel, options)
+        ): F[$Client[F]] = F.bracket(channel)(ch => F.delay(new $Client[F](ch, options)))(ch => F.delay(ch.shutdown()))
         """.supressWarts("DefaultArguments")
 
       private def lit(x: Any): Literal = Literal(Constant(x.toString))
