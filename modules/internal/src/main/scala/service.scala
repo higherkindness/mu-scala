@@ -194,12 +194,6 @@ object serviceImpl {
           override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $Client[F] =
               new $Client[F](channel.asInstanceOf[_root_.io.grpc.ManagedChannel], options)
 
-           def buildBracket(channel: F[_root_.io.grpc.ManagedChannel], options: _root_.io.grpc.CallOptions): F[$Client[F]] = F.bracket(channel) { ch =>
-             F.delay(build(ch, options))
-           } { ch =>
-             F.delay(ch.shutdown())
-           }
-
           ..$clientCallMethods
           ..$nonRpcDefs
         }""".supressWarts("DefaultArguments")
@@ -214,11 +208,12 @@ object serviceImpl {
           )(implicit
           F: _root_.cats.effect.ConcurrentEffect[F],
           EC: _root_.scala.concurrent.ExecutionContext
-        ): F[$Client[F]] = {
-          val managedChannelInterpreter =
-            new _root_.mu.rpc.client.ManagedChannelInterpreter[F](channelFor, channelConfigList)
-          F.bracket(managedChannelInterpreter.build(channelFor, channelConfigList))(ch => F.delay(new $Client[F](ch, options)))(ch => F.delay(ch.shutdown()))
-        }""".supressWarts("DefaultArguments")
+        ): _root_.cats.effect.Resource[F, $Client[F]] =
+          _root_.cats.effect.Resource.make {
+            val managedChannelInterpreter = new _root_.mu.rpc.client.ManagedChannelInterpreter[F](channelFor, channelConfigList)
+            managedChannelInterpreter.build(channelFor, channelConfigList)
+          }(channel => F.delay(channel.shutdown())).flatMap(ch => _root_.cats.effect.Resource.make(F.delay(new $Client[F](ch, options)))(_ => F.delay(())))
+        """.supressWarts("DefaultArguments")
 
       val clientFromChannel: DefDef =
         q"""
@@ -226,9 +221,36 @@ object serviceImpl {
           channel: F[_root_.io.grpc.ManagedChannel],
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit
+          F: _root_.cats.effect.ConcurrentEffect[F],
+          EC: _root_.scala.concurrent.ExecutionContext
+        ): _root_.cats.effect.Resource[F, $Client[F]] = _root_.cats.effect.Resource.make(channel)(channel => F.delay(channel.shutdown())).flatMap(ch => _root_.cats.effect.Resource.make(F.delay(new $Client[F](ch, options)))(_ => F.delay(())))
+        """.supressWarts("DefaultArguments")
+
+      val unsafeClient: DefDef =
+        q"""
+        def unsafeClient[$F_](
+          channelFor: _root_.mu.rpc.ChannelFor,
+          channelConfigList: List[_root_.mu.rpc.client.ManagedChannelConfig] = List(
+            _root_.mu.rpc.client.UsePlaintext()),
+            options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+          )(implicit
           F: _root_.cats.effect.ConcurrentEffect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
-        ): F[$Client[F]] = F.bracket(channel)(ch => F.delay(new $Client[F](ch, options)))(ch => F.delay(ch.shutdown()))
+        ): $Client[$F] = {
+          val managedChannelInterpreter =
+            new _root_.mu.rpc.client.ManagedChannelInterpreter[F](channelFor, channelConfigList)
+          new $Client[$F](managedChannelInterpreter.build(channelFor, channelConfigList), options)
+        }""".supressWarts("DefaultArguments")
+
+      val unsafeClientFromChannel: DefDef =
+        q"""
+        def unsafeClientFromChannel[$F_](
+          channel: _root_.io.grpc.Channel,
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit
+          F: _root_.cats.effect.ConcurrentEffect[$F],
+          EC: _root_.scala.concurrent.ExecutionContext
+        ): $Client[$F] = new $Client[$F](channel, options)
         """.supressWarts("DefaultArguments")
 
       private def lit(x: Any): Literal = Literal(Constant(x.toString))
@@ -408,7 +430,9 @@ object serviceImpl {
               service.bindService,
               service.clientClass,
               service.client,
-              service.clientFromChannel
+              service.clientFromChannel,
+              service.unsafeClient,
+              service.unsafeClientFromChannel
             )
           )
         )

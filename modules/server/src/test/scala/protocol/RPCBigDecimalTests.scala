@@ -141,8 +141,8 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
     "be able to serialize and deserialize BigDecimal using proto format" in {
 
       withServerChannel(ProtoRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: ProtoRPCServiceDef.Client[ConcurrentMonad] =
-          ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+        val client: ConcurrentMonad[ProtoRPCServiceDef.Client[ConcurrentMonad]] =
+          ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](IO.pure(sc.channel))
 
         check {
           forAll { bd: BigDecimal =>
@@ -158,7 +158,7 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
       withServerChannel(ProtoRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
         val client: ProtoRPCServiceDef.Client[ConcurrentMonad] =
-          ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+          ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
         check {
           forAll { (bd: BigDecimal, s: String) =>
@@ -177,7 +177,7 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
       withServerChannel(AvroRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
         val client: AvroRPCServiceDef.Client[ConcurrentMonad] =
-          AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+          AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
         check {
           forAll(bigDecimalGen(2)) { bd =>
@@ -193,7 +193,7 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
       withServerChannel(AvroRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
         val client: AvroRPCServiceDef.Client[ConcurrentMonad] =
-          AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+          AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
         check {
           forAll { request: RequestPS =>
@@ -214,7 +214,7 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
       withServerChannel(AvroWithSchemaRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
         val client: AvroWithSchemaRPCServiceDef.Client[ConcurrentMonad] =
-          AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+          AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
         check {
           forAll(bigDecimalGen(2)) { bd =>
@@ -232,7 +232,7 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
       withServerChannel(AvroWithSchemaRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
         val client: AvroWithSchemaRPCServiceDef.Client[ConcurrentMonad] =
-          AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+          AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
         check {
           forAll { request: RequestPS =>

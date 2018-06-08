@@ -20,6 +20,7 @@ package protocol
 import java.time._
 
 import cats.Applicative
+import cats.effect.IO
 import cats.syntax.applicative._
 import com.fortysevendeg.scalacheck.datetime.instances.jdk8._
 import com.fortysevendeg.scalacheck.datetime.GenDateTime._
@@ -108,8 +109,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     "be able to serialize and deserialize LocalDate using proto format" in {
 
       withServerChannel(ProtoRPCDateServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: ProtoRPCDateServiceDef.Client[ConcurrentMonad] =
-          ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+        val client: ConcurrentMonad[ProtoRPCDateServiceDef.Client[ConcurrentMonad]] =
+          ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
@@ -125,8 +126,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     "be able to serialize and deserialize LocalDateTime using proto format" in {
 
       withServerChannel(ProtoRPCDateServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: ProtoRPCDateServiceDef.Client[ConcurrentMonad] =
-          ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+        val client: ConcurrentMonad[ProtoRPCDateServiceDef.Client[ConcurrentMonad]] =
+          ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
@@ -142,8 +143,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     "be able to serialize and deserialize Instant using proto format" in {
 
       withServerChannel(ProtoRPCDateServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: ProtoRPCDateServiceDef.Client[ConcurrentMonad] =
-          ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+        val client: ConcurrentMonad[ProtoRPCDateServiceDef.Client[ConcurrentMonad]] =
+          ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
@@ -159,8 +160,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     "be able to serialize and deserialize LocalDate, LocalDateTime, and Instant in a Request using proto format" in {
 
       withServerChannel(ProtoRPCDateServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: ProtoRPCDateServiceDef.Client[ConcurrentMonad] =
-          ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+        val client: ConcurrentMonad[ProtoRPCDateServiceDef.Client[ConcurrentMonad]] =
+          ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
         check {
           forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
@@ -181,8 +182,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     "be able to serialize and deserialize LocalDate using avro format" in {
 
       withServerChannel(AvroRPCDateServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: AvroRPCDateServiceDef.Client[ConcurrentMonad] =
-          AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+        val client: ConcurrentMonad[AvroRPCDateServiceDef.Client[ConcurrentMonad]] =
+          AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
@@ -198,8 +199,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     "be able to serialize and deserialize LocalDateTime using avro format" in {
 
       withServerChannel(AvroRPCDateServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: AvroRPCDateServiceDef.Client[ConcurrentMonad] =
-          AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+        val client: ConcurrentMonad[AvroRPCDateServiceDef.Client[ConcurrentMonad]] =
+          AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
@@ -215,8 +216,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     "be able to serialize and deserialize Instant using avro format" in {
 
       withServerChannel(AvroRPCDateServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: AvroRPCDateServiceDef.Client[ConcurrentMonad] =
-          AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+        val client: ConcurrentMonad[AvroRPCDateServiceDef.Client[ConcurrentMonad]] =
+          AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
@@ -232,8 +233,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     "be able to serialize and deserialize LocalDate, LocalDateTime, and Instant in a Request using avro format" in {
 
       withServerChannel(AvroRPCDateServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: AvroRPCDateServiceDef.Client[ConcurrentMonad] =
-          AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+        val client: ConcurrentMonad[AvroRPCDateServiceDef.Client[ConcurrentMonad]] =
+          AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
         check {
           forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
@@ -254,8 +255,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     "be able to serialize and deserialize LocalDate using avro format with schema" in {
 
       withServerChannel(AvroWithSchemaRPCDateServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: AvroWithSchemaRPCDateServiceDef.Client[ConcurrentMonad] =
-          AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+        val client: ConcurrentMonad[AvroWithSchemaRPCDateServiceDef.Client[ConcurrentMonad]] =
+          AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
@@ -271,8 +272,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     "be able to serialize and deserialize LocalDateTime using avro format with schema" in {
 
       withServerChannel(AvroWithSchemaRPCDateServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: AvroWithSchemaRPCDateServiceDef.Client[ConcurrentMonad] =
-          AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+        val client: ConcurrentMonad[AvroWithSchemaRPCDateServiceDef.Client[ConcurrentMonad]] =
+          AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
@@ -288,8 +289,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     "be able to serialize and deserialize Instant using avro format with schema" in {
 
       withServerChannel(AvroWithSchemaRPCDateServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: AvroWithSchemaRPCDateServiceDef.Client[ConcurrentMonad] =
-          AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+        val client: ConcurrentMonad[AvroWithSchemaRPCDateServiceDef.Client[ConcurrentMonad]] =
+          AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
@@ -305,8 +306,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     "be able to serialize and deserialize LocalDate, LocalDateTime, and Instant in a Request using avro format with schema" in {
 
       withServerChannel(AvroWithSchemaRPCDateServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: AvroWithSchemaRPCDateServiceDef.Client[ConcurrentMonad] =
-          AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
+        val client: ConcurrentMonad[AvroWithSchemaRPCDateServiceDef.Client[ConcurrentMonad]] =
+          AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
         check {
           forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {

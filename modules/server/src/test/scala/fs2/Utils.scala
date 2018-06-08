@@ -167,21 +167,21 @@ object Utils extends CommonUtils {
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    implicit val muProtoRPCServiceClient: ProtoRPCService.Client[ConcurrentMonad] =
+    implicit val muProtoRPCServiceClient: ConcurrentMonad[ProtoRPCService.Client[ConcurrentMonad]] =
       ProtoRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val muAvroRPCServiceClient: AvroRPCService.Client[ConcurrentMonad] =
+    implicit val muAvroRPCServiceClient: ConcurrentMonad[AvroRPCService.Client[ConcurrentMonad]] =
       AvroRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val muAvroWithSchemaRPCServiceClient: AvroWithSchemaRPCService.Client[
-      ConcurrentMonad] =
+    implicit val muAvroWithSchemaRPCServiceClient: ConcurrentMonad[AvroWithSchemaRPCService.Client[
+      ConcurrentMonad]] =
       AvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val muCompressedProtoRPCServiceClient: CompressedProtoRPCService.Client[
-      ConcurrentMonad] =
+    implicit val muCompressedProtoRPCServiceClient: ConcurrentMonad[CompressedProtoRPCService.Client[
+      ConcurrentMonad]] =
       CompressedProtoRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val muCompressedAvroRPCServiceClient: CompressedAvroRPCService.Client[
-      ConcurrentMonad] =
+    implicit val muCompressedAvroRPCServiceClient: ConcurrentMonad[CompressedAvroRPCService.Client[
+      ConcurrentMonad]] =
       CompressedAvroRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val muCompressedAvroWithSchemaRPCServiceClient: CompressedAvroWithSchemaRPCService.Client[
-      ConcurrentMonad] =
+    implicit val muCompressedAvroWithSchemaRPCServiceClient: ConcurrentMonad[CompressedAvroWithSchemaRPCService.Client[
+      ConcurrentMonad]] =
       CompressedAvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
 
   }
