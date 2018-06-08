@@ -34,13 +34,6 @@ object ProjectPlugin extends AutoPlugin {
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
-      scalacOptions := Seq(
-        "-deprecation",
-        "-encoding",
-        "UTF-8",
-        "-feature",
-        "-unchecked",
-        "-language:higherKinds"),
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect) % Test,
         %%("scalamockScalatest")        % Test,
@@ -197,7 +190,8 @@ object ProjectPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] =
     // format: OFF
-    scalaMetaSettings ++ sharedReleaseProcess ++ warnUnusedImport ++ Seq(
+    sharedReleaseProcess ++ warnUnusedImport ++ Seq(
+      addCompilerPlugin(%%("paradise") cross CrossVersion.full),
       libraryDependencies ++= commonDeps :+ %("slf4j-nop") % Test,
       scalaVersion := "2.12.6",
       crossScalaVersions := Seq("2.11.12", "2.12.6"),
