@@ -22,7 +22,9 @@ import io.grpc.netty.NettyChannelBuilder
 
 package object netty {
 
-  class NettyChannelInterpreter(initConfig: ChannelFor, configList: List[ManagedChannelConfig]) {
+  class NettyChannelInterpreter(
+      initConfig: ChannelFor,
+      configList: List[Either[ManagedChannelConfig, NettyChannelConfig]]) {
 
     def build: ManagedChannel = {
       val builder: NettyChannelBuilder = initConfig match {
@@ -35,14 +37,14 @@ package object netty {
 
       configList
         .foldLeft(builder) { (acc, cfg) =>
-          (ManagedChannelB(acc) orElse NettyChannelB(acc))(cfg)
+          cfg.fold(c => configureChannel(acc, c), c => NettyChannelB(acc)(c))
         }
         .build()
     }
   }
 
   def NettyChannelB(
-      mcb: NettyChannelBuilder): PartialFunction[ManagedChannelConfig, NettyChannelBuilder] = {
+      mcb: NettyChannelBuilder): PartialFunction[NettyChannelConfig, NettyChannelBuilder] = {
     case NettyChannelType(channelType)       => mcb.channelType(channelType)
     case NettyWithOption(option, value)      => mcb.withOption(option, value)
     case NettyNegotiationType(nt)            => mcb.negotiationType(nt)

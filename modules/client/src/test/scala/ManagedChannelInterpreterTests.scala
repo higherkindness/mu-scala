@@ -17,12 +17,10 @@
 package freestyle.rpc
 package client
 
+import cats.effect.IO
 import cats.data.Kleisli
 import freestyle.rpc.common.SC
 import io.grpc.ManagedChannel
-
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
 
 abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
@@ -37,11 +35,12 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
       val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext())
 
       val managedChannelInterpreter =
-        new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
+        new ManagedChannelInterpreter[IO](channelFor, channelConfigList)
 
-      val mc: ManagedChannel = managedChannelInterpreter.build(channelFor, channelConfigList)
+      val mc: ManagedChannel =
+        managedChannelInterpreter.build(channelFor, channelConfigList).unsafeRunSync
 
-      mc shouldBe an[ManagedChannel]
+      mc shouldBe a[ManagedChannel]
 
       mc.shutdownNow()
     }
@@ -53,9 +52,10 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
       val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext())
 
       val managedChannelInterpreter =
-        new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
+        new ManagedChannelInterpreter[IO](channelFor, channelConfigList)
 
-      val mc: ManagedChannel = managedChannelInterpreter.build(channelFor, channelConfigList)
+      val mc: ManagedChannel =
+        managedChannelInterpreter.build(channelFor, channelConfigList).unsafeRunSync
 
       mc shouldBe a[ManagedChannel]
 
@@ -69,15 +69,12 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
       val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext())
 
       val managedChannelInterpreter =
-        new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
+        new ManagedChannelInterpreter[IO](channelFor, channelConfigList)
 
-      val kleisli: ManagedChannelOps[Future, String] =
-        Kleisli[Future, ManagedChannel, String]((mc: ManagedChannel) => {
-          mc.shutdownNow()
-          Future.successful(foo)
-        })
+      val kleisli: ManagedChannelOps[IO, String] =
+        Kleisli.liftF(IO(foo))
 
-      Await.result(managedChannelInterpreter[String](kleisli), Duration.Inf) shouldBe foo
+      managedChannelInterpreter[String](kleisli).unsafeRunSync shouldBe foo
     }
 
     "build a io.grpc.ManagedChannel based on any configuration combination" in {
@@ -87,27 +84,14 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
       val channelConfigList: List[ManagedChannelConfig] = managedChannelConfigAllList
 
       val managedChannelInterpreter =
-        new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
+        new ManagedChannelInterpreter[IO](channelFor, channelConfigList)
 
-      val mc: ManagedChannel = managedChannelInterpreter.build(channelFor, channelConfigList)
+      val mc: ManagedChannel =
+        managedChannelInterpreter.build(channelFor, channelConfigList).unsafeRunSync
 
       mc shouldBe a[ManagedChannel]
 
       mc.shutdownNow()
-    }
-
-    "throw an exception when configuration is not recognized" in {
-
-      val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
-
-      case object Unexpected extends ManagedChannelConfig
-      val channelConfigList: List[ManagedChannelConfig] = List(Unexpected)
-
-      val managedChannelInterpreter =
-        new ManagedChannelInterpreter[Future](channelFor, channelConfigList)
-
-      a[MatchError] shouldBe thrownBy(
-        managedChannelInterpreter.build(channelFor, channelConfigList))
     }
 
     "throw an exception when ChannelFor is not recognized" in {
@@ -115,10 +99,10 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
       val channelFor: ChannelFor = ChannelForPort(SC.port)
 
       val managedChannelInterpreter =
-        new ManagedChannelInterpreter[Future](channelFor, Nil)
+        new ManagedChannelInterpreter[IO](channelFor, Nil)
 
       an[IllegalArgumentException] shouldBe thrownBy(
-        managedChannelInterpreter.build(channelFor, Nil))
+        managedChannelInterpreter.build(channelFor, Nil).unsafeRunSync)
     }
   }
 }
