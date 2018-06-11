@@ -50,10 +50,12 @@ object serviceImpl {
       val nonRpcDefs: List[Tree] = defs.collect {
         case d: DefDef if findAnnotation(d.mods, "rpc").isEmpty => d
       }
+      val imports: List[Tree] = defs.collect {
+        case imp: Import => imp
+      }
 
-      val methodDescriptors: List[Tree] = rpcCalls.map(_.methodDescriptor)
-      private val serverCallDescriptors: List[Tree] =
-        rpcCalls.map(call => q"(${call.descriptorName}, ${call.descriptorAndHandler})")
+      val methodDescriptors: List[Tree]             = rpcCalls.map(_.methodDescriptor)
+      private val serverCallDescriptors: List[Tree] = rpcCalls.map(_.descriptorAndHandler)
       val bindService: Tree =
         q"""
         def bindService[$F_](implicit
@@ -197,11 +199,13 @@ object serviceImpl {
 
         val descriptorName = TermName(methodName + "MethodDescriptor")
 
-        private def typeParam(t: Tree) = t match {
-          case tq"$tpt[..$tpts]" => tpts.lastOption.getOrElse(tpt)
+        val reqType = requestType match {
+          case tq"$s[..$tpts]" if requestStreamingImpl.isDefined => tpts.last
+          case other => other
         }
-        val reqType = typeParam(requestType)
-        val respType = typeParam(responseType)
+        val respType = responseType  match {
+          case tq"$x[..$tpts]" => tpts.last
+        }
         val methodDescriptor = q"""
           val $descriptorName: _root_.io.grpc.MethodDescriptor[$reqType, $respType] = {
           $encodersImport
@@ -220,26 +224,20 @@ object serviceImpl {
         def clientCallType(clientMethodName: String) =
           q"$clientCall.${TermName(clientMethodName)}(input, $descriptorName, channel, options)"
 
-        private def streamingImplType(tp: Tree) = streamingImpl match {
-          case Fs2Stream       => q"_root_.fs2.Stream[$F, $tp]"
-          case MonixObservable => q"_root_.monix.reactive.Observable[$tp]"
-        }
-
         val clientDef = streamingType match {
-          case Some(RequestStreaming)  => q"""
-            def $methodName(input: ${streamingImplType(requestType)}): $F[$responseType] =
-              ${clientCallType("clientStreaming")}"""
-          case Some(ResponseStreaming) => q"""
-            def $methodName(input: $requestType): ${streamingImplType(responseType)} =
-              ${clientCallType("serverStreaming")}"""
+          case Some(RequestStreaming) =>
+            q"""
+            def $methodName(input: $requestType): $responseType = ${clientCallType(
+              "clientStreaming")}"""
+          case Some(ResponseStreaming) =>
+            q"""
+            def $methodName(input: $requestType): $responseType = ${clientCallType(
+              "serverStreaming")}"""
           case Some(BidirectionalStreaming) =>
             q"""
-            def $methodName(input: ${streamingImplType(requestType)}): ${streamingImplType(
-              responseType)} =
-              ${clientCallType("bidiStreaming")}"""
+            def $methodName(input: $requestType): $responseType = ${clientCallType("bidiStreaming")}"""
           case None => q"""
-            def $methodName(input: $requestType): $F[$responseType] =
-              ${clientCallType("unary")}"""
+            def $methodName(input: $requestType): $responseType = ${clientCallType("unary")}"""
         }
 
         val maybeAlg = compressionType match {
@@ -248,7 +246,7 @@ object serviceImpl {
         }
 
         def serverCallType(serverMethodName: String) =
-          q"$serverCall.${TermName(serverMethodName)}(algebra.${serviceName.toTermName}, $maybeAlg)"
+          q"$serverCall.${TermName(serverMethodName)}(algebra.$methodName, $maybeAlg)"
 
         val descriptorAndHandler: Tree = {
           val handler = streamingType match {
@@ -285,18 +283,18 @@ object serviceImpl {
           Template(
             companion.impl.parents,
             companion.impl.self,
-            companion.impl.body ++ service.methodDescriptors ++ List(
+            companion.impl.body ++ service.imports ++ service.methodDescriptors ++ List(
               service.bindService,
               service.clientClass,
               service.client,
               service.clientFromChannel
-              )
+            )
           )
         )
         List(serviceDef, enrichedCompanion)
       case _ => sys.error("@service-annotated definition must be a trait or abstract class")
     }
-    println(result) //todo: remove this once the damn thing works
+    println(result) //todo: remove this
     c.Expr(Block(result, Literal(Constant(()))))
   }
 }
