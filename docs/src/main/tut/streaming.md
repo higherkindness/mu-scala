@@ -40,7 +40,6 @@ object service {
      * @return Stream of server responses.
      */
     @rpc(Protobuf)
-    @stream[ResponseStreaming.type]
     def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
 
     /**
@@ -54,7 +53,6 @@ object service {
      * @return Single server response.
      */
     @rpc(Protobuf)
-    @stream[RequestStreaming.type]
     def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse]
 
     /**
@@ -70,7 +68,6 @@ object service {
      * @return Stream of server responses.
      */
     @rpc(Protobuf)
-    @stream[BidirectionalStreaming.type]
     def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
 
   }
@@ -127,7 +124,6 @@ object service {
      * @return Stream of server responses.
      */
     @rpc(Protobuf)
-    @stream[ResponseStreaming.type]
     def lotsOfReplies(request: HelloRequest): Stream[F, HelloResponse]
 
     /**
@@ -137,7 +133,6 @@ object service {
      * @return Single server response.
      */
     @rpc(Protobuf)
-    @stream[RequestStreaming.type]
     def lotsOfGreetings(request: Stream[F, HelloRequest]): F[HelloResponse]
 
     /**
@@ -147,7 +142,6 @@ object service {
      * @return Stream of server responses.
      */
     @rpc(Protobuf)
-    @stream[BidirectionalStreaming.type]
     def bidiHello(request: Stream[F, HelloRequest]): Stream[F, HelloResponse]
 
   }
@@ -166,8 +160,8 @@ As you can see, it is really similar to the Observable service.
 [gRPC guide]: https://grpc.io/docs/guides/
 [@tagless algebra]: http://frees.io/docs/core/algebras/
 [PBDirect]: https://github.com/btlines/pbdirect
-[scalameta]: https://github.com/scalameta/scalameta
+[scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
 [Metrifier]: https://github.com/47deg/metrifier
-[frees-config]: http://frees.io/docs/patterns/config/
+

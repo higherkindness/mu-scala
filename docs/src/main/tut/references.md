@@ -10,7 +10,7 @@ permalink: /docs/rpc/references
 * [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call)
 * [gRPC](https://grpc.io/)
 * [Protocol Buffers Docs](https://developers.google.com/protocol-buffers/docs/overview)
-* [scalameta](https://github.com/scalameta/scalameta)
+* [scalamacros]: https://github.com/scalamacros/paradise
 * [PBDirect](https://github.com/btlines/pbdirect)
 * [ScalaPB](https://scalapb.github.io/)
 * [Monix](https://monix.io)
@@ -38,8 +38,7 @@ If you want to delve deeper into [frees-rpc], we have a complete example at the 
 [gRPC guide]: https://grpc.io/docs/guides/
 [@tagless algebra]: http://frees.io/docs/core/algebras/
 [PBDirect]: https://github.com/btlines/pbdirect
-[scalameta]: https://github.com/scalameta/scalameta
+[scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
 [Metrifier]: https://github.com/47deg/metrifier
-[frees-config]: http://frees.io/docs/patterns/config/

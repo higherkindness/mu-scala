@@ -23,6 +23,7 @@ import scala.reflect.macros.blackbox
 // $COVERAGE-OFF$
 object serviceImpl {
 
+  //todo: move the Context-dependent inner classes and functions elsewhere, if possible
   def service(c: blackbox.Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
     import c.universe._
     import Flag._
@@ -38,24 +39,25 @@ object serviceImpl {
       val F: TypeName  = F_.name
 
       private val defs: List[Tree] = serviceDef.impl.body
-      val rpcDefs: List[DefDef] = defs.collect {
+      private val rpcDefs: List[DefDef] = defs.collect {
         case d: DefDef if findAnnotation(d.mods, "rpc").isDefined => d
       }
-      val rpcCalls: List[RpcRequest] = rpcDefs.map { d =>
+      private val rpcRequests: List[RpcRequest] = rpcDefs.map { d =>
         val name   = d.name
         val params = d.vparamss.flatten
         require(params.length == 1, s"RPC call $name has more than one request parameter")
         RpcRequest(name, params.head.tpt, d.tpt, findAnnotation(d.mods, "rpc").get.children.tail)
       }
-      val nonRpcDefs: List[Tree] = defs.collect {
+      private val nonRpcDefs: List[Tree] = defs.collect {
         case d: DefDef if findAnnotation(d.mods, "rpc").isEmpty => d
       }
       val imports: List[Tree] = defs.collect {
         case imp: Import => imp
       }
 
-      val methodDescriptors: List[Tree]             = rpcCalls.map(_.methodDescriptor)
-      private val serverCallDescriptors: List[Tree] = rpcCalls.map(_.descriptorAndHandler)
+      val methodDescriptors: List[Tree] = rpcRequests.map(_.methodDescriptor)
+      private val serverCallDescriptorsAndHandlers: List[Tree] =
+        rpcRequests.map(_.descriptorAndHandler)
       val bindService: Tree =
         q"""
         def bindService[$F_](implicit
@@ -63,11 +65,12 @@ object serviceImpl {
           algebra: $serviceName[$F],
           S: _root_.monix.execution.Scheduler
         ): _root_.io.grpc.ServerServiceDefinition =
-          new _root_.freestyle.rpc.internal.service.GRPCServiceDefBuilder(${lit(serviceName)}, ..$serverCallDescriptors).apply
+          new _root_.freestyle.rpc.internal.service.GRPCServiceDefBuilder(${lit(serviceName)}, ..$serverCallDescriptorsAndHandlers).apply
         """
 
-      private val clientCallMethods: List[Tree] = rpcCalls.map(_.clientDef)
+      private val clientCallMethods: List[Tree] = rpcRequests.map(_.clientDef)
       private val Client                        = TypeName("Client")
+      //todo: surpressWarts("DefaultArguments")
       val clientClass: Tree =
         q"""
         class $Client[$F_](
@@ -83,6 +86,7 @@ object serviceImpl {
           ..$nonRpcDefs
         }"""
 
+      //todo: surpressWarts("DefaultArguments")
       val client: Tree =
         q"""
         def client[$F_](
@@ -99,6 +103,7 @@ object serviceImpl {
           new $Client[$F](managedChannelInterpreter.build(channelFor, channelConfigList), options)
         }"""
 
+      //todo: surpressWarts("DefaultArguments")
       val clientFromChannel: Tree =
         q"""
         def clientFromChannel[$F_](
@@ -127,35 +132,37 @@ object serviceImpl {
       private def findAnnotation(mods: Modifiers, name: String): Option[Tree] =
         mods.annotations.find(_.children.head.toString == s"new $name")
 
+      //todo: validate that the request and responses are case classes, if possible
       case class RpcRequest(
           methodName: TermName,
           requestType: Tree,
           responseType: Tree,
           options: List[Tree]) {
 
-        val serializationType: SerializationType =
+        private val serializationType: SerializationType =
           annotationParam(options, 0, "serializationType") match {
             case "Protobuf"       => Protobuf
             case "Avro"           => Avro
             case "AvroWithSchema" => AvroWithSchema
           }
 
-        val compressionType: CompressionType =
+        private val compressionType: CompressionType =
           annotationParam(options, 1, "compressionType", Some("Identity")) match {
             case "Identity" => Identity
             case "Gzip"     => Gzip
           }
 
-        val requestStreamingImpl: Option[StreamingImpl]  = streamingImplFor(requestType)
-        val responseStreamingImpl: Option[StreamingImpl] = streamingImplFor(responseType)
-        val streamingImpls: Set[StreamingImpl] =
+        private val requestStreamingImpl: Option[StreamingImpl]  = streamingImplFor(requestType)
+        private val responseStreamingImpl: Option[StreamingImpl] = streamingImplFor(responseType)
+        private val streamingImpls: Set[StreamingImpl] =
           Set(requestStreamingImpl, responseStreamingImpl).flatten
         require(
           streamingImpls.size < 2,
           s"RPC service $serviceName has different streaming implementations for request and response")
-        val streamingImpl: StreamingImpl = streamingImpls.headOption.getOrElse(MonixObservable)
+        private val streamingImpl: StreamingImpl =
+          streamingImpls.headOption.getOrElse(MonixObservable)
 
-        val streamingType: Option[StreamingType] =
+        private val streamingType: Option[StreamingType] =
           if (requestStreamingImpl.isDefined && responseStreamingImpl.isDefined)
             Some(BidirectionalStreaming)
           else if (requestStreamingImpl.isDefined) Some(RequestStreaming)
@@ -168,17 +175,17 @@ object serviceImpl {
           case _                                                        => None
         }
 
-        val clientCall = streamingImpl match {
+        private val clientCallsImpl = streamingImpl match {
           case Fs2Stream       => q"_root_.freestyle.rpc.internal.client.fs2Calls"
           case MonixObservable => q"_root_.freestyle.rpc.internal.client.monixCalls"
         }
 
-        val serverCall = streamingImpl match {
+        private val serverCallsImpl = streamingImpl match {
           case Fs2Stream       => q"_root_.freestyle.rpc.internal.server.fs2Calls"
           case MonixObservable => q"_root_.freestyle.rpc.internal.server.monixCalls"
         }
 
-        val methodType = {
+        private val streamingMethodType = {
           val suffix = streamingType match {
             case Some(RequestStreaming)       => "CLIENT_STREAMING"
             case Some(ResponseStreaming)      => "SERVER_STREAMING"
@@ -188,7 +195,8 @@ object serviceImpl {
           q"_root_.io.grpc.MethodDescriptor.MethodType.${TermName(suffix)}"
         }
 
-        val encodersImport = serializationType match {
+        //todo: surpressWarts("Null", "ExplicitImplicitTypes")
+        private val encodersImport = serializationType match {
           case Protobuf =>
             q"import _root_.freestyle.rpc.internal.encoders.pbd._"
           case Avro =>
@@ -197,23 +205,24 @@ object serviceImpl {
             q"import _root_.freestyle.rpc.internal.encoders.avrowithschema._"
         }
 
-        val descriptorName = TermName(methodName + "MethodDescriptor")
+        private val methodDescriptorName = TermName(methodName + "MethodDescriptor")
 
-        val reqType = requestType match {
+        private val reqType = requestType match {
           case tq"$s[..$tpts]" if requestStreamingImpl.isDefined => tpts.last
           case other                                             => other
         }
-        val respType = responseType match {
+        private val respType = responseType match {
           case tq"$x[..$tpts]" => tpts.last
         }
-        val methodDescriptor = q"""
-          val $descriptorName: _root_.io.grpc.MethodDescriptor[$reqType, $respType] = {
+        //todo: surpressWarts("DefaultArguments")
+        val methodDescriptor: Tree = q"""
+          val $methodDescriptorName: _root_.io.grpc.MethodDescriptor[$reqType, $respType] = {
           $encodersImport
           _root_.io.grpc.MethodDescriptor
             .newBuilder(
               implicitly[_root_.io.grpc.MethodDescriptor.Marshaller[$reqType]],
               implicitly[_root_.io.grpc.MethodDescriptor.Marshaller[$respType]])
-            .setType($methodType)
+            .setType($streamingMethodType)
             .setFullMethodName(
               _root_.io.grpc.MethodDescriptor.generateFullMethodName(${lit(serviceName)}, ${lit(
           methodName)}))
@@ -221,48 +230,55 @@ object serviceImpl {
           }
         """
 
-        def clientCallType(clientMethodName: String) =
-          q"$clientCall.${TermName(clientMethodName)}(input, $descriptorName, channel, options)"
+        private def clientCallMethodFor(clientMethodName: String) =
+          q"$clientCallsImpl.${TermName(clientMethodName)}(input, $methodDescriptorName, channel, options)"
 
-        val clientDef = streamingType match {
+        val clientDef: Tree = streamingType match {
           case Some(RequestStreaming) =>
             q"""
-            def $methodName(input: $requestType): $responseType = ${clientCallType(
+            def $methodName(input: $requestType): $responseType = ${clientCallMethodFor(
               "clientStreaming")}"""
           case Some(ResponseStreaming) =>
             q"""
-            def $methodName(input: $requestType): $responseType = ${clientCallType(
+            def $methodName(input: $requestType): $responseType = ${clientCallMethodFor(
               "serverStreaming")}"""
           case Some(BidirectionalStreaming) =>
             q"""
-            def $methodName(input: $requestType): $responseType = ${clientCallType("bidiStreaming")}"""
+            def $methodName(input: $requestType): $responseType = ${clientCallMethodFor(
+              "bidiStreaming")}"""
           case None => q"""
-            def $methodName(input: $requestType): $responseType = ${clientCallType("unary")}"""
+            def $methodName(input: $requestType): $responseType = ${clientCallMethodFor("unary")}"""
         }
 
-        val maybeAlg = compressionType match {
+        private val compressionOption = compressionType match {
           case Identity => q"None"
           case Gzip     => q"""Some("gzip")"""
         }
 
-        def serverCallType(serverMethodName: String) =
-          q"$serverCall.${TermName(serverMethodName)}(algebra.$methodName, $maybeAlg)"
+        private def serverCallMethodFor(serverMethodName: String) =
+          q"$serverCallsImpl.${TermName(serverMethodName)}(algebra.$methodName, $compressionOption)"
 
         val descriptorAndHandler: Tree = {
           val handler = streamingType match {
             case Some(RequestStreaming) =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(${serverCallType("clientStreamingMethod")})"
+              q"_root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(${serverCallMethodFor("clientStreamingMethod")})"
             case Some(ResponseStreaming) =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(${serverCallType("serverStreamingMethod")})"
+              q"_root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(${serverCallMethodFor("serverStreamingMethod")})"
             case Some(BidirectionalStreaming) =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(${serverCallType("bidiStreamingMethod")})"
+              q"_root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(${serverCallMethodFor("bidiStreamingMethod")})"
             case None =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncUnaryCall(${serverCallType("unaryMethod")})"
+              q"_root_.io.grpc.stub.ServerCalls.asyncUnaryCall(${serverCallMethodFor("unaryMethod")})"
           }
-          q"($descriptorName, $handler)"
+          q"($methodDescriptorName, $handler)"
         }
       }
     }
+    /* todo: restore with a proper scalamacros replacement to `mod`, if possible
+    private def surpressWarts(warts: String*) = {
+      val wartsString = warts.toList.map(w => "org.wartremover.warts." + w)
+      val argList     = wartsString.map(ws => arg"$ws")
+      mod"""@root_.java.lang.SuppressWarnings(_root_.scala.Array(..$argList))"""
+    }*/
 
     val classAndMaybeCompanion = annottees.map(_.tree)
     val result: List[Tree] = classAndMaybeCompanion.head match {
@@ -289,6 +305,7 @@ object serviceImpl {
               )
             )
         }
+        //todo: surpressWarts("Any", "NonUnitStatements", "StringPlusAny", "Throw")
         val enrichedCompanion = ModuleDef(
           companion.mods,
           companion.name,
