@@ -201,9 +201,9 @@ object serviceImpl {
 
         val reqType = requestType match {
           case tq"$s[..$tpts]" if requestStreamingImpl.isDefined => tpts.last
-          case other => other
+          case other                                             => other
         }
-        val respType = responseType  match {
+        val respType = responseType match {
           case tq"$x[..$tpts]" => tpts.last
         }
         val methodDescriptor = q"""
@@ -273,9 +273,21 @@ object serviceImpl {
           case Some(obj: ModuleDef) => obj
           case _ =>
             ModuleDef(
-              Modifiers(),
+              NoMods,
               serviceDef.name.toTermName,
-              Template(List(TypeTree(typeOf[AnyRef])), noSelfType, Nil))
+              Template(
+                List(TypeTree(typeOf[AnyRef])),
+                noSelfType,
+                List(
+                  DefDef(
+                    Modifiers(),
+                    termNames.CONSTRUCTOR,
+                    List(),
+                    List(List()),
+                    TypeTree(),
+                    Block(List(pendingSuperCall), Literal(Constant(())))))
+              )
+            )
         }
         val enrichedCompanion = ModuleDef(
           companion.mods,
@@ -294,7 +306,6 @@ object serviceImpl {
         List(serviceDef, enrichedCompanion)
       case _ => sys.error("@service-annotated definition must be a trait or abstract class")
     }
-    println(result) //todo: remove this
     c.Expr(Block(result, Literal(Constant(()))))
   }
 }

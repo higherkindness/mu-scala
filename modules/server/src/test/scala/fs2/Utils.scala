@@ -39,39 +39,30 @@ object Utils extends CommonUtils {
       @rpc(AvroWithSchema, Gzip) def unaryCompressedWithSchema(a: A): F[C]
 
       @rpc(Protobuf)
-      @stream[ResponseStreaming.type]
       def serverStreaming(b: B): Stream[F, C]
 
       @rpc(Protobuf)
-      @stream[ResponseStreaming.type]
       def serverStreamingWithError(e: E): Stream[F, C]
 
       @rpc(Protobuf, Gzip)
-      @stream[ResponseStreaming.type]
       def serverStreamingCompressed(b: B): Stream[F, C]
 
       @rpc(Protobuf)
-      @stream[RequestStreaming.type]
       def clientStreaming(oa: Stream[F, A]): F[D]
 
       @rpc(Protobuf, Gzip)
-      @stream[RequestStreaming.type]
       def clientStreamingCompressed(oa: Stream[F, A]): F[D]
 
       @rpc(Avro)
-      @stream[BidirectionalStreaming.type]
       def biStreaming(oe: Stream[F, E]): Stream[F, E]
 
       @rpc(AvroWithSchema)
-      @stream[BidirectionalStreaming.type]
       def biStreamingWithSchema(oe: Stream[F, E]): Stream[F, E]
 
       @rpc(Avro, Gzip)
-      @stream[BidirectionalStreaming.type]
       def biStreamingCompressed(oe: Stream[F, E]): Stream[F, E]
 
       @rpc(AvroWithSchema, Gzip)
-      @stream[BidirectionalStreaming.type]
       def biStreamingCompressedWithSchema(oe: Stream[F, E]): Stream[F, E]
 
     }
