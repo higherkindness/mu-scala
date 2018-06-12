@@ -28,6 +28,68 @@ object serviceImpl {
     import c.universe._
     import Flag._
 
+    trait SupressWarts[T] {
+      def supressWarts(warts: String*)(t: T): T
+    }
+
+    object SupressWarts {
+      def apply[A](implicit A: SupressWarts[A]): SupressWarts[A] = A
+
+      implicit val supressWartsOnModifier: SupressWarts[Modifiers] = new SupressWarts[Modifiers] {
+        def supressWarts(warts: String*)(mod: Modifiers): Modifiers = {
+          val argList = warts.map(ws => s"org.wartremover.warts.$ws")
+
+          Modifiers(
+            mod.flags,
+            mod.privateWithin,
+            q"new _root_.java.lang.SuppressWarnings(_root_.scala.Array(..$argList))" :: mod.annotations)
+        }
+      }
+
+      implicit val supressWartsOnClassDef: SupressWarts[ClassDef] = new SupressWarts[ClassDef] {
+        def supressWarts(warts: String*)(clazz: ClassDef): ClassDef = {
+          ClassDef(
+            SupressWarts[Modifiers].supressWarts(warts: _*)(clazz.mods),
+            clazz.name,
+            clazz.tparams,
+            clazz.impl
+          )
+        }
+      }
+
+      implicit val supressWartsOnDefDef: SupressWarts[DefDef] = new SupressWarts[DefDef] {
+        def supressWarts(warts: String*)(defdef: DefDef): DefDef = {
+          DefDef(
+            SupressWarts[Modifiers].supressWarts(warts: _*)(defdef.mods),
+            defdef.name,
+            defdef.tparams,
+            defdef.vparamss,
+            defdef.tpt,
+            defdef.rhs,
+          )
+        }
+      }
+
+      implicit val supressWartsOnValDef: SupressWarts[ValDef] = new SupressWarts[ValDef] {
+        def supressWarts(warts: String*)(valdef: ValDef): ValDef = {
+          ValDef(
+            SupressWarts[Modifiers].supressWarts(warts: _*)(valdef.mods),
+            valdef.name,
+            valdef.tpt,
+            valdef.rhs,
+          )
+        }
+      }
+
+      class PimpedSupressWarts[A](value: A)(implicit A: SupressWarts[A]) {
+        def supressWarts(warts: String*): A = A.supressWarts(warts: _*)(value)
+      }
+
+      implicit def pimpSupressWarts[A: SupressWarts](a: A) = new PimpedSupressWarts(a)
+    }
+
+    import SupressWarts._
+
     class RpcService(serviceDef: ClassDef) {
       val serviceName: TypeName = serviceDef.name
 
@@ -58,7 +120,7 @@ object serviceImpl {
       val methodDescriptors: List[Tree] = rpcRequests.map(_.methodDescriptor)
       private val serverCallDescriptorsAndHandlers: List[Tree] =
         rpcRequests.map(_.descriptorAndHandler)
-      val bindService: Tree =
+      val bindService: DefDef =
         q"""
         def bindService[$F_](implicit
           F: _root_.cats.effect.Effect[$F],
@@ -70,8 +132,7 @@ object serviceImpl {
 
       private val clientCallMethods: List[Tree] = rpcRequests.map(_.clientDef)
       private val Client                        = TypeName("Client")
-      //todo: surpressWarts("DefaultArguments")
-      val clientClass: Tree =
+      val clientClass: ClassDef =
         q"""
         class $Client[$F_](
           channel: _root_.io.grpc.Channel,
@@ -84,10 +145,9 @@ object serviceImpl {
               new $Client[$F](channel, options)
           ..$clientCallMethods
           ..$nonRpcDefs
-        }"""
+        }""".supressWarts("DefaultArguments")
 
-      //todo: surpressWarts("DefaultArguments")
-      val client: Tree =
+      val client: DefDef =
         q"""
         def client[$F_](
           channelFor: _root_.freestyle.rpc.ChannelFor,
@@ -101,10 +161,9 @@ object serviceImpl {
           val managedChannelInterpreter =
             new _root_.freestyle.rpc.client.ManagedChannelInterpreter[F](channelFor, channelConfigList)
           new $Client[$F](managedChannelInterpreter.build(channelFor, channelConfigList), options)
-        }"""
+        }""".supressWarts("DefaultArguments")
 
-      //todo: surpressWarts("DefaultArguments")
-      val clientFromChannel: Tree =
+      val clientFromChannel: DefDef =
         q"""
         def clientFromChannel[$F_](
           channel: _root_.io.grpc.Channel,
@@ -113,7 +172,7 @@ object serviceImpl {
           F: _root_.cats.effect.Effect[$F],
           S: _root_.monix.execution.Scheduler
         ): $Client[$F] = new $Client[$F](channel, options)
-        """
+        """.supressWarts("DefaultArguments")
 
       private def lit(x: Any): Literal = Literal(Constant(x.toString))
 
@@ -195,7 +254,6 @@ object serviceImpl {
           q"_root_.io.grpc.MethodDescriptor.MethodType.${TermName(suffix)}"
         }
 
-        //todo: surpressWarts("Null", "ExplicitImplicitTypes")
         private val encodersImport = serializationType match {
           case Protobuf =>
             q"import _root_.freestyle.rpc.internal.encoders.pbd._"
@@ -214,8 +272,8 @@ object serviceImpl {
         private val respType = responseType match {
           case tq"$x[..$tpts]" => tpts.last
         }
-        //todo: surpressWarts("DefaultArguments")
-        val methodDescriptor: Tree = q"""
+
+        val methodDescriptor: ValDef = q"""
           val $methodDescriptorName: _root_.io.grpc.MethodDescriptor[$reqType, $respType] = {
           $encodersImport
           _root_.io.grpc.MethodDescriptor
@@ -228,7 +286,7 @@ object serviceImpl {
           methodName)}))
             .build()
           }
-        """
+        """.supressWarts("Null", "ExplicitImplicitTypes")
 
         private def clientCallMethodFor(clientMethodName: String) =
           q"$clientCallsImpl.${TermName(clientMethodName)}(input, $methodDescriptorName, channel, options)"
@@ -273,12 +331,6 @@ object serviceImpl {
         }
       }
     }
-    /* todo: restore with a proper scalamacros replacement to `mod`, if possible
-    private def surpressWarts(warts: String*) = {
-      val wartsString = warts.toList.map(w => "org.wartremover.warts." + w)
-      val argList     = wartsString.map(ws => arg"$ws")
-      mod"""@root_.java.lang.SuppressWarnings(_root_.scala.Array(..$argList))"""
-    }*/
 
     val classAndMaybeCompanion = annottees.map(_.tree)
     val result: List[Tree] = classAndMaybeCompanion.head match {
@@ -305,9 +357,9 @@ object serviceImpl {
               )
             )
         }
-        //todo: surpressWarts("Any", "NonUnitStatements", "StringPlusAny", "Throw")
+
         val enrichedCompanion = ModuleDef(
-          companion.mods,
+          companion.mods.supressWarts("Any", "NonUnitStatements", "StringPlusAny", "Throw"),
           companion.name,
           Template(
             companion.impl.parents,
