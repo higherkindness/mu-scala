@@ -23,35 +23,36 @@ import scala.meta._
 
 object ScalaParser {
 
-  def parse(input: Source, inputName: String): RpcDefinitions = {
-    val definitions = input.collect { case defn: Defn => defn }
+  def parse(tb: ToolBox[reflect.runtime.universe.type])(input: tb.u.Tree, inputName: String): RpcDefinitions = {
 
-    // format: OFF
+    import tb.u._
+    val definitions = input.collect {case defs: ModuleDef => defs}
+
     def annotationValue(name: String): Option[String] = (for {
       defn <- definitions
-      annotation <- defn.annotationsNamed(name)
+      annotation <- annotationsNamed(defn)(name)
       firstArg <- annotation.firstArg
-    } yield firstArg).headOption.map(_.toString.unquoted)
+    } yield firstArg).headOption.map(_.toString)
 
     val outputName = annotationValue("outputName").getOrElse(inputName)
     val outputPackage = annotationValue("outputPackage")
 
     val options: Seq[RpcOption] = for {
-      defn  <- definitions
-      option <- defn.annotationsNamed("option")
+      defn <- definitions
+      option <- annotationsNamed(defn)("option")
       Seq(name, value) <- option.withArgsNamed("name", "value")
-    } yield RpcOption(name.toString.unquoted, value.toString) // keep value quoting as-is
+    } yield RpcOption(name.toString, value.toString) // keep value quoting as-is
 
-    val messages: Seq[RpcMessage] = definitions.filter(_.hasAnnotation("message")).map { defn =>
+    val messages: Seq[RpcMessage] = definitions.filter(mod => hasAnnotation(mod)("message")).map { defn =>
       RpcMessage(defn.name, defn.params)
     }
 
-    val services: Seq[RpcService] = definitions.filter(_.hasAnnotation("service")).map { defn =>
+    val services: Seq[RpcService] = definitions.filter(mod => hasAnnotation(mod)("service")).map { defn =>
       RpcService(defn.name, ServiceAlg(defn).requests.map(req =>
         RpcRequest(req.serialization, req.name.value, req.requestType, req.responseType, req.streamingType)))
     }
-    // format: ON
 
     RpcDefinitions(outputName, outputPackage, options, messages, services)
   }
 }
+
