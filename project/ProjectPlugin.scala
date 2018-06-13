@@ -50,6 +50,7 @@ object ProjectPlugin extends AutoPlugin {
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
+        "org.scala-lang" % "scala-compiler" % scalaVersion.value,
         %%("scalamockScalatest") % Test
       )
     )
