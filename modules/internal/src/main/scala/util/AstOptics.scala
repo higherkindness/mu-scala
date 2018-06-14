@@ -20,6 +20,7 @@ package util
 
 import monocle._
 import monocle.function.all._
+import scala.Function.{const => κ}
 import scala.tools.reflect.ToolBox
 
 class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
@@ -97,6 +98,18 @@ class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
     }
   }
 
+  /**
+   * There are so many quirks for getting parameters for other
+   * constructs such as normal classes.  I think we only need case
+   * classes and defs... we'll see :)
+   */
+  val params: Optional[Tree, List[ValDef]] = Optional[Tree, List[ValDef]] {
+    case _CaseClassDef(m) =>
+      Some(m.impl.collect { case x: ValDef if x.mods hasFlag Flag.CASEACCESSOR => x })
+    case _DefDef(m) => Some(m.vparamss.flatten)
+    case _          => None
+  } { κ(identity) }
+
   val annotationName: Optional[Tree, String] = _Select ^|-> qualifier ^<-? _New ^|-> tpt ^<-? _Ident ^|-> name
 
   val toAnnotation: Optional[Tree, Annotation] = Optional[Tree, Annotation] {
@@ -130,6 +143,9 @@ class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
 
   def annotationsNamed(name: String): Traversal[Tree, Annotation] =
     parsedAnnotations ^|-? named(name)
+
+  def hasAnnotation(name: String)(tree: Tree): Boolean =
+    annotationsNamed(name).exist(κ(true))(tree)
 
   def named(name: String): Optional[Annotation, Annotation] =
     Optional[Annotation, Annotation] {
