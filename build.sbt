@@ -81,7 +81,7 @@ lazy val server = project
   .in(file("modules/server"))
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(client % "test->test")
-  .dependsOn(internal)
+  .dependsOn(internal % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "frees-rpc-server")
   .settings(serverSettings)
