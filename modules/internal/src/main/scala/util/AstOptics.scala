@@ -41,6 +41,11 @@ class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
     case _                  => None
   }(identity)
 
+  val _CaseClassDef: Prism[Tree, ClassDef] = Prism[Tree, ClassDef] {
+    case classdef: ClassDef if classdef.mods hasFlag Flag.CASE => Some(classdef)
+    case _                                                     => None
+  }(identity)
+
   val _ValDef: Prism[Tree, ValDef] = Prism[Tree, ValDef] {
     case valdef: ValDef => Some(valdef)
     case _              => None
