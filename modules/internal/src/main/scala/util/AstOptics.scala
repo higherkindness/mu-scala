@@ -27,74 +27,127 @@ class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
 
   import tb.u._
 
-  val _ModuleDef: Prism[Tree, ModuleDef] = Prism[Tree, ModuleDef] {
-    case mod: ModuleDef => Some(mod)
-    case _              => None
-  }(identity)
+  object ast {
+    val _SingletonTypeTree: Prism[Tree, SingletonTypeTree] = Prism[Tree, SingletonTypeTree] {
+      case mod: SingletonTypeTree => Some(mod)
+      case _                      => None
+    }(identity)
 
-  val _DefDef: Prism[Tree, DefDef] = Prism[Tree, DefDef] {
-    case defdef: DefDef => Some(defdef)
-    case _              => None
-  }(identity)
+    val _AppliedTypeTree: Prism[Tree, AppliedTypeTree] = Prism[Tree, AppliedTypeTree] {
+      case mod: AppliedTypeTree => Some(mod)
+      case _                    => None
+    }(identity)
 
-  val _ClassDef: Prism[Tree, ClassDef] = Prism[Tree, ClassDef] {
-    case classdef: ClassDef => Some(classdef)
-    case _                  => None
-  }(identity)
+    val _ModuleDef: Prism[Tree, ModuleDef] = Prism[Tree, ModuleDef] {
+      case mod: ModuleDef => Some(mod)
+      case _              => None
+    }(identity)
 
-  val _CaseClassDef: Prism[Tree, ClassDef] = Prism[Tree, ClassDef] {
-    case classdef: ClassDef if classdef.mods hasFlag Flag.CASE => Some(classdef)
-    case _                                                     => None
-  }(identity)
+    val _DefDef: Prism[Tree, DefDef] = Prism[Tree, DefDef] {
+      case defdef: DefDef => Some(defdef)
+      case _              => None
+    }(identity)
 
-  val _ValDef: Prism[Tree, ValDef] = Prism[Tree, ValDef] {
-    case valdef: ValDef => Some(valdef)
-    case _              => None
-  }(identity)
+    def _AnnotatedDefDef(annotationName: String): Prism[Tree, DefDef] =
+      Prism[Tree, DefDef] {
+        case defdef: DefDef if hasAnnotation(annotationName)(defdef) => Some(defdef)
+        case _                                                       => None
+      }(identity)
 
-  val _Apply: Prism[Tree, Apply] = Prism[Tree, Apply] {
-    case apply: Apply => Some(apply)
-    case _            => None
-  }(identity)
+    val _ClassDef: Prism[Tree, ClassDef] = Prism[Tree, ClassDef] {
+      case classdef: ClassDef => Some(classdef)
+      case _                  => None
+    }(identity)
+
+    val _CaseClassDef: Prism[Tree, ClassDef] = Prism[Tree, ClassDef] {
+      case classdef: ClassDef if classdef.mods hasFlag Flag.CASE => Some(classdef)
+      case _                                                     => None
+    }(identity)
+
+    val _ValDef: Prism[Tree, ValDef] = Prism[Tree, ValDef] {
+      case valdef: ValDef => Some(valdef)
+      case _              => None
+    }(identity)
+
+    val _Apply: Prism[Tree, Apply] = Prism[Tree, Apply] {
+      case apply: Apply => Some(apply)
+      case _            => None
+    }(identity)
+
+    val _Select: Prism[Tree, Select] = Prism[Tree, Select] {
+      case select: Select => Some(select)
+      case _              => None
+    }(identity)
+
+    val _New: Prism[Tree, New] = Prism[Tree, New] {
+      case n: New => Some(n)
+      case _      => None
+    }(identity)
+
+    val _Ident: Prism[Tree, Ident] = Prism[Tree, Ident] {
+      case ident: Ident => Some(ident)
+      case _            => None
+    }(identity)
+  }
 
   val fun: Lens[Apply, Tree] = Lens[Apply, Tree](_.fun)(fun => app => Apply(fun, app.args))
-
-  val _Select: Prism[Tree, Select] = Prism[Tree, Select] {
-    case select: Select => Some(select)
-    case _              => None
-  }(identity)
 
   val qualifier: Lens[Select, Tree] =
     Lens[Select, Tree](_.qualifier)(qualifier => select => Select(qualifier, select.name))
 
-  val _New: Prism[Tree, New] = Prism[Tree, New] {
-    case n: New => Some(n)
-    case _      => None
-  }(identity)
+  val newTpt: Lens[New, Tree] = Lens[New, Tree](_.tpt)(tpt => n => New(tpt))
 
-  val tpt: Lens[New, Tree] = Lens[New, Tree](_.tpt)(tpt => n => New(tpt))
+  val name: Optional[Tree, String] =
+    Optional[Tree, String] {
+      case ast._Ident(i)    => Some(i.name.toString)
+      case ast._ClassDef(c) => Some(c.name.toString)
+      case _                => None
+    } { name =>
+      {
+        case ast._Ident(_)    => Ident(TermName(name))
+        case ast._ClassDef(c) => ClassDef(c.mods, TypeName(name), c.tparams, c.impl)
+        case x                => x
+      }
+    }
 
-  val _Ident: Prism[Tree, Ident] = Prism[Tree, Ident] {
-    case ident: Ident => Some(ident)
-    case _            => None
-  }(identity)
+  /**
+   * this Optional needs to handle two different cases:
+   *
+   * - a type constructor such as `F[T]` (represented by `AppliedTypeTree(TypeName("F"), List(Ident("T")))`)
+   * - a type constructor such as `Stream[F, T]` (represented by `AppliedTypeTree(TypeName("Stream"), List(Ident("F"), Ident("T")))`)
+   *
+   * In both cases, the return should be `T`
+   */
+  val rpcTypeNameFromTypeConstructor: Optional[Tree, String] = Optional[Tree, String] {
+    case ast._Ident(x)                                           => name.getOption(x)
+    case ast._SingletonTypeTree(x)                               => Some(x.toString)
+    case ast._AppliedTypeTree(AppliedTypeTree(x, List(name)))    => Some(name.toString)
+    case ast._AppliedTypeTree(AppliedTypeTree(x, List(_, name))) => Some(name.toString)
+    case _                                                       => None
+  } { name =>
+    {
+      case x => x
+    }
+  }
 
-  val name: Lens[Ident, String] =
-    Lens[Ident, String](_.name.toString)(name => ident => Ident(TermName(name)))
+  val returnType: Lens[DefDef, Tree] = Lens[DefDef, Tree](_.tpt)(tpt =>
+    defdef => DefDef(defdef.mods, defdef.name, defdef.tparams, defdef.vparamss, tpt, defdef.rhs))
+
+  val returnTypeAsString = returnType ^|-? rpcTypeNameFromTypeConstructor
 
   val modifiers: Optional[Tree, Modifiers] = Optional[Tree, Modifiers] {
-    case _ModuleDef(m) => Some(m.mods)
-    case _ValDef(m)    => Some(m.mods)
-    case _ClassDef(m)  => Some(m.mods)
-    case _DefDef(m)    => Some(m.mods)
-    case _             => None
+    case ast._ModuleDef(m) => Some(m.mods)
+    case ast._ValDef(m)    => Some(m.mods)
+    case ast._ClassDef(m)  => Some(m.mods)
+    case ast._DefDef(m)    => Some(m.mods)
+    case _                 => None
   } { mods =>
     {
-      case _ModuleDef(m) => ModuleDef(mods, m.name, m.impl)
-      case _ValDef(m)    => ValDef(mods, m.name, m.tpt, m.rhs)
-      case _ClassDef(m)  => ClassDef(mods, m.name, m.tparams, m.impl)
-      case _DefDef(m)    => DefDef(mods, m.name, m.tparams, m.vparamss, m.tpt, m.rhs)
-      case otherwise     => otherwise
+      case ast._ModuleDef(m) => ModuleDef(mods, m.name, m.impl)
+      case ast._ValDef(m)    => ValDef(mods, m.name, m.tpt, m.rhs)
+      case ast._ClassDef(m)  => ClassDef(mods, m.name, m.tparams, m.impl)
+      case ast._DefDef(m)    => DefDef(mods, m.name, m.tparams, m.vparamss, m.tpt, m.rhs)
+      case otherwise         => otherwise
     }
   }
 
@@ -104,17 +157,21 @@ class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
    * classes and defs... we'll see :)
    */
   val params: Optional[Tree, List[ValDef]] = Optional[Tree, List[ValDef]] {
-    case _CaseClassDef(m) =>
+    case ast._CaseClassDef(m) =>
       Some(m.impl.collect { case x: ValDef if x.mods hasFlag Flag.CASEACCESSOR => x })
-    case _DefDef(m) => Some(m.vparamss.flatten)
-    case _          => None
+    case ast._DefDef(m) => Some(m.vparamss.flatten)
+    case _              => None
   } { κ(identity) }
 
-  val annotationName: Optional[Tree, String] = _Select ^|-> qualifier ^<-? _New ^|-> tpt ^<-? _Ident ^|-> name
+  val valDefTpt = Lens[ValDef, Tree](_.tpt)(t => v => ValDef(v.mods, v.name, t, v.rhs))
+
+  val firstParamForRpc: Optional[Tree, String] = params ^|-? headOption ^|-> valDefTpt ^|-? rpcTypeNameFromTypeConstructor
+
+  val annotationName: Optional[Tree, String] = ast._Select ^|-> qualifier ^<-? ast._New ^|-> newTpt ^|-? name
 
   val toAnnotation: Optional[Tree, Annotation] = Optional[Tree, Annotation] {
-    case _Apply(Apply(fun, Nil)) => annotationName.getOption(fun).map(NoParamAnnotation)
-    case _Apply(Apply(fun, args)) =>
+    case ast._Apply(Apply(fun, Nil)) => annotationName.getOption(fun).map(NoParamAnnotation)
+    case ast._Apply(Apply(fun, args)) =>
       val namedArgs = args.collect {
         case AssignOrNamedArg(argName, value) => argName.toString -> value
       }
@@ -130,8 +187,8 @@ class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
     case _ => None
   } { ann =>
     {
-      case _Apply(ap) => ???
-      case _          => ???
+      case ast._Apply(ap) => ???
+      case _              => ???
     }
   }
 
