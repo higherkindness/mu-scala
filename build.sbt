@@ -151,7 +151,7 @@ lazy val `dropwizard-client` = project
 
 lazy val `idlgen-core` = project
   .in(file("modules/idlgen/core"))
-  .dependsOn(internal)
+  .dependsOn(internal % "compile->compile;test->test")
   .dependsOn(client % "test->test")
   .settings(moduleName := "frees-rpc-idlgen-core")
   .settings(idlGenSettings)
