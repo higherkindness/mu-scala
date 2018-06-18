@@ -121,6 +121,19 @@ class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
     identity
   }
 
+  val _StreamingConstructor: Prism[Ident, String] = Prism.partial[Ident, String] {
+    case Ident(TypeName("Observable")) => "Observable"
+    case Ident(TypeName("Stream"))     => "Stream"
+  } {
+    case "Observable" => Ident(TypeName("Observable"))
+    case "Stream"     => Ident(TypeName("Stream"))
+  }
+
+  val appliedTypeTreeTpt: Lens[AppliedTypeTree, Tree] =
+    Lens[AppliedTypeTree, Tree](_.tpt)(tpt => att => AppliedTypeTree(tpt, att.args))
+
+  val streamingTypeFromConstructor: Optional[Tree, String] = ast._AppliedTypeTree ^|-> appliedTypeTreeTpt ^<-? ast._Ident ^<-? _StreamingConstructor
+
   val returnType: Lens[DefDef, Tree] = Lens[DefDef, Tree](_.tpt)(tpt =>
     defdef => DefDef(defdef.mods, defdef.name, defdef.tparams, defdef.vparamss, tpt, defdef.rhs))
 
@@ -160,6 +173,10 @@ class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
 
   val annotationName: Optional[Tree, String] = ast._Select ^|-> qualifier ^<-? ast._New ^|-> newTpt ^|-? name
 
+  val responseStreaming: Optional[DefDef, String] = returnType ^|-? streamingTypeFromConstructor
+
+  val requestStreaming: Optional[Tree, String] = params ^|-? headOption ^|-> valDefTpt ^|-? streamingTypeFromConstructor
+
   val toAnnotation: Optional[Tree, Annotation] = Optional[Tree, Annotation] {
     case ast._Apply(Apply(fun, Nil)) =>
       annotationName.getOption(fun).map(Annotation.NoParamAnnotation)
@@ -187,7 +204,7 @@ class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
 
   val parsedAnnotations: Traversal[Tree, Annotation] = modifiers ^|-> annotations ^|->> each ^|-? toAnnotation
 
-  val asIdlType: Prism[Ident, SerializationType] = Prism.partial[Ident, SerializationType] {
+  val _AsIdlType: Prism[Ident, SerializationType] = Prism.partial[Ident, SerializationType] {
     case Ident(TermName("Protobuf"))       => Protobuf
     case Ident(TermName("Avro"))           => Avro
     case Ident(TermName("AvroWithSchema")) => AvroWithSchema
@@ -198,7 +215,7 @@ class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
   }
 
   val idlType: Traversal[Tree, SerializationType] =
-    annotationsNamed("rpc") ^|-? Annotation.firstArg ^<-? ast._Ident ^<-? asIdlType
+    annotationsNamed("rpc") ^|-? Annotation.firstArg ^<-? ast._Ident ^<-? _AsIdlType
 
   def annotationsNamed(name: String): Traversal[Tree, Annotation] =
     parsedAnnotations ^|-? named(name)

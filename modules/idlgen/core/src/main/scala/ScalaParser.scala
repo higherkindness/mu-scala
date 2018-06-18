@@ -66,7 +66,12 @@ object ScalaParser {
         val name              = x.name.toString
         val requestType       = firstParamForRpc.getOption(x).get
         val responseType      = returnTypeAsString.getOption(x).get
-        val streamingType     = None //TODO
+        val streamingType = (requestStreaming.getOption(x), responseStreaming.getOption(x)) match {
+          case (None, None)       => None
+          case (Some(_), None)    => Some(RequestStreaming)
+          case (None, Some(_))    => Some(ResponseStreaming)
+          case (Some(_), Some(_)) => Some(BidirectionalStreaming)
+        }
 
         RpcRequest(serializationType, name, requestType, responseType, streamingType)
       }
