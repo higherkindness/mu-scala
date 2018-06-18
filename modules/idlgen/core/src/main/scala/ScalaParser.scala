@@ -22,17 +22,18 @@ import freestyle.rpc.internal.util.AstOptics
 import freestyle.rpc.protocol._
 import scala.tools.reflect.ToolBox
 
-object ScalaParser {
+class ScalaParser(val tb: ToolBox[reflect.runtime.universe.type]) {
 
-  def parse(tb: ToolBox[reflect.runtime.universe.type])(
+  import tb.u._
+  val model: Model = new Model(tb)
+  val optics       = new AstOptics(tb)
+  import optics._
+  import model._
+
+  def parse(
       input: tb.u.Tree,
-      inputName: String,
-      model: Model = new Model(tb)): model.RpcDefinitions = {
-
-    val optics = new AstOptics(tb)
-    import tb.u._
-    import optics._
-    import model._
+      inputName: String
+  ): RpcDefinitions = {
 
     val definitions = input.collect { case defs: ModuleDef => defs }
 
