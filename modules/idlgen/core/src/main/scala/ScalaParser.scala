@@ -18,20 +18,17 @@ package freestyle.rpc
 package idlgen
 
 import freestyle.rpc.internal.util.StringUtil._
-import freestyle.rpc.internal.util.AstOptics
+import freestyle.rpc.internal.util.{AstOptics, Toolbox}
 import freestyle.rpc.protocol._
-import scala.tools.reflect.ToolBox
 
-class ScalaParser(val tb: ToolBox[reflect.runtime.universe.type]) {
+object ScalaParser {
 
-  import tb.u._
-  val model: Model = new Model(tb)
-  val optics       = new AstOptics(tb)
-  import optics._
-  import model._
+  import Toolbox.u._
+  import AstOptics._
+  import Model._
 
   def parse(
-      input: tb.u.Tree,
+      input: Tree,
       inputName: String
   ): RpcDefinitions = {
 

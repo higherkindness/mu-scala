@@ -16,14 +16,15 @@
 
 package freestyle.rpc.idlgen
 
+import freestyle.rpc.internal.util.Toolbox
 import freestyle.rpc.internal.util.StringUtil._
 import freestyle.rpc.protocol._
 
 import scala.tools.reflect.ToolBox
 
-class Model(val tb: ToolBox[reflect.runtime.universe.type]) {
+object Model {
 
-  import tb.u._
+  import Toolbox.u._
 
   case class RpcDefinitions(
       outputName: String,

@@ -19,15 +19,11 @@ package freestyle.rpc.idlgen
 import java.io.File
 import java.nio.file.{Files, Paths}
 import freestyle.rpc.protocol.SerializationType
+import freestyle.rpc.internal.util._
 import scala.collection.JavaConverters._
-import scala.tools.reflect.ToolBox
 
-abstract class IdlGenerator(val tb: ToolBox[reflect.runtime.universe.type]) extends Generator {
-
-  private[this] val ScalaFileExtension = ".scala"
-
-  private[this] val parser = new ScalaParser(tb)
-  import parser.model._
+trait IdlGenerator extends Generator {
+  import Model._
 
   def serializationType: SerializationType
   def outputSubdir: String
@@ -42,8 +38,8 @@ abstract class IdlGenerator(val tb: ToolBox[reflect.runtime.universe.type]) exte
       options: String*): Option[(String, Seq[String])] = {
     val inputName = inputFile.getName.replaceAll(ScalaFileExtension, "")
     val definitions =
-      parser.parse(
-        tb.parse(Files.readAllLines(Paths.get(inputFile.toURI)).asScala.mkString("\n")),
+      ScalaParser.parse(
+        Toolbox.parse(Files.readAllLines(Paths.get(inputFile.toURI)).asScala.mkString("\n")),
         inputName)
     generateFrom(definitions).map(output => s"$outputSubdir/$inputName$fileExtension" -> output)
   }

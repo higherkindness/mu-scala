@@ -24,9 +24,9 @@ import scala.Function.{const => κ}
 import scala.tools.reflect.ToolBox
 import freestyle.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
 
-class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
+trait AstOptics {
 
-  import tb.u._
+  import Toolbox.u._
 
   object ast {
     val _SingletonTypeTree: Prism[Tree, SingletonTypeTree] = Prism[Tree, SingletonTypeTree] {
@@ -259,3 +259,5 @@ class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
   }
 
 }
+
+object AstOptics extends AstOptics
