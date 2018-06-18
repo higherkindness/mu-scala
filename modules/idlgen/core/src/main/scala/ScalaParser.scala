@@ -58,26 +58,17 @@ object ScalaParser {
       RpcMessage(defn.name.toString, params.getOption(defn).get) // TODO: wat
     }
 
-    def serializationType(s: Ident): SerializationType = s match {
-      case Ident(TermName("Protobuf"))       => Protobuf
-      case Ident(TermName("Avro"))           => Avro
-      case Ident(TermName("AvroWithSchema")) => AvroWithSchema
-    }
-
     def getRequestsFromService(defn: Tree): List[RpcRequest] = {
       val rpcMethods = ast._AnnotatedDefDef("rpc")
 
       defn.collect({ case rpcMethods(x) => x }).map { x =>
-        val idlType =
-          serializationType(
-            annotationsNamed("rpc").getAll(x).head.firstArg.head.asInstanceOf[Ident])
+        val serializationType = idlType.getAll(x).head
+        val name              = x.name.toString
+        val requestType       = firstParamForRpc.getOption(x).get
+        val responseType      = returnTypeAsString.getOption(x).get
+        val streamingType     = None //TODO
 
-        val name          = x.name.toString
-        val requestType   = firstParamForRpc.getOption(x).get
-        val responseType  = returnTypeAsString.getOption(x).get
-        val streamingType = None //TODO
-
-        RpcRequest(idlType, name, requestType, responseType, streamingType)
+        RpcRequest(serializationType, name, requestType, responseType, streamingType)
       }
     }
 
