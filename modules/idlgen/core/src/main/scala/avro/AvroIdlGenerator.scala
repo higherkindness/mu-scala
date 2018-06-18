@@ -18,109 +18,111 @@ package freestyle.rpc.idlgen.avro
 
 import freestyle.rpc.idlgen._
 import freestyle.rpc.protocol._
-import freestyle.rpc.internal.util.AstOptics
+import freestyle.rpc.internal.util._
 import io.circe._
 import io.circe.generic.auto._
 import io.circe.syntax._
-import scala.tools.reflect.ToolBox
 
-// class AvroWithSchemaIdlGenerator(override val tb: ToolBox[reflect.runtime.universe.type])
-//     extends AvroIdlGenerator(tb) {
-//   val serializationType: SerializationType = AvroWithSchema
-// }
+object AvroIdlGenerator extends AvroIdlGenerator {
+  val serializationType: SerializationType = Avro
+}
 
-// class AvroIdlGenerator(tb: ToolBox[reflect.runtime.universe.type]) extends IdlGenerator(tb) {
+object AvroWithSchemaIdlGenerator extends AvroIdlGenerator {
+  val serializationType: SerializationType = AvroWithSchema
+}
 
-//   val model  = new Model(tb)
-//   val optics = new AstOptics(tb)
+trait AvroIdlGenerator extends IdlGenerator {
 
-//   import tb.u._
-//   import model._
-//   import optics._
+  import Toolbox.u._
+  import Model._
+  import AstOptics._
 
-//   val idlType: String       = avro.IdlType
-//   val outputSubdir: String  = "avro"
-//   val fileExtension: String = AvprExtension
+  val idlType: String       = avro.IdlType
+  val outputSubdir: String  = "avro"
+  val fileExtension: String = AvprExtension
 
-//   // Note: don't use the object directly as the implicit value unless moving it here, or circe will give invalid output
-//   implicit private val avroTypeEncoder: Encoder[AvroType] = AvroTypeEncoder
+  // Note: don't use the object directly as the implicit value unless moving it here, or circe will give invalid output
+  implicit private val avroTypeEncoder: Encoder[AvroType] = AvroTypeEncoder
 
-//   override protected def generateFrom(
-//       outputName: String,
-//       outputPackage: Option[String],
-//       options: Seq[RpcOption],
-//       messages: Seq[RpcMessage],
-//       services: Seq[RpcService]): Seq[String] = {
+  override protected def generateFrom(
+      outputName: String,
+      outputPackage: Option[String],
+      options: Seq[RpcOption],
+      messages: Seq[RpcMessage],
+      services: Seq[RpcService]): Seq[String] = {
 
-//     val avroRecords = messages.map {
-//       case RpcMessage(name, params) =>
-//         AvroRecord(
-//           name = name,
-//           fields = params.flatMap {
-//             case ast._ValDef(ValDef(_, TermName(name), tpt, _)) =>
-//               null //AvroField(name, mappedType(3))
-// //          case param"$name: $tpe" => tpe.map(t => AvroField(name.toString, mappedType(t)))
-//           }
-//         )
-//     }
-//     val avroMessages: Map[String, AvroMessage] = services
-//       .flatMap(_.requests)
-//       .filter(_.streamingType.isEmpty)
-//       .map {
-//         case RpcRequest(_, name, reqType, respType, _) =>
-//           name -> AvroMessage(
-//             Seq(AvroField(DefaultRequestParamName, mappedType(reqType)))
-//               .filterNot(_.`type` == AvroEmpty),
-//             mappedType(respType))
-//       }
-//       .toMap
-//     val protocol = AvroProtocol(outputPackage.getOrElse(""), outputName, avroRecords, avroMessages)
-//     protocol.asJson.spaces2.split('\n')
-//   }
+    val avroRecords = messages.map {
+      case RpcMessage(name, params) =>
+        AvroRecord(
+          name = name,
+          fields = params map {
+            case ast._ValDef(ValDef(_, TermName(name), tpt, _)) =>
+              AvroField(name, mappedType(tpt))
+          }
+        )
+    }
+    val avroMessages: Map[String, AvroMessage] = services
+      .flatMap(_.requests)
+      .filter(_.streamingType.isEmpty)
+      .map {
+        case RpcRequest(_, name, reqType, respType, _) =>
+          name -> AvroMessage(
+            Seq(AvroField(DefaultRequestParamName, mappedType(q"$reqType")))
+              .filterNot(_.`type` == AvroEmpty),
+            mappedType(q"$respType"))
+      }
+      .toMap
+    val protocol = AvroProtocol(outputPackage.getOrElse(""), outputName, avroRecords, avroMessages)
+    protocol.asJson.spaces2.split('\n')
+  }
 
-//   case class AvroProtocol(
-//       namespace: String,
-//       protocol: String,
-//       types: Seq[AvroRecord],
-//       messages: Map[String, AvroMessage])
+  case class AvroProtocol(
+      namespace: String,
+      protocol: String,
+      types: Seq[AvroRecord],
+      messages: Map[String, AvroMessage])
 
-//   case class AvroRecord(name: String, `type`: String = "record", fields: Seq[AvroField])
+  case class AvroRecord(name: String, `type`: String = "record", fields: Seq[AvroField])
 
-//   case class AvroMessage(request: Seq[AvroField], response: AvroType)
+  case class AvroMessage(request: Seq[AvroField], response: AvroType)
 
-//   case class AvroField(name: String, `type`: AvroType)
+  case class AvroField(name: String, `type`: AvroType)
 
-//   sealed trait AvroType
-//   case object AvroEmpty                     extends AvroType
-//   case class AvroRef(ref: String)           extends AvroType
-//   case class AvroArray(elemType: AvroType)  extends AvroType
-//   case class AvroOption(elemType: AvroType) extends AvroType
+  sealed trait AvroType
+  case object AvroEmpty                     extends AvroType
+  case class AvroRef(ref: String)           extends AvroType
+  case class AvroArray(elemType: AvroType)  extends AvroType
+  case class AvroOption(elemType: AvroType) extends AvroType
 
-//   object AvroTypeEncoder extends Encoder[AvroType] {
-//     def apply(t: AvroType): Json = t match {
-//       case AvroEmpty            => "null"
-//       case AvroRef(ref)         => ref
-//       case AvroArray(elemType)  => Json.obj("type" -> "array", "items" -> apply(elemType))
-//       case AvroOption(elemType) => Json.arr(apply(AvroEmpty), apply(elemType))
-//     }
-//   }
+  object AvroTypeEncoder extends Encoder[AvroType] {
+    def apply(t: AvroType): Json = t match {
+      case AvroEmpty            => "null"
+      case AvroRef(ref)         => ref
+      case AvroArray(elemType)  => Json.obj("type" -> "array", "items" -> apply(elemType))
+      case AvroOption(elemType) => Json.arr(apply(AvroEmpty), apply(elemType))
+    }
+  }
 
-//   private def mappedType(typeArg: TypeName): AvroType = typeArg match {
-//     // case targ"Boolean"    => "boolean"
-//     // case targ"Int"        => "int"
-//     // case targ"Long"       => "long"
-//     // case targ"Float"      => "float"
-//     // case targ"Double"     => "double"
-//     // case targ"String"     => "string"
-//     // case targ"Seq[$t]"    => AvroArray(mappedType(t))
-//     // case targ"List[$t]"   => AvroArray(mappedType(t))
-//     // case targ"Array[$t]"  => AvroArray(mappedType(t))
-//     // case targ"Option[$t]" => AvroOption(mappedType(t))
-//     // case targ"Empty.type" => AvroEmpty
-//     case _ => typeArg.toString
-//   }
+  private def mappedType(typeArg: Tree): AvroType = typeArg match {
+    case ast._Ident(Ident(TypeName("Boolean"))) => "boolean"
+    case ast._Ident(Ident(TypeName("Int")))     => "int"
+    case ast._Ident(Ident(TypeName("Long")))    => "long"
+    case ast._Ident(Ident(TypeName("Float")))   => "float"
+    case ast._Ident(Ident(TypeName("Double")))  => "double"
+    case ast._Ident(Ident(TypeName("String")))  => "string"
+    case ast._AppliedTypeTree(AppliedTypeTree(ast._Ident(Ident(TypeName("Seq"))), List(t))) =>
+      AvroArray(mappedType(t))
+    case ast._AppliedTypeTree(AppliedTypeTree(ast._Ident(Ident(TypeName("List"))), List(t))) =>
+      AvroArray(mappedType(t))
+    case ast._AppliedTypeTree(AppliedTypeTree(ast._Ident(Ident(TypeName("Array"))), List(t))) =>
+      AvroArray(mappedType(t))
+    case ast._AppliedTypeTree(AppliedTypeTree(ast._Ident(Ident(TypeName("Option"))), List(t))) =>
+      AvroOption(mappedType(t))
+    case ast._SingletonTypeTree(SingletonTypeTree("Empty.type")) => AvroEmpty
+    case _                                                       => typeArg.toString
+  }
 
-//   implicit private def string2AvroRef(s: String): AvroRef = AvroRef(s)
+  implicit private def string2AvroRef(s: String): AvroRef = AvroRef(s)
 
-//   implicit private def string2Json(s: String): Json = s.asJson
-// }
+  implicit private def string2Json(s: String): Json = s.asJson
+}
