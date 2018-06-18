@@ -17,9 +17,8 @@
 package freestyle.rpc
 
 import freestyle.rpc.idlgen.avro._
-//import freestyle.rpc.idlgen.proto.ProtoIdlGenerator
+import freestyle.rpc.idlgen.proto.ProtoIdlGenerator
 import freestyle.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
-import freestyle.rpc.internal.util.Toolbox
 
 package object idlgen {
 
@@ -28,13 +27,13 @@ package object idlgen {
 
   val ScalaFileExtension = ".scala"
 
-  // val idlGenerators: Map[String, IdlGenerator] = Seq(ProtoIdlGenerator, AvroIdlGenerator)
-  //   .map(g => g.idlType -> g)
-  //   .toMap
+  val idlGenerators: Map[String, IdlGenerator] = Seq(ProtoIdlGenerator, AvroIdlGenerator)
+    .map(g => g.idlType -> g)
+    .toMap
 
-  // val srcGenerators: Map[String, SrcGenerator] = Seq(AvroSrcGenerator)
-  //   .map(g => g.idlType -> g)
-  //   .toMap
+  val srcGenerators: Map[String, SrcGenerator] = Seq(AvroSrcGenerator)
+    .map(g => g.idlType -> g)
+    .toMap
 
   val serializationTypes: Map[String, SerializationType] =
     Map("Protobuf" -> Protobuf, "Avro" -> Avro, "AvroWithSchema" -> AvroWithSchema)

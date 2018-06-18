@@ -18,9 +18,13 @@ package freestyle.rpc.idlgen.proto
 
 import freestyle.rpc.idlgen._
 import freestyle.rpc.protocol._
-import scala.meta._
+import freestyle.rpc.internal.util.{AstOptics, Toolbox}
 
 object ProtoIdlGenerator extends IdlGenerator {
+
+  import Toolbox.u._
+  import Model._
+  import AstOptics._
 
   val idlType: String                      = IdlType
   val serializationType: SerializationType = Protobuf
@@ -65,10 +69,10 @@ object ProtoIdlGenerator extends IdlGenerator {
   private def textBlock(blockType: String, name: String, contents: Seq[String]) =
     s"$blockType $name {" +: contents :+ "}"
 
-  private def messageFields(params: Seq[Term.Param]): Seq[String] =
+  private def messageFields(params: Seq[ValDef]): Seq[String] =
     params
-      .flatMap {
-        case param"$name: $tpe" => tpe.map(t => s"  ${mappedType(t)} $name")
+      .map {
+        case ast._ValDef(ValDef(_, TermName(name), tpt, _)) => s"  ${mappedType(tpt)} $name"
       }
       .zipWithIndex
       .map { case (field, i) => s"$field = ${i + 1};" }
@@ -79,31 +83,34 @@ object ProtoIdlGenerator extends IdlGenerator {
         s"  rpc ${name.capitalize} (${requestType(reqType, streamingType)}) returns (${responseType(retType, streamingType)});"
     }
 
-  private def requestType(t: Type, streamingType: Option[StreamingType]): String =
+  private def requestType(t: String, streamingType: Option[StreamingType]): String =
     paramType(t, streamingType, RequestStreaming, BidirectionalStreaming)
 
-  private def responseType(t: Type, streamingType: Option[StreamingType]): String =
+  private def responseType(t: String, streamingType: Option[StreamingType]): String =
     paramType(t, streamingType, ResponseStreaming, BidirectionalStreaming)
 
   private def paramType(
-      t: Type,
+      t: String,
       streamingType: Option[StreamingType],
       matchingStreamingTypes: StreamingType*): String = {
-    val sType = t.toString
-    val pType = if (sType == EmptyType) ProtoEmpty else sType
+    val pType = if (t == EmptyType) ProtoEmpty else t
     if (streamingType.exists(matchingStreamingTypes.contains)) s"stream $pType" else pType
   }
 
-  private def mappedType(typeArg: Type.Arg): String = typeArg match {
-    case targ"Boolean"     => "bool"
-    case targ"Int"         => "int32"
-    case targ"Long"        => "int64"
-    case targ"Float"       => "float"
-    case targ"Double"      => "double"
-    case targ"String"      => "string"
-    case targ"Array[Byte]" => "bytes"
-    case targ"Option[$t]"  => mappedType(t)
-    case targ"List[$t]"    => s"repeated ${mappedType(t)}"
-    case _                 => typeArg.toString
+  private def mappedType(typeArg: Tree): String = typeArg match {
+    case ast._Ident(Ident(TypeName("Boolean"))) => "bool"
+    case ast._Ident(Ident(TypeName("Int")))     => "int32"
+    case ast._Ident(Ident(TypeName("Long")))    => "int64"
+    case ast._Ident(Ident(TypeName("Float")))   => "float"
+    case ast._Ident(Ident(TypeName("Double")))  => "double"
+    case ast._Ident(Ident(TypeName("String")))  => "string"
+    case ast._AppliedTypeTree(
+        AppliedTypeTree(ast._Ident(Ident(TypeName("Array"))), List(TermName("Byte")))) =>
+      "bytes"
+    case ast._AppliedTypeTree(AppliedTypeTree(ast._Ident(Ident(TypeName("Option"))), List(t))) =>
+      mappedType(t)
+    case ast._AppliedTypeTree(AppliedTypeTree(ast._Ident(Ident(TypeName("List"))), List(t))) =>
+      s"repeated ${mappedType(t)}"
+    case _ => typeArg.toString
   }
 }
