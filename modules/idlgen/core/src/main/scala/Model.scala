@@ -20,8 +20,6 @@ import freestyle.rpc.internal.util.Toolbox
 import freestyle.rpc.internal.util.StringUtil._
 import freestyle.rpc.protocol._
 
-import scala.tools.reflect.ToolBox
-
 object Model {
 
   import Toolbox.u._

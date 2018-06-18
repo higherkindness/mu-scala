@@ -21,7 +21,6 @@ package util
 import monocle._
 import monocle.function.all._
 import scala.Function.{const => κ}
-import scala.tools.reflect.ToolBox
 import freestyle.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
 
 trait AstOptics {
