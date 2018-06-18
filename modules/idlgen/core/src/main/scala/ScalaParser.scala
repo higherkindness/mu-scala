@@ -19,6 +19,7 @@ package idlgen
 
 import freestyle.rpc.internal.util.StringUtil._
 import freestyle.rpc.internal.util.AstOptics
+import freestyle.rpc.protocol._
 import scala.tools.reflect.ToolBox
 
 object ScalaParser {
@@ -57,18 +58,26 @@ object ScalaParser {
       RpcMessage(defn.name.toString, params.getOption(defn).get) // TODO: wat
     }
 
+    def serializationType(s: Ident): SerializationType = s match {
+      case Ident(TermName("Protobuf"))       => Protobuf
+      case Ident(TermName("Avro"))           => Avro
+      case Ident(TermName("AvroWithSchema")) => AvroWithSchema
+    }
+
     def getRequestsFromService(defn: Tree): List[RpcRequest] = {
       val rpcMethods = ast._AnnotatedDefDef("rpc")
 
       defn.collect({ case rpcMethods(x) => x }).map { x =>
-        val serializationType = protocol.Avro //TODO: annotationsNamed("rpc").getAll(defn).head.firstArg
-        val name              = x.name.toString
-        val requestType       = firstParamForRpc.getOption(x).get
-        println(requestType)
+        val idlType =
+          serializationType(
+            annotationsNamed("rpc").getAll(x).head.firstArg.head.asInstanceOf[Ident])
+
+        val name          = x.name.toString
+        val requestType   = firstParamForRpc.getOption(x).get
         val responseType  = returnTypeAsString.getOption(x).get
         val streamingType = None //TODO
 
-        RpcRequest(serializationType, name, requestType, responseType, streamingType)
+        RpcRequest(idlType, name, requestType, responseType, streamingType)
       }
     }
 
