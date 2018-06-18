@@ -22,6 +22,7 @@ import monocle._
 import monocle.function.all._
 import scala.Function.{const => κ}
 import scala.tools.reflect.ToolBox
+import freestyle.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
 
 class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
 
@@ -110,14 +111,6 @@ class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
       }
     }
 
-  /**
-   * this Optional needs to handle two different cases:
-   *
-   * - a type constructor such as `F[T]` (represented by `AppliedTypeTree(TypeName("F"), List(Ident("T")))`)
-   * - a type constructor such as `Stream[F, T]` (represented by `AppliedTypeTree(TypeName("Stream"), List(Ident("F"), Ident("T")))`)
-   *
-   * In both cases, the return should be `T`
-   */
   val rpcTypeNameFromTypeConstructor: Optional[Tree, String] = Optional[Tree, String] {
     case ast._Ident(x)                                           => name.getOption(x)
     case ast._SingletonTypeTree(x)                               => Some(x.toString)
@@ -125,9 +118,7 @@ class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
     case ast._AppliedTypeTree(AppliedTypeTree(x, List(_, name))) => Some(name.toString)
     case _                                                       => None
   } { name =>
-    {
-      case x => x
-    }
+    identity
   }
 
   val returnType: Lens[DefDef, Tree] = Lens[DefDef, Tree](_.tpt)(tpt =>
@@ -170,7 +161,8 @@ class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
   val annotationName: Optional[Tree, String] = ast._Select ^|-> qualifier ^<-? ast._New ^|-> newTpt ^|-? name
 
   val toAnnotation: Optional[Tree, Annotation] = Optional[Tree, Annotation] {
-    case ast._Apply(Apply(fun, Nil)) => annotationName.getOption(fun).map(NoParamAnnotation)
+    case ast._Apply(Apply(fun, Nil)) =>
+      annotationName.getOption(fun).map(Annotation.NoParamAnnotation)
     case ast._Apply(Apply(fun, args)) =>
       val namedArgs = args.collect {
         case AssignOrNamedArg(argName, value) => argName.toString -> value
@@ -178,18 +170,15 @@ class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
 
       annotationName.getOption(fun).map { name =>
         if (namedArgs.size == args.size) {
-          AllNamedArgsAnnotation(name, namedArgs.toMap)
+          Annotation.AllNamedArgsAnnotation(name, namedArgs.toMap)
         } else {
-          UnnamedArgsAnnotation(name, args)
+          Annotation.UnnamedArgsAnnotation(name, args)
         }
       }
 
     case _ => None
   } { ann =>
-    {
-      case ast._Apply(ap) => ???
-      case _              => ???
-    }
+    identity
   }
 
   val annotations: Lens[Modifiers, List[Tree]] =
@@ -197,6 +186,19 @@ class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
       mod => Modifiers(mod.flags, mod.privateWithin, anns))
 
   val parsedAnnotations: Traversal[Tree, Annotation] = modifiers ^|-> annotations ^|->> each ^|-? toAnnotation
+
+  val asIdlType: Prism[Ident, SerializationType] = Prism.partial[Ident, SerializationType] {
+    case Ident(TermName("Protobuf"))       => Protobuf
+    case Ident(TermName("Avro"))           => Avro
+    case Ident(TermName("AvroWithSchema")) => AvroWithSchema
+  } {
+    case Protobuf       => Ident(TermName("Protobuf"))
+    case Avro           => Ident(TermName("Avro"))
+    case AvroWithSchema => Ident(TermName("AvroWithSchema"))
+  }
+
+  val idlType: Traversal[Tree, SerializationType] =
+    annotationsNamed("rpc") ^|-? Annotation.firstArg ^<-? ast._Ident ^<-? asIdlType
 
   def annotationsNamed(name: String): Traversal[Tree, Annotation] =
     parsedAnnotations ^|-? named(name)
@@ -215,20 +217,28 @@ class AstOptics(val tb: ToolBox[reflect.runtime.universe.type]) {
   sealed trait Annotation {
     def name: String
     def firstArg: Option[Tree] = this match {
-      case NoParamAnnotation(_)            => None
-      case UnnamedArgsAnnotation(_, args)  => args.headOption
-      case AllNamedArgsAnnotation(_, args) => args.headOption.map(_._2)
+      case Annotation.NoParamAnnotation(_)            => None
+      case Annotation.UnnamedArgsAnnotation(_, args)  => args.headOption
+      case Annotation.AllNamedArgsAnnotation(_, args) => args.headOption.map(_._2)
     }
     def withArgsNamed(names: String*): Option[Seq[Tree]] = this match {
-      case NoParamAnnotation(_)            => counted(names, Seq.empty)
-      case UnnamedArgsAnnotation(_, args)  => counted(names, args)
-      case AllNamedArgsAnnotation(_, args) => counted(names, names.flatMap(args.get))
+      case Annotation.NoParamAnnotation(_)            => counted(names, Seq.empty)
+      case Annotation.UnnamedArgsAnnotation(_, args)  => counted(names, args)
+      case Annotation.AllNamedArgsAnnotation(_, args) => counted(names, names.flatMap(args.get))
     }
     private def counted(names: Seq[String], args: Seq[Tree]): Option[Seq[Tree]] =
       Some(args).filter(_.size >= names.size)
   }
-  case class NoParamAnnotation(name: String)                               extends Annotation
-  case class UnnamedArgsAnnotation(name: String, args: Seq[Tree])          extends Annotation
-  case class AllNamedArgsAnnotation(name: String, args: Map[String, Tree]) extends Annotation
+
+  object Annotation {
+
+    val firstArg: Optional[Annotation, Tree] = Optional[Annotation, Tree](_.firstArg) { x =>
+      identity
+    }
+
+    case class NoParamAnnotation(name: String)                               extends Annotation
+    case class UnnamedArgsAnnotation(name: String, args: Seq[Tree])          extends Annotation
+    case class AllNamedArgsAnnotation(name: String, args: Map[String, Tree]) extends Annotation
+  }
 
 }
