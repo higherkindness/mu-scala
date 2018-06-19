@@ -36,6 +36,7 @@ trait AvroIdlGenerator extends IdlGenerator {
   import Toolbox.u._
   import Model._
   import AstOptics._
+  import StringUtil._
 
   val idlType: String       = avro.IdlType
   val outputSubdir: String  = "avro"
@@ -67,9 +68,9 @@ trait AvroIdlGenerator extends IdlGenerator {
       .map {
         case RpcRequest(_, name, reqType, respType, _) =>
           name -> AvroMessage(
-            Seq(AvroField(DefaultRequestParamName, mappedType(q"$reqType")))
+            Seq(AvroField(DefaultRequestParamName, mappedType(reqType)))
               .filterNot(_.`type` == AvroEmpty),
-            mappedType(q"$respType"))
+            mappedType(respType))
       }
       .toMap
     val protocol = AvroProtocol(outputPackage.getOrElse(""), outputName, avroRecords, avroMessages)
@@ -103,7 +104,7 @@ trait AvroIdlGenerator extends IdlGenerator {
     }
   }
 
-  private def mappedType(typeArg: Tree): AvroType = typeArg match {
+  def mappedType(typeArg: Tree): AvroType = typeArg match {
     case ast._Ident(Ident(TypeName("Boolean"))) => "boolean"
     case ast._Ident(Ident(TypeName("Int")))     => "int"
     case ast._Ident(Ident(TypeName("Long")))    => "long"
@@ -118,8 +119,9 @@ trait AvroIdlGenerator extends IdlGenerator {
       AvroArray(mappedType(t))
     case ast._AppliedTypeTree(AppliedTypeTree(ast._Ident(Ident(TypeName("Option"))), List(t))) =>
       AvroOption(mappedType(t))
-    case ast._SingletonTypeTree(SingletonTypeTree("Empty.type")) => AvroEmpty
-    case _                                                       => typeArg.toString
+    case ast._SingletonTypeTree(SingletonTypeTree(ast._Ident(Ident(TermName("Empty"))))) =>
+      AvroEmpty
+    case _ => typeArg.toString.unquoted
   }
 
   implicit private def string2AvroRef(s: String): AvroRef = AvroRef(s)

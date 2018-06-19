@@ -110,12 +110,12 @@ trait AstOptics {
       }
     }
 
-  val rpcTypeNameFromTypeConstructor: Optional[Tree, String] = Optional[Tree, String] {
-    case ast._Ident(x)                                           => name.getOption(x)
-    case ast._SingletonTypeTree(x)                               => Some(x.toString)
-    case ast._AppliedTypeTree(AppliedTypeTree(x, List(name)))    => Some(name.toString)
-    case ast._AppliedTypeTree(AppliedTypeTree(x, List(_, name))) => Some(name.toString)
-    case _                                                       => None
+  val rpcTypeNameFromTypeConstructor: Optional[Tree, Tree] = Optional[Tree, Tree] {
+    case ast._Ident(x)                                          => Some(x)
+    case ast._SingletonTypeTree(x)                              => Some(x)
+    case ast._AppliedTypeTree(AppliedTypeTree(x, List(tpe)))    => Some(tpe)
+    case ast._AppliedTypeTree(AppliedTypeTree(x, List(_, tpe))) => Some(tpe)
+    case _                                                      => None
   } { name =>
     identity
   }
@@ -168,7 +168,7 @@ trait AstOptics {
 
   val valDefTpt = Lens[ValDef, Tree](_.tpt)(t => v => ValDef(v.mods, v.name, t, v.rhs))
 
-  val firstParamForRpc: Optional[Tree, String] = params ^|-? headOption ^|-> valDefTpt ^|-? rpcTypeNameFromTypeConstructor
+  val firstParamForRpc: Optional[Tree, Tree] = params ^|-? headOption ^|-> valDefTpt ^|-? rpcTypeNameFromTypeConstructor
 
   val annotationName: Optional[Tree, String] = ast._Select ^|-> qualifier ^<-? ast._New ^|-> newTpt ^|-? name
 
