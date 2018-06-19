@@ -48,8 +48,8 @@ object Model {
   case class RpcRequest(
       serializationType: SerializationType,
       name: String,
-      requestType: String,
-      responseType: String,
+      requestType: Tree,
+      responseType: Tree,
       streamingType: Option[StreamingType] = None) {
     // Workaround for `Type` using referential equality; needed mostly for unit testing
     override def equals(other: Any): Boolean = other match {

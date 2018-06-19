@@ -83,16 +83,17 @@ object ProtoIdlGenerator extends IdlGenerator {
         s"  rpc ${name.capitalize} (${requestType(reqType, streamingType)}) returns (${responseType(retType, streamingType)});"
     }
 
-  private def requestType(t: String, streamingType: Option[StreamingType]): String =
+  private def requestType(t: Tree, streamingType: Option[StreamingType]): String =
     paramType(t, streamingType, RequestStreaming, BidirectionalStreaming)
 
-  private def responseType(t: String, streamingType: Option[StreamingType]): String =
+  private def responseType(t: Tree, streamingType: Option[StreamingType]): String =
     paramType(t, streamingType, ResponseStreaming, BidirectionalStreaming)
 
   private def paramType(
-      t: String,
+      tpe: Tree,
       streamingType: Option[StreamingType],
       matchingStreamingTypes: StreamingType*): String = {
+    val t     = tpe.toString
     val pType = if (t == EmptyType) ProtoEmpty else t
     if (streamingType.exists(matchingStreamingTypes.contains)) s"stream $pType" else pType
   }
