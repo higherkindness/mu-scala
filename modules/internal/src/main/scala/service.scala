@@ -110,6 +110,7 @@ object serviceImpl {
         require(params.length == 1, s"RPC call $name has more than one request parameter")
         RpcRequest(name, params.head.tpt, d.tpt, findAnnotation(d.mods, "rpc").get.children.tail)
       }
+
       private val nonRpcDefs: List[Tree] = defs.collect {
         case d: DefDef if findAnnotation(d.mods, "rpc").isEmpty => d
       }
@@ -141,10 +142,9 @@ object serviceImpl {
           F: _root_.cats.effect.Effect[$F],
           S: _root_.monix.execution.Scheduler
         ) extends _root_.io.grpc.stub.AbstractStub[$Client[$F]](channel, options) {
-          override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $Client[F] = new $Client[$F](channel, options)
-
+          override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $Client[F] =
+              new $Client[$F](channel, options)
           ..$clientCallMethods
-
           ..$nonRpcDefs
         }""".supressWarts("DefaultArguments")
 
