@@ -50,29 +50,31 @@ object ScalaParser {
       Seq(name, value) <- option.withArgsNamed("name", "value")
     } yield RpcOption(name.toString.unquoted, value.toString) // keep value quoting as-is
 
-    val messages: Seq[RpcMessage] = definitions.head.collect {
-      case ast._CaseClassDef(mod) if hasAnnotation("message")(mod) => mod
-    } map { defn =>
-      RpcMessage(defn.name.toString, params.getOption(defn).get) // TODO: wat
-    }
+    val messages: Seq[RpcMessage] = for {
+      defs <- definitions
+      defn <- defs.collect {
+        case ast._CaseClassDef(mod) if hasAnnotation("message")(mod) => mod
+      }
+      params <- params.getOption(defn).toList
+    } yield RpcMessage(defn.name.toString, params)
 
     def getRequestsFromService(defn: Tree): List[RpcRequest] = {
       val rpcMethods = ast._AnnotatedDefDef("rpc")
 
-      defn.collect({ case rpcMethods(x) => x }).map { x =>
-        val serializationType = idlType.getAll(x).head
-        val name              = x.name.toString
-        val requestType       = firstParamForRpc.getOption(x).get
-        val responseType      = returnTypeAsString.getOption(x).get
+      for {
+        x                 <- defn.collect({ case rpcMethods(x) => x })
+        serializationType <- idlType.getAll(x).headOption.toList
+        val name = x.name.toString
+        requestType  <- firstParamForRpc.getOption(x).toList
+        responseType <- returnTypeAsString.getOption(x).toList
         val streamingType = (requestStreaming.getOption(x), responseStreaming.getOption(x)) match {
           case (None, None)       => None
           case (Some(_), None)    => Some(RequestStreaming)
           case (None, Some(_))    => Some(ResponseStreaming)
           case (Some(_), Some(_)) => Some(BidirectionalStreaming)
         }
+      } yield RpcRequest(serializationType, name, requestType, responseType, streamingType)
 
-        RpcRequest(serializationType, name, requestType, responseType, streamingType)
-      }
     }
 
     val services: Seq[RpcService] = definitions.head.collect {
