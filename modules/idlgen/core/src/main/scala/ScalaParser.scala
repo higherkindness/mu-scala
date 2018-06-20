@@ -77,14 +77,12 @@ object ScalaParser {
 
     }
 
-    val services: Seq[RpcService] = definitions.head.collect {
-      case ast._ClassDef(mod) if hasAnnotation("service")(mod) => mod
-    } map { defn =>
-      RpcService(
-        defn.name.toString,
-        getRequestsFromService(defn)
-      )
-    }
+    val services: Seq[RpcService] = for {
+      d <- definitions
+      defn <- d.collect {
+        case ast._ClassDef(mod) if hasAnnotation("service")(mod) => mod
+      }
+    } yield RpcService(defn.name.toString, getRequestsFromService(defn))
 
     RpcDefinitions(outputName, outputPackage, options, messages, services)
   }
