@@ -65,7 +65,7 @@ object serviceImpl {
             defdef.tparams,
             defdef.vparamss,
             defdef.tpt,
-            defdef.rhs,
+            defdef.rhs
           )
         }
       }
@@ -76,7 +76,7 @@ object serviceImpl {
             SupressWarts[Modifiers].supressWarts(warts: _*)(valdef.mods),
             valdef.name,
             valdef.tpt,
-            valdef.rhs,
+            valdef.rhs
           )
         }
       }
