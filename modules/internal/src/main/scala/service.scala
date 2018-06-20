@@ -141,9 +141,10 @@ object serviceImpl {
           F: _root_.cats.effect.Effect[$F],
           S: _root_.monix.execution.Scheduler
         ) extends _root_.io.grpc.stub.AbstractStub[$Client[$F]](channel, options) {
-          override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $Client[F] =
-              new $Client[$F](channel, options)
+          override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $Client[F] = new $Client[$F](channel, options)
+
           ..$clientCallMethods
+
           ..$nonRpcDefs
         }""".supressWarts("DefaultArguments")
 
