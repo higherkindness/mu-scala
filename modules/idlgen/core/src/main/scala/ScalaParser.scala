@@ -51,8 +51,7 @@ object ScalaParser {
     } yield RpcOption(name.toString.unquoted, value.toString) // keep value quoting as-is
 
     val messages: Seq[RpcMessage] = for {
-      defs <- definitions
-      defn <- defs.collect {
+      defn <- input.collect {
         case ast._CaseClassDef(mod) if hasAnnotation("message")(mod) => mod
       }
       params <- params.getOption(defn).toList
@@ -78,8 +77,7 @@ object ScalaParser {
     }
 
     val services: Seq[RpcService] = for {
-      d <- definitions
-      defn <- d.collect {
+      defn <- input.collect {
         case ast._ClassDef(mod) if hasAnnotation("service")(mod) => mod
       }
     } yield RpcService(defn.name.toString, getRequestsFromService(defn))
