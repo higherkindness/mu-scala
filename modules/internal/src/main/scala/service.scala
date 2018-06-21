@@ -65,7 +65,7 @@ object serviceImpl {
             defdef.tparams,
             defdef.vparamss,
             defdef.tpt,
-            defdef.rhs,
+            defdef.rhs
           )
         }
       }
@@ -76,7 +76,7 @@ object serviceImpl {
             SupressWarts[Modifiers].supressWarts(warts: _*)(valdef.mods),
             valdef.name,
             valdef.tpt,
-            valdef.rhs,
+            valdef.rhs
           )
         }
       }
@@ -110,6 +110,7 @@ object serviceImpl {
         require(params.length == 1, s"RPC call $name has more than one request parameter")
         RpcRequest(name, params.head.tpt, d.tpt, findAnnotation(d.mods, "rpc").get.children.tail)
       }
+
       private val nonRpcDefs: List[Tree] = defs.collect {
         case d: DefDef if findAnnotation(d.mods, "rpc").isEmpty => d
       }
