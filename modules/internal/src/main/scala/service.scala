@@ -104,12 +104,13 @@ object serviceImpl {
       private val rpcDefs: List[DefDef] = defs.collect {
         case d: DefDef if findAnnotation(d.mods, "rpc").isDefined => d
       }
-      private val rpcRequests: List[RpcRequest] = rpcDefs.map { d =>
-        val name   = d.name
-        val params = d.vparamss.flatten
-        require(params.length == 1, s"RPC call $name has more than one request parameter")
-        RpcRequest(name, params.head.tpt, d.tpt, findAnnotation(d.mods, "rpc").get.children.tail)
-      }
+      private val rpcRequests: List[RpcRequest] = for {
+        d      <- rpcDefs
+        params <- d.vparamss
+        _ = require(params.length == 1, s"RPC call ${d.name} has more than one request parameter")
+        p    <- params.headOption.toList
+        anns <- findAnnotation(d.mods, "rpc").toList.map(_.children.tail)
+      } yield RpcRequest(d.name, p.tpt, d.tpt, anns)
 
       private val nonRpcDefs: List[Tree] = defs.collect {
         case d: DefDef if findAnnotation(d.mods, "rpc").isEmpty => d
@@ -190,7 +191,7 @@ object serviceImpl {
           else default.getOrElse(sys.error(s"Missing annotation parameter $name")))
 
       private def findAnnotation(mods: Modifiers, name: String): Option[Tree] =
-        mods.annotations.find(_.children.head.toString == s"new $name")
+        mods.annotations.flatMap(_.children.headOption.toList).find(_.toString == s"new $name")
 
       //todo: validate that the request and responses are case classes, if possible
       case class RpcRequest(
