@@ -65,7 +65,7 @@ In the previous section, we’ve seen an overview of what [gRPC] offers for defi
 
 First things first, the main difference in respect to [gRPC] is that [frees-rpc] doesn’t need `.proto` files, but it still uses protobuf, thanks to the [PBDirect] library, which allows to read and write Scala objects directly to protobuf with no `.proto` file definitions. Therefore, in summary, we have:
 
-* Your protocols, both messages, and services, will reside with your business-logic in your Scala files using [scalameta] annotations to set them up. We’ll see more details on this shortly.
+* Your protocols, both messages, and services, will reside with your business-logic in your Scala files using [scalamacros] annotations to set them up. We’ll see more details on this shortly.
 * Instead of reading `.proto` files to set up the [RPC] messages and services, [frees-rpc] offers (as an optional feature) to generate them, based on your protocols defined in your Scala code. This feature is offered to maintain compatibility with other languages and systems outside of Scala. We'll check out this feature further in [this section](/docs/rpc/idl-generation).
 
 Let’s start looking at how to define the `Person` message that we saw previously.
@@ -304,8 +304,8 @@ In the `Streaming` section, we are going to see all the streaming options.
 [gRPC guide]: https://grpc.io/docs/guides/
 [@tagless algebra]: http://frees.io/docs/core/algebras/
 [PBDirect]: https://github.com/btlines/pbdirect
-[scalameta]: https://github.com/scalameta/scalameta
+[scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
 [Metrifier]: https://github.com/47deg/metrifier
-[frees-config]: http://frees.io/docs/patterns/config/
+

@@ -115,7 +115,6 @@ object Protocols {
      * @return Features available within the given Rectangle, in a streaming fashion.
      */
     @rpc(Protobuf)
-    @stream[ResponseStreaming.type]
     def listFeatures(rectangle: Rectangle): Observable[Feature]
 
     /**
@@ -128,7 +127,6 @@ object Protocols {
      * @return RouteSummary when traversal is completed.
      */
     @rpc(Protobuf)
-    @stream[RequestStreaming.type]
     def recordRoute(points: Observable[Point]): F[RouteSummary]
 
     /**
@@ -141,7 +139,6 @@ object Protocols {
      * @return Stream of RouteNotes.
      */
     @rpc(Protobuf)
-    @stream[BidirectionalStreaming.type]
     def routeChat(routeNotes: Observable[RouteNote]): Observable[RouteNote]
   }
 

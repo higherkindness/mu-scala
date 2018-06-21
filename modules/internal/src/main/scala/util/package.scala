@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package freestyle
-package rpc
+package freestyle.rpc.internal
 
-import freestyle.rpc.internal.serviceImpl
+import scala.reflect.runtime.universe.runtimeMirror
+import scala.tools.reflect.ToolBox
 
-import scala.annotation.{compileTimeOnly, StaticAnnotation}
-
-// $COVERAGE-OFF$
-package object protocol {
-
-  @compileTimeOnly("enable macro paradise to expand @service macro annotations")
-  class service extends StaticAnnotation {
-    def macroTransform(annottees: Any*): Any = macro serviceImpl.service
-  }
+package object util {
+  val mirror                                          = runtimeMirror(getClass.getClassLoader)
+  val Toolbox: ToolBox[reflect.runtime.universe.type] = ToolBox(mirror).mkToolBox()
 }
-
-// $COVERAGE-ON$
