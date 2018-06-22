@@ -105,23 +105,18 @@ trait AvroIdlGenerator extends IdlGenerator {
   }
 
   def mappedType(typeArg: Tree): AvroType = typeArg match {
-    case ast._Ident(Ident(TypeName("Boolean"))) => "boolean"
-    case ast._Ident(Ident(TypeName("Int")))     => "int"
-    case ast._Ident(Ident(TypeName("Long")))    => "long"
-    case ast._Ident(Ident(TypeName("Float")))   => "float"
-    case ast._Ident(Ident(TypeName("Double")))  => "double"
-    case ast._Ident(Ident(TypeName("String")))  => "string"
-    case ast._AppliedTypeTree(AppliedTypeTree(ast._Ident(Ident(TypeName("Seq"))), List(t))) =>
-      AvroArray(mappedType(t))
-    case ast._AppliedTypeTree(AppliedTypeTree(ast._Ident(Ident(TypeName("List"))), List(t))) =>
-      AvroArray(mappedType(t))
-    case ast._AppliedTypeTree(AppliedTypeTree(ast._Ident(Ident(TypeName("Array"))), List(t))) =>
-      AvroArray(mappedType(t))
-    case ast._AppliedTypeTree(AppliedTypeTree(ast._Ident(Ident(TypeName("Option"))), List(t))) =>
-      AvroOption(mappedType(t))
-    case ast._SingletonTypeTree(SingletonTypeTree(ast._Ident(Ident(TermName("Empty"))))) =>
-      AvroEmpty
-    case _ => typeArg.toString.unquoted
+    case BaseType("Boolean")                => "boolean"
+    case BaseType("Int")                    => "int"
+    case BaseType("Long")                   => "long"
+    case BaseType("Float")                  => "float"
+    case BaseType("Double")                 => "double"
+    case BaseType("String")                 => "string"
+    case SingleAppliedTypeTree("Seq", t)    => AvroArray(mappedType(t))
+    case SingleAppliedTypeTree("List", t)   => AvroArray(mappedType(t))
+    case SingleAppliedTypeTree("Array", t)  => AvroArray(mappedType(t))
+    case SingleAppliedTypeTree("Option", t) => AvroOption(mappedType(t))
+    case SingletonType("Empty")             => AvroEmpty
+    case _                                  => typeArg.toString.unquoted
   }
 
   implicit private def string2AvroRef(s: String): AvroRef = AvroRef(s)

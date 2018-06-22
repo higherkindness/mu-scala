@@ -99,19 +99,15 @@ object ProtoIdlGenerator extends IdlGenerator {
   }
 
   private def mappedType(typeArg: Tree): String = typeArg match {
-    case ast._Ident(Ident(TypeName("Boolean"))) => "bool"
-    case ast._Ident(Ident(TypeName("Int")))     => "int32"
-    case ast._Ident(Ident(TypeName("Long")))    => "int64"
-    case ast._Ident(Ident(TypeName("Float")))   => "float"
-    case ast._Ident(Ident(TypeName("Double")))  => "double"
-    case ast._Ident(Ident(TypeName("String")))  => "string"
-    case ast._AppliedTypeTree(
-        AppliedTypeTree(ast._Ident(Ident(TypeName("Array"))), List(TermName("Byte")))) =>
-      "bytes"
-    case ast._AppliedTypeTree(AppliedTypeTree(ast._Ident(Ident(TypeName("Option"))), List(t))) =>
-      mappedType(t)
-    case ast._AppliedTypeTree(AppliedTypeTree(ast._Ident(Ident(TypeName("List"))), List(t))) =>
-      s"repeated ${mappedType(t)}"
-    case _ => typeArg.toString
+    case BaseType("Boolean")                              => "bool"
+    case BaseType("Int")                                  => "int32"
+    case BaseType("Long")                                 => "int64"
+    case BaseType("Float")                                => "float"
+    case BaseType("Double")                               => "double"
+    case BaseType("String")                               => "string"
+    case SingleAppliedTypeTree("Array", TermName("Byte")) => "bytes"
+    case SingleAppliedTypeTree("Option", t)               => mappedType(t)
+    case SingleAppliedTypeTree("List", t)                 => s"repeated ${mappedType(t)}"
+    case _                                                => typeArg.toString
   }
 }

@@ -19,6 +19,8 @@ package freestyle.rpc
 import freestyle.rpc.idlgen.avro._
 import freestyle.rpc.idlgen.proto.ProtoIdlGenerator
 import freestyle.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
+import freestyle.rpc.internal.util.Toolbox.u._
+import freestyle.rpc.internal.util.AstOptics.ast
 
 package object idlgen {
 
@@ -37,4 +39,26 @@ package object idlgen {
 
   val serializationTypes: Map[String, SerializationType] =
     Map("Protobuf" -> Protobuf, "Avro" -> Avro, "AvroWithSchema" -> AvroWithSchema)
+
+  object BaseType {
+    def unapply(tpe: Tree): Option[String] = tpe match {
+      case ast._Ident(Ident(TypeName(name))) => Some(name)
+      case _                                 => None
+    }
+  }
+
+  object SingleAppliedTypeTree {
+    def unapply(tpe: Tree): Option[(String, Tree)] = tpe match {
+      case ast._AppliedTypeTree(AppliedTypeTree(ast._Ident(Ident(TypeName(ctor))), List(tree))) =>
+        Some((ctor, tree))
+      case _ => None
+    }
+  }
+
+  object SingletonType {
+    def unapply(tpe: Tree): Option[String] = tpe match {
+      case ast._SingletonTypeTree(SingletonTypeTree(ast._Ident(Ident(TermName(t))))) => Some(t)
+      case _                                                                         => None
+    }
+  }
 }
