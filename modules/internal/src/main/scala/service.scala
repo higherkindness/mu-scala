@@ -191,7 +191,11 @@ object serviceImpl {
           else default.getOrElse(sys.error(s"Missing annotation parameter $name")))
 
       private def findAnnotation(mods: Modifiers, name: String): Option[Tree] =
-        mods.annotations.flatMap(_.children.headOption.toList).find(_.toString == s"new $name")
+        mods.annotations find {
+          case ann @ Apply(Select(New(Ident(TypeName(`name`))), _), _)     => true
+          case ann @ Apply(Select(New(Select(_, TypeName(`name`))), _), _) => true
+          case _                                                           => false
+        }
 
       //todo: validate that the request and responses are case classes, if possible
       case class RpcRequest(
