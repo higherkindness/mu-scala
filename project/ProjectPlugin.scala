@@ -31,16 +31,10 @@ object ProjectPlugin extends AutoPlugin {
       val nettySSL: String           = "2.0.8.Final"
       val pbdirect: String           = "0.1.0"
       val prometheus: String         = "0.3.0"
+      val monocle: String            = "1.5.0-cats"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
-      scalacOptions := Seq(
-        "-deprecation",
-        "-encoding",
-        "UTF-8",
-        "-feature",
-        "-unchecked",
-        "-language:higherKinds"),
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect) % Test,
         %%("scalamockScalatest")        % Test,
@@ -53,10 +47,12 @@ object ProjectPlugin extends AutoPlugin {
         %%("cats-effect", V.catsEffect),
         %("grpc-stub", V.grpc),
         %%("monix"),
+        %%("monocle-core", V.monocle),
         %%("fs2-reactive-streams", V.fs2ReactiveStreams),
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
+        "org.scala-lang" % "scala-compiler" % scalaVersion.value,
         %%("scalamockScalatest") % Test
       )
     )
@@ -197,7 +193,8 @@ object ProjectPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] =
     // format: OFF
-    scalaMetaSettings ++ sharedReleaseProcess ++ warnUnusedImport ++ Seq(
+    sharedReleaseProcess ++ warnUnusedImport ++ Seq(
+      addCompilerPlugin(%%("paradise") cross CrossVersion.full),
       libraryDependencies ++= commonDeps :+ %("slf4j-nop") % Test,
       scalaVersion := "2.12.6",
       crossScalaVersions := Seq("2.11.12", "2.12.6"),

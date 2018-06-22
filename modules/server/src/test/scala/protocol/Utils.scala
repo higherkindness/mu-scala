@@ -88,43 +88,33 @@ object Utils extends CommonUtils {
           empty: Empty.type): F[A]
 
       @rpc(Protobuf)
-      @stream[ResponseStreaming.type]
       def serverStreaming(b: B): Observable[C]
 
       @rpc(Protobuf)
-      @stream[ResponseStreaming.type]
       def serverStreamingWithError(e: E): Observable[C]
 
       @rpc(Protobuf, Gzip)
-      @stream[ResponseStreaming.type]
       def serverStreamingCompressed(b: B): Observable[C]
 
       @rpc(Protobuf, Gzip)
-      @stream[ResponseStreaming.type]
       def serverStreamingCompressedWithError(e: E): Observable[C]
 
       @rpc(Protobuf)
-      @stream[RequestStreaming.type]
       def clientStreaming(oa: Observable[A]): F[D]
 
       @rpc(Protobuf, Gzip)
-      @stream[RequestStreaming.type]
       def clientStreamingCompressed(oa: Observable[A]): F[D]
 
       @rpc(Avro)
-      @stream[BidirectionalStreaming.type]
       def biStreaming(oe: Observable[E]): Observable[E]
 
       @rpc(AvroWithSchema)
-      @stream[BidirectionalStreaming.type]
       def biStreamingWithSchema(oe: Observable[E]): Observable[E]
 
       @rpc(Avro, Gzip)
-      @stream[BidirectionalStreaming.type]
       def biStreamingCompressed(oe: Observable[E]): Observable[E]
 
       @rpc(AvroWithSchema, Gzip)
-      @stream[BidirectionalStreaming.type]
       def biStreamingCompressedWithSchema(oe: Observable[E]): Observable[E]
 
       @rpc(Protobuf)

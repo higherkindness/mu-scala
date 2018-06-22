@@ -14,43 +14,73 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package freestyle.rpc
+package idlgen
 
-import freestyle.rpc.internal.ServiceAlg
-import freestyle.rpc.internal.util.ScalametaUtil._
 import freestyle.rpc.internal.util.StringUtil._
-import scala.meta._
+import freestyle.rpc.internal.util.{AstOptics, Toolbox}
+import freestyle.rpc.protocol._
 
 object ScalaParser {
 
-  def parse(input: Source, inputName: String): RpcDefinitions = {
-    val definitions = input.collect { case defn: Defn => defn }
+  import Toolbox.u._
+  import AstOptics._
+  import Model._
 
-    // format: OFF
-    def annotationValue(name: String): Option[String] = (for {
-      defn <- definitions
-      annotation <- defn.annotationsNamed(name)
-      firstArg <- annotation.firstArg
-    } yield firstArg).headOption.map(_.toString.unquoted)
+  def parse(
+      input: Tree,
+      inputName: String
+  ): RpcDefinitions = {
 
-    val outputName = annotationValue("outputName").getOrElse(inputName)
+    val definitions = input.collect { case defs: ModuleDef => defs }
+
+    def annotationValue(name: String): Option[String] =
+      (for {
+        defn       <- definitions
+        annotation <- annotationsNamed(name).getAll(defn)
+        firstArg   <- annotation.firstArg
+      } yield firstArg).headOption.map(_.toString.unquoted)
+
+    val outputName    = annotationValue("outputName").getOrElse(inputName)
     val outputPackage = annotationValue("outputPackage")
 
     val options: Seq[RpcOption] = for {
-      defn  <- definitions
-      option <- defn.annotationsNamed("option")
+      defn             <- definitions
+      option           <- annotationsNamed("option").getAll(defn)
       Seq(name, value) <- option.withArgsNamed("name", "value")
     } yield RpcOption(name.toString.unquoted, value.toString) // keep value quoting as-is
 
-    val messages: Seq[RpcMessage] = definitions.filter(_.hasAnnotation("message")).map { defn =>
-      RpcMessage(defn.name, defn.params)
+    val messages: Seq[RpcMessage] = for {
+      defn <- input.collect {
+        case ast._CaseClassDef(mod) if hasAnnotation("message")(mod) => mod
+      }
+      params <- params.getOption(defn).toList
+    } yield RpcMessage(defn.name.toString, params)
+
+    def getRequestsFromService(defn: Tree): List[RpcRequest] = {
+      val rpcMethods = ast._AnnotatedDefDef("rpc")
+
+      for {
+        x                 <- defn.collect({ case rpcMethods(x) => x })
+        serializationType <- idlType.getAll(x).headOption.toList
+        val name = x.name.toString
+        requestType  <- firstParamForRpc.getOption(x).toList
+        responseType <- returnTypeAsString.getOption(x).toList
+        val streamingType = (requestStreaming.getOption(x), responseStreaming.getOption(x)) match {
+          case (None, None)       => None
+          case (Some(_), None)    => Some(RequestStreaming)
+          case (None, Some(_))    => Some(ResponseStreaming)
+          case (Some(_), Some(_)) => Some(BidirectionalStreaming)
+        }
+      } yield RpcRequest(serializationType, name, requestType, responseType, streamingType)
+
     }
 
-    val services: Seq[RpcService] = definitions.filter(_.hasAnnotation("service")).map { defn =>
-      RpcService(defn.name, ServiceAlg(defn).requests.map(req =>
-        RpcRequest(req.serialization, req.name.value, req.requestType, req.responseType, req.streamingType)))
-    }
-    // format: ON
+    val services: Seq[RpcService] =
+      input.collect {
+        case ast._ClassDef(mod) if hasAnnotation("service")(mod) =>
+          RpcService(mod.name.toString, getRequestsFromService(mod))
+      }
 
     RpcDefinitions(outputName, outputPackage, options, messages, services)
   }

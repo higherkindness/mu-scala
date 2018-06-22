@@ -54,15 +54,12 @@ object service {
     def sayHelloAvro(request: HelloRequest): F[HelloResponse]
 
     @rpc(Protobuf)
-    @stream[ResponseStreaming.type]
     def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
 
     @rpc(Protobuf)
-    @stream[RequestStreaming.type]
     def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse]
 
     @rpc(Protobuf)
-    @stream[BidirectionalStreaming.type]
     def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
     
   }
@@ -264,9 +261,8 @@ The following example shows how to set up a dependency with another artifact or 
 [gRPC guide]: https://grpc.io/docs/guides/
 [@tagless algebra]: http://frees.io/docs/core/algebras/
 [PBDirect]: https://github.com/btlines/pbdirect
-[scalameta]: https://github.com/scalameta/scalameta
+[scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
 [Metrifier]: https://github.com/47deg/metrifier
-[frees-config]: http://frees.io/docs/patterns/config/
 [avrohugger]: https://github.com/julianpeeters/avrohugger
