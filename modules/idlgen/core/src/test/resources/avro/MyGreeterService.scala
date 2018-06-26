@@ -22,12 +22,12 @@ import freestyle.rpc.protocol._
 
 @message case class HelloResponse(arg1: String, arg2: Option[String], arg3: List[String])
 
-@service trait MyGreeterService[F[_]] {
+@service(Avro) trait MyGreeterService[F[_]] {
 
-  @rpc(Avro, Gzip)
+  @rpc(Gzip)
   def sayHelloAvro(arg: foo.bar.HelloRequest): F[foo.bar.HelloResponse]
 
-  @rpc(Avro, Gzip)
+  @rpc(Gzip)
   def sayNothingAvro(arg: Empty.type): F[Empty.type]
 
 }

@@ -26,62 +26,31 @@ object GreeterService {
 
   @message case class HelloResponse(arg1: String, arg2: Option[String], arg3: List[String])
 
-  @service trait Greeter[F[_]] {
+  @service(Avro) trait AvroGreeter[F[_]] {
+    @rpc def sayHelloAvro(request: HelloRequest): F[HelloResponse]
+    @rpc def sayNothingAvro(request: Empty.type): F[Empty.type]
+    @rpc def lotsOfRepliesAvro(request: HelloRequest): Observable[HelloResponse]
+    @rpc def lotsOfGreetingsAvro(request: Observable[HelloRequest]): F[HelloResponse]
+    @rpc def bidiHelloAvro(request: Observable[HelloRequest]): Observable[HelloResponse]
+    @rpc def bidiHelloFs2Avro(request: Stream[F, HelloRequest]): Stream[F, HelloResponse]
+  }
 
-    @rpc(Avro)
-    def sayHelloAvro(request: HelloRequest): F[HelloResponse]
+  @service(AvroWithSchema) trait AvroWithSchemaGreeter[F[_]] {
+    @rpc def sayHelloAvro(request: HelloRequest): F[HelloResponse]
+    @rpc def sayNothingAvro(request: Empty.type): F[Empty.type]
+    @rpc def lotsOfRepliesAvro(request: HelloRequest): Observable[HelloResponse]
+    @rpc def lotsOfGreetingsAvro(request: Observable[HelloRequest]): F[HelloResponse]
+    @rpc def bidiHelloAvro(request: Observable[HelloRequest]): Observable[HelloResponse]
+    @rpc def bidiHelloFs2Avro(request: Stream[F, HelloRequest]): Stream[F, HelloResponse]
+  }
 
-    @rpc(AvroWithSchema)
-    def sayHelloAvro(request: HelloRequest): F[HelloResponse]
-
-    @rpc(Protobuf)
-    def sayHelloProto(request: HelloRequest): F[HelloResponse]
-
-    @rpc(Avro)
-    def sayNothingAvro(request: Empty.type): F[Empty.type]
-
-    @rpc(AvroWithSchema)
-    def sayNothingAvro(request: Empty.type): F[Empty.type]
-
-    @rpc(Protobuf)
-    def sayNothingProto(request: Empty.type): F[Empty.type]
-
-    @rpc(Avro)
-    def lotsOfRepliesAvro(request: HelloRequest): Observable[HelloResponse]
-
-    @rpc(AvroWithSchema)
-    def lotsOfRepliesAvro(request: HelloRequest): Observable[HelloResponse]
-
-    @rpc(Protobuf)
-    def lotsOfRepliesProto(request: HelloRequest): Observable[HelloResponse]
-
-    @rpc(Avro)
-    def lotsOfGreetingsAvro(request: Observable[HelloRequest]): F[HelloResponse]
-
-    @rpc(AvroWithSchema)
-    def lotsOfGreetingsAvro(request: Observable[HelloRequest]): F[HelloResponse]
-
-    @rpc(Protobuf)
-    def lotsOfGreetingsProto(request: Observable[HelloRequest]): F[HelloResponse]
-
-    @rpc(Avro)
-    def bidiHelloAvro(request: Observable[HelloRequest]): Observable[HelloResponse]
-
-    @rpc(AvroWithSchema)
-    def bidiHelloAvro(request: Observable[HelloRequest]): Observable[HelloResponse]
-
-    @rpc(Protobuf)
-    def bidiHelloProto(request: Observable[HelloRequest]): Observable[HelloResponse]
-
-    @rpc(Avro)
-    def bidiHelloFs2Avro(request: Stream[F, HelloRequest]): Stream[F, HelloResponse]
-
-    @rpc(AvroWithSchema)
-    def bidiHelloFs2Avro(request: Stream[F, HelloRequest]): Stream[F, HelloResponse]
-
-    @rpc(Protobuf)
-    def bidiHelloFs2Proto(request: Stream[F, HelloRequest]): Stream[F, HelloResponse]
-
+  @service(Protobuf) trait ProtoGreeter[F[_]] {
+    @rpc def sayHelloProto(request: HelloRequest): F[HelloResponse]
+    @rpc def sayNothingProto(request: Empty.type): F[Empty.type]
+    @rpc def lotsOfRepliesProto(request: HelloRequest): Observable[HelloResponse]
+    @rpc def lotsOfGreetingsProto(request: Observable[HelloRequest]): F[HelloResponse]
+    @rpc def bidiHelloProto(request: Observable[HelloRequest]): Observable[HelloResponse]
+    @rpc def bidiHelloFs2Proto(request: Stream[F, HelloRequest]): Stream[F, HelloResponse]
   }
 
 }
