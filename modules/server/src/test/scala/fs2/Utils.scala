@@ -27,50 +27,33 @@ object Utils extends CommonUtils {
 
   object service {
 
-    @service
-    trait RPCService[F[_]] {
-
-      @rpc(Avro) def unary(a: A): F[C]
-
-      @rpc(AvroWithSchema) def unaryWithSchema(a: A): F[C]
-
-      @rpc(Avro, Gzip) def unaryCompressed(a: A): F[C]
-
-      @rpc(AvroWithSchema, Gzip) def unaryCompressedWithSchema(a: A): F[C]
-
-      @rpc(Protobuf)
-      def serverStreaming(b: B): Stream[F, C]
-
-      @rpc(Protobuf)
-      def serverStreamingWithError(e: E): Stream[F, C]
-
-      @rpc(Protobuf, Gzip)
-      def serverStreamingCompressed(b: B): Stream[F, C]
-
-      @rpc(Protobuf)
-      def clientStreaming(oa: Stream[F, A]): F[D]
-
-      @rpc(Protobuf, Gzip)
-      def clientStreamingCompressed(oa: Stream[F, A]): F[D]
-
-      @rpc(Avro)
-      def biStreaming(oe: Stream[F, E]): Stream[F, E]
-
-      @rpc(AvroWithSchema)
-      def biStreamingWithSchema(oe: Stream[F, E]): Stream[F, E]
-
-      @rpc(Avro, Gzip)
-      def biStreamingCompressed(oe: Stream[F, E]): Stream[F, E]
-
-      @rpc(AvroWithSchema, Gzip)
-      def biStreamingCompressedWithSchema(oe: Stream[F, E]): Stream[F, E]
-
+    @service(Protobuf) trait ProtoRPCService[F[_]] {
+      @rpc def serverStreamingWithError(e: E): Stream[F, C]
+      @rpc(Gzip) def serverStreamingCompressed(b: B): Stream[F, C]
+      @rpc def clientStreaming(oa: Stream[F, A]): F[D]
+      @rpc(Gzip) def clientStreamingCompressed(oa: Stream[F, A]): F[D]
+      @rpc def serverStreaming(b: B): Stream[F, C]
     }
 
-    object RPCService {
-      // this companion object is here to make sure @service supports
-      // companion objects
+    @service(Avro) trait AvroRPCService[F[_]] {
+      @rpc def unary(a: A): F[C]
+      @rpc(Gzip) def unaryCompressed(a: A): F[C]
+      @rpc def biStreaming(oe: Stream[F, E]): Stream[F, E]
+      @rpc(Gzip) def biStreamingCompressed(oe: Stream[F, E]): Stream[F, E]
     }
+
+    @service(AvroWithSchema) trait AvroWithSchemaRPCService[F[_]] {
+      @rpc def unaryWithSchema(a: A): F[C]
+      @rpc(Gzip) def unaryCompressedWithSchema(a: A): F[C]
+      @rpc def biStreamingWithSchema(oe: Stream[F, E]): Stream[F, E]
+      @rpc(Gzip) def biStreamingCompressedWithSchema(oe: Stream[F, E]): Stream[F, E]
+    }
+
+    // this companion objects are here to make sure @service supports
+    // companion objects
+    object ProtoRPCService          {}
+    object AvroRPCService           {}
+    object AvroWithSchemaRPCService {}
 
   }
 
@@ -81,7 +64,10 @@ object Utils extends CommonUtils {
       import database._
       import service._
 
-      class ServerRPCService[F[_]: Effect] extends RPCService[F] {
+      class ServerRPCService[F[_]: Effect]
+          extends ProtoRPCService[F]
+          with AvroRPCService[F]
+          with AvroWithSchemaRPCService[F] {
 
         def unary(a: A): F[C] = Effect[F].delay(c1)
 
@@ -153,7 +139,9 @@ object Utils extends CommonUtils {
       new ServerRPCService[ConcurrentMonad]
 
     val grpcConfigs: List[GrpcConfig] = List(
-      AddService(RPCService.bindService[ConcurrentMonad])
+      AddService(ProtoRPCService.bindService[ConcurrentMonad]),
+      AddService(AvroRPCService.bindService[ConcurrentMonad]),
+      AddService(AvroWithSchemaRPCService.bindService[ConcurrentMonad])
     )
 
     implicit val serverW: ServerW = createServerConf(grpcConfigs)
@@ -162,9 +150,13 @@ object Utils extends CommonUtils {
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    implicit val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
-      RPCService.client[ConcurrentMonad](createChannelFor)
-
+    implicit val freesProtoRPCServiceClient: ProtoRPCService.Client[ConcurrentMonad] =
+      ProtoRPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val freesAvroRPCServiceClient: AvroRPCService.Client[ConcurrentMonad] =
+      AvroRPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val freesAvroWithSchemaRPCServiceClient: AvroWithSchemaRPCService.Client[
+      ConcurrentMonad] =
+      AvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
   }
 
   object implicits extends FreesRuntime

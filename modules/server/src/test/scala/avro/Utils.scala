@@ -52,111 +52,106 @@ object Utils extends CommonUtils {
   def responseCoproduct[A](a: A)  = ResponseCoproduct(Coproduct[A :+: CNil](a))
 
   object service {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: Request): F[Response]
+      @rpc def get(a: Request): F[Response]
 
-      @rpc(AvroWithSchema) def getCoproduct(
-          a: RequestCoproduct[Request]): F[ResponseCoproduct[Response]]
+      @rpc def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproduct[Response]]
     }
   }
 
   object serviceRequestAddedBoolean {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: RequestAddedBoolean): F[Response]
+      @rpc def get(a: RequestAddedBoolean): F[Response]
 
-      @rpc(AvroWithSchema) def getCoproduct(
+      @rpc def getCoproduct(
           a: RequestCoproduct[RequestAddedBoolean]): F[ResponseCoproduct[Response]]
     }
   }
 
   object serviceRequestAddedString {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: RequestAddedString): F[Response]
+      @rpc def get(a: RequestAddedString): F[Response]
 
-      @rpc(AvroWithSchema) def getCoproduct(
-          a: RequestCoproduct[RequestAddedString]): F[ResponseCoproduct[Response]]
+      @rpc def getCoproduct(a: RequestCoproduct[RequestAddedString]): F[ResponseCoproduct[Response]]
     }
   }
 
   object serviceRequestAddedInt {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: RequestAddedInt): F[Response]
+      @rpc def get(a: RequestAddedInt): F[Response]
 
-      @rpc(AvroWithSchema) def getCoproduct(
-          a: RequestCoproduct[RequestAddedInt]): F[ResponseCoproduct[Response]]
+      @rpc def getCoproduct(a: RequestCoproduct[RequestAddedInt]): F[ResponseCoproduct[Response]]
     }
   }
 
   object serviceRequestAddedNestedRequest {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: RequestAddedNestedRequest): F[Response]
+      @rpc def get(a: RequestAddedNestedRequest): F[Response]
 
-      @rpc(AvroWithSchema) def getCoproduct(
+      @rpc def getCoproduct(
           a: RequestCoproduct[RequestAddedNestedRequest]): F[ResponseCoproduct[Response]]
     }
   }
 
   object serviceRequestDroppedField {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: RequestDroppedField): F[Response]
+      @rpc def get(a: RequestDroppedField): F[Response]
 
-      @rpc(AvroWithSchema) def getCoproduct(
+      @rpc def getCoproduct(
           a: RequestCoproduct[RequestDroppedField]): F[ResponseCoproduct[Response]]
     }
   }
 
   object serviceResponseAddedBoolean {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: Request): F[ResponseAddedBoolean]
+      @rpc def get(a: Request): F[ResponseAddedBoolean]
 
-      @rpc(AvroWithSchema) def getCoproduct(
+      @rpc def getCoproduct(
           a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseAddedBoolean]]
     }
   }
 
   object serviceResponseAddedString {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: Request): F[ResponseAddedString]
+      @rpc def get(a: Request): F[ResponseAddedString]
 
-      @rpc(AvroWithSchema) def getCoproduct(
-          a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseAddedString]]
+      @rpc def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseAddedString]]
     }
   }
 
   object serviceResponseAddedInt {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: Request): F[ResponseAddedInt]
+      @rpc def get(a: Request): F[ResponseAddedInt]
 
-      @rpc(AvroWithSchema) def getCoproduct(
-          a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseAddedInt]]
+      @rpc def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseAddedInt]]
     }
   }
 
   object serviceResponseAddedNestedResponse {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: Request): F[ResponseAddedNestedResponse]
+      @rpc def get(a: Request): F[ResponseAddedNestedResponse]
 
-      @rpc(AvroWithSchema) def getCoproduct(
+      @rpc def getCoproduct(
           a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseAddedNestedResponse]]
     }
   }
 
   object serviceResponseDroppedField {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: Request): F[ResponseDroppedField]
+      @rpc def get(a: Request): F[ResponseDroppedField]
 
-      @rpc(AvroWithSchema) def getCoproduct(
+      @rpc def getCoproduct(
           a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseDroppedField]]
     }
   }
