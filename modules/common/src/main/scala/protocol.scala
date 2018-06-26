@@ -19,13 +19,9 @@ package protocol
 
 import scala.annotation.StaticAnnotation
 
-@deprecated("Streaming type is now determined from request and response types", "0.14.0")
-sealed trait StreamingType extends Product with Serializable
-@deprecated("Streaming type is now determined from request and response types", "0.14.0")
-case object RequestStreaming extends StreamingType
-@deprecated("Streaming type is now determined from request and response types", "0.14.0")
-case object ResponseStreaming extends StreamingType
-@deprecated("Streaming type is now determined from request and response types", "0.14.0")
+sealed trait StreamingType         extends Product with Serializable
+case object RequestStreaming       extends StreamingType
+case object ResponseStreaming      extends StreamingType
 case object BidirectionalStreaming extends StreamingType
 
 sealed trait SerializationType extends Product with Serializable
@@ -37,8 +33,7 @@ sealed abstract class CompressionType extends Product with Serializable
 case object Identity                  extends CompressionType
 case object Gzip                      extends CompressionType
 
-class rpc(val serializationType: SerializationType, val compressionType: CompressionType = Identity)
-    extends StaticAnnotation
+class rpc(val compressionType: CompressionType = Identity) extends StaticAnnotation
 @deprecated("Streaming type is now determined from request and response types", "0.14.0")
 class stream[S <: StreamingType]       extends StaticAnnotation
 class message                          extends StaticAnnotation
