@@ -67,7 +67,7 @@ object Utils extends CommonUtils {
         F.map(emptyParamResponse(Empty))(a => a.x + a.y)
     }
 
-    @service(Avro) trait AvroWithSchemaRPCService[F[_]] {
+    @service(AvroWithSchema) trait AvroWithSchemaRPCService[F[_]] {
       @rpc def unaryWithSchema(a: A): F[C]
       @rpc(Gzip) def unaryCompressedWithSchema(a: A): F[C]
       @rpc def emptyAvroWithSchema(empty: Empty.type): F[Empty.type]
