@@ -27,7 +27,7 @@ object service {
   @message
   case class HelloResponse(reply: String)
 
-  @service
+  @service(Protobuf)
   trait Greeter[F[_]] {
 
     /**
@@ -39,7 +39,7 @@ object service {
      * @param request Single client request.
      * @return Stream of server responses.
      */
-    @rpc(Protobuf)
+    @rpc
     def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
 
     /**
@@ -52,7 +52,7 @@ object service {
      * @param request Stream of client requests.
      * @return Single server response.
      */
-    @rpc(Protobuf)
+    @rpc
     def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse]
 
     /**
@@ -67,7 +67,7 @@ object service {
      * @param request Stream of client requests.
      * @return Stream of server responses.
      */
-    @rpc(Protobuf)
+    @rpc
     def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
 
   }
@@ -114,7 +114,7 @@ object service {
   @message
   case class HelloResponse(reply: String)
 
-  @service
+  @service(Protobuf)
   trait Greeter[F[_]] {
 
     /**
@@ -123,7 +123,7 @@ object service {
      * @param request Single client request.
      * @return Stream of server responses.
      */
-    @rpc(Protobuf)
+    @rpc
     def lotsOfReplies(request: HelloRequest): Stream[F, HelloResponse]
 
     /**
@@ -132,7 +132,7 @@ object service {
      * @param request Stream of client requests.
      * @return Single server response.
      */
-    @rpc(Protobuf)
+    @rpc
     def lotsOfGreetings(request: Stream[F, HelloRequest]): F[HelloResponse]
 
     /**
@@ -141,7 +141,7 @@ object service {
      * @param request Stream of client requests.
      * @return Stream of server responses.
      */
-    @rpc(Protobuf)
+    @rpc
     def bidiHello(request: Stream[F, HelloRequest]): Stream[F, HelloResponse]
 
   }

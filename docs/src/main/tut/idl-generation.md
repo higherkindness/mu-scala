@@ -44,26 +44,28 @@ object service {
   @message
   case class HelloResponse(reply: String)
 
-  @service
-  trait Greeter[F[_]] {
+  @service(Protobuf)
+  trait ProtoGreeter[F[_]] {
 
-    @rpc(Protobuf)
+    @rpc
     def sayHello(request: HelloRequest): F[HelloResponse]
-     
-    @rpc(Avro)
-    def sayHelloAvro(request: HelloRequest): F[HelloResponse]
 
-    @rpc(Protobuf)
+    @rpc
     def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
 
-    @rpc(Protobuf)
+    @rpc
     def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse]
 
-    @rpc(Protobuf)
+    @rpc
     def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
     
   }
   
+  @service(Avro)
+  trait AvroGreeter[F[_]] {
+    @rpc
+    def sayHelloAvro(request: HelloRequest): F[HelloResponse]
+  }
 }
 ```
 
@@ -93,7 +95,7 @@ message HelloResponse {
   string reply = 1;
 }
 
-service Greeter {
+service ProtoGreeter {
   rpc SayHello (HelloRequest) returns (HelloResponse);
   rpc LotsOfReplies (HelloRequest) returns (stream HelloResponse);
   rpc LotsOfGreetings (stream HelloRequest) returns (HelloResponse);
@@ -200,7 +202,7 @@ import freestyle.rpc.protocol._
 
 @service trait GreeterService[F[_]] {
 
-  @rpc(Avro)
+  @rpc
   def sayHelloAvro(arg: foo.bar.HelloRequest): F[foo.bar.HelloResponse]
 
 }
