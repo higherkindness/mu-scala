@@ -55,8 +55,9 @@ object ProtoIdlGenerator extends IdlGenerator {
     val messageLines = messages.flatMap {
       case RpcMessage(name, params) => textBlock("message", name, messageFields(params)) :+ ""
     }
-    val serviceLines = services.flatMap {
-      case RpcService(name, requests) => textBlock("service", name, requestFields(requests))
+    val serviceLines: Seq[String] = services.flatMap {
+      case RpcService(_, name, requests) =>
+        textBlock("service", name, requestFields(requests))
     }
     val importLines =
       if (serviceLines.exists(_.contains(ProtoEmpty)))
@@ -79,7 +80,7 @@ object ProtoIdlGenerator extends IdlGenerator {
 
   private def requestFields(requests: Seq[RpcRequest]): Seq[String] =
     requests.map {
-      case RpcRequest(_, name, reqType, retType, streamingType) =>
+      case RpcRequest(name, reqType, retType, streamingType) =>
         s"  rpc ${name.capitalize} (${requestType(reqType, streamingType)}) returns (${responseType(retType, streamingType)});"
     }
 

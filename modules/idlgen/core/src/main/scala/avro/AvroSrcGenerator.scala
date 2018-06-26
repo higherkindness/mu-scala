@@ -110,7 +110,7 @@ object AvroSrcGenerator extends SrcGenerator {
     val messageLines = schemaLines.tail.map(line =>
       if (line.contains("case class")) s"@message $line" else line) :+ "" // note: can be "final case class"
 
-    val rpcAnnotation = s"  @rpc(${(serializationType +: options).mkString(", ")})"
+    val rpcAnnotation = s"  @rpc(${options.mkString(", ")})"
     val requestLines = protocol.getMessages.asScala.toSeq.flatMap {
       case (name, message) =>
         val comment = Seq(Option(message.getDoc).map(doc => s"  /** $doc */")).flatten
@@ -127,7 +127,8 @@ object AvroSrcGenerator extends SrcGenerator {
 
     val serviceLines =
       if (requestLines.isEmpty) Seq.empty
-      else Seq(s"@service trait ${protocol.getName}[F[_]] {", "") ++ requestLines :+ "}"
+      else
+        Seq(s"@service($serializationType) trait ${protocol.getName}[F[_]] {", "") ++ requestLines :+ "}"
 
     outputPath -> (packageLines ++ importLines ++ messageLines ++ serviceLines)
   }
