@@ -77,7 +77,7 @@ class IdlGenTests extends RpcBaseTestSuite {
         RpcRequest("lotsOfRepliesProto"  , `type`("HelloRequest"), `type`("HelloResponse"), Some(ResponseStreaming)),
         RpcRequest("lotsOfGreetingsProto", `type`("HelloRequest"), `type`("HelloResponse"), Some(RequestStreaming)),
         RpcRequest("bidiHelloProto"      , `type`("HelloRequest"), `type`("HelloResponse"), Some(BidirectionalStreaming)),
-        RpcRequest("bidiHelloFs2Proto"   , `type`("HelloRequest"), `type`("HelloResponse"), Some(BidirectionalStreaming)))),
+        RpcRequest("bidiHelloFs2Proto"   , `type`("HelloRequest"), `type`("HelloResponse"), Some(BidirectionalStreaming))))
     ))
 
   "Scala Parser" should {
