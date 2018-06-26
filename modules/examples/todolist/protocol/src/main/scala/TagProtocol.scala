@@ -29,26 +29,20 @@ trait TagProtocol {
 
   final case class TagResponse(tag: Option[TagMessage])
 
-  @service
+  @service(Avro)
   trait TagRpcService[F[_]] {
 
-    @rpc(Avro)
-    def reset(empty: Empty.type): F[MessageId]
+    @rpc def reset(empty: Empty.type): F[MessageId]
 
-    @rpc(Avro)
-    def insert(tagRequest: TagRequest): F[TagResponse]
+    @rpc def insert(tagRequest: TagRequest): F[TagResponse]
 
-    @rpc(Avro)
-    def retrieve(id: MessageId): F[TagResponse]
+    @rpc def retrieve(id: MessageId): F[TagResponse]
 
-    @rpc(Avro)
-    def list(empty: Empty.type): F[TagList]
+    @rpc def list(empty: Empty.type): F[TagList]
 
-    @rpc(Avro)
-    def update(tag: TagMessage): F[TagResponse]
+    @rpc def update(tag: TagMessage): F[TagResponse]
 
-    @rpc(Avro)
-    def destroy(id: MessageId): F[MessageId]
+    @rpc def destroy(id: MessageId): F[MessageId]
 
   }
 

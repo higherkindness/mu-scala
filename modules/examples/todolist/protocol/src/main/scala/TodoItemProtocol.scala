@@ -45,25 +45,25 @@ trait TodoItemProtocol {
 
   final case class TodoItemResponse(msg: Option[TodoItemMessage])
 
-  @service
+  @service(Avro)
   trait TodoItemRpcService[F[_]] {
 
-    @rpc(Avro)
+    @rpc
     def reset(empty: Empty.type): F[MessageId]
 
-    @rpc(Avro)
+    @rpc
     def insert(item: TodoItemRequest): F[TodoItemResponse]
 
-    @rpc(Avro)
+    @rpc
     def retrieve(id: MessageId): F[TodoItemResponse]
 
-    @rpc(Avro)
+    @rpc
     def list(empty: Empty.type): F[TodoItemList]
 
-    @rpc(Avro)
+    @rpc
     def update(item: TodoItemMessage): F[TodoItemResponse]
 
-    @rpc(Avro)
+    @rpc
     def destroy(id: MessageId): F[MessageId]
 
   }
