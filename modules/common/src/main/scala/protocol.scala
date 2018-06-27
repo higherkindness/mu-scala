@@ -33,7 +33,6 @@ sealed abstract class CompressionType extends Product with Serializable
 case object Identity                  extends CompressionType
 case object Gzip                      extends CompressionType
 
-class rpc(val compressionType: CompressionType = Identity) extends StaticAnnotation
 @deprecated("Streaming type is now determined from request and response types", "0.14.0")
 class stream[S <: StreamingType]       extends StaticAnnotation
 class message                          extends StaticAnnotation
