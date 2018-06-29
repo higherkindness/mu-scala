@@ -32,22 +32,16 @@ trait TodoListProtocol {
   @service(Avro)
   trait TodoListRpcService[F[_]] {
 
-    @rpc
     def reset(empty: Empty.type): F[MessageId]
 
-    @rpc
     def insert(item: TodoListRequest): F[TodoListResponse]
 
-    @rpc
     def retrieve(id: MessageId): F[TodoListResponse]
 
-    @rpc
     def list(empty: Empty.type): F[TodoListList]
 
-    @rpc
     def update(item: TodoListMessage): F[TodoListResponse]
 
-    @rpc
     def destroy(id: MessageId): F[MessageId]
 
   }

@@ -34,16 +34,16 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
     case class Response(bigDecimal: BigDecimal, result: String, check: Boolean)
 
     @service(Protobuf) trait ProtoRPCServiceDef[F[_]] {
-      @rpc def bigDecimalProto(bd: BigDecimal): F[BigDecimal]
-      @rpc def bigDecimalProtoWrapper(req: Request): F[Response]
+      def bigDecimalProto(bd: BigDecimal): F[BigDecimal]
+      def bigDecimalProtoWrapper(req: Request): F[Response]
     }
     @service(Avro) trait AvroRPCServiceDef[F[_]] {
-      @rpc def bigDecimalAvro(bd: BigDecimal): F[BigDecimal]
-      @rpc def bigDecimalAvroWrapper(req: Request): F[Response]
+      def bigDecimalAvro(bd: BigDecimal): F[BigDecimal]
+      def bigDecimalAvroWrapper(req: Request): F[Response]
     }
     @service(AvroWithSchema) trait AvroWithSchemaRPCServiceDef[F[_]] {
-      @rpc def bigDecimalAvroWithSchema(bd: BigDecimal): F[BigDecimal]
-      @rpc def bigDecimalAvroWithSchemaWrapper(req: Request): F[Response]
+      def bigDecimalAvroWithSchema(bd: BigDecimal): F[BigDecimal]
+      def bigDecimalAvroWithSchemaWrapper(req: Request): F[Response]
     }
 
     class RPCServiceDefImpl[F[_]: Applicative]

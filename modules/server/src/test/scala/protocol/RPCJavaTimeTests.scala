@@ -41,23 +41,23 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     @service(Protobuf)
     trait ProtoRPCDateServiceDef[F[_]] {
-      @rpc def localDateProto(date: LocalDate): F[LocalDate]
-      @rpc def localDateTimeProto(dateTime: LocalDateTime): F[LocalDateTime]
-      @rpc def dateProtoWrapper(req: Request): F[Response]
+      def localDateProto(date: LocalDate): F[LocalDate]
+      def localDateTimeProto(dateTime: LocalDateTime): F[LocalDateTime]
+      def dateProtoWrapper(req: Request): F[Response]
     }
 
     @service(Avro)
     trait AvroRPCDateServiceDef[F[_]] {
-      @rpc def localDateAvro(date: LocalDate): F[LocalDate]
-      @rpc def localDateTimeAvro(dateTime: LocalDateTime): F[LocalDateTime]
-      @rpc def dateAvroWrapper(req: Request): F[Response]
+      def localDateAvro(date: LocalDate): F[LocalDate]
+      def localDateTimeAvro(dateTime: LocalDateTime): F[LocalDateTime]
+      def dateAvroWrapper(req: Request): F[Response]
     }
 
     @service(AvroWithSchema)
     trait AvroWithSchemaRPCDateServiceDef[F[_]] {
-      @rpc def localDateAvroWithSchema(date: LocalDate): F[LocalDate]
-      @rpc def localDateTimeAvroWithSchema(dateTime: LocalDateTime): F[LocalDateTime]
-      @rpc def dateAvroWrapperWithSchema(req: Request): F[Response]
+      def localDateAvroWithSchema(date: LocalDate): F[LocalDate]
+      def localDateTimeAvroWithSchema(dateTime: LocalDateTime): F[LocalDateTime]
+      def dateAvroWrapperWithSchema(req: Request): F[Response]
     }
 
     class RPCDateServiceDefImpl[F[_]: Applicative]

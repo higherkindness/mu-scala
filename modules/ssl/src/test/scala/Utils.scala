@@ -35,12 +35,12 @@ object Utils extends CommonUtils {
 
     @service(Avro)
     trait AvroRPCService[F[_]] {
-      @rpc def unary(a: A): F[C]
+      def unary(a: A): F[C]
     }
 
     @service(AvroWithSchema)
     trait AvroWithSchemaRPCService[F[_]] {
-      @rpc def unaryWithSchema(a: A): F[C]
+      def unaryWithSchema(a: A): F[C]
 
     }
 

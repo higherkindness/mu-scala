@@ -28,25 +28,34 @@ object Utils extends CommonUtils {
   object service {
 
     @service(Protobuf) trait ProtoRPCService[F[_]] {
-      @rpc def serverStreamingWithError(e: E): Stream[F, C]
-      @rpc(Gzip) def serverStreamingCompressed(b: B): Stream[F, C]
-      @rpc def clientStreaming(oa: Stream[F, A]): F[D]
-      @rpc(Gzip) def clientStreamingCompressed(oa: Stream[F, A]): F[D]
-      @rpc def serverStreaming(b: B): Stream[F, C]
+      def serverStreamingWithError(e: E): Stream[F, C]
+      def clientStreaming(oa: Stream[F, A]): F[D]
+      def serverStreaming(b: B): Stream[F, C]
+    }
+
+    @service(Protobuf, Gzip) trait CompressedProtoRPCService[F[_]] {
+      def serverStreamingCompressed(b: B): Stream[F, C]
+      def clientStreamingCompressed(oa: Stream[F, A]): F[D]
     }
 
     @service(Avro) trait AvroRPCService[F[_]] {
-      @rpc def unary(a: A): F[C]
-      @rpc(Gzip) def unaryCompressed(a: A): F[C]
-      @rpc def biStreaming(oe: Stream[F, E]): Stream[F, E]
-      @rpc(Gzip) def biStreamingCompressed(oe: Stream[F, E]): Stream[F, E]
+      def unary(a: A): F[C]
+      def biStreaming(oe: Stream[F, E]): Stream[F, E]
+    }
+
+    @service(Avro, Gzip) trait CompressedAvroRPCService[F[_]] {
+      def unaryCompressed(a: A): F[C]
+      def biStreamingCompressed(oe: Stream[F, E]): Stream[F, E]
     }
 
     @service(AvroWithSchema) trait AvroWithSchemaRPCService[F[_]] {
-      @rpc def unaryWithSchema(a: A): F[C]
-      @rpc(Gzip) def unaryCompressedWithSchema(a: A): F[C]
-      @rpc def biStreamingWithSchema(oe: Stream[F, E]): Stream[F, E]
-      @rpc(Gzip) def biStreamingCompressedWithSchema(oe: Stream[F, E]): Stream[F, E]
+      def unaryWithSchema(a: A): F[C]
+      def biStreamingWithSchema(oe: Stream[F, E]): Stream[F, E]
+    }
+
+    @service(AvroWithSchema, Gzip) trait CompressedAvroWithSchemaRPCService[F[_]] {
+      def unaryCompressedWithSchema(a: A): F[C]
+      def biStreamingCompressedWithSchema(oe: Stream[F, E]): Stream[F, E]
     }
 
     // this companion objects are here to make sure @service supports
@@ -67,7 +76,10 @@ object Utils extends CommonUtils {
       class ServerRPCService[F[_]: Effect]
           extends ProtoRPCService[F]
           with AvroRPCService[F]
-          with AvroWithSchemaRPCService[F] {
+          with AvroWithSchemaRPCService[F]
+          with CompressedProtoRPCService[F]
+          with CompressedAvroRPCService[F]
+          with CompressedAvroWithSchemaRPCService[F] {
 
         def unary(a: A): F[C] = Effect[F].delay(c1)
 
@@ -141,7 +153,10 @@ object Utils extends CommonUtils {
     val grpcConfigs: List[GrpcConfig] = List(
       AddService(ProtoRPCService.bindService[ConcurrentMonad]),
       AddService(AvroRPCService.bindService[ConcurrentMonad]),
-      AddService(AvroWithSchemaRPCService.bindService[ConcurrentMonad])
+      AddService(AvroWithSchemaRPCService.bindService[ConcurrentMonad]),
+      AddService(CompressedProtoRPCService.bindService[ConcurrentMonad]),
+      AddService(CompressedAvroRPCService.bindService[ConcurrentMonad]),
+      AddService(CompressedAvroWithSchemaRPCService.bindService[ConcurrentMonad])
     )
 
     implicit val serverW: ServerW = createServerConf(grpcConfigs)
@@ -157,6 +172,16 @@ object Utils extends CommonUtils {
     implicit val freesAvroWithSchemaRPCServiceClient: AvroWithSchemaRPCService.Client[
       ConcurrentMonad] =
       AvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val freesCompressedProtoRPCServiceClient: CompressedProtoRPCService.Client[
+      ConcurrentMonad] =
+      CompressedProtoRPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val freesCompressedAvroRPCServiceClient: CompressedAvroRPCService.Client[
+      ConcurrentMonad] =
+      CompressedAvroRPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val freesCompressedAvroWithSchemaRPCServiceClient: CompressedAvroWithSchemaRPCService.Client[
+      ConcurrentMonad] =
+      CompressedAvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
+
   }
 
   object implicits extends FreesRuntime

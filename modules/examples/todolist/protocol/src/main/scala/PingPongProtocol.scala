@@ -37,7 +37,6 @@ trait PingPongProtocol {
      * @param empty
      * @return Pong response with current timestamp.
      */
-    @rpc
     def ping(empty: Empty.type): F[Pong]
 
   }

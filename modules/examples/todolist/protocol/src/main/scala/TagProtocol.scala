@@ -32,17 +32,17 @@ trait TagProtocol {
   @service(Avro)
   trait TagRpcService[F[_]] {
 
-    @rpc def reset(empty: Empty.type): F[MessageId]
+    def reset(empty: Empty.type): F[MessageId]
 
-    @rpc def insert(tagRequest: TagRequest): F[TagResponse]
+    def insert(tagRequest: TagRequest): F[TagResponse]
 
-    @rpc def retrieve(id: MessageId): F[TagResponse]
+    def retrieve(id: MessageId): F[TagResponse]
 
-    @rpc def list(empty: Empty.type): F[TagList]
+    def list(empty: Empty.type): F[TagList]
 
-    @rpc def update(tag: TagMessage): F[TagResponse]
+    def update(tag: TagMessage): F[TagResponse]
 
-    @rpc def destroy(id: MessageId): F[MessageId]
+    def destroy(id: MessageId): F[MessageId]
 
   }
 
