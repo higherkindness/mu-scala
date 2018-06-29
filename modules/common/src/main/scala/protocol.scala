@@ -33,8 +33,6 @@ sealed abstract class CompressionType extends Product with Serializable
 case object Identity                  extends CompressionType
 case object Gzip                      extends CompressionType
 
-@deprecated("Streaming type is now determined from request and response types", "0.14.0")
-class stream[S <: StreamingType]       extends StaticAnnotation
 class message                          extends StaticAnnotation
 class option(name: String, value: Any) extends StaticAnnotation
 class outputPackage(value: String)     extends StaticAnnotation
