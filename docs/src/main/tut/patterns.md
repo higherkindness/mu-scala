@@ -34,28 +34,24 @@ object service {
      * @param request Client request.
      * @return Server response.
      */
-    @rpc
     def sayHello(request: HelloRequest): F[HelloResponse]
 
     /**
      * @param request Single client request.
      * @return Stream of server responses.
      */
-    @rpc
     def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
 
     /**
      * @param request Stream of client requests.
      * @return Single server response.
      */
-    @rpc
     def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse]
 
     /**
      * @param request Stream of client requests.
      * @return Stream of server responses.
      */
-    @rpc
     def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
 
   }

@@ -89,7 +89,7 @@ object IdlGenPlugin extends AutoPlugin {
 
     lazy val genOptions: SettingKey[Seq[String]] =
       settingKey[Seq[String]](
-        "Options for the generator, such as additional @rpc annotation parameters in srcGen.")
+        "Options for the generator, such as additional @service annotation parameters in srcGen.")
   }
 
   import freestyle.rpc.idlgen.IdlGenPlugin.autoImport._

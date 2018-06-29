@@ -37,7 +37,6 @@ object service {
 
   @service(Protobuf)
   trait Greeter[F[_]] {
-    @rpc
     def sayHello(request: HelloRequest): F[HelloResponse]
   }
 }

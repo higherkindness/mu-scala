@@ -119,7 +119,7 @@ object protocol {
      * @param request Say Hello Request.
      * @return HelloReply.
      */
-    @rpc def sayHello(request: HelloRequest): F[HelloReply]
+    def sayHello(request: HelloRequest): F[HelloReply]
 
   }
 }
@@ -163,13 +163,13 @@ object protocol {
      * @param request Say Hello Request.
      * @return HelloReply.
      */
-    @rpc def sayHello(request: HelloRequest): F[HelloReply]
+    def sayHello(request: HelloRequest): F[HelloReply]
 
-    @rpc def emptyResponse(request: HelloRequest): F[Empty.type]
+    def emptyResponse(request: HelloRequest): F[Empty.type]
 
-    @rpc def emptyRequest(request: Empty.type): F[HelloReply]
+    def emptyRequest(request: Empty.type): F[HelloReply]
 
-    @rpc def emptyRequestRespose(request: Empty.type): F[Empty.type]
+    def emptyRequestRespose(request: Empty.type): F[Empty.type]
   }
 }
 ```
@@ -177,7 +177,6 @@ object protocol {
 We are also using some additional annotations:
 
 * `@service(Protobuf)`: tags the trait as an [RPC] service, in order to derive server and client code (macro expansion). It receives as argument the type of serialization that will be used to encode/decode data, `Protocol Buffers` in the example. `Avro` is also supported as another type of serialization.
-* `@rpc`: indicates that the method is an RPC service.
 
 We'll see more details about these and other annotations in the following sections.
 
@@ -203,7 +202,7 @@ object service {
      * @param empty Client request.
      * @return empty server response.
      */
-    @rpc(Gzip) def emptyCompressed(empty: Empty.type): F[Empty.type]
+    def emptyCompressed(empty: Empty.type): F[Empty.type]
 
   }
 
@@ -283,7 +282,6 @@ object service {
      * @param request Client request.
      * @return Server response.
      */
-    @rpc
     def sayHello(request: HelloRequest): F[HelloResponse]
 
   }
@@ -291,7 +289,7 @@ object service {
 }
 ```
 
-Here `sayHello` is our unary RPC, where only the `@rpc` annotation is needed.
+Here `sayHello` is our unary RPC.
 
 In the `Streaming` section, we are going to see all the streaming options.
 

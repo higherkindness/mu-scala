@@ -47,23 +47,18 @@ object service {
   @service(Protobuf)
   trait ProtoGreeter[F[_]] {
 
-    @rpc
     def sayHello(request: HelloRequest): F[HelloResponse]
 
-    @rpc
     def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
 
-    @rpc
     def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse]
 
-    @rpc
     def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
     
   }
   
   @service(Avro)
   trait AvroGreeter[F[_]] {
-    @rpc
     def sayHelloAvro(request: HelloRequest): F[HelloResponse]
   }
 }
@@ -202,7 +197,6 @@ import freestyle.rpc.protocol._
 
 @service trait GreeterService[F[_]] {
 
-  @rpc
   def sayHelloAvro(arg: foo.bar.HelloRequest): F[foo.bar.HelloResponse]
 
 }
