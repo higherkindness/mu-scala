@@ -58,10 +58,8 @@ object ScalaParser {
     } yield RpcMessage(defn.name.toString, params)
 
     def getRequestsFromService(defn: Tree): List[RpcRequest] = {
-      val rpcMethods = ast._AnnotatedDefDef("rpc")
-
       for {
-        x            <- defn.collect({ case rpcMethods(x) => x })
+        x            <- defn.collect({ case ast._DefDef(x) if x.rhs.isEmpty => x })
         name         <- List(x.name.toString)
         requestType  <- firstParamForRpc.getOption(x).toList
         responseType <- returnTypeAsString.getOption(x).toList
