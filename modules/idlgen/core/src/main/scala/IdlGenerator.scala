@@ -61,7 +61,6 @@ trait IdlGenerator extends Generator {
 
   private def filterServices(services: Seq[RpcService]): Seq[RpcService] =
     services
-      .map(service =>
-        service.copy(requests = service.requests.filter(_.serializationType == serializationType)))
+      .filter(_.serializationType == serializationType)
       .filter(_.requests.nonEmpty)
 }

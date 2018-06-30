@@ -56,27 +56,29 @@ class IdlGenTests extends RpcBaseTestSuite {
       RpcMessage("HelloRequest",  Seq(valDef("arg1", "String"), valDefHK("arg2", "Option", "String"), valDefHK("arg3", "List", "String"))),
       RpcMessage("HelloResponse", Seq(valDef("arg1", "String"), valDefHK("arg2", "Option", "String"), valDefHK("arg3", "List", "String")))
     ),
-    Seq(RpcService("Greeter", Seq(
-      RpcRequest(Avro          , "sayHelloAvro"        , `type`("HelloRequest"), `type`("HelloResponse"), None),
-      RpcRequest(AvroWithSchema, "sayHelloAvro"        , `type`("HelloRequest"), `type`("HelloResponse"), None),
-      RpcRequest(Protobuf      , "sayHelloProto"       , `type`("HelloRequest"), `type`("HelloResponse"), None),
-      RpcRequest(Avro          , "sayNothingAvro"      , `type`("Empty.type")  , `type`("Empty.type")   , None),
-      RpcRequest(AvroWithSchema, "sayNothingAvro"      , `type`("Empty.type")  , `type`("Empty.type")   , None),
-      RpcRequest(Protobuf      , "sayNothingProto"     , `type`("Empty.type")  , `type`("Empty.type")   , None),
-      RpcRequest(Avro          , "lotsOfRepliesAvro"   , `type`("HelloRequest"), `type`("HelloResponse"), Some(ResponseStreaming)),
-      RpcRequest(AvroWithSchema, "lotsOfRepliesAvro"   , `type`("HelloRequest"), `type`("HelloResponse"), Some(ResponseStreaming)),
-      RpcRequest(Protobuf      , "lotsOfRepliesProto"  , `type`("HelloRequest"), `type`("HelloResponse"), Some(ResponseStreaming)),
-      RpcRequest(Avro          , "lotsOfGreetingsAvro" , `type`("HelloRequest"), `type`("HelloResponse"), Some(RequestStreaming)),
-      RpcRequest(AvroWithSchema, "lotsOfGreetingsAvro" , `type`("HelloRequest"), `type`("HelloResponse"), Some(RequestStreaming)),
-      RpcRequest(Protobuf      , "lotsOfGreetingsProto", `type`("HelloRequest"), `type`("HelloResponse"), Some(RequestStreaming)),
-      RpcRequest(Avro          , "bidiHelloAvro"       , `type`("HelloRequest"), `type`("HelloResponse"), Some(BidirectionalStreaming)),
-      RpcRequest(AvroWithSchema, "bidiHelloAvro"       , `type`("HelloRequest"), `type`("HelloResponse"), Some(BidirectionalStreaming)),
-      RpcRequest(Protobuf      , "bidiHelloProto"      , `type`("HelloRequest"), `type`("HelloResponse"), Some(BidirectionalStreaming)),
-      RpcRequest(Avro          , "bidiHelloFs2Avro"    , `type`("HelloRequest"), `type`("HelloResponse"), Some(BidirectionalStreaming)),
-      RpcRequest(AvroWithSchema, "bidiHelloFs2Avro"    , `type`("HelloRequest"), `type`("HelloResponse"), Some(BidirectionalStreaming)),
-      RpcRequest(Protobuf      , "bidiHelloFs2Proto"   , `type`("HelloRequest"), `type`("HelloResponse"), Some(BidirectionalStreaming))
-    )))
-  )
+    Seq(
+      RpcService(Avro, "AvroGreeter", Seq(
+        RpcRequest("sayHelloAvro"        , `type`("HelloRequest"), `type`("HelloResponse"), None),
+        RpcRequest("sayNothingAvro"      , `type`("Empty.type")  , `type`("Empty.type")   , None),
+        RpcRequest("lotsOfRepliesAvro"   , `type`("HelloRequest"), `type`("HelloResponse"), Some(ResponseStreaming)),
+        RpcRequest("lotsOfGreetingsAvro" , `type`("HelloRequest"), `type`("HelloResponse"), Some(RequestStreaming)),
+        RpcRequest("bidiHelloAvro"       , `type`("HelloRequest"), `type`("HelloResponse"), Some(BidirectionalStreaming)),
+        RpcRequest("bidiHelloFs2Avro"    , `type`("HelloRequest"), `type`("HelloResponse"), Some(BidirectionalStreaming)))),
+      RpcService(AvroWithSchema, "AvroWithSchemaGreeter", Seq(
+        RpcRequest("sayHelloAvro"        , `type`("HelloRequest"), `type`("HelloResponse"), None),
+        RpcRequest("sayNothingAvro"      , `type`("Empty.type")  , `type`("Empty.type")   , None),
+        RpcRequest("lotsOfRepliesAvro"   , `type`("HelloRequest"), `type`("HelloResponse"), Some(ResponseStreaming)),
+        RpcRequest("lotsOfGreetingsAvro" , `type`("HelloRequest"), `type`("HelloResponse"), Some(RequestStreaming)),
+        RpcRequest("bidiHelloAvro"       , `type`("HelloRequest"), `type`("HelloResponse"), Some(BidirectionalStreaming)),
+        RpcRequest("bidiHelloFs2Avro"    , `type`("HelloRequest"), `type`("HelloResponse"), Some(BidirectionalStreaming)))),
+      RpcService(Protobuf, "ProtoGreeter", Seq(
+        RpcRequest("sayHelloProto"       , `type`("HelloRequest"), `type`("HelloResponse"), None),
+        RpcRequest("sayNothingProto"     , `type`("Empty.type")  , `type`("Empty.type")   , None),
+        RpcRequest("lotsOfRepliesProto"  , `type`("HelloRequest"), `type`("HelloResponse"), Some(ResponseStreaming)),
+        RpcRequest("lotsOfGreetingsProto", `type`("HelloRequest"), `type`("HelloResponse"), Some(RequestStreaming)),
+        RpcRequest("bidiHelloProto"      , `type`("HelloRequest"), `type`("HelloResponse"), Some(BidirectionalStreaming)),
+        RpcRequest("bidiHelloFs2Proto"   , `type`("HelloRequest"), `type`("HelloResponse"), Some(BidirectionalStreaming))))
+    ))
 
   "Scala Parser" should {
     "generate correct RPC definitions from Scala source file" in {

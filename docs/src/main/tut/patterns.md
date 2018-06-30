@@ -27,35 +27,31 @@ object service {
   @message
   case class HelloResponse(reply: String)
 
-  @service
+  @service(Protobuf)
   trait Greeter[F[_]] {
 
     /**
      * @param request Client request.
      * @return Server response.
      */
-    @rpc(Protobuf)
     def sayHello(request: HelloRequest): F[HelloResponse]
 
     /**
      * @param request Single client request.
      * @return Stream of server responses.
      */
-    @rpc(Protobuf)
     def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
 
     /**
      * @param request Stream of client requests.
      * @return Single server response.
      */
-    @rpc(Protobuf)
     def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse]
 
     /**
      * @param request Stream of client requests.
      * @return Stream of server responses.
      */
-    @rpc(Protobuf)
     def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
 
   }

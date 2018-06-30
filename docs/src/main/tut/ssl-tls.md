@@ -56,9 +56,8 @@ object service {
   @message
   case class HelloResponse(reply: String)
 
-  @service
+  @service(Protobuf)
   trait Greeter[F[_]] {
-    @rpc(Protobuf)
     def sayHello(request: HelloRequest): F[HelloResponse]
   }
 }

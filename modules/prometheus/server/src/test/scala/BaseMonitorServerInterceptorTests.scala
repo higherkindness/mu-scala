@@ -66,7 +66,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
 
         s.labelValues.asScala.toList should contain theSameElementsAs Vector(
           "UNARY",
-          "RPCService",
+          "AvroRPCService",
           "unary",
           "OK")
       }
@@ -104,7 +104,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
 
         s.labelValues.asScala.toList should contain theSameElementsAs Vector(
           "CLIENT_STREAMING",
-          "RPCService",
+          "ProtoRPCService",
           "clientStreaming",
           "OK")
       }
@@ -138,7 +138,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
 
         s.labelValues.asScala.toList should contain theSameElementsAs Vector(
           "SERVER_STREAMING",
-          "RPCService",
+          "ProtoRPCService",
           "serverStreaming",
           "OK"
         )
@@ -152,7 +152,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
         s.value should be <= response.size.doubleValue()
         s.labelValues.asScala.toList should contain theSameElementsAs Vector(
           "SERVER_STREAMING",
-          "RPCService",
+          "ProtoRPCService",
           "serverStreaming"
         )
       }
@@ -186,7 +186,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
         s.value should be <= 1d
         s.labelValues.asScala.toList should contain theSameElementsAs Vector(
           "BIDI_STREAMING",
-          "RPCService",
+          "AvroRPCService",
           "biStreaming",
           "OK")
       }

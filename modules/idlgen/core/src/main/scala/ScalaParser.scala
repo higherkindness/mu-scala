@@ -58,30 +58,41 @@ object ScalaParser {
     } yield RpcMessage(defn.name.toString, params)
 
     def getRequestsFromService(defn: Tree): List[RpcRequest] = {
-      val rpcMethods = ast._AnnotatedDefDef("rpc")
-
       for {
-        x                 <- defn.collect({ case rpcMethods(x) => x })
-        serializationType <- idlType.getAll(x).headOption.toList
-        val name = x.name.toString
+        x            <- defn.collect({ case ast._DefDef(x) if x.rhs.isEmpty => x })
+        name         <- List(x.name.toString)
         requestType  <- firstParamForRpc.getOption(x).toList
         responseType <- returnTypeAsString.getOption(x).toList
-        val streamingType = (requestStreaming.getOption(x), responseStreaming.getOption(x)) match {
+        streamingType = (requestStreaming.getOption(x), responseStreaming.getOption(x)) match {
           case (None, None)       => None
           case (Some(_), None)    => Some(RequestStreaming)
           case (None, Some(_))    => Some(ResponseStreaming)
           case (Some(_), Some(_)) => Some(BidirectionalStreaming)
         }
-      } yield RpcRequest(serializationType, name, requestType, responseType, streamingType)
+      } yield RpcRequest(name, requestType, responseType, streamingType)
 
     }
 
     val services: Seq[RpcService] =
       input.collect {
-        case ast._ClassDef(mod) if hasAnnotation("service")(mod) =>
-          RpcService(mod.name.toString, getRequestsFromService(mod))
+        case ServiceClass(clazz, serializationType) =>
+          RpcService(serializationType, clazz.name.toString, getRequestsFromService(clazz))
       }
 
     RpcDefinitions(outputName, outputPackage, options, messages, services)
+  }
+
+  object ServiceClass {
+    def unapply(tree: Tree): Option[(ClassDef, SerializationType)] =
+      for {
+        clazz             <- ast._ClassDef.getOption(tree)
+        serviceAnnotation <- annotationsNamed("service").getAll(clazz).headOption
+        serialization     <- serviceAnnotation.firstArg
+      } yield
+        (clazz, serialization.toString match {
+          case "Protobuf"       => Protobuf
+          case "Avro"           => Avro
+          case "AvroWithSchema" => AvroWithSchema
+        })
   }
 }

@@ -23,7 +23,7 @@ message HelloResponse {
   repeated string arg3 = 3;
 }
 
-service Greeter {
+service ProtoGreeter {
   rpc SayHelloProto (HelloRequest) returns (HelloResponse);
   rpc SayNothingProto (google.protobuf.Empty) returns (google.protobuf.Empty);
   rpc LotsOfRepliesProto (HelloRequest) returns (stream HelloResponse);

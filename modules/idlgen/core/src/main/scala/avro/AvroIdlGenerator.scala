@@ -66,7 +66,7 @@ trait AvroIdlGenerator extends IdlGenerator {
       .flatMap(_.requests)
       .filter(_.streamingType.isEmpty)
       .map {
-        case RpcRequest(_, name, reqType, respType, _) =>
+        case RpcRequest(name, reqType, respType, _) =>
           name -> AvroMessage(
             Seq(AvroField(DefaultRequestParamName, mappedType(reqType)))
               .filterNot(_.`type` == AvroEmpty),

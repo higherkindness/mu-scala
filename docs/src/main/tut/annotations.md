@@ -10,8 +10,7 @@ Provided below is a summary of all the current annotations that [frees-rpc] prov
 
 Annotation | Scope | Arguments | Description
 --- | --- | --- | ---
-@service | `Trait` | - | Tags the trait as an [RPC] service, in order to derive server and client code (macro expansion).
-@rpc | `Method` | (`SerializationType`, `Compression`) | Indicates that the method is an RPC request. As `SerializationType` parameter value, `Protobuf` and `Avro` are the current supported serialization methods. As `Compression` parameter value, only `Gzip` is supported.
+@service | `Trait` | (`SerializationType`, `Compression`) | Tags the trait as an [RPC] service, in order to derive server and client code (macro expansion). As `SerializationType` parameter value, `Protobuf` and `Avro` are the current supported serialization methods. As `Compression` parameter value, only `Gzip` is supported.
 @message | `Case Class` | - | Tags the case class as an RPC message.
 @option | `Object` | `(name: String, value: Any)` | Defines the equivalent headers in `.proto` files.
 @outputPackage | `Object` | `(value: String)` | Defines the `package` declaration in `.proto` files, and the `namespace` tag in `.avpr` files.

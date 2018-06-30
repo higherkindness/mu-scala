@@ -82,11 +82,13 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         )
       )
 
-      val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
-        RPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+      val avroRpcService: AvroRPCService.Client[ConcurrentMonad] =
+        AvroRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+      val avroWithSchemaRpcService: AvroWithSchemaRPCService.Client[ConcurrentMonad] =
+        AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
 
-      freesRPCServiceClient.unary(a1).unsafeRunSync() shouldBe c1
-      freesRPCServiceClient.unaryWithSchema(a1).unsafeRunSync() shouldBe c1
+      avroRpcService.unary(a1).unsafeRunSync() shouldBe c1
+      avroWithSchemaRpcService.unaryWithSchema(a1).unsafeRunSync() shouldBe c1
 
     }
 
@@ -101,14 +103,15 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         )
       )
 
-      val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
-        RPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+      val avroRpcService: AvroRPCService.Client[ConcurrentMonad] =
+        AvroRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+      val avroWithSchemaRpcService: AvroWithSchemaRPCService.Client[ConcurrentMonad] =
+        AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+
+      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(avroRpcService.unary(a1).unsafeRunSync())
 
       a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
-        freesRPCServiceClient.unary(a1).unsafeRunSync())
-
-      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
-        freesRPCServiceClient.unaryWithSchema(a1).unsafeRunSync())
+        avroWithSchemaRpcService.unaryWithSchema(a1).unsafeRunSync())
 
     }
 
@@ -123,14 +126,15 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         )
       )
 
-      val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
-        RPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+      val avroRpcService: AvroRPCService.Client[ConcurrentMonad] =
+        AvroRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+      val avroWithSchemaRpcService: AvroWithSchemaRPCService.Client[ConcurrentMonad] =
+        AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+
+      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(avroRpcService.unary(a1).unsafeRunSync())
 
       a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
-        freesRPCServiceClient.unary(a1).unsafeRunSync())
-
-      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
-        freesRPCServiceClient.unaryWithSchema(a1).unsafeRunSync())
+        avroWithSchemaRpcService.unaryWithSchema(a1).unsafeRunSync())
 
     }
 
