@@ -19,8 +19,7 @@ package server
 
 import java.net.InetSocketAddress
 
-import cats.Id
-import cats.data.Kleisli
+import cats.effect.IO
 import freestyle.rpc.common.SC
 import freestyle.rpc.server.netty.NettyServerConfigBuilder
 import io.grpc.Server
@@ -30,18 +29,6 @@ import scala.collection.JavaConverters._
 class ServerConfigTests extends RpcServerTestSuite {
 
   import implicits._
-
-  "GrpcConfigInterpreter" should {
-
-    "work as expected" in {
-
-      val kInterpreter =
-        new GrpcKInterpreter[Id](serverMock).apply(Kleisli[Id, Server, Int](s => s.getPort))
-
-      kInterpreter shouldBe SC.port
-    }
-
-  }
 
   "SServerBuilder" should {
 
@@ -102,22 +89,22 @@ class ServerConfigTests extends RpcServerTestSuite {
     }
   }
 
-  "ServerW" should {
+  "GrpcServer" should {
 
     "work as expected for the '.netty(ChannelFor)' builder" in {
 
       val configList: List[GrpcConfig] = List(AddService(sd1))
-      val server: Server               = ServerW.netty(ChannelForPort(SC.port), configList).server
+      val server: IO[GrpcServer[IO]]   = GrpcServer.netty[IO](ChannelForPort(SC.port), configList)
 
-      server.getServices.asScala.toList shouldBe List(sd1)
+      server.flatMap(_.getServices).unsafeRunSync shouldBe List(sd1)
     }
 
     "work as expected for the '.netty(Int)' builder" in {
 
       val configList: List[GrpcConfig] = List(AddService(sd1))
-      val server: Server               = ServerW.netty(SC.port, configList).server
+      val server: IO[GrpcServer[IO]]   = GrpcServer.netty[IO](SC.port, configList)
 
-      server.getServices.asScala.toList shouldBe List(sd1)
+      server.flatMap(_.getServices).unsafeRunSync shouldBe List(sd1)
     }
   }
 

@@ -89,7 +89,7 @@ import cats.effect.IO
 import cats.effect.Effect
 import freestyle.rpc.protocol._
 import freestyle.rpc.server.netty.SetSslContext
-import freestyle.rpc.server.{AddService, GrpcConfig, ServerW}
+import freestyle.rpc.server.{AddService, GrpcConfig, GrpcServer}
 import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.GrpcSslContexts
 import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}
@@ -127,7 +127,7 @@ trait Runtime extends CommonRuntime {
     // Important. We have to create the server with Netty. OkHttp is not supported for the Ssl 
     // encryption in frees-rpc at this moment.
 
-    implicit val serverW: ServerW = ServerW.netty(8080, grpcConfigs)
+    val server: IO[GrpcServer[IO]] = GrpcServer.netty[IO](8080, grpcConfigs)
 
 }
 

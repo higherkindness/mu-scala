@@ -45,10 +45,13 @@ object netty {
   final case class PermitKeepAliveTime(keepAliveTime: Long, timeUnit: TimeUnit) extends GrpcConfig
   final case class PermitKeepAliveWithoutCalls(permit: Boolean)                 extends GrpcConfig
 
-  final case class NettyServerConfigBuilder(initConfig: ChannelFor, configList: List[GrpcConfig]) {
+  // ?
+  private[server] final case class NettyServerConfigBuilder(
+      initConfig: ChannelFor,
+      configList: List[GrpcConfig]) {
 
     def build: Server =
-      buildNettyConfig(
+      GrpcServer.buildNettyConfig(
         initConfig match {
           case ChannelForPort(port)        => NettyServerBuilder.forPort(port)
           case ChannelForSocketAddress(sa) => NettyServerBuilder.forAddress(sa)

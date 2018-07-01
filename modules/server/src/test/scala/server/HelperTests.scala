@@ -17,24 +17,23 @@
 package freestyle.rpc
 package server
 
-import cats.Monad
 import freestyle.rpc.common.ConcurrentMonad
-import io.grpc.Server
 
-class HelperTests extends RpcServerTestSuite with Helpers {
+class HelperTests extends RpcServerTestSuite {
 
   import implicits._
 
-  "server helper" should {
+  "GrpcServer.server helper" should {
 
     "work as expected" in {
 
       val grpcServer: GrpcServer[ConcurrentMonad] = grpcServerHandlerTests[ConcurrentMonad]
 
-      server[ConcurrentMonad](Monad[ConcurrentMonad], grpcServer)
+      GrpcServer
+        .server[ConcurrentMonad](grpcServer)
         .unsafeRunSync() shouldBe ((): Unit)
 
-      (serverMock.start _: () => Server).verify()
+      (serverMock.start _: () => io.grpc.Server).verify()
     }
 
   }

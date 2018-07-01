@@ -20,7 +20,6 @@ package fs2
 import freestyle.rpc.common._
 import freestyle.rpc.server._
 import _root_.fs2.Stream
-import freestyle.rpc.server.implicits._
 import org.scalatest._
 
 class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
@@ -36,8 +35,6 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     serverStop[ConcurrentMonad].unsafeRunSync()
 
   "frees-rpc server" should {
-
-    import freestyle.rpc.server.implicits._
 
     "allow to startup a server and check if it's alive" in {
 

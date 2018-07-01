@@ -18,13 +18,17 @@ package freestyle.rpc
 package server
 
 import cats.~>
-import io.grpc._
-
+import cats.effect.{Effect, IO, Sync}
+import cats.syntax.apply._
+import cats.syntax.functor._
+import freestyle.rpc.server.netty.NettyServerConfigBuilder
+import io.grpc.{Server, ServerBuilder, ServerServiceDefinition}
+import io.grpc.netty.NettyServerBuilder
 import scala.concurrent.duration.TimeUnit
 
 trait GrpcServer[F[_]] { self =>
 
-  def start(): F[Server]
+  def start(): F[Unit]
 
   def getPort: F[Int]
 
@@ -34,9 +38,9 @@ trait GrpcServer[F[_]] { self =>
 
   def getMutableServices: F[List[ServerServiceDefinition]]
 
-  def shutdown(): F[Server]
+  def shutdown(): F[Unit]
 
-  def shutdownNow(): F[Server]
+  def shutdownNow(): F[Unit]
 
   def isShutdown: F[Boolean]
 
@@ -47,7 +51,7 @@ trait GrpcServer[F[_]] { self =>
   def awaitTermination(): F[Unit]
 
   def mapK[G[_]](fk: F ~> G): GrpcServer[G] = new GrpcServer[G] {
-    def start(): G[Server] = fk(self.start)
+    def start(): G[Unit] = fk(self.start)
 
     def getPort: G[Int] = fk(self.getPort)
 
@@ -57,9 +61,9 @@ trait GrpcServer[F[_]] { self =>
 
     def getMutableServices: G[List[ServerServiceDefinition]] = fk(self.getMutableServices)
 
-    def shutdown(): G[Server] = fk(self.shutdown)
+    def shutdown(): G[Unit] = fk(self.shutdown)
 
-    def shutdownNow(): G[Server] = fk(self.shutdownNow)
+    def shutdownNow(): G[Unit] = fk(self.shutdownNow)
 
     def isShutdown: G[Boolean] = fk(self.isShutdown)
 
@@ -73,5 +77,51 @@ trait GrpcServer[F[_]] { self =>
 }
 
 object GrpcServer {
-  def apply[F[_]](implicit F: GrpcServer[F]): GrpcServer[F] = F
+
+  // def server[F[_]](S: GrpcServer[F])(implicit B: Bracket[F, Throwable]): F[Unit] =
+  //   B.bracket(S.start)(_ => S.awaitTermination)(_ => S.shutdown)
+  def server[F[_]](S: GrpcServer[F])(implicit F: Effect[F]): F[Unit] = {
+    val shutdownEventually: F[Unit] = F.delay {
+      Runtime.getRuntime.addShutdownHook(new Thread() {
+        override def run(): Unit = F.runAsync(S.shutdown)(IO.fromEither).unsafeRunSync
+      })
+    }
+
+    S.start() *> shutdownEventually *> S.awaitTermination()
+  }
+
+  def default[F[_]](port: Int, configList: List[GrpcConfig])(
+      implicit F: Sync[F]): F[GrpcServer[F]] =
+    F.delay(SServerBuilder(port, configList).build).map(fromServer[F])
+
+  def netty[F[_]](port: Int, configList: List[GrpcConfig])(implicit F: Sync[F]): F[GrpcServer[F]] =
+    netty(ChannelForPort(port), configList)
+
+  def netty[F[_]](channelFor: ChannelFor, configList: List[GrpcConfig])(
+      implicit F: Sync[F]): F[GrpcServer[F]] =
+    F.delay(NettyServerConfigBuilder(channelFor, configList).build).map(fromServer[F])
+
+  def fromServer[F[_]: Sync](server: Server): GrpcServer[F] =
+    handlers.GrpcServerHandler[F].mapK(λ[GrpcServerOps[F, ?] ~> F](_.run(server)))
+
+  private[server] def buildGrpcConfig[SB <: ServerBuilder[SB]](
+      acc: SB,
+      configList: List[GrpcConfig]): Server = {
+    configList
+      .foldLeft(acc) { (acc, cfg) =>
+        SBuilder(acc)(cfg)
+      }
+      .build()
+  }
+
+  private[server] def buildNettyConfig(
+      acc: NettyServerBuilder,
+      configList: List[GrpcConfig]): Server = {
+    configList
+      .foldLeft(acc) { (acc, cfg) =>
+        (SBuilder(acc) orElse NettySBuilder(acc))(cfg)
+      }
+      .build()
+  }
+
 }

@@ -21,9 +21,11 @@ import monix.eval.Task
 
 trait TaskImplicits {
 
-  implicit class TaskOps[A](task: Task[A]) {
+  implicit def taskToOps[A](task: Task[A]): TaskOps[A] = new TaskOps(task)
+}
 
-    def to[F[_]](implicit F: LiftTask[F]): F[A] = F.liftTask(task)
+private[internal] class TaskOps[A](private val task: Task[A]) extends AnyVal {
 
-  }
+  def to[F[_]](implicit F: LiftTask[F]): F[A] = F.liftTask(task)
+
 }
