@@ -91,7 +91,8 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
         val handledSamples =
           findRecordedMetricOrThrow(clientMetricRpcCompleted).samples.asScala.toList
         handledSamples.size shouldBe 1
-        handledSamples.headOption should beASampleMetric(List("UNARY", "RPCService", "unary", "OK"))
+        handledSamples.headOption should beASampleMetric(
+          List("AvroRPCService", "OK", "UNARY", "unary"))
       }
 
       val clientRuntime: InterceptorsRuntime = defaultClientRuntime
@@ -146,7 +147,7 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
             findRecordedMetricOrThrow(clientMetricRpcCompleted).samples.asScala.toList
           handledSamples.size shouldBe 1
           handledSamples.headOption should beASampleMetric(
-            labels = List("CLIENT_STREAMING", "RPCService", "clientStreaming", "OK"),
+            labels = List("CLIENT_STREAMING", "ProtoRPCService", "clientStreaming", "OK"),
             maxValue = 2d)
         }
 
@@ -183,7 +184,7 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
           findRecordedMetricOrThrow(clientMetricRpcCompleted).samples.asScala.toList
         handledSamples.size shouldBe 1
         handledSamples.headOption should beASampleMetric(
-          List("SERVER_STREAMING", "RPCService", "serverStreaming", "OK"))
+          List("SERVER_STREAMING", "ProtoRPCService", "serverStreaming", "OK"))
       }
 
       val clientRuntime: InterceptorsRuntime = defaultClientRuntime
@@ -221,7 +222,7 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
         handledSamples.headOption should be
 
         handledSamples.headOption should beASampleMetric(
-          List("BIDI_STREAMING", "RPCService", "biStreaming", "OK"))
+          List("AvroRPCService", "BIDI_STREAMING", "OK", "biStreaming"))
       }
 
       val clientRuntime: InterceptorsRuntime = defaultClientRuntime

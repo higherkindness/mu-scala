@@ -101,29 +101,73 @@ object serviceImpl {
       val F: TypeName  = F_.name
 
       private val defs: List[Tree] = serviceDef.impl.body
-      private val rpcDefs: List[DefDef] = defs.collect {
-        case d: DefDef if findAnnotation(d.mods, "rpc").isDefined => d
-      }
+
+      private val (rpcDefs, nonRpcDefs) = defs.collect {
+        case d: DefDef => d
+      } partition (_.rhs.isEmpty)
+
+      private def compressionType(anns: List[Tree]): Tree =
+        annotationParam(anns, 1, "compressionType", Some("Identity")) match {
+          case "Identity" => q"None"
+          case "Gzip"     => q"""Some("gzip")"""
+        }
+
       private val rpcRequests: List[RpcRequest] = for {
         d      <- rpcDefs
         params <- d.vparamss
         _ = require(params.length == 1, s"RPC call ${d.name} has more than one request parameter")
-        p    <- params.headOption.toList
-        anns <- findAnnotation(d.mods, "rpc").toList.map(_.children.tail)
-      } yield RpcRequest(d.name, p.tpt, d.tpt, anns)
+        p <- params.headOption.toList
+      } yield RpcRequest(d.name, p.tpt, d.tpt, compressionType(serviceDef.mods.annotations))
 
-      private val nonRpcDefs: List[Tree] = defs.collect {
-        case d: DefDef if findAnnotation(d.mods, "rpc").isEmpty => d
-      }
       val imports: List[Tree] = defs.collect {
         case imp: Import => imp
+      }
+
+      private def getCtorParams(clazz: ClassDef): List[Tree] = clazz.impl collect {
+        case x: ValDef if x.mods.hasFlag(Flag.PARAMACCESSOR) => x
+      }
+
+      private val (serializationType, compression): (SerializationType, CompressionType) =
+        c.prefix.tree match {
+          case q"new service($serializationType)" =>
+            serializationType.toString match {
+              case "Protobuf"       => (Protobuf, Identity)
+              case "Avro"           => (Avro, Identity)
+              case "AvroWithSchema" => (AvroWithSchema, Identity)
+              case _ =>
+                sys.error(
+                  "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema]")
+            }
+          case q"new service($serializationType, $compressionType)" =>
+            (serializationType.toString, compressionType.toString) match {
+              case ("Protobuf", "Identity")       => (Protobuf, Identity)
+              case ("Avro", "Identity")           => (Avro, Identity)
+              case ("AvroWithSchema", "Identity") => (AvroWithSchema, Identity)
+              case ("Protobuf", "Gzip")           => (Protobuf, Gzip)
+              case ("Avro", "Gzip")               => (Avro, Gzip)
+              case ("AvroWithSchema", "Gzip")     => (AvroWithSchema, Gzip)
+              case _ =>
+                sys.error(
+                  "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema], and a CompressionType parameter [Identity|Gzip]")
+            }
+          case _ =>
+            sys.error(
+              "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema]")
+        }
+
+      val encodersImport = serializationType match {
+        case Protobuf =>
+          q"import _root_.freestyle.rpc.internal.encoders.pbd._"
+        case Avro =>
+          q"import _root_.freestyle.rpc.internal.encoders.avro._"
+        case AvroWithSchema =>
+          q"import _root_.freestyle.rpc.internal.encoders.avrowithschema._"
       }
 
       val methodDescriptors: List[Tree] = rpcRequests.map(_.methodDescriptor)
       private val serverCallDescriptorsAndHandlers: List[Tree] =
         rpcRequests.map(_.descriptorAndHandler)
-      val bindService: DefDef =
-        q"""
+      val bindService: DefDef = q"""
         def bindService[$F_](implicit
           F: _root_.cats.effect.Effect[$F],
           algebra: $serviceName[$F],
@@ -192,9 +236,9 @@ object serviceImpl {
 
       private def findAnnotation(mods: Modifiers, name: String): Option[Tree] =
         mods.annotations find {
-          case ann @ Apply(Select(New(Ident(TypeName(`name`))), _), _)     => true
-          case ann @ Apply(Select(New(Select(_, TypeName(`name`))), _), _) => true
-          case _                                                           => false
+          case Apply(Select(New(Ident(TypeName(`name`))), _), _)     => true
+          case Apply(Select(New(Select(_, TypeName(`name`))), _), _) => true
+          case _                                                     => false
         }
 
       //todo: validate that the request and responses are case classes, if possible
@@ -202,20 +246,8 @@ object serviceImpl {
           methodName: TermName,
           requestType: Tree,
           responseType: Tree,
-          options: List[Tree]) {
-
-        private val serializationType: SerializationType =
-          annotationParam(options, 0, "serializationType") match {
-            case "Protobuf"       => Protobuf
-            case "Avro"           => Avro
-            case "AvroWithSchema" => AvroWithSchema
-          }
-
-        private val compressionType: CompressionType =
-          annotationParam(options, 1, "compressionType", Some("Identity")) match {
-            case "Identity" => Identity
-            case "Gzip"     => Gzip
-          }
+          compressionOption: Tree
+      ) {
 
         private val requestStreamingImpl: Option[StreamingImpl]  = streamingImplFor(requestType)
         private val responseStreamingImpl: Option[StreamingImpl] = streamingImplFor(responseType)
@@ -260,15 +292,6 @@ object serviceImpl {
           q"_root_.io.grpc.MethodDescriptor.MethodType.${TermName(suffix)}"
         }
 
-        private val encodersImport = serializationType match {
-          case Protobuf =>
-            q"import _root_.freestyle.rpc.internal.encoders.pbd._"
-          case Avro =>
-            q"import _root_.freestyle.rpc.internal.encoders.avro._"
-          case AvroWithSchema =>
-            q"import _root_.freestyle.rpc.internal.encoders.avrowithschema._"
-        }
-
         private val methodDescriptorName = TermName(methodName + "MethodDescriptor")
 
         private val reqType = requestType match {
@@ -279,18 +302,20 @@ object serviceImpl {
           case tq"$x[..$tpts]" => tpts.last
         }
 
-        val methodDescriptor: ValDef = q"""
-          val $methodDescriptorName: _root_.io.grpc.MethodDescriptor[$reqType, $respType] = {
-          $encodersImport
-          _root_.io.grpc.MethodDescriptor
-            .newBuilder(
-              implicitly[_root_.io.grpc.MethodDescriptor.Marshaller[$reqType]],
-              implicitly[_root_.io.grpc.MethodDescriptor.Marshaller[$respType]])
-            .setType($streamingMethodType)
-            .setFullMethodName(
-              _root_.io.grpc.MethodDescriptor.generateFullMethodName(${lit(serviceName)}, ${lit(
+        val methodDescriptor: DefDef = q"""
+          def $methodDescriptorName(implicit
+            ReqM: _root_.io.grpc.MethodDescriptor.Marshaller[$reqType],
+            RespM: _root_.io.grpc.MethodDescriptor.Marshaller[$respType]
+          ): _root_.io.grpc.MethodDescriptor[$reqType, $respType] = {
+            _root_.io.grpc.MethodDescriptor
+              .newBuilder(
+                ReqM,
+                RespM)
+              .setType($streamingMethodType)
+              .setFullMethodName(
+                _root_.io.grpc.MethodDescriptor.generateFullMethodName(${lit(serviceName)}, ${lit(
           methodName)}))
-            .build()
+              .build()
           }
         """.supressWarts("Null", "ExplicitImplicitTypes")
 
@@ -312,11 +337,6 @@ object serviceImpl {
               "bidiStreaming")}"""
           case None => q"""
             def $methodName(input: $requestType): $responseType = ${clientCallMethodFor("unary")}"""
-        }
-
-        private val compressionOption = compressionType match {
-          case Identity => q"None"
-          case Gzip     => q"""Some("gzip")"""
         }
 
         private def serverCallMethodFor(serverMethodName: String) =
@@ -371,6 +391,7 @@ object serviceImpl {
             companion.impl.parents,
             companion.impl.self,
             companion.impl.body ++ service.imports ++ service.methodDescriptors ++ List(
+              service.encodersImport,
               service.bindService,
               service.clientClass,
               service.client,

@@ -63,26 +63,26 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run unary services" in {
 
-      freesRPCServiceClient.unary(a1).unsafeRunSync() shouldBe c1
+      freesAvroRPCServiceClient.unary(a1).unsafeRunSync() shouldBe c1
 
     }
 
     "be able to run unary services with avro schemas" in {
 
-      freesRPCServiceClient.unaryWithSchema(a1).unsafeRunSync() shouldBe c1
+      freesAvroWithSchemaRPCServiceClient.unaryWithSchema(a1).unsafeRunSync() shouldBe c1
 
     }
 
     "be able to run server streaming services" in {
 
-      freesRPCServiceClient.serverStreaming(b1).compile.toList.unsafeRunSync() shouldBe cList
+      freesProtoRPCServiceClient.serverStreaming(b1).compile.toList.unsafeRunSync() shouldBe cList
 
     }
 
     "handle errors in server streaming services" in {
 
       def clientProgram(errorCode: String): Stream[ConcurrentMonad, C] =
-        freesRPCServiceClient
+        freesProtoRPCServiceClient
           .serverStreamingWithError(E(a1, errorCode))
           .handleErrorWith(ex => Stream(C(ex.getMessage, a1)))
 
@@ -98,7 +98,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run client streaming services" in {
 
-      freesRPCServiceClient
+      freesProtoRPCServiceClient
         .clientStreaming(Stream.fromIterator[ConcurrentMonad, A](aList.iterator))
         .unsafeRunSync() shouldBe dResult33
     }
@@ -108,7 +108,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       ignoreOnTravis(
         "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/164 is fixed")
 
-      freesRPCServiceClient
+      freesAvroRPCServiceClient
         .biStreaming(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
         .compile
         .toList
@@ -122,7 +122,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       ignoreOnTravis(
         "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/164 is fixed")
 
-      freesRPCServiceClient
+      freesAvroWithSchemaRPCServiceClient
         .biStreamingWithSchema(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
         .compile
         .toList
@@ -138,14 +138,14 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       val tuple =
         (
-          freesRPCServiceClient.unary(a1),
-          freesRPCServiceClient.unaryWithSchema(a1),
-          freesRPCServiceClient.serverStreaming(b1),
-          freesRPCServiceClient.clientStreaming(
+          freesAvroRPCServiceClient.unary(a1),
+          freesAvroWithSchemaRPCServiceClient.unaryWithSchema(a1),
+          freesProtoRPCServiceClient.serverStreaming(b1),
+          freesProtoRPCServiceClient.clientStreaming(
             Stream.fromIterator[ConcurrentMonad, A](aList.iterator)),
-          freesRPCServiceClient.biStreaming(
+          freesAvroRPCServiceClient.biStreaming(
             Stream.fromIterator[ConcurrentMonad, E](eList.iterator)),
-          freesRPCServiceClient.biStreamingWithSchema(
+          freesAvroWithSchemaRPCServiceClient.biStreamingWithSchema(
             Stream.fromIterator[ConcurrentMonad, E](eList.iterator)))
 
       tuple._1.unsafeRunSync() shouldBe c1
@@ -163,19 +163,21 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run unary services" in {
 
-      freesRPCServiceClient.unaryCompressed(a1).unsafeRunSync() shouldBe c1
+      freesCompressedAvroRPCServiceClient.unaryCompressed(a1).unsafeRunSync() shouldBe c1
 
     }
 
     "be able to run unary services with avro schema" in {
 
-      freesRPCServiceClient.unaryCompressedWithSchema(a1).unsafeRunSync() shouldBe c1
+      freesCompressedAvroWithSchemaRPCServiceClient
+        .unaryCompressedWithSchema(a1)
+        .unsafeRunSync() shouldBe c1
 
     }
 
     "be able to run server streaming services" in {
 
-      freesRPCServiceClient
+      freesCompressedProtoRPCServiceClient
         .serverStreamingCompressed(b1)
         .compile
         .toList
@@ -185,7 +187,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run client streaming services" in {
 
-      freesRPCServiceClient
+      freesCompressedProtoRPCServiceClient
         .clientStreamingCompressed(Stream.fromIterator[ConcurrentMonad, A](aList.iterator))
         .unsafeRunSync() shouldBe dResult33
     }
@@ -195,7 +197,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       ignoreOnTravis(
         "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/164 is fixed")
 
-      freesRPCServiceClient
+      freesCompressedAvroRPCServiceClient
         .biStreamingCompressed(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
         .compile
         .toList
@@ -209,7 +211,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       ignoreOnTravis(
         "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/164 is fixed")
 
-      freesRPCServiceClient
+      freesCompressedAvroWithSchemaRPCServiceClient
         .biStreamingCompressedWithSchema(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
         .compile
         .toList
@@ -225,14 +227,14 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       val tuple =
         (
-          freesRPCServiceClient.unaryCompressed(a1),
-          freesRPCServiceClient.unaryCompressedWithSchema(a1),
-          freesRPCServiceClient.serverStreamingCompressed(b1),
-          freesRPCServiceClient.clientStreamingCompressed(
+          freesCompressedAvroRPCServiceClient.unaryCompressed(a1),
+          freesCompressedAvroWithSchemaRPCServiceClient.unaryCompressedWithSchema(a1),
+          freesCompressedProtoRPCServiceClient.serverStreamingCompressed(b1),
+          freesCompressedProtoRPCServiceClient.clientStreamingCompressed(
             Stream.fromIterator[ConcurrentMonad, A](aList.iterator)),
-          freesRPCServiceClient.biStreamingCompressed(
+          freesCompressedAvroRPCServiceClient.biStreamingCompressed(
             Stream.fromIterator[ConcurrentMonad, E](eList.iterator)),
-          freesRPCServiceClient.biStreamingCompressedWithSchema(
+          freesCompressedAvroWithSchemaRPCServiceClient.biStreamingCompressedWithSchema(
             Stream.fromIterator[ConcurrentMonad, E](eList.iterator)))
 
       tuple._1.unsafeRunSync() shouldBe c1

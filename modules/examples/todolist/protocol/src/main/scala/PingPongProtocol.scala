@@ -28,7 +28,7 @@ trait PingPongProtocol {
    */
   final case class Pong(time: Long = System.currentTimeMillis() / 1000L)
 
-  @service
+  @service(Protobuf)
   trait PingPongService[F[_]] {
 
     /**
@@ -37,7 +37,6 @@ trait PingPongProtocol {
      * @param empty
      * @return Pong response with current timestamp.
      */
-    @rpc(Protobuf)
     def ping(empty: Empty.type): F[Pong]
 
   }
