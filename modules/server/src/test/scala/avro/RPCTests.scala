@@ -17,82 +17,228 @@
 package freestyle.rpc
 package avro
 
-import cats.Apply
-import freestyle.rpc.common._
+import freestyle.rpc.common.{ConcurrentMonad, _}
 import freestyle.rpc.testing.servers.withServerChannel
 import io.grpc.ServerServiceDefinition
 import org.scalatest._
+import shapeless.{:+:, CNil, Coproduct}
 
 class RPCTests extends RpcBaseTestSuite {
 
   import freestyle.rpc.avro.Utils._
   import freestyle.rpc.avro.Utils.implicits._
 
-  "frees-rpc client using avro serialization with schemas" should {
+  def runTestProgram[A](ssd: ServerServiceDefinition, response: A)(
+      f: service.RPCService.Client[ConcurrentMonad] => A): Assertion = {
+    withServerChannel(ssd) { sc =>
+      f(service.RPCService.clientFromChannel[ConcurrentMonad](sc.channel)) shouldBe response
+    }
+  }
 
-    def runTestProgram[T](ssd: ServerServiceDefinition): Assertion = {
+  "An AvroWithSchema service with an updated request model" can {
 
-      withServerChannel(ssd) { sc =>
-        val rpcServiceClient: service.RPCService.Client[ConcurrentMonad] =
-          service.RPCService.clientFromChannel[ConcurrentMonad](sc.channel)
+    "add a new non-optional field, and" should {
+      "be able to respond to an outdated request without the new value" in {
+        runTestProgram(serviceRequestAddedBoolean.RPCService.bindService[ConcurrentMonad], response) {
+          client =>
+            client.get(request).unsafeRunSync()
+        }
+      }
+      "be able to respond to an outdated request without the new value within a coproduct" in {
+        runTestProgram(
+          serviceRequestAddedBoolean.RPCService.bindService[ConcurrentMonad],
+          responseCoproduct(response)) { client =>
+          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
+        }
+      }
+    }
 
-        val (r1, r2) = Apply[ConcurrentMonad]
-          .product(
-            rpcServiceClient.get(request),
-            rpcServiceClient.getCoproduct(requestCoproduct(request)))
-          .unsafeRunSync()
+    "add a new optional field, and" should {
+      "be able to respond to an outdated request without the new optional value" in {
+        runTestProgram(
+          serviceRequestAddedOptionalBoolean.RPCService.bindService[ConcurrentMonad],
+          response) { client =>
+          client.get(request).unsafeRunSync()
+        }
+      }
+      "be able to respond to an outdated request without the new optional value within a coproduct" in {
+        runTestProgram(
+          serviceRequestAddedOptionalBoolean.RPCService.bindService[ConcurrentMonad],
+          responseCoproduct(response)) { client =>
+          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
+        }
+      }
+    }
 
-        r1 shouldBe response
-        r2 shouldBe responseCoproduct(response)
+    "add a new item in coproduct, and" should {
+      "be able to respond to an outdated request with the previous coproduct" in {
+        runTestProgram(
+          serviceRequestAddedCoproductItem.RPCService.bindService[ConcurrentMonad],
+          responseCoproduct(response)) { client =>
+          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
+        }
+      }
+    }
+
+    "remove an item in coproduct, and" should {
+      "be able to respond to an outdated request with the previous coproduct" in {
+        runTestProgram(
+          serviceRequestRemovedCoproductItem.RPCService.bindService[ConcurrentMonad],
+          responseCoproduct(response)) { client =>
+          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
+        }
+      }
+
+      "be able to respond to an outdated request with the removed valued of the previous coproduct" in {
+        runTestProgram(
+          serviceRequestRemovedCoproductItem.RPCService.bindService[ConcurrentMonad],
+          responseCoproduct(response)) { client =>
+          client.getCoproduct(requestCoproductInt).unsafeRunSync()
+        }
       }
 
     }
 
-    "be able to respond to a request" in {
-      runTestProgram(service.RPCService.bindService[ConcurrentMonad])
+    "remove an existing field, and" should {
+      "be able to respond to an outdated request with the old value" in {
+        runTestProgram(serviceRequestDroppedField.RPCService.bindService[ConcurrentMonad], response) {
+          client =>
+            client.get(request).unsafeRunSync()
+        }
+      }
+      "be able to respond to an outdated request with the old value within a coproduct" in {
+        runTestProgram(
+          serviceRequestDroppedField.RPCService.bindService[ConcurrentMonad],
+          responseCoproduct(response)) { client =>
+          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
+        }
+      }
     }
 
-    "be able to respond to a request when the request model has added a boolean field" in {
-      runTestProgram(serviceRequestAddedBoolean.RPCService.bindService[ConcurrentMonad])
+    "replace the type of a field, and" should {
+      "be able to respond to an outdated request with the previous value" in {
+        runTestProgram(serviceRequestReplacedType.RPCService.bindService[ConcurrentMonad], response) {
+          client =>
+            client.get(request).unsafeRunSync()
+        }
+      }
+      "be able to respond to an outdated request with the previous value within a coproduct" in {
+        runTestProgram(
+          serviceRequestReplacedType.RPCService.bindService[ConcurrentMonad],
+          responseCoproduct(response)) { client =>
+          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
+        }
+      }
     }
 
-    "be able to respond to a request when the request model has added a string field" in {
-      runTestProgram(serviceRequestAddedString.RPCService.bindService[ConcurrentMonad])
+    "rename an existing field, and" should {
+      "be able to respond to an outdated request with the previous name" in {
+        runTestProgram(serviceRequestRenamedField.RPCService.bindService[ConcurrentMonad], response) {
+          client =>
+            client.get(request).unsafeRunSync()
+        }
+      }
+      "be able to respond to an outdated request with the previous name within a coproduct" in {
+        runTestProgram(
+          serviceRequestRenamedField.RPCService.bindService[ConcurrentMonad],
+          responseCoproduct(response)) { client =>
+          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
+        }
+      }
     }
 
-    "be able to respond to a request when the request model has added an int field" in {
-      runTestProgram(serviceRequestAddedInt.RPCService.bindService[ConcurrentMonad])
+  }
 
+  "An AvroWithSchema service with an updated response model" can {
+
+    "add a new non-optional field, and" should {
+      "be able to provide a compatible response" in {
+        runTestProgram(
+          serviceResponseAddedBoolean.RPCService.bindService[ConcurrentMonad],
+          response) { client =>
+          client.get(request).unsafeRunSync()
+        }
+      }
+      "be able to provide a compatible response within a coproduct" in {
+        runTestProgram(
+          serviceResponseAddedBoolean.RPCService.bindService[ConcurrentMonad],
+          responseCoproduct(response)) { client =>
+          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
+        }
+      }
     }
 
-    "be able to respond to a request when the request model has added a field that is a case class" in {
-      runTestProgram(serviceRequestAddedNestedRequest.RPCService.bindService[ConcurrentMonad])
+    "add a new item in a coproduct, and" should {
+      "be able to provide a compatible response within a coproduct" in {
+        runTestProgram(
+          serviceResponseAddedBooleanCoproduct.RPCService.bindService[ConcurrentMonad],
+          ResponseCoproduct(Coproduct[Response :+: Int :+: String :+: CNil](0))) { client =>
+          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
+        }
+      }
     }
 
-    "be able to respond to a request when the request model has dropped a field" in {
-      runTestProgram(serviceRequestDroppedField.RPCService.bindService[ConcurrentMonad])
+    "remove an item in a coproduct, and" should {
+      "be able to provide a compatible response" in {
+        runTestProgram(
+          serviceResponseRemovedIntCoproduct.RPCService.bindService[ConcurrentMonad],
+          responseCoproduct(response)) { client =>
+          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
+        }
+      }
     }
 
-    "be able to respond to a request when the response model has added a boolean field" in {
-      runTestProgram(serviceResponseAddedBoolean.RPCService.bindService[ConcurrentMonad])
+    "change the type of a field, and" should {
+      "be able to provide a compatible response" in {
+        runTestProgram(
+          serviceResponseReplacedType.RPCService.bindService[ConcurrentMonad],
+          response) { client =>
+          client.get(request).unsafeRunSync()
+        }
+      }
+      "be able to provide a compatible response within a coproduct" in {
+        runTestProgram(
+          serviceResponseReplacedType.RPCService.bindService[ConcurrentMonad],
+          responseCoproduct(response)) { client =>
+          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
+        }
+      }
     }
 
-    "be able to respond to a request when the response model has added a string field" in {
-      runTestProgram(serviceResponseAddedString.RPCService.bindService[ConcurrentMonad])
-
+    "rename a field, and" should {
+      "be able to provide a compatible response" in {
+        runTestProgram(
+          serviceResponseRenamedField.RPCService.bindService[ConcurrentMonad],
+          response) { client =>
+          client.get(request).unsafeRunSync()
+        }
+      }
+      "be able to provide a compatible response within a coproduct" in {
+        runTestProgram(
+          serviceResponseRenamedField.RPCService.bindService[ConcurrentMonad],
+          responseCoproduct(response)) { client =>
+          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
+        }
+      }
     }
 
-    "be able to respond to a request when the response model has added an int field" in {
-      runTestProgram(serviceResponseAddedInt.RPCService.bindService[ConcurrentMonad])
+    "drop a field, and" should {
+      "be able to provide a compatible response" in {
+        runTestProgram(
+          serviceResponseDroppedField.RPCService.bindService[ConcurrentMonad],
+          response) { client =>
+          client.get(request).unsafeRunSync()
+        }
+      }
+      "be able to provide a compatible response within a coproduct" in {
+        runTestProgram(
+          serviceResponseDroppedField.RPCService.bindService[ConcurrentMonad],
+          responseCoproduct(response)) { client =>
+          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
+        }
+      }
     }
 
-    "be able to respond to a request when the response model has added a field that is a case class" in {
-      runTestProgram(serviceResponseAddedNestedResponse.RPCService.bindService[ConcurrentMonad])
-    }
-
-    "be able to respond to a request when the response model has dropped a field" in {
-      runTestProgram(serviceResponseDroppedField.RPCService.bindService[ConcurrentMonad])
-    }
   }
 
 }
