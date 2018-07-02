@@ -62,11 +62,11 @@ object Utils extends CommonUtils {
   //Original Service
 
   object service {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: Request): F[Response]
+      def get(a: Request): F[Response]
 
-      @rpc(AvroWithSchema) def getCoproduct(
+      def getCoproduct(
           a: RequestCoproduct[Request]): F[ResponseCoproduct[Response]]
     }
   }
@@ -74,67 +74,67 @@ object Utils extends CommonUtils {
   //Updated request services
 
   object serviceRequestAddedBoolean {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: RequestAddedBoolean): F[Response]
+      def get(a: RequestAddedBoolean): F[Response]
 
-      @rpc(AvroWithSchema) def getCoproduct(
+      def getCoproduct(
           a: RequestCoproduct[RequestAddedBoolean]): F[ResponseCoproduct[Response]]
     }
   }
 
   object serviceRequestAddedOptionalBoolean {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: RequestAddedOptionalBoolean): F[Response]
+      def get(a: RequestAddedOptionalBoolean): F[Response]
 
-      @rpc(AvroWithSchema) def getCoproduct(
+      def getCoproduct(
           a: RequestCoproduct[RequestAddedOptionalBoolean]): F[ResponseCoproduct[Response]]
     }
   }
 
   object serviceRequestAddedCoproductItem {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def getCoproduct(
+      def getCoproduct(
           a: RequestSuperCoproduct[Request]): F[ResponseCoproduct[Response]]
     }
   }
 
   object serviceRequestRemovedCoproductItem {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def getCoproduct(
+      def getCoproduct(
           a: RequestCoproductNoInt[Request]): F[ResponseCoproduct[Response]]
     }
   }
 
   object serviceRequestDroppedField {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: RequestDroppedField): F[Response]
+      def get(a: RequestDroppedField): F[Response]
 
-      @rpc(AvroWithSchema) def getCoproduct(
+      def getCoproduct(
           a: RequestCoproduct[RequestDroppedField]): F[ResponseCoproduct[Response]]
     }
   }
 
   object serviceRequestReplacedType {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: RequestReplacedType): F[Response]
+      def get(a: RequestReplacedType): F[Response]
 
-      @rpc(AvroWithSchema) def getCoproduct(
+      def getCoproduct(
           a: RequestCoproduct[RequestReplacedType]): F[ResponseCoproduct[Response]]
     }
   }
 
   object serviceRequestRenamedField {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: RequestRenamedField): F[Response]
+      def get(a: RequestRenamedField): F[Response]
 
-      @rpc(AvroWithSchema) def getCoproduct(
+      def getCoproduct(
           a: RequestCoproduct[RequestRenamedField]): F[ResponseCoproduct[Response]]
     }
   }
@@ -142,57 +142,57 @@ object Utils extends CommonUtils {
   //Updated response services
 
   object serviceResponseAddedBoolean {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: Request): F[ResponseAddedBoolean]
+      def get(a: Request): F[ResponseAddedBoolean]
 
-      @rpc(AvroWithSchema) def getCoproduct(
+      def getCoproduct(
           a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseAddedBoolean]]
     }
   }
 
   object serviceResponseAddedBooleanCoproduct {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def getCoproduct(
+      def getCoproduct(
           a: RequestCoproduct[Request]): F[ResponseSuperCoproduct[Response]]
     }
   }
 
   object serviceResponseRemovedIntCoproduct {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def getCoproduct(
+      def getCoproduct(
           a: RequestCoproduct[Request]): F[ResponseCoproductNoInt[Response]]
     }
   }
 
   object serviceResponseReplacedType {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: Request): F[ResponseReplacedType]
+      def get(a: Request): F[ResponseReplacedType]
 
-      @rpc(AvroWithSchema) def getCoproduct(
+      def getCoproduct(
           a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseReplacedType]]
     }
   }
 
   object serviceResponseRenamedField {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: Request): F[ResponseRenamedField]
+      def get(a: Request): F[ResponseRenamedField]
 
-      @rpc(AvroWithSchema) def getCoproduct(
+      def getCoproduct(
           a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseRenamedField]]
     }
   }
 
   object serviceResponseDroppedField {
-    @service
+    @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      @rpc(AvroWithSchema) def get(a: Request): F[ResponseDroppedField]
+      def get(a: Request): F[ResponseDroppedField]
 
-      @rpc(AvroWithSchema) def getCoproduct(
+      def getCoproduct(
           a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseDroppedField]]
     }
   }
