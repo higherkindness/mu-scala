@@ -36,7 +36,7 @@ class GrpcServerHandlerTests extends RpcServerTestSuite {
 
     "allow to start a GrpcServer" in {
 
-      runK(handler.start, serverMock).unsafeRunSync() shouldBe (())
+      runK(handler.start, serverMock).attempt.unsafeRunSync().isRight shouldBe true
       (serverMock.start _: () => Server).verify().once()
 
     }
@@ -75,14 +75,14 @@ class GrpcServerHandlerTests extends RpcServerTestSuite {
 
     "allow to stop a started GrpcServer" in {
 
-      runK(handler.shutdown, serverMock).unsafeRunSync() shouldBe (())
+      runK(handler.shutdown, serverMock).attempt.unsafeRunSync().isRight shouldBe true
       (serverMock.shutdown _: () => Server).verify().once()
 
     }
 
     "allow to stop immediately a started GrpcServer" in {
 
-      runK(handler.shutdownNow, serverMock).unsafeRunSync() shouldBe (())
+      runK(handler.shutdownNow, serverMock).attempt.unsafeRunSync().isRight shouldBe true
       (serverMock.shutdownNow _: () => Server).verify().once()
 
     }
