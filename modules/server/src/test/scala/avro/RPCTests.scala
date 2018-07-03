@@ -17,7 +17,7 @@
 package freestyle.rpc
 package avro
 
-import freestyle.rpc.common.{ConcurrentMonad, _}
+import freestyle.rpc.common._
 import freestyle.rpc.testing.servers.withServerChannel
 import io.grpc.ServerServiceDefinition
 import org.scalatest._
