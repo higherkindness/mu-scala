@@ -39,17 +39,14 @@ class RPCTests extends RpcBaseTestSuite {
 
     "add a new non-optional field, and" should {
       "be able to respond to an outdated request without the new value" in {
-        runTestProgram(serviceRequestAddedBoolean.RPCService.bindService[ConcurrentMonad], response) {
-          client =>
-            client.get(request).unsafeRunSync()
-        }
+        runTestProgram(
+          serviceRequestAddedBoolean.RPCService.bindService[ConcurrentMonad],
+          response)(_.get(request).unsafeRunSync())
       }
       "be able to respond to an outdated request without the new value within a coproduct" in {
         runTestProgram(
           serviceRequestAddedBoolean.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response)) { client =>
-          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
-        }
+          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
       }
     }
 
@@ -57,16 +54,12 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to respond to an outdated request without the new optional value" in {
         runTestProgram(
           serviceRequestAddedOptionalBoolean.RPCService.bindService[ConcurrentMonad],
-          response) { client =>
-          client.get(request).unsafeRunSync()
-        }
+          response)(_.get(request).unsafeRunSync())
       }
       "be able to respond to an outdated request without the new optional value within a coproduct" in {
         runTestProgram(
           serviceRequestAddedOptionalBoolean.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response)) { client =>
-          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
-        }
+          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
       }
     }
 
@@ -74,9 +67,7 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to respond to an outdated request with the previous coproduct" in {
         runTestProgram(
           serviceRequestAddedCoproductItem.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response)) { client =>
-          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
-        }
+          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
       }
     }
 
@@ -84,66 +75,53 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to respond to an outdated request with the previous coproduct" in {
         runTestProgram(
           serviceRequestRemovedCoproductItem.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response)) { client =>
-          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
-        }
+          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
       }
 
       "be able to respond to an outdated request with the removed valued of the previous coproduct" in {
         runTestProgram(
           serviceRequestRemovedCoproductItem.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response)) { client =>
-          client.getCoproduct(requestCoproductInt).unsafeRunSync()
-        }
+          responseCoproduct(response))(_.getCoproduct(requestCoproductInt).unsafeRunSync())
       }
 
     }
 
     "remove an existing field, and" should {
       "be able to respond to an outdated request with the old value" in {
-        runTestProgram(serviceRequestDroppedField.RPCService.bindService[ConcurrentMonad], response) {
-          client =>
-            client.get(request).unsafeRunSync()
-        }
+        runTestProgram(
+          serviceRequestDroppedField.RPCService.bindService[ConcurrentMonad],
+          response)(_.get(request).unsafeRunSync())
       }
       "be able to respond to an outdated request with the old value within a coproduct" in {
         runTestProgram(
           serviceRequestDroppedField.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response)) { client =>
-          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
-        }
+          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
       }
     }
 
     "replace the type of a field, and" should {
       "be able to respond to an outdated request with the previous value" in {
-        runTestProgram(serviceRequestReplacedType.RPCService.bindService[ConcurrentMonad], response) {
-          client =>
-            client.get(request).unsafeRunSync()
-        }
+        runTestProgram(
+          serviceRequestReplacedType.RPCService.bindService[ConcurrentMonad],
+          response)(_.get(request).unsafeRunSync())
       }
       "be able to respond to an outdated request with the previous value within a coproduct" in {
         runTestProgram(
           serviceRequestReplacedType.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response)) { client =>
-          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
-        }
+          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
       }
     }
 
     "rename an existing field, and" should {
       "be able to respond to an outdated request with the previous name" in {
-        runTestProgram(serviceRequestRenamedField.RPCService.bindService[ConcurrentMonad], response) {
-          client =>
-            client.get(request).unsafeRunSync()
-        }
+        runTestProgram(
+          serviceRequestRenamedField.RPCService.bindService[ConcurrentMonad],
+          response)(_.get(request).unsafeRunSync())
       }
       "be able to respond to an outdated request with the previous name within a coproduct" in {
         runTestProgram(
           serviceRequestRenamedField.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response)) { client =>
-          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
-        }
+          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
       }
     }
 
@@ -155,16 +133,12 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to provide a compatible response" in {
         runTestProgram(
           serviceResponseAddedBoolean.RPCService.bindService[ConcurrentMonad],
-          response) { client =>
-          client.get(request).unsafeRunSync()
-        }
+          response)(_.get(request).unsafeRunSync())
       }
       "be able to provide a compatible response within a coproduct" in {
         runTestProgram(
           serviceResponseAddedBoolean.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response)) { client =>
-          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
-        }
+          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
       }
     }
 
@@ -172,9 +146,8 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to provide a compatible response within a coproduct" in {
         runTestProgram(
           serviceResponseAddedBooleanCoproduct.RPCService.bindService[ConcurrentMonad],
-          ResponseCoproduct(Coproduct[Response :+: Int :+: String :+: CNil](0))) { client =>
-          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
-        }
+          ResponseCoproduct(Coproduct[Response :+: Int :+: String :+: CNil](0)))(
+          _.getCoproduct(requestCoproduct(request)).unsafeRunSync())
       }
     }
 
@@ -182,9 +155,7 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to provide a compatible response" in {
         runTestProgram(
           serviceResponseRemovedIntCoproduct.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response)) { client =>
-          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
-        }
+          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
       }
     }
 
@@ -192,16 +163,12 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to provide a compatible response" in {
         runTestProgram(
           serviceResponseReplacedType.RPCService.bindService[ConcurrentMonad],
-          response) { client =>
-          client.get(request).unsafeRunSync()
-        }
+          response)(_.get(request).unsafeRunSync())
       }
       "be able to provide a compatible response within a coproduct" in {
         runTestProgram(
           serviceResponseReplacedType.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response)) { client =>
-          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
-        }
+          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
       }
     }
 
@@ -209,16 +176,12 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to provide a compatible response" in {
         runTestProgram(
           serviceResponseRenamedField.RPCService.bindService[ConcurrentMonad],
-          response) { client =>
-          client.get(request).unsafeRunSync()
-        }
+          response)(_.get(request).unsafeRunSync())
       }
       "be able to provide a compatible response within a coproduct" in {
         runTestProgram(
           serviceResponseRenamedField.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response)) { client =>
-          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
-        }
+          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
       }
     }
 
@@ -226,16 +189,12 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to provide a compatible response" in {
         runTestProgram(
           serviceResponseDroppedField.RPCService.bindService[ConcurrentMonad],
-          response) { client =>
-          client.get(request).unsafeRunSync()
-        }
+          response)(_.get(request).unsafeRunSync())
       }
       "be able to provide a compatible response within a coproduct" in {
         runTestProgram(
           serviceResponseDroppedField.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response)) { client =>
-          client.getCoproduct(requestCoproduct(request)).unsafeRunSync()
-        }
+          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
       }
     }
 
