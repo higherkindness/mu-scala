@@ -64,7 +64,6 @@ Next, our dummy `Greeter` server implementation:
 ```tut:silent
 import cats.effect.Async
 import cats.syntax.applicative._
-import freestyle.free._
 import freestyle.rpc.server.implicits._
 import monix.execution.Scheduler
 import monix.eval.Task
@@ -158,11 +157,6 @@ object gserver {
 
     implicit val greeterServiceHandler: ServiceHandler[IO] = new ServiceHandler[IO]
 
-    val grpcConfigs: List[GrpcConfig] = List(
-      AddService(Greeter.bindService[IO])
-    )
-
-    implicit val serverW: ServerW = ServerW.default(8080, grpcConfigs)
   }
 
   object implicits extends Implicits
@@ -181,16 +175,20 @@ What else is needed? We just need to define a `main` method:
 
 ```tut:silent
 import cats.effect.IO
-import cats.effect.IO._
 import freestyle.rpc.server.GrpcServer
-import freestyle.rpc.server.implicits._
 
 object RPCServer {
 
   import gserver.implicits._
 
-  def main(args: Array[String]): Unit =
-    server[IO].unsafeRunSync()
+  def main(args: Array[String]): Unit = {
+    val grpcConfigs: List[GrpcConfig] = List(
+      AddService(Greeter.bindService[IO])
+    )
+
+    val runServer = GrpcServer.default[IO](8080, grpcConfigs).flatMap(GrpcServer.server[IO])
+    runServer.unsafeRunSync()
+  }
 
 }
 ```
@@ -270,7 +268,6 @@ Given the transport settings and a list of optional configurations, we can creat
 So, taking into account all we have just said, how would our code look?
 
 ```tut:silent
-import cats.implicits._
 import cats.effect.IO
 import freestyle.rpc._
 import freestyle.rpc.config._
@@ -278,10 +275,7 @@ import freestyle.rpc.client._
 import freestyle.rpc.client.config._
 import freestyle.rpc.client.implicits._
 import monix.eval.Task
-import io.grpc.ManagedChannel
 import service._
-
-import scala.util.{Failure, Success, Try}
 
 object gclient {
 
@@ -319,10 +313,11 @@ object RPCDemoApp {
 
   def main(args: Array[String]): Unit = {
 
-    val result = Await.result(serviceClient.sayHello(HelloRequest("foo")).runAsync, Duration.Inf)
+    val hello = serviceClient.sayHello(HelloRequest("foo")).flatMap { result =>
+      Task.eval(println(s"Result = $result"))
+    }
 
-    println(s"Result = $result")
-
+    Await.result(hello.runAsync, Duration.Inf)
   }
 
 }

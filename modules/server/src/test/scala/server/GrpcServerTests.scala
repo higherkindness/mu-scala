@@ -32,13 +32,13 @@ class GrpcServerTests extends RpcServerTestSuite {
 
     type Result = (
         Boolean,
-        Server,
+        Unit,
         Int,
         List[ServerServiceDefinition],
         List[ServerServiceDefinition],
         List[ServerServiceDefinition],
-        Server,
-        Server,
+        Unit,
+        Unit,
         Boolean,
         Boolean,
         Boolean,
@@ -68,13 +68,13 @@ class GrpcServerTests extends RpcServerTestSuite {
 
       program[ConcurrentMonad](grpcServerHandlerTests).unsafeRunSync() shouldBe ((
         b,
-        serverCopyMock,
+        (),
         SC.port,
         serviceList,
         immutableServiceList,
         mutableServiceList,
-        serverCopyMock,
-        serverCopyMock,
+        (),
+        (),
         b,
         b,
         b,

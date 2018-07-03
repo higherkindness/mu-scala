@@ -29,26 +29,24 @@ import com.typesafe.config.ConfigException.Missing
 
 class ServerConfig[F[_]](implicit S: Sync[F], C: ConfigM[F]) {
 
-  def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): F[ServerW] =
+  def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): F[GrpcServer[F]] =
     for {
       config <- C.load
-      port <- S.pure(
-        Either
-          .catchOnly[Missing](config.getInt(portPath)))
-    } yield ServerW.default(port.getOrElse(defaultPort), configList)
+      port = Either.catchOnly[Missing](config.getInt(portPath))
+      server <- GrpcServer.default(port.getOrElse(defaultPort), configList)
+    } yield server
 
-  def buildNettyServer(portPath: String, configList: List[GrpcConfig] = Nil): F[ServerW] =
+  def buildNettyServer(portPath: String, configList: List[GrpcConfig] = Nil): F[GrpcServer[F]] =
     for {
       config <- C.load
-      port <- S.pure(
-        Either
-          .catchOnly[Missing](config.getInt(portPath)))
-    } yield ServerW.netty(ChannelForPort(port.getOrElse(defaultPort)), configList)
+      port = Either.catchOnly[Missing](config.getInt(portPath))
+      server <- GrpcServer.netty(ChannelForPort(port.getOrElse(defaultPort)), configList)
+    } yield server
 }
 
 object ServerConfig {
-  def apply[F[_]](implicit S: Sync[F], C: ConfigM[F]): ServerConfig[F] = new ServerConfig[F]
+  def apply[F[_]](implicit SC: ServerConfig[F]): ServerConfig[F] = SC
 
   implicit def defaultServerConfig[F[_]](implicit S: Sync[F], C: ConfigM[F]): ServerConfig[F] =
-    apply[F](S, C)
+    new ServerConfig[F]()(S, C)
 }

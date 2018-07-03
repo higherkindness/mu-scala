@@ -19,6 +19,7 @@ package freestyle.rpc
 import java.net.ServerSocket
 
 import cats.Functor
+import cats.effect.Sync
 import cats.syntax.functor._
 import freestyle.rpc.common._
 import freestyle.rpc.server._
@@ -56,11 +57,11 @@ trait CommonUtils {
   def createChannelForPort(port: Int): ChannelFor =
     ChannelForAddress(SC.host, port)
 
-  def createServerConf(grpcConfigs: List[GrpcConfig]): ServerW =
-    ServerW.default(SC.port, grpcConfigs)
+  def createServerConf[F[_]: Sync](grpcConfigs: List[GrpcConfig]): F[GrpcServer[F]] =
+    GrpcServer.default[F](SC.port, grpcConfigs)
 
-  def createServerConfOnRandomPort(grpcConfigs: List[GrpcConfig]): ServerW =
-    ServerW.default(pickUnusedPort, grpcConfigs)
+  def createServerConfOnRandomPort[F[_]: Sync](grpcConfigs: List[GrpcConfig]): F[GrpcServer[F]] =
+    GrpcServer.default[F](pickUnusedPort, grpcConfigs)
 
   def serverStart[F[_]: Functor](implicit S: GrpcServer[F]): F[Unit] =
     S.start().void
@@ -69,7 +70,7 @@ trait CommonUtils {
     S.shutdownNow().void
 
   def serverAwaitTermination[F[_]: Functor](implicit S: GrpcServer[F]): F[Unit] =
-    S.awaitTermination()
+    S.awaitTermination().void
 
   def debug(str: String): Unit = logger.debug(str)
 

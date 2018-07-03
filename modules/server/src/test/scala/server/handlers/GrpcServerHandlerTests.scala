@@ -30,13 +30,13 @@ class GrpcServerHandlerTests extends RpcServerTestSuite {
 
   import implicits._
 
-  val handler: GrpcServerHandler[ConcurrentMonad] = new GrpcServerHandler[ConcurrentMonad]
+  val handler = GrpcServerHandler[ConcurrentMonad]
 
   "GrpcServer.Handler" should {
 
     "allow to start a GrpcServer" in {
 
-      runK(handler.start, serverMock).unsafeRunSync() shouldBe serverCopyMock
+      runK(handler.start, serverMock).attempt.unsafeRunSync().isRight shouldBe true
       (serverMock.start _: () => Server).verify().once()
 
     }
@@ -75,14 +75,14 @@ class GrpcServerHandlerTests extends RpcServerTestSuite {
 
     "allow to stop a started GrpcServer" in {
 
-      runK(handler.shutdown, serverMock).unsafeRunSync() shouldBe serverCopyMock
+      runK(handler.shutdown, serverMock).attempt.unsafeRunSync().isRight shouldBe true
       (serverMock.shutdown _: () => Server).verify().once()
 
     }
 
     "allow to stop immediately a started GrpcServer" in {
 
-      runK(handler.shutdownNow, serverMock).unsafeRunSync() shouldBe serverCopyMock
+      runK(handler.shutdownNow, serverMock).attempt.unsafeRunSync().isRight shouldBe true
       (serverMock.shutdownNow _: () => Server).verify().once()
 
     }

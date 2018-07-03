@@ -45,7 +45,8 @@ case class InterceptorsRuntime(
     AddService(AvroWithSchemaRPCService.bindService[ConcurrentMonad])
   )
 
-  implicit lazy val serverW: ServerW = createServerConfOnRandomPort(grpcConfigs)
+  implicit lazy val grpcServer: GrpcServer[ConcurrentMonad] =
+    createServerConfOnRandomPort[ConcurrentMonad](grpcConfigs).unsafeRunSync
 
   implicit lazy val freesRPCHandler: ServerRPCService[ConcurrentMonad] =
     new ServerRPCService[ConcurrentMonad]

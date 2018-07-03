@@ -33,19 +33,13 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
   import freestyle.rpc.protocol.Utils.database._
   import freestyle.rpc.protocol.Utils.implicits._
 
-  override protected def beforeAll(): Unit = {
-    import freestyle.rpc.server.implicits._
+  override protected def beforeAll(): Unit =
     serverStart[ConcurrentMonad].unsafeRunSync()
-  }
 
-  override protected def afterAll(): Unit = {
-    import freestyle.rpc.server.implicits._
+  override protected def afterAll(): Unit =
     serverStop[ConcurrentMonad].unsafeRunSync()
-  }
 
   "frees-rpc server" should {
-
-    import freestyle.rpc.server.implicits._
 
     "allow to startup a server and check if it's alive" in {
 

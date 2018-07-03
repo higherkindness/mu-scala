@@ -503,7 +503,8 @@ object Utils extends CommonUtils {
       AddService(CompressedAvroWithSchemaRPCService.bindService[ConcurrentMonad])
     )
 
-    implicit val serverW: ServerW = createServerConf(grpcConfigs)
+    implicit val grpcServer: GrpcServer[ConcurrentMonad] =
+      createServerConf[ConcurrentMonad](grpcConfigs).unsafeRunSync
 
     //////////////////////////////////
     // Client Runtime Configuration //

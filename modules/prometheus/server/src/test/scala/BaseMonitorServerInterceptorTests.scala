@@ -27,7 +27,6 @@ import scala.collection.JavaConverters._
 
 abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
 
-  import freestyle.rpc.server.implicits._
   import freestyle.rpc.protocol.Utils.database._
   import freestyle.rpc.prometheus.shared.RegistryHelper._
 
