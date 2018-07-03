@@ -19,8 +19,7 @@ package server
 
 import java.util.concurrent.TimeUnit
 
-import io.grpc._
-import io.grpc.netty.{NettyServerBuilder, ProtocolNegotiator}
+import io.grpc.netty.ProtocolNegotiator
 import io.netty.channel.{ChannelOption, EventLoopGroup, ServerChannel}
 import io.netty.handler.ssl.SslContext
 
@@ -45,20 +44,4 @@ object netty {
   final case class PermitKeepAliveTime(keepAliveTime: Long, timeUnit: TimeUnit) extends GrpcConfig
   final case class PermitKeepAliveWithoutCalls(permit: Boolean)                 extends GrpcConfig
 
-  // ?
-  private[server] final case class NettyServerConfigBuilder(
-      initConfig: ChannelFor,
-      configList: List[GrpcConfig]) {
-
-    def build: Server =
-      GrpcServer.buildNettyConfig(
-        initConfig match {
-          case ChannelForPort(port)        => NettyServerBuilder.forPort(port)
-          case ChannelForSocketAddress(sa) => NettyServerBuilder.forAddress(sa)
-          case e =>
-            throw new IllegalArgumentException(s"ManagedChannel not supported for $e")
-        },
-        configList
-      )
-  }
 }

@@ -21,53 +21,57 @@ import java.net.InetSocketAddress
 
 import cats.effect.IO
 import freestyle.rpc.common.SC
-import freestyle.rpc.server.netty.NettyServerConfigBuilder
-import io.grpc.Server
-
-import scala.collection.JavaConverters._
 
 class ServerConfigTests extends RpcServerTestSuite {
 
   import implicits._
 
-  "SServerBuilder" should {
+  "GrpcServer.default" should {
 
     "work as expected for a basic configuration" in {
 
       val configList: List[GrpcConfig] = List(AddService(sd1))
-      val server: Server               = SServerBuilder(SC.port, configList).build
+      val server: IO[GrpcServer[IO]]   = GrpcServer.default(SC.port, configList)
 
-      server.getServices.asScala.toList shouldBe List(sd1)
+      server.flatMap(_.getServices).unsafeRunSync shouldBe List(sd1)
     }
   }
 
-  "NettyServerConfigBuilder" should {
+  "GrpcServer.netty" should {
 
     "work as expected for port" in {
 
       val configList: List[GrpcConfig] = List(AddService(sd1))
-      val server: Server               = NettyServerConfigBuilder(ChannelForPort(SC.port), configList).build
+      val server: IO[GrpcServer[IO]]   = GrpcServer.netty(ChannelForPort(SC.port), configList)
 
-      server.getServices.asScala.toList shouldBe List(sd1)
+      server.flatMap(_.getServices).unsafeRunSync shouldBe List(sd1)
     }
 
     "work as expected for SocketAddress" in {
 
       val configList: List[GrpcConfig] = List(AddService(sd1))
-      val server: Server =
-        NettyServerConfigBuilder(
+      val server: IO[GrpcServer[IO]] =
+        GrpcServer.netty(
           ChannelForSocketAddress(new InetSocketAddress(SC.host, SC.port)),
-          configList).build
+          configList)
 
-      server.getServices.asScala.toList shouldBe List(sd1)
+      server.flatMap(_.getServices).unsafeRunSync shouldBe List(sd1)
     }
 
     "work as expected for port, with any configuration combination" in {
 
-      val server: Server =
-        NettyServerConfigBuilder(ChannelForPort(SC.port), grpcAllConfigList).build
+      val server: IO[GrpcServer[IO]] =
+        GrpcServer.netty(ChannelForPort(SC.port), grpcAllConfigList)
 
-      server.getServices.asScala.toList shouldBe List(sd1)
+      server.flatMap(_.getServices).unsafeRunSync shouldBe List(sd1)
+    }
+
+    "work as expected for an `Int` port" in {
+
+      val configList: List[GrpcConfig] = List(AddService(sd1))
+      val server: IO[GrpcServer[IO]]   = GrpcServer.netty[IO](SC.port, configList)
+
+      server.flatMap(_.getServices).unsafeRunSync shouldBe List(sd1)
     }
 
     "throw an exception when configuration is not recognized" in {
@@ -76,35 +80,20 @@ class ServerConfigTests extends RpcServerTestSuite {
 
       val configList: List[GrpcConfig] = List(AddService(sd1), Unexpected)
 
-      an[MatchError] shouldBe thrownBy(
-        NettyServerConfigBuilder(ChannelForPort(SC.port), configList).build)
+      val server: IO[GrpcServer[IO]] =
+        GrpcServer.netty(ChannelForPort(SC.port), configList)
+
+      an[MatchError] shouldBe thrownBy(server.unsafeRunSync)
     }
 
     "throw an exception when ChannelFor is not recognized" in {
 
       val configList: List[GrpcConfig] = List(AddService(sd1))
 
-      an[IllegalArgumentException] shouldBe thrownBy(
-        NettyServerConfigBuilder(ChannelForTarget(SC.host), configList).build)
-    }
-  }
+      val server: IO[GrpcServer[IO]] =
+        GrpcServer.netty(ChannelForTarget(SC.host), configList)
 
-  "GrpcServer" should {
-
-    "work as expected for the '.netty(ChannelFor)' builder" in {
-
-      val configList: List[GrpcConfig] = List(AddService(sd1))
-      val server: IO[GrpcServer[IO]]   = GrpcServer.netty[IO](ChannelForPort(SC.port), configList)
-
-      server.flatMap(_.getServices).unsafeRunSync shouldBe List(sd1)
-    }
-
-    "work as expected for the '.netty(Int)' builder" in {
-
-      val configList: List[GrpcConfig] = List(AddService(sd1))
-      val server: IO[GrpcServer[IO]]   = GrpcServer.netty[IO](SC.port, configList)
-
-      server.flatMap(_.getServices).unsafeRunSync shouldBe List(sd1)
+      an[IllegalArgumentException] shouldBe thrownBy(server.unsafeRunSync)
     }
   }
 

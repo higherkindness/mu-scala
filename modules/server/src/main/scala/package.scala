@@ -27,7 +27,8 @@ package object server {
 
   val defaultPort = 50051
 
-  private[server] def SBuilder[SB <: ServerBuilder[SB]](sb: SB): PartialFunction[GrpcConfig, SB] = {
+  private[server] def SBuilder[SB <: ServerBuilder[SB]](
+      sb: ServerBuilder[SB]): PartialFunction[GrpcConfig, SB] = {
     case DirectExecutor                  => sb.directExecutor()
     case SetExecutor(ex)                 => sb.executor(ex)
     case AddService(srv)                 => sb.addService(srv)

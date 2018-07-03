@@ -20,8 +20,8 @@ package server
 import cats.~>
 import cats.effect.{Effect, IO, Sync}
 import cats.syntax.apply._
+import cats.syntax.flatMap._
 import cats.syntax.functor._
-import freestyle.rpc.server.netty.NettyServerConfigBuilder
 import io.grpc.{Server, ServerBuilder, ServerServiceDefinition}
 import io.grpc.netty.NettyServerBuilder
 import scala.concurrent.duration.TimeUnit
@@ -92,36 +92,45 @@ object GrpcServer {
 
   def default[F[_]](port: Int, configList: List[GrpcConfig])(
       implicit F: Sync[F]): F[GrpcServer[F]] =
-    F.delay(SServerBuilder(port, configList).build).map(fromServer[F])
+    F.delay(buildServer(ServerBuilder.forPort(port), configList)).map(fromServer[F])
 
   def netty[F[_]](port: Int, configList: List[GrpcConfig])(implicit F: Sync[F]): F[GrpcServer[F]] =
     netty(ChannelForPort(port), configList)
 
   def netty[F[_]](channelFor: ChannelFor, configList: List[GrpcConfig])(
       implicit F: Sync[F]): F[GrpcServer[F]] =
-    F.delay(NettyServerConfigBuilder(channelFor, configList).build).map(fromServer[F])
+    for {
+      builder <- F.delay(nettyBuilder(channelFor))
+      server  <- F.delay(buildNettyServer(builder, configList))
+    } yield fromServer[F](server)
 
   def fromServer[F[_]: Sync](server: Server): GrpcServer[F] =
     handlers.GrpcServerHandler[F].mapK(λ[GrpcServerOps[F, ?] ~> F](_.run(server)))
 
-  private[server] def buildGrpcConfig[SB <: ServerBuilder[SB]](
-      acc: SB,
-      configList: List[GrpcConfig]): Server = {
+  private[this] def buildServer(bldr: ServerBuilder[SB] forSome { type SB <: ServerBuilder[SB] }, configList: List[GrpcConfig]): Server = {
     configList
-      .foldLeft(acc) { (acc, cfg) =>
-        SBuilder(acc)(cfg)
+      .foldLeft(bldr) { (bldr, cfg) =>
+        SBuilder(bldr)(cfg)
       }
       .build()
   }
 
-  private[server] def buildNettyConfig(
-      acc: NettyServerBuilder,
+  private[this] def buildNettyServer(
+      bldr: NettyServerBuilder,
       configList: List[GrpcConfig]): Server = {
     configList
-      .foldLeft(acc) { (acc, cfg) =>
-        (SBuilder(acc) orElse NettySBuilder(acc))(cfg)
+      .foldLeft(bldr) { (bldr, cfg) =>
+        (SBuilder(bldr) orElse NettySBuilder(bldr))(cfg)
       }
       .build()
   }
+
+  private[this] def nettyBuilder(initConfig: ChannelFor): NettyServerBuilder =
+    initConfig match {
+      case ChannelForPort(port)        => NettyServerBuilder.forPort(port)
+      case ChannelForSocketAddress(sa) => NettyServerBuilder.forAddress(sa)
+      case e =>
+        throw new IllegalArgumentException(s"ManagedChannel not supported for $e")
+    }
 
 }
