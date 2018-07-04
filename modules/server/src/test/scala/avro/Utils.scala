@@ -34,6 +34,7 @@ object Utils extends CommonUtils {
   case class RequestSuperCoproduct[A](a: A :+: Int :+: String :+: Boolean :+: CNil)
   case class RequestCoproductNoInt[A](
       b: A :+: String :+: CNil = Coproduct[A :+: String :+: CNil](""))
+  case class RequestCoproductReplaced[A](a: A :+: Int :+: Boolean :+: CNil)
 
   case class Response(a: String, b: Int = 123)
   case class ResponseAddedBoolean(a: String, b: Int, c: Boolean)
@@ -50,6 +51,8 @@ object Utils extends CommonUtils {
   val request                   = Request("foo", 123)
   def requestCoproduct[A](a: A) = RequestCoproduct(Coproduct[A :+: Int :+: String :+: CNil](a))
   val requestCoproductInt       = RequestCoproduct(Coproduct[Request :+: Int :+: String :+: CNil](1))
+  val requestCoproductString = RequestCoproduct(
+    Coproduct[Request :+: Int :+: String :+: CNil]("hi"))
 
   val response                        = Response("foo", 123)
   val responseAddedBoolean            = ResponseAddedBoolean(response.a, response.b, true)
@@ -102,6 +105,13 @@ object Utils extends CommonUtils {
     @service(AvroWithSchema)
     trait RPCService[F[_]] {
       def getCoproduct(a: RequestCoproductNoInt[Request]): F[ResponseCoproduct[Response]]
+    }
+  }
+
+  object serviceRequestReplacedCoproductItem {
+    @service(AvroWithSchema)
+    trait RPCService[F[_]] {
+      def getCoproduct(a: RequestCoproductReplaced[Request]): F[ResponseCoproduct[Response]]
     }
   }
 
@@ -220,6 +230,12 @@ object Utils extends CommonUtils {
         Effect[F].delay(responseCoproduct(response))
     }
 
+    class RequestReplacedCoproductItemRPCServiceHandler[F[_]: Effect]
+        extends serviceRequestReplacedCoproductItem.RPCService[F] {
+      def getCoproduct(a: RequestCoproductReplaced[Request]): F[ResponseCoproduct[Response]] =
+        Effect[F].delay(responseCoproduct(response))
+    }
+
     class RequestDroppedFieldRPCServiceHandler[F[_]: Effect]
         extends serviceRequestDroppedField.RPCService[F] {
       def get(a: RequestDroppedField): F[Response] = Effect[F].delay(response)
@@ -311,6 +327,10 @@ object Utils extends CommonUtils {
     implicit val requestRemovedCoproductItemRPCServiceHandler: serviceRequestRemovedCoproductItem.RPCService[
       ConcurrentMonad] =
       new RequestRemovedCoproductItemRPCServiceHandler[ConcurrentMonad]
+
+    implicit val requestReplacedCoproductItemRPCServiceHandler: serviceRequestReplacedCoproductItem.RPCService[
+      ConcurrentMonad] =
+      new RequestReplacedCoproductItemRPCServiceHandler[ConcurrentMonad]
 
     implicit val requestDroppedFieldRPCServiceHandler: serviceRequestDroppedField.RPCService[
       ConcurrentMonad] =
