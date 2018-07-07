@@ -47,6 +47,7 @@ object Utils extends CommonUtils {
       a: A :+: Int :+: String :+: CNil = Coproduct[A :+: Int :+: String :+: CNil](0),
       b: A :+: Int :+: String :+: Boolean :+: CNil)
   case class ResponseCoproductNoInt[A](a: A :+: String :+: CNil)
+  case class ResponseCoproductReplaced[A](a: A :+: Int :+: Boolean :+: CNil)
 
   val request                   = Request("foo", 123)
   def requestCoproduct[A](a: A) = RequestCoproduct(Coproduct[A :+: Int :+: String :+: CNil](a))
@@ -61,6 +62,7 @@ object Utils extends CommonUtils {
   val responseDroppedField            = ResponseDroppedField(response.a)
   def responseCoproduct[A](a: A)      = ResponseCoproduct(Coproduct[A :+: Int :+: String :+: CNil](a))
   def responseCoproductNoInt[A](a: A) = ResponseCoproductNoInt(Coproduct[A :+: String :+: CNil](a))
+  //def responseCoproductReplaced[A](a: A)      = ResponseCoproduct(Coproduct[A :+: Int :+: String :+: CNil](a))
 
   //Original Service
 
@@ -167,6 +169,13 @@ object Utils extends CommonUtils {
     }
   }
 
+  object serviceResponseReplacedCoproduct {
+    @service(AvroWithSchema)
+    trait RPCService[F[_]] {
+      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproductReplaced[Response]]
+    }
+  }
+
   object serviceResponseReplacedType {
     @service(AvroWithSchema)
     trait RPCService[F[_]] {
@@ -270,6 +279,12 @@ object Utils extends CommonUtils {
         Effect[F].delay(
           ResponseSuperCoproduct(
             b = Coproduct[Response :+: Int :+: String :+: Boolean :+: CNil](true)))
+    }
+
+    class ResponseRemovedIntCoproductRPCServiceHandler[F[_]: Effect]
+        extends serviceResponseRemovedIntCoproduct.RPCService[F] {
+      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproductNoInt[Response]] =
+        Effect[F].delay(responseCoproductNoInt(response))
     }
 
     class ResponseRemovedIntCoproductRPCServiceHandler[F[_]: Effect]
