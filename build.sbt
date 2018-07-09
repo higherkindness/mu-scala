@@ -73,6 +73,12 @@ lazy val `client-okhttp` = project
   .settings(clientOkHttpSettings)
   .disablePlugins(ScriptedPlugin)
 
+lazy val `client-cache` = project
+  .in(file("modules/client-cache"))
+  .settings(moduleName := "frees-rpc-client-cache")
+  .settings(clientCacheSettings)
+  .disablePlugins(ScriptedPlugin)
+
 ////////////////
 //// SERVER ////
 ////////////////
@@ -273,6 +279,7 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   common,
   internal,
   client,
+  `client-cache`,
   `client-netty`,
   `client-okhttp`,
   server,
