@@ -21,9 +21,11 @@ object ProjectPlugin extends AutoPlugin {
     lazy val V = new {
       val avro4s: String             = "1.8.3"
       val avrohugger: String         = "1.0.0-RC10"
+      val betterMonadicFor: String   = "0.2.4"
       val catsEffect: String         = "0.10.1"
       val circe: String              = "0.9.3"
       val frees: String              = "0.8.1"
+      val fs2: String                = "0.10.5"
       val fs2ReactiveStreams: String = "0.5.1"
       val grpc: String               = "1.11.0"
       val log4s: String              = "1.6.1"
@@ -50,6 +52,7 @@ object ProjectPlugin extends AutoPlugin {
         %%("monix", V.monix),
         %%("monocle-core", V.monocle),
         %%("fs2-reactive-streams", V.fs2ReactiveStreams),
+        %%("fs2-core", V.fs2),
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
@@ -76,6 +79,15 @@ object ProjectPlugin extends AutoPlugin {
     lazy val clientOkHttpSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %("grpc-okhttp", V.grpc)
+      )
+    )
+
+    lazy val clientCacheSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("log4s", V.log4s),
+        %%("fs2-core", V.fs2),
+        %%("cats-effect", V.catsEffect),
+        compilerPlugin("com.olegpy" %% "better-monadic-for" % V.betterMonadicFor)
       )
     )
 
