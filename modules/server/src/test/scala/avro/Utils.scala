@@ -26,30 +26,46 @@ object Utils extends CommonUtils {
 
   case class Request(a: String = "foo", b: Int = 123)
   case class RequestAddedBoolean(a: String, b: Int, c: Boolean = true)
-  case class RequestAddedString(a: String, b: Int, c: String = "bar")
-  case class RequestAddedInt(a: String, b: Int, c: Int = 456)
-  case class RequestAddedNestedRequest(a: String, b: Int, c: Request = Request("bar", 456))
+  case class RequestAddedOptionalBoolean(a: String, b: Int, c: Option[Boolean] = None)
   case class RequestDroppedField(a: String)
-  case class RequestCoproduct[A](a: A :+: CNil)
+  case class RequestReplacedType(a: String, c: Boolean = true)
+  case class RequestRenamedField(a: String, c: Int = 0)
+  case class RequestCoproduct[A](a: A :+: Int :+: String :+: CNil)
+  case class RequestSuperCoproduct[A](a: A :+: Int :+: String :+: Boolean :+: CNil)
+  case class RequestCoproductNoInt[A](
+      b: A :+: String :+: CNil = Coproduct[A :+: String :+: CNil](""))
+  case class RequestCoproductReplaced[A](a: A :+: Int :+: Boolean :+: CNil)
 
   case class Response(a: String, b: Int = 123)
   case class ResponseAddedBoolean(a: String, b: Int, c: Boolean)
-  case class ResponseAddedString(a: String, b: Int, c: String)
-  case class ResponseAddedInt(a: String, b: Int, c: Int)
-  case class ResponseAddedNestedResponse(a: String, b: Int, c: Response)
+  case class ResponseAddedOptionalBoolean(a: String, b: Int, c: Option[Boolean])
+  case class ResponseReplacedType(a: String, b: Int = 123, c: Boolean)
+  case class ResponseRenamedField(a: String, b: Int = 123, c: Int)
   case class ResponseDroppedField(a: String)
-  case class ResponseCoproduct[A](a: A :+: CNil)
+  case class ResponseCoproduct[A](a: A :+: Int :+: String :+: CNil)
+  case class ResponseSuperCoproduct[A](
+      a: A :+: Int :+: String :+: CNil = Coproduct[A :+: Int :+: String :+: CNil](0),
+      b: A :+: Int :+: String :+: Boolean :+: CNil)
+  case class ResponseCoproductNoInt[A](a: A :+: String :+: CNil)
+  case class ResponseCoproductReplaced[A](a: A :+: Int :+: Boolean :+: CNil)
 
   val request                   = Request("foo", 123)
-  def requestCoproduct[A](a: A) = RequestCoproduct(Coproduct[A :+: CNil](a))
+  def requestCoproduct[A](a: A) = RequestCoproduct(Coproduct[A :+: Int :+: String :+: CNil](a))
+  val requestCoproductInt       = RequestCoproduct(Coproduct[Request :+: Int :+: String :+: CNil](1))
+  val requestCoproductString = RequestCoproduct(
+    Coproduct[Request :+: Int :+: String :+: CNil]("hi"))
 
-  val response                    = Response("foo", 123)
-  val responseAddedBoolean        = ResponseAddedBoolean(response.a, response.b, true)
-  val responseAddedString         = ResponseAddedString(response.a, response.b, "bar")
-  val responseAddedInt            = ResponseAddedInt(response.a, response.b, 456)
-  val responseAddedNestedResponse = ResponseAddedNestedResponse(response.a, response.b, response)
-  val responseDroppedField        = ResponseDroppedField(response.a)
-  def responseCoproduct[A](a: A)  = ResponseCoproduct(Coproduct[A :+: CNil](a))
+  val response                        = Response("foo", 123)
+  val responseAddedBoolean            = ResponseAddedBoolean(response.a, response.b, true)
+  val responseReplacedType            = ResponseReplacedType(a = response.a, c = true)
+  val responseRenamedField            = ResponseRenamedField(a = response.a, c = 456)
+  val responseDroppedField            = ResponseDroppedField(response.a)
+  def responseCoproduct[A](a: A)      = ResponseCoproduct(Coproduct[A :+: Int :+: String :+: CNil](a))
+  def responseCoproductNoInt[A](a: A) = ResponseCoproductNoInt(Coproduct[A :+: String :+: CNil](a))
+  def responseCoproductReplaced[A](a: A) =
+    ResponseCoproductReplaced(Coproduct[A :+: Int :+: Boolean :+: CNil](a))
+
+  //Original Service
 
   object service {
     @service(AvroWithSchema)
@@ -60,6 +76,8 @@ object Utils extends CommonUtils {
     }
   }
 
+  //Updated request services
+
   object serviceRequestAddedBoolean {
     @service(AvroWithSchema)
     trait RPCService[F[_]] {
@@ -69,31 +87,34 @@ object Utils extends CommonUtils {
     }
   }
 
-  object serviceRequestAddedString {
+  object serviceRequestAddedOptionalBoolean {
     @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      def get(a: RequestAddedString): F[Response]
-
-      def getCoproduct(a: RequestCoproduct[RequestAddedString]): F[ResponseCoproduct[Response]]
-    }
-  }
-
-  object serviceRequestAddedInt {
-    @service(AvroWithSchema)
-    trait RPCService[F[_]] {
-      def get(a: RequestAddedInt): F[Response]
-
-      def getCoproduct(a: RequestCoproduct[RequestAddedInt]): F[ResponseCoproduct[Response]]
-    }
-  }
-
-  object serviceRequestAddedNestedRequest {
-    @service(AvroWithSchema)
-    trait RPCService[F[_]] {
-      def get(a: RequestAddedNestedRequest): F[Response]
+      def get(a: RequestAddedOptionalBoolean): F[Response]
 
       def getCoproduct(
-          a: RequestCoproduct[RequestAddedNestedRequest]): F[ResponseCoproduct[Response]]
+          a: RequestCoproduct[RequestAddedOptionalBoolean]): F[ResponseCoproduct[Response]]
+    }
+  }
+
+  object serviceRequestAddedCoproductItem {
+    @service(AvroWithSchema)
+    trait RPCService[F[_]] {
+      def getCoproduct(a: RequestSuperCoproduct[Request]): F[ResponseCoproduct[Response]]
+    }
+  }
+
+  object serviceRequestRemovedCoproductItem {
+    @service(AvroWithSchema)
+    trait RPCService[F[_]] {
+      def getCoproduct(a: RequestCoproductNoInt[Request]): F[ResponseCoproduct[Response]]
+    }
+  }
+
+  object serviceRequestReplacedCoproductItem {
+    @service(AvroWithSchema)
+    trait RPCService[F[_]] {
+      def getCoproduct(a: RequestCoproductReplaced[Request]): F[ResponseCoproduct[Response]]
     }
   }
 
@@ -106,6 +127,26 @@ object Utils extends CommonUtils {
     }
   }
 
+  object serviceRequestReplacedType {
+    @service(AvroWithSchema)
+    trait RPCService[F[_]] {
+      def get(a: RequestReplacedType): F[Response]
+
+      def getCoproduct(a: RequestCoproduct[RequestReplacedType]): F[ResponseCoproduct[Response]]
+    }
+  }
+
+  object serviceRequestRenamedField {
+    @service(AvroWithSchema)
+    trait RPCService[F[_]] {
+      def get(a: RequestRenamedField): F[Response]
+
+      def getCoproduct(a: RequestCoproduct[RequestRenamedField]): F[ResponseCoproduct[Response]]
+    }
+  }
+
+  //Updated response services
+
   object serviceResponseAddedBoolean {
     @service(AvroWithSchema)
     trait RPCService[F[_]] {
@@ -115,31 +156,42 @@ object Utils extends CommonUtils {
     }
   }
 
-  object serviceResponseAddedString {
+  object serviceResponseAddedBooleanCoproduct {
     @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      def get(a: Request): F[ResponseAddedString]
-
-      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseAddedString]]
+      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseSuperCoproduct[Response]]
     }
   }
 
-  object serviceResponseAddedInt {
+  object serviceResponseRemovedIntCoproduct {
     @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      def get(a: Request): F[ResponseAddedInt]
-
-      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseAddedInt]]
+      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproductNoInt[Response]]
     }
   }
 
-  object serviceResponseAddedNestedResponse {
+  object serviceResponseReplacedCoproduct {
     @service(AvroWithSchema)
     trait RPCService[F[_]] {
-      def get(a: Request): F[ResponseAddedNestedResponse]
+      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproductReplaced[Response]]
+    }
+  }
 
-      def getCoproduct(
-          a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseAddedNestedResponse]]
+  object serviceResponseReplacedType {
+    @service(AvroWithSchema)
+    trait RPCService[F[_]] {
+      def get(a: Request): F[ResponseReplacedType]
+
+      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseReplacedType]]
+    }
+  }
+
+  object serviceResponseRenamedField {
+    @service(AvroWithSchema)
+    trait RPCService[F[_]] {
+      def get(a: Request): F[ResponseRenamedField]
+
+      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseRenamedField]]
     }
   }
 
@@ -157,7 +209,8 @@ object Utils extends CommonUtils {
     class RPCServiceHandler[F[_]: Effect] extends service.RPCService[F] {
       def get(a: Request): F[Response] = Effect[F].delay(response)
       def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproduct[Response]] =
-        Effect[F].delay(ResponseCoproduct(Coproduct[Response :+: CNil](response)))
+        Effect[F].delay(
+          ResponseCoproduct(Coproduct[Response :+: Int :+: String :+: CNil](response)))
     }
 
     class RequestAddedBooleanRPCServiceHandler[F[_]: Effect]
@@ -167,25 +220,29 @@ object Utils extends CommonUtils {
         Effect[F].delay(responseCoproduct(response))
     }
 
-    class RequestAddedStringRPCServiceHandler[F[_]: Effect]
-        extends serviceRequestAddedString.RPCService[F] {
-      def get(a: RequestAddedString): F[Response] = Effect[F].delay(response)
-      def getCoproduct(a: RequestCoproduct[RequestAddedString]): F[ResponseCoproduct[Response]] =
-        Effect[F].delay(responseCoproduct(response))
-    }
-
-    class RequestAddedIntRPCServiceHandler[F[_]: Effect]
-        extends serviceRequestAddedInt.RPCService[F] {
-      def get(a: RequestAddedInt): F[Response] = Effect[F].delay(response)
-      def getCoproduct(a: RequestCoproduct[RequestAddedInt]): F[ResponseCoproduct[Response]] =
-        Effect[F].delay(responseCoproduct(response))
-    }
-
-    class RequestAddedNestedRequestRPCServiceHandler[F[_]: Effect]
-        extends serviceRequestAddedNestedRequest.RPCService[F] {
-      def get(a: RequestAddedNestedRequest): F[Response] = Effect[F].delay(response)
+    class RequestAddedOptionalBooleanRPCServiceHandler[F[_]: Effect]
+        extends serviceRequestAddedOptionalBoolean.RPCService[F] {
+      def get(a: RequestAddedOptionalBoolean): F[Response] = Effect[F].delay(response)
       def getCoproduct(
-          a: RequestCoproduct[RequestAddedNestedRequest]): F[ResponseCoproduct[Response]] =
+          a: RequestCoproduct[RequestAddedOptionalBoolean]): F[ResponseCoproduct[Response]] =
+        Effect[F].delay(responseCoproduct(response))
+    }
+
+    class RequestAddedCoproductItemRPCServiceHandler[F[_]: Effect]
+        extends serviceRequestAddedCoproductItem.RPCService[F] {
+      def getCoproduct(a: RequestSuperCoproduct[Request]): F[ResponseCoproduct[Response]] =
+        Effect[F].delay(responseCoproduct(response))
+    }
+
+    class RequestRemovedCoproductItemRPCServiceHandler[F[_]: Effect]
+        extends serviceRequestRemovedCoproductItem.RPCService[F] {
+      def getCoproduct(a: RequestCoproductNoInt[Request]): F[ResponseCoproduct[Response]] =
+        Effect[F].delay(responseCoproduct(response))
+    }
+
+    class RequestReplacedCoproductItemRPCServiceHandler[F[_]: Effect]
+        extends serviceRequestReplacedCoproductItem.RPCService[F] {
+      def getCoproduct(a: RequestCoproductReplaced[Request]): F[ResponseCoproduct[Response]] =
         Effect[F].delay(responseCoproduct(response))
     }
 
@@ -196,6 +253,20 @@ object Utils extends CommonUtils {
         Effect[F].delay(responseCoproduct(response))
     }
 
+    class RequestReplacedTypeRPCServiceHandler[F[_]: Effect]
+        extends serviceRequestReplacedType.RPCService[F] {
+      def get(a: RequestReplacedType): F[Response] = Effect[F].delay(response)
+      def getCoproduct(a: RequestCoproduct[RequestReplacedType]): F[ResponseCoproduct[Response]] =
+        Effect[F].delay(responseCoproduct(response))
+    }
+
+    class RequestRenamedFieldRPCServiceHandler[F[_]: Effect]
+        extends serviceRequestRenamedField.RPCService[F] {
+      def get(a: RequestRenamedField): F[Response] = Effect[F].delay(response)
+      def getCoproduct(a: RequestCoproduct[RequestRenamedField]): F[ResponseCoproduct[Response]] =
+        Effect[F].delay(responseCoproduct(response))
+    }
+
     class ResponseAddedBooleanRPCServiceHandler[F[_]: Effect]
         extends serviceResponseAddedBoolean.RPCService[F] {
       def get(a: Request): F[ResponseAddedBoolean] = Effect[F].delay(responseAddedBoolean)
@@ -203,27 +274,38 @@ object Utils extends CommonUtils {
         Effect[F].delay(responseCoproduct(responseAddedBoolean))
     }
 
-    class ResponseAddedStringRPCServiceHandler[F[_]: Effect]
-        extends serviceResponseAddedString.RPCService[F] {
-      def get(a: Request): F[ResponseAddedString] = Effect[F].delay(responseAddedString)
-      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseAddedString]] =
-        Effect[F].delay(responseCoproduct(responseAddedString))
+    class ResponseAddedBooleanCoproductRPCServiceHandler[F[_]: Effect]
+        extends serviceResponseAddedBooleanCoproduct.RPCService[F] {
+      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseSuperCoproduct[Response]] =
+        Effect[F].delay(
+          ResponseSuperCoproduct(
+            b = Coproduct[Response :+: Int :+: String :+: Boolean :+: CNil](true)))
     }
 
-    class ResponseAddedIntRPCServiceHandler[F[_]: Effect]
-        extends serviceResponseAddedInt.RPCService[F] {
-      def get(a: Request): F[ResponseAddedInt] = Effect[F].delay(responseAddedInt)
-      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseAddedInt]] =
-        Effect[F].delay(responseCoproduct(responseAddedInt))
+    class ResponseRemovedIntCoproductRPCServiceHandler[F[_]: Effect]
+        extends serviceResponseRemovedIntCoproduct.RPCService[F] {
+      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproductNoInt[Response]] =
+        Effect[F].delay(responseCoproductNoInt(response))
     }
 
-    class ResponseAddedNestedResponseRPCServiceHandler[F[_]: Effect]
-        extends serviceResponseAddedNestedResponse.RPCService[F] {
-      def get(a: Request): F[ResponseAddedNestedResponse] =
-        Effect[F].delay(responseAddedNestedResponse)
-      def getCoproduct(
-          a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseAddedNestedResponse]] =
-        Effect[F].delay(responseCoproduct(responseAddedNestedResponse))
+    class ResponseReplacedCoproductRPCServiceHandler[F[_]: Effect]
+        extends serviceResponseReplacedCoproduct.RPCService[F] {
+      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproductReplaced[Response]] =
+        Effect[F].delay(responseCoproductReplaced(response))
+    }
+
+    class ResponseReplacedTypeRPCServiceHandler[F[_]: Effect]
+        extends serviceResponseReplacedType.RPCService[F] {
+      def get(a: Request): F[ResponseReplacedType] = Effect[F].delay(responseReplacedType)
+      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseReplacedType]] =
+        Effect[F].delay(responseCoproduct(responseReplacedType))
+    }
+
+    class ResponseRenamedFieldRPCServiceHandler[F[_]: Effect]
+        extends serviceResponseRenamedField.RPCService[F] {
+      def get(a: Request): F[ResponseRenamedField] = Effect[F].delay(responseRenamedField)
+      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproduct[ResponseRenamedField]] =
+        Effect[F].delay(responseCoproduct(responseRenamedField))
     }
 
     class ResponseDroppedFieldRPCServiceHandler[F[_]: Effect]
@@ -250,37 +332,57 @@ object Utils extends CommonUtils {
       ConcurrentMonad] =
       new RequestAddedBooleanRPCServiceHandler[ConcurrentMonad]
 
-    implicit val requestAddedStringRPCServiceHandler: serviceRequestAddedString.RPCService[
+    implicit val requestAddedOptionalBooleanRPCServiceHandler: serviceRequestAddedOptionalBoolean.RPCService[
       ConcurrentMonad] =
-      new RequestAddedStringRPCServiceHandler[ConcurrentMonad]
+      new RequestAddedOptionalBooleanRPCServiceHandler[ConcurrentMonad]
 
-    implicit val requestAddedIntRPCServiceHandler: serviceRequestAddedInt.RPCService[
+    implicit val requestAddedCoproductItemRPCServiceHandler: serviceRequestAddedCoproductItem.RPCService[
       ConcurrentMonad] =
-      new RequestAddedIntRPCServiceHandler[ConcurrentMonad]
+      new RequestAddedCoproductItemRPCServiceHandler[ConcurrentMonad]
 
-    implicit val requestAddedNestedRequestRPCServiceHandler: serviceRequestAddedNestedRequest.RPCService[
+    implicit val requestRemovedCoproductItemRPCServiceHandler: serviceRequestRemovedCoproductItem.RPCService[
       ConcurrentMonad] =
-      new RequestAddedNestedRequestRPCServiceHandler[ConcurrentMonad]
+      new RequestRemovedCoproductItemRPCServiceHandler[ConcurrentMonad]
+
+    implicit val requestReplacedCoproductItemRPCServiceHandler: serviceRequestReplacedCoproductItem.RPCService[
+      ConcurrentMonad] =
+      new RequestReplacedCoproductItemRPCServiceHandler[ConcurrentMonad]
 
     implicit val requestDroppedFieldRPCServiceHandler: serviceRequestDroppedField.RPCService[
       ConcurrentMonad] =
       new RequestDroppedFieldRPCServiceHandler[ConcurrentMonad]
 
+    implicit val requestReplacedTypeRPCServiceHandler: serviceRequestReplacedType.RPCService[
+      ConcurrentMonad] =
+      new RequestReplacedTypeRPCServiceHandler[ConcurrentMonad]
+
+    implicit val requestRenamedFieldRPCServiceHandler: serviceRequestRenamedField.RPCService[
+      ConcurrentMonad] =
+      new RequestRenamedFieldRPCServiceHandler[ConcurrentMonad]
+
     implicit val responseAddedBooleanRPCServiceHandler: serviceResponseAddedBoolean.RPCService[
       ConcurrentMonad] =
       new ResponseAddedBooleanRPCServiceHandler[ConcurrentMonad]
 
-    implicit val responseAddedStringRPCServiceHandler: serviceResponseAddedString.RPCService[
+    implicit val responseAddedBooleanCoproductRPCServiceHandler: serviceResponseAddedBooleanCoproduct.RPCService[
       ConcurrentMonad] =
-      new ResponseAddedStringRPCServiceHandler[ConcurrentMonad]
+      new ResponseAddedBooleanCoproductRPCServiceHandler[ConcurrentMonad]
 
-    implicit val responseAddedIntRPCServiceHandler: serviceResponseAddedInt.RPCService[
+    implicit val responseRemovedIntCoproductRPCServiceHandler: serviceResponseRemovedIntCoproduct.RPCService[
       ConcurrentMonad] =
-      new ResponseAddedIntRPCServiceHandler[ConcurrentMonad]
+      new ResponseRemovedIntCoproductRPCServiceHandler[ConcurrentMonad]
 
-    implicit val responseAddedNestedResponseRPCServiceHandler: serviceResponseAddedNestedResponse.RPCService[
+    implicit val responseReplacedCoproductRPCServiceHandler: serviceResponseReplacedCoproduct.RPCService[
       ConcurrentMonad] =
-      new ResponseAddedNestedResponseRPCServiceHandler[ConcurrentMonad]
+      new ResponseReplacedCoproductRPCServiceHandler[ConcurrentMonad]
+
+    implicit val responseReplacedTypeRPCServiceHandler: serviceResponseReplacedType.RPCService[
+      ConcurrentMonad] =
+      new ResponseReplacedTypeRPCServiceHandler[ConcurrentMonad]
+
+    implicit val responseRenamedFieldRPCServiceHandler: serviceResponseRenamedField.RPCService[
+      ConcurrentMonad] =
+      new ResponseRenamedFieldRPCServiceHandler[ConcurrentMonad]
 
     implicit val responseDroppedFieldRPCServiceHandler: serviceResponseDroppedField.RPCService[
       ConcurrentMonad] =
