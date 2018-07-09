@@ -49,29 +49,29 @@ You can install any of these dependencies in your build as follows:
 
 ```scala
 // required for the RPC Server:
-libraryDependencies += "io.frees" %% "frees-rpc-server"            % "0.13.7"
+libraryDependencies += "io.frees" %% "frees-rpc-server"            % "0.14.0"
 
 // required for a protocol definition:
-libraryDependencies += "io.frees" %% "frees-rpc-client-core"       % "0.13.7"
+libraryDependencies += "io.frees" %% "frees-rpc-client-core"       % "0.14.0"
 
 // required for the use of the derived RPC Client/s, using either Netty or OkHttp as transport layer:
-libraryDependencies += "io.frees" %% "frees-rpc-client-netty"      % "0.13.7"
+libraryDependencies += "io.frees" %% "frees-rpc-client-netty"      % "0.14.0"
 // or:
-libraryDependencies += "io.frees" %% "frees-rpc-client-okhttp"     % "0.13.7"
+libraryDependencies += "io.frees" %% "frees-rpc-client-okhttp"     % "0.14.0"
 
 // optional - for both server and client configuration.
-libraryDependencies += "io.frees" %% "frees-rpc-config"            % "0.13.7"
+libraryDependencies += "io.frees" %% "frees-rpc-config"            % "0.14.0"
 
 // optional - for both server and client metrics reporting, using Prometheus.
-libraryDependencies += "io.frees" %% "frees-rpc-prometheus-server" % "0.13.7"
-libraryDependencies += "io.frees" %% "frees-rpc-prometheus-client" % "0.13.7"
+libraryDependencies += "io.frees" %% "frees-rpc-prometheus-server" % "0.14.0"
+libraryDependencies += "io.frees" %% "frees-rpc-prometheus-client" % "0.14.0"
 
 // optional - for both server and client metrics reporting, using Dropwizard.
-libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-server" % "0.13.7"
-libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-client" % "0.13.7"
+libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-server" % "0.14.0"
+libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-client" % "0.14.0"
 
 // optional - for the communication between server and client by using SSL/TLS.
-libraryDependencies += "io.frees" %% "frees-rpc-netty-ssl" % "0.13.7"
+libraryDependencies += "io.frees" %% "frees-rpc-netty-ssl" % "0.14.0"
 ```
 
 [comment]: # (End Replace)
