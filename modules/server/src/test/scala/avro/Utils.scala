@@ -62,7 +62,8 @@ object Utils extends CommonUtils {
   val responseDroppedField            = ResponseDroppedField(response.a)
   def responseCoproduct[A](a: A)      = ResponseCoproduct(Coproduct[A :+: Int :+: String :+: CNil](a))
   def responseCoproductNoInt[A](a: A) = ResponseCoproductNoInt(Coproduct[A :+: String :+: CNil](a))
-  //def responseCoproductReplaced[A](a: A)      = ResponseCoproduct(Coproduct[A :+: Int :+: String :+: CNil](a))
+  def responseCoproductReplaced[A](a: A) =
+    ResponseCoproductReplaced(Coproduct[A :+: Int :+: Boolean :+: CNil](a))
 
   //Original Service
 
@@ -287,10 +288,10 @@ object Utils extends CommonUtils {
         Effect[F].delay(responseCoproductNoInt(response))
     }
 
-    class ResponseRemovedIntCoproductRPCServiceHandler[F[_]: Effect]
-        extends serviceResponseRemovedIntCoproduct.RPCService[F] {
-      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproductNoInt[Response]] =
-        Effect[F].delay(responseCoproductNoInt(response))
+    class ResponseReplacedCoproductRPCServiceHandler[F[_]: Effect]
+        extends serviceResponseReplacedCoproduct.RPCService[F] {
+      def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproductReplaced[Response]] =
+        Effect[F].delay(responseCoproductReplaced(response))
     }
 
     class ResponseReplacedTypeRPCServiceHandler[F[_]: Effect]
@@ -370,6 +371,10 @@ object Utils extends CommonUtils {
     implicit val responseRemovedIntCoproductRPCServiceHandler: serviceResponseRemovedIntCoproduct.RPCService[
       ConcurrentMonad] =
       new ResponseRemovedIntCoproductRPCServiceHandler[ConcurrentMonad]
+
+    implicit val responseReplacedCoproductRPCServiceHandler: serviceResponseReplacedCoproduct.RPCService[
+      ConcurrentMonad] =
+      new ResponseReplacedCoproductRPCServiceHandler[ConcurrentMonad]
 
     implicit val responseReplacedTypeRPCServiceHandler: serviceResponseReplacedType.RPCService[
       ConcurrentMonad] =

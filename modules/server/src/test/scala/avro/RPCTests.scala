@@ -183,6 +183,15 @@ class RPCTests extends RpcBaseTestSuite {
       }
     }
 
+    "replace an item in a coproduct, and" should {
+      "be able to provide a compatible response" in {
+        runSucceedAssertion(
+          serviceResponseReplacedCoproduct.RPCService.bindService[ConcurrentMonad],
+          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
+      }
+
+    }
+
     "change the type of a field, and" should {
       "be able to provide a compatible response" in {
         runSucceedAssertion(
