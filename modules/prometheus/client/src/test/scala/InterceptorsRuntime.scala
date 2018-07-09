@@ -40,23 +40,40 @@ case class InterceptorsRuntime(
   //////////////////////////////////
 
   lazy val grpcConfigs: List[GrpcConfig] = List(
-    AddService(RPCService.bindService[ConcurrentMonad])
+    AddService(ProtoRPCService.bindService[ConcurrentMonad]),
+    AddService(AvroRPCService.bindService[ConcurrentMonad]),
+    AddService(AvroWithSchemaRPCService.bindService[ConcurrentMonad])
   )
 
-  implicit lazy val serverW: ServerW = createServerConfOnRandomPort(grpcConfigs)
+  implicit lazy val grpcServer: GrpcServer[ConcurrentMonad] =
+    createServerConfOnRandomPort[ConcurrentMonad](grpcConfigs).unsafeRunSync
 
   implicit lazy val freesRPCHandler: ServerRPCService[ConcurrentMonad] =
     new ServerRPCService[ConcurrentMonad]
 
   implicit val CR: CollectorRegistry = cr
+  val configList = List(
+    UsePlaintext(),
+    AddInterceptor(MonitoringClientInterceptor(configuration.withCollectorRegistry(cr)))
+  )
 
-  implicit lazy val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
-    RPCService.client[ConcurrentMonad](
+  implicit lazy val freesProtoRPCServiceClient: ProtoRPCService.Client[ConcurrentMonad] =
+    ProtoRPCService.client[ConcurrentMonad](
       channelFor = createChannelForPort(pickUnusedPort),
-      channelConfigList = List(
-        UsePlaintext(),
-        AddInterceptor(MonitoringClientInterceptor(configuration.withCollectorRegistry(cr)))
-      )
+      channelConfigList = configList
+    )
+
+  implicit lazy val freesAvroRPCServiceClient: AvroRPCService.Client[ConcurrentMonad] =
+    AvroRPCService.client[ConcurrentMonad](
+      channelFor = createChannelForPort(pickUnusedPort),
+      channelConfigList = configList
+    )
+
+  implicit lazy val freesAvroWithSchemaRPCServiceClient: AvroWithSchemaRPCService.Client[
+    ConcurrentMonad] =
+    AvroWithSchemaRPCService.client[ConcurrentMonad](
+      channelFor = createChannelForPort(pickUnusedPort),
+      channelConfigList = configList
     )
 
   implicit lazy val freesRPCServiceClientHandler: FreesRPCServiceClientHandler[ConcurrentMonad] =

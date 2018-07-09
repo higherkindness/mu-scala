@@ -44,29 +44,23 @@ object service {
   @message
   case class HelloResponse(reply: String)
 
-  @service
-  trait Greeter[F[_]] {
+  @service(Protobuf)
+  trait ProtoGreeter[F[_]] {
 
-    @rpc(Protobuf)
     def sayHello(request: HelloRequest): F[HelloResponse]
-     
-    @rpc(Avro)
-    def sayHelloAvro(request: HelloRequest): F[HelloResponse]
 
-    @rpc(Protobuf)
-    @stream[ResponseStreaming.type]
     def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
 
-    @rpc(Protobuf)
-    @stream[RequestStreaming.type]
     def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse]
 
-    @rpc(Protobuf)
-    @stream[BidirectionalStreaming.type]
     def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
     
   }
   
+  @service(Avro)
+  trait AvroGreeter[F[_]] {
+    def sayHelloAvro(request: HelloRequest): F[HelloResponse]
+  }
 }
 ```
 
@@ -96,7 +90,7 @@ message HelloResponse {
   string reply = 1;
 }
 
-service Greeter {
+service ProtoGreeter {
   rpc SayHello (HelloRequest) returns (HelloResponse);
   rpc LotsOfReplies (HelloRequest) returns (stream HelloResponse);
   rpc LotsOfGreetings (stream HelloRequest) returns (HelloResponse);
@@ -203,7 +197,6 @@ import freestyle.rpc.protocol._
 
 @service trait GreeterService[F[_]] {
 
-  @rpc(Avro)
   def sayHelloAvro(arg: foo.bar.HelloRequest): F[foo.bar.HelloResponse]
 
 }
@@ -227,7 +220,7 @@ Just like `idlGen`, `srcGen` and `srcGenFromJars` has some configurable settings
   * All the definitions extracted from the different `jar` or `sbt` modules, and also,
   * All the source folders specified in the `srcGenSourceDirs` setting.
 * **`srcGenTargetDir`**: the Scala target base directory, where the `srcGen` task will write the Scala files in subdirectories/packages based on the namespaces of the IDL files. By default: `Compile / sourceManaged`, typically `target/scala-2.12/src_managed/main/`.
-* **`genOptions`**: additional options to add to the generated `@rpc` annotations, after the IDL type. Currently only supports `"Gzip"`.
+* **`genOptions`**: additional options to add to the generated `@service` annotations, after the IDL type. Currently only supports `"Gzip"`.
 
 The source directory must exist, otherwise, the `srcGen` task will fail. Target directories will be created upon generation.
 
@@ -264,9 +257,8 @@ The following example shows how to set up a dependency with another artifact or 
 [gRPC guide]: https://grpc.io/docs/guides/
 [@tagless algebra]: http://frees.io/docs/core/algebras/
 [PBDirect]: https://github.com/btlines/pbdirect
-[scalameta]: https://github.com/scalameta/scalameta
+[scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
 [Metrifier]: https://github.com/47deg/metrifier
-[frees-config]: http://frees.io/docs/patterns/config/
 [avrohugger]: https://github.com/julianpeeters/avrohugger

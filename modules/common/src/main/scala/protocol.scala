@@ -24,10 +24,6 @@ case object RequestStreaming       extends StreamingType
 case object ResponseStreaming      extends StreamingType
 case object BidirectionalStreaming extends StreamingType
 
-sealed trait StreamingImpl  extends Product with Serializable
-case object Fs2Stream       extends StreamingImpl
-case object MonixObservable extends StreamingImpl
-
 sealed trait SerializationType extends Product with Serializable
 case object Protobuf           extends SerializationType
 case object Avro               extends SerializationType
@@ -37,9 +33,6 @@ sealed abstract class CompressionType extends Product with Serializable
 case object Identity                  extends CompressionType
 case object Gzip                      extends CompressionType
 
-class rpc(val serializationType: SerializationType, val compressionType: CompressionType = Identity)
-    extends StaticAnnotation
-class stream[S <: StreamingType]       extends StaticAnnotation
 class message                          extends StaticAnnotation
 class option(name: String, value: Any) extends StaticAnnotation
 class outputPackage(value: String)     extends StaticAnnotation

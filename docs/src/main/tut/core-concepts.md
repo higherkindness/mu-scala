@@ -65,7 +65,7 @@ In the previous section, we’ve seen an overview of what [gRPC] offers for defi
 
 First things first, the main difference in respect to [gRPC] is that [frees-rpc] doesn’t need `.proto` files, but it still uses protobuf, thanks to the [PBDirect] library, which allows to read and write Scala objects directly to protobuf with no `.proto` file definitions. Therefore, in summary, we have:
 
-* Your protocols, both messages, and services, will reside with your business-logic in your Scala files using [scalameta] annotations to set them up. We’ll see more details on this shortly.
+* Your protocols, both messages, and services, will reside with your business-logic in your Scala files using [scalamacros] annotations to set them up. We’ll see more details on this shortly.
 * Instead of reading `.proto` files to set up the [RPC] messages and services, [frees-rpc] offers (as an optional feature) to generate them, based on your protocols defined in your Scala code. This feature is offered to maintain compatibility with other languages and systems outside of Scala. We'll check out this feature further in [this section](/docs/rpc/idl-generation).
 
 Let’s start looking at how to define the `Person` message that we saw previously.
@@ -110,7 +110,7 @@ object protocol {
   @message
   case class HelloReply(message: String)
 
-  @service
+  @service(Protobuf)
   trait Greeter[F[_]] {
 
     /**
@@ -119,7 +119,7 @@ object protocol {
      * @param request Say Hello Request.
      * @return HelloReply.
      */
-    @rpc(Protobuf) def sayHello(request: HelloRequest): F[HelloReply]
+    def sayHello(request: HelloRequest): F[HelloReply]
 
   }
 }
@@ -154,7 +154,7 @@ object protocol {
   @message
   case class HelloReply(message: String)
 
-  @service
+  @service(Protobuf)
   trait Greeter[F[_]] {
 
     /**
@@ -163,21 +163,20 @@ object protocol {
      * @param request Say Hello Request.
      * @return HelloReply.
      */
-    @rpc(Protobuf) def sayHello(request: HelloRequest): F[HelloReply]
+    def sayHello(request: HelloRequest): F[HelloReply]
 
-    @rpc(Protobuf) def emptyResponse(request: HelloRequest): F[Empty.type]
+    def emptyResponse(request: HelloRequest): F[Empty.type]
 
-    @rpc(Protobuf) def emptyRequest(request: Empty.type): F[HelloReply]
+    def emptyRequest(request: Empty.type): F[HelloReply]
 
-    @rpc(Protobuf) def emptyRequestRespose(request: Empty.type): F[Empty.type]
+    def emptyRequestRespose(request: Empty.type): F[Empty.type]
   }
 }
 ```
 
 We are also using some additional annotations:
 
-* `@service`: tags the trait as an [RPC] service, in order to derive server and client code (macro expansion).
-* `@rpc(Protobuf)`: indicates that the method is an RPC service. It receives as argument the type of serialization that will be used to encode/decode data, `Protocol Buffers` in the example. `Avro` is also supported as another type of serialization.
+* `@service(Protobuf)`: tags the trait as an [RPC] service, in order to derive server and client code (macro expansion). It receives as argument the type of serialization that will be used to encode/decode data, `Protocol Buffers` in the example. `Avro` is also supported as another type of serialization.
 
 We'll see more details about these and other annotations in the following sections.
 
@@ -194,7 +193,7 @@ Let's see an example of a unary service on the server side.
 ```tut:silent
 object service {
 
-  @service
+  @service(Protobuf)
   trait Greeter[F[_]] {
 
     /**
@@ -203,7 +202,7 @@ object service {
      * @param empty Client request.
      * @return empty server response.
      */
-    @rpc(Protobuf, Gzip) def emptyCompressed(empty: Empty.type): F[Empty.type] 
+    def emptyCompressed(empty: Empty.type): F[Empty.type]
 
   }
 
@@ -271,7 +270,7 @@ object service {
   @message
   case class HelloResponse(reply: String)
 
-  @service
+  @service(Protobuf)
   trait Greeter[F[_]] {
 
     /**
@@ -283,7 +282,6 @@ object service {
      * @param request Client request.
      * @return Server response.
      */
-    @rpc(Protobuf)
     def sayHello(request: HelloRequest): F[HelloResponse]
 
   }
@@ -291,7 +289,7 @@ object service {
 }
 ```
 
-Here `sayHello` is our unary RPC, where only the `@rpc` annotation is needed.
+Here `sayHello` is our unary RPC.
 
 In the `Streaming` section, we are going to see all the streaming options.
 
@@ -304,8 +302,8 @@ In the `Streaming` section, we are going to see all the streaming options.
 [gRPC guide]: https://grpc.io/docs/guides/
 [@tagless algebra]: http://frees.io/docs/core/algebras/
 [PBDirect]: https://github.com/btlines/pbdirect
-[scalameta]: https://github.com/scalameta/scalameta
+[scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
 [Metrifier]: https://github.com/47deg/metrifier
-[frees-config]: http://frees.io/docs/patterns/config/
+

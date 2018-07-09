@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
-package server
+package freestyle.rpc.internal
 
-import freestyle.rpc.server.netty.NettyServerConfigBuilder
-import io.grpc.Server
+import scala.reflect.runtime.universe.runtimeMirror
+import scala.tools.reflect.ToolBox
 
-case class ServerW(server: Server)
-
-object ServerW {
-
-  def default(port: Int, configList: List[GrpcConfig]): ServerW =
-    ServerW(SServerBuilder(port, configList).build)
-
-  def netty(port: Int, configList: List[GrpcConfig]): ServerW =
-    netty(ChannelForPort(port), configList)
-
-  def netty(channelFor: ChannelFor, configList: List[GrpcConfig]): ServerW =
-    ServerW(NettyServerConfigBuilder(channelFor, configList).build)
-
+package object util {
+  val mirror                                          = runtimeMirror(getClass.getClassLoader)
+  val Toolbox: ToolBox[reflect.runtime.universe.type] = ToolBox(mirror).mkToolBox()
 }

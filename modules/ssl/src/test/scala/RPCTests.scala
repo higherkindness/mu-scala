@@ -26,7 +26,6 @@ import freestyle.rpc.client.netty.{
 }
 import freestyle.rpc.common._
 import freestyle.rpc.server._
-import freestyle.rpc.server.implicits._
 import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.NegotiationType
 import org.scalatest._
@@ -45,8 +44,6 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     serverStop[ConcurrentMonad].unsafeRunSync()
 
   "frees-rpc server" should {
-
-    import freestyle.rpc.server.implicits._
 
     "allow to startup a server and check if it's alive" in {
 
@@ -82,11 +79,13 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         )
       )
 
-      val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
-        RPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+      val avroRpcService: AvroRPCService.Client[ConcurrentMonad] =
+        AvroRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+      val avroWithSchemaRpcService: AvroWithSchemaRPCService.Client[ConcurrentMonad] =
+        AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
 
-      freesRPCServiceClient.unary(a1).unsafeRunSync() shouldBe c1
-      freesRPCServiceClient.unaryWithSchema(a1).unsafeRunSync() shouldBe c1
+      avroRpcService.unary(a1).unsafeRunSync() shouldBe c1
+      avroWithSchemaRpcService.unaryWithSchema(a1).unsafeRunSync() shouldBe c1
 
     }
 
@@ -101,14 +100,15 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         )
       )
 
-      val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
-        RPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+      val avroRpcService: AvroRPCService.Client[ConcurrentMonad] =
+        AvroRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+      val avroWithSchemaRpcService: AvroWithSchemaRPCService.Client[ConcurrentMonad] =
+        AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+
+      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(avroRpcService.unary(a1).unsafeRunSync())
 
       a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
-        freesRPCServiceClient.unary(a1).unsafeRunSync())
-
-      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
-        freesRPCServiceClient.unaryWithSchema(a1).unsafeRunSync())
+        avroWithSchemaRpcService.unaryWithSchema(a1).unsafeRunSync())
 
     }
 
@@ -123,14 +123,15 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         )
       )
 
-      val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
-        RPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+      val avroRpcService: AvroRPCService.Client[ConcurrentMonad] =
+        AvroRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+      val avroWithSchemaRpcService: AvroWithSchemaRPCService.Client[ConcurrentMonad] =
+        AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+
+      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(avroRpcService.unary(a1).unsafeRunSync())
 
       a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
-        freesRPCServiceClient.unary(a1).unsafeRunSync())
-
-      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
-        freesRPCServiceClient.unaryWithSchema(a1).unsafeRunSync())
+        avroWithSchemaRpcService.unaryWithSchema(a1).unsafeRunSync())
 
     }
 

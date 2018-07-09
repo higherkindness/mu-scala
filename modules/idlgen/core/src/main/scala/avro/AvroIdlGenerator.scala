@@ -18,17 +18,25 @@ package freestyle.rpc.idlgen.avro
 
 import freestyle.rpc.idlgen._
 import freestyle.rpc.protocol._
+import freestyle.rpc.internal.util._
 import io.circe._
 import io.circe.generic.auto._
 import io.circe.syntax._
-import scala.meta._
 
-object AvroIdlGenerator extends AvroIdlGenerator { val serializationType: SerializationType = Avro }
+object AvroIdlGenerator extends AvroIdlGenerator {
+  val serializationType: SerializationType = Avro
+}
+
 object AvroWithSchemaIdlGenerator extends AvroIdlGenerator {
   val serializationType: SerializationType = AvroWithSchema
 }
 
 trait AvroIdlGenerator extends IdlGenerator {
+
+  import Toolbox.u._
+  import Model._
+  import AstOptics._
+  import StringUtil._
 
   val idlType: String       = avro.IdlType
   val outputSubdir: String  = "avro"
@@ -37,7 +45,7 @@ trait AvroIdlGenerator extends IdlGenerator {
   // Note: don't use the object directly as the implicit value unless moving it here, or circe will give invalid output
   implicit private val avroTypeEncoder: Encoder[AvroType] = AvroTypeEncoder
 
-  protected def generateFrom(
+  override protected def generateFrom(
       outputName: String,
       outputPackage: Option[String],
       options: Seq[RpcOption],
@@ -46,15 +54,19 @@ trait AvroIdlGenerator extends IdlGenerator {
 
     val avroRecords = messages.map {
       case RpcMessage(name, params) =>
-        AvroRecord(name = name, fields = params.flatMap {
-          case param"$name: $tpe" => tpe.map(t => AvroField(name.toString, mappedType(t)))
-        })
+        AvroRecord(
+          name = name,
+          fields = params map {
+            case ast._ValDef(ValDef(_, TermName(name), tpt, _)) =>
+              AvroField(name, mappedType(tpt))
+          }
+        )
     }
-    val avroMessages = services
+    val avroMessages: Map[String, AvroMessage] = services
       .flatMap(_.requests)
       .filter(_.streamingType.isEmpty)
       .map {
-        case RpcRequest(_, name, reqType, respType, _) =>
+        case RpcRequest(name, reqType, respType, _) =>
           name -> AvroMessage(
             Seq(AvroField(DefaultRequestParamName, mappedType(reqType)))
               .filterNot(_.`type` == AvroEmpty),
@@ -92,19 +104,19 @@ trait AvroIdlGenerator extends IdlGenerator {
     }
   }
 
-  private def mappedType(typeArg: Type.Arg): AvroType = typeArg match {
-    case targ"Boolean"    => "boolean"
-    case targ"Int"        => "int"
-    case targ"Long"       => "long"
-    case targ"Float"      => "float"
-    case targ"Double"     => "double"
-    case targ"String"     => "string"
-    case targ"Seq[$t]"    => AvroArray(mappedType(t))
-    case targ"List[$t]"   => AvroArray(mappedType(t))
-    case targ"Array[$t]"  => AvroArray(mappedType(t))
-    case targ"Option[$t]" => AvroOption(mappedType(t))
-    case targ"Empty.type" => AvroEmpty
-    case _                => typeArg.toString
+  def mappedType(typeArg: Tree): AvroType = typeArg match {
+    case BaseType("Boolean")                => "boolean"
+    case BaseType("Int")                    => "int"
+    case BaseType("Long")                   => "long"
+    case BaseType("Float")                  => "float"
+    case BaseType("Double")                 => "double"
+    case BaseType("String")                 => "string"
+    case SingleAppliedTypeTree("Seq", t)    => AvroArray(mappedType(t))
+    case SingleAppliedTypeTree("List", t)   => AvroArray(mappedType(t))
+    case SingleAppliedTypeTree("Array", t)  => AvroArray(mappedType(t))
+    case SingleAppliedTypeTree("Option", t) => AvroOption(mappedType(t))
+    case SingletonType("Empty")             => AvroEmpty
+    case _                                  => typeArg.toString.unquoted
   }
 
   implicit private def string2AvroRef(s: String): AvroRef = AvroRef(s)

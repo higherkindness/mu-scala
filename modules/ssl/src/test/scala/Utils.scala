@@ -24,7 +24,7 @@ import cats.effect.Effect
 import freestyle.rpc.common._
 import freestyle.rpc.protocol._
 import freestyle.rpc.server.netty.SetSslContext
-import freestyle.rpc.server.{AddService, GrpcConfig, ServerW}
+import freestyle.rpc.server.{AddService, GrpcConfig, GrpcServer}
 import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.GrpcSslContexts
 import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}
@@ -33,12 +33,14 @@ object Utils extends CommonUtils {
 
   object service {
 
-    @service
-    trait RPCService[F[_]] {
+    @service(Avro)
+    trait AvroRPCService[F[_]] {
+      def unary(a: A): F[C]
+    }
 
-      @rpc(Avro) def unary(a: A): F[C]
-
-      @rpc(AvroWithSchema) def unaryWithSchema(a: A): F[C]
+    @service(AvroWithSchema)
+    trait AvroWithSchemaRPCService[F[_]] {
+      def unaryWithSchema(a: A): F[C]
 
     }
 
@@ -51,7 +53,9 @@ object Utils extends CommonUtils {
       import database._
       import service._
 
-      class ServerRPCService[F[_]: Effect] extends RPCService[F] {
+      class ServerRPCService[F[_]: Effect]
+          extends AvroRPCService[F]
+          with AvroWithSchemaRPCService[F] {
 
         def unary(a: A): F[C] = Effect[F].delay(c1)
 
@@ -90,10 +94,12 @@ object Utils extends CommonUtils {
 
     val grpcConfigs: List[GrpcConfig] = List(
       SetSslContext(serverSslContext),
-      AddService(RPCService.bindService[ConcurrentMonad])
+      AddService(AvroRPCService.bindService[ConcurrentMonad]),
+      AddService(AvroWithSchemaRPCService.bindService[ConcurrentMonad])
     )
 
-    implicit val serverW: ServerW = ServerW.netty(SC.port, grpcConfigs)
+    implicit val grpcServer: GrpcServer[ConcurrentMonad] =
+      GrpcServer.netty[ConcurrentMonad](SC.port, grpcConfigs).unsafeRunSync
 
     //////////////////////////////////
     // Client Runtime Configuration //

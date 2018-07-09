@@ -35,9 +35,8 @@ object service {
   @message
   case class HelloResponse(reply: String)
 
-  @service
+  @service(Protobuf)
   trait Greeter[F[_]] {
-    @rpc(Protobuf)
     def sayHello(request: HelloRequest): F[HelloResponse]
   }
 }
@@ -88,7 +87,7 @@ object InterceptingServerCalls extends CommonRuntime {
     AddService(Greeter.bindService[IO].interceptWith(monitorInterceptor))
   )
 
-  implicit val serverW: ServerW = ServerW.default(8080, grpcConfigs)
+  val server: IO[GrpcServer[IO]]= GrpcServer.default[IO](8080, grpcConfigs)
 
 }
 ```
@@ -158,8 +157,8 @@ configuration.collectorRegistry.register(new DropwizardExports(metrics))
 [gRPC guide]: https://grpc.io/docs/guides/
 [@tagless algebra]: http://frees.io/docs/core/algebras/
 [PBDirect]: https://github.com/btlines/pbdirect
-[scalameta]: https://github.com/scalameta/scalameta
+[scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
 [Metrifier]: https://github.com/47deg/metrifier
-[frees-config]: http://frees.io/docs/patterns/config/
+

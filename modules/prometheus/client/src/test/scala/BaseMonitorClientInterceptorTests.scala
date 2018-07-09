@@ -32,7 +32,6 @@ import scala.collection.JavaConverters._
 
 abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
 
-  import freestyle.rpc.server.implicits._
   import freestyle.rpc.protocol.Utils.database._
   import freestyle.rpc.prometheus.shared.RegistryHelper._
 
@@ -91,7 +90,8 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
         val handledSamples =
           findRecordedMetricOrThrow(clientMetricRpcCompleted).samples.asScala.toList
         handledSamples.size shouldBe 1
-        handledSamples.headOption should beASampleMetric(List("UNARY", "RPCService", "unary", "OK"))
+        handledSamples.headOption should beASampleMetric(
+          List("AvroRPCService", "OK", "UNARY", "unary"))
       }
 
       val clientRuntime: InterceptorsRuntime = defaultClientRuntime
@@ -146,7 +146,7 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
             findRecordedMetricOrThrow(clientMetricRpcCompleted).samples.asScala.toList
           handledSamples.size shouldBe 1
           handledSamples.headOption should beASampleMetric(
-            labels = List("CLIENT_STREAMING", "RPCService", "clientStreaming", "OK"),
+            labels = List("CLIENT_STREAMING", "ProtoRPCService", "clientStreaming", "OK"),
             maxValue = 2d)
         }
 
@@ -183,7 +183,7 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
           findRecordedMetricOrThrow(clientMetricRpcCompleted).samples.asScala.toList
         handledSamples.size shouldBe 1
         handledSamples.headOption should beASampleMetric(
-          List("SERVER_STREAMING", "RPCService", "serverStreaming", "OK"))
+          List("SERVER_STREAMING", "ProtoRPCService", "serverStreaming", "OK"))
       }
 
       val clientRuntime: InterceptorsRuntime = defaultClientRuntime
@@ -221,7 +221,7 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
         handledSamples.headOption should be
 
         handledSamples.headOption should beASampleMetric(
-          List("BIDI_STREAMING", "RPCService", "biStreaming", "OK"))
+          List("AvroRPCService", "BIDI_STREAMING", "OK", "biStreaming"))
       }
 
       val clientRuntime: InterceptorsRuntime = defaultClientRuntime
@@ -303,6 +303,9 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
     }
 
     "work when combining multiple calls" in {
+
+      ignoreOnTravis(
+        "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/168 is fixed")
 
       def unary[F[_]](implicit APP: MyRPCClient[F]): F[C] =
         APP.u(a1.x, a1.y)

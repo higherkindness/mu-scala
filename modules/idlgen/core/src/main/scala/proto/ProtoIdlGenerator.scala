@@ -18,9 +18,13 @@ package freestyle.rpc.idlgen.proto
 
 import freestyle.rpc.idlgen._
 import freestyle.rpc.protocol._
-import scala.meta._
+import freestyle.rpc.internal.util.{AstOptics, Toolbox}
 
 object ProtoIdlGenerator extends IdlGenerator {
+
+  import Toolbox.u._
+  import Model._
+  import AstOptics._
 
   val idlType: String                      = IdlType
   val serializationType: SerializationType = Protobuf
@@ -51,8 +55,9 @@ object ProtoIdlGenerator extends IdlGenerator {
     val messageLines = messages.flatMap {
       case RpcMessage(name, params) => textBlock("message", name, messageFields(params)) :+ ""
     }
-    val serviceLines = services.flatMap {
-      case RpcService(name, requests) => textBlock("service", name, requestFields(requests))
+    val serviceLines: Seq[String] = services.flatMap {
+      case RpcService(_, name, requests) =>
+        textBlock("service", name, requestFields(requests))
     }
     val importLines =
       if (serviceLines.exists(_.contains(ProtoEmpty)))
@@ -65,45 +70,45 @@ object ProtoIdlGenerator extends IdlGenerator {
   private def textBlock(blockType: String, name: String, contents: Seq[String]) =
     s"$blockType $name {" +: contents :+ "}"
 
-  private def messageFields(params: Seq[Term.Param]): Seq[String] =
+  private def messageFields(params: Seq[ValDef]): Seq[String] =
     params
-      .flatMap {
-        case param"$name: $tpe" => tpe.map(t => s"  ${mappedType(t)} $name")
+      .map {
+        case ast._ValDef(ValDef(_, TermName(name), tpt, _)) => s"  ${mappedType(tpt)} $name"
       }
       .zipWithIndex
       .map { case (field, i) => s"$field = ${i + 1};" }
 
   private def requestFields(requests: Seq[RpcRequest]): Seq[String] =
     requests.map {
-      case RpcRequest(_, name, reqType, retType, streamingType) =>
+      case RpcRequest(name, reqType, retType, streamingType) =>
         s"  rpc ${name.capitalize} (${requestType(reqType, streamingType)}) returns (${responseType(retType, streamingType)});"
     }
 
-  private def requestType(t: Type, streamingType: Option[StreamingType]): String =
+  private def requestType(t: Tree, streamingType: Option[StreamingType]): String =
     paramType(t, streamingType, RequestStreaming, BidirectionalStreaming)
 
-  private def responseType(t: Type, streamingType: Option[StreamingType]): String =
+  private def responseType(t: Tree, streamingType: Option[StreamingType]): String =
     paramType(t, streamingType, ResponseStreaming, BidirectionalStreaming)
 
   private def paramType(
-      t: Type,
+      tpe: Tree,
       streamingType: Option[StreamingType],
       matchingStreamingTypes: StreamingType*): String = {
-    val sType = t.toString
-    val pType = if (sType == EmptyType) ProtoEmpty else sType
+    val t     = tpe.toString
+    val pType = if (t == EmptyType) ProtoEmpty else t
     if (streamingType.exists(matchingStreamingTypes.contains)) s"stream $pType" else pType
   }
 
-  private def mappedType(typeArg: Type.Arg): String = typeArg match {
-    case targ"Boolean"     => "bool"
-    case targ"Int"         => "int32"
-    case targ"Long"        => "int64"
-    case targ"Float"       => "float"
-    case targ"Double"      => "double"
-    case targ"String"      => "string"
-    case targ"Array[Byte]" => "bytes"
-    case targ"Option[$t]"  => mappedType(t)
-    case targ"List[$t]"    => s"repeated ${mappedType(t)}"
-    case _                 => typeArg.toString
+  private def mappedType(typeArg: Tree): String = typeArg match {
+    case BaseType("Boolean")                              => "bool"
+    case BaseType("Int")                                  => "int32"
+    case BaseType("Long")                                 => "int64"
+    case BaseType("Float")                                => "float"
+    case BaseType("Double")                               => "double"
+    case BaseType("String")                               => "string"
+    case SingleAppliedTypeTree("Array", TermName("Byte")) => "bytes"
+    case SingleAppliedTypeTree("Option", t)               => mappedType(t)
+    case SingleAppliedTypeTree("List", t)                 => s"repeated ${mappedType(t)}"
+    case _                                                => typeArg.toString
   }
 }

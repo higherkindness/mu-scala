@@ -27,7 +27,7 @@ object service {
   @message
   case class HelloResponse(reply: String)
 
-  @service
+  @service(Protobuf)
   trait Greeter[F[_]] {
 
     /**
@@ -39,8 +39,6 @@ object service {
      * @param request Single client request.
      * @return Stream of server responses.
      */
-    @rpc(Protobuf)
-    @stream[ResponseStreaming.type]
     def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
 
     /**
@@ -53,8 +51,6 @@ object service {
      * @param request Stream of client requests.
      * @return Single server response.
      */
-    @rpc(Protobuf)
-    @stream[RequestStreaming.type]
     def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse]
 
     /**
@@ -69,8 +65,6 @@ object service {
      * @param request Stream of client requests.
      * @return Stream of server responses.
      */
-    @rpc(Protobuf)
-    @stream[BidirectionalStreaming.type]
     def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
 
   }
@@ -80,9 +74,9 @@ object service {
 
 The code might be explanatory by itself but let's review the different services one by one:
 
-* `lotsOfReplies `: Server streaming RPC, where `@rpc` and `@stream` annotations are needed here. However, there are three different types of streaming (server, client and bidirectional), that are specified by the type parameter required in the `@stream` annotation, `@stream[ResponseStreaming.type]` in this particular definition.
-* `lotsOfGreetings `: Client streaming RPC, `@rpc` should be sorted by the `@stream[RequestStreaming.type]` annotation.
-* `bidiHello `: Bidirectional streaming RPC, where `@rpc` is accompanied by the `@stream[BidirectionalStreaming.type]` annotation.
+* `lotsOfReplies `: Server streaming RPC.
+* `lotsOfGreetings `: Client streaming RPC.
+* `bidiHello `: Bidirectional streaming RPC.
 
 ## Integrations
 
@@ -117,7 +111,7 @@ object service {
   @message
   case class HelloResponse(reply: String)
 
-  @service
+  @service(Protobuf)
   trait Greeter[F[_]] {
 
     /**
@@ -126,8 +120,6 @@ object service {
      * @param request Single client request.
      * @return Stream of server responses.
      */
-    @rpc(Protobuf)
-    @stream[ResponseStreaming.type]
     def lotsOfReplies(request: HelloRequest): Stream[F, HelloResponse]
 
     /**
@@ -136,8 +128,6 @@ object service {
      * @param request Stream of client requests.
      * @return Single server response.
      */
-    @rpc(Protobuf)
-    @stream[RequestStreaming.type]
     def lotsOfGreetings(request: Stream[F, HelloRequest]): F[HelloResponse]
 
     /**
@@ -146,8 +136,6 @@ object service {
      * @param request Stream of client requests.
      * @return Stream of server responses.
      */
-    @rpc(Protobuf)
-    @stream[BidirectionalStreaming.type]
     def bidiHello(request: Stream[F, HelloRequest]): Stream[F, HelloResponse]
 
   }
@@ -166,8 +154,8 @@ As you can see, it is really similar to the Observable service.
 [gRPC guide]: https://grpc.io/docs/guides/
 [@tagless algebra]: http://frees.io/docs/core/algebras/
 [PBDirect]: https://github.com/btlines/pbdirect
-[scalameta]: https://github.com/scalameta/scalameta
+[scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
 [Metrifier]: https://github.com/47deg/metrifier
-[frees-config]: http://frees.io/docs/patterns/config/
+

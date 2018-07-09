@@ -73,6 +73,12 @@ lazy val `client-okhttp` = project
   .settings(clientOkHttpSettings)
   .disablePlugins(ScriptedPlugin)
 
+lazy val `client-cache` = project
+  .in(file("modules/client-cache"))
+  .settings(moduleName := "frees-rpc-client-cache")
+  .settings(clientCacheSettings)
+  .disablePlugins(ScriptedPlugin)
+
 ////////////////
 //// SERVER ////
 ////////////////
@@ -81,7 +87,7 @@ lazy val server = project
   .in(file("modules/server"))
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(client % "test->test")
-  .dependsOn(internal)
+  .dependsOn(internal % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "frees-rpc-server")
   .settings(serverSettings)
@@ -151,7 +157,7 @@ lazy val `dropwizard-client` = project
 
 lazy val `idlgen-core` = project
   .in(file("modules/idlgen/core"))
-  .dependsOn(internal)
+  .dependsOn(internal % "compile->compile;test->test")
   .dependsOn(client % "test->test")
   .settings(moduleName := "frees-rpc-idlgen-core")
   .settings(idlGenSettings)
@@ -273,6 +279,7 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   common,
   internal,
   client,
+  `client-cache`,
   `client-netty`,
   `client-okhttp`,
   server,

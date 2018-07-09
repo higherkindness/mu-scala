@@ -25,39 +25,26 @@ import examples.todolist.persistence._
 import examples.todolist.protocol.Protocols._
 import examples.todolist.runtime.CommonRuntime
 import examples.todolist.server.handlers._
-import freestyle.rpc.server._
-import freestyle.rpc.server.config.BuildServerFromConfig
-import freestyle.rpc.server.{AddService, GrpcConfig, ServerW}
+
 import freestyle.tagless.loggingJVM.log4s.implicits._
 import java.util.Properties
 
-trait ServerImplicits extends CommonRuntime with RepositoriesImplicits {
+sealed trait ServerImplicits extends CommonRuntime with RepositoriesImplicits {
 
-  implicit val pingPongServiceHandler: PingPongServiceHandler[IO] =
+  implicit val pingPongServiceHandler: PingPongService[IO] =
     new PingPongServiceHandler[IO]()
 
-  implicit val tagRpcServiceHandler: TagRpcServiceHandler[IO] =
+  implicit val tagRpcServiceHandler: TagRpcService[IO] =
     new TagRpcServiceHandler[IO]()
 
-  implicit val todoListRpcServiceHandler: TodoListRpcServiceHandler[IO] =
+  implicit val todoListRpcServiceHandler: TodoListRpcService[IO] =
     new TodoListRpcServiceHandler[IO]()
 
-  implicit val todoItemmRpcServiceHandler: TodoItemRpcServiceHandler[IO] =
+  implicit val todoItemmRpcServiceHandler: TodoItemRpcService[IO] =
     new TodoItemRpcServiceHandler[IO] {}
-
-  val grpcConfigs: List[GrpcConfig] =
-    List(
-      AddService(PingPongService.bindService[IO]),
-      AddService(TagRpcService.bindService[IO]),
-      AddService(TodoListRpcService.bindService[IO]),
-      AddService(TodoItemRpcService.bindService[IO])
-    )
-
-  implicit val serverW: ServerW =
-    BuildServerFromConfig[IO]("rpc.server.port", grpcConfigs).unsafeRunSync()
 }
 
-trait RepositoriesImplicits {
+sealed trait RepositoriesImplicits {
 
   implicit val xa: HikariTransactor[IO] =
     HikariTransactor[IO](new HikariDataSource(new HikariConfig(new Properties {

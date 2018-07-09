@@ -33,19 +33,13 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
   import freestyle.rpc.protocol.Utils.database._
   import freestyle.rpc.protocol.Utils.implicits._
 
-  override protected def beforeAll(): Unit = {
-    import freestyle.rpc.server.implicits._
+  override protected def beforeAll(): Unit =
     serverStart[ConcurrentMonad].unsafeRunSync()
-  }
 
-  override protected def afterAll(): Unit = {
-    import freestyle.rpc.server.implicits._
+  override protected def afterAll(): Unit =
     serverStop[ConcurrentMonad].unsafeRunSync()
-  }
 
   "frees-rpc server" should {
-
-    import freestyle.rpc.server.implicits._
 
     "allow to startup a server and check if it's alive" in {
 
@@ -265,7 +259,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to have non request methods" in {
 
-      def clientProgram[F[_]: cats.Functor](implicit client: service.RPCService.Client[F]): F[Int] =
+      def clientProgram[F[_]: cats.Functor](
+          implicit client: service.ProtoRPCService.Client[F]): F[Int] =
         client.sumA
 
       clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe 3000

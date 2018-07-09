@@ -27,7 +27,6 @@ import scala.collection.JavaConverters._
 
 abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
 
-  import freestyle.rpc.server.implicits._
   import freestyle.rpc.protocol.Utils.database._
   import freestyle.rpc.prometheus.shared.RegistryHelper._
 
@@ -66,7 +65,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
 
         s.labelValues.asScala.toList should contain theSameElementsAs Vector(
           "UNARY",
-          "RPCService",
+          "AvroRPCService",
           "unary",
           "OK")
       }
@@ -104,7 +103,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
 
         s.labelValues.asScala.toList should contain theSameElementsAs Vector(
           "CLIENT_STREAMING",
-          "RPCService",
+          "ProtoRPCService",
           "clientStreaming",
           "OK")
       }
@@ -138,7 +137,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
 
         s.labelValues.asScala.toList should contain theSameElementsAs Vector(
           "SERVER_STREAMING",
-          "RPCService",
+          "ProtoRPCService",
           "serverStreaming",
           "OK"
         )
@@ -152,7 +151,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
         s.value should be <= response.size.doubleValue()
         s.labelValues.asScala.toList should contain theSameElementsAs Vector(
           "SERVER_STREAMING",
-          "RPCService",
+          "ProtoRPCService",
           "serverStreaming"
         )
       }
@@ -186,7 +185,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
         s.value should be <= 1d
         s.labelValues.asScala.toList should contain theSameElementsAs Vector(
           "BIDI_STREAMING",
-          "RPCService",
+          "AvroRPCService",
           "biStreaming",
           "OK")
       }
@@ -258,6 +257,9 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
     }
 
     "work when combining multiple calls" in {
+
+      ignoreOnTravis(
+        "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/168 is fixed")
 
       def unary[F[_]](implicit APP: MyRPCClient[F]): F[C] =
         APP.u(a1.x, a1.y)
