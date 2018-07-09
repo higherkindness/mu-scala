@@ -4,7 +4,21 @@
 
 Release changes:
 
-* Release frees-rpc 0.14.0 ([#339](https://github.com/frees-io/freestyle-rpc/pull/339))
+Mainly, it completes the milestone https://github.com/frees-io/freestyle-rpc/issues/290: 
+* Core Macro Conversions: https://github.com/frees-io/freestyle-rpc/pull/328 (joined-effort by @L-Lavigne and @pepegar ). 
+* Implement Wart suppression: https://github.com/frees-io/freestyle-rpc/pull/325 (by @pepegar ).
+* Migrate idlgen to scalamacros: https://github.com/frees-io/freestyle-rpc/pull/326 (by @pepegar ).
+
+Additionally, this new release brings new features and bug fixes:
+
+* Marshallers as implicit params: https://github.com/frees-io/freestyle-rpc/pull/330 (by @pepegar ).
+
+* Refactor GrpcServer: https://github.com/frees-io/freestyle-rpc/pull/333 (by @peterneyens ).
+* Upgrades monix to 3.0.0-RC1 https://github.com/frees-io/freestyle-rpc/pull/336 (by @juanpedromoreno).
+* RPC Clients caching as a new module: https://github.com/frees-io/freestyle-rpc/pull/337 (by @peterneyens ).
+* Others.
+
+_Caveat_: This version is not binary compatible with the previous ones.
 
 
 ## 06/07/2018 - Version 0.13.7
