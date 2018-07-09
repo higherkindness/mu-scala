@@ -17,11 +17,27 @@
 package examples.todolist.server
 
 import cats.effect.IO
+import examples.todolist.protocol.Protocols._
 import examples.todolist.server.implicits._
-import freestyle.rpc.server.implicits._
+import freestyle.rpc.server.config.BuildServerFromConfig
+import freestyle.rpc.server.{AddService, GrpcConfig, GrpcServer}
 
 object ServerApp {
 
-  def main(args: Array[String]): Unit =
-    server[IO].unsafeRunSync()
+  def main(args: Array[String]): Unit = {
+    val grpcConfigs: List[GrpcConfig] =
+      List(
+        AddService(PingPongService.bindService[IO]),
+        AddService(TagRpcService.bindService[IO]),
+        AddService(TodoListRpcService.bindService[IO]),
+        AddService(TodoItemRpcService.bindService[IO])
+      )
+
+    val runServer = for {
+      server <- BuildServerFromConfig[IO]("rpc.server.port", grpcConfigs)
+      _      <- GrpcServer.server[IO](server)
+    } yield ()
+
+    runServer.unsafeRunSync
+  }
 }

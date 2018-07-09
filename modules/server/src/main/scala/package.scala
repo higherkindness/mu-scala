@@ -17,41 +17,18 @@
 package freestyle.rpc
 
 import cats.data.Kleisli
-import cats.~>
 import freestyle.rpc.server.netty._
 import io.grpc.{ServerBuilder, _}
 import io.grpc.netty.NettyServerBuilder
 
 package object server {
 
-  type GrpcServerOps[F[_], A] = Kleisli[F, Server, A]
+  private[server] type GrpcServerOps[F[_], A] = Kleisli[F, Server, A]
 
   val defaultPort = 50051
 
-  final class GrpcKInterpreter[F[_]](server: Server) extends (Kleisli[F, Server, ?] ~> F) {
-
-    override def apply[B](fa: Kleisli[F, Server, B]): F[B] =
-      fa(server)
-
-  }
-
-  def buildGrpcConfig[SB <: ServerBuilder[SB]](acc: SB, configList: List[GrpcConfig]): Server = {
-    configList
-      .foldLeft(acc) { (acc, cfg) =>
-        SBuilder(acc)(cfg)
-      }
-      .build()
-  }
-
-  def buildNettyConfig(acc: NettyServerBuilder, configList: List[GrpcConfig]): Server = {
-    configList
-      .foldLeft(acc) { (acc, cfg) =>
-        (SBuilder(acc) orElse NettySBuilder(acc))(cfg)
-      }
-      .build()
-  }
-
-  def SBuilder[SB <: ServerBuilder[SB]](sb: SB): PartialFunction[GrpcConfig, SB] = {
+  private[server] def SBuilder[SB <: ServerBuilder[SB]](
+      sb: ServerBuilder[SB]): PartialFunction[GrpcConfig, SB] = {
     case DirectExecutor                  => sb.directExecutor()
     case SetExecutor(ex)                 => sb.executor(ex)
     case AddService(srv)                 => sb.addService(srv)
@@ -64,7 +41,8 @@ package object server {
     case SetCompressorRegistry(cr)       => sb.compressorRegistry(cr)
   }
 
-  def NettySBuilder(nsb: NettyServerBuilder): PartialFunction[GrpcConfig, NettyServerBuilder] = {
+  private[server] def NettySBuilder(
+      nsb: NettyServerBuilder): PartialFunction[GrpcConfig, NettyServerBuilder] = {
     case ChannelType(channelType)             => nsb.channelType(channelType)
     case WithChildOption(option, value)       => nsb.withChildOption(option, value)
     case BossEventLoopGroup(group)            => nsb.bossEventLoopGroup(group)

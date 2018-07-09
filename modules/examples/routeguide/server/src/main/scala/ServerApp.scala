@@ -17,8 +17,10 @@
 package example.routeguide.server
 
 import cats.effect.IO
-import freestyle.rpc.server.implicits._
+import freestyle.rpc.server.{AddService, GrpcConfig, GrpcServer}
+import freestyle.rpc.server.config.BuildServerFromConfig
 import org.log4s._
+import example.routeguide.protocol.Protocols.RouteGuideService
 import example.routeguide.server.implicits._
 
 object ServerAppIO {
@@ -27,10 +29,17 @@ object ServerAppIO {
 
   def main(args: Array[String]): Unit = {
 
-    logger.info(s"Server is starting ...")
+    val grpcConfigs: List[GrpcConfig] = List(
+      AddService(RouteGuideService.bindService[IO])
+    )
 
-    server[IO].unsafeRunSync()
+    val runServer = for {
+      server <- BuildServerFromConfig[IO]("rpc.server.port", grpcConfigs)
+      _      <- IO(logger.info(s"Server is starting ..."))
+      _      <- GrpcServer.server[IO](server)
+    } yield ()
 
+    runServer.unsafeRunSync
   }
 
 }

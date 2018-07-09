@@ -28,6 +28,7 @@ object ProjectPlugin extends AutoPlugin {
       val grpc: String               = "1.11.0"
       val log4s: String              = "1.6.1"
       val logback: String            = "1.2.3"
+      val monix: String              = "3.0.0-RC1"
       val nettySSL: String           = "2.0.8.Final"
       val pbdirect: String           = "0.1.0"
       val prometheus: String         = "0.3.0"
@@ -46,13 +47,13 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect),
         %("grpc-stub", V.grpc),
-        %%("monix"),
+        %%("monix", V.monix),
         %%("monocle-core", V.monocle),
         %%("fs2-reactive-streams", V.fs2ReactiveStreams),
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
-        "org.scala-lang" % "scala-compiler" % scalaVersion.value,
+        "org.scala-lang"         % "scala-compiler" % scalaVersion.value,
         %%("scalamockScalatest") % Test
       )
     )
@@ -138,7 +139,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val exampleRouteguideRuntimeSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("monix")
+        %%("monix", V.monix)
       )
     )
 
@@ -154,7 +155,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val exampleTodolistRuntimeSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("monix")
+        %%("monix", V.monix)
       )
     )
 

@@ -26,7 +26,6 @@ import freestyle.rpc.client.netty.{
 }
 import freestyle.rpc.common._
 import freestyle.rpc.server._
-import freestyle.rpc.server.implicits._
 import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.NegotiationType
 import org.scalatest._
@@ -45,8 +44,6 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     serverStop[ConcurrentMonad].unsafeRunSync()
 
   "frees-rpc server" should {
-
-    import freestyle.rpc.server.implicits._
 
     "allow to startup a server and check if it's alive" in {
 

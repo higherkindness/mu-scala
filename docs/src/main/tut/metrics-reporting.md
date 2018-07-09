@@ -87,7 +87,7 @@ object InterceptingServerCalls extends CommonRuntime {
     AddService(Greeter.bindService[IO].interceptWith(monitorInterceptor))
   )
 
-  implicit val serverW: ServerW = ServerW.default(8080, grpcConfigs)
+  val server: IO[GrpcServer[IO]]= GrpcServer.default[IO](8080, grpcConfigs)
 
 }
 ```

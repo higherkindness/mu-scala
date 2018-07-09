@@ -24,7 +24,7 @@ import cats.effect.Effect
 import freestyle.rpc.common._
 import freestyle.rpc.protocol._
 import freestyle.rpc.server.netty.SetSslContext
-import freestyle.rpc.server.{AddService, GrpcConfig, ServerW}
+import freestyle.rpc.server.{AddService, GrpcConfig, GrpcServer}
 import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.GrpcSslContexts
 import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}
@@ -98,7 +98,8 @@ object Utils extends CommonUtils {
       AddService(AvroWithSchemaRPCService.bindService[ConcurrentMonad])
     )
 
-    implicit val serverW: ServerW = ServerW.netty(SC.port, grpcConfigs)
+    implicit val grpcServer: GrpcServer[ConcurrentMonad] =
+      GrpcServer.netty[ConcurrentMonad](SC.port, grpcConfigs).unsafeRunSync
 
     //////////////////////////////////
     // Client Runtime Configuration //

@@ -22,12 +22,12 @@ import cats.Functor
 package object config {
 
   def BuildServerFromConfig[F[_]: Functor](portPath: String, configList: List[GrpcConfig] = Nil)(
-      implicit SC: ServerConfig[F]): F[ServerW] =
+      implicit SC: ServerConfig[F]): F[GrpcServer[F]] =
     SC.buildServer(portPath, configList)
 
   def BuildNettyServerFromConfig[F[_]: Functor](
       portPath: String,
-      configList: List[GrpcConfig] = Nil)(implicit SC: ServerConfig[F]): F[ServerW] =
+      configList: List[GrpcConfig] = Nil)(implicit SC: ServerConfig[F]): F[GrpcServer[F]] =
     SC.buildNettyServer(portPath, configList)
 
 }

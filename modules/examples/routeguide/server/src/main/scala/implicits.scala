@@ -17,24 +17,15 @@
 package example.routeguide.server
 
 import cats.effect.IO
-import freestyle.rpc.server._
-import freestyle.rpc.server.config.BuildServerFromConfig
-import freestyle.rpc.server.{AddService, GrpcConfig, ServerW}
+import freestyle.rpc.server.{AddService, GrpcConfig}
 import example.routeguide.server.handlers.RouteGuideServiceHandler
 import example.routeguide.protocol.Protocols.RouteGuideService
 import example.routeguide.runtime._
 
-trait ServerImplicits extends RouteGuide {
+sealed trait ServerImplicits extends RouteGuide {
 
   implicit val routeGuideServiceHandler: RouteGuideService[IO] =
     new RouteGuideServiceHandler[IO]
-
-  val grpcConfigs: List[GrpcConfig] = List(
-    AddService(RouteGuideService.bindService[IO])
-  )
-
-  implicit val serverW: ServerW =
-    BuildServerFromConfig[IO]("rpc.server.port", grpcConfigs).unsafeRunSync()
 
 }
 
