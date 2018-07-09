@@ -304,6 +304,9 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
 
     "work when combining multiple calls" in {
 
+      ignoreOnTravis(
+        "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/168 is fixed")
+
       def unary[F[_]](implicit APP: MyRPCClient[F]): F[C] =
         APP.u(a1.x, a1.y)
 
