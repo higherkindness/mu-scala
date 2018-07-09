@@ -1,5 +1,12 @@
 # Changelog
 
+## 07/09/2018 - Version 0.14.0
+
+Release changes:
+
+* Release frees-rpc 0.14.0 ([#339](https://github.com/frees-io/freestyle-rpc/pull/339))
+
+
 ## 06/07/2018 - Version 0.13.7
 
 Release changes:
