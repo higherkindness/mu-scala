@@ -22,127 +22,78 @@ import cats.effect.Async
 import cats.syntax.applicative._
 import freestyle.rpc.common._
 import freestyle.rpc.server.implicits._
-import freestyle.tagless.tagless
 import io.grpc.Status
 import monix.reactive.Observable
 
 object Utils extends CommonUtils {
 
   object service {
+    @service(Avro, Gzip) trait CompressedAvroRPCService[F[_]] {
+      def unaryCompressed(a: A): F[C]
+      def unaryCompressedWithError(e: E): F[C]
+      def emptyAvroCompressed(empty: Empty.type): F[Empty.type]
+      def emptyAvroParamCompressed(a: A): F[Empty.type]
+      def emptyAvroParamResponseCompressed(empty: Empty.type): F[A]
+      def biStreamingCompressed(oe: Observable[E]): Observable[E]
+    }
 
-    @service
-    trait RPCService[F[_]] {
-
+    @service(Protobuf, Gzip) trait CompressedProtoRPCService[F[_]] {
       import ExternalScope._
 
-      @rpc(Protobuf) def notAllowed(b: Boolean): F[C]
-
-      @rpc(Protobuf, Gzip) def notAllowedCompressed(b: Boolean): F[C]
-
-      @rpc(Avro) def unary(a: A): F[C]
-
-      @rpc(Avro) def unaryWithError(e: E): F[C]
-
-      @rpc(AvroWithSchema) def unaryWithSchema(a: A): F[C]
-
-      @rpc(Avro, Gzip) def unaryCompressed(a: A): F[C]
-
-      @rpc(Avro, Gzip) def unaryCompressedWithError(e: E): F[C]
-
-      @rpc(AvroWithSchema, Gzip) def unaryCompressedWithSchema(a: A): F[C]
-
-      @rpc(Protobuf) def empty(empty: Empty.type): F[Empty.type]
-
-      @rpc(Protobuf, Gzip) def emptyCompressed(empty: Empty.type): F[Empty.type]
-
-      @rpc(Protobuf) def emptyParam(a: A): F[Empty.type]
-
-      @rpc(Protobuf, Gzip) def emptyParamCompressed(a: A): F[Empty.type]
-
-      @rpc(Protobuf) def emptyParamResponse(empty: Empty.type): F[A]
-
-      @rpc(Protobuf, Gzip) def emptyParamResponseCompressed(empty: Empty.type): F[A]
-
-      @rpc(Avro) def emptyAvro(empty: Empty.type): F[Empty.type]
-
-      @rpc(AvroWithSchema) def emptyAvroWithSchema(empty: Empty.type): F[Empty.type]
-
-      @rpc(Avro, Gzip) def emptyAvroCompressed(empty: Empty.type): F[Empty.type]
-
-      @rpc(AvroWithSchema, Gzip) def emptyAvroWithSchemaCompressed(empty: Empty.type): F[Empty.type]
-
-      @rpc(Avro) def emptyAvroParam(a: A): F[Empty.type]
-
-      @rpc(AvroWithSchema) def emptyAvroWithSchemaParam(a: A): F[Empty.type]
-
-      @rpc(Avro, Gzip) def emptyAvroParamCompressed(a: A): F[Empty.type]
-
-      @rpc(AvroWithSchema, Gzip) def emptyAvroWithSchemaParamCompressed(a: A): F[Empty.type]
-
-      @rpc(Avro) def emptyAvroParamResponse(empty: Empty.type): F[A]
-
-      @rpc(AvroWithSchema) def emptyAvroWithSchemaParamResponse(empty: Empty.type): F[A]
-
-      @rpc(Avro, Gzip) def emptyAvroParamResponseCompressed(empty: Empty.type): F[A]
-
-      @rpc(AvroWithSchema, Gzip) def emptyAvroWithSchemaParamResponseCompressed(
-          empty: Empty.type): F[A]
-
-      @rpc(Protobuf)
-      @stream[ResponseStreaming.type]
-      def serverStreaming(b: B): Observable[C]
-
-      @rpc(Protobuf)
-      @stream[ResponseStreaming.type]
-      def serverStreamingWithError(e: E): Observable[C]
-
-      @rpc(Protobuf, Gzip)
-      @stream[ResponseStreaming.type]
+      def notAllowedCompressed(b: Boolean): F[C]
+      def emptyCompressed(empty: Empty.type): F[Empty.type]
+      def emptyParamCompressed(a: A): F[Empty.type]
+      def emptyParamResponseCompressed(empty: Empty.type): F[A]
       def serverStreamingCompressed(b: B): Observable[C]
-
-      @rpc(Protobuf, Gzip)
-      @stream[ResponseStreaming.type]
       def serverStreamingCompressedWithError(e: E): Observable[C]
-
-      @rpc(Protobuf)
-      @stream[RequestStreaming.type]
-      def clientStreaming(oa: Observable[A]): F[D]
-
-      @rpc(Protobuf, Gzip)
-      @stream[RequestStreaming.type]
       def clientStreamingCompressed(oa: Observable[A]): F[D]
-
-      @rpc(Avro)
-      @stream[BidirectionalStreaming.type]
-      def biStreaming(oe: Observable[E]): Observable[E]
-
-      @rpc(AvroWithSchema)
-      @stream[BidirectionalStreaming.type]
-      def biStreamingWithSchema(oe: Observable[E]): Observable[E]
-
-      @rpc(Avro, Gzip)
-      @stream[BidirectionalStreaming.type]
-      def biStreamingCompressed(oe: Observable[E]): Observable[E]
-
-      @rpc(AvroWithSchema, Gzip)
-      @stream[BidirectionalStreaming.type]
-      def biStreamingCompressedWithSchema(oe: Observable[E]): Observable[E]
-
-      @rpc(Protobuf)
-      def scope(empty: Empty.type): F[External]
-
-      @rpc(Protobuf, Gzip)
       def scopeCompressed(empty: Empty.type): F[External]
+    }
+
+    @service(AvroWithSchema, Gzip) trait CompressedAvroWithSchemaRPCService[F[_]] {
+      def unaryCompressedWithSchema(a: A): F[C]
+      def emptyAvroWithSchemaCompressed(empty: Empty.type): F[Empty.type]
+      def emptyAvroWithSchemaParamCompressed(a: A): F[Empty.type]
+      def emptyAvroWithSchemaParamResponseCompressed(empty: Empty.type): F[A]
+      def biStreamingCompressedWithSchema(oe: Observable[E]): Observable[E]
+    }
+
+    @service(Avro) trait AvroRPCService[F[_]] {
+      def unary(a: A): F[C]
+      def unaryWithError(e: E): F[C]
+      def emptyAvro(empty: Empty.type): F[Empty.type]
+      def emptyAvroParam(a: A): F[Empty.type]
+      def emptyAvroParamResponse(empty: Empty.type): F[A]
+      def biStreaming(oe: Observable[E]): Observable[E]
+    }
+
+    @service(Protobuf) trait ProtoRPCService[F[_]] {
+      import ExternalScope._
+
+      def notAllowed(b: Boolean): F[C]
+      def empty(empty: Empty.type): F[Empty.type]
+      def emptyParam(a: A): F[Empty.type]
+      def emptyParamResponse(empty: Empty.type): F[A]
+      def serverStreaming(b: B): Observable[C]
+      def serverStreamingWithError(e: E): Observable[C]
+      def clientStreaming(oa: Observable[A]): F[D]
+      def scope(empty: Empty.type): F[External]
 
       def sumA(implicit F: cats.Functor[F]): F[Int] =
         F.map(emptyParamResponse(Empty))(a => a.x + a.y)
     }
 
+    @service(AvroWithSchema) trait AvroWithSchemaRPCService[F[_]] {
+      def unaryWithSchema(a: A): F[C]
+      def emptyAvroWithSchema(empty: Empty.type): F[Empty.type]
+      def emptyAvroWithSchemaParam(a: A): F[Empty.type]
+      def emptyAvroWithSchemaParamResponse(empty: Empty.type): F[A]
+      def biStreamingWithSchema(oe: Observable[E]): Observable[E]
+    }
   }
 
   object client {
 
-    @tagless(true)
     trait MyRPCClient[F[_]] {
       def notAllowed(b: Boolean): F[C]
       def empty: F[Empty.type]
@@ -176,7 +127,12 @@ object Utils extends CommonUtils {
       import freestyle.rpc.protocol._
 
       class ServerRPCService[F[_]: Async](implicit M: MonadError[F, Throwable])
-          extends RPCService[F] {
+          extends ProtoRPCService[F]
+          with AvroRPCService[F]
+          with AvroWithSchemaRPCService[F]
+          with CompressedProtoRPCService[F]
+          with CompressedAvroRPCService[F]
+          with CompressedAvroWithSchemaRPCService[F] {
 
         def notAllowed(b: Boolean): F[C] = c1.pure
 
@@ -305,51 +261,54 @@ object Utils extends CommonUtils {
       import freestyle.rpc.protocol._
 
       class FreesRPCServiceClientHandler[F[_]: Async](
-          implicit client: RPCService.Client[F],
+          implicit
+          proto: ProtoRPCService.Client[F],
+          aws: AvroWithSchemaRPCService.Client[F],
+          avro: AvroRPCService.Client[F],
           M: MonadError[F, Throwable])
-          extends MyRPCClient.Handler[F] {
+          extends MyRPCClient[F] {
 
         override def notAllowed(b: Boolean): F[C] =
-          client.notAllowed(b)
+          proto.notAllowed(b)
 
         override def empty: F[Empty.type] =
-          client.empty(protocol.Empty)
+          proto.empty(protocol.Empty)
 
         override def emptyParam(a: A): F[Empty.type] =
-          client.emptyParam(a)
+          proto.emptyParam(a)
 
         override def emptyParamResponse: F[A] =
-          client.emptyParamResponse(protocol.Empty)
+          proto.emptyParamResponse(protocol.Empty)
 
         override def emptyAvro: F[Empty.type] =
-          client.emptyAvro(protocol.Empty)
+          avro.emptyAvro(protocol.Empty)
 
         override def emptyAvroWithSchema: F[Empty.type] =
-          client.emptyAvroWithSchema(protocol.Empty)
+          aws.emptyAvroWithSchema(protocol.Empty)
 
         override def emptyAvroParam(a: A): F[Empty.type] =
-          client.emptyAvroParam(a)
+          avro.emptyAvroParam(a)
 
         override def emptyAvroWithSchemaParam(a: A): F[Empty.type] =
-          client.emptyAvroWithSchemaParam(a)
+          aws.emptyAvroWithSchemaParam(a)
 
         override def emptyAvroParamResponse: F[A] =
-          client.emptyAvroParamResponse(protocol.Empty)
+          avro.emptyAvroParamResponse(protocol.Empty)
 
         override def emptyAvroWithSchemaParamResponse: F[A] =
-          client.emptyAvroWithSchemaParamResponse(protocol.Empty)
+          aws.emptyAvroWithSchemaParamResponse(protocol.Empty)
 
         override def u(x: Int, y: Int): F[C] =
-          client.unary(A(x, y))
+          avro.unary(A(x, y))
 
         override def uws(x: Int, y: Int): F[C] =
-          client.unaryWithSchema(A(x, y))
+          aws.unaryWithSchema(A(x, y))
 
         override def uwe(a: A, err: String): F[C] =
-          client.unaryWithError(E(a, err))
+          avro.unaryWithError(E(a, err))
 
         override def ss(a: Int, b: Int): F[List[C]] =
-          client
+          proto
             .serverStreaming(B(A(a, a), A(b, b)))
             .zipWithIndex
             .map {
@@ -361,13 +320,13 @@ object Utils extends CommonUtils {
             .to[F]
 
         override def ss192(a: Int, b: Int): F[List[C]] =
-          client
+          proto
             .serverStreaming(B(A(a, a), A(b, b)))
             .toListL
             .to[F]
 
         override def sswe(a: A, err: String): F[List[C]] =
-          client
+          proto
             .serverStreamingWithError(E(a, err))
             .zipWithIndex
             .map {
@@ -379,11 +338,11 @@ object Utils extends CommonUtils {
             .to[F]
 
         override def cs(cList: List[C], bar: Int): F[D] =
-          client.clientStreaming(Observable.fromIterable(cList.map(c => c.a)))
+          proto.clientStreaming(Observable.fromIterable(cList.map(c => c.a)))
 
         import cats.syntax.functor._
         override def bs(eList: List[E]): F[E] =
-          client
+          avro
             .biStreaming(Observable.fromIterable(eList))
             .zipWithIndex
             .map {
@@ -396,7 +355,7 @@ object Utils extends CommonUtils {
             .map(_.head)
 
         override def bsws(eList: List[E]): F[E] =
-          client
+          aws
             .biStreamingWithSchema(Observable.fromIterable(eList))
             .zipWithIndex
             .map {
@@ -411,51 +370,53 @@ object Utils extends CommonUtils {
       }
 
       class FreesRPCServiceClientCompressedHandler[F[_]: Async](
-          implicit client: RPCService.Client[F],
+          implicit proto: CompressedProtoRPCService.Client[F],
+          aws: CompressedAvroWithSchemaRPCService.Client[F],
+          avro: CompressedAvroRPCService.Client[F],
           M: MonadError[F, Throwable])
-          extends MyRPCClient.Handler[F] {
+          extends MyRPCClient[F] {
 
         override def notAllowed(b: Boolean): F[C] =
-          client.notAllowedCompressed(b)
+          proto.notAllowedCompressed(b)
 
         override def empty: F[Empty.type] =
-          client.emptyCompressed(protocol.Empty)
+          proto.emptyCompressed(protocol.Empty)
 
         override def emptyParam(a: A): F[Empty.type] =
-          client.emptyParamCompressed(a)
+          proto.emptyParamCompressed(a)
 
         override def emptyParamResponse: F[A] =
-          client.emptyParamResponseCompressed(protocol.Empty)
+          proto.emptyParamResponseCompressed(protocol.Empty)
 
         override def emptyAvro: F[Empty.type] =
-          client.emptyAvroCompressed(protocol.Empty)
+          avro.emptyAvroCompressed(protocol.Empty)
 
         override def emptyAvroWithSchema: F[Empty.type] =
-          client.emptyAvroWithSchemaCompressed(protocol.Empty)
+          aws.emptyAvroWithSchemaCompressed(protocol.Empty)
 
         override def emptyAvroParam(a: A): F[Empty.type] =
-          client.emptyAvroParamCompressed(a)
+          avro.emptyAvroParamCompressed(a)
 
         override def emptyAvroWithSchemaParam(a: A): F[Empty.type] =
-          client.emptyAvroWithSchemaParamCompressed(a)
+          aws.emptyAvroWithSchemaParamCompressed(a)
 
         override def emptyAvroParamResponse: F[A] =
-          client.emptyAvroParamResponseCompressed(protocol.Empty)
+          avro.emptyAvroParamResponseCompressed(protocol.Empty)
 
         override def emptyAvroWithSchemaParamResponse: F[A] =
-          client.emptyAvroWithSchemaParamResponseCompressed(protocol.Empty)
+          aws.emptyAvroWithSchemaParamResponseCompressed(protocol.Empty)
 
         override def u(x: Int, y: Int): F[C] =
-          client.unaryCompressed(A(x, y))
+          avro.unaryCompressed(A(x, y))
 
         override def uwe(a: A, err: String): F[C] =
-          client.unaryCompressedWithError(E(a, err))
+          avro.unaryCompressedWithError(E(a, err))
 
         override def uws(x: Int, y: Int): F[C] =
-          client.unaryCompressedWithSchema(A(x, y))
+          aws.unaryCompressedWithSchema(A(x, y))
 
         override def ss(a: Int, b: Int): F[List[C]] =
-          client
+          proto
             .serverStreamingCompressed(B(A(a, a), A(b, b)))
             .zipWithIndex
             .map {
@@ -467,13 +428,13 @@ object Utils extends CommonUtils {
             .to[F]
 
         override def ss192(a: Int, b: Int): F[List[C]] =
-          client
+          proto
             .serverStreamingCompressed(B(A(a, a), A(b, b)))
             .toListL
             .to[F]
 
         override def sswe(a: A, err: String): F[List[C]] =
-          client
+          proto
             .serverStreamingCompressedWithError(E(a, err))
             .zipWithIndex
             .map {
@@ -485,11 +446,11 @@ object Utils extends CommonUtils {
             .to[F]
 
         override def cs(cList: List[C], bar: Int): F[D] =
-          client.clientStreamingCompressed(Observable.fromIterable(cList.map(c => c.a)))
+          proto.clientStreamingCompressed(Observable.fromIterable(cList.map(c => c.a)))
 
         import cats.syntax.functor._
         override def bs(eList: List[E]): F[E] =
-          client
+          avro
             .biStreamingCompressed(Observable.fromIterable(eList))
             .zipWithIndex
             .map {
@@ -502,7 +463,7 @@ object Utils extends CommonUtils {
             .map(_.head)
 
         override def bsws(eList: List[E]): F[E] =
-          client
+          aws
             .biStreamingCompressedWithSchema(Observable.fromIterable(eList))
             .zipWithIndex
             .map {
@@ -534,17 +495,35 @@ object Utils extends CommonUtils {
       new ServerRPCService[ConcurrentMonad]
 
     val grpcConfigs: List[GrpcConfig] = List(
-      AddService(RPCService.bindService[ConcurrentMonad])
+      AddService(ProtoRPCService.bindService[ConcurrentMonad]),
+      AddService(AvroRPCService.bindService[ConcurrentMonad]),
+      AddService(AvroWithSchemaRPCService.bindService[ConcurrentMonad]),
+      AddService(CompressedProtoRPCService.bindService[ConcurrentMonad]),
+      AddService(CompressedAvroRPCService.bindService[ConcurrentMonad]),
+      AddService(CompressedAvroWithSchemaRPCService.bindService[ConcurrentMonad])
     )
 
-    implicit val serverW: ServerW = createServerConf(grpcConfigs)
+    implicit val grpcServer: GrpcServer[ConcurrentMonad] =
+      createServerConf[ConcurrentMonad](grpcConfigs).unsafeRunSync
 
     //////////////////////////////////
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    implicit val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
-      RPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val protoRPCServiceClient: ProtoRPCService.Client[ConcurrentMonad] =
+      ProtoRPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val avroRPCServiceClient: AvroRPCService.Client[ConcurrentMonad] =
+      AvroRPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val awsRPCServiceClient: AvroWithSchemaRPCService.Client[ConcurrentMonad] =
+      AvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val compressedprotoRPCServiceClient: CompressedProtoRPCService.Client[
+      ConcurrentMonad] =
+      CompressedProtoRPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val compressedavroRPCServiceClient: CompressedAvroRPCService.Client[ConcurrentMonad] =
+      CompressedAvroRPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val compressedawsRPCServiceClient: CompressedAvroWithSchemaRPCService.Client[
+      ConcurrentMonad] =
+      CompressedAvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
 
   }
 

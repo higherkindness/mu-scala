@@ -18,26 +18,35 @@ package freestyle.rpc
 package server
 package config
 
-import cats.Functor
-import cats.syntax.either._
+import cats.effect.Sync
+import cats.syntax.flatMap._
 import cats.syntax.functor._
-import freestyle.tagless._
-import freestyle.tagless.config.ConfigM
+import cats.syntax.either._
 
-@module
-trait ServerConfig {
+import freestyle.rpc.config.ConfigM
 
-  val configM: ConfigM
-  implicit val functor: Functor
+import com.typesafe.config.ConfigException.Missing
 
-  def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): FS[ServerW] =
-    configM.load.map { config =>
-      val port = config.int(portPath).getOrElse(defaultPort)
-      ServerW.default(port, configList)
-    }
+class ServerConfig[F[_]](implicit S: Sync[F], C: ConfigM[F]) {
 
-  def buildNettyServer(portPath: String, configList: List[GrpcConfig] = Nil): FS[ServerW] =
-    configM.load.map { config =>
-      ServerW.netty(ChannelForPort(config.int(portPath).getOrElse(defaultPort)), configList)
-    }
+  def buildServer(portPath: String, configList: List[GrpcConfig] = Nil): F[GrpcServer[F]] =
+    for {
+      config <- C.load
+      port = Either.catchOnly[Missing](config.getInt(portPath))
+      server <- GrpcServer.default(port.getOrElse(defaultPort), configList)
+    } yield server
+
+  def buildNettyServer(portPath: String, configList: List[GrpcConfig] = Nil): F[GrpcServer[F]] =
+    for {
+      config <- C.load
+      port = Either.catchOnly[Missing](config.getInt(portPath))
+      server <- GrpcServer.netty(ChannelForPort(port.getOrElse(defaultPort)), configList)
+    } yield server
+}
+
+object ServerConfig {
+  def apply[F[_]](implicit SC: ServerConfig[F]): ServerConfig[F] = SC
+
+  implicit def defaultServerConfig[F[_]](implicit S: Sync[F], C: ConfigM[F]): ServerConfig[F] =
+    new ServerConfig[F]()(S, C)
 }

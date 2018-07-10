@@ -56,9 +56,8 @@ object service {
   @message
   case class HelloResponse(reply: String)
 
-  @service
+  @service(Protobuf)
   trait Greeter[F[_]] {
-    @rpc(Protobuf)
     def sayHello(request: HelloRequest): F[HelloResponse]
   }
 }
@@ -90,7 +89,7 @@ import cats.effect.IO
 import cats.effect.Effect
 import freestyle.rpc.protocol._
 import freestyle.rpc.server.netty.SetSslContext
-import freestyle.rpc.server.{AddService, GrpcConfig, ServerW}
+import freestyle.rpc.server.{AddService, GrpcConfig, GrpcServer}
 import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.GrpcSslContexts
 import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}
@@ -128,7 +127,7 @@ trait Runtime extends CommonRuntime {
     // Important. We have to create the server with Netty. OkHttp is not supported for the Ssl 
     // encryption in frees-rpc at this moment.
 
-    implicit val serverW: ServerW = ServerW.netty(8080, grpcConfigs)
+    val server: IO[GrpcServer[IO]] = GrpcServer.netty[IO](8080, grpcConfigs)
 
 }
 
@@ -201,8 +200,8 @@ object MainApp extends CommonRuntime {
 [gRPC guide]: https://grpc.io/docs/guides/
 [@tagless algebra]: http://frees.io/docs/core/algebras/
 [PBDirect]: https://github.com/btlines/pbdirect
-[scalameta]: https://github.com/scalameta/scalameta
+[scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
 [Metrifier]: https://github.com/47deg/metrifier
-[frees-config]: http://frees.io/docs/patterns/config/
+

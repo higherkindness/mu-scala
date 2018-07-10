@@ -17,7 +17,7 @@ Add the following line to _project/plugins.sbt_:
 [comment]: # (Start Replace)
 
 ```scala
-addSbtPlugin("io.frees" % "sbt-frees-rpc-idlgen" % "0.13.4")
+addSbtPlugin("io.frees" % "sbt-frees-rpc-idlgen" % "0.14.0")
 ```
 
 [comment]: # (End Replace)
@@ -44,29 +44,23 @@ object service {
   @message
   case class HelloResponse(reply: String)
 
-  @service
-  trait Greeter[F[_]] {
+  @service(Protobuf)
+  trait ProtoGreeter[F[_]] {
 
-    @rpc(Protobuf)
     def sayHello(request: HelloRequest): F[HelloResponse]
-     
-    @rpc(Avro)
-    def sayHelloAvro(request: HelloRequest): F[HelloResponse]
 
-    @rpc(Protobuf)
-    @stream[ResponseStreaming.type]
     def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
 
-    @rpc(Protobuf)
-    @stream[RequestStreaming.type]
     def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse]
 
-    @rpc(Protobuf)
-    @stream[BidirectionalStreaming.type]
     def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
     
   }
   
+  @service(Avro)
+  trait AvroGreeter[F[_]] {
+    def sayHelloAvro(request: HelloRequest): F[HelloResponse]
+  }
 }
 ```
 
@@ -96,7 +90,7 @@ message HelloResponse {
   string reply = 1;
 }
 
-service Greeter {
+service ProtoGreeter {
   rpc SayHello (HelloRequest) returns (HelloResponse);
   rpc LotsOfReplies (HelloRequest) returns (stream HelloResponse);
   rpc LotsOfGreetings (stream HelloRequest) returns (HelloResponse);
@@ -172,9 +166,9 @@ To use it, run:
 sbt "srcGen avro"
 ```
 
-You could even use `IDL` definitions packaged into artifacts, within your classpath. In that particular situation, you need to setup `srcJarNames`, specifying the artifacts names (or sbt module names) that will be unzipped/used to extract the `IDL` files.
+You could even use `IDL` definitions packaged into artifacts, within your classpath. In that particular situation, you need to setup `srcGenJarNames`, specifying the artifact names (or sbt module names) that will be unzipped/used to extract the `IDL` files.
 
-`srcJarNames ` can very useful when you want to distribute your `IDL` files without binary code (to prevent binary conflicts in clients). In that case, you might want to include some additional settings in the build where your `IDL` files are placed, like for instance:
+`srcGenJarNames ` can be very useful when you want to distribute your `IDL` files without binary code (to prevent binary conflicts in clients). In that case, you might want to include some additional settings in the build where your `IDL` files are placed, for instance:
 
 ```
 //...
@@ -203,7 +197,6 @@ import freestyle.rpc.protocol._
 
 @service trait GreeterService[F[_]] {
 
-  @rpc(Avro)
   def sayHelloAvro(arg: foo.bar.HelloRequest): F[foo.bar.HelloResponse]
 
 }
@@ -221,14 +214,13 @@ Just like `idlGen`, `srcGen` and `srcGenFromJars` has some configurable settings
 
 * **`idlType`**: the type of IDL to generate from, currently only `avro`.
 * **`srcGenSerializationType`**: the serialization type when generating Scala sources from the IDL definitions. `Protobuf`, `Avro` or `AvroWithSchema` are the current supported serialization types. By default, the serialization type is `Avro`.
-* **`srcJarNames`**: the list of jar names or sbt modules containing the IDL definitions that will be used at compilation time by `srcGen` to generate the Scala Sources. By default, this sequence is empty.
-* **`srcGenSourceDir`**: the IDL source base directory, where your IDL files are placed. By default: `Compile / resourceDirectory`, typically `src/main/resources/`.
-* **`srcGenSourceDirs`**: the list of directories where your IDL files are placed. By default, it contains `srcGenSourceDir.value` and `srcGenSourceFromJarsDir.value` folders.
+* **`srcGenJarNames`**: the list of jar names or sbt modules containing the IDL definitions that will be used at compilation time by `srcGen` to generate the Scala Sources. By default, this sequence is empty.
+* **`srcGenSourceDirs`**: the list of directories where your IDL files are placed. By default: `Compile / resourceDirectory`, typically `src/main/resources/`.
 * **`srcGenIDLTargetDir`**: the directory where all the IDL files will be placed. By default, it's defined as `(Compile / resourceManaged).value / idlType.value`, typically `target/scala-2.12/resource_managed/main/avro`. Given this configuration, the plugin will automatically copy to this target directory:
   * All the definitions extracted from the different `jar` or `sbt` modules, and also,
   * All the source folders specified in the `srcGenSourceDirs` setting.
 * **`srcGenTargetDir`**: the Scala target base directory, where the `srcGen` task will write the Scala files in subdirectories/packages based on the namespaces of the IDL files. By default: `Compile / sourceManaged`, typically `target/scala-2.12/src_managed/main/`.
-* **`genOptions`**: additional options to add to the generated `@rpc` annotations, after the IDL type. Currently only supports `"Gzip"`.
+* **`genOptions`**: additional options to add to the generated `@service` annotations, after the IDL type. Currently only supports `"Gzip"`.
 
 The source directory must exist, otherwise, the `srcGen` task will fail. Target directories will be created upon generation.
 
@@ -244,7 +236,7 @@ The following example shows how to set up a dependency with another artifact or 
       publishMavenStyle := true,
       idlType := "avro",
       srcGenSerializationType := "AvroWithSchema",
-      srcJarNames := Seq("foo-domain"),
+      srcGenJarNames := Seq("foo-domain"),
       srcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
       sourceGenerators in Compile += (Compile / srcGen).taskValue,
       libraryDependencies ++= Seq(
@@ -265,9 +257,8 @@ The following example shows how to set up a dependency with another artifact or 
 [gRPC guide]: https://grpc.io/docs/guides/
 [@tagless algebra]: http://frees.io/docs/core/algebras/
 [PBDirect]: https://github.com/btlines/pbdirect
-[scalameta]: https://github.com/scalameta/scalameta
+[scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
 [Metrifier]: https://github.com/47deg/metrifier
-[frees-config]: http://frees.io/docs/patterns/config/
 [avrohugger]: https://github.com/julianpeeters/avrohugger

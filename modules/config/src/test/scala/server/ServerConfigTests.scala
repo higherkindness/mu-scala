@@ -18,7 +18,6 @@ package freestyle.rpc
 package server
 package config
 
-import freestyle.tagless.config.implicits._
 import freestyle.rpc.common.{ConcurrentMonad, SC}
 
 import scala.concurrent.ExecutionContext
@@ -27,24 +26,32 @@ class ServerConfigTests extends RpcServerTestSuite {
 
   implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
-  "ServerConfig.Op" should {
+  "ServerConfig" should {
 
     "load the port specified in the config file" in {
 
-      val serverConf: ServerW =
-        BuildServerFromConfig[ConcurrentMonad]("rpc.server.port").unsafeRunSync()
+      val loadAndPort = for {
+        server <- BuildServerFromConfig[ConcurrentMonad]("rpc.server.port")
+        _      <- server.start
+        port   <- server.getPort
+        _      <- server.shutdownNow
+        _      <- server.awaitTermination
+      } yield port
 
-      serverConf.server.start().getPort shouldBe SC.port
-      serverConf.server.shutdownNow().awaitTermination()
+      loadAndPort.unsafeRunSync shouldBe SC.port
     }
 
     "load the default port when the config port path is not found" in {
 
-      val serverConf: ServerW =
-        BuildServerFromConfig[ConcurrentMonad]("rpc.wrong.path").unsafeRunSync()
+      val loadAndPort = for {
+        server <- BuildServerFromConfig[ConcurrentMonad]("rpc.wrong.port")
+        _      <- server.start
+        port   <- server.getPort
+        _      <- server.shutdownNow
+        _      <- server.awaitTermination
+      } yield port
 
-      serverConf.server.start().getPort shouldBe defaultPort
-      serverConf.server.shutdownNow().awaitTermination()
+      loadAndPort.unsafeRunSync shouldBe defaultPort
     }
 
   }

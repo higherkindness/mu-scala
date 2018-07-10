@@ -89,7 +89,7 @@ object Protocols {
   @message
   case class RouteSummary(point_count: Int, feature_count: Int, distance: Int, elapsed_time: Int)
 
-  @service
+  @service(Protobuf)
   trait RouteGuideService[F[_]] {
 
     /**
@@ -101,7 +101,7 @@ object Protocols {
      * @param point Position.
      * @return Feature at a given point.
      */
-    @rpc(Protobuf) def getFeature(point: Point): F[Feature]
+    def getFeature(point: Point): F[Feature]
 
     /**
      * A server-to-client streaming RPC.
@@ -114,8 +114,6 @@ object Protocols {
      * @param rectangle Rectangle.
      * @return Features available within the given Rectangle, in a streaming fashion.
      */
-    @rpc(Protobuf)
-    @stream[ResponseStreaming.type]
     def listFeatures(rectangle: Rectangle): Observable[Feature]
 
     /**
@@ -127,8 +125,6 @@ object Protocols {
      * @param points Stream of points.
      * @return RouteSummary when traversal is completed.
      */
-    @rpc(Protobuf)
-    @stream[RequestStreaming.type]
     def recordRoute(points: Observable[Point]): F[RouteSummary]
 
     /**
@@ -140,8 +136,6 @@ object Protocols {
      * @param routeNotes Stream of RouteNotes.
      * @return Stream of RouteNotes.
      */
-    @rpc(Protobuf)
-    @stream[BidirectionalStreaming.type]
     def routeChat(routeNotes: Observable[RouteNote]): Observable[RouteNote]
   }
 

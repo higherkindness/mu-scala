@@ -20,27 +20,24 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String             = "1.8.3"
-      val avrohugger: String         = "1.0.0-RC9"
+      val avrohugger: String         = "1.0.0-RC10"
+      val betterMonadicFor: String   = "0.2.4"
       val catsEffect: String         = "0.10.1"
       val circe: String              = "0.9.3"
-      val frees: String              = "0.8.0"
+      val frees: String              = "0.8.1"
+      val fs2: String                = "0.10.5"
       val fs2ReactiveStreams: String = "0.5.1"
       val grpc: String               = "1.11.0"
       val log4s: String              = "1.6.1"
       val logback: String            = "1.2.3"
+      val monix: String              = "3.0.0-RC1"
       val nettySSL: String           = "2.0.8.Final"
       val pbdirect: String           = "0.1.0"
       val prometheus: String         = "0.3.0"
+      val monocle: String            = "1.5.0-cats"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
-      scalacOptions := Seq(
-        "-deprecation",
-        "-encoding",
-        "UTF-8",
-        "-feature",
-        "-unchecked",
-        "-language:higherKinds"),
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect) % Test,
         %%("scalamockScalatest")        % Test,
@@ -50,21 +47,23 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val internalSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("frees-async-cats-effect", V.frees),
-        %%("frees-async-guava", V.frees) exclude ("com.google.guava", "guava"),
+        %%("cats-effect", V.catsEffect),
         %("grpc-stub", V.grpc),
-        %%("monix"),
+        %%("monix", V.monix),
+        %%("monocle-core", V.monocle),
         %%("fs2-reactive-streams", V.fs2ReactiveStreams),
+        %%("fs2-core", V.fs2),
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
+        "org.scala-lang"         % "scala-compiler" % scalaVersion.value,
         %%("scalamockScalatest") % Test
       )
     )
 
     lazy val clientCoreSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("frees-async-cats-effect", V.frees),
+        %%("cats-effect", V.catsEffect),
         %%("scalamockScalatest") % Test,
         %("grpc-netty", V.grpc)  % Test
       )
@@ -83,6 +82,15 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+    lazy val clientCacheSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("log4s", V.log4s),
+        %%("fs2-core", V.fs2),
+        %%("cats-effect", V.catsEffect),
+        compilerPlugin("com.olegpy" %% "better-monadic-for" % V.betterMonadicFor)
+      )
+    )
+
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %("grpc-netty", V.grpc),
@@ -93,7 +101,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val configSettings = Seq(
       libraryDependencies ++= Seq(
-        %%("frees-config", V.frees)
+        %%("pureconfig")
       )
     )
 
@@ -143,7 +151,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val exampleRouteguideRuntimeSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("monix")
+        %%("monix", V.monix)
       )
     )
 
@@ -159,13 +167,13 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val exampleTodolistRuntimeSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("monix")
+        %%("monix", V.monix)
       )
     )
 
     lazy val exampleTodolistCommonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "io.frees" %% "frees-todolist-lib" % "0.8.1-SNAPSHOT",
+        "io.frees" %% "frees-todolist-lib" % V.frees,
         %%("log4s", V.log4s),
         %("logback-classic", V.logback)
       )
@@ -198,8 +206,11 @@ object ProjectPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] =
     // format: OFF
-    scalaMetaSettings ++ sharedReleaseProcess ++ warnUnusedImport ++ Seq(
+    sharedReleaseProcess ++ warnUnusedImport ++ Seq(
+      addCompilerPlugin(%%("paradise") cross CrossVersion.full),
       libraryDependencies ++= commonDeps :+ %("slf4j-nop") % Test,
+      scalaVersion := "2.12.6",
+      crossScalaVersions := Seq("2.11.12", "2.12.6"),
       Test / fork := true,
       Tut / scalacOptions -= "-Ywarn-unused-import",
       orgAfterCISuccessTaskListSetting ~= (_.filterNot(_ == defaultPublishMicrosite)),

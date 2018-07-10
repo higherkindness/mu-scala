@@ -17,24 +17,6 @@
 package freestyle.rpc
 package server
 
-import cats.{Applicative, Apply}
-import cats.syntax.apply._
-import cats.syntax.functor._
 import freestyle.rpc.internal.TaskImplicits
-import freestyle.rpc.server.handlers.GrpcServerHandler
 
-trait ServerImplicits {
-
-  implicit def grpcServerHandler[F[_]: Applicative](implicit SW: ServerW): GrpcServer[F] =
-    GrpcServerHandler[F].mapK[F](new GrpcKInterpreter[F](SW.server))
-
-}
-
-trait Helpers {
-
-  def server[F[_]: Apply](implicit S: GrpcServer[F]): F[Unit] =
-    S.start() *> S.awaitTermination().void
-
-}
-
-object implicits extends TaskImplicits with Helpers with ServerImplicits
+object implicits extends TaskImplicits

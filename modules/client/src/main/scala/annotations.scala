@@ -25,10 +25,11 @@ import scala.annotation.{compileTimeOnly, StaticAnnotation}
 package object protocol {
 
   @compileTimeOnly("enable macro paradise to expand @service macro annotations")
-  class service extends StaticAnnotation {
-    import scala.meta._
-
-    inline def apply(defn: Any): Any = meta { serviceImpl.service(defn) }
+  class service(
+      val serializationType: SerializationType,
+      val compressionType: CompressionType = Identity)
+      extends StaticAnnotation {
+    def macroTransform(annottees: Any*): Any = macro serviceImpl.service
   }
 }
 

@@ -17,9 +17,6 @@
 package examples.todolist.client
 package clients
 
-import freestyle.tagless.tagless
-
-@tagless(true)
 trait PingPongClient[F[_]] {
   def ping(): F[Unit]
 }

@@ -27,38 +27,31 @@ object service {
   @message
   case class HelloResponse(reply: String)
 
-  @service
+  @service(Protobuf)
   trait Greeter[F[_]] {
 
     /**
      * @param request Client request.
      * @return Server response.
      */
-    @rpc(Protobuf)
     def sayHello(request: HelloRequest): F[HelloResponse]
 
     /**
      * @param request Single client request.
      * @return Stream of server responses.
      */
-    @rpc(Protobuf)
-    @stream[ResponseStreaming.type]
     def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
 
     /**
      * @param request Stream of client requests.
      * @return Single server response.
      */
-    @rpc(Protobuf)
-    @stream[RequestStreaming.type]
     def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse]
 
     /**
      * @param request Stream of client requests.
      * @return Stream of server responses.
      */
-    @rpc(Protobuf)
-    @stream[BidirectionalStreaming.type]
     def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
 
   }
@@ -71,7 +64,6 @@ Next, our dummy `Greeter` server implementation:
 ```tut:silent
 import cats.effect.Async
 import cats.syntax.applicative._
-import freestyle.free._
 import freestyle.rpc.server.implicits._
 import monix.execution.Scheduler
 import monix.eval.Task
@@ -157,7 +149,6 @@ import cats.effect.IO
 import freestyle.rpc.server._
 import freestyle.rpc.server.handlers._
 import freestyle.rpc.server.implicits._
-import freestyle.async.catsEffect.implicits._
 import service._
 
 object gserver {
@@ -166,11 +157,6 @@ object gserver {
 
     implicit val greeterServiceHandler: ServiceHandler[IO] = new ServiceHandler[IO]
 
-    val grpcConfigs: List[GrpcConfig] = List(
-      AddService(Greeter.bindService[IO])
-    )
-
-    implicit val serverW: ServerW = ServerW.default(8080, grpcConfigs)
   }
 
   object implicits extends Implicits
@@ -189,16 +175,20 @@ What else is needed? We just need to define a `main` method:
 
 ```tut:silent
 import cats.effect.IO
-import cats.effect.IO._
 import freestyle.rpc.server.GrpcServer
-import freestyle.rpc.server.implicits._
 
 object RPCServer {
 
   import gserver.implicits._
 
-  def main(args: Array[String]): Unit =
-    server[IO].unsafeRunSync()
+  def main(args: Array[String]): Unit = {
+    val grpcConfigs: List[GrpcConfig] = List(
+      AddService(Greeter.bindService[IO])
+    )
+
+    val runServer = GrpcServer.default[IO](8080, grpcConfigs).flatMap(GrpcServer.server[IO])
+    runServer.unsafeRunSync()
+  }
 
 }
 ```
@@ -278,31 +268,21 @@ Given the transport settings and a list of optional configurations, we can creat
 So, taking into account all we have just said, how would our code look?
 
 ```tut:silent
-import cats.implicits._
 import cats.effect.IO
-import freestyle.free.config.implicits._
-import freestyle.async.catsEffect.implicits._
 import freestyle.rpc._
+import freestyle.rpc.config._
 import freestyle.rpc.client._
 import freestyle.rpc.client.config._
 import freestyle.rpc.client.implicits._
 import monix.eval.Task
-import io.grpc.ManagedChannel
 import service._
-
-import scala.util.{Failure, Success, Try}
 
 object gclient {
 
   trait Implicits extends CommonRuntime {
 
     val channelFor: ChannelFor =
-      ConfigForAddress[Try]("rpc.host", "rpc.port") match {
-        case Success(c) => c
-        case Failure(e) =>
-          e.printStackTrace()
-          throw new RuntimeException("Unable to load the client configuration", e)
-    }
+      ConfigForAddress[IO]("rpc.host", "rpc.port").unsafeRunSync
 
     implicit val serviceClient: Greeter.Client[Task] =
       Greeter.client[Task](channelFor)
@@ -333,10 +313,11 @@ object RPCDemoApp {
 
   def main(args: Array[String]): Unit = {
 
-    val result = Await.result(serviceClient.sayHello(HelloRequest("foo")).runAsync, Duration.Inf)
+    val hello = serviceClient.sayHello(HelloRequest("foo")).flatMap { result =>
+      Task.eval(println(s"Result = $result"))
+    }
 
-    println(s"Result = $result")
-
+    Await.result(hello.runAsync, Duration.Inf)
   }
 
 }
@@ -351,8 +332,7 @@ object RPCDemoApp {
 [gRPC guide]: https://grpc.io/docs/guides/
 [@tagless algebra]: http://frees.io/docs/core/algebras/
 [PBDirect]: https://github.com/btlines/pbdirect
-[scalameta]: https://github.com/scalameta/scalameta
+[scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
 [Metrifier]: https://github.com/47deg/metrifier
-[frees-config]: http://frees.io/docs/patterns/config/

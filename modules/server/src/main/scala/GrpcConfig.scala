@@ -33,9 +33,3 @@ final case class SetFallbackHandlerRegistry(fallbackRegistry: HandlerRegistry) e
 final case class UseTransportSecurity(certChain: File, privateKey: File)       extends GrpcConfig
 final case class SetDecompressorRegistry(registry: DecompressorRegistry)       extends GrpcConfig
 final case class SetCompressorRegistry(registry: CompressorRegistry)           extends GrpcConfig
-
-final case class SServerBuilder(port: Int, grpcConfigList: List[GrpcConfig] = Nil) {
-
-  def build[SB <: ServerBuilder[SB]]: Server =
-    buildGrpcConfig[SB](ServerBuilder.forPort(port).asInstanceOf[SB], grpcConfigList)
-}

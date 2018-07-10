@@ -27,59 +27,42 @@ object Utils extends CommonUtils {
 
   object service {
 
-    @service
-    trait RPCService[F[_]] {
-
-      @rpc(Avro) def unary(a: A): F[C]
-
-      @rpc(AvroWithSchema) def unaryWithSchema(a: A): F[C]
-
-      @rpc(Avro, Gzip) def unaryCompressed(a: A): F[C]
-
-      @rpc(AvroWithSchema, Gzip) def unaryCompressedWithSchema(a: A): F[C]
-
-      @rpc(Protobuf)
-      @stream[ResponseStreaming.type]
-      def serverStreaming(b: B): Stream[F, C]
-
-      @rpc(Protobuf)
-      @stream[ResponseStreaming.type]
+    @service(Protobuf) trait ProtoRPCService[F[_]] {
       def serverStreamingWithError(e: E): Stream[F, C]
-
-      @rpc(Protobuf, Gzip)
-      @stream[ResponseStreaming.type]
-      def serverStreamingCompressed(b: B): Stream[F, C]
-
-      @rpc(Protobuf)
-      @stream[RequestStreaming.type]
       def clientStreaming(oa: Stream[F, A]): F[D]
+      def serverStreaming(b: B): Stream[F, C]
+    }
 
-      @rpc(Protobuf, Gzip)
-      @stream[RequestStreaming.type]
+    @service(Protobuf, Gzip) trait CompressedProtoRPCService[F[_]] {
+      def serverStreamingCompressed(b: B): Stream[F, C]
       def clientStreamingCompressed(oa: Stream[F, A]): F[D]
+    }
 
-      @rpc(Avro)
-      @stream[BidirectionalStreaming.type]
+    @service(Avro) trait AvroRPCService[F[_]] {
+      def unary(a: A): F[C]
       def biStreaming(oe: Stream[F, E]): Stream[F, E]
+    }
 
-      @rpc(AvroWithSchema)
-      @stream[BidirectionalStreaming.type]
-      def biStreamingWithSchema(oe: Stream[F, E]): Stream[F, E]
-
-      @rpc(Avro, Gzip)
-      @stream[BidirectionalStreaming.type]
+    @service(Avro, Gzip) trait CompressedAvroRPCService[F[_]] {
+      def unaryCompressed(a: A): F[C]
       def biStreamingCompressed(oe: Stream[F, E]): Stream[F, E]
+    }
 
-      @rpc(AvroWithSchema, Gzip)
-      @stream[BidirectionalStreaming.type]
+    @service(AvroWithSchema) trait AvroWithSchemaRPCService[F[_]] {
+      def unaryWithSchema(a: A): F[C]
+      def biStreamingWithSchema(oe: Stream[F, E]): Stream[F, E]
+    }
+
+    @service(AvroWithSchema, Gzip) trait CompressedAvroWithSchemaRPCService[F[_]] {
+      def unaryCompressedWithSchema(a: A): F[C]
       def biStreamingCompressedWithSchema(oe: Stream[F, E]): Stream[F, E]
-
     }
 
-    object RPCService {
-      // this companion object is here to make sure @service supports
-      // companion objects
-    }
+    // this companion objects are here to make sure @service supports
+    // companion objects
+    object ProtoRPCService          {}
+    object AvroRPCService           {}
+    object AvroWithSchemaRPCService {}
 
   }
 
@@ -90,7 +73,13 @@ object Utils extends CommonUtils {
       import database._
       import service._
 
-      class ServerRPCService[F[_]: Effect] extends RPCService[F] {
+      class ServerRPCService[F[_]: Effect]
+          extends ProtoRPCService[F]
+          with AvroRPCService[F]
+          with AvroWithSchemaRPCService[F]
+          with CompressedProtoRPCService[F]
+          with CompressedAvroRPCService[F]
+          with CompressedAvroWithSchemaRPCService[F] {
 
         def unary(a: A): F[C] = Effect[F].delay(c1)
 
@@ -162,17 +151,37 @@ object Utils extends CommonUtils {
       new ServerRPCService[ConcurrentMonad]
 
     val grpcConfigs: List[GrpcConfig] = List(
-      AddService(RPCService.bindService[ConcurrentMonad])
+      AddService(ProtoRPCService.bindService[ConcurrentMonad]),
+      AddService(AvroRPCService.bindService[ConcurrentMonad]),
+      AddService(AvroWithSchemaRPCService.bindService[ConcurrentMonad]),
+      AddService(CompressedProtoRPCService.bindService[ConcurrentMonad]),
+      AddService(CompressedAvroRPCService.bindService[ConcurrentMonad]),
+      AddService(CompressedAvroWithSchemaRPCService.bindService[ConcurrentMonad])
     )
 
-    implicit val serverW: ServerW = createServerConf(grpcConfigs)
+    implicit val grpcServer: GrpcServer[ConcurrentMonad] =
+      createServerConf[ConcurrentMonad](grpcConfigs).unsafeRunSync
 
     //////////////////////////////////
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    implicit val freesRPCServiceClient: RPCService.Client[ConcurrentMonad] =
-      RPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val freesProtoRPCServiceClient: ProtoRPCService.Client[ConcurrentMonad] =
+      ProtoRPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val freesAvroRPCServiceClient: AvroRPCService.Client[ConcurrentMonad] =
+      AvroRPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val freesAvroWithSchemaRPCServiceClient: AvroWithSchemaRPCService.Client[
+      ConcurrentMonad] =
+      AvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val freesCompressedProtoRPCServiceClient: CompressedProtoRPCService.Client[
+      ConcurrentMonad] =
+      CompressedProtoRPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val freesCompressedAvroRPCServiceClient: CompressedAvroRPCService.Client[
+      ConcurrentMonad] =
+      CompressedAvroRPCService.client[ConcurrentMonad](createChannelFor)
+    implicit val freesCompressedAvroWithSchemaRPCServiceClient: CompressedAvroWithSchemaRPCService.Client[
+      ConcurrentMonad] =
+      CompressedAvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
 
   }
 

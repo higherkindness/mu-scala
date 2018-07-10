@@ -1,5 +1,64 @@
 # Changelog
 
+## 07/09/2018 - Version 0.14.0
+
+Release changes:
+
+Mainly, it completes the milestone https://github.com/frees-io/freestyle-rpc/issues/290: 
+* Core Macro Conversions: https://github.com/frees-io/freestyle-rpc/pull/328 (joined-effort by @L-Lavigne and @pepegar ). 
+* Implement Wart suppression: https://github.com/frees-io/freestyle-rpc/pull/325 (by @pepegar ).
+* Migrate idlgen to scalamacros: https://github.com/frees-io/freestyle-rpc/pull/326 (by @pepegar ).
+
+Additionally, this new release brings new features and bug fixes:
+
+* Marshallers as implicit params: https://github.com/frees-io/freestyle-rpc/pull/330 (by @pepegar ).
+
+* Refactor GrpcServer: https://github.com/frees-io/freestyle-rpc/pull/333 (by @peterneyens ).
+* Upgrades monix to 3.0.0-RC1 https://github.com/frees-io/freestyle-rpc/pull/336 (by @juanpedromoreno).
+* RPC Clients caching as a new module: https://github.com/frees-io/freestyle-rpc/pull/337 (by @peterneyens ).
+* Others.
+
+_Caveat_: This version is not binary compatible with the previous ones.
+
+
+## 06/07/2018 - Version 0.13.7
+
+Release changes:
+
+* Decouples frees-async-cats-effect ([#302](https://github.com/frees-io/freestyle-rpc/pull/302))
+* Upgrades Scala and Sbt versions ([#304](https://github.com/frees-io/freestyle-rpc/pull/304))
+* Update Scala to 2.12.6 in TravisCI ([#306](https://github.com/frees-io/freestyle-rpc/pull/306))
+* Releases 0.13.7 ([#308](https://github.com/frees-io/freestyle-rpc/pull/308))
+
+
+## 06/06/2018 - Version 0.13.6
+
+Release changes:
+
+* Ignoring new bidirectional FS2 tests on Travis ([#281](https://github.com/frees-io/freestyle-rpc/pull/281))
+* Re-ignoring failing tests, with reference to new issue ([#283](https://github.com/frees-io/freestyle-rpc/pull/283))
+* replace all occurrences of @tagless annotation with the manual impl ([#296](https://github.com/frees-io/freestyle-rpc/pull/296))
+* Decouple frees config ([#300](https://github.com/frees-io/freestyle-rpc/pull/300))
+* decouple from frees-async ([#297](https://github.com/frees-io/freestyle-rpc/pull/297))
+* Downgrade avro4s to 1.8.3 ([#301](https://github.com/frees-io/freestyle-rpc/pull/301))
+
+
+## 05/29/2018 - Version 0.13.5
+
+Release changes:
+
+* noPublishSettings for RPC examples ([#264](https://github.com/frees-io/freestyle-rpc/pull/264))
+* Fix #192 (crash with some server stream transformations) ([#266](https://github.com/frees-io/freestyle-rpc/pull/266))
+* Exposing ServerChannel ([#268](https://github.com/frees-io/freestyle-rpc/pull/268))
+* BigDecimal serialization in protobuf and avro ([#271](https://github.com/frees-io/freestyle-rpc/pull/271))
+* Adds a java time util for serializing dates ([#272](https://github.com/frees-io/freestyle-rpc/pull/272))
+* Support for serializing LocalDate and LocalDateTime values ([#273](https://github.com/frees-io/freestyle-rpc/pull/273))
+* Bump avrohugger to 1.0.0-RC9 ([#274](https://github.com/frees-io/freestyle-rpc/pull/274))
+* Update avro4s and avrohugger ([#280](https://github.com/frees-io/freestyle-rpc/pull/280))
+* Rename srcJarNames to srcGenJarNames and fix deprecations ([#277](https://github.com/frees-io/freestyle-rpc/pull/277))
+* Release 0.13.5 ([#275](https://github.com/frees-io/freestyle-rpc/pull/275))
+
+
 ## 05/02/2018 - Version 0.13.4
 
 Release changes:

@@ -35,9 +35,8 @@ object service {
   @message
   case class HelloResponse(reply: String)
 
-  @service
+  @service(Protobuf)
   trait Greeter[F[_]] {
-    @rpc(Protobuf)
     def sayHello(request: HelloRequest): F[HelloResponse]
   }
 }
@@ -67,7 +66,6 @@ import cats.effect.IO
 import freestyle.rpc.server._
 import freestyle.rpc.server.handlers._
 import freestyle.rpc.server.implicits._
-import freestyle.async.catsEffect.implicits._
 import freestyle.rpc.prometheus.shared.Configuration
 import freestyle.rpc.prometheus.server.MonitoringServerInterceptor
 import io.prometheus.client.CollectorRegistry
@@ -89,7 +87,7 @@ object InterceptingServerCalls extends CommonRuntime {
     AddService(Greeter.bindService[IO].interceptWith(monitorInterceptor))
   )
 
-  implicit val serverW: ServerW = ServerW.default(8080, grpcConfigs)
+  val server: IO[GrpcServer[IO]]= GrpcServer.default[IO](8080, grpcConfigs)
 
 }
 ```
@@ -101,9 +99,8 @@ In this case, in order to intercept the client calls we need additional configur
 ```tut:silent
 import cats.implicits._
 import cats.effect.IO
-import freestyle.free.config.implicits._
-import freestyle.async.catsEffect.implicits._
 import freestyle.rpc._
+import freestyle.rpc.config._
 import freestyle.rpc.client._
 import freestyle.rpc.client.config._
 import freestyle.rpc.client.implicits._
@@ -119,12 +116,7 @@ import freestyle.rpc.prometheus.client.MonitoringClientInterceptor
 object InterceptingClientCalls extends CommonRuntime {
 
   val channelFor: ChannelFor =
-    ConfigForAddress[Try]("rpc.host", "rpc.port") match {
-      case Success(c) => c
-      case Failure(e) =>
-        e.printStackTrace()
-        throw new RuntimeException("Unable to load the client configuration", e)
-      }
+    ConfigForAddress[IO]("rpc.host", "rpc.port").unsafeRunSync
 
   implicit val serviceClient: Greeter.Client[Task] =
     Greeter.client[Task](
@@ -165,8 +157,8 @@ configuration.collectorRegistry.register(new DropwizardExports(metrics))
 [gRPC guide]: https://grpc.io/docs/guides/
 [@tagless algebra]: http://frees.io/docs/core/algebras/
 [PBDirect]: https://github.com/btlines/pbdirect
-[scalameta]: https://github.com/scalameta/scalameta
+[scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
 [Metrifier]: https://github.com/47deg/metrifier
-[frees-config]: http://frees.io/docs/patterns/config/
+

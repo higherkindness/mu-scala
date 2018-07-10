@@ -19,7 +19,8 @@ package server
 
 import java.util.concurrent.{Executor, TimeUnit}
 
-import cats.Applicative
+import cats.effect.Sync
+import cats.syntax.functor._
 import freestyle.rpc.common.{RpcBaseTestSuite, SC}
 import freestyle.rpc.server.netty._
 import io.grpc._
@@ -125,10 +126,10 @@ trait RpcServerTestSuite extends RpcBaseTestSuite {
 
   object implicits extends Helpers with DummyData {
 
-    def grpcServerHandlerTests[F[_]](implicit F: Applicative[F]): GrpcServer[F] = {
+    def grpcServerHandlerTests[F[_]](implicit F: Sync[F]): GrpcServer[F] = {
       new GrpcServer[F] {
 
-        def start(): F[Server] = F.pure(serverMock.start())
+        def start(): F[Unit] = F.pure(serverMock.start()).void
 
         def getPort: F[Int] = F.pure(serverMock.getPort)
 
@@ -141,9 +142,9 @@ trait RpcServerTestSuite extends RpcBaseTestSuite {
         def getMutableServices: F[List[ServerServiceDefinition]] =
           F.pure(serverMock.getMutableServices.asScala.toList)
 
-        def shutdown(): F[Server] = F.pure(serverMock.shutdown())
+        def shutdown(): F[Unit] = F.pure(serverMock.shutdown()).void
 
-        def shutdownNow(): F[Server] = F.pure(serverMock.shutdownNow())
+        def shutdownNow(): F[Unit] = F.pure(serverMock.shutdownNow()).void
 
         def isShutdown: F[Boolean] = F.pure(serverMock.isShutdown)
 

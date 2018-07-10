@@ -18,24 +18,21 @@ package freestyle.rpc
 package client
 package config
 
-import cats.instances.try_._
-import freestyle.tagless.config.implicits._
-import freestyle.rpc.common.SC
-
-import scala.util.{Success, Try}
+import freestyle.rpc.common.{ConcurrentMonad, SC}
 
 class ChannelConfigTests extends RpcClientTestSuite {
 
   "ChannelConfig" should {
 
     "for Address [host, port] work as expected" in {
-
-      ConfigForAddress[Try](SC.host, SC.port.toString) shouldBe a[Success[_]]
+      ConfigForAddress[ConcurrentMonad](SC.host, SC.port.toString).unsafeRunSync shouldBe ChannelForAddress(
+        "localhost",
+        50051)
     }
 
     "for Target work as expected" in {
 
-      ConfigForTarget[Try](SC.host) shouldBe a[Success[_]]
+      ConfigForTarget[ConcurrentMonad](SC.host).unsafeRunSync shouldBe ChannelForTarget("target")
     }
 
   }

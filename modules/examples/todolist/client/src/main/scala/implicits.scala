@@ -20,7 +20,6 @@ import cats.effect.IO
 import examples.todolist.client.handlers._
 import examples.todolist.protocol.Protocols._
 import freestyle.tagless.loggingJVM.log4s.implicits._
-import freestyle.tagless.config.implicits._
 import examples.todolist.runtime.CommonRuntime
 import freestyle.rpc.ChannelFor
 import freestyle.rpc.client.config.ConfigForAddress

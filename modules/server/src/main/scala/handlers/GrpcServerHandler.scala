@@ -17,26 +17,20 @@
 package freestyle.rpc
 package server.handlers
 
-import cats.Applicative
 import cats.data.Kleisli
+import cats.effect.Sync
+import cats.syntax.functor._
 import freestyle.rpc.server.{GrpcServer, GrpcServerOps}
 import io.grpc.{Server, ServerServiceDefinition}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.TimeUnit
 
-class GrpcServerHandler[F[_]: Applicative] extends GrpcServer.Handler[GrpcServerOps[F, ?]] {
+private[handlers] class GrpcServerHandler[F[_]: Sync] private[GrpcServerHandler] ()
+    extends GrpcServer[GrpcServerOps[F, ?]] {
 
-  def start: GrpcServerOps[F, Server] = captureWithServer { server =>
-    Runtime.getRuntime.addShutdownHook(new Thread() {
-      override def run(): Unit = {
-        server.shutdown()
-        (): Unit
-      }
-    })
-
-    server.start()
-  }
+  def start: GrpcServerOps[F, Unit] =
+    captureWithServer(_.start()).void
 
   def getPort: GrpcServerOps[F, Int] = captureWithServer(_.getPort)
 
@@ -49,9 +43,11 @@ class GrpcServerHandler[F[_]: Applicative] extends GrpcServer.Handler[GrpcServer
   def getMutableServices: GrpcServerOps[F, List[ServerServiceDefinition]] =
     captureWithServer(_.getMutableServices.asScala.toList)
 
-  def shutdown: GrpcServerOps[F, Server] = captureWithServer(_.shutdown())
+  def shutdown: GrpcServerOps[F, Unit] =
+    captureWithServer(_.shutdown()).void
 
-  def shutdownNow: GrpcServerOps[F, Server] = captureWithServer(_.shutdownNow())
+  def shutdownNow: GrpcServerOps[F, Unit] =
+    captureWithServer(_.shutdownNow()).void
 
   def isShutdown: GrpcServerOps[F, Boolean] = captureWithServer(_.isShutdown)
 
@@ -63,11 +59,11 @@ class GrpcServerHandler[F[_]: Applicative] extends GrpcServer.Handler[GrpcServer
   def awaitTermination: GrpcServerOps[F, Unit] = captureWithServer(_.awaitTermination())
 
   private[this] def captureWithServer[A](f: Server => A): GrpcServerOps[F, A] =
-    Kleisli(s => Applicative[F].pure(f(s)))
+    Kleisli(s => Sync[F].delay(f(s)))
 
 }
 
 object GrpcServerHandler {
-  def apply[F[_]](implicit F: Applicative[F]): GrpcServer[GrpcServerOps[F, ?]] =
+  def apply[F[_]](implicit F: Sync[F]): GrpcServer[GrpcServerOps[F, ?]] =
     new GrpcServerHandler[F]()(F)
 }

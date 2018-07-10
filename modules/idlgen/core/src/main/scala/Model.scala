@@ -16,45 +16,51 @@
 
 package freestyle.rpc.idlgen
 
+import freestyle.rpc.internal.util.Toolbox
 import freestyle.rpc.internal.util.StringUtil._
 import freestyle.rpc.protocol._
-import scala.meta._
 
-case class RpcDefinitions(
-    outputName: String,
-    outputPackage: Option[String],
-    options: Seq[RpcOption],
-    messages: Seq[RpcMessage],
-    services: Seq[RpcService])
+object Model {
 
-case class RpcOption(name: String, value: String)
+  import Toolbox.u._
 
-case class RpcMessage(name: String, params: Seq[Term.Param]) {
-  // Workaround for `Term.Param` using referential equality; needed mostly for unit testing
-  override def equals(other: Any): Boolean = other match {
-    case that: RpcMessage =>
-      this.name == that.name && this.params.map(_.toString.trimAll) == that.params.map(
-        _.toString.trimAll)
-    case _ => false
+  case class RpcDefinitions(
+      outputName: String,
+      outputPackage: Option[String],
+      options: Seq[RpcOption],
+      messages: Seq[RpcMessage],
+      services: Seq[RpcService])
+
+  case class RpcOption(name: String, value: String)
+
+  case class RpcMessage(name: String, params: Seq[ValDef]) {
+    // Workaround for `Term.Param` using referential equality; needed mostly for unit testing
+    override def equals(other: Any): Boolean = other match {
+      case that: RpcMessage =>
+        this.name == that.name && this.params.map(_.toString.trimAll) == that.params.map(
+          _.toString.trimAll)
+      case _ => false
+    }
   }
-}
 
-case class RpcService(name: String, requests: Seq[RpcRequest])
+  case class RpcService(
+      serializationType: SerializationType,
+      name: String,
+      requests: Seq[RpcRequest])
 
-case class RpcRequest(
-    serializationType: SerializationType,
-    name: String,
-    requestType: Type,
-    responseType: Type,
-    streamingType: Option[StreamingType] = None) {
-  // Workaround for `Type` using referential equality; needed mostly for unit testing
-  override def equals(other: Any): Boolean = other match {
-    case that: RpcRequest =>
-      this.serializationType == that.serializationType &&
+  case class RpcRequest(
+      name: String,
+      requestType: Tree,
+      responseType: Tree,
+      streamingType: Option[StreamingType] = None) {
+    // Workaround for `Type` using referential equality; needed mostly for unit testing
+    override def equals(other: Any): Boolean = other match {
+      case that: RpcRequest =>
         this.name == that.name &&
-        this.requestType.toString.trimAll == that.requestType.toString.trimAll &&
-        this.responseType.toString.trimAll == that.responseType.toString.trimAll &&
-        this.streamingType == that.streamingType
-    case _ => false
+          this.requestType.toString.trimAll == that.requestType.toString.trimAll &&
+          this.responseType.toString.trimAll == that.responseType.toString.trimAll &&
+          this.streamingType == that.streamingType
+      case _ => false
+    }
   }
 }
