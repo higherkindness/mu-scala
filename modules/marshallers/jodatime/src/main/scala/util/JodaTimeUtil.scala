@@ -15,21 +15,27 @@
  */
 
 package freestyle.rpc
-package internal
+package jodatime
 package util
 
-import java.time._
+import org.joda.time._
 
-object JavaTimeUtil {
+object JodaTimeUtil {
 
-  def localDateToInt(value: LocalDate): Int = value.toEpochDay.toInt
+  private[this] val initialDate = DateTime.now(DateTimeZone.UTC).withMillis(0)
 
-  def intToLocalDate(value: Int): LocalDate = LocalDate.ofEpochDay(value.toLong)
+  def jodaLocalDateToInt(value: LocalDate): Int =
+    Days
+      .daysBetween(initialDate, value.toDateTimeAtStartOfDay(DateTimeZone.UTC))
+      .getDays
 
-  def localDateTimeToLong(value: LocalDateTime): Long =
-    value.toInstant(ZoneOffset.UTC).toEpochMilli
+  def intToJodaLocalDate(value: Int): LocalDate =
+    initialDate.plusDays(value).toLocalDate
 
-  def longToLocalDateTime(value: Long): LocalDateTime =
-    ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneOffset.UTC).toLocalDateTime
+  def jodaLocalDatetimeToLong(value: LocalDateTime): Long =
+    value.toDateTime(DateTimeZone.UTC).getMillis
+
+  def longToJodaLocalDateTime(value: Long): LocalDateTime =
+    new LocalDateTime(value, DateTimeZone.UTC)
 
 }

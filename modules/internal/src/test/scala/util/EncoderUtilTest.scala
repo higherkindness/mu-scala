@@ -18,18 +18,36 @@ package freestyle.rpc
 package internal
 package util
 
-import java.time._
+import org.scalatest._
+import org.scalacheck.Prop._
+import org.scalatest.prop.Checkers
 
-object JavaTimeUtil {
+class EncoderUtilTest extends WordSpec with Matchers with Checkers {
 
-  def localDateToInt(value: LocalDate): Int = value.toEpochDay.toInt
+  "EncoderUtil" should {
 
-  def intToLocalDate(value: Int): LocalDate = LocalDate.ofEpochDay(value.toLong)
+    "allow to convert int to and from byteArray" in {
+      check {
+        { n: Int =>
+          val value: Array[Byte] = EncoderUtil.intToByteArray(n)
 
-  def localDateTimeToLong(value: LocalDateTime): Long =
-    value.toInstant(ZoneOffset.UTC).toEpochMilli
+          EncoderUtil.byteArrayToInt(value) == n
 
-  def longToLocalDateTime(value: Long): LocalDateTime =
-    ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneOffset.UTC).toLocalDateTime
+        }
+      }
+    }
+
+    "allow to convert long to and from byteArray" in {
+      check {
+        { n: Long =>
+          val value: Array[Byte] = EncoderUtil.longToByteArray(n)
+
+          EncoderUtil.byteArrayToLong(value) == n
+
+        }
+      }
+    }
+
+  }
 
 }

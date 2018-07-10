@@ -18,18 +18,26 @@ package freestyle.rpc
 package internal
 package util
 
-import java.time._
+import java.nio.ByteBuffer
 
-object JavaTimeUtil {
+object EncoderUtil {
 
-  def localDateToInt(value: LocalDate): Int = value.toEpochDay.toInt
+  def intToByteArray(value: Int): Array[Byte] = {
+    val byteBuffer = ByteBuffer.allocate(4)
+    byteBuffer.putInt(value)
+    byteBuffer.array()
+  }
 
-  def intToLocalDate(value: Int): LocalDate = LocalDate.ofEpochDay(value.toLong)
+  def byteArrayToInt(value: Array[Byte]): Int =
+    ByteBuffer.wrap(value).getInt
 
-  def localDateTimeToLong(value: LocalDateTime): Long =
-    value.toInstant(ZoneOffset.UTC).toEpochMilli
+  def longToByteArray(value: Long): Array[Byte] = {
+    val byteBuffer = ByteBuffer.allocate(8)
+    byteBuffer.putLong(value)
+    byteBuffer.array()
+  }
 
-  def longToLocalDateTime(value: Long): LocalDateTime =
-    ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneOffset.UTC).toLocalDateTime
+  def byteArrayToLong(value: Array[Byte]): Long =
+    ByteBuffer.wrap(value).getLong
 
 }
