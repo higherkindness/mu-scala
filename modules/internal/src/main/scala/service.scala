@@ -157,11 +157,15 @@ object serviceImpl {
 
       val encodersImport = serializationType match {
         case Protobuf =>
-          q"import _root_.freestyle.rpc.internal.encoders.pbd._"
+          List(
+            q"import _root_.cats.instances.list._",
+            q"import _root_.cats.instances.option._",
+            q"import _root_.freestyle.rpc.internal.encoders.pbd._"
+          )
         case Avro =>
-          q"import _root_.freestyle.rpc.internal.encoders.avro._"
+          List(q"import _root_.freestyle.rpc.internal.encoders.avro._")
         case AvroWithSchema =>
-          q"import _root_.freestyle.rpc.internal.encoders.avrowithschema._"
+          List(q"import _root_.freestyle.rpc.internal.encoders.avrowithschema._")
       }
 
       val methodDescriptors: List[Tree] = rpcRequests.map(_.methodDescriptor)
@@ -390,8 +394,7 @@ object serviceImpl {
           Template(
             companion.impl.parents,
             companion.impl.self,
-            companion.impl.body ++ service.imports ++ service.methodDescriptors ++ List(
-              service.encodersImport,
+            companion.impl.body ++ service.imports ++ service.methodDescriptors ++ service.encodersImport ++ List(
               service.bindService,
               service.clientClass,
               service.client,
