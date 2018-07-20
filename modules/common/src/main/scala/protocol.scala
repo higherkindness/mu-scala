@@ -33,10 +33,36 @@ sealed abstract class CompressionType extends Product with Serializable
 case object Identity                  extends CompressionType
 case object Gzip                      extends CompressionType
 
-class message                          extends StaticAnnotation
-class option(name: String, value: Any) extends StaticAnnotation
-class outputPackage(value: String)     extends StaticAnnotation
-class outputName(value: String)        extends StaticAnnotation
+sealed trait HttpMethod
+case object OPTIONS extends HttpMethod
+case object GET     extends HttpMethod
+case object HEAD    extends HttpMethod
+case object POST    extends HttpMethod
+case object PUT     extends HttpMethod
+case object DELETE  extends HttpMethod
+case object TRACE   extends HttpMethod
+case object CONNECT extends HttpMethod
+case object PATCH   extends HttpMethod
+object HttpMethod {
+  def fromString(str: String): Option[HttpMethod] = str match {
+    case "OPTIONS" => Some(OPTIONS)
+    case "GET"     => Some(GET)
+    case "HEAD"    => Some(HEAD)
+    case "POST"    => Some(POST)
+    case "PUT"     => Some(PUT)
+    case "DELETE"  => Some(DELETE)
+    case "TRACE"   => Some(TRACE)
+    case "CONNECT" => Some(CONNECT)
+    case "PATCH"   => Some(PATCH)
+    case _         => None
+  }
+}
+
+class message                               extends StaticAnnotation
+class http(method: HttpMethod, uri: String) extends StaticAnnotation
+class option(name: String, value: Any)      extends StaticAnnotation
+class outputPackage(value: String)          extends StaticAnnotation
+class outputName(value: String)             extends StaticAnnotation
 
 @message
 object Empty

@@ -55,6 +55,13 @@ object ProjectPlugin extends AutoPlugin {
         %%("monocle-core", V.monocle),
         %%("fs2-reactive-streams", V.fs2ReactiveStreams),
         %%("fs2-core", V.fs2),
+
+        %%("http4s-dsl", V.http4s),
+        %%("http4s-blaze-server", V.http4s),
+        %%("http4s-circe", V.http4s),
+        %%("circe-generic"),
+        %%("http4s-blaze-client", V.http4s),
+
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),

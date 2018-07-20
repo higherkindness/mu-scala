@@ -245,6 +245,55 @@ object serviceImpl {
           case _                                                     => false
         }
 
+      val toHttpRequest: ((TermName, String, RpcRequest)) => DefDef = {
+        case (method, path, req) =>
+          q"""
+        def ${req.methodName}(req: ${req.requestType})(implicit
+          client: _root_.org.http4s.client.Client[F],
+          requestEncoder: EntityEncoder[F, ${req.requestType}],
+          responseDecoder: EntityDecoder[F, ${req.responseType}]
+        ): F[${req.responseType}] = {
+          val request = Request[F](Method.$method, uri / $path)
+          client.expect[${req.responseType}](request)
+        }
+        """
+      }
+
+      private val requests = for {
+        d      <- rpcDefs.collect { case x if findAnnotation(x.mods, "http").isDefined => x }
+        args   <- findAnnotation(d.mods, "http").collect({ case Apply(_, args) => args }).toList
+        params <- d.vparamss
+        _ = require(params.length == 1, s"RPC call ${d.name} has more than one request parameter")
+        p <- params.headOption.toList
+      } yield {
+        val method = TermName(args(0).toString) // TODO: fix direct index access
+        val uri    = args(1).toString // TODO: fix direct index access
+
+        (
+          method,
+          uri,
+          RpcRequest(d.name, p.tpt, d.tpt, compressionType(serviceDef.mods.annotations)))
+      }
+
+      val httpRequests    = requests.map(toHttpRequest)
+      val HttpClient      = TypeName("HttpClient")
+      val httpClientClass = q"""
+        class $HttpClient[$F_](uri: Uri)(implicit Sync: _root_.cats.effect.Sync[F]) {
+          ..$httpRequests
+        }
+        """
+
+      println(httpClientClass)
+
+      val http = q"""
+        object http {
+
+          import _root_.org.http4s._
+
+          $httpClientClass
+        }
+      """
+
       //todo: validate that the request and responses are case classes, if possible
       case class RpcRequest(
           methodName: TermName,
@@ -398,7 +447,8 @@ object serviceImpl {
               service.bindService,
               service.clientClass,
               service.client,
-              service.clientFromChannel
+              service.clientFromChannel,
+              service.http
             )
           )
         )
