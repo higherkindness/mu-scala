@@ -245,16 +245,16 @@ object serviceImpl {
           case _                                                     => false
         }
 
-      val toHttpRequest: ((TermName, String, RpcRequest)) => DefDef = {
-        case (method, path, req) =>
+      val toHttpRequest: ((TermName, String, TermName, Tree, Tree)) => DefDef = {
+        case (method, path, name, requestType, responseType) =>
           q"""
-        def ${req.methodName}(req: ${req.requestType})(implicit
+        def $name(req: $requestType)(implicit
           client: _root_.org.http4s.client.Client[F],
-          requestEncoder: EntityEncoder[F, ${req.requestType}],
-          responseDecoder: EntityDecoder[F, ${req.responseType}]
-        ): F[${req.responseType}] = {
-          val request = Request[F](Method.$method, uri / $path)
-          client.expect[${req.responseType}](request)
+          requestEncoder: EntityEncoder[F, $requestType],
+          responseDecoder: EntityDecoder[F, $responseType]
+        ): F[$responseType] = {
+          val request = Request[F](Method.$method, uri / $path).withBody(req)
+          client.expect[$responseType](request)
         }
         """
       }
@@ -269,10 +269,14 @@ object serviceImpl {
         val method = TermName(args(0).toString) // TODO: fix direct index access
         val uri    = args(1).toString // TODO: fix direct index access
 
-        (
-          method,
-          uri,
-          RpcRequest(d.name, p.tpt, d.tpt, compressionType(serviceDef.mods.annotations)))
+        val responseType: Tree = d.tpt match {
+          case tq"Observable[..$tpts]"       => tpts.head
+          case tq"Stream[$carrier, ..$tpts]" => tpts.head
+          case tq"$carrier[..$tpts]"         => tpts.head
+          case _                             => throw new Exception("asdf") //TODO: sh*t
+        }
+
+        (method, uri, d.name, p.tpt, responseType)
       }
 
       val httpRequests    = requests.map(toHttpRequest)
@@ -282,8 +286,6 @@ object serviceImpl {
           ..$httpRequests
         }
         """
-
-      println(httpClientClass)
 
       val http = q"""
         object http {
