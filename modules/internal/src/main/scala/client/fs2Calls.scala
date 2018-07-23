@@ -22,7 +22,7 @@ import cats.effect.Effect
 import _root_.fs2._
 import _root_.fs2.interop.reactivestreams._
 import monix.execution.Scheduler
-import io.grpc.{CallOptions, Channel, MethodDescriptor}
+import _root_.io.grpc.{CallOptions, Channel, MethodDescriptor}
 import monix.reactive.Observable
 
 object fs2Calls {
