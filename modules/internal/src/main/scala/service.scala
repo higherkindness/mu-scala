@@ -245,16 +245,26 @@ object serviceImpl {
           case _                                                     => false
         }
 
-      val toHttpRequest: ((TermName, String, TermName, Tree, Tree)) => DefDef = {
-        case (method, path, name, requestType, responseType) =>
+      def requestExecution(responseType: Tree, methodResponseType: Tree): Tree =
+        methodResponseType match {
+          case tq"Observable[..$tpts]" =>
+            q"Observable.fromReactivePublisher(client.streaming(request)(_.body.chunks.parseJsonStream.map(_.as[$responseType]).rethrow).toUnicastPublisher)"
+          case tq"Stream[$carrier, ..$tpts]" =>
+            q"client.streaming(request)(_.body.chunks.parseJsonStream.map(_.as[$responseType]).rethrow)"
+          case tq"$carrier[..$tpts]" =>
+            q"client.expect[$responseType](request)"
+        }
+
+      val toHttpRequest: ((TermName, String, TermName, Tree, Tree, Tree)) => DefDef = {
+        case (method, path, name, requestType, responseType, methodResponseType) =>
           q"""
         def $name(req: $requestType)(implicit
           client: _root_.org.http4s.client.Client[F],
           requestEncoder: EntityEncoder[F, $requestType],
           responseDecoder: EntityDecoder[F, $responseType]
-        ): F[$responseType] = {
+        ): $methodResponseType = {
           val request = Request[F](Method.$method, uri / $path).withBody(req)
-          client.expect[$responseType](request)
+          ${requestExecution(responseType, methodResponseType)}
         }
         """
       }
@@ -276,21 +286,26 @@ object serviceImpl {
           case _                             => throw new Exception("asdf") //TODO: sh*t
         }
 
-        (method, uri, d.name, p.tpt, responseType)
+        (method, uri, d.name, p.tpt, responseType, d.tpt)
       }
 
       val httpRequests    = requests.map(toHttpRequest)
       val HttpClient      = TypeName("HttpClient")
       val httpClientClass = q"""
-        class $HttpClient[$F_](uri: Uri)(implicit Sync: _root_.cats.effect.Sync[F]) {
+        class $HttpClient[$F_](uri: Uri)(implicit Sync: _root_.cats.effect.Effect[F], ec: scala.concurrent.ExecutionContext) {
           ..$httpRequests
         }
         """
 
+      println(httpClientClass)
+
       val http = q"""
         object http {
 
+          import _root_.fs2.interop.reactivestreams._
           import _root_.org.http4s._
+          import _root_.jawnfs2._
+          import _root_.io.circe.jawn.CirceSupportParser.facade
 
           $httpClientClass
         }
