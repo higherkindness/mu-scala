@@ -245,72 +245,6 @@ object serviceImpl {
           case _                                                     => false
         }
 
-      def requestExecution(responseType: Tree, methodResponseType: Tree): Tree =
-        methodResponseType match {
-          case tq"Observable[..$tpts]" =>
-            q"Observable.fromReactivePublisher(client.streaming(request)(_.body.chunks.parseJsonStream.map(_.as[$responseType]).rethrow).toUnicastPublisher)"
-          case tq"Stream[$carrier, ..$tpts]" =>
-            q"client.streaming(request)(_.body.chunks.parseJsonStream.map(_.as[$responseType]).rethrow)"
-          case tq"$carrier[..$tpts]" =>
-            q"client.expect[$responseType](request)"
-        }
-
-      val toHttpRequest: ((TermName, String, TermName, Tree, Tree, Tree)) => DefDef = {
-        case (method, path, name, requestType, responseType, methodResponseType) =>
-          q"""
-        def $name(req: $requestType)(implicit
-          client: _root_.org.http4s.client.Client[F],
-          requestEncoder: EntityEncoder[F, $requestType],
-          responseDecoder: EntityDecoder[F, $responseType]
-        ): $methodResponseType = {
-          val request = Request[F](Method.$method, uri / $path).withBody(req)
-          ${requestExecution(responseType, methodResponseType)}
-        }
-        """
-      }
-
-      private val requests = for {
-        d      <- rpcDefs.collect { case x if findAnnotation(x.mods, "http").isDefined => x }
-        args   <- findAnnotation(d.mods, "http").collect({ case Apply(_, args) => args }).toList
-        params <- d.vparamss
-        _ = require(params.length == 1, s"RPC call ${d.name} has more than one request parameter")
-        p <- params.headOption.toList
-      } yield {
-        val method = TermName(args(0).toString) // TODO: fix direct index access
-        val uri    = args(1).toString // TODO: fix direct index access
-
-        val responseType: Tree = d.tpt match {
-          case tq"Observable[..$tpts]"       => tpts.head
-          case tq"Stream[$carrier, ..$tpts]" => tpts.head
-          case tq"$carrier[..$tpts]"         => tpts.head
-          case _                             => throw new Exception("asdf") //TODO: sh*t
-        }
-
-        (method, uri, d.name, p.tpt, responseType, d.tpt)
-      }
-
-      val httpRequests    = requests.map(toHttpRequest)
-      val HttpClient      = TypeName("HttpClient")
-      val httpClientClass = q"""
-        class $HttpClient[$F_](uri: Uri)(implicit Sync: _root_.cats.effect.Effect[F], ec: scala.concurrent.ExecutionContext) {
-          ..$httpRequests
-        }
-        """
-
-      println(httpClientClass)
-
-      val http = q"""
-        object http {
-
-          import _root_.fs2.interop.reactivestreams._
-          import _root_.org.http4s._
-          import _root_.jawnfs2._
-          import _root_.io.circe.jawn.CirceSupportParser.facade
-
-          $httpClientClass
-        }
-      """
-
       //todo: validate that the request and responses are case classes, if possible
       case class RpcRequest(
           methodName: TermName,
@@ -464,8 +398,7 @@ object serviceImpl {
               service.bindService,
               service.clientClass,
               service.client,
-              service.clientFromChannel,
-              service.http
+              service.clientFromChannel
             )
           )
         )
