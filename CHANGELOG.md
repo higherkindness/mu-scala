@@ -1,5 +1,15 @@
 # Changelog
 
+## 07/17/2018 - Version 0.14.1
+
+Release changes:
+
+* Avro Schema Backward and Forward Compatibility ([#334](https://github.com/frees-io/freestyle-rpc/pull/334))
+* Update 0.14.0 CHANGELOG ([#340](https://github.com/frees-io/freestyle-rpc/pull/340))
+* Utility method for encode joda time instances ([#276](https://github.com/frees-io/freestyle-rpc/pull/276))
+* Fixes options and lists serialization in proto ([#342](https://github.com/frees-io/freestyle-rpc/pull/342))
+
+
 ## 07/09/2018 - Version 0.14.0
 
 Release changes:
