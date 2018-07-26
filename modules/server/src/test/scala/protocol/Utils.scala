@@ -21,7 +21,6 @@ import cats.MonadError
 import cats.effect.Async
 import cats.syntax.applicative._
 import freestyle.rpc.common._
-import freestyle.rpc.server.implicits._
 import io.grpc.Status
 import monix.reactive.Observable
 
