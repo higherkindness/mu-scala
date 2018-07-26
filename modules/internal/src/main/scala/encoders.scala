@@ -27,6 +27,7 @@ import freestyle.rpc.protocol._
 import freestyle.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTimeUtil}
 import io.grpc.MethodDescriptor.Marshaller
 import org.apache.avro.Schema
+import org.apache.avro.Schema.Field
 
 object encoders {
 
@@ -91,7 +92,7 @@ object encoders {
     }
 
     implicit object bigDecimalFromValue extends FromValue[BigDecimal] {
-      def apply(value: Any, field: Schema.Field): BigDecimal =
+      def apply(value: Any, field: Field): BigDecimal =
         BigDecimalUtil.byteToBigDecimal(value.asInstanceOf[ByteBuffer].array())
     }
 
@@ -105,7 +106,7 @@ object encoders {
     }
 
     implicit object localDateFromValue extends FromValue[LocalDate] {
-      def apply(value: Any, field: Schema.Field): LocalDate =
+      def apply(value: Any, field: Field): LocalDate =
         JavaTimeUtil.intToLocalDate(value.asInstanceOf[Int])
     }
 
@@ -119,7 +120,7 @@ object encoders {
     }
 
     implicit object localDateTimeFromValue extends FromValue[LocalDateTime] {
-      def apply(value: Any, field: Schema.Field): LocalDateTime =
+      def apply(value: Any, field: Field): LocalDateTime =
         JavaTimeUtil.longToLocalDateTime(value.asInstanceOf[Long])
     }
 

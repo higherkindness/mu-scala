@@ -25,6 +25,7 @@ import freestyle.rpc.internal.util.EncoderUtil
 import freestyle.rpc.jodatime.util.JodaTimeUtil
 import io.grpc.MethodDescriptor.Marshaller
 import org.apache.avro.Schema
+import org.apache.avro.Schema.Field
 import org.joda.time.{LocalDate, LocalDateTime}
 
 object jodaTimeEncoders {
@@ -33,55 +34,53 @@ object jodaTimeEncoders {
 
     import pbdirect._
 
-    implicit object LocalDateWriter extends PBWriter[LocalDate] {
+    implicit object JodaLocalDateWriter extends PBWriter[LocalDate] {
       override def writeTo(index: Int, value: LocalDate, out: CodedOutputStream): Unit =
         out.writeByteArray(
           index,
           EncoderUtil.intToByteArray(JodaTimeUtil.jodaLocalDateToInt(value)))
     }
 
-    implicit object LocalDateReader extends PBReader[LocalDate] {
+    implicit object JodaLocalDateReader extends PBReader[LocalDate] {
       override def read(input: CodedInputStream): LocalDate =
         JodaTimeUtil.intToJodaLocalDate(EncoderUtil.byteArrayToInt(input.readByteArray()))
     }
 
-    implicit object LocalDateTimeWriter extends PBWriter[LocalDateTime] {
+    implicit object JodaLocalDateTimeWriter extends PBWriter[LocalDateTime] {
       override def writeTo(index: Int, value: LocalDateTime, out: CodedOutputStream): Unit =
         out.writeByteArray(
           index,
           EncoderUtil.longToByteArray(JodaTimeUtil.jodaLocalDatetimeToLong(value)))
     }
 
-    implicit object LocalDateTimeReader extends PBReader[LocalDateTime] {
+    implicit object JodaLocalDateTimeReader extends PBReader[LocalDateTime] {
       override def read(input: CodedInputStream): LocalDateTime =
         JodaTimeUtil.longToJodaLocalDateTime(EncoderUtil.byteArrayToLong(input.readByteArray()))
     }
 
-    implicit val localDateMarshaller: Marshaller[LocalDate] =
-      new Marshaller[LocalDate] {
+    implicit object JodaLocalDateMarshaller extends Marshaller[LocalDate] {
 
-        override def parse(stream: InputStream): LocalDate =
-          Iterator.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray.pbTo[LocalDate]
+      override def parse(stream: InputStream): LocalDate =
+        Iterator.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray.pbTo[LocalDate]
 
-        override def stream(value: LocalDate): InputStream = new ByteArrayInputStream(value.toPB)
+      override def stream(value: LocalDate): InputStream = new ByteArrayInputStream(value.toPB)
 
-      }
+    }
 
-    implicit val localDateTimeMarshaller: Marshaller[LocalDateTime] =
-      new Marshaller[LocalDateTime] {
+    implicit object JodaLocalDateTimeMarshaller extends Marshaller[LocalDateTime] {
 
-        override def parse(stream: InputStream): LocalDateTime =
-          Iterator
-            .continually(stream.read)
-            .takeWhile(_ != -1)
-            .map(_.toByte)
-            .toArray
-            .pbTo[LocalDateTime]
+      override def parse(stream: InputStream): LocalDateTime =
+        Iterator
+          .continually(stream.read)
+          .takeWhile(_ != -1)
+          .map(_.toByte)
+          .toArray
+          .pbTo[LocalDateTime]
 
-        override def stream(value: LocalDateTime): InputStream =
-          new ByteArrayInputStream(value.toPB)
+      override def stream(value: LocalDateTime): InputStream =
+        new ByteArrayInputStream(value.toPB)
 
-      }
+    }
 
   }
 
@@ -89,35 +88,35 @@ object jodaTimeEncoders {
 
     import com.sksamuel.avro4s._
 
-    implicit object localDateToSchema extends ToSchema[LocalDate] {
+    implicit object JodaLocalDateToSchema extends ToSchema[LocalDate] {
       override val schema: Schema = Schema.create(Schema.Type.INT)
     }
 
-    implicit object localDateFromValue extends FromValue[LocalDate] {
-      def apply(value: Any, field: Schema.Field): LocalDate =
+    implicit object JodaLocalDateFromValue extends FromValue[LocalDate] {
+      override def apply(value: Any, field: Field): LocalDate =
         JodaTimeUtil.intToJodaLocalDate(value.asInstanceOf[Int])
     }
 
-    implicit object localDateToValue extends ToValue[LocalDate] {
+    implicit object JodalocalDateToValue extends ToValue[LocalDate] {
       override def apply(value: LocalDate): Int =
         JodaTimeUtil.jodaLocalDateToInt(value)
     }
 
-    implicit object localDateTimeToSchema extends ToSchema[LocalDateTime] {
+    implicit object JodaLocalDateTimeToSchema extends ToSchema[LocalDateTime] {
       override val schema: Schema = Schema.create(Schema.Type.LONG)
     }
 
-    implicit object localDateTimeFromValue extends FromValue[LocalDateTime] {
-      def apply(value: Any, field: Schema.Field): LocalDateTime =
+    implicit object JodaLocalDateTimeFromValue extends FromValue[LocalDateTime] {
+      def apply(value: Any, field: Field): LocalDateTime =
         JodaTimeUtil.longToJodaLocalDateTime(value.asInstanceOf[Long])
     }
 
-    implicit object localDateTimeToValue extends ToValue[LocalDateTime] {
+    implicit object JodaLocalDateTimeToValue extends ToValue[LocalDateTime] {
       override def apply(value: LocalDateTime): Long =
         JodaTimeUtil.jodaLocalDatetimeToLong(value)
     }
 
-    implicit val localDateMarshaller: Marshaller[LocalDate] = new Marshaller[LocalDate] {
+    implicit object JodaLocalDateMarshaller extends Marshaller[LocalDate] {
       override def stream(value: LocalDate): InputStream =
         new ByteArrayInputStream(EncoderUtil.intToByteArray(JodaTimeUtil.jodaLocalDateToInt(value)))
 
@@ -125,16 +124,15 @@ object jodaTimeEncoders {
         JodaTimeUtil.intToJodaLocalDate(EncoderUtil.byteArrayToInt(ByteStreams.toByteArray(stream)))
     }
 
-    implicit val localDateTimeMarshaller: Marshaller[LocalDateTime] =
-      new Marshaller[LocalDateTime] {
-        override def stream(value: LocalDateTime): InputStream =
-          new ByteArrayInputStream(
-            EncoderUtil.longToByteArray(JodaTimeUtil.jodaLocalDatetimeToLong(value)))
+    implicit object JodaLocalDateTimeMarshaller extends Marshaller[LocalDateTime] {
+      override def stream(value: LocalDateTime): InputStream =
+        new ByteArrayInputStream(
+          EncoderUtil.longToByteArray(JodaTimeUtil.jodaLocalDatetimeToLong(value)))
 
-        override def parse(stream: InputStream): LocalDateTime =
-          JodaTimeUtil.longToJodaLocalDateTime(
-            EncoderUtil.byteArrayToLong(ByteStreams.toByteArray(stream)))
-      }
+      override def parse(stream: InputStream): LocalDateTime =
+        JodaTimeUtil.longToJodaLocalDateTime(
+          EncoderUtil.byteArrayToLong(ByteStreams.toByteArray(stream)))
+    }
   }
 
 }
