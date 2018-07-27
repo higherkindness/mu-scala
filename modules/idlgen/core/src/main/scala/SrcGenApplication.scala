@@ -16,8 +16,13 @@
 
 package freestyle.rpc.idlgen
 
+import freestyle.rpc.idlgen.Model.MarshallersImport
 import freestyle.rpc.idlgen.avro.AvroSrcGenerator
 
-object SrcGenApplication extends GeneratorApplication(AvroSrcGenerator) {
-  def main(args: Array[String]): Unit = generateFrom(args)
+object SrcGenApplication {
+  def apply(
+      marshallersImports: List[MarshallersImport] = Nil): GeneratorApplication[AvroSrcGenerator] =
+    new GeneratorApplication(AvroSrcGenerator(marshallersImports)) {
+      def main(args: Array[String]): Unit = generateFrom(args)
+    }
 }

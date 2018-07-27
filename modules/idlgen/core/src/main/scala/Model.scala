@@ -63,4 +63,16 @@ object Model {
       case _ => false
     }
   }
+
+  sealed abstract class MarshallersImport(val marshallersImport: String)
+      extends Product
+      with Serializable
+
+  final case class CustomMarshallersImport(mi: String) extends MarshallersImport(mi)
+  case object BigDecimalAvroMarshallers
+      extends MarshallersImport("freestyle.rpc.internal.encoders.avro.bigdecimal._")
+  case object JavaTimeDateAvroMarshallers
+      extends MarshallersImport("freestyle.rpc.internal.encoders.avro.javatime._")
+  case object JodaDateTimeAvroMarshallers
+      extends MarshallersImport("freestyle.rpc.marshallers.jodaTimeEncoders.avro._")
 }

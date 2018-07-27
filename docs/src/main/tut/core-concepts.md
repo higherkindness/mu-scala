@@ -193,7 +193,7 @@ Let's see an example of a unary service on the server side.
 ```tut:silent
 object service {
 
-  @service(Protobuf)
+  @service(Protobuf, Gzip)
   trait Greeter[F[_]] {
 
     /**
