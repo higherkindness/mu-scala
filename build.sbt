@@ -277,6 +277,10 @@ lazy val `example-todolist-client` = project
 
 lazy val `marshallers-jodatime` = project
   .in(file("modules/marshallers/jodatime"))
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(client % "compile->compile;test->test")
+  .dependsOn(internal % "compile->compile;test->test")
+  .dependsOn(testing % "test->test")
   .settings(moduleName := "frees-rpc-marshallers-jodatime")
   .settings(libraryDependencies += "joda-time" % "joda-time" % "2.9.9")
   .settings(libraryDependencies += "com.47deg" %% "scalacheck-toolbox-datetime" % "0.2.4" % "test")
