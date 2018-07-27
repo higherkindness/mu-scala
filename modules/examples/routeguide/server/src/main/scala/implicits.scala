@@ -17,7 +17,6 @@
 package example.routeguide.server
 
 import cats.effect.IO
-import freestyle.rpc.server.{AddService, GrpcConfig}
 import example.routeguide.server.handlers.RouteGuideServiceHandler
 import example.routeguide.protocol.Protocols.RouteGuideService
 import example.routeguide.runtime._

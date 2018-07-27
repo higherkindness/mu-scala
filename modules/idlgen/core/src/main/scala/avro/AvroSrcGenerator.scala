@@ -105,7 +105,11 @@ object AvroSrcGenerator extends SrcGenerator {
 
     val packageLines = Seq(schemaLines.head, "")
 
-    val importLines = Seq("import freestyle.rpc.protocol._")
+    val importLines = Seq(
+      "import freestyle.rpc.internal.encoders.avro.bigdecimal._",
+      "import freestyle.rpc.internal.encoders.avro.javatime._",
+      "import freestyle.rpc.protocol._"
+    )
 
     val messageLines = schemaLines.tail.map(line =>
       if (line.contains("case class")) s"@message $line" else line) :+ "" // note: can be "final case class"

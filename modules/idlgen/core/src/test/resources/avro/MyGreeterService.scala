@@ -16,6 +16,8 @@
 
 package foo.bar
 
+import freestyle.rpc.internal.encoders.avro.bigdecimal._
+import freestyle.rpc.internal.encoders.avro.javatime._
 import freestyle.rpc.protocol._
 
 @message case class HelloRequest(arg1: String, arg2: Option[String], arg3: List[String])
