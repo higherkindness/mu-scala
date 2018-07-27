@@ -2,25 +2,30 @@ $ exists src/main/resources/service.avdl
 > 'set idlType := "avro"'
 > 'set srcGenSerializationType := "Avro"'
 > srcGen
+> compile
 $ exists target/scala-2.12/src_managed/main/io/frees/service.scala
 $ delete target/scala-2.12/src_managed/main/io/frees/service.scala
 
 $ exists src/main/resources/service.avdl
 > 'set idlType := "avro"'
-> 'set idlGenCodecImports := List()'
+> 'set idlGenMarshallerImports := List()'
 > srcGen
+> compile
 $ exists target/scala-2.12/src_managed/main/io/frees/service.scala
 $ delete target/scala-2.12/src_managed/main/io/frees/service.scala
 
 $ exists src/main/resources/service.avdl
 > 'set idlType := "avro"'
-> 'set idlGenCodecImports := List(freestyle.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))'
+> 'set idlGenMarshallerImports := List(freestyle.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))'
 > srcGen
+> compile
 $ exists target/scala-2.12/src_managed/main/io/frees/service.scala
 $ delete target/scala-2.12/src_managed/main/io/frees/service.scala
 
 $ exists src/main/resources/service.avdl
 > 'set idlType := "avro"'
-> 'set idlGenCodecImports := List(freestyle.rpc.idlgen.Model.BigDecimalAvroMarshallers, freestyle.rpc.idlgen.Model.JavaTimeDateAvroMarshallers, freestyle.rpc.idlgen.Model.JodaDateTimeAvroMarshallers, freestyle.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))'
+> 'set idlGenMarshallerImports := List(freestyle.rpc.idlgen.Model.BigDecimalAvroMarshallers, freestyle.rpc.idlgen.Model.JavaTimeDateAvroMarshallers, freestyle.rpc.idlgen.Model.JodaDateTimeAvroMarshallers, freestyle.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))'
 > srcGen
+> compile
 $ exists target/scala-2.12/src_managed/main/io/frees/service.scala
+$ delete target/scala-2.12/src_managed/main/io/frees/service.scala

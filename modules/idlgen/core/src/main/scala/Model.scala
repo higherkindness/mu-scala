@@ -75,4 +75,10 @@ object Model {
       extends MarshallersImport("freestyle.rpc.internal.encoders.avro.javatime._")
   case object JodaDateTimeAvroMarshallers
       extends MarshallersImport("freestyle.rpc.marshallers.jodaTimeEncoders.avro._")
+  case object BigDecimalProtobufMarshallers
+      extends MarshallersImport("freestyle.rpc.internal.encoders.pbd.bigdecimal._")
+  case object JavaTimeDateProtobufMarshallers
+      extends MarshallersImport("freestyle.rpc.internal.encoders.pbd.javatime._")
+  case object JodaDateTimeProtobufMarshallers
+      extends MarshallersImport("freestyle.rpc.marshallers.jodaTimeEncoders.pbd._")
 }

@@ -1,1 +1,1 @@
-addSbtPlugin("io.frees" %% "sbt-frees-rpc-idlgen" % "0.14.2-SNAPSHOT")
+addSbtPlugin("io.frees" %% "sbt-frees-rpc-idlgen" % sys.props("version"))

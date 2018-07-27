@@ -65,19 +65,29 @@ trait AvroScalaGeneratorArbitrary {
       .choose(1, 5)
       .flatMap(Gen.listOfN(_, importSliceGen).map(_.mkString(".") + "._").map(CustomMarshallersImport))
 
-  val marshallersImportGen: Gen[MarshallersImport] =
-    Gen.oneOf(
-      Gen.const(BigDecimalAvroMarshallers),
-      Gen.const(JavaTimeDateAvroMarshallers),
-      Gen.const(JodaDateTimeAvroMarshallers),
-      customMarshallersImportsGen
-    )
+  def marshallersImportGen(serializationType: String): Gen[MarshallersImport] = serializationType match {
+    case "Avro" | "AvroWithSchema" =>
+      Gen.oneOf(
+        Gen.const(BigDecimalAvroMarshallers),
+        Gen.const(JavaTimeDateAvroMarshallers),
+        Gen.const(JodaDateTimeAvroMarshallers),
+        customMarshallersImportsGen
+      )
+    case "Protobuf" =>
+      Gen.oneOf(
+        Gen.const(BigDecimalProtobufMarshallers),
+        Gen.const(JavaTimeDateProtobufMarshallers),
+        Gen.const(JodaDateTimeProtobufMarshallers),
+        customMarshallersImportsGen
+      )
+    case _ => customMarshallersImportsGen
+  }
 
   implicit val scenarioArb: Arbitrary[Scenario] = Arbitrary {
     for {
       inputResourcePath  <- Gen.oneOf("/avro/GreeterService.avpr", "/avro/GreeterService.avdl")
-      serializationType  <- Gen.oneOf("Avro", "AvroWithSchema")
-      marshallersImports <- Gen.listOf(marshallersImportGen)
+      serializationType  <- Gen.oneOf("Avro", "AvroWithSchema", "Protobuf")
+      marshallersImports <- Gen.listOf(marshallersImportGen(serializationType))
       options            <- Gen.option("Gzip")
     } yield
       Scenario(
