@@ -58,7 +58,7 @@ trait AvroScalaGeneratorArbitrary {
   }
 
   val importSliceGen: Gen[String] =
-    Gen.choose(4, 10).flatMap(Gen.listOfN(_, Gen.choose('a', 'z')).map(_.mkString("")))
+    Gen.choose(4, 10).flatMap(Gen.listOfN(_, Gen.alphaLowerChar).map(_.mkString("")))
 
   val customMarshallersImportsGen: Gen[MarshallersImport] =
     Gen
