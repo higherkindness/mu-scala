@@ -18,6 +18,7 @@ package freestyle.rpc.idlgen
 
 import java.io.File
 
+import freestyle.rpc.idlgen.Model._
 import sbt.Keys._
 import sbt._
 import sbt.io.{Path, PathFinder}
@@ -90,6 +91,11 @@ object IdlGenPlugin extends AutoPlugin {
     lazy val genOptions: SettingKey[Seq[String]] =
       settingKey[Seq[String]](
         "Options for the generator, such as additional @service annotation parameters in srcGen.")
+
+    lazy val idlGenMarshallerImports: SettingKey[List[MarshallersImport]] =
+      settingKey[List[MarshallersImport]](
+        "List of imports needed for creating the request/response marshallers. " +
+          "By default, this include the instances for serializing `BigDecimal`, `java.time.LocalDate`, and `java.time.LocalDateTime`")
   }
 
   import freestyle.rpc.idlgen.IdlGenPlugin.autoImport._
@@ -108,7 +114,14 @@ object IdlGenPlugin extends AutoPlugin {
     srcGenSourceDirs := Seq(srcGenSourceDir.value),
     srcGenIDLTargetDir := (Compile / resourceManaged).value / idlType.value,
     srcGenTargetDir := (Compile / sourceManaged).value,
-    genOptions := Seq.empty
+    genOptions := Seq.empty,
+    idlGenMarshallerImports := {
+      if (srcGenSerializationType.value == "Avro" || srcGenSerializationType.value == "AvroWithSchema")
+        List(BigDecimalAvroMarshallers, JavaTimeDateAvroMarshallers)
+      else if (srcGenSerializationType.value == "Protobuf")
+        List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)
+      else Nil
+    }
   )
 
   lazy val taskSettings: Seq[Def.Setting[_]] = {
@@ -145,12 +158,13 @@ object IdlGenPlugin extends AutoPlugin {
           },
           Def.task {
             idlGenTask(
-              SrcGenApplication,
+              SrcGenApplication(idlGenMarshallerImports.value),
               idlType.value,
               srcGenSerializationType.value,
               genOptions.value,
               srcGenTargetDir.value,
-              target.value / "srcGen")(srcGenIDLTargetDir.value.allPaths.get.toSet).toSeq
+              target.value / "srcGen"
+            )(srcGenIDLTargetDir.value.allPaths.get.toSet).toSeq
           }
         )
         .value,

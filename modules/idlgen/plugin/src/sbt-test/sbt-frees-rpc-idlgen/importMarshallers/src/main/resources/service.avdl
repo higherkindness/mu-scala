@@ -1,0 +1,16 @@
+@namespace("io.frees")
+protocol service {
+
+  record Foo {
+    string bar;
+  }
+
+  record Person {
+    long id;
+    string name;
+    union { null, string } email;
+  }
+
+  io.frees.Person hi(io.frees.Foo request);
+
+}

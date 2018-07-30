@@ -33,7 +33,7 @@ package object idlgen {
     .map(g => g.idlType -> g)
     .toMap
 
-  val srcGenerators: Map[String, SrcGenerator] = Seq(AvroSrcGenerator)
+  val srcGenerators: Map[String, SrcGenerator] = Seq(AvroSrcGenerator())
     .map(g => g.idlType -> g)
     .toMap
 

@@ -16,17 +16,21 @@
 
 package freestyle.rpc.idlgen.avro
 
+import java.io.File
+
 import avrohugger.Generator
 import avrohugger.format.Standard
 import avrohugger.types._
 import freestyle.rpc.idlgen._
-import java.io.File
+import freestyle.rpc.idlgen.Model.MarshallersImport
 import org.apache.avro._
 import org.log4s._
+
 import scala.collection.JavaConverters._
 import scala.util.Right
 
-object AvroSrcGenerator extends SrcGenerator {
+case class AvroSrcGenerator(marshallersImports: List[MarshallersImport] = Nil)
+    extends SrcGenerator {
 
   private[this] val logger = getLogger
 
@@ -105,11 +109,10 @@ object AvroSrcGenerator extends SrcGenerator {
 
     val packageLines = Seq(schemaLines.head, "")
 
-    val importLines = Seq(
-      "import freestyle.rpc.internal.encoders.avro.bigdecimal._",
-      "import freestyle.rpc.internal.encoders.avro.javatime._",
-      "import freestyle.rpc.protocol._"
-    )
+    val importLines =
+      ("import freestyle.rpc.protocol._" :: marshallersImports
+        .map(_.marshallersImport)
+        .map("import " + _)).sorted
 
     val messageLines = schemaLines.tail.map(line =>
       if (line.contains("case class")) s"@message $line" else line) :+ "" // note: can be "final case class"

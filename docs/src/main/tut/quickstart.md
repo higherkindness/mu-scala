@@ -73,6 +73,9 @@ libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-client" % "0.14.1"
 
 // optional - for the communication between server and client by using SSL/TLS.
 libraryDependencies += "io.frees" %% "frees-rpc-netty-ssl" % "0.14.1"
+
+// optional - for using the jodatime marshallers.
+libraryDependencies += "io.frees" %% "frees-rpc-marshallers-jodatime" % "0.14.1"
 ```
 
 [comment]: # (End Replace)
