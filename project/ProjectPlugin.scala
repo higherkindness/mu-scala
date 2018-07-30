@@ -27,7 +27,7 @@ object ProjectPlugin extends AutoPlugin {
       val frees: String              = "0.8.1"
       val fs2: String                = "0.10.5"
       val fs2ReactiveStreams: String = "0.5.1"
-      val grpc: String               = "1.11.0"
+      val grpc: String               = "1.13.2"
       val log4s: String              = "1.6.1"
       val logback: String            = "1.2.3"
       val monix: String              = "3.0.0-RC1"
