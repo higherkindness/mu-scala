@@ -26,9 +26,10 @@ It's divided into multiple and different artifacts, grouped by scope:
 --- | --- | --- | ---
 `frees-rpc-server` | Server | Yes | Needed to attach RPC Services and spin-up an RPC Server.
 `frees-rpc-client-core` | Client | Yes | Mandatory to define protocols and auto-derived clients.
-`frees-rpc-client-netty` | Client | Yes* | Optional if you use `OkHttp`, required from the client perspective.
-`frees-rpc-client-okhttp` | Client | Yes* | Optional if you use `Netty`, required from the client perspective.
-`frees-rpc-config` | Server/Client | No | It provides configuration helpers using [frees-config] to load the application configuration values.
+`frees-rpc-client-netty` | Client | Yes* | Mandatory on the client side if we are using `Netty` in the server side.
+`frees-rpc-client-okhttp` | Client | Yes* | Mandatory on the client side if we are using `OkHttp` in the server side.
+`frees-rpc-config` | Server/Client | No | Provides configuration helpers using [frees-config] to load the application configuration values.
+`frees-rpc-marshallers-jodatime` | Server/Client | No | Provides marshallers for serializing and deserializing the `LocalDate` and `LocalDateTime` joda instances.
 `frees-rpc-prometheus-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, on the _Server_ side.
 `frees-rpc-prometheus-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, on the _Client_ side.
 `frees-rpc-prometheus-shared` | Server/Client | No | Common code for both the client and the server in the prometheus scope.
@@ -39,7 +40,7 @@ It's divided into multiple and different artifacts, grouped by scope:
 `frees-rpc-common` | Server/Client | Provided* | Common things that are used throughout the project.
 `frees-rpc-internal` | Server/Client | Provided* | Macros.
 `frees-rpc-async` | Server/Client | Provided* | Async instances useful for interacting with the RPC services on both sides, server and the client.
-`frees-rpc-netty-ssl` | Server/Client | No | It adds the `io.netty:netty-tcnative-boringssl-static:jar` dependency, aligned with the Netty version (if that's the case) used in the `frees-rpc` build. See [this section](https://github.com/grpc/grpc-java/blob/master/SECURITY.md#netty) for more information. Adding this you wouldn't need to figure out which would be the right version, `frees-rpc` gives you the right one.
+`frees-rpc-netty-ssl` | Server/Client | No | Adds the `io.netty:netty-tcnative-boringssl-static:jar` dependency, aligned with the Netty version (if that's the case) used in the `frees-rpc` build. See [this section](https://github.com/grpc/grpc-java/blob/master/SECURITY.md#netty) for more information. Adding this you wouldn't need to figure out which would be the right version, `frees-rpc` gives you the right one.
 
 * `Yes*`: on the client-side, you must choose either `Netty` or `OkHttp` as the transport layer.
 * `Provided*`: you don't need to add it to your build, it'll be transitively provided when using other dependencies.
@@ -73,6 +74,9 @@ libraryDependencies += "io.frees" %% "frees-rpc-dropwizard-client" % "0.14.1"
 
 // optional - for the communication between server and client by using SSL/TLS.
 libraryDependencies += "io.frees" %% "frees-rpc-netty-ssl" % "0.14.1"
+
+// optional - for using the jodatime marshallers.
+libraryDependencies += "io.frees" %% "frees-rpc-marshallers-jodatime" % "0.14.1"
 ```
 
 [comment]: # (End Replace)
