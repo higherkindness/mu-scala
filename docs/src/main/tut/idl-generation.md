@@ -223,6 +223,7 @@ Just like `idlGen`, `srcGen` and `srcGenFromJars` has some configurable settings
 * **`genOptions`**: additional options to add to the generated `@service` annotations, after the IDL type. Currently only supports `"Gzip"`.
 * **`idlGenMarshallerImports`**: additional imports to add on top to the generated service files. This property can be used for importing extra codecs for your services. By default: `List(BigDecimalAvroMarshallers, JavaTimeDateAvroMarshallers)` if thew serialization type is `Avro` or `AvroWithSchema` or `List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)` if thew serialization type is `Protobuf`. The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also available, but they needs the dependency `frees-rpc-marshallers-jodatime`. You can also specify custom imports with the following:
   * `idlGenMarshallerImports := List(freestyle.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))`
+  * See the [Custom codecs section in core concepts](/docs/rpc/core-concepts#custom-codecs) for more information.
 
 The source directory must exist, otherwise, the `srcGen` task will fail. Target directories will be created upon generation.
 

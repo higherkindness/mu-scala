@@ -49,6 +49,7 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
 
     object AvroService {
       import freestyle.rpc.marshallers.jodaTimeEncoders.avro._
+      import freestyle.rpc.marshallers.jodaTimeEncoders.avro.marshallers._
       @service(Avro)
       trait Def[F[_]] {
         def jodaLocalDateAvro(date: LocalDate): F[LocalDate]

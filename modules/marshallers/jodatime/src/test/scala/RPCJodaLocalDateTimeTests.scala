@@ -39,36 +39,27 @@ class RPCJodaLocalDateTimeTests extends RpcBaseTestSuite with BeforeAndAfter wit
     case class Response(date: LocalDateTime, label: String, check: Boolean)
 
     object ProtobufService {
-
       import freestyle.rpc.marshallers.jodaTimeEncoders.pbd._
-
       @service(Protobuf)
       trait Def[F[_]] {
         def jodaLocalDateTimeProto(date: LocalDateTime): F[LocalDateTime]
         def jodaLocalDateTimeReqProto(request: Request): F[Response]
       }
-
     }
 
     object AvroService {
-
       import freestyle.rpc.marshallers.jodaTimeEncoders.avro._
-
+      import freestyle.rpc.marshallers.jodaTimeEncoders.avro.marshallers._
       @service(Avro)
       trait Def[F[_]] {
         def jodaLocalDateTimeAvro(date: LocalDateTime): F[LocalDateTime]
-
         def jodaLocalDateTimeReqAvro(request: Request): F[Response]
       }
-
       @service(AvroWithSchema)
       trait WithSchemaDef[F[_]] {
         def localDateTimeAvroWithSchema(date: LocalDateTime): F[LocalDateTime]
-
         def jodaLocalDateTimeReqAvroWithSchema(request: Request): F[Response]
-
       }
-
     }
 
     class RPCJodaServiceDefHandler[F[_]: Applicative]

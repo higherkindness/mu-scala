@@ -26,6 +26,7 @@ import com.fortysevendeg.scalacheck.datetime.GenDateTime._
 import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.seconds
 import freestyle.rpc.common._
 import freestyle.rpc.internal.encoders.avro.javatime._
+import freestyle.rpc.internal.encoders.avro.javatime.marshallers._
 import freestyle.rpc.internal.encoders.pbd.javatime._
 import freestyle.rpc.testing.servers.withServerChannel
 import org.scalacheck.Arbitrary

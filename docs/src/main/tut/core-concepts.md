@@ -293,6 +293,114 @@ Here `sayHello` is our unary RPC.
 
 In the `Streaming` section, we are going to see all the streaming options.
 
+## Custom codecs
+
+[frees-rpc] allows you to use custom decoders and encoders. It creates implicits `Marshaller` instances for your messages using existing serializers/deserializers for the serialization type you're using.
+
+In the case of `Protobuf`, [frees-rpc] uses instances of [PBDirect] for creating the `Marshaller` instances. In the case of `Avro`, it uses instances of [Avro4s].
+
+Let's see a couple of samples, one per each type of serialization. Suppose you want to serialize `java.time.LocalDate` as part of your messages in `String` format. With `Probobuf`, as we've mentioned, you need to provide the instances of [PBDirect] for that type. Concretely, you need to provide a `PBWriter` and a `PBReader`.
+
+```tut:silent
+object protocol {
+
+  import java.time._
+  import java.time.format._
+  
+  import com.google.protobuf.{CodedInputStream, CodedOutputStream}
+  import pbdirect._
+  
+  implicit object LocalDateWriter extends PBWriter[LocalDate] {
+    override def writeTo(index: Int, value: LocalDate, out: CodedOutputStream): Unit =
+      out.writeString(index, value.format(DateTimeFormatter.ISO_LOCAL_DATE))
+  }
+  
+  implicit object LocalDateReader extends PBReader[LocalDate] {
+    override def read(input: CodedInputStream): LocalDate =
+      LocalDate.parse(input.readString(), DateTimeFormatter.ISO_LOCAL_DATE)
+  }
+
+  @message
+  case class HelloRequest(name: String, date: LocalDate)
+
+  @message
+  case class HelloReply(message: String)
+
+  @service(Protobuf)
+  trait Greeter[F[_]] {
+
+    def sayHello(request: HelloRequest): F[HelloReply]
+  }
+}
+```
+
+For `Avro` is quite similar, but in this case we need to provide three instances of [Avro4s]. `ToSchema`, `FromValue`, and `ToValue`.
+
+```tut:silent
+object protocol {
+
+  import java.time._
+  import java.time.format._
+  
+  import com.sksamuel.avro4s._
+  import org.apache.avro.Schema
+  import org.apache.avro.Schema.Field
+  
+  implicit object LocalDateToSchema extends ToSchema[LocalDate] {
+    override val schema: Schema = 
+      Schema.create(Schema.Type.STRING)
+  }
+
+  implicit object LocalDateToValue extends ToValue[LocalDate] {
+    override def apply(value: LocalDate): String = 
+      value.format(DateTimeFormatter.ISO_LOCAL_DATE)
+  }
+
+  implicit object LocalDateFromValue extends FromValue[LocalDate] {
+    override def apply(value: Any, field: Field): LocalDate = 
+      LocalDate.parse(value.toString(), DateTimeFormatter.ISO_LOCAL_DATE)
+  }
+
+  @message
+  case class HelloRequest(name: String, date: LocalDate)
+
+  @message
+  case class HelloReply(message: String)
+
+  @service(Avro)
+  trait Greeter[F[_]] {
+
+    def sayHello(request: HelloRequest): F[HelloReply]
+  }
+}
+```
+
+[frees-rpc] provides serializers for `BigDecimal`, `java.time.LocalDate` and `java.time.LocalDateTime`. The only thing you need to do is to add the following import to your service:
+
+* `BigDecimal` in `Protobuf`
+  * `import freestyle.rpc.internal.encoders.pbd.bigDecimal._`
+* `java.time.LocalDate` and `java.time.LocalDateTime` in `Protobuf`
+  * `import freestyle.rpc.internal.encoders.pbd.javatime._`
+* `BigDecimal` in `Avro`
+  * `import freestyle.rpc.internal.encoders.avro.bigDecimal._`
+* `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
+  * `import freestyle.rpc.internal.encoders.avro.javatime._`
+
+It also provides the instances for `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime`, but you need the `frees-rpc-marshallers-jodatime` extra dependency. See the [quickstart section](/docs/rpc/quickstart) for the SBT instructions.
+
+* `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Protobuf`
+  * `import freestyle.rpc.marshallers.jodaTimeEncoders.pbd._`
+* `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
+  * `import freestyle.rpc.marshallers.jodaTimeEncoders.avro._`
+  
+**Note**: If you want to send one of these instances directly as a request or response through Avro, you need to provide an instance of `Marshaller`. [frees-rpc] provides the marshallers for `BigDecimal`, `java.time.LocalDate`, `java.time.LocalDateTime`, `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in a separated package:
+* `BigDecimal` in `Avro`
+  * `import freestyle.rpc.internal.encoders.avro.bigDecimal.marshallers._`
+* `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
+  * `import freestyle.rpc.internal.encoders.avro.javatime.marshallers._`
+* `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
+  * `import freestyle.rpc.marshallers.jodaTimeEncoders.avro.marshallers._`
+
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
@@ -306,4 +414,5 @@ In the `Streaming` section, we are going to see all the streaming options.
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
 [Metrifier]: https://github.com/47deg/metrifier
+[Avro4s]: https://github.com/sksamuel/avro4s
 
