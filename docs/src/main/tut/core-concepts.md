@@ -375,15 +375,15 @@ object protocol {
 }
 ```
 
-[frees-rpc] provides serializers for `BigDecimal`, `LocalDate` and `LocalDateTime`. The only thing you need to do is to add the following import to your service:
+[frees-rpc] provides serializers for `BigDecimal`, `java.time.LocalDate` and `java.time.LocalDateTime`. The only thing you need to do is to add the following import to your service:
 
 * `BigDecimal` in `Protobuf`
   * `import freestyle.rpc.internal.encoders.pbd.bigDecimal._`
-* `LocalDate` and `LocalDateTime` in `Protobuf`
+* `java.time.LocalDate` and `java.time.LocalDateTime` in `Protobuf`
   * `import freestyle.rpc.internal.encoders.pbd.javatime._`
 * `BigDecimal` in `Avro`
   * `import freestyle.rpc.internal.encoders.avro.bigDecimal._`
-* `LocalDate` and `LocalDateTime` in `Avro`
+* `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
   * `import freestyle.rpc.internal.encoders.avro.javatime._`
 
 It also provides the instances for `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime`, but you need the `frees-rpc-marshallers-jodatime` extra dependency. See the [quickstart section](/docs/rpc/quickstart) for the SBT instructions.
@@ -393,10 +393,10 @@ It also provides the instances for `org.joda.time.LocalDate` and `org.joda.time.
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
   * `import freestyle.rpc.marshallers.jodaTimeEncoders.avro._`
   
-**Note**: If you want to send one of these instances directly as a request or response through Avro, you need to provide an instance of `Marshaller`. [frees-rpc] provides the marshallers for `BigDecimal`, `LocalDate`, `LocalDateTime`, `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in a separated package:
+**Note**: If you want to send one of these instances directly as a request or response through Avro, you need to provide an instance of `Marshaller`. [frees-rpc] provides the marshallers for `BigDecimal`, `java.time.LocalDate`, `java.time.LocalDateTime`, `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in a separated package:
 * `BigDecimal` in `Avro`
   * `import freestyle.rpc.internal.encoders.avro.bigDecimal.marshallers._`
-* `LocalDate` and `LocalDateTime` in `Avro`
+* `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
   * `import freestyle.rpc.internal.encoders.avro.javatime.marshallers._`
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
   * `import freestyle.rpc.marshallers.jodaTimeEncoders.avro.marshallers._`
