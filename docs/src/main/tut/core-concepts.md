@@ -392,6 +392,14 @@ It also provides the instances for `org.joda.time.LocalDate` and `org.joda.time.
   * `import freestyle.rpc.marshallers.jodaTimeEncoders.pbd._`
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
   * `import freestyle.rpc.marshallers.jodaTimeEncoders.avro._`
+  
+**Note**: If you want to send one of these instances directly as a request or response through Avro, you need to provide an instance of `Marshaller`. [frees-rpc] provides the marshallers for `BigDecimal`, `LocalDate`, `LocalDateTime`, `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in a separated package:
+* `BigDecimal` in `Avro`
+  * `import freestyle.rpc.internal.encoders.avro.bigDecimal.marshallers._`
+* `LocalDate` and `LocalDateTime` in `Avro`
+  * `import freestyle.rpc.internal.encoders.avro.javatime.marshallers._`
+* `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
+  * `import freestyle.rpc.marshallers.jodaTimeEncoders.avro.marshallers._`
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
