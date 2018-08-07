@@ -45,6 +45,12 @@ It's divided into multiple and different artifacts, grouped by scope:
 * `Yes*`: on the client-side, you must choose either `Netty` or `OkHttp` as the transport layer.
 * `Provided*`: you don't need to add it to your build, it'll be transitively provided when using other dependencies.
 
+To use the project, add the following to your build.sbt:
+
+```scala
+addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.full)
+```
+
 You can install any of these dependencies in your build as follows:
 
 [comment]: # (Start Replace)
