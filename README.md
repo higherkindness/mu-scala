@@ -48,7 +48,7 @@ It's divided into multiple and different artifacts, grouped by scope:
 To use the project, add the following to your build.sbt:
 
 ```scala
-addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.full)
+addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch)
 ```
 
 You can install any of these dependencies in your build as follows:
