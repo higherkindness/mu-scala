@@ -45,6 +45,12 @@ It's divided into multiple and different artifacts, grouped by scope:
 * `Yes*`: on the client-side, you must choose either `Netty` or `OkHttp` as the transport layer.
 * `Provided*`: you don't need to add it to your build, it'll be transitively provided when using other dependencies.
 
+To use the project, add the following to your build.sbt:
+
+```scala
+addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch)
+```
+
 You can install any of these dependencies in your build as follows:
 
 [comment]: # (Start Replace)
