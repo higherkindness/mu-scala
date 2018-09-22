@@ -165,12 +165,6 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val exampleTodolistRuntimeSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        %%("monix", V.monix)
-      )
-    )
-
     lazy val exampleTodolistCommonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.frees" %% "frees-todolist-lib" % V.frees,

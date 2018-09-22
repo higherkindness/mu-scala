@@ -258,7 +258,6 @@ lazy val `example-todolist-runtime` = project
   .in(file("modules/examples/todolist/runtime"))
   .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-todolist-runtime")
-  .settings(exampleTodolistRuntimeSettings)
   .disablePlugins(ScriptedPlugin)
 
 lazy val `example-todolist-server` = project

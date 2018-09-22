@@ -21,6 +21,8 @@ import cats.effect.LiftIO
 import monix.eval.Task
 import monix.execution.Scheduler
 
+import scala.concurrent.ExecutionContext
+
 trait LiftTask[F[_]] {
   def liftTask[A](task: Task[A]): F[A]
 }
@@ -31,8 +33,8 @@ object LiftTask {
       def liftTask[A](task: Task[A]): Task[A] = task
     }
 
-  implicit def effectLiftTask[F[_]](implicit F: LiftIO[F], s: Scheduler): LiftTask[F] =
+  implicit def effectLiftTask[F[_]](implicit F: LiftIO[F], EC: ExecutionContext): LiftTask[F] =
     new LiftTask[F] {
-      def liftTask[A](task: Task[A]): F[A] = F.liftIO(task.toIO(s))
+      def liftTask[A](task: Task[A]): F[A] = F.liftIO(task.toIO(Scheduler(EC)))
     }
 }

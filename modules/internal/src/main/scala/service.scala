@@ -175,7 +175,7 @@ object serviceImpl {
         def bindService[$F_](implicit
           F: _root_.cats.effect.Effect[$F],
           algebra: $serviceName[$F],
-          S: _root_.monix.execution.Scheduler
+          EC: _root_.scala.concurrent.ExecutionContext
         ): _root_.io.grpc.ServerServiceDefinition =
           new _root_.freestyle.rpc.internal.service.GRPCServiceDefBuilder(${lit(serviceName)}, ..$serverCallDescriptorsAndHandlers).apply
         """
@@ -189,7 +189,7 @@ object serviceImpl {
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit
           F: _root_.cats.effect.Effect[$F],
-          S: _root_.monix.execution.Scheduler
+          EC: _root_.scala.concurrent.ExecutionContext
         ) extends _root_.io.grpc.stub.AbstractStub[$Client[$F]](channel, options) {
           override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $Client[F] =
               new $Client[$F](channel, options)
@@ -206,7 +206,7 @@ object serviceImpl {
             options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
           )(implicit
           F: _root_.cats.effect.Effect[$F],
-          S: _root_.monix.execution.Scheduler
+          EC: _root_.scala.concurrent.ExecutionContext
         ): $Client[$F] = {
           val managedChannelInterpreter =
             new _root_.freestyle.rpc.client.ManagedChannelInterpreter[F](channelFor, channelConfigList)
@@ -220,7 +220,7 @@ object serviceImpl {
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit
           F: _root_.cats.effect.Effect[$F],
-          S: _root_.monix.execution.Scheduler
+          EC: _root_.scala.concurrent.ExecutionContext
         ): $Client[$F] = new $Client[$F](channel, options)
         """.supressWarts("DefaultArguments")
 

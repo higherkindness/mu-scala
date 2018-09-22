@@ -22,7 +22,7 @@ import monix.execution.{Ack, Scheduler}
 import monix.reactive.{Observable, Observer, Pipe}
 import monix.reactive.observers.Subscriber
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 package object server {
 
@@ -47,7 +47,7 @@ package object server {
   private[server] def transformStreamObserver[Req, Res](
       transformer: Observable[Req] => Observable[Res],
       responseObserver: StreamObserver[Res]
-  )(implicit S: Scheduler): StreamObserver[Req] =
+  )(implicit EC: ExecutionContext): StreamObserver[Req] =
     transform(transformer, responseObserver.toSubscriber).toStreamObserver
 
   private[server] def addCompression[A](

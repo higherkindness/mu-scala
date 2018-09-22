@@ -22,6 +22,7 @@ import cats.effect.Async
 import cats.syntax.applicative._
 import freestyle.rpc.common._
 import io.grpc.Status
+import monix.execution.Scheduler
 import monix.reactive.Observable
 
 object Utils extends CommonUtils {
@@ -132,6 +133,8 @@ object Utils extends CommonUtils {
           with CompressedProtoRPCService[F]
           with CompressedAvroRPCService[F]
           with CompressedAvroWithSchemaRPCService[F] {
+
+        implicit val S: Scheduler = Scheduler(EC)
 
         def notAllowed(b: Boolean): F[C] = c1.pure
 
@@ -267,6 +270,8 @@ object Utils extends CommonUtils {
           M: MonadError[F, Throwable])
           extends MyRPCClient[F] {
 
+        implicit val S: Scheduler = Scheduler(EC)
+
         override def notAllowed(b: Boolean): F[C] =
           proto.notAllowed(b)
 
@@ -374,6 +379,8 @@ object Utils extends CommonUtils {
           avro: CompressedAvroRPCService.Client[F],
           M: MonadError[F, Throwable])
           extends MyRPCClient[F] {
+
+        implicit val S: Scheduler = Scheduler(EC)
 
         override def notAllowed(b: Boolean): F[C] =
           proto.notAllowedCompressed(b)
