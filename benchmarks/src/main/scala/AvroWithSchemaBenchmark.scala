@@ -16,22 +16,23 @@
 
 package freestyle.rpc.benchmarks
 
-import cats.effect.IO
-import freestyle.rpc.protocol.Empty
 import java.util.concurrent.TimeUnit
 
+import cats.effect.IO
 import freestyle.rpc.benchmarks.Utils._
-import freestyle.rpc.benchmarks.shared.models._
-import freestyle.rpc.benchmarks.shared.protocols.PersonServiceAvro
+import freestyle.rpc.benchmarks.shared.protocols.PersonServiceAvroWithSchema
 import freestyle.rpc.benchmarks.shared.Runtime
+import freestyle.rpc.benchmarks.shared.models._
+import freestyle.rpc.protocol.Empty
 import org.openjdk.jmh.annotations._
 
 @State(Scope.Thread)
 @BenchmarkMode(Array(Mode.Throughput))
 @OutputTimeUnit(TimeUnit.SECONDS)
-class AvroBenchmark extends Runtime {
+class AvroWithSchemaBenchmark extends Runtime {
 
-  val client: PersonServiceAvro.Client[IO] = PersonServiceAvro.client[IO](channel)
+  val client: PersonServiceAvroWithSchema.Client[IO] =
+    PersonServiceAvroWithSchema.client[IO](channel)
 
   @Benchmark
   def listPersons: PersonList = client.listPersons(Empty).unsafeRunTimed(defaultTimeOut).get

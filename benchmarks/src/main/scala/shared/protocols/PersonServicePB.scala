@@ -16,12 +16,13 @@
 
 package freestyle.rpc.benchmarks
 package shared
+package protocols
 
 import freestyle.rpc.benchmarks.shared.models._
 import freestyle.rpc.protocol._
 
-@service(Avro)
-trait PersonServiceAvro[F[_]] {
+@service(Protobuf)
+trait PersonServicePB[F[_]] {
 
   def listPersons(empty: Empty.type): F[PersonList]
 

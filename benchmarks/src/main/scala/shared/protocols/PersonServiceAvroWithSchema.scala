@@ -16,24 +16,20 @@
 
 package freestyle.rpc.benchmarks
 package shared
-package server
+package protocols
 
-import cats.effect.IO
-import freestyle.rpc.server.GrpcServer
-import org.log4s.Logger
+import freestyle.rpc.benchmarks.shared.models._
+import freestyle.rpc.protocol._
 
-object RPCAvroServer extends AvroImplicits {
+@service(AvroWithSchema)
+trait PersonServiceAvroWithSchema[F[_]] {
 
-  val logger: Logger = org.log4s.getLogger
+  def listPersons(empty: Empty.type): F[PersonList]
 
-  def main(args: Array[String]): Unit = {
+  def getPerson(id: PersonId): F[Person]
 
-    logger.info(s"Server is starting ...")
+  def getPersonLinks(id: PersonId): F[PersonLinkList]
 
-    val avroServer =
-      GrpcServer.default[IO](channel.port, grpcConfigsAvro).flatMap(GrpcServer.server[IO])
-
-    avroServer.unsafeRunSync()
-  }
+  def createPerson(person: Person): F[Person]
 
 }

@@ -30,5 +30,3 @@ trait Runtime {
   val channel: ChannelForAddress = ChannelForAddress("localhost", 8080)
 
 }
-
-object implicits extends Runtime
