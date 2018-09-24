@@ -24,6 +24,8 @@ class MonitorClientInterceptorTests extends BaseMonitorClientInterceptorTests {
 
   override def name: String = "Prometheus"
 
+  override def namespace: Option[String] = Some("grpc")
+
   def defaultClientRuntime: InterceptorsRuntime =
     InterceptorsRuntime(Configuration.defaultBasicMetrics)
 

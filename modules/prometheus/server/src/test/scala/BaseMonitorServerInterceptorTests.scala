@@ -31,6 +31,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
   import freestyle.rpc.prometheus.shared.RegistryHelper._
 
   def name: String
+  def namespace: Option[String]
   def defaultInterceptorsRuntime: InterceptorsRuntime
   def allMetricsInterceptorsRuntime: InterceptorsRuntime
   def interceptorsRuntimeWithNonDefaultBuckets(buckets: Vector[Double]): InterceptorsRuntime
@@ -52,12 +53,12 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
         _ <- serverStop[ConcurrentMonad]
       } yield (): Unit).unsafeRunSync()
 
-      findRecordedMetricOrThrow(serverMetricRpcStarted).samples.size() shouldBe 1
-      findRecordedMetricOrThrow(serverMetricStreamMessagesReceived).samples shouldBe empty
-      findRecordedMetricOrThrow(serverMetricStreamMessagesSent).samples shouldBe empty
+      findRecordedMetricOrThrow(serverMetricRpcStarted(namespace)).samples.size() shouldBe 1
+      findRecordedMetricOrThrow(serverMetricStreamMessagesReceived(namespace)).samples shouldBe empty
+      findRecordedMetricOrThrow(serverMetricStreamMessagesSent(namespace)).samples shouldBe empty
 
       val handledSamples =
-        findRecordedMetricOrThrow(serverMetricHandledCompleted).samples.asScala.toList
+        findRecordedMetricOrThrow(serverMetricHandledCompleted(namespace)).samples.asScala.toList
       handledSamples.size shouldBe 1
       handledSamples.headOption.foreach { s =>
         s.value should be >= 0d
@@ -90,12 +91,13 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
         _ <- serverStop[ConcurrentMonad]
       } yield (): Unit).unsafeRunSync()
 
-      findRecordedMetricOrThrow(serverMetricRpcStarted).samples.size() shouldBe 1
-      findRecordedMetricOrThrow(serverMetricStreamMessagesReceived).samples.size() shouldBe 1
-      findRecordedMetricOrThrow(serverMetricStreamMessagesSent).samples shouldBe empty
+      findRecordedMetricOrThrow(serverMetricRpcStarted(namespace)).samples.size() shouldBe 1
+      findRecordedMetricOrThrow(serverMetricStreamMessagesReceived(namespace)).samples
+        .size() shouldBe 1
+      findRecordedMetricOrThrow(serverMetricStreamMessagesSent(namespace)).samples shouldBe empty
 
       val handledSamples =
-        findRecordedMetricOrThrow(serverMetricHandledCompleted).samples.asScala.toList
+        findRecordedMetricOrThrow(serverMetricHandledCompleted(namespace)).samples.asScala.toList
       handledSamples.size shouldBe 1
       handledSamples.headOption.foreach { s =>
         s.value should be >= 0d
@@ -124,12 +126,12 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
         _ <- serverStop[ConcurrentMonad]
       } yield r).unsafeRunSync()
 
-      findRecordedMetricOrThrow(serverMetricRpcStarted).samples.size() shouldBe 1
-      findRecordedMetricOrThrow(serverMetricStreamMessagesReceived).samples shouldBe empty
-      findRecordedMetricOrThrow(serverMetricStreamMessagesSent).samples.size() shouldBe 1
+      findRecordedMetricOrThrow(serverMetricRpcStarted(namespace)).samples.size() shouldBe 1
+      findRecordedMetricOrThrow(serverMetricStreamMessagesReceived(namespace)).samples shouldBe empty
+      findRecordedMetricOrThrow(serverMetricStreamMessagesSent(namespace)).samples.size() shouldBe 1
 
       val handledSamples =
-        findRecordedMetricOrThrow(serverMetricHandledCompleted).samples.asScala.toList
+        findRecordedMetricOrThrow(serverMetricHandledCompleted(namespace)).samples.asScala.toList
       handledSamples.size shouldBe 1
       handledSamples.headOption.foreach { s =>
         s.value should be >= 0d
@@ -144,7 +146,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
       }
 
       val messagesSent =
-        findRecordedMetricOrThrow(serverMetricStreamMessagesSent).samples.asScala.toList
+        findRecordedMetricOrThrow(serverMetricStreamMessagesSent(namespace)).samples.asScala.toList
 
       messagesSent.headOption.foreach { s =>
         s.value should be >= 0.doubleValue()
@@ -173,12 +175,13 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
         _ <- serverStop[ConcurrentMonad]
       } yield (): Unit).unsafeRunSync()
 
-      findRecordedMetricOrThrow(serverMetricRpcStarted).samples.size() shouldBe 1
-      findRecordedMetricOrThrow(serverMetricStreamMessagesReceived).samples.size() shouldBe 1
-      findRecordedMetricOrThrow(serverMetricStreamMessagesSent).samples.size() shouldBe 1
+      findRecordedMetricOrThrow(serverMetricRpcStarted(namespace)).samples.size() shouldBe 1
+      findRecordedMetricOrThrow(serverMetricStreamMessagesReceived(namespace)).samples
+        .size() shouldBe 1
+      findRecordedMetricOrThrow(serverMetricStreamMessagesSent(namespace)).samples.size() shouldBe 1
 
       val handledSamples =
-        findRecordedMetricOrThrow(serverMetricHandledCompleted).samples.asScala.toList
+        findRecordedMetricOrThrow(serverMetricHandledCompleted(namespace)).samples.asScala.toList
       handledSamples.size shouldBe 1
       handledSamples.headOption.foreach { s =>
         s.value should be >= 0d
@@ -207,7 +210,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
         _ <- serverStop[ConcurrentMonad]
       } yield (): Unit).unsafeRunSync()
 
-      findRecordedMetric(serverMetricHandledLatencySeconds) shouldBe None
+      findRecordedMetric(serverMetricHandledLatencySeconds(namespace)) shouldBe None
 
     }
 
@@ -227,7 +230,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
       } yield (): Unit).unsafeRunSync()
 
       val metric: Option[Collector.MetricFamilySamples] =
-        findRecordedMetric(serverMetricHandledLatencySeconds)
+        findRecordedMetric(serverMetricHandledLatencySeconds(namespace))
 
       metric shouldBe defined
       metric.map { m =>
@@ -252,7 +255,9 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
         _ <- serverStop[ConcurrentMonad]
       } yield (): Unit).unsafeRunSync()
 
-      countSamples(serverMetricHandledLatencySeconds, "grpc_server_handled_latency_seconds_bucket") shouldBe (buckets.size + 1)
+      countSamples(
+        serverMetricHandledLatencySeconds(namespace),
+        "grpc_server_handled_latency_seconds_bucket") shouldBe (buckets.size + 1)
 
     }
 
@@ -278,8 +283,8 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
         _ <- serverStop[ConcurrentMonad]
       } yield (): Unit).unsafeRunSync()
 
-      findRecordedMetricOrThrow(serverMetricRpcStarted).samples.size() shouldBe 2
-      findRecordedMetricOrThrow(serverMetricHandledCompleted).samples.size() shouldBe 2
+      findRecordedMetricOrThrow(serverMetricRpcStarted(namespace)).samples.size() shouldBe 2
+      findRecordedMetricOrThrow(serverMetricHandledCompleted(namespace)).samples.size() shouldBe 2
 
     }
 
