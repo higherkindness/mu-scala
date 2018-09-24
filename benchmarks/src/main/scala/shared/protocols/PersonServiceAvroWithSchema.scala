@@ -16,17 +16,20 @@
 
 package freestyle.rpc.benchmarks
 package shared
+package protocols
 
-import cats.effect.IO
-import freestyle.rpc.ChannelForAddress
+import freestyle.rpc.benchmarks.shared.models._
+import freestyle.rpc.protocol._
 
-trait Runtime {
+@service(AvroWithSchema)
+trait PersonServiceAvroWithSchema[F[_]] {
 
-  implicit val S: monix.execution.Scheduler =
-    monix.execution.Scheduler.Implicits.global
+  def listPersons(empty: Empty.type): F[PersonList]
 
-  implicit val persistenceService: PersistenceService[IO] = PersistenceService[IO]
+  def getPerson(id: PersonId): F[Person]
 
-  val channel: ChannelForAddress = ChannelForAddress("localhost", 8080)
+  def getPersonLinks(id: PersonId): F[PersonLinkList]
+
+  def createPerson(person: Person): F[Person]
 
 }

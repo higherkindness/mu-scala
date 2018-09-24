@@ -22,7 +22,7 @@ import cats.effect.IO
 import freestyle.rpc.server.GrpcServer
 import org.log4s.Logger
 
-object RPCProtoServer extends ProtoImplicits {
+object RPCServer extends ServerImplicits {
 
   val logger: Logger = org.log4s.getLogger
 
@@ -30,10 +30,10 @@ object RPCProtoServer extends ProtoImplicits {
 
     logger.info(s"Server is starting ...")
 
-    val pbServer =
-      GrpcServer.default[IO](channel.port, grpcConfigsProto).flatMap(GrpcServer.server[IO])
+    val avroServer =
+      GrpcServer.default[IO](channel.port, grpcConfigsAvro).flatMap(GrpcServer.server[IO])
 
-    pbServer.unsafeRunSync()
+    avroServer.unsafeRunSync()
   }
 
 }

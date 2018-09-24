@@ -63,25 +63,27 @@ trait AvroScalaGeneratorArbitrary {
   val customMarshallersImportsGen: Gen[MarshallersImport] =
     Gen
       .choose(1, 5)
-      .flatMap(Gen.listOfN(_, importSliceGen).map(_.mkString(".") + "._").map(CustomMarshallersImport))
+      .flatMap(
+        Gen.listOfN(_, importSliceGen).map(_.mkString(".") + "._").map(CustomMarshallersImport))
 
-  def marshallersImportGen(serializationType: String): Gen[MarshallersImport] = serializationType match {
-    case "Avro" | "AvroWithSchema" =>
-      Gen.oneOf(
-        Gen.const(BigDecimalAvroMarshallers),
-        Gen.const(JavaTimeDateAvroMarshallers),
-        Gen.const(JodaDateTimeAvroMarshallers),
-        customMarshallersImportsGen
-      )
-    case "Protobuf" =>
-      Gen.oneOf(
-        Gen.const(BigDecimalProtobufMarshallers),
-        Gen.const(JavaTimeDateProtobufMarshallers),
-        Gen.const(JodaDateTimeProtobufMarshallers),
-        customMarshallersImportsGen
-      )
-    case _ => customMarshallersImportsGen
-  }
+  def marshallersImportGen(serializationType: String): Gen[MarshallersImport] =
+    serializationType match {
+      case "Avro" | "AvroWithSchema" =>
+        Gen.oneOf(
+          Gen.const(BigDecimalAvroMarshallers),
+          Gen.const(JavaTimeDateAvroMarshallers),
+          Gen.const(JodaDateTimeAvroMarshallers),
+          customMarshallersImportsGen
+        )
+      case "Protobuf" =>
+        Gen.oneOf(
+          Gen.const(BigDecimalProtobufMarshallers),
+          Gen.const(JavaTimeDateProtobufMarshallers),
+          Gen.const(JodaDateTimeProtobufMarshallers),
+          customMarshallersImportsGen
+        )
+      case _ => customMarshallersImportsGen
+    }
 
   implicit val scenarioArb: Arbitrary[Scenario] = Arbitrary {
     for {

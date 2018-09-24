@@ -21,15 +21,14 @@ import freestyle.rpc.protocol.Empty
 import java.util.concurrent.TimeUnit
 import freestyle.rpc.benchmarks.Utils._
 import freestyle.rpc.benchmarks.shared.models._
-import freestyle.rpc.benchmarks.shared.PersonServicePB
+import freestyle.rpc.benchmarks.shared.protocols.PersonServicePB
+import freestyle.rpc.benchmarks.shared.Runtime
 import org.openjdk.jmh.annotations._
 
 @State(Scope.Thread)
 @BenchmarkMode(Array(Mode.Throughput))
 @OutputTimeUnit(TimeUnit.SECONDS)
-class ProtoBenchmark {
-
-  import freestyle.rpc.benchmarks.shared.implicits._
+class ProtoBenchmark extends Runtime {
 
   val client: PersonServicePB.Client[IO] = PersonServicePB.client[IO](channel)
 

@@ -20,7 +20,7 @@ package server
 
 import cats.effect._
 import freestyle.rpc.benchmarks.shared.models._
-import freestyle.rpc.benchmarks.shared.{PersonServiceAvro, PersonServicePB}
+import freestyle.rpc.benchmarks.shared.protocols._
 import freestyle.rpc.protocol.Empty
 import freestyle.rpc.server._
 
@@ -47,19 +47,20 @@ class RPCAvroHandler[F[_]: Effect](implicit PS: PersistenceService[F])
     extends HandlerImpl[F]
     with PersonServiceAvro[F]
 
-trait ProtoImplicits extends Runtime {
+class RPCAvroWithSchemaHandler[F[_]: Effect](implicit PS: PersistenceService[F])
+    extends HandlerImpl[F]
+    with PersonServiceAvroWithSchema[F]
 
-  implicit private val personServicePBHandler: RPCProtoHandler[IO] = new RPCProtoHandler[IO]
+trait ServerImplicits extends Runtime {
 
-  implicit val grpcConfigsProto: List[GrpcConfig] = List(
-    AddService(PersonServicePB.bindService[IO]))
-
-}
-
-trait AvroImplicits extends Runtime {
-
-  implicit private val personServiceAvroHandler: RPCAvroHandler[IO] = new RPCAvroHandler[IO]
+  implicit private val pbHandler: RPCProtoHandler[IO]  = new RPCProtoHandler[IO]
+  implicit private val avroHandler: RPCAvroHandler[IO] = new RPCAvroHandler[IO]
+  implicit private val avroWithSchemaHandler: RPCAvroWithSchemaHandler[IO] =
+    new RPCAvroWithSchemaHandler[IO]
 
   implicit val grpcConfigsAvro: List[GrpcConfig] = List(
-    AddService(PersonServiceAvro.bindService[IO]))
+    AddService(PersonServicePB.bindService[IO]),
+    AddService(PersonServiceAvro.bindService[IO]),
+    AddService(PersonServiceAvroWithSchema.bindService[IO])
+  )
 }
