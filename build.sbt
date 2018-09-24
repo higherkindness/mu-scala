@@ -174,6 +174,18 @@ lazy val `idlgen-sbt` = project
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
   .settings(buildInfoPackage := "freestyle.rpc.idlgen")
 
+////////////////////
+//// BENCHMARKS ////
+////////////////////
+
+lazy val benchmarks = project
+  .in(file("benchmarks"))
+  .dependsOn(client)
+  .dependsOn(server)
+  .settings(moduleName := "frees-rpc-benchmarks")
+  .disablePlugins(ScriptedPlugin)
+  .enablePlugins(JmhPlugin)
+
 //////////////////
 //// EXAMPLES ////
 //////////////////
@@ -317,7 +329,8 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `example-todolist-protocol`,
   `example-todolist-runtime`,
   `example-todolist-server`,
-  `example-todolist-client`
+  `example-todolist-client`,
+  benchmarks
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =
