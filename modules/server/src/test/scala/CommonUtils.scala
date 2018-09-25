@@ -74,7 +74,8 @@ trait CommonUtils {
 
   def debug(str: String): Unit = logger.debug(str)
 
-  implicit val S: monix.execution.Scheduler = monix.execution.Scheduler.Implicits.global
+  implicit val EC: scala.concurrent.ExecutionContext =
+    scala.concurrent.ExecutionContext.Implicits.global
 
   val pickUnusedPort: Int =
     Try {

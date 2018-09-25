@@ -20,10 +20,11 @@ package shared
 import cats.effect.IO
 import freestyle.rpc.ChannelForAddress
 
+import scala.concurrent.ExecutionContext
+
 trait Runtime {
 
-  implicit val S: monix.execution.Scheduler =
-    monix.execution.Scheduler.Implicits.global
+  implicit val EC: ExecutionContext = ExecutionContext.Implicits.global
 
   implicit val persistenceService: PersistenceService[IO] = PersistenceService[IO]
 

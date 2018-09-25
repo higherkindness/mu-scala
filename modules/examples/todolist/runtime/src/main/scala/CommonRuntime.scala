@@ -16,10 +16,10 @@
 
 package examples.todolist.runtime
 
-import monix.execution.Scheduler
+import scala.concurrent.ExecutionContext
 
 trait CommonRuntime {
 
-  implicit val S: Scheduler = Scheduler.Implicits.global
+  implicit val EC: ExecutionContext = ExecutionContext.Implicits.global
 
 }

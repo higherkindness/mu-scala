@@ -87,7 +87,7 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
   "A RPC server" should {
 
     import RPCDateService._
-    import monix.execution.Scheduler.Implicits.global
+    import scala.concurrent.ExecutionContext.Implicits.global
 
     implicit val H: RPCDateServiceDefImpl[ConcurrentMonad] =
       new RPCDateServiceDefImpl[ConcurrentMonad]

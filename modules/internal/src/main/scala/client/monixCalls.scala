@@ -23,7 +23,7 @@ import com.google.common.util.concurrent._
 import io.grpc.stub.{ClientCalls, StreamObserver}
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
 import java.util.concurrent.{Executor => JavaExecutor}
-import monix.execution.Scheduler
+import scala.concurrent.ExecutionContext
 import monix.reactive.Observable
 import scala.concurrent.ExecutionContext
 
@@ -35,7 +35,7 @@ object monixCalls {
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler): F[Res] =
+      options: CallOptions)(implicit EC: ExecutionContext): F[Res] =
     listenableFuture2Async(
       ClientCalls
         .futureUnaryCall(channel.newCall(descriptor, options), request))
@@ -52,7 +52,7 @@ object monixCalls {
       input: Observable[Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler, L: LiftTask[F]): F[Res] =
+      options: CallOptions)(implicit EC: ExecutionContext, L: LiftTask[F]): F[Res] =
     L.liftTask {
       input
         .liftByOperator(
@@ -82,7 +82,7 @@ object monixCalls {
     )
 
   private[this] def listenableFuture2Async[F[_], A](
-      fa: => ListenableFuture[A])(implicit F: Async[F], E: ExecutionContext): F[A] =
+      fa: => ListenableFuture[A])(implicit F: Async[F], EC: ExecutionContext): F[A] =
     F.async { cb =>
       Futures.addCallback(
         fa,
@@ -92,7 +92,7 @@ object monixCalls {
           override def onFailure(t: Throwable): Unit = cb(Left(t))
         },
         new JavaExecutor {
-          override def execute(command: Runnable): Unit = E.execute(command)
+          override def execute(command: Runnable): Unit = EC.execute(command)
         }
       )
     }
