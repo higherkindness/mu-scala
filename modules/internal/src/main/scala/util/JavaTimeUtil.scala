@@ -27,9 +27,13 @@ object JavaTimeUtil {
   def intToLocalDate(value: Int): LocalDate = LocalDate.ofEpochDay(value.toLong)
 
   def localDateTimeToLong(value: LocalDateTime): Long =
-    value.toInstant(ZoneOffset.UTC).toEpochMilli
+    instantToLong(value.toInstant(ZoneOffset.UTC))
 
   def longToLocalDateTime(value: Long): LocalDateTime =
-    ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneOffset.UTC).toLocalDateTime
+    ZonedDateTime.ofInstant(longToInstant(value), ZoneOffset.UTC).toLocalDateTime
+
+  def instantToLong(value: Instant): Long = value.toEpochMilli
+
+  def longToInstant(value: Long): Instant = Instant.ofEpochMilli(value)
 
 }
