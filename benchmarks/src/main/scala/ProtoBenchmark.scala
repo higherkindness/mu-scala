@@ -17,6 +17,7 @@
 package freestyle.rpc.benchmarks
 
 import cats.effect.IO
+import cats.syntax.functor._
 import freestyle.rpc.protocol.Empty
 import java.util.concurrent.TimeUnit
 
@@ -38,7 +39,7 @@ class ProtoBenchmark extends Runtime {
   val client: PersonServicePB.Client[IO] = PersonServicePB.clientFromChannel[IO](sc.channel)
 
   @TearDown
-  def shutdown(): Unit = sc.shutdown(); ()
+  def shutdown(): Unit = IO(sc.shutdown()).void.unsafeRunSync()
 
   @Benchmark
   def listPersons: PersonList = client.listPersons(Empty).unsafeRunTimed(defaultTimeOut).get

@@ -19,6 +19,7 @@ package freestyle.rpc.benchmarks
 import java.util.concurrent.TimeUnit
 
 import cats.effect.IO
+import cats.syntax.functor._
 import freestyle.rpc.benchmarks.Utils._
 import freestyle.rpc.benchmarks.shared.protocols.PersonServiceAvroWithSchema
 import freestyle.rpc.benchmarks.shared.Runtime
@@ -39,7 +40,7 @@ class AvroWithSchemaBenchmark extends Runtime {
     PersonServiceAvroWithSchema.clientFromChannel[IO](sc.channel)
 
   @TearDown
-  def shutdown(): Unit = sc.shutdown(); ()
+  def shutdown(): Unit = IO(sc.shutdown()).void.unsafeRunSync()
 
   @Benchmark
   def listPersons: PersonList = client.listPersons(Empty).unsafeRunTimed(defaultTimeOut).get
