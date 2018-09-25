@@ -44,9 +44,9 @@ trait AvroScalaGeneratorArbitrary {
          |
          |$imports
          |
-         |@message case class HelloRequest(arg1: String, arg2: Option[String], arg3: List[String])
+         |@message case class HelloRequest(arg1: String, arg2: Option[String], arg3: Seq[String])
          |
-         |@message case class HelloResponse(arg1: String, arg2: Option[String], arg3: List[String])
+         |@message case class HelloResponse(arg1: String, arg2: Option[String], arg3: Seq[String])
          |
          |@service(${(serializationType +: options.toSeq).mkString(", ")}) trait MyGreeterService[F[_]] {
          |
