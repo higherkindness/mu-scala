@@ -18,7 +18,7 @@ package freestyle.rpc
 package internal.encoders
 
 import java.io.{ByteArrayInputStream, InputStream}
-import java.time.{LocalDate, LocalDateTime}
+import java.time.{Instant, LocalDate, LocalDateTime}
 
 import com.google.protobuf.{CodedInputStream, CodedOutputStream}
 import freestyle.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTimeUtil}
@@ -73,6 +73,16 @@ object pbd {
     implicit object LocalDateTimeReader extends PBReader[LocalDateTime] {
       override def read(input: CodedInputStream): LocalDateTime =
         JavaTimeUtil.longToLocalDateTime(EncoderUtil.byteArrayToLong(input.readByteArray()))
+    }
+
+    implicit object InstantWriter extends PBWriter[Instant] {
+      override def writeTo(index: Int, value: Instant, out: CodedOutputStream): Unit =
+        out.writeByteArray(index, EncoderUtil.longToByteArray(JavaTimeUtil.instantToLong(value)))
+    }
+
+    implicit object InstantReader extends PBReader[Instant] {
+      override def read(input: CodedInputStream): Instant =
+        JavaTimeUtil.longToInstant(EncoderUtil.byteArrayToLong(input.readByteArray()))
     }
 
   }
