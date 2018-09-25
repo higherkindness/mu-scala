@@ -165,6 +165,7 @@ lazy val benchmarks = project
   .in(file("benchmarks"))
   .dependsOn(client)
   .dependsOn(server)
+  .dependsOn(testing)
   .settings(moduleName := "frees-rpc-benchmarks")
   .enablePlugins(JmhPlugin)
 

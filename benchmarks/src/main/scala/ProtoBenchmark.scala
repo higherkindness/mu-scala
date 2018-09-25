@@ -19,10 +19,13 @@ package freestyle.rpc.benchmarks
 import cats.effect.IO
 import freestyle.rpc.protocol.Empty
 import java.util.concurrent.TimeUnit
+
 import freestyle.rpc.benchmarks.Utils._
 import freestyle.rpc.benchmarks.shared.models._
 import freestyle.rpc.benchmarks.shared.protocols.PersonServicePB
 import freestyle.rpc.benchmarks.shared.Runtime
+import freestyle.rpc.benchmarks.shared.server._
+import freestyle.rpc.testing.servers.ServerChannel
 import org.openjdk.jmh.annotations._
 
 @State(Scope.Thread)
@@ -30,7 +33,12 @@ import org.openjdk.jmh.annotations._
 @OutputTimeUnit(TimeUnit.SECONDS)
 class ProtoBenchmark extends Runtime {
 
-  val client: PersonServicePB.Client[IO] = PersonServicePB.client[IO](channel)
+  implicit val handler: ProtoHandler[IO] = new ProtoHandler[IO]
+  val sc: ServerChannel                  = ServerChannel(PersonServicePB.bindService[IO])
+  val client: PersonServicePB.Client[IO] = PersonServicePB.clientFromChannel[IO](sc.channel)
+
+  @TearDown
+  def shutdown(): Unit = sc.shutdown(); ()
 
   @Benchmark
   def listPersons: PersonList = client.listPersons(Empty).unsafeRunTimed(defaultTimeOut).get

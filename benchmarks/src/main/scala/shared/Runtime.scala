@@ -18,7 +18,6 @@ package freestyle.rpc.benchmarks
 package shared
 
 import cats.effect.IO
-import freestyle.rpc.ChannelForAddress
 
 import scala.concurrent.ExecutionContext
 
@@ -27,7 +26,5 @@ trait Runtime {
   implicit val EC: ExecutionContext = ExecutionContext.Implicits.global
 
   implicit val persistenceService: PersistenceService[IO] = PersistenceService[IO]
-
-  val channel: ChannelForAddress = ChannelForAddress("localhost", 8080)
 
 }
