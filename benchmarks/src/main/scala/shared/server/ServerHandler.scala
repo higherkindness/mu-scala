@@ -39,24 +39,24 @@ abstract class HandlerImpl[F[_]: Effect](implicit persistenceService: Persistenc
     persistenceService.createPerson(person)
 }
 
-class RPCProtoHandler[F[_]: Effect](implicit PS: PersistenceService[F])
+class ProtoHandler[F[_]: Effect](implicit PS: PersistenceService[F])
     extends HandlerImpl[F]
     with PersonServicePB[F]
 
-class RPCAvroHandler[F[_]: Effect](implicit PS: PersistenceService[F])
+class AvroHandler[F[_]: Effect](implicit PS: PersistenceService[F])
     extends HandlerImpl[F]
     with PersonServiceAvro[F]
 
-class RPCAvroWithSchemaHandler[F[_]: Effect](implicit PS: PersistenceService[F])
+class AvroWithSchemaHandler[F[_]: Effect](implicit PS: PersistenceService[F])
     extends HandlerImpl[F]
     with PersonServiceAvroWithSchema[F]
 
 trait ServerImplicits extends Runtime {
 
-  implicit private val pbHandler: RPCProtoHandler[IO]  = new RPCProtoHandler[IO]
-  implicit private val avroHandler: RPCAvroHandler[IO] = new RPCAvroHandler[IO]
-  implicit private val avroWithSchemaHandler: RPCAvroWithSchemaHandler[IO] =
-    new RPCAvroWithSchemaHandler[IO]
+  implicit private val pbHandler: ProtoHandler[IO]  = new ProtoHandler[IO]
+  implicit private val avroHandler: AvroHandler[IO] = new AvroHandler[IO]
+  implicit private val avroWithSchemaHandler: AvroWithSchemaHandler[IO] =
+    new AvroWithSchemaHandler[IO]
 
   implicit val grpcConfigsAvro: List[GrpcConfig] = List(
     AddService(PersonServicePB.bindService[IO]),
