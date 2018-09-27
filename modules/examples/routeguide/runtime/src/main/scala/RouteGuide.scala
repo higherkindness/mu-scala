@@ -26,11 +26,11 @@ trait RouteGuide {
   implicit val S: Scheduler = Scheduler.Implicits.global
 
   implicit def T2IO(implicit S: Scheduler): Task ~> IO = new (Task ~> IO) {
-    override def apply[A](fa: Task[A]) = fa.toIO
+    override def apply[A](fa: Task[A]): IO[A] = fa.toIO
   }
 
-  implicit def T2Task(implicit S: Scheduler): Task ~> Task = new (Task ~> Task) {
-    override def apply[A](fa: Task[A]) = fa
+  implicit def T2Task: Task ~> Task = new (Task ~> Task) {
+    override def apply[A](fa: Task[A]): Task[A] = fa
   }
 
 }

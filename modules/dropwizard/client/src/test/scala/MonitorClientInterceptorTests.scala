@@ -27,6 +27,8 @@ class MonitorClientInterceptorTests extends BaseMonitorClientInterceptorTests {
 
   override def name: String = "Dropwizard"
 
+  override def namespace: Option[String] = Some("grpc")
+
   def defaultClientRuntime: InterceptorsRuntime = {
 
     val metrics: MetricRegistry      = new MetricRegistry

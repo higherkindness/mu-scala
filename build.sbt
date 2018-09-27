@@ -13,7 +13,6 @@ lazy val common = project
   .in(file("modules/common"))
   .settings(moduleName := "frees-rpc-common")
   .settings(commonSettings)
-  .disablePlugins(ScriptedPlugin)
 
 lazy val internal = project
   .in(file("modules/internal"))
@@ -21,13 +20,11 @@ lazy val internal = project
   .dependsOn(testing % "test->test")
   .settings(moduleName := "frees-rpc-internal")
   .settings(internalSettings)
-  .disablePlugins(ScriptedPlugin)
 
 lazy val testing = project
   .in(file("modules/testing"))
   .settings(moduleName := "frees-rpc-testing")
   .settings(testingSettings)
-  .disablePlugins(ScriptedPlugin)
 
 lazy val ssl = project
   .in(file("modules/ssl"))
@@ -35,7 +32,6 @@ lazy val ssl = project
   .dependsOn(`client-netty` % "compile->compile;test->test")
   .settings(moduleName := "frees-rpc-netty-ssl")
   .settings(nettySslSettings)
-  .disablePlugins(ScriptedPlugin)
 
 lazy val config = project
   .in(file("modules/config"))
@@ -45,7 +41,6 @@ lazy val config = project
   .dependsOn(testing % "test->test")
   .settings(moduleName := "frees-rpc-config")
   .settings(configSettings)
-  .disablePlugins(ScriptedPlugin)
 
 ////////////////
 //// CLIENT ////
@@ -58,27 +53,23 @@ lazy val client = project
   .dependsOn(testing % "test->test")
   .settings(moduleName := "frees-rpc-client-core")
   .settings(clientCoreSettings)
-  .disablePlugins(ScriptedPlugin)
 
 lazy val `client-netty` = project
   .in(file("modules/client-netty"))
   .dependsOn(client % "compile->compile;test->test")
   .settings(moduleName := "frees-rpc-client-netty")
   .settings(clientNettySettings)
-  .disablePlugins(ScriptedPlugin)
 
 lazy val `client-okhttp` = project
   .in(file("modules/client-okhttp"))
   .dependsOn(client % "compile->compile;test->test")
   .settings(moduleName := "frees-rpc-client-okhttp")
   .settings(clientOkHttpSettings)
-  .disablePlugins(ScriptedPlugin)
 
 lazy val `client-cache` = project
   .in(file("modules/client-cache"))
   .settings(moduleName := "frees-rpc-client-cache")
   .settings(clientCacheSettings)
-  .disablePlugins(ScriptedPlugin)
 
 ////////////////
 //// SERVER ////
@@ -92,7 +83,6 @@ lazy val server = project
   .dependsOn(testing % "test->test")
   .settings(moduleName := "frees-rpc-server")
   .settings(serverSettings)
-  .disablePlugins(ScriptedPlugin)
 
 //////////////////////
 //// INTERCEPTORS ////
@@ -102,7 +92,6 @@ lazy val interceptors = project
   .in(file("modules/interceptors"))
   .settings(moduleName := "frees-rpc-interceptors")
   .settings(interceptorsSettings)
-  .disablePlugins(ScriptedPlugin)
 
 ////////////////////
 //// PROMETHEUS ////
@@ -113,14 +102,12 @@ lazy val `prometheus-shared` = project
   .dependsOn(interceptors % "compile->compile;test->test")
   .settings(moduleName := "frees-rpc-prometheus-shared")
   .settings(prometheusSettings)
-  .disablePlugins(ScriptedPlugin)
 
 lazy val `prometheus-server` = project
   .in(file("modules/prometheus/server"))
   .dependsOn(`prometheus-shared` % "compile->compile;test->test")
   .dependsOn(server % "compile->compile;test->test")
   .settings(moduleName := "frees-rpc-prometheus-server")
-  .disablePlugins(ScriptedPlugin)
 
 lazy val `prometheus-client` = project
   .in(file("modules/prometheus/client"))
@@ -129,7 +116,6 @@ lazy val `prometheus-client` = project
   .dependsOn(server % "test->test")
   .settings(moduleName := "frees-rpc-prometheus-client")
   .settings(prometheusClientSettings)
-  .disablePlugins(ScriptedPlugin)
 
 ////////////////////
 //// DROPWIZARD ////
@@ -141,7 +127,6 @@ lazy val `dropwizard-server` = project
   .dependsOn(server % "compile->compile;test->test")
   .settings(moduleName := "frees-rpc-dropwizard-server")
   .settings(dropwizardSettings)
-  .disablePlugins(ScriptedPlugin)
 
 lazy val `dropwizard-client` = project
   .in(file("modules/dropwizard/client"))
@@ -150,7 +135,6 @@ lazy val `dropwizard-client` = project
   .dependsOn(server % "test->test")
   .settings(moduleName := "frees-rpc-dropwizard-client")
   .settings(dropwizardSettings)
-  .disablePlugins(ScriptedPlugin)
 
 ////////////////
 //// IDLGEN ////
@@ -162,18 +146,47 @@ lazy val `idlgen-core` = project
   .dependsOn(client % "test->test")
   .settings(moduleName := "frees-rpc-idlgen-core")
   .settings(idlGenSettings)
-  .disablePlugins(ScriptedPlugin)
 
 lazy val `idlgen-sbt` = project
   .in(file("modules/idlgen/plugin"))
   .dependsOn(`idlgen-core`)
   .settings(moduleName := "sbt-frees-rpc-idlgen")
-  .settings(sbtPlugin := true)
   .settings(crossScalaVersions := Seq(scalac.`2.12`))
   .settings(sbtPluginSettings: _*)
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
   .settings(buildInfoPackage := "freestyle.rpc.idlgen")
+  .enablePlugins(SbtPlugin)
+
+////////////////////
+//// BENCHMARKS ////
+////////////////////
+
+lazy val lastReleasedV = "0.15.0"
+
+lazy val `benchmarks-vprev` = project
+  .in(file("benchmarks/vprev"))
+  .settings(
+    libraryDependencies ++= Seq(
+      "io.frees" %% "frees-rpc-client-core" % lastReleasedV,
+      "io.frees" %% "frees-rpc-server"      % lastReleasedV,
+      "io.frees" %% "frees-rpc-testing"     % lastReleasedV
+    )
+  )
+  .settings(moduleName := "frees-rpc-benchmarks-vprev")
+  .settings(crossSettings)
+  .settings(noPublishSettings)
+  .enablePlugins(JmhPlugin)
+
+lazy val `benchmarks-vnext` = project
+  .in(file("benchmarks/vnext"))
+  .dependsOn(client)
+  .dependsOn(server)
+  .dependsOn(testing)
+  .settings(moduleName := "frees-rpc-benchmarks-vnext")
+  .settings(crossSettings)
+  .settings(noPublishSettings)
+  .enablePlugins(JmhPlugin)
 
 //////////////////
 //// EXAMPLES ////
@@ -188,14 +201,12 @@ lazy val `example-routeguide-protocol` = project
   .dependsOn(client)
   .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-routeguide-protocol")
-  .disablePlugins(ScriptedPlugin)
 
 lazy val `example-routeguide-runtime` = project
   .in(file("modules/examples/routeguide/runtime"))
   .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-routeguide-runtime")
   .settings(exampleRouteguideRuntimeSettings)
-  .disablePlugins(ScriptedPlugin)
 
 lazy val `example-routeguide-common` = project
   .in(file("modules/examples/routeguide/common"))
@@ -204,7 +215,6 @@ lazy val `example-routeguide-common` = project
   .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-routeguide-common")
   .settings(exampleRouteguideCommonSettings)
-  .disablePlugins(ScriptedPlugin)
 
 lazy val `example-routeguide-server` = project
   .in(file("modules/examples/routeguide/server"))
@@ -213,7 +223,6 @@ lazy val `example-routeguide-server` = project
   .dependsOn(server)
   .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-routeguide-server")
-  .disablePlugins(ScriptedPlugin)
 
 lazy val `example-routeguide-client` = project
   .in(file("modules/examples/routeguide/client"))
@@ -229,8 +238,8 @@ lazy val `example-routeguide-client` = project
     )
   )
   .settings(addCommandAlias("runClientIO", "runMain example.routeguide.client.io.ClientAppIO"))
-  .settings(addCommandAlias("runClientTask", "runMain example.routeguide.client.task.ClientAppTask"))
-  .disablePlugins(ScriptedPlugin)
+  .settings(
+    addCommandAlias("runClientTask", "runMain example.routeguide.client.task.ClientAppTask"))
 
 ////////////////////
 ////  TODOLIST  ////
@@ -241,14 +250,11 @@ lazy val `example-todolist-protocol` = project
   .dependsOn(client)
   .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-todolist-protocol")
-  .disablePlugins(ScriptedPlugin)
 
 lazy val `example-todolist-runtime` = project
   .in(file("modules/examples/todolist/runtime"))
   .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-todolist-runtime")
-  .settings(exampleTodolistRuntimeSettings)
-  .disablePlugins(ScriptedPlugin)
 
 lazy val `example-todolist-server` = project
   .in(file("modules/examples/todolist/server"))
@@ -259,7 +265,6 @@ lazy val `example-todolist-server` = project
   .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-todolist-server")
   .settings(exampleTodolistCommonSettings)
-  .disablePlugins(ScriptedPlugin)
 
 lazy val `example-todolist-client` = project
   .in(file("modules/examples/todolist/client"))
@@ -270,7 +275,6 @@ lazy val `example-todolist-client` = project
   .settings(noPublishSettings)
   .settings(moduleName := "frees-rpc-example-todolist-client")
   .settings(exampleTodolistCommonSettings)
-  .disablePlugins(ScriptedPlugin)
 
 /////////////////////
 //// MARSHALLERS ////
@@ -283,9 +287,7 @@ lazy val `marshallers-jodatime` = project
   .dependsOn(internal % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "frees-rpc-marshallers-jodatime")
-  .settings(libraryDependencies += "joda-time" % "joda-time" % "2.9.9")
-  .settings(libraryDependencies += "com.47deg" %% "scalacheck-toolbox-datetime" % "0.2.4" % "test")
-  .disablePlugins(ScriptedPlugin)
+  .settings(marshallersJodatimeSettings)
 
 //////////////////////////
 //// MODULES REGISTRY ////
@@ -318,7 +320,9 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `example-todolist-protocol`,
   `example-todolist-runtime`,
   `example-todolist-server`,
-  `example-todolist-client`
+  `example-todolist-client`,
+  `benchmarks-vprev`,
+  `benchmarks-vnext`
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =
@@ -330,7 +334,6 @@ lazy val root = project
   .settings(noPublishSettings)
   .aggregate(allModules: _*)
   .dependsOn(allModulesDeps: _*)
-  .disablePlugins(ScriptedPlugin)
 
 lazy val docs = project
   .in(file("docs"))

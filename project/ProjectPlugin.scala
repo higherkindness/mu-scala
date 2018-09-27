@@ -22,28 +22,32 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String             = "1.8.3"
-      val avrohugger: String         = "1.0.0-RC10"
+      val avrohugger: String         = "1.0.0-RC13"
       val betterMonadicFor: String   = "0.2.4"
       val catsEffect: String         = "0.10.1"
       val circe: String              = "0.9.3"
-      val frees: String              = "0.8.1"
-      val fs2: String                = "0.10.5"
+      val frees: String              = "0.8.2"
+      val fs2: String                = "0.10.6"
       val fs2ReactiveStreams: String = "0.5.1"
-      val grpc: String               = "1.13.2"
+      val jodaTime: String           = "2.10"
+      val grpc: String               = "1.15.0"
       val log4s: String              = "1.6.1"
       val logback: String            = "1.2.3"
       val monix: String              = "3.0.0-RC1"
-      val nettySSL: String           = "2.0.8.Final"
+      val monocle: String            = "1.5.1-cats"
+      val nettySSL: String           = "2.0.12.Final"
+      val paradise: String           = "2.1.1"
       val pbdirect: String           = "0.1.0"
-      val prometheus: String         = "0.3.0"
-      val monocle: String            = "1.5.0-cats"
+      val prometheus: String         = "0.5.0"
+      val pureconfig: String         = "0.9.2"
+      val scalacheckToolbox: String  = "0.2.5"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("cats-effect", V.catsEffect) % Test,
-        %%("scalamockScalatest")        % Test,
-        %%("scheckToolboxDatetime")     % Test
+        %%("cats-effect", V.catsEffect)                  % Test,
+        %%("scalamockScalatest")                         % Test,
+        %%("scheckToolboxDatetime", V.scalacheckToolbox) % Test
       )
     )
 
@@ -103,7 +107,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val configSettings = Seq(
       libraryDependencies ++= Seq(
-        %%("pureconfig")
+        %%("pureconfig", V.pureconfig)
       )
     )
 
@@ -157,6 +161,13 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+    lazy val marshallersJodatimeSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %("joda-time", V.jodaTime),
+        %%("scheckToolboxDatetime", V.scalacheckToolbox) % Test
+      )
+    )
+
     lazy val exampleRouteguideCommonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("circe-core", V.circe),
@@ -164,12 +175,6 @@ object ProjectPlugin extends AutoPlugin {
         %%("circe-parser", V.circe),
         %%("log4s", V.log4s),
         %("logback-classic", V.logback)
-      )
-    )
-
-    lazy val exampleTodolistRuntimeSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        %%("monix", V.monix)
       )
     )
 
@@ -198,6 +203,15 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+    lazy val crossSettings: Seq[Def.Setting[_]] = Seq(
+      unmanagedSourceDirectories in Compile += {
+        baseDirectory.value.getParentFile / "shared" / "src" / "main" / "scala"
+      },
+      unmanagedSourceDirectories in Test += {
+        baseDirectory.value.getParentFile / "shared" / "src" / "test" / "scala"
+      }
+    )
+
     lazy val micrositeSettings = Seq(
       micrositeName := "Frees-rpc",
       micrositeDescription := "A purely functional library for building RPC endpoint-based services with support for RPC and HTTP/2.",
@@ -211,10 +225,12 @@ object ProjectPlugin extends AutoPlugin {
 
   }
 
+  import autoImport._
+
   override def projectSettings: Seq[Def.Setting[_]] =
     // format: OFF
     sharedReleaseProcess ++ warnUnusedImport ++ Seq(
-      addCompilerPlugin(%%("paradise") cross CrossVersion.full),
+      addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
       libraryDependencies ++= commonDeps :+ %("slf4j-nop") % Test,
       scalaVersion := "2.12.6",
       crossScalaVersions := Seq("2.11.12", "2.12.6"),

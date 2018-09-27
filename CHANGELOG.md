@@ -1,5 +1,25 @@
 # Changelog
 
+## 09/26/2018 - Version 0.15.0
+
+Release changes:
+
+* Marshallers for serializing and deserializing joda.time dates ([#341](https://github.com/frees-io/freestyle-rpc/pull/341))
+* BigDecimal and java.time encoders/decoders implicit instances are now optional ([#373](https://github.com/frees-io/freestyle-rpc/pull/373))
+* Customize the codecs used in services through sbt ([#374](https://github.com/frees-io/freestyle-rpc/pull/374))
+* Bumps io.grpc dependency ([#375](https://github.com/frees-io/freestyle-rpc/pull/375))
+* Updates docs with the custom codecs section ([#377](https://github.com/frees-io/freestyle-rpc/pull/377))
+* document mandatory compiler plugin ([#378](https://github.com/frees-io/freestyle-rpc/pull/378))
+* Benchmarks - AvroWithSchema (unary services) ([#384](https://github.com/frees-io/freestyle-rpc/pull/384))
+* Allows Custom namespace for server/client metrics ([#385](https://github.com/frees-io/freestyle-rpc/pull/385))
+* Depending on Execution Context instead of Monix Scheduler ([#386](https://github.com/frees-io/freestyle-rpc/pull/386))
+* Upgrades Build Dependencies ([#387](https://github.com/frees-io/freestyle-rpc/pull/387))
+* Adds the avro and protobuffer serializers for java.time.Instant ([#388](https://github.com/frees-io/freestyle-rpc/pull/388))
+* Auto spin-up RPC server when running benchmark ([#389](https://github.com/frees-io/freestyle-rpc/pull/389))
+* Benchmarks - Avro and Proto Unary Services ([#383](https://github.com/frees-io/freestyle-rpc/pull/383))
+* Releases 0.15.0 frees-rpc Version ([#390](https://github.com/frees-io/freestyle-rpc/pull/390))
+
+
 ## 07/17/2018 - Version 0.14.1
 
 Release changes:
