@@ -21,7 +21,7 @@ import cats.syntax.functor._
 import freestyle.rpc.protocol.Empty
 import java.util.concurrent.TimeUnit
 
-import freestyle.rpc.benchmarks.Utils._
+import freestyle.rpc.benchmarks.shared.Utils._
 import freestyle.rpc.benchmarks.shared.models._
 import freestyle.rpc.benchmarks.shared.protocols.PersonServiceAvro
 import freestyle.rpc.benchmarks.shared.Runtime

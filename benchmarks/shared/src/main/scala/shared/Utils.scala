@@ -15,6 +15,7 @@
  */
 
 package freestyle.rpc.benchmarks
+package shared
 
 import freestyle.rpc.benchmarks.shared.models._
 

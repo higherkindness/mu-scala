@@ -29,3 +29,4 @@ project/plugins/project/
 .DS_Store
 
 /secring.gpg
+benchmarks/results

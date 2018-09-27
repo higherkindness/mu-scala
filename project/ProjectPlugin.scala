@@ -201,6 +201,15 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+    lazy val crossSettings: Seq[Def.Setting[_]] = Seq(
+      unmanagedSourceDirectories in Compile += {
+        baseDirectory.value.getParentFile / "shared" / "src" / "main" / "scala"
+      },
+      unmanagedSourceDirectories in Test += {
+        baseDirectory.value.getParentFile / "shared" / "src" / "test" / "scala"
+      }
+    )
+
     lazy val docsSettings = Seq(
       // Pointing to https://github.com/frees-io/freestyle/tree/master/docs/src/main/tut/docs/rpc
       tutTargetDirectory := baseDirectory.value.getParentFile.getParentFile / "docs" / "src" / "main" / "tut" / "docs" / "rpc",
