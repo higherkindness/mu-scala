@@ -1,3 +1,4 @@
+import ProjectPlugin.autoImport.micrositeSettings
 import sbtorgpolicies.model.scalac
 
 pgpPassphrase := Some(getEnvVar("PGP_PASSPHRASE").getOrElse("").toCharArray)
@@ -337,5 +338,15 @@ lazy val docs = project
   .dependsOn(allModulesDeps: _*)
   .settings(name := "frees-rpc-docs")
   .settings(noPublishSettings)
-  .settings(docsSettings)
+  .settings(micrositeSettings: _*)
+  .settings(
+    addCompilerPlugin(%%("scalameta-paradise") cross CrossVersion.full),
+    libraryDependencies += %%("scalameta", "1.8.0"),
+    scalacOptions += "-Xplugin-require:macroparadise"
+  )
+  .settings(
+    libraryDependencies ++= Seq(%%("scalamockScalatest") % "tut"),
+    scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
+  )
   .enablePlugins(TutPlugin)
+  .enablePlugins(MicrositesPlugin)

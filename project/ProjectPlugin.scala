@@ -1,5 +1,7 @@
+import com.typesafe.sbt.site.jekyll.JekyllPlugin.autoImport._
 import freestyle.FreestylePlugin
 import freestyle.FreestylePlugin.autoImport._
+import microsites.MicrositeKeys._
 import sbt.Keys._
 import sbt.ScriptedPlugin.autoImport._
 import sbt._
@@ -196,10 +198,15 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val docsSettings = Seq(
-      // Pointing to https://github.com/frees-io/freestyle/tree/master/docs/src/main/tut/docs/rpc
-      tutTargetDirectory := baseDirectory.value.getParentFile.getParentFile / "docs" / "src" / "main" / "tut" / "docs" / "rpc",
-      libraryDependencies ++= Seq(%%("scalamockScalatest") % "tut")
+    lazy val micrositeSettings = Seq(
+      micrositeName := "Frees-rpc",
+      micrositeDescription := "A purely functional library for building RPC endpoint-based services with support for RPC and HTTP/2.",
+      micrositeDocumentationUrl := "/docs/rpc/",
+      micrositeGithubOwner := "frees-io",
+      micrositeGithubRepo := "freestyle-rpc",
+      micrositeGitterChannelUrl := "47deg/freestyle",
+      micrositeOrganizationHomepage := "http://www.47deg.com",
+      includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md"
     )
 
   }

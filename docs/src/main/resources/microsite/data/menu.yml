@@ -1,0 +1,32 @@
+options:
+  - title: Microservices
+    url: docs/rpc
+
+    nested_options:
+
+      - title: Quickstart
+        url: docs/rpc/quickstart
+
+      - title: Core concepts
+        url: docs/rpc/core-concepts
+
+      - title: Streaming
+        url: docs/rpc/streaming
+
+      - title: Annotations
+        url: docs/rpc/annotations
+
+      - title: IDL Generation
+        url: docs/rpc/idl-generation
+
+      - title: Patterns
+        url: docs/rpc/patterns
+
+      - title: SSL/TLS
+        url: docs/rpc/ssl-tls
+
+      - title: Metrics Reporting
+        url: docs/rpc/metrics-reporting
+
+      - title: References
+        url: docs/rpc/references
