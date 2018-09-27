@@ -214,6 +214,15 @@ object ProjectPlugin extends AutoPlugin {
       includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md"
     )
 
+    lazy val crossSettings: Seq[Def.Setting[_]] = Seq(
+      unmanagedSourceDirectories in Compile += {
+        baseDirectory.value.getParentFile / "shared" / "src" / "main" / "scala"
+      },
+      unmanagedSourceDirectories in Test += {
+        baseDirectory.value.getParentFile / "shared" / "src" / "test" / "scala"
+      }
+    )
+
   }
 
   import autoImport._

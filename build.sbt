@@ -162,12 +162,30 @@ lazy val `idlgen-sbt` = project
 //// BENCHMARKS ////
 ////////////////////
 
-lazy val benchmarks = project
-  .in(file("benchmarks"))
+lazy val lastReleasedV = "0.15.0"
+
+lazy val `benchmarks-vprev` = project
+  .in(file("benchmarks/vprev"))
+  .settings(
+    libraryDependencies ++= Seq(
+      "io.frees" %% "frees-rpc-client-core" % lastReleasedV,
+      "io.frees" %% "frees-rpc-server"      % lastReleasedV,
+      "io.frees" %% "frees-rpc-testing"     % lastReleasedV
+    )
+  )
+  .settings(moduleName := "frees-rpc-benchmarks-vprev")
+  .settings(crossSettings)
+  .settings(noPublishSettings)
+  .enablePlugins(JmhPlugin)
+
+lazy val `benchmarks-vnext` = project
+  .in(file("benchmarks/vnext"))
   .dependsOn(client)
   .dependsOn(server)
   .dependsOn(testing)
-  .settings(moduleName := "frees-rpc-benchmarks")
+  .settings(moduleName := "frees-rpc-benchmarks-vnext")
+  .settings(crossSettings)
+  .settings(noPublishSettings)
   .enablePlugins(JmhPlugin)
 
 //////////////////
@@ -303,7 +321,8 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `example-todolist-runtime`,
   `example-todolist-server`,
   `example-todolist-client`,
-  benchmarks
+  `benchmarks-vprev`,
+  `benchmarks-vnext`
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =

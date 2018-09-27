@@ -16,28 +16,27 @@
 
 package freestyle.rpc.benchmarks
 
-import java.util.concurrent.TimeUnit
-
 import cats.effect.IO
 import cats.syntax.functor._
-import freestyle.rpc.benchmarks.Utils._
-import freestyle.rpc.benchmarks.shared.protocols.PersonServiceAvroWithSchema
-import freestyle.rpc.benchmarks.shared.Runtime
-import freestyle.rpc.benchmarks.shared.models._
-import freestyle.rpc.benchmarks.shared.server._
 import freestyle.rpc.protocol.Empty
+import java.util.concurrent.TimeUnit
+
+import freestyle.rpc.benchmarks.shared.Utils._
+import freestyle.rpc.benchmarks.shared.models._
+import freestyle.rpc.benchmarks.shared.protocols.PersonServicePB
+import freestyle.rpc.benchmarks.shared.Runtime
+import freestyle.rpc.benchmarks.shared.server._
 import freestyle.rpc.testing.servers.ServerChannel
 import org.openjdk.jmh.annotations._
 
 @State(Scope.Thread)
 @BenchmarkMode(Array(Mode.Throughput))
 @OutputTimeUnit(TimeUnit.SECONDS)
-class AvroWithSchemaBenchmark extends Runtime {
+class ProtoBenchmark extends Runtime {
 
-  implicit val handler: AvroWithSchemaHandler[IO] = new AvroWithSchemaHandler[IO]
-  val sc: ServerChannel                           = ServerChannel(PersonServiceAvroWithSchema.bindService[IO])
-  val client: PersonServiceAvroWithSchema.Client[IO] =
-    PersonServiceAvroWithSchema.clientFromChannel[IO](sc.channel)
+  implicit val handler: ProtoHandler[IO] = new ProtoHandler[IO]
+  val sc: ServerChannel                  = ServerChannel(PersonServicePB.bindService[IO])
+  val client: PersonServicePB.Client[IO] = PersonServicePB.clientFromChannel[IO](sc.channel)
 
   @TearDown
   def shutdown(): Unit = IO(sc.shutdown()).void.unsafeRunSync()
