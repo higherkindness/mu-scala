@@ -27,19 +27,19 @@ case class ClientMetrics(cfg: Configuration) {
   import freestyle.rpc.prometheus.implicits._
 
   private[this] val rpcStartedBuilder: Counter.Builder =
-    clientMetricRpcStarted.toCounterBuilder
+    clientMetricRpcStarted(cfg.namespace).toCounterBuilder
 
   private[this] val rpcCompletedBuilder: Counter.Builder =
-    clientMetricRpcCompleted.toCounterBuilder
+    clientMetricRpcCompleted(cfg.namespace).toCounterBuilder
 
   private[this] val completedLatencySecondsBuilder: Histogram.Builder =
-    clientMetricCompletedLatencySeconds.toHistogramBuilder
+    clientMetricCompletedLatencySeconds(cfg.namespace).toHistogramBuilder
 
   private[this] val streamMessagesReceivedBuilder: Counter.Builder =
-    clientMetricStreamMessagesReceived.toCounterBuilder
+    clientMetricStreamMessagesReceived(cfg.namespace).toCounterBuilder
 
   private[this] val streamMessagesSentBuilder: Counter.Builder =
-    clientMetricStreamMessagesSent.toCounterBuilder
+    clientMetricStreamMessagesSent(cfg.namespace).toCounterBuilder
 
   val rpcStarted: Counter   = rpcStartedBuilder.register(cfg.collectorRegistry)
   val rpcCompleted: Counter = rpcCompletedBuilder.register(cfg.collectorRegistry)

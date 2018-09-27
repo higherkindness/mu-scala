@@ -24,6 +24,8 @@ import cats.effect.Effect
 import io.grpc.stub.ServerCalls._
 import io.grpc.stub.StreamObserver
 import monix.execution.Scheduler
+
+import scala.concurrent.ExecutionContext
 import monix.reactive.Observable
 
 object fs2Calls {
@@ -37,14 +39,16 @@ object fs2Calls {
 
   def clientStreamingMethod[F[_]: Effect, Req, Res](
       f: Stream[F, Req] => F[Res],
-      maybeCompression: Option[String])(implicit S: Scheduler): ClientStreamingMethod[Req, Res] =
+      maybeCompression: Option[String])(
+      implicit EC: ExecutionContext): ClientStreamingMethod[Req, Res] =
     new ClientStreamingMethod[Req, Res] {
 
       override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
         addCompression(responseObserver, maybeCompression)
         transformStreamObserver[Req, Res](
           inputObservable =>
-            Observable.fromEffect(f(inputObservable.toReactivePublisher.toStream[F])),
+            Observable.fromEffect(
+              f(inputObservable.toReactivePublisher(Scheduler(EC)).toStream[F])),
           responseObserver
         )
       }
@@ -52,7 +56,8 @@ object fs2Calls {
 
   def serverStreamingMethod[F[_]: Effect, Req, Res](
       f: Req => Stream[F, Res],
-      maybeCompression: Option[String])(implicit S: Scheduler): ServerStreamingMethod[Req, Res] =
+      maybeCompression: Option[String])(
+      implicit EC: ExecutionContext): ServerStreamingMethod[Req, Res] =
     new ServerStreamingMethod[Req, Res] {
 
       override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
@@ -63,7 +68,8 @@ object fs2Calls {
 
   def bidiStreamingMethod[F[_]: Effect, Req, Res](
       f: Stream[F, Req] => Stream[F, Res],
-      maybeCompression: Option[String])(implicit S: Scheduler): BidiStreamingMethod[Req, Res] =
+      maybeCompression: Option[String])(
+      implicit EC: ExecutionContext): BidiStreamingMethod[Req, Res] =
     new BidiStreamingMethod[Req, Res] {
 
       override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
@@ -71,7 +77,7 @@ object fs2Calls {
         transformStreamObserver[Req, Res](
           (inputObservable: Observable[Req]) =>
             Observable.fromReactivePublisher(
-              f(inputObservable.toReactivePublisher.toStream[F]).toUnicastPublisher),
+              f(inputObservable.toReactivePublisher(Scheduler(EC)).toStream[F]).toUnicastPublisher),
           responseObserver
         )
       }

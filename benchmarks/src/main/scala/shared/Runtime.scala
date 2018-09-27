@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package examples.todolist.runtime
+package freestyle.rpc.benchmarks
+package shared
+
+import cats.effect.IO
 
 import scala.concurrent.ExecutionContext
 
-trait CommonRuntime {
+trait Runtime {
 
   implicit val EC: ExecutionContext = ExecutionContext.Implicits.global
+
+  implicit val persistenceService: PersistenceService[IO] = PersistenceService[IO]
 
 }

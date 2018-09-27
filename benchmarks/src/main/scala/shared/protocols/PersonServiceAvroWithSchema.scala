@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-package examples.todolist.runtime
+package freestyle.rpc.benchmarks
+package shared
+package protocols
 
-import scala.concurrent.ExecutionContext
+import freestyle.rpc.benchmarks.shared.models._
+import freestyle.rpc.protocol._
 
-trait CommonRuntime {
+@service(AvroWithSchema)
+trait PersonServiceAvroWithSchema[F[_]] {
 
-  implicit val EC: ExecutionContext = ExecutionContext.Implicits.global
+  def listPersons(empty: Empty.type): F[PersonList]
+
+  def getPerson(id: PersonId): F[Person]
+
+  def getPersonLinks(id: PersonId): F[PersonLinkList]
+
+  def createPerson(person: Person): F[Person]
 
 }

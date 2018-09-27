@@ -14,12 +14,26 @@
  * limitations under the License.
  */
 
-package examples.todolist.runtime
+package freestyle.rpc.benchmarks
 
-import scala.concurrent.ExecutionContext
+import freestyle.rpc.benchmarks.shared.models._
 
-trait CommonRuntime {
+import scala.concurrent.duration._
 
-  implicit val EC: ExecutionContext = ExecutionContext.Implicits.global
+object Utils {
 
+  val defaultTimeOut: FiniteDuration = 30.seconds
+
+  val person: Person = Person(
+    id = "5",
+    name = PersonName(title = "ms", first = "valentine", last = "lacroix"),
+    gender = "female",
+    location = Location(
+      street = "1494 avenue du fort-caire",
+      city = "orléans",
+      state = "aveyron",
+      postCode = 91831),
+    email = "valentine.lacroix@example.com",
+    picture = None
+  )
 }

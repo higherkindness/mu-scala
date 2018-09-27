@@ -21,8 +21,10 @@ package client
 import cats.effect.Effect
 import _root_.fs2._
 import _root_.fs2.interop.reactivestreams._
-import monix.execution.Scheduler
+
+import scala.concurrent.ExecutionContext
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
+import monix.execution.Scheduler
 import monix.reactive.Observable
 
 object fs2Calls {
@@ -31,24 +33,24 @@ object fs2Calls {
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler): F[Res] =
+      options: CallOptions)(implicit EC: ExecutionContext): F[Res] =
     monixCalls.unary(request, descriptor, channel, options)
 
   def serverStreaming[F[_]: Effect, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler): Stream[F, Res] =
+      options: CallOptions)(implicit EC: ExecutionContext): Stream[F, Res] =
     monixCalls
       .serverStreaming(request, descriptor, channel, options)
-      .toReactivePublisher
+      .toReactivePublisher(Scheduler(EC))
       .toStream[F]
 
   def clientStreaming[F[_]: Effect, Req, Res](
       input: Stream[F, Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler): F[Res] =
+      options: CallOptions)(implicit EC: ExecutionContext): F[Res] =
     monixCalls.clientStreaming(
       Observable
         .fromReactivePublisher(input.toUnicastPublisher),
@@ -60,7 +62,7 @@ object fs2Calls {
       input: Stream[F, Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler): Stream[F, Res] =
+      options: CallOptions)(implicit EC: ExecutionContext): Stream[F, Res] =
     monixCalls
       .bidiStreaming(
         Observable
@@ -68,6 +70,6 @@ object fs2Calls {
         descriptor,
         channel,
         options)
-      .toReactivePublisher
+      .toReactivePublisher(Scheduler(EC))
       .toStream[F]
 }

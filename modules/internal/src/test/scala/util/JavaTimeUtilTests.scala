@@ -54,6 +54,17 @@ class JavaTimeUtilTests extends WordSpec with Matchers with Checkers {
         }
       }
     }
+
+    "allow to convert Instant to and from long" in {
+      import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.seconds
+      check {
+        forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
+          val date  = zdt.toInstant
+          val value = JavaTimeUtil.instantToLong(date)
+          JavaTimeUtil.longToInstant(value) == date
+        }
+      }
+    }
   }
 
 }

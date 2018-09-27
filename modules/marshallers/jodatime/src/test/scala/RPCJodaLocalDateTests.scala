@@ -85,7 +85,7 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
   "RPCJodaService" should {
 
     import RPCJodaLocalDateService._
-    import monix.execution.Scheduler.Implicits.global
+    import scala.concurrent.ExecutionContext.Implicits.global
 
     implicit val H: RPCLocalDateServiceDefHandler[ConcurrentMonad] =
       new RPCLocalDateServiceDefHandler[ConcurrentMonad]

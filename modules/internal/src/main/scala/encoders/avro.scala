@@ -19,7 +19,7 @@ package internal.encoders
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
 import java.nio.ByteBuffer
-import java.time.{LocalDate, LocalDateTime}
+import java.time.{Instant, LocalDate, LocalDateTime}
 
 import com.google.common.io.ByteStreams
 import freestyle.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTimeUtil}
@@ -121,6 +121,20 @@ object avro extends AvroMarshallers {
         JavaTimeUtil.localDateTimeToLong(value)
     }
 
+    implicit object instantToSchema extends ToSchema[Instant] {
+      override val schema: Schema = Schema.create(Schema.Type.LONG)
+    }
+
+    implicit object instantFromValue extends FromValue[Instant] {
+      def apply(value: Any, field: Field): Instant =
+        JavaTimeUtil.longToInstant(value.asInstanceOf[Long])
+    }
+
+    implicit object instantToValue extends ToValue[Instant] {
+      override def apply(value: Instant): Long =
+        JavaTimeUtil.instantToLong(value)
+    }
+
     object marshallers {
 
       implicit val localDateMarshaller: Marshaller[LocalDate] = new Marshaller[LocalDate] {
@@ -141,6 +155,15 @@ object avro extends AvroMarshallers {
           override def parse(stream: InputStream): LocalDateTime =
             JavaTimeUtil.longToLocalDateTime(
               EncoderUtil.byteArrayToLong(ByteStreams.toByteArray(stream)))
+        }
+
+      implicit val instantMarshaller: Marshaller[Instant] =
+        new Marshaller[Instant] {
+          override def stream(value: Instant): InputStream =
+            new ByteArrayInputStream(EncoderUtil.longToByteArray(JavaTimeUtil.instantToLong(value)))
+
+          override def parse(stream: InputStream): Instant =
+            JavaTimeUtil.longToInstant(EncoderUtil.byteArrayToLong(ByteStreams.toByteArray(stream)))
         }
     }
 
