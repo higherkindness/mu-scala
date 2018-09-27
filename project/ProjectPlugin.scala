@@ -225,8 +225,8 @@ object ProjectPlugin extends AutoPlugin {
     sharedReleaseProcess ++ warnUnusedImport ++ Seq(
       addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
       libraryDependencies ++= commonDeps :+ %("slf4j-nop") % Test,
-      scalaVersion := "2.12.6",
-      crossScalaVersions := Seq("2.11.12", "2.12.6"),
+      scalaVersion := "2.12.7",
+      crossScalaVersions := Seq("2.11.12", "2.12.7"),
       Test / fork := true,
       Tut / scalacOptions -= "-Ywarn-unused-import",
       orgAfterCISuccessTaskListSetting ~= (_.filterNot(_ == defaultPublishMicrosite)),
