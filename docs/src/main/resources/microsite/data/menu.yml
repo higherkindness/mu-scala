@@ -1,32 +1,24 @@
 options:
-  - title: Microservices
-    url: docs/rpc
+  - title: Core concepts
+    url: docs/rpc/core-concepts
 
-    nested_options:
+  - title: Streaming
+    url: docs/rpc/streaming
 
-      - title: Quickstart
-        url: docs/rpc/quickstart
+  - title: Annotations
+    url: docs/rpc/annotations
 
-      - title: Core concepts
-        url: docs/rpc/core-concepts
+  - title: IDL Generation
+    url: docs/rpc/idl-generation
 
-      - title: Streaming
-        url: docs/rpc/streaming
+  - title: Patterns
+    url: docs/rpc/patterns
 
-      - title: Annotations
-        url: docs/rpc/annotations
+  - title: SSL/TLS
+    url: docs/rpc/ssl-tls
 
-      - title: IDL Generation
-        url: docs/rpc/idl-generation
+  - title: Metrics Reporting
+    url: docs/rpc/metrics-reporting
 
-      - title: Patterns
-        url: docs/rpc/patterns
-
-      - title: SSL/TLS
-        url: docs/rpc/ssl-tls
-
-      - title: Metrics Reporting
-        url: docs/rpc/metrics-reporting
-
-      - title: References
-        url: docs/rpc/references
+  - title: References
+    url: docs/rpc/references

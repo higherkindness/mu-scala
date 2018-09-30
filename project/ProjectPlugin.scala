@@ -212,10 +212,10 @@ object ProjectPlugin extends AutoPlugin {
       }
     )
 
-    lazy val micrositeSettings = Seq(
+    lazy val freesMicrositeSettings = Seq(
       micrositeName := "Frees-rpc",
-      micrositeDescription := "A purely functional library for building RPC endpoint-based services with support for RPC and HTTP/2.",
-      micrositeDocumentationUrl := "/docs/rpc/",
+      micrositeDescription := "A purely functional library for building RPC endpoint-based services",
+      micrositeDocumentationUrl := "/docs/rpc/core-concepts.html",
       micrositeGithubOwner := "frees-io",
       micrositeGithubRepo := "freestyle-rpc",
       micrositeGitterChannelUrl := "47deg/freestyle",
