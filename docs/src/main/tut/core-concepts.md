@@ -375,13 +375,15 @@ object protocol {
 }
 ```
 
-[frees-rpc] provides serializers for `BigDecimal`, `java.time.LocalDate` and `java.time.LocalDateTime`. The only thing you need to do is to add the following import to your service:
+[frees-rpc] provides serializers for `BigDecimal`, `BigDecimal` with tagged 'precision' and 'scale' (like `BigDecimal @@ (Nat._8, Nat._2)`), `java.time.LocalDate` and `java.time.LocalDateTime`. The only thing you need to do is to add the following import to your service:
 
 * `BigDecimal` in `Protobuf`
   * `import freestyle.rpc.internal.encoders.pbd.bigDecimal._`
 * `java.time.LocalDate` and `java.time.LocalDateTime` in `Protobuf`
   * `import freestyle.rpc.internal.encoders.pbd.javatime._`
-* `BigDecimal` in `Avro`
+* `BigDecimal` in `Avro` (**note**: this encoder is not avro spec compliant)
+  * `import freestyle.rpc.internal.encoders.avro.bigDecimal._`
+* Tagged `BigDecimal` in `Avro`
   * `import freestyle.rpc.internal.encoders.avro.bigDecimalTagged._`
 * `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
   * `import freestyle.rpc.internal.encoders.avro.javatime._`
@@ -395,6 +397,8 @@ It also provides the instances for `org.joda.time.LocalDate` and `org.joda.time.
   
 **Note**: If you want to send one of these instances directly as a request or response through Avro, you need to provide an instance of `Marshaller`. [frees-rpc] provides the marshallers for `BigDecimal`, `java.time.LocalDate`, `java.time.LocalDateTime`, `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in a separated package:
 * `BigDecimal` in `Avro`
+  * `import freestyle.rpc.internal.encoders.avro.bigDecimal.marshallers._`
+* Tagged `BigDecimal` in `Avro` (**note**: this encoder is not avro spec compliant)
   * `import freestyle.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._`
 * `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
   * `import freestyle.rpc.internal.encoders.avro.javatime.marshallers._`

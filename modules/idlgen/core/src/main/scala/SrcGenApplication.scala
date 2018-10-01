@@ -16,12 +16,14 @@
 
 package freestyle.rpc.idlgen
 
-import freestyle.rpc.idlgen.Model.MarshallersImport
+import freestyle.rpc.idlgen.Model.{BigDecimalTypeGen, MarshallersImport, ScalaBigDecimalGen}
 import freestyle.rpc.idlgen.avro.AvroSrcGenerator
 
 object SrcGenApplication {
   def apply(
-      marshallersImports: List[MarshallersImport] = Nil): GeneratorApplication[AvroSrcGenerator] =
+      marshallersImports: List[MarshallersImport] = Nil,
+      bigDecimalTypeGen: BigDecimalTypeGen = ScalaBigDecimalGen): GeneratorApplication[
+    AvroSrcGenerator] =
     new GeneratorApplication(AvroSrcGenerator(marshallersImports)) {
       def main(args: Array[String]): Unit = generateFrom(args)
     }

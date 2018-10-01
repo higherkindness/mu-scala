@@ -68,13 +68,18 @@ object avro extends AvroMarshallers {
 
     }
 
+  @deprecated("Use `freestyle.rpc.internal.encoders.avro.bigDecimal` instead.", "0.15.1")
+  object bigdecimal extends AvroBigDecimal
+
   @deprecated(
     "This avro4s encoder doesn't fulfill the avro specs. " +
       "Be aware that this serializes without taking into account the precision and scale, " +
       "and it could lead to serialization problems if the client uses a different serializer.",
     "0.15.1"
   )
-  object bigDecimal {
+  object bigDecimal extends AvroBigDecimal
+
+  trait AvroBigDecimal {
 
     implicit object bigDecimalToSchema extends ToSchema[BigDecimal] {
       override val schema: Schema = Schema.create(Schema.Type.BYTES)
