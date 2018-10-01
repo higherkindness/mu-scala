@@ -1,7 +1,10 @@
 ---
-layout: docs
-title: Quickstart
-permalink: /docs/rpc/quickstart
+layout: home
+title: Home
+technologies:
+ - first: ["Scala", "Frees-rpc library is completely written in Scala."]
+ - second: ["gRPC", "Frees-rpc combines RPC protocols, services and clients thank to gRPC framework."]
+ - third: ["Functional Programming", "frees-rpc is a purely functional library for building RPC endpoint based services."]
 ---
 
 # Quickstart

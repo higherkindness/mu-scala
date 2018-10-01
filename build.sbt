@@ -336,9 +336,12 @@ lazy val root = project
 
 lazy val docs = project
   .in(file("docs"))
-  .aggregate(allModules: _*)
   .dependsOn(allModulesDeps: _*)
   .settings(name := "frees-rpc-docs")
-  .settings(noPublishSettings)
-  .settings(docsSettings)
-  .enablePlugins(TutPlugin)
+  .settings(freesMicrositeSettings: _*)
+  .settings(noPublishSettings: _*)
+  .settings(
+    libraryDependencies ++= Seq(%%("scalamockScalatest") % "tut"),
+    scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
+  )
+  .enablePlugins(MicrositesPlugin)
