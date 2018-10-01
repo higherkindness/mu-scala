@@ -34,7 +34,8 @@ case class AvroSrcGenerator(marshallersImports: List[MarshallersImport] = Nil)
 
   private[this] val logger = getLogger
 
-  private val mainGenerator = Generator(Standard)
+  private val avroScalaCustomTypes = Standard.defaultTypes.copy(decimal = ScalaBigDecimalWithPrecision)
+  private val mainGenerator = Generator(Standard, avroScalaCustomTypes = Some(avroScalaCustomTypes))
   private val adtGenerator = mainGenerator.copy(avroScalaCustomTypes =
     Some(AvroScalaTypes.defaults.copy(protocol = ScalaADT))) // ScalaADT: sealed trait hierarchies
 

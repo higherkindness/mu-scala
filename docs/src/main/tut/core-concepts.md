@@ -382,7 +382,7 @@ object protocol {
 * `java.time.LocalDate` and `java.time.LocalDateTime` in `Protobuf`
   * `import freestyle.rpc.internal.encoders.pbd.javatime._`
 * `BigDecimal` in `Avro`
-  * `import freestyle.rpc.internal.encoders.avro.bigDecimal._`
+  * `import freestyle.rpc.internal.encoders.avro.bigDecimalTagged._`
 * `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
   * `import freestyle.rpc.internal.encoders.avro.javatime._`
 
@@ -395,7 +395,7 @@ It also provides the instances for `org.joda.time.LocalDate` and `org.joda.time.
   
 **Note**: If you want to send one of these instances directly as a request or response through Avro, you need to provide an instance of `Marshaller`. [frees-rpc] provides the marshallers for `BigDecimal`, `java.time.LocalDate`, `java.time.LocalDateTime`, `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in a separated package:
 * `BigDecimal` in `Avro`
-  * `import freestyle.rpc.internal.encoders.avro.bigDecimal.marshallers._`
+  * `import freestyle.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._`
 * `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
   * `import freestyle.rpc.internal.encoders.avro.javatime.marshallers._`
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
