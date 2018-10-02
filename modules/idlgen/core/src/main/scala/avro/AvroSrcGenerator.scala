@@ -22,19 +22,26 @@ import avrohugger.Generator
 import avrohugger.format.Standard
 import avrohugger.types._
 import freestyle.rpc.idlgen._
-import freestyle.rpc.idlgen.Model.MarshallersImport
+import freestyle.rpc.idlgen.Model._
 import org.apache.avro._
 import org.log4s._
 
 import scala.collection.JavaConverters._
 import scala.util.Right
 
-case class AvroSrcGenerator(marshallersImports: List[MarshallersImport] = Nil)
+case class AvroSrcGenerator(
+    marshallersImports: List[MarshallersImport] = Nil,
+    bigDecimalTypeGen: BigDecimalTypeGen = ScalaBigDecimalGen)
     extends SrcGenerator {
 
   private[this] val logger = getLogger
 
-  private val mainGenerator = Generator(Standard)
+  private val avroBigDecimal: AvroScalaDecimalType = bigDecimalTypeGen match {
+    case ScalaBigDecimalGen       => ScalaBigDecimal
+    case ScalaBigDecimalTaggedGen => ScalaBigDecimalWithPrecision
+  }
+  private val avroScalaCustomTypes = Standard.defaultTypes.copy(decimal = avroBigDecimal)
+  private val mainGenerator        = Generator(Standard, avroScalaCustomTypes = Some(avroScalaCustomTypes))
   private val adtGenerator = mainGenerator.copy(avroScalaCustomTypes =
     Some(AvroScalaTypes.defaults.copy(protocol = ScalaADT))) // ScalaADT: sealed trait hierarchies
 

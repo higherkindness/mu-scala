@@ -92,6 +92,10 @@ object IdlGenPlugin extends AutoPlugin {
       settingKey[Seq[String]](
         "Options for the generator, such as additional @service annotation parameters in srcGen.")
 
+    lazy val idlGenBigDecimal: SettingKey[BigDecimalTypeGen] =
+      settingKey[BigDecimalTypeGen]("The Scala generated type for `decimals`. Possible values are `ScalaBigDecimalGen` and `ScalaBigDecimalTaggedGen`" +
+      "The difference is that `ScalaBigDecimalTaggedGen` will append the 'precision' and the 'scale' as tagged types, i.e. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`")
+
     lazy val idlGenMarshallerImports: SettingKey[List[MarshallersImport]] =
       settingKey[List[MarshallersImport]](
         "List of imports needed for creating the request/response marshallers. " +
@@ -115,9 +119,13 @@ object IdlGenPlugin extends AutoPlugin {
     srcGenIDLTargetDir := (Compile / resourceManaged).value / idlType.value,
     srcGenTargetDir := (Compile / sourceManaged).value,
     genOptions := Seq.empty,
+    idlGenBigDecimal := ScalaBigDecimalGen,
     idlGenMarshallerImports := {
       if (srcGenSerializationType.value == "Avro" || srcGenSerializationType.value == "AvroWithSchema")
-        List(BigDecimalAvroMarshallers, JavaTimeDateAvroMarshallers)
+        (idlGenBigDecimal.value match {
+          case ScalaBigDecimalGen       => BigDecimalAvroMarshallers
+          case ScalaBigDecimalTaggedGen => BigDecimalTaggedAvroMarshallers
+        }) :: JavaTimeDateAvroMarshallers :: List.empty[MarshallersImport]
       else if (srcGenSerializationType.value == "Protobuf")
         List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)
       else Nil
