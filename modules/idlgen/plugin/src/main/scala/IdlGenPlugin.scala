@@ -93,8 +93,9 @@ object IdlGenPlugin extends AutoPlugin {
         "Options for the generator, such as additional @service annotation parameters in srcGen.")
 
     lazy val idlGenBigDecimal: SettingKey[BigDecimalTypeGen] =
-      settingKey[BigDecimalTypeGen]("The Scala generated type for `decimals`. Possible values are `ScalaBigDecimalGen` and `ScalaBigDecimalTaggedGen`" +
-      "The difference is that `ScalaBigDecimalTaggedGen` will append the 'precision' and the 'scale' as tagged types, i.e. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`")
+      settingKey[BigDecimalTypeGen](
+        "The Scala generated type for `decimals`. Possible values are `ScalaBigDecimalGen` and `ScalaBigDecimalTaggedGen`" +
+          "The difference is that `ScalaBigDecimalTaggedGen` will append the 'precision' and the 'scale' as tagged types, i.e. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`")
 
     lazy val idlGenMarshallerImports: SettingKey[List[MarshallersImport]] =
       settingKey[List[MarshallersImport]](

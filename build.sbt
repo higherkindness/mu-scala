@@ -288,6 +288,27 @@ lazy val `marshallers-jodatime` = project
   .settings(moduleName := "frees-rpc-marshallers-jodatime")
   .settings(marshallersJodatimeSettings)
 
+///////////////////////////
+//// DECIMAL MIGRATION ////
+///////////////////////////
+
+lazy val `legacy-avro-decimal-compat-protocol` = project
+  .in(file("modules/legacy-avro-decimal/procotol"))
+  .settings(moduleName := "legacy-avro-decimal-compat-protocol")
+  .settings(legacyAvroDecimalProtocolSettings)
+
+lazy val `legacy-avro-decimal-compat-model` = project
+  .in(file("modules/legacy-avro-decimal/model"))
+  .settings(moduleName := "legacy-avro-decimal-compat-model")
+  .settings(legacyAvroDecimalModelSettings)
+
+lazy val `legacy-avro-decimal-compat-encoders` = project
+  .in(file("modules/legacy-avro-decimal/encoders"))
+  .settings(moduleName := "legacy-avro-decimal-compat-encoders")
+  .settings(legacyAvroDecimalEncodersSettings)
+  .dependsOn(`legacy-avro-decimal-compat-model`)
+  .dependsOn(internal)
+
 //////////////////////////
 //// MODULES REGISTRY ////
 //////////////////////////
@@ -321,7 +342,10 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `example-todolist-server`,
   `example-todolist-client`,
   `benchmarks-vprev`,
-  `benchmarks-vnext`
+  `benchmarks-vnext`,
+  `legacy-avro-decimal-compat-protocol`,
+  `legacy-avro-decimal-compat-model`,
+  `legacy-avro-decimal-compat-encoders`
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =

@@ -223,6 +223,16 @@ object ProjectPlugin extends AutoPlugin {
       includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md"
     )
 
+    lazy val legacyAvroDecimalProtocolSettings: Seq[Def.Setting[_]] = Seq(
+      publishMavenStyle := true,
+      crossPaths := false,
+      libraryDependencies := Nil
+    )
+
+    lazy val legacyAvroDecimalModelSettings: Seq[Def.Setting[_]] = Nil
+
+    lazy val legacyAvroDecimalEncodersSettings: Seq[Def.Setting[_]] = Nil
+
   }
 
   import autoImport._
