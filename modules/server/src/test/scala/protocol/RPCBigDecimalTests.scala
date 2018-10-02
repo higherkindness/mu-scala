@@ -21,8 +21,8 @@ import cats.Applicative
 import cats.syntax.applicative._
 import org.scalatest._
 import freestyle.rpc.common._
-import freestyle.rpc.internal.encoders.avro.bigdecimalTagged._
-import freestyle.rpc.internal.encoders.avro.bigdecimalTagged.marshallers._
+import freestyle.rpc.internal.encoders.avro.bigDecimalTagged._
+import freestyle.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._
 import freestyle.rpc.internal.encoders.pbd.bigDecimal._
 import freestyle.rpc.testing.servers.withServerChannel
 import org.scalacheck.{Arbitrary, Gen}

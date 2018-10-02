@@ -107,7 +107,7 @@ object avro extends AvroMarshallers {
     }
   }
 
-  object bigdecimalTagged {
+  object bigDecimalTagged {
 
     private[this] def toDecimalTag[SP](bigDecimal: BigDecimal): BigDecimal @@ SP =
       shapeless.tag[SP][BigDecimal](bigDecimal)

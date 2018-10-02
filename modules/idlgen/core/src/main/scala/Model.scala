@@ -70,9 +70,9 @@ object Model {
 
   final case class CustomMarshallersImport(mi: String) extends MarshallersImport(mi)
   case object BigDecimalAvroMarshallers
-      extends MarshallersImport("freestyle.rpc.internal.encoders.avro.bigdecimal._")
+      extends MarshallersImport("freestyle.rpc.internal.encoders.avro.bigDecimal._")
   case object BigDecimalTaggedAvroMarshallers
-      extends MarshallersImport("freestyle.rpc.internal.encoders.avro.bigdecimalTagged._")
+      extends MarshallersImport("freestyle.rpc.internal.encoders.avro.bigDecimalTagged._")
   case object JavaTimeDateAvroMarshallers
       extends MarshallersImport("freestyle.rpc.internal.encoders.avro.javatime._")
   case object JodaDateTimeAvroMarshallers
