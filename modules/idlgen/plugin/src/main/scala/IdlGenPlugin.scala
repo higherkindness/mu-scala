@@ -166,7 +166,7 @@ object IdlGenPlugin extends AutoPlugin {
           },
           Def.task {
             idlGenTask(
-              SrcGenApplication(idlGenMarshallerImports.value),
+              SrcGenApplication(idlGenMarshallerImports.value, idlGenBigDecimal.value),
               idlType.value,
               srcGenSerializationType.value,
               genOptions.value,
