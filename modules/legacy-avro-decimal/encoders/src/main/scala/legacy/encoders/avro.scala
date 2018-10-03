@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.protocols
+package freestyle.rpc.protocol.legacy
 
 import java.io.{ByteArrayInputStream, InputStream}
 import java.nio.ByteBuffer
@@ -26,32 +26,31 @@ import io.grpc.MethodDescriptor.Marshaller
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Field
 
-object legacyAvroDecimalEncoders {
+object avro {
 
-  import legacyAvroDecimalUtils._
+  import AvroDecimalCompatUtils._
 
-  implicit object bigDecimalToSchema extends ToSchema[LegacyAvroDecimalCompat] {
+  implicit object bigDecimalToSchema extends ToSchema[AvroDecimalCompat] {
     override val schema: Schema = Schema.create(Schema.Type.BYTES)
   }
 
-  implicit object bigDecimalFromValue extends FromValue[LegacyAvroDecimalCompat] {
-    def apply(value: Any, field: Field): LegacyAvroDecimalCompat =
-      LegacyAvroDecimalCompat(
-        BigDecimalUtil.byteToBigDecimal(value.asInstanceOf[ByteBuffer].array()))
+  implicit object bigDecimalFromValue extends FromValue[AvroDecimalCompat] {
+    def apply(value: Any, field: Field): AvroDecimalCompat =
+      AvroDecimalCompat(BigDecimalUtil.byteToBigDecimal(value.asInstanceOf[ByteBuffer].array()))
   }
 
-  implicit object bigDecimalToValue extends ToValue[LegacyAvroDecimalCompat] {
-    override def apply(value: LegacyAvroDecimalCompat): ByteBuffer =
+  implicit object bigDecimalToValue extends ToValue[AvroDecimalCompat] {
+    override def apply(value: AvroDecimalCompat): ByteBuffer =
       ByteBuffer.wrap(BigDecimalUtil.bigDecimalToByte(value.toBigDecimal))
   }
 
-  implicit val bigDecimalMarshaller: Marshaller[LegacyAvroDecimalCompat] =
-    new Marshaller[LegacyAvroDecimalCompat] {
-      override def stream(value: LegacyAvroDecimalCompat): InputStream =
+  implicit val bigDecimalMarshaller: Marshaller[AvroDecimalCompat] =
+    new Marshaller[AvroDecimalCompat] {
+      override def stream(value: AvroDecimalCompat): InputStream =
         new ByteArrayInputStream(BigDecimalUtil.bigDecimalToByte(value.toBigDecimal))
 
-      override def parse(stream: InputStream): LegacyAvroDecimalCompat =
-        LegacyAvroDecimalCompat(BigDecimalUtil.byteToBigDecimal(ByteStreams.toByteArray(stream)))
+      override def parse(stream: InputStream): AvroDecimalCompat =
+        AvroDecimalCompat(BigDecimalUtil.byteToBigDecimal(ByteStreams.toByteArray(stream)))
     }
 
 }

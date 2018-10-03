@@ -14,17 +14,6 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.protocols
+package freestyle.rpc.protocol.legacy
 
-object legacyAvroDecimalUtils {
-
-  object LegacyAvroDecimalCompat {
-    def apply(bd: BigDecimal): LegacyAvroDecimalCompat =
-      new LegacyAvroDecimalCompat(bd.toString())
-  }
-
-  implicit class LegacyAvroDecimalCompatOps(private val ladc: LegacyAvroDecimalCompat) {
-    def toBigDecimal: BigDecimal = BigDecimal(ladc.value)
-  }
-
-}
+case class AvroDecimalCompat(value: String)

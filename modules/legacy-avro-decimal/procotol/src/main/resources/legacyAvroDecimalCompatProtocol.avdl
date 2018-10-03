@@ -1,8 +1,8 @@
-@namespace("freestyle.rpc.protocols")
+@namespace("freestyle.rpc.protocol.legacy")
 
-protocol LegacyAvroDecimalCompat {
+protocol AvroDecimalCompat {
 
-  record LegacyAvroDecimalCompat {
+  record AvroDecimalCompat {
     string value;
   }
 

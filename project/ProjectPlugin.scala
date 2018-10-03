@@ -229,10 +229,6 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies := Nil
     )
 
-    lazy val legacyAvroDecimalModelSettings: Seq[Def.Setting[_]] = Nil
-
-    lazy val legacyAvroDecimalEncodersSettings: Seq[Def.Setting[_]] = Nil
-
   }
 
   import autoImport._

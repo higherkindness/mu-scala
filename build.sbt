@@ -300,13 +300,11 @@ lazy val `legacy-avro-decimal-compat-protocol` = project
 lazy val `legacy-avro-decimal-compat-model` = project
   .in(file("modules/legacy-avro-decimal/model"))
   .settings(moduleName := "legacy-avro-decimal-compat-model")
-  .settings(legacyAvroDecimalModelSettings)
 
 lazy val `legacy-avro-decimal-compat-encoders` = project
   .in(file("modules/legacy-avro-decimal/encoders"))
   .settings(moduleName := "legacy-avro-decimal-compat-encoders")
-  .settings(legacyAvroDecimalEncodersSettings)
-  .dependsOn(`legacy-avro-decimal-compat-model`)
+  .dependsOn(`legacy-avro-decimal-compat-model` % "provided")
   .dependsOn(internal)
 
 //////////////////////////
