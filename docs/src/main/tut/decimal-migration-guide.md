@@ -6,6 +6,12 @@ permalink: /docs/rpc/decimal-migration-guide
 
 # Migration guide for decimal types (available from 0.15.1)
 
+## Intended audience
+
+This guide is only for projects that are in a prior version to `0.15.1` **and** have decimals in some of their protocols **and** want to serialize those decimals following the avro specs.
+
+If you're starting a new project, you can use safely tagged `BigDecimal`s. Check the [Custom codecs section in Core concepts](/docs/rpc/core-concepts#custom-codecs) and [Plugin Settings section in IDL Generation](/docs/rpc/idl-generation#plugin-settings) for more information.
+
 ## Background
 
 The `0.13.5` version introduced custom encoders for `BigDecimal` values that serialize the values as byte arrays in a way not compliant with the avro specs.
