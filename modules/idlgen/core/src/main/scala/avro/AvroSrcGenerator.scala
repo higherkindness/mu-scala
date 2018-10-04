@@ -42,8 +42,8 @@ case class AvroSrcGenerator(
   }
   private val avroScalaCustomTypes = Standard.defaultTypes.copy(decimal = avroBigDecimal)
   private val mainGenerator        = Generator(Standard, avroScalaCustomTypes = Some(avroScalaCustomTypes))
-  private val adtGenerator = mainGenerator.copy(avroScalaCustomTypes =
-    Some(AvroScalaTypes.defaults.copy(protocol = ScalaADT))) // ScalaADT: sealed trait hierarchies
+  private val adtGenerator = mainGenerator.copy(avroScalaCustomTypes = Some(
+    mainGenerator.avroScalaTypes.copy(protocol = ScalaADT))) // ScalaADT: sealed trait hierarchies
 
   val idlType: String = avro.IdlType
 

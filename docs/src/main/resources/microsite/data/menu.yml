@@ -20,5 +20,8 @@ options:
   - title: Metrics Reporting
     url: docs/rpc/metrics-reporting
 
+  - title: Migration guide for decimal types
+    url: docs/rpc/decimal-migration-guide
+
   - title: References
     url: docs/rpc/references
