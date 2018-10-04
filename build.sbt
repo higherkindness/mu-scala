@@ -296,6 +296,7 @@ lazy val `legacy-avro-decimal-compat-protocol` = project
   .in(file("modules/legacy-avro-decimal/procotol"))
   .settings(moduleName := "legacy-avro-decimal-compat-protocol")
   .settings(legacyAvroDecimalProtocolSettings)
+  .disablePlugins(scoverage.ScoverageSbtPlugin)
 
 lazy val `legacy-avro-decimal-compat-model` = project
   .in(file("modules/legacy-avro-decimal/model"))
