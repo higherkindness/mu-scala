@@ -1,20 +1,25 @@
 import com.typesafe.sbt.site.jekyll.JekyllPlugin.autoImport._
-import freestyle.FreestylePlugin
-import freestyle.FreestylePlugin.autoImport._
 import microsites.MicrositeKeys._
 import sbt.Keys._
 import sbt.ScriptedPlugin.autoImport._
 import sbt._
+import sbtorgpolicies.OrgPoliciesPlugin
 import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
+import sbtorgpolicies.model._
+import sbtorgpolicies.runnable.SetSetting
+import sbtorgpolicies.runnable.syntax._
+import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
 import sbtrelease.ReleasePlugin.autoImport._
+import scoverage.ScoverageKeys
+import scoverage.ScoverageKeys._
 
 import scala.language.reflectiveCalls
 import tut.TutPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
 
-  override def requires: Plugins = FreestylePlugin
+  override def requires: Plugins = OrgPoliciesPlugin
 
   override def trigger: PluginTrigger = allRequirements
 
@@ -40,6 +45,7 @@ object ProjectPlugin extends AutoPlugin {
       val pbdirect: String           = "0.1.0"
       val prometheus: String         = "0.5.0"
       val pureconfig: String         = "0.9.2"
+      val scala: String              = "2.12.7"
       val scalacheckToolbox: String  = "0.2.5"
     }
 
@@ -212,15 +218,16 @@ object ProjectPlugin extends AutoPlugin {
       }
     )
 
-    lazy val freesMicrositeSettings = Seq(
+    lazy val micrositeSettings = Seq(
       micrositeName := "Frees-rpc",
       micrositeDescription := "A purely functional library for building RPC endpoint-based services",
       micrositeDocumentationUrl := "/docs/rpc/core-concepts.html",
-      micrositeGithubOwner := "frees-io",
+      micrositeGithubOwner := "higherkindness",
       micrositeGithubRepo := "freestyle-rpc",
       micrositeGitterChannelUrl := "47deg/freestyle",
       micrositeOrganizationHomepage := "http://www.47deg.com",
-      includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md"
+      includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
+      micrositePushSiteWith := GitHub4s
     )
 
     lazy val legacyAvroDecimalProtocolSettings: Seq[Def.Setting[_]] = Seq(
@@ -234,24 +241,86 @@ object ProjectPlugin extends AutoPlugin {
   import autoImport._
 
   override def projectSettings: Seq[Def.Setting[_]] =
-    // format: OFF
     sharedReleaseProcess ++ warnUnusedImport ++ Seq(
-      addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
-      libraryDependencies ++= commonDeps :+ %("slf4j-nop") % Test,
-      scalaVersion := "2.12.7",
-      crossScalaVersions := Seq("2.11.12", "2.12.7"),
+      description := "Freestyle RPC is a purely functional library for " +
+        "building RPC endpoint based services with support for RPC and HTTP/2",
+      startYear := Some(2017),
+      orgProjectName := "frees-rpc",
+      orgGithubSetting := GitHubSettings(
+        organization = "higherkindness",
+        project = (name in LocalRootProject).value,
+        organizationName = "47 Degrees",
+        groupId = "io.frees",
+        organizationHomePage = url("http://47deg.com"),
+        organizationEmail = "hello@47deg.com"
+      ),
+      scalaVersion := V.scala,
+      crossScalaVersions := Seq("2.11.12", V.scala),
+      scalacOptions ++= scalacAdvancedOptions,
+      scalacOptions ~= (_ filterNot Set("-Yliteral-types", "-Xlint").contains),
       Test / fork := true,
       Tut / scalacOptions -= "-Ywarn-unused-import",
-      orgAfterCISuccessTaskListSetting ~= (_.filterNot(_ == defaultPublishMicrosite)),
+      compileOrder in Compile := CompileOrder.JavaThenScala,
+      coverageFailOnMinimum := false,
+      addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
+      libraryDependencies ++= Seq(
+        %%("scalatest") % "test",
+        %("slf4j-nop")  % Test
+      )
+    ) ++ Seq(
+      // sbt-org-policies settings:
+      // format: OFF
+      orgMaintainersSetting := List(Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
       orgBadgeListSetting := List(
         TravisBadge.apply,
-        CodecovBadge.apply,
-        { info => MavenCentralBadge.apply(info.copy(libName = "frees-rpc")) },
+        CodecovBadge.apply, { info => MavenCentralBadge.apply(info.copy(libName = "frees-rpc")) },
         ScalaLangBadge.apply,
         LicenseBadge.apply,
         // Gitter badge (owner field) can be configured with default value if we migrate it to the frees-io organization
         { info => GitterBadge.apply(info.copy(owner = "47deg", repo = "freestyle")) },
         GitHubIssuesBadge.apply
+      ),
+      orgEnforcedFilesSetting := List(
+        LicenseFileType(orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
+        ContributingFileType(
+          orgProjectName.value,
+          // Organization field can be configured with default value if we migrate it to the frees-io organization
+          orgGithubSetting.value.copy(organization = "47deg", project = "freestyle")
+        ),
+        AuthorsFileType(
+          name.value,
+          orgGithubSetting.value,
+          orgMaintainersSetting.value,
+          orgContributorsSetting.value),
+        NoticeFileType(orgProjectName.value, orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
+        VersionSbtFileType,
+        ChangelogFileType,
+        ReadmeFileType(
+          orgProjectName.value,
+          orgGithubSetting.value,
+          startYear.value,
+          orgLicenseSetting.value,
+          orgCommitBranchSetting.value,
+          sbtPlugin.value,
+          name.value,
+          version.value,
+          scalaBinaryVersion.value,
+          sbtBinaryVersion.value,
+          orgSupportedScalaJSVersion.value,
+          orgBadgeListSetting.value
+        ),
+        ScalafmtFileType,
+        TravisFileType(crossScalaVersions.value, orgScriptCICommandKey, orgAfterCISuccessCommandKey)
+      ),
+      orgScriptTaskListSetting := List(
+        (clean in Global).asRunnableItemFull,
+        SetSetting(coverageEnabled in Global, true).asRunnableItem,
+        (compile in Compile).asRunnableItemFull,
+        (test in Test).asRunnableItemFull,
+        (ScoverageKeys.coverageReport in Test).asRunnableItemFull,
+        (ScoverageKeys.coverageAggregate in Test).asRunnableItemFull,
+        SetSetting(coverageEnabled in Global, false).asRunnableItem,
+        "docs/tut".asRunnableItem,
       )
     )
   // format: ON

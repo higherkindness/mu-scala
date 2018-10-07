@@ -361,7 +361,7 @@ lazy val docs = project
   .in(file("docs"))
   .dependsOn(allModulesDeps: _*)
   .settings(name := "frees-rpc-docs")
-  .settings(freesMicrositeSettings: _*)
+  .settings(micrositeSettings: _*)
   .settings(noPublishSettings: _*)
   .settings(
     libraryDependencies ++= Seq(%%("scalamockScalatest") % "tut"),
