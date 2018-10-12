@@ -1,5 +1,19 @@
 # Changelog
 
+## 10/12/2018 - Version 0.15.1
+
+Release changes:
+
+* First micro-site approach ([#407](https://github.com/higherkindness/freestyle-rpc/pull/407))
+* Adds support for BigDecimal tagged types ([#409](https://github.com/higherkindness/freestyle-rpc/pull/409))
+* Bumps Scala up to 2.12.7 ([#408](https://github.com/higherkindness/freestyle-rpc/pull/408))
+* Running Benchmarks - Scripts ([#406](https://github.com/higherkindness/freestyle-rpc/pull/406))
+* Migration guide for decimals ([#412](https://github.com/higherkindness/freestyle-rpc/pull/412))
+* Fixes the tagged decimal code generation ([#410](https://github.com/higherkindness/freestyle-rpc/pull/410))
+* Releases version 0.15.1 ([#413](https://github.com/higherkindness/freestyle-rpc/pull/413))
+* Decoupling sbt-freestyle ([#414](https://github.com/higherkindness/freestyle-rpc/pull/414))
+
+
 ## 09/26/2018 - Version 0.15.0
 
 Release changes:
