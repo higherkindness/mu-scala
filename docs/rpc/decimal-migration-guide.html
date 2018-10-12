@@ -1,0 +1,174 @@
+<html><head><title>Frees-rpc: Migration guide for decimal types</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="47 Degrees" /><meta name="description" content="A purely functional library for building RPC endpoint-based services" /><meta name="og:image" content="/img/poster.png" /><meta name="og:title" content="Frees-rpc: Migration guide for decimal types" /><meta name="og:site_name" content="Frees-rpc" /><meta name="og:url" content="https://higherkindness.github.io/freestyle-rpc/" /><meta name="og:type" content="website" /><meta name="og:description" content="A purely functional library for building RPC endpoint-based services" /><link rel="icon" type="image/png" href="/img/favicon.png" /><meta name="twitter:title" content="Frees-rpc: Migration guide for decimal types" /><meta name="twitter:image" content="https://higherkindness.github.io/freestyle-rpc/img/poster.png" /><meta name="twitter:description" content="A purely functional library for building RPC endpoint-based services" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/img/favicon310x150.png" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/highlight/styles/default.css" /><link rel="stylesheet" href="/css/style.css" /><link rel="stylesheet" href="/css/palette.css" /><link rel="stylesheet" href="/css/codemirror.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><ul id="sidebar" class="sidebar-nav"><li class="sidebar-brand"><a href="/" class="brand"><div class="brand-wrapper"><span>Frees-rpc</span></div></a></li> <li><a href="/docs/rpc/core-concepts" class="">Core concepts</a></li> <li><a href="/docs/rpc/streaming" class="">Streaming</a></li> <li><a href="/docs/rpc/annotations" class="">Annotations</a></li> <li><a href="/docs/rpc/idl-generation" class="">IDL Generation</a></li> <li><a href="/docs/rpc/patterns" class="">Patterns</a></li> <li><a href="/docs/rpc/ssl-tls" class="">SSL/TLS</a></li> <li><a href="/docs/rpc/metrics-reporting" class="">Metrics Reporting</a></li> <li><a href="/docs/rpc/decimal-migration-guide" class=" active ">Migration guide for decimal types</a></li> <li><a href="/docs/rpc/references" class="">References</a></li></ul></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li id="gh-eyes-item" class="hidden-xs"><a href="https://github.com/higherkindness/freestyle-rpc"><i class="fa fa-eye"></i><span>WATCH<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs"><a href="https://github.com/higherkindness/freestyle-rpc"><i class="fa fa-star-o"></i><span>STARS<span id="stars" class="label label-default">--</span></span></a></li><li><a href="#" onclick="shareSiteTwitter('Frees-rpc A purely functional library for building RPC endpoint-based services');"><i class="fa fa-twitter"></i></a></li><li><a href="#" onclick="shareSiteFacebook('Frees-rpc A purely functional library for building RPC endpoint-based services');"><i class="fa fa-facebook"></i></a></li><li><a href="#" onclick="shareSiteGoogle();"><i class="fa fa-google-plus"></i></a></li></ul></div></div></div></div><div id="content" data-github-owner="higherkindness" data-github-repo="freestyle-rpc"><div class="content-wrapper"><section><h1 id="migration-guide-for-decimal-types-available-from-0151">Migration guide for decimal types (available from 0.15.1)</h1>
+
+<p>## Intended audience</p>
+
+<p>This guide is only for projects that are in a prior version to <code class="highlighter-rouge">0.15.1</code> <strong>and</strong> have decimals in some of their protocols <strong>and</strong> want to serialize those decimals following the avro specs.</p>
+
+<p>If you’re starting a new project, you can use safely tagged <code class="highlighter-rouge">BigDecimal</code>s. Check the <a href="/docs/rpc/core-concepts#custom-codecs">Custom codecs section in Core concepts</a> and <a href="/docs/rpc/idl-generation#plugin-settings">Plugin Settings section in IDL Generation</a> for more information.</p>
+
+<h2 id="background">Background</h2>
+
+<p>The <code class="highlighter-rouge">0.13.5</code> version introduced custom encoders for <code class="highlighter-rouge">BigDecimal</code> values that serialize the values as byte arrays in a way not compliant with the avro specs.</p>
+
+<p>Starting from <code class="highlighter-rouge">0.15.1</code>, there is a new way for serializing decimals following the avro specs. The idea is to convert the decimal to a scala <code class="highlighter-rouge">BigDecimal</code> with a <code class="highlighter-rouge">shapeless</code> tag indicating the precision and scale.</p>
+
+<p>Let’s see it with an example. Suppose the following service definition:</p>
+
+<p><strong>AVDL</strong></p>
+
+<p><code class="highlighter-rouge">models.avdl</code></p>
+
+<pre><code class="language-avdl">@namespace("freestyle.rpc.protocols")
+
+protocol StockInfoModels {
+
+  record StockInfoRequest {
+    string stockId;
+  }
+
+  record StockInfoResponse {
+    string stockId;
+    decimal(10,2) price;
+    decimal(5,4) rate;
+  }
+
+}
+</code></pre>
+
+<p><code class="highlighter-rouge">services.avdl</code></p>
+
+<pre><code class="language-avdl">@namespace("freestyle.rpc.protocols")
+
+protocol StockInfoService {
+
+  import idl "models.avdl";
+  
+  freestyle.rpc.protocols.StockInfoResponse getStockInfo(freestyle.rpc.protocols.StockInfoRequest request);
+
+}
+</code></pre>
+
+<p><strong>Scala</strong></p>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="nn">freestyle.rpc.protocols</span>
+
+<span class="k">import</span> <span class="nn">freestyle.rpc.internal.encoders.avro.bigdecimal._</span>
+<span class="k">import</span> <span class="nn">freestyle.rpc.internal.encoders.avro.javatime._</span>
+<span class="k">import</span> <span class="nn">freestyle.rpc.protocol._</span>
+
+<span class="nd">@message</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">StockInfoRequest</span><span class="o">(</span><span class="n">stockId</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
+
+<span class="nd">@message</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">StockInfoResponse</span><span class="o">(</span><span class="n">stockId</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">price</span><span class="k">:</span> <span class="kt">BigDecimal</span><span class="o">,</span> <span class="n">rate</span><span class="k">:</span> <span class="kt">BigDecimal</span><span class="o">)</span>
+
+<span class="nd">@service</span><span class="o">(</span><span class="nc">AvroWithSchema</span><span class="o">)</span> <span class="k">trait</span> <span class="nc">StockInfoService</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
+
+  <span class="k">def</span> <span class="n">getStockInfo</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">freestyle.rpc.protocols.StockInfoRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">freestyle.rpc.protocols.StockInfoResponse</span><span class="o">]</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>With the <em>Scala</em> definition, you could serialize the <code class="highlighter-rouge">BigDecimal</code>s accordingly to the avro specs (you can query the <em>scale</em> in the value) but you can’t deserialize it, because the <em>Scala</em> <strong>type</strong> doesn’t give us information about the <em>scale</em></p>
+
+<p>Starting from <code class="highlighter-rouge">0.15.1</code> you could generate the following service in <em>Scala</em> (manually or through the <code class="highlighter-rouge">idlgen</code> plugin with the setting <code class="highlighter-rouge">idlGenBigDecimal := ScalaBigDecimalTaggedGen</code>)</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="nn">freestyle.rpc.protocols</span>
+
+<span class="k">import</span> <span class="nn">freestyle.rpc.internal.encoders.avro.bigDecimalTagged._</span>
+<span class="k">import</span> <span class="nn">freestyle.rpc.internal.encoders.avro.javatime._</span>
+<span class="k">import</span> <span class="nn">freestyle.rpc.protocol._</span>
+<span class="k">import</span> <span class="nn">shapeless.</span><span class="o">{@@,</span> <span class="nc">Nat</span><span class="o">}</span>
+
+<span class="nd">@message</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">StockInfoRequest</span><span class="o">(</span><span class="n">stockId</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
+
+<span class="nd">@message</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">StockInfoResponse</span><span class="o">(</span><span class="n">stockId</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">price</span><span class="k">:</span> <span class="kt">BigDecimal</span> <span class="kt">@@</span> <span class="o">(</span><span class="kt">Nat.</span><span class="k">_</span><span class="err">10</span><span class="o">,</span> <span class="kt">Nat.</span><span class="k">_</span><span class="err">2</span><span class="o">),</span> <span class="n">rate</span><span class="k">:</span> <span class="kt">BigDecimal</span> <span class="kt">@@</span> <span class="o">(</span><span class="kt">Nat.</span><span class="k">_</span><span class="err">5</span><span class="o">,</span> <span class="kt">Nat.</span><span class="k">_</span><span class="err">4</span><span class="o">))</span>
+
+<span class="nd">@service</span><span class="o">(</span><span class="nc">AvroWithSchema</span><span class="o">)</span> <span class="k">trait</span> <span class="nc">StockInfoService</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
+
+  <span class="k">def</span> <span class="n">getStockInfo</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">freestyle.rpc.protocols.StockInfoRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">freestyle.rpc.protocols.StockInfoResponse</span><span class="o">]</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>As you can see, now we can know by type what is the precision and the scale of these <code class="highlighter-rouge">BigDecimal</code></p>
+
+<h2 id="how-to-upgrade">How to upgrade?</h2>
+
+<p>If you have services with <code class="highlighter-rouge">decimal</code>s, those <code class="highlighter-rouge">decimal</code>s are serialized in the old way, so upgrading your server or client will break the communications. The process is the following:</p>
+
+<ol>
+  <li>We’ll call <code class="highlighter-rouge">v1</code> to your current model/protocol version.</li>
+  <li>Create a <strong>new protocol version</strong> duplicating the decimal fields (<code class="highlighter-rouge">v2</code>). Set the type to the new ones to tagged decimals (as shown above)</li>
+  <li><strong>Upgrade your server</strong> to <code class="highlighter-rouge">v2</code> and emit the same value in each par of duplicated fields. The old ones will be serialized in the old format, the new ones will be serialized with the new format.</li>
+  <li>Clients on <code class="highlighter-rouge">v1</code> will be reading old fields -&gt; <strong>We’re good</strong></li>
+  <li>Create a <strong>new protocol version</strong>, removing the old decimal fields (<code class="highlighter-rouge">v3</code>)</li>
+  <li><strong>Upgrade your clients</strong> to <code class="highlighter-rouge">v3</code>, they will be reading the new values -&gt; <strong>We’re good</strong></li>
+  <li>At some time, when all your clients will be using the <code class="highlighter-rouge">v3</code> (or a higher version) you can safely <strong>upgrade your server</strong> to <code class="highlighter-rouge">v3</code></li>
+</ol>
+
+<h2 id="services-defined-in-avdl">Services defined in AVDL</h2>
+
+<p>When you configure your project to use tagged type, you can’t mix <code class="highlighter-rouge">BigDecimal</code> and tagged <code class="highlighter-rouge">BigDecimal</code> types. For that reason, the process is slightly different.</p>
+
+<p>On step <strong>2</strong>, the types to the old decimals needs to be changed to a custom type and then implement an encoder for that type that serializes the values in the same way decimals were serialized before.</p>
+
+<p>Luckily, there are a couple of modules created for easing this task:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">"io.frees" % "legacy-avro-decimal-compat-protocol" % "x.x.x"</code></li>
+</ul>
+
+<p>Provides an avdl file (<code class="highlighter-rouge">legacyAvroDecimalCompatProtocol.avdl</code>) with the custom type (<code class="highlighter-rouge">freestyle.rpc.protocols.LegacyAvroDecimalCompat</code>) to replace your old <code class="highlighter-rouge">decimal</code> values. In that way, you could go from this:</p>
+
+<pre><code class="language-avdl">@namespace("freestyle.rpc.protocols")
+
+protocol StockInfoModels {
+
+  record StockInfoRequest {
+    string stockId;
+  }
+
+  record StockInfoResponse {
+    string stockId;
+    decimal(10,2) price;
+    decimal(5,4) rate;
+  }
+
+}
+</code></pre>
+
+<p>To this:</p>
+
+<pre><code class="language-avdl">@namespace("freestyle.rpc.protocols")
+
+protocol StockInfoModel {
+
+  import idl "legacyAvroDecimalCompatProtocol.avdl";
+
+  record StockInfoRequest {
+    string stockId;
+  }
+
+  record StockInfoResponse {
+    string stockId;
+    freestyle.rpc.protocols.LegacyAvroDecimalCompat price;
+    freestyle.rpc.protocols.LegacyAvroDecimalCompat rate;
+    decimal(10,2) stockPrice;
+    decimal(5,4) stockRate;
+  }
+
+}
+</code></pre>
+
+<ul>
+  <li><code class="highlighter-rouge">"io.frees" %% "legacy-avro-decimal-compat-encoders" % "x.x.x"</code></li>
+</ul>
+
+<p>Provides the serializers for the custom type.</p>
+
+<p>There is a repository that shows an example about how to make this process:</p>
+<ul>
+  <li>https://github.com/frees-io/freestyle-rpc-protocol-decimal-update</li>
+</ul>
+</section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/highlight/highlight.pack.js"></script><script>hljs.configure({languages:['scala','java','bash']});
+hljs.initHighlighting();
+              </script><script>((window.gitter = {}).chat = {}).options = {
+room: '47deg/freestyle'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/js/main.js"></script></body></html>
