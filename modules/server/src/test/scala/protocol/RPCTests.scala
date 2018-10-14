@@ -137,7 +137,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run client bidirectional streaming services" in {
 
       ignoreOnTravis(
-        "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/281 is fixed")
+        "TODO: restore once https://github.com/higherkindness/freestyle-rpc/issues/281 is fixed")
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[E] =
         APP.bs(eList)
@@ -312,7 +312,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run client bidirectional streaming services" in {
 
       ignoreOnTravis(
-        "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/281 is fixed")
+        "TODO: restore once https://github.com/higherkindness/freestyle-rpc/issues/281 is fixed")
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[E] =
         APP.bs(eList)

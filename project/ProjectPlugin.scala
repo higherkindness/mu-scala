@@ -251,7 +251,7 @@ object ProjectPlugin extends AutoPlugin {
         organization = "higherkindness",
         project = (name in LocalRootProject).value,
         organizationName = "47 Degrees",
-        groupId = "io.frees",
+        groupId = "io.higherkindness",
         organizationHomePage = url("http://47deg.com"),
         organizationEmail = "hello@47deg.com"
       ),
@@ -277,7 +277,7 @@ object ProjectPlugin extends AutoPlugin {
         CodecovBadge.apply, { info => MavenCentralBadge.apply(info.copy(libName = "frees-rpc")) },
         ScalaLangBadge.apply,
         LicenseBadge.apply,
-        // Gitter badge (owner field) can be configured with default value if we migrate it to the frees-io organization
+        // Gitter badge (owner field) can be configured with default value if we migrate it to the higherkindness organization
         { info => GitterBadge.apply(info.copy(owner = "47deg", repo = "freestyle")) },
         GitHubIssuesBadge.apply
       ),
@@ -285,7 +285,7 @@ object ProjectPlugin extends AutoPlugin {
         LicenseFileType(orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
         ContributingFileType(
           orgProjectName.value,
-          // Organization field can be configured with default value if we migrate it to the frees-io organization
+          // Organization field can be configured with default value if we migrate it to the higherkindness organization
           orgGithubSetting.value.copy(organization = "47deg", project = "freestyle")
         ),
         AuthorsFileType(
