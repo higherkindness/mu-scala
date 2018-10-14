@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package prometheus
 package server
 
-import freestyle.rpc.common._
-import freestyle.rpc.protocol.Utils.client.MyRPCClient
+import mu.rpc.common._
+import mu.rpc.protocol.Utils.client.MyRPCClient
 import io.prometheus.client.Collector
-import freestyle.rpc.interceptors.metrics._
+import mu.rpc.interceptors.metrics._
 
 import scala.collection.JavaConverters._
 
 abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
 
-  import freestyle.rpc.protocol.Utils.database._
-  import freestyle.rpc.prometheus.shared.RegistryHelper._
+  import mu.rpc.protocol.Utils.database._
+  import mu.rpc.prometheus.shared.RegistryHelper._
 
   def name: String
   def namespace: Option[String]
@@ -76,7 +76,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
     "work for client streaming RPC metrics" in {
 
       ignoreOnTravis(
-        "TODO: restore once https://github.com/higherkindness/freestyle-rpc/issues/168 is fixed")
+        "TODO: restore once https://github.com/higherkindness/mu-rpc/issues/168 is fixed")
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[D] =
         APP.cs(cList, i)
@@ -264,7 +264,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
     "work when combining multiple calls" in {
 
       ignoreOnTravis(
-        "TODO: restore once https://github.com/higherkindness/freestyle-rpc/issues/168 is fixed")
+        "TODO: restore once https://github.com/higherkindness/mu-rpc/issues/168 is fixed")
 
       def unary[F[_]](implicit APP: MyRPCClient[F]): F[C] =
         APP.u(a1.x, a1.y)

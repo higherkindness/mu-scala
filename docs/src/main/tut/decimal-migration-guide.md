@@ -60,9 +60,9 @@ protocol StockInfoService {
 ```scala
 package freestyle.rpc.protocols
 
-import freestyle.rpc.internal.encoders.avro.bigdecimal._
-import freestyle.rpc.internal.encoders.avro.javatime._
-import freestyle.rpc.protocol._
+import mu.rpc.internal.encoders.avro.bigdecimal._
+import mu.rpc.internal.encoders.avro.javatime._
+import mu.rpc.protocol._
 
 @message case class StockInfoRequest(stockId: String)
 
@@ -82,9 +82,9 @@ Starting from `0.15.1` you could generate the following service in *Scala* (manu
 ```scala
 package freestyle.rpc.protocols
 
-import freestyle.rpc.internal.encoders.avro.bigDecimalTagged._
-import freestyle.rpc.internal.encoders.avro.javatime._
-import freestyle.rpc.protocol._
+import mu.rpc.internal.encoders.avro.bigDecimalTagged._
+import mu.rpc.internal.encoders.avro.javatime._
+import mu.rpc.protocol._
 import shapeless.{@@, Nat}
 
 @message case class StockInfoRequest(stockId: String)
@@ -171,4 +171,4 @@ protocol StockInfoModel {
 Provides the serializers for the custom type.
 
 There is a repository that shows an example about how to make this process:
-* https://github.com/frees-io/freestyle-rpc-protocol-decimal-update
+* https://github.com/higherkindness/freestyle-rpc-protocol-decimal-update

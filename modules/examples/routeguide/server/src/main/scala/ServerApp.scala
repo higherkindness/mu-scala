@@ -17,8 +17,8 @@
 package example.routeguide.server
 
 import cats.effect.IO
-import freestyle.rpc.server.{AddService, GrpcConfig, GrpcServer}
-import freestyle.rpc.server.config.BuildServerFromConfig
+import mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
+import mu.rpc.server.config.BuildServerFromConfig
 import org.log4s._
 import example.routeguide.protocol.Protocols.RouteGuideService
 import example.routeguide.server.implicits._

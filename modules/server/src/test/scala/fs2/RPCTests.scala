@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package fs2
 
-import freestyle.rpc.common._
-import freestyle.rpc.server._
+import mu.rpc.common._
+import mu.rpc.server._
 import _root_.fs2.Stream
 import org.scalatest._
 
 class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
-  import freestyle.rpc.fs2.Utils._
-  import freestyle.rpc.fs2.Utils.database._
-  import freestyle.rpc.fs2.Utils.implicits._
+  import mu.rpc.fs2.Utils._
+  import mu.rpc.fs2.Utils.database._
+  import mu.rpc.fs2.Utils.implicits._
 
   override protected def beforeAll(): Unit =
     serverStart[ConcurrentMonad].unsafeRunSync()
@@ -103,7 +103,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run client bidirectional streaming services" in {
 
       ignoreOnTravis(
-        "TODO: restore once https://github.com/higherkindness/freestyle-rpc/issues/164 is fixed")
+        "TODO: restore once https://github.com/higherkindness/mu-rpc/issues/164 is fixed")
 
       freesAvroRPCServiceClient
         .biStreaming(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
@@ -117,7 +117,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run client bidirectional streaming services with avro schema" in {
 
       ignoreOnTravis(
-        "TODO: restore once https://github.com/higherkindness/freestyle-rpc/issues/164 is fixed")
+        "TODO: restore once https://github.com/higherkindness/mu-rpc/issues/164 is fixed")
 
       freesAvroWithSchemaRPCServiceClient
         .biStreamingWithSchema(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
@@ -131,7 +131,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run multiple rpc services" in {
 
       ignoreOnTravis(
-        "TODO: restore once https://github.com/higherkindness/freestyle-rpc/issues/164 is fixed")
+        "TODO: restore once https://github.com/higherkindness/mu-rpc/issues/164 is fixed")
 
       val tuple =
         (
@@ -192,7 +192,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run client bidirectional streaming services" in {
 
       ignoreOnTravis(
-        "TODO: restore once https://github.com/higherkindness/freestyle-rpc/issues/164 is fixed")
+        "TODO: restore once https://github.com/higherkindness/mu-rpc/issues/164 is fixed")
 
       freesCompressedAvroRPCServiceClient
         .biStreamingCompressed(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
@@ -206,7 +206,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run client bidirectional streaming services with avro schema" in {
 
       ignoreOnTravis(
-        "TODO: restore once https://github.com/higherkindness/freestyle-rpc/issues/164 is fixed")
+        "TODO: restore once https://github.com/higherkindness/mu-rpc/issues/164 is fixed")
 
       freesCompressedAvroWithSchemaRPCServiceClient
         .biStreamingCompressedWithSchema(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
@@ -220,7 +220,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run multiple rpc services" in {
 
       ignoreOnTravis(
-        "TODO: restore once https://github.com/higherkindness/freestyle-rpc/issues/164 is fixed")
+        "TODO: restore once https://github.com/higherkindness/mu-rpc/issues/164 is fixed")
 
       val tuple =
         (

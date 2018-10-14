@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package idlgen
 
-import freestyle.rpc.internal.util.StringUtil._
-import freestyle.rpc.internal.util.{AstOptics, Toolbox}
-import freestyle.rpc.protocol._
+import mu.rpc.internal.util.StringUtil._
+import mu.rpc.internal.util.{AstOptics, Toolbox}
+import mu.rpc.protocol._
 
 object ScalaParser {
 

@@ -43,7 +43,7 @@ trait CommonRuntime {
 ```
 
 ```tut:invisible
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 import monix.execution.Scheduler
 
 object service {
@@ -67,7 +67,7 @@ object service {
 import cats.effect.Async
 import cats.syntax.applicative._
 import freestyle.free._
-import freestyle.rpc.server.implicits._
+import mu.rpc.server.implicits._
 import monix.execution.Scheduler
 import monix.eval.Task
 import monix.reactive.Observable
@@ -87,9 +87,9 @@ import java.security.cert.X509Certificate
 
 import cats.effect.IO
 import cats.effect.Effect
-import freestyle.rpc.protocol._
-import freestyle.rpc.server.netty.SetSslContext
-import freestyle.rpc.server.{AddService, GrpcConfig, GrpcServer}
+import mu.rpc.protocol._
+import mu.rpc.server.netty.SetSslContext
+import mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
 import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.GrpcSslContexts
 import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}
@@ -138,9 +138,9 @@ object implicits extends Runtime
 Lastly, as we did before with the server side, let's see what happens on the client side.
 
 ```tut:silent
-import freestyle.rpc.ChannelForAddress
-import freestyle.rpc.client.OverrideAuthority
-import freestyle.rpc.client.netty.{
+import mu.rpc.ChannelForAddress
+import mu.rpc.client.OverrideAuthority
+import mu.rpc.client.netty.{
   NettyChannelInterpreter,
   NettyNegotiationType,
   NettySslContext,
@@ -194,7 +194,7 @@ object MainApp extends CommonRuntime {
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/frees-io/freestyle-rpc
+[frees-rpc]: https://github.com/higherkindness/freestyle-rpc
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

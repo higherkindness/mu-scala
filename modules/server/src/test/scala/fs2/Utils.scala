@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package fs2
 
-import freestyle.rpc.common._
-import freestyle.rpc.protocol._
+import mu.rpc.common._
+import mu.rpc.protocol._
 import _root_.fs2._
 import cats.effect.Effect
 import io.grpc.Status
@@ -141,7 +141,7 @@ object Utils extends CommonUtils {
 
     import service._
     import handlers.server._
-    import freestyle.rpc.server._
+    import mu.rpc.server._
 
     //////////////////////////////////
     // Server Runtime Configuration //

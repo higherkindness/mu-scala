@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package internal.encoders
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
@@ -22,8 +22,8 @@ import java.nio.ByteBuffer
 import java.time.{Instant, LocalDate, LocalDateTime}
 
 import com.google.common.io.ByteStreams
-import freestyle.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTimeUtil}
-import freestyle.rpc.protocol.Empty
+import mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTimeUtil}
+import mu.rpc.protocol.Empty
 import io.grpc.MethodDescriptor.Marshaller
 import org.apache.avro.{Conversions, LogicalTypes, Schema}
 import org.apache.avro.Schema.Field

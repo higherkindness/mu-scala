@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package client
 
 import cats.data.Kleisli
-import freestyle.rpc.common.SC
+import mu.rpc.common.SC
 import io.grpc.ManagedChannel
 
 import scala.concurrent.duration.Duration

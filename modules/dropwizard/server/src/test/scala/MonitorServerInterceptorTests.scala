@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package dropwizard
 package server
 
 import com.codahale.metrics.MetricRegistry
-import freestyle.rpc.prometheus.server.{BaseMonitorServerInterceptorTests, InterceptorsRuntime}
-import freestyle.rpc.prometheus.shared.Configuration
+import mu.rpc.prometheus.server.{BaseMonitorServerInterceptorTests, InterceptorsRuntime}
+import mu.rpc.prometheus.shared.Configuration
 import io.prometheus.client.dropwizard.DropwizardExports
 
 class MonitorServerInterceptorTests extends BaseMonitorServerInterceptorTests {

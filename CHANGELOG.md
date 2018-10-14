@@ -18,48 +18,48 @@ Release changes:
 
 Release changes:
 
-* Marshallers for serializing and deserializing joda.time dates ([#341](https://github.com/frees-io/freestyle-rpc/pull/341))
-* BigDecimal and java.time encoders/decoders implicit instances are now optional ([#373](https://github.com/frees-io/freestyle-rpc/pull/373))
-* Customize the codecs used in services through sbt ([#374](https://github.com/frees-io/freestyle-rpc/pull/374))
-* Bumps io.grpc dependency ([#375](https://github.com/frees-io/freestyle-rpc/pull/375))
-* Updates docs with the custom codecs section ([#377](https://github.com/frees-io/freestyle-rpc/pull/377))
-* document mandatory compiler plugin ([#378](https://github.com/frees-io/freestyle-rpc/pull/378))
-* Benchmarks - AvroWithSchema (unary services) ([#384](https://github.com/frees-io/freestyle-rpc/pull/384))
-* Allows Custom namespace for server/client metrics ([#385](https://github.com/frees-io/freestyle-rpc/pull/385))
-* Depending on Execution Context instead of Monix Scheduler ([#386](https://github.com/frees-io/freestyle-rpc/pull/386))
-* Upgrades Build Dependencies ([#387](https://github.com/frees-io/freestyle-rpc/pull/387))
-* Adds the avro and protobuffer serializers for java.time.Instant ([#388](https://github.com/frees-io/freestyle-rpc/pull/388))
-* Auto spin-up RPC server when running benchmark ([#389](https://github.com/frees-io/freestyle-rpc/pull/389))
-* Benchmarks - Avro and Proto Unary Services ([#383](https://github.com/frees-io/freestyle-rpc/pull/383))
-* Releases 0.15.0 frees-rpc Version ([#390](https://github.com/frees-io/freestyle-rpc/pull/390))
+* Marshallers for serializing and deserializing joda.time dates ([#341](https://github.com/higherkindness/freestyle-rpc/pull/341))
+* BigDecimal and java.time encoders/decoders implicit instances are now optional ([#373](https://github.com/higherkindness/freestyle-rpc/pull/373))
+* Customize the codecs used in services through sbt ([#374](https://github.com/higherkindness/freestyle-rpc/pull/374))
+* Bumps io.grpc dependency ([#375](https://github.com/higherkindness/freestyle-rpc/pull/375))
+* Updates docs with the custom codecs section ([#377](https://github.com/higherkindness/freestyle-rpc/pull/377))
+* document mandatory compiler plugin ([#378](https://github.com/higherkindness/freestyle-rpc/pull/378))
+* Benchmarks - AvroWithSchema (unary services) ([#384](https://github.com/higherkindness/freestyle-rpc/pull/384))
+* Allows Custom namespace for server/client metrics ([#385](https://github.com/higherkindness/freestyle-rpc/pull/385))
+* Depending on Execution Context instead of Monix Scheduler ([#386](https://github.com/higherkindness/freestyle-rpc/pull/386))
+* Upgrades Build Dependencies ([#387](https://github.com/higherkindness/freestyle-rpc/pull/387))
+* Adds the avro and protobuffer serializers for java.time.Instant ([#388](https://github.com/higherkindness/freestyle-rpc/pull/388))
+* Auto spin-up RPC server when running benchmark ([#389](https://github.com/higherkindness/freestyle-rpc/pull/389))
+* Benchmarks - Avro and Proto Unary Services ([#383](https://github.com/higherkindness/freestyle-rpc/pull/383))
+* Releases 0.15.0 frees-rpc Version ([#390](https://github.com/higherkindness/freestyle-rpc/pull/390))
 
 
 ## 07/17/2018 - Version 0.14.1
 
 Release changes:
 
-* Avro Schema Backward and Forward Compatibility ([#334](https://github.com/frees-io/freestyle-rpc/pull/334))
-* Update 0.14.0 CHANGELOG ([#340](https://github.com/frees-io/freestyle-rpc/pull/340))
-* Utility method for encode joda time instances ([#276](https://github.com/frees-io/freestyle-rpc/pull/276))
-* Fixes options and lists serialization in proto ([#342](https://github.com/frees-io/freestyle-rpc/pull/342))
+* Avro Schema Backward and Forward Compatibility ([#334](https://github.com/higherkindness/freestyle-rpc/pull/334))
+* Update 0.14.0 CHANGELOG ([#340](https://github.com/higherkindness/freestyle-rpc/pull/340))
+* Utility method for encode joda time instances ([#276](https://github.com/higherkindness/freestyle-rpc/pull/276))
+* Fixes options and lists serialization in proto ([#342](https://github.com/higherkindness/freestyle-rpc/pull/342))
 
 
 ## 07/09/2018 - Version 0.14.0
 
 Release changes:
 
-Mainly, it completes the milestone https://github.com/frees-io/freestyle-rpc/issues/290: 
-* Core Macro Conversions: https://github.com/frees-io/freestyle-rpc/pull/328 (joined-effort by @L-Lavigne and @pepegar ). 
-* Implement Wart suppression: https://github.com/frees-io/freestyle-rpc/pull/325 (by @pepegar ).
-* Migrate idlgen to scalamacros: https://github.com/frees-io/freestyle-rpc/pull/326 (by @pepegar ).
+Mainly, it completes the milestone https://github.com/higherkindness/freestyle-rpc/issues/290: 
+* Core Macro Conversions: https://github.com/higherkindness/freestyle-rpc/pull/328 (joined-effort by @L-Lavigne and @pepegar ). 
+* Implement Wart suppression: https://github.com/higherkindness/freestyle-rpc/pull/325 (by @pepegar ).
+* Migrate idlgen to scalamacros: https://github.com/higherkindness/freestyle-rpc/pull/326 (by @pepegar ).
 
 Additionally, this new release brings new features and bug fixes:
 
-* Marshallers as implicit params: https://github.com/frees-io/freestyle-rpc/pull/330 (by @pepegar ).
+* Marshallers as implicit params: https://github.com/higherkindness/freestyle-rpc/pull/330 (by @pepegar ).
 
-* Refactor GrpcServer: https://github.com/frees-io/freestyle-rpc/pull/333 (by @peterneyens ).
-* Upgrades monix to 3.0.0-RC1 https://github.com/frees-io/freestyle-rpc/pull/336 (by @juanpedromoreno).
-* RPC Clients caching as a new module: https://github.com/frees-io/freestyle-rpc/pull/337 (by @peterneyens ).
+* Refactor GrpcServer: https://github.com/higherkindness/freestyle-rpc/pull/333 (by @peterneyens ).
+* Upgrades monix to 3.0.0-RC1 https://github.com/higherkindness/freestyle-rpc/pull/336 (by @juanpedromoreno).
+* RPC Clients caching as a new module: https://github.com/higherkindness/freestyle-rpc/pull/337 (by @peterneyens ).
 * Others.
 
 _Caveat_: This version is not binary compatible with the previous ones.
@@ -69,126 +69,126 @@ _Caveat_: This version is not binary compatible with the previous ones.
 
 Release changes:
 
-* Decouples frees-async-cats-effect ([#302](https://github.com/frees-io/freestyle-rpc/pull/302))
-* Upgrades Scala and Sbt versions ([#304](https://github.com/frees-io/freestyle-rpc/pull/304))
-* Update Scala to 2.12.6 in TravisCI ([#306](https://github.com/frees-io/freestyle-rpc/pull/306))
-* Releases 0.13.7 ([#308](https://github.com/frees-io/freestyle-rpc/pull/308))
+* Decouples frees-async-cats-effect ([#302](https://github.com/higherkindness/freestyle-rpc/pull/302))
+* Upgrades Scala and Sbt versions ([#304](https://github.com/higherkindness/freestyle-rpc/pull/304))
+* Update Scala to 2.12.6 in TravisCI ([#306](https://github.com/higherkindness/freestyle-rpc/pull/306))
+* Releases 0.13.7 ([#308](https://github.com/higherkindness/freestyle-rpc/pull/308))
 
 
 ## 06/06/2018 - Version 0.13.6
 
 Release changes:
 
-* Ignoring new bidirectional FS2 tests on Travis ([#281](https://github.com/frees-io/freestyle-rpc/pull/281))
-* Re-ignoring failing tests, with reference to new issue ([#283](https://github.com/frees-io/freestyle-rpc/pull/283))
-* replace all occurrences of @tagless annotation with the manual impl ([#296](https://github.com/frees-io/freestyle-rpc/pull/296))
-* Decouple frees config ([#300](https://github.com/frees-io/freestyle-rpc/pull/300))
-* decouple from frees-async ([#297](https://github.com/frees-io/freestyle-rpc/pull/297))
-* Downgrade avro4s to 1.8.3 ([#301](https://github.com/frees-io/freestyle-rpc/pull/301))
+* Ignoring new bidirectional FS2 tests on Travis ([#281](https://github.com/higherkindness/freestyle-rpc/pull/281))
+* Re-ignoring failing tests, with reference to new issue ([#283](https://github.com/higherkindness/freestyle-rpc/pull/283))
+* replace all occurrences of @tagless annotation with the manual impl ([#296](https://github.com/higherkindness/freestyle-rpc/pull/296))
+* Decouple frees config ([#300](https://github.com/higherkindness/freestyle-rpc/pull/300))
+* decouple from frees-async ([#297](https://github.com/higherkindness/freestyle-rpc/pull/297))
+* Downgrade avro4s to 1.8.3 ([#301](https://github.com/higherkindness/freestyle-rpc/pull/301))
 
 
 ## 05/29/2018 - Version 0.13.5
 
 Release changes:
 
-* noPublishSettings for RPC examples ([#264](https://github.com/frees-io/freestyle-rpc/pull/264))
-* Fix #192 (crash with some server stream transformations) ([#266](https://github.com/frees-io/freestyle-rpc/pull/266))
-* Exposing ServerChannel ([#268](https://github.com/frees-io/freestyle-rpc/pull/268))
-* BigDecimal serialization in protobuf and avro ([#271](https://github.com/frees-io/freestyle-rpc/pull/271))
-* Adds a java time util for serializing dates ([#272](https://github.com/frees-io/freestyle-rpc/pull/272))
-* Support for serializing LocalDate and LocalDateTime values ([#273](https://github.com/frees-io/freestyle-rpc/pull/273))
-* Bump avrohugger to 1.0.0-RC9 ([#274](https://github.com/frees-io/freestyle-rpc/pull/274))
-* Update avro4s and avrohugger ([#280](https://github.com/frees-io/freestyle-rpc/pull/280))
-* Rename srcJarNames to srcGenJarNames and fix deprecations ([#277](https://github.com/frees-io/freestyle-rpc/pull/277))
-* Release 0.13.5 ([#275](https://github.com/frees-io/freestyle-rpc/pull/275))
+* noPublishSettings for RPC examples ([#264](https://github.com/higherkindness/freestyle-rpc/pull/264))
+* Fix #192 (crash with some server stream transformations) ([#266](https://github.com/higherkindness/freestyle-rpc/pull/266))
+* Exposing ServerChannel ([#268](https://github.com/higherkindness/freestyle-rpc/pull/268))
+* BigDecimal serialization in protobuf and avro ([#271](https://github.com/higherkindness/freestyle-rpc/pull/271))
+* Adds a java time util for serializing dates ([#272](https://github.com/higherkindness/freestyle-rpc/pull/272))
+* Support for serializing LocalDate and LocalDateTime values ([#273](https://github.com/higherkindness/freestyle-rpc/pull/273))
+* Bump avrohugger to 1.0.0-RC9 ([#274](https://github.com/higherkindness/freestyle-rpc/pull/274))
+* Update avro4s and avrohugger ([#280](https://github.com/higherkindness/freestyle-rpc/pull/280))
+* Rename srcJarNames to srcGenJarNames and fix deprecations ([#277](https://github.com/higherkindness/freestyle-rpc/pull/277))
+* Release 0.13.5 ([#275](https://github.com/higherkindness/freestyle-rpc/pull/275))
 
 
 ## 05/02/2018 - Version 0.13.4
 
 Release changes:
 
-* Added tests for RPC error handling, and a fix for StatusRuntimeException ([#252](https://github.com/frees-io/freestyle-rpc/pull/252))
-* Removes the IDL core Dependency ([#254](https://github.com/frees-io/freestyle-rpc/pull/254))
-* Check if file exists before unzipping in idlgen plugin ([#259](https://github.com/frees-io/freestyle-rpc/pull/259))
-* New example: TodoList application ([#256](https://github.com/frees-io/freestyle-rpc/pull/256))
-* Releases 0.13.4 ([#260](https://github.com/frees-io/freestyle-rpc/pull/260))
+* Added tests for RPC error handling, and a fix for StatusRuntimeException ([#252](https://github.com/higherkindness/freestyle-rpc/pull/252))
+* Removes the IDL core Dependency ([#254](https://github.com/higherkindness/freestyle-rpc/pull/254))
+* Check if file exists before unzipping in idlgen plugin ([#259](https://github.com/higherkindness/freestyle-rpc/pull/259))
+* New example: TodoList application ([#256](https://github.com/higherkindness/freestyle-rpc/pull/256))
+* Releases 0.13.4 ([#260](https://github.com/higherkindness/freestyle-rpc/pull/260))
 
 
 ## 04/18/2018 - Version 0.13.3
 
 Release changes:
 
-* Add route guide example ([#236](https://github.com/frees-io/freestyle-rpc/pull/236))
-* fixing shutdown hook to run shutdown of server ([#238](https://github.com/frees-io/freestyle-rpc/pull/238))
-* Adds support for Marshalling/Unmarshalling BigDecimals ([#244](https://github.com/frees-io/freestyle-rpc/pull/244))
-* Allow a sequence of source generated directories ([#243](https://github.com/frees-io/freestyle-rpc/pull/243))
-* Code Generation from IDL definitions placed in different sources ([#248](https://github.com/frees-io/freestyle-rpc/pull/248))
-* Fixes Server Helper. Releases 0.13.3. ([#249](https://github.com/frees-io/freestyle-rpc/pull/249))
+* Add route guide example ([#236](https://github.com/higherkindness/freestyle-rpc/pull/236))
+* fixing shutdown hook to run shutdown of server ([#238](https://github.com/higherkindness/freestyle-rpc/pull/238))
+* Adds support for Marshalling/Unmarshalling BigDecimals ([#244](https://github.com/higherkindness/freestyle-rpc/pull/244))
+* Allow a sequence of source generated directories ([#243](https://github.com/higherkindness/freestyle-rpc/pull/243))
+* Code Generation from IDL definitions placed in different sources ([#248](https://github.com/higherkindness/freestyle-rpc/pull/248))
+* Fixes Server Helper. Releases 0.13.3. ([#249](https://github.com/higherkindness/freestyle-rpc/pull/249))
 
 
 ## 04/10/2018 - Version 0.13.2
 
 Release changes:
 
-* Avro Messages Serialized With Schemas ([#215](https://github.com/frees-io/freestyle-rpc/pull/215))
-* Spins up gRPC Servers forName ([#230](https://github.com/frees-io/freestyle-rpc/pull/230))
-* SBT - Adds AvroWithSchema Support ([#233](https://github.com/frees-io/freestyle-rpc/pull/233))
-* Releases Freestyle RPC 0.13.2 ([#234](https://github.com/frees-io/freestyle-rpc/pull/234))
+* Avro Messages Serialized With Schemas ([#215](https://github.com/higherkindness/freestyle-rpc/pull/215))
+* Spins up gRPC Servers forName ([#230](https://github.com/higherkindness/freestyle-rpc/pull/230))
+* SBT - Adds AvroWithSchema Support ([#233](https://github.com/higherkindness/freestyle-rpc/pull/233))
+* Releases Freestyle RPC 0.13.2 ([#234](https://github.com/higherkindness/freestyle-rpc/pull/234))
 
 
 ## 04/08/2018 - Version 0.13.1
 
 Release changes:
 
-* Releases the plugin first, then the core ([#214](https://github.com/frees-io/freestyle-rpc/pull/214))
-* Enable conditionally disabling certain tests in Travis ([#216](https://github.com/frees-io/freestyle-rpc/pull/216))
-* Support for packaged Avdl into jar dependencies ([#224](https://github.com/frees-io/freestyle-rpc/pull/224))
+* Releases the plugin first, then the core ([#214](https://github.com/higherkindness/freestyle-rpc/pull/214))
+* Enable conditionally disabling certain tests in Travis ([#216](https://github.com/higherkindness/freestyle-rpc/pull/216))
+* Support for packaged Avdl into jar dependencies ([#224](https://github.com/higherkindness/freestyle-rpc/pull/224))
 
 
 ## 04/02/2018 - Version 0.13.0
 
 Release changes:
 
-* Fixes title formatting in SSL/TLS ([#202](https://github.com/frees-io/freestyle-rpc/pull/202))
-* Fixes `idlgen-sbt` release Process in Travis ([#204](https://github.com/frees-io/freestyle-rpc/pull/204))
-* Solves encoding issues in docs ([#207](https://github.com/frees-io/freestyle-rpc/pull/207))
-* Fixes in idlGen header, docs and tests ([#208](https://github.com/frees-io/freestyle-rpc/pull/208))
-* Ignore intermittently-failing tests on Travis ([#209](https://github.com/frees-io/freestyle-rpc/pull/209))
-* Scala source generation from Avro IDL ([#210](https://github.com/frees-io/freestyle-rpc/pull/210))
-* Dependency updates ([#211](https://github.com/frees-io/freestyle-rpc/pull/211))
-* Release 0.13.0 ([#212](https://github.com/frees-io/freestyle-rpc/pull/212))
+* Fixes title formatting in SSL/TLS ([#202](https://github.com/higherkindness/freestyle-rpc/pull/202))
+* Fixes `idlgen-sbt` release Process in Travis ([#204](https://github.com/higherkindness/freestyle-rpc/pull/204))
+* Solves encoding issues in docs ([#207](https://github.com/higherkindness/freestyle-rpc/pull/207))
+* Fixes in idlGen header, docs and tests ([#208](https://github.com/higherkindness/freestyle-rpc/pull/208))
+* Ignore intermittently-failing tests on Travis ([#209](https://github.com/higherkindness/freestyle-rpc/pull/209))
+* Scala source generation from Avro IDL ([#210](https://github.com/higherkindness/freestyle-rpc/pull/210))
+* Dependency updates ([#211](https://github.com/higherkindness/freestyle-rpc/pull/211))
+* Release 0.13.0 ([#212](https://github.com/higherkindness/freestyle-rpc/pull/212))
 
 
 ## 03/19/2018 - Version 0.12.0
 
 Release changes:
 
-* Merge sbt-freestyle-protogen into freestyle-rpc codebase, and update @rpc processing to handle latest `freestyle-rpc syntax ([#184](https://github.com/frees-io/freestyle-rpc/pull/184))
-* IdlGen refactoring to prepare for eventual Avro support, with Proto generation style fixes ([#186](https://github.com/frees-io/freestyle-rpc/pull/186))
-* Project Upgrade ([#187](https://github.com/frees-io/freestyle-rpc/pull/187))
-* Fixed stacktraces in tests caused by unclosed channels ([#189](https://github.com/frees-io/freestyle-rpc/pull/189))
-* sbt build config refactoring, with dependency updates ([#188](https://github.com/frees-io/freestyle-rpc/pull/188))
-* Upgrades to Freestyle 0.8.0 ([#193](https://github.com/frees-io/freestyle-rpc/pull/193))
-* Fixes Snapshot Publish ([#194](https://github.com/frees-io/freestyle-rpc/pull/194))
-* [Docs] Split into different sections ([#190](https://github.com/frees-io/freestyle-rpc/pull/190))
-* Avro IDL Support ([#195](https://github.com/frees-io/freestyle-rpc/pull/195))
-* Releases frees-rpc 0.12.0 ([#198](https://github.com/frees-io/freestyle-rpc/pull/198))
+* Merge sbt-freestyle-protogen into freestyle-rpc codebase, and update @rpc processing to handle latest `freestyle-rpc syntax ([#184](https://github.com/higherkindness/freestyle-rpc/pull/184))
+* IdlGen refactoring to prepare for eventual Avro support, with Proto generation style fixes ([#186](https://github.com/higherkindness/freestyle-rpc/pull/186))
+* Project Upgrade ([#187](https://github.com/higherkindness/freestyle-rpc/pull/187))
+* Fixed stacktraces in tests caused by unclosed channels ([#189](https://github.com/higherkindness/freestyle-rpc/pull/189))
+* sbt build config refactoring, with dependency updates ([#188](https://github.com/higherkindness/freestyle-rpc/pull/188))
+* Upgrades to Freestyle 0.8.0 ([#193](https://github.com/higherkindness/freestyle-rpc/pull/193))
+* Fixes Snapshot Publish ([#194](https://github.com/higherkindness/freestyle-rpc/pull/194))
+* [Docs] Split into different sections ([#190](https://github.com/higherkindness/freestyle-rpc/pull/190))
+* Avro IDL Support ([#195](https://github.com/higherkindness/freestyle-rpc/pull/195))
+* Releases frees-rpc 0.12.0 ([#198](https://github.com/higherkindness/freestyle-rpc/pull/198))
 
 
 ## 02/14/2018 - Version 0.11.1
 
 Release changes:
 
-* Readd support for companion objects ([#172](https://github.com/frees-io/freestyle-rpc/pull/172))
-* Update fs2-reactive-streams and release 0.11.1 ([#173](https://github.com/frees-io/freestyle-rpc/pull/173))
+* Readd support for companion objects ([#172](https://github.com/higherkindness/freestyle-rpc/pull/172))
+* Update fs2-reactive-streams and release 0.11.1 ([#173](https://github.com/higherkindness/freestyle-rpc/pull/173))
 
 
 ## 02/13/2018 - Version 0.11.0
 
 Release changes:
 
-* Now the service requires an Effect instead of AsyncContext and `Task ~> M` ([#150](https://github.com/frees-io/freestyle-rpc/pull/150))
-* fs2.Stream Support ([#152](https://github.com/frees-io/freestyle-rpc/pull/152))
+* Now the service requires an Effect instead of AsyncContext and `Task ~> M` ([#150](https://github.com/higherkindness/freestyle-rpc/pull/150))
+* fs2.Stream Support ([#152](https://github.com/higherkindness/freestyle-rpc/pull/152))
 * Updates build by using sbt-freestyle 0.13.16 ([#154](https://github.com/frees-io/freestyle-rpc/pull/154))
 * Upgrades fs2-reactive-streams lib ([#155](https://github.com/frees-io/freestyle-rpc/pull/155))
 * Change implicit StreamObserver conversions to syntax ([#157](https://github.com/frees-io/freestyle-rpc/pull/157))

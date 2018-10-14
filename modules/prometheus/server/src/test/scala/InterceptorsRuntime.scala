@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package prometheus
 package server
 
-import freestyle.rpc.common.ConcurrentMonad
-import freestyle.rpc.prometheus.shared.Configuration
-import freestyle.rpc.protocol.Utils._
+import mu.rpc.common.ConcurrentMonad
+import mu.rpc.prometheus.shared.Configuration
+import mu.rpc.protocol.Utils._
 import io.prometheus.client.CollectorRegistry
 
 case class InterceptorsRuntime(
@@ -31,8 +31,8 @@ case class InterceptorsRuntime(
   import service._
   import handlers.server._
   import handlers.client._
-  import freestyle.rpc.server._
-  import freestyle.rpc.interceptors.implicits._
+  import mu.rpc.server._
+  import mu.rpc.interceptors.implicits._
 
   //////////////////////////////////
   // Server Runtime Configuration //

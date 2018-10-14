@@ -15,7 +15,7 @@ Predictably, generating the server code is just implementing a service [Handler]
 First of all, our `Greeter` RPC protocol definition:
 
 ```tut:invisible
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 
 object service {
 
@@ -64,7 +64,7 @@ Next, our dummy `Greeter` server implementation:
 ```tut:silent
 import cats.effect.Async
 import cats.syntax.applicative._
-import freestyle.rpc.server.implicits._
+import mu.rpc.server.implicits._
 import monix.execution.Scheduler
 import monix.eval.Task
 import monix.reactive.Observable
@@ -139,16 +139,16 @@ Now, we need to implicitly provide two things:
 * A runtime interpreter of our `ServiceHandler` tied to a specific type. In our case, we'll use `cats.effects.IO`.
 * A `ServerW` implicit evidence, compounded by:
 	* RPC port where the server will bootstrap.
-	* The set of configurations we want to add to our [gRPC] server, like our `Greeter` service definition. All these configurations are aggregated in a `List[GrpcConfig]`. Later on, an internal builder will build the final server based on this list. The full list of exposed settings is available in [this file](https://github.com/frees-io/freestyle-rpc/blob/master/modules/server/src/main/scala/GrpcConfig.scala).
+	* The set of configurations we want to add to our [gRPC] server, like our `Greeter` service definition. All these configurations are aggregated in a `List[GrpcConfig]`. Later on, an internal builder will build the final server based on this list. The full list of exposed settings is available in [this file](https://github.com/higherkindness/freestyle-rpc/blob/master/modules/server/src/main/scala/GrpcConfig.scala).
 
 In summary, the result would be as follows:
 
 ```tut:silent
 import cats.~>
 import cats.effect.IO
-import freestyle.rpc.server._
-import freestyle.rpc.server.handlers._
-import freestyle.rpc.server.implicits._
+import mu.rpc.server._
+import mu.rpc.server.handlers._
+import mu.rpc.server.implicits._
 import service._
 
 object gserver {
@@ -175,7 +175,7 @@ What else is needed? We just need to define a `main` method:
 
 ```tut:silent
 import cats.effect.IO
-import freestyle.rpc.server.GrpcServer
+import mu.rpc.server.GrpcServer
 
 object RPCServer {
 
@@ -200,7 +200,7 @@ Fortunately, once all the runtime requirements are in place (**`import gserver.i
 Thanks to `withServerChannel` from the package `freestyle.rpc.testing.servers`, you will be able to run in-memory instances of the server, which is very convenient for testing purposes. Below, a very simple property-based test for proving `Greeter.sayHello`:
 
 ```tut:silent
-import freestyle.rpc.testing.servers.withServerChannel
+import mu.rpc.testing.servers.withServerChannel
 import org.scalatest.prop.Checkers
 import org.scalatest._
 import org.scalacheck.Gen
@@ -261,7 +261,7 @@ First of all, we need to configure how the client will reach the server in terms
 * By Address (host/port): brings the ability to create a channel with the target's address and port number.
 * By Target: it can create a channel with a target string, which can be either a valid [NameResolver](https://grpc.io/grpc-java/javadoc/io/grpc/NameResolver.html)-compliant URI or an authority string.
 
-Additionally, we can add more optional configurations that can be used when the connection is occurring. All the options are available [here](https://github.com/frees-io/freestyle-rpc/blob/6b0e926a5a14fbe3d9282e8c78340f2d9a0421f3/rpc/src/main/scala/client/ChannelConfig.scala#L33-L46). As we will see shortly in our example, we are going to skip the negotiation (`UsePlaintext()`).
+Additionally, we can add more optional configurations that can be used when the connection is occurring. All the options are available [here](https://github.com/higherkindness/freestyle-rpc/blob/6b0e926a5a14fbe3d9282e8c78340f2d9a0421f3/rpc/src/main/scala/client/ChannelConfig.scala#L33-L46). As we will see shortly in our example, we are going to skip the negotiation (`UsePlaintext()`).
 
 Given the transport settings and a list of optional configurations, we can create the [ManagedChannel.html](https://grpc.io/grpc-java/javadoc/io/grpc/ManagedChannel.html) object, using the `ManagedChannelInterpreter` builder.
 
@@ -269,11 +269,11 @@ So, taking into account all we have just said, how would our code look?
 
 ```tut:silent
 import cats.effect.IO
-import freestyle.rpc._
-import freestyle.rpc.config._
-import freestyle.rpc.client._
-import freestyle.rpc.client.config._
-import freestyle.rpc.client.implicits._
+import mu.rpc._
+import mu.rpc.config._
+import mu.rpc.client._
+import mu.rpc.client.config._
+import mu.rpc.client.implicits._
 import monix.eval.Task
 import service._
 
@@ -326,7 +326,7 @@ object RPCDemoApp {
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/frees-io/freestyle-rpc
+[frees-rpc]: https://github.com/higherkindness/freestyle-rpc
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

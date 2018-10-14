@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.client.cache
+package mu.rpc.client.cache
 
 import cats.effect.{Effect, Timer}
 import cats.instances.list._

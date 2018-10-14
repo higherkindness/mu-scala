@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package mu.rpc.idlgen
 
-import freestyle.rpc.idlgen.avro.AvroIdlGenerator
-import freestyle.rpc.idlgen.proto.ProtoIdlGenerator
+import mu.rpc.idlgen.avro.AvroIdlGenerator
+import mu.rpc.idlgen.proto.ProtoIdlGenerator
 
 object IdlGenApplication extends GeneratorApplication(ProtoIdlGenerator, AvroIdlGenerator) {
   def main(args: Array[String]): Unit = generateFrom(args)

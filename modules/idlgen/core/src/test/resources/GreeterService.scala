@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 
 @outputName("MyGreeterService")
 @outputPackage("foo.bar")

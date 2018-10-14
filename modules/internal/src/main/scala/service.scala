@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package internal
 
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 import scala.reflect.macros.blackbox
 
 // $COVERAGE-OFF$
@@ -160,12 +160,12 @@ object serviceImpl {
           List(
             q"import _root_.cats.instances.list._",
             q"import _root_.cats.instances.option._",
-            q"import _root_.freestyle.rpc.internal.encoders.pbd._"
+            q"import _root_.mu.rpc.internal.encoders.pbd._"
           )
         case Avro =>
-          List(q"import _root_.freestyle.rpc.internal.encoders.avro._")
+          List(q"import _root_.mu.rpc.internal.encoders.avro._")
         case AvroWithSchema =>
-          List(q"import _root_.freestyle.rpc.internal.encoders.avrowithschema._")
+          List(q"import _root_.mu.rpc.internal.encoders.avrowithschema._")
       }
 
       val methodDescriptors: List[Tree] = rpcRequests.map(_.methodDescriptor)
@@ -177,7 +177,7 @@ object serviceImpl {
           algebra: $serviceName[$F],
           EC: _root_.scala.concurrent.ExecutionContext
         ): _root_.io.grpc.ServerServiceDefinition =
-          new _root_.freestyle.rpc.internal.service.GRPCServiceDefBuilder(${lit(serviceName)}, ..$serverCallDescriptorsAndHandlers).apply
+          new _root_.mu.rpc.internal.service.GRPCServiceDefBuilder(${lit(serviceName)}, ..$serverCallDescriptorsAndHandlers).apply
         """
 
       private val clientCallMethods: List[Tree] = rpcRequests.map(_.clientDef)
@@ -200,16 +200,16 @@ object serviceImpl {
       val client: DefDef =
         q"""
         def client[$F_](
-          channelFor: _root_.freestyle.rpc.ChannelFor,
-          channelConfigList: List[_root_.freestyle.rpc.client.ManagedChannelConfig] = List(
-            _root_.freestyle.rpc.client.UsePlaintext()),
+          channelFor: _root_.mu.rpc.ChannelFor,
+          channelConfigList: List[_root_.mu.rpc.client.ManagedChannelConfig] = List(
+            _root_.mu.rpc.client.UsePlaintext()),
             options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
           )(implicit
           F: _root_.cats.effect.Effect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
         ): $Client[$F] = {
           val managedChannelInterpreter =
-            new _root_.freestyle.rpc.client.ManagedChannelInterpreter[F](channelFor, channelConfigList)
+            new _root_.mu.rpc.client.ManagedChannelInterpreter[F](channelFor, channelConfigList)
           new $Client[$F](managedChannelInterpreter.build(channelFor, channelConfigList), options)
         }""".supressWarts("DefaultArguments")
 
@@ -277,13 +277,13 @@ object serviceImpl {
         }
 
         private val clientCallsImpl = streamingImpl match {
-          case Fs2Stream       => q"_root_.freestyle.rpc.internal.client.fs2Calls"
-          case MonixObservable => q"_root_.freestyle.rpc.internal.client.monixCalls"
+          case Fs2Stream       => q"_root_.mu.rpc.internal.client.fs2Calls"
+          case MonixObservable => q"_root_.mu.rpc.internal.client.monixCalls"
         }
 
         private val serverCallsImpl = streamingImpl match {
-          case Fs2Stream       => q"_root_.freestyle.rpc.internal.server.fs2Calls"
-          case MonixObservable => q"_root_.freestyle.rpc.internal.server.monixCalls"
+          case Fs2Stream       => q"_root_.mu.rpc.internal.server.fs2Calls"
+          case MonixObservable => q"_root_.mu.rpc.internal.server.monixCalls"
         }
 
         private val streamingMethodType = {

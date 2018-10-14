@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen.avro
+package mu.rpc.idlgen.avro
 
 import java.io.File
 
 import avrohugger.Generator
 import avrohugger.format.Standard
 import avrohugger.types._
-import freestyle.rpc.idlgen._
-import freestyle.rpc.idlgen.Model._
+import mu.rpc.idlgen._
+import mu.rpc.idlgen.Model._
 import org.apache.avro._
 import org.log4s._
 
@@ -117,7 +117,7 @@ case class AvroSrcGenerator(
     val packageLines = Seq(schemaLines.head, "")
 
     val importLines =
-      ("import freestyle.rpc.protocol._" :: marshallersImports
+      ("import mu.rpc.protocol._" :: marshallersImports
         .map(_.marshallersImport)
         .map("import " + _)).sorted
 
@@ -130,7 +130,7 @@ case class AvroSrcGenerator(
         try comment ++ Seq(parseMessage(name, message.getRequest, message.getResponse), "")
         catch {
           case ParseException(msg) =>
-            logger.warn(s"$msg, cannot be converted to freestyle-rpc: $message")
+            logger.warn(s"$msg, cannot be converted to mu-rpc: $message")
             Seq.empty
         }
     }

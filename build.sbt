@@ -154,7 +154,7 @@ lazy val `idlgen-sbt` = project
   .settings(sbtPluginSettings: _*)
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
-  .settings(buildInfoPackage := "freestyle.rpc.idlgen")
+  .settings(buildInfoPackage := "mu.rpc.idlgen")
   .enablePlugins(SbtPlugin)
 
 ////////////////////
@@ -165,13 +165,18 @@ lazy val lastReleasedV = "0.15.1"
 
 lazy val `benchmarks-vprev` = project
   .in(file("benchmarks/vprev"))
-  .settings(
-    libraryDependencies ++= Seq(
-      "io.frees" %% "frees-rpc-client-core" % lastReleasedV,
-      "io.frees" %% "frees-rpc-server"      % lastReleasedV,
-      "io.frees" %% "frees-rpc-testing"     % lastReleasedV
-    )
-  )
+  // TODO: temporarily disabled until the project is migrated
+//  .settings(
+//    libraryDependencies ++= Seq(
+//      "io.frees" %% "frees-rpc-client-core" % lastReleasedV,
+//      "io.frees" %% "frees-rpc-server"      % lastReleasedV,
+//      "io.frees" %% "frees-rpc-testing"     % lastReleasedV
+//    )
+//  )
+  // TODO: remove dependsOn and uncomment the lines above
+  .dependsOn(client)
+  .dependsOn(server)
+  .dependsOn(testing)
   .settings(moduleName := "frees-rpc-benchmarks-vprev")
   .settings(crossSettings)
   .settings(noPublishSettings)
@@ -352,7 +357,7 @@ lazy val allModulesDeps: Seq[ClasspathDependency] =
 
 lazy val root = project
   .in(file("."))
-  .settings(name := "freestyle-rpc")
+  .settings(name := "mu-rpc")
   .settings(noPublishSettings)
   .aggregate(allModules: _*)
   .dependsOn(allModulesDeps: _*)

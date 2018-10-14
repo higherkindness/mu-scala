@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package internal
 package client
 
@@ -29,7 +29,7 @@ import scala.concurrent.ExecutionContext
 
 object monixCalls {
 
-  import freestyle.rpc.internal.converters._
+  import mu.rpc.internal.converters._
 
   def unary[F[_]: Async, Req, Res](
       request: Req,

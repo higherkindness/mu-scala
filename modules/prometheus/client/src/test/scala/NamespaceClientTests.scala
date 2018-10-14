@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package prometheus
 package client
 
-import freestyle.rpc.common._
-import freestyle.rpc.interceptors.metrics._
-import freestyle.rpc.prometheus.shared.Configuration
-import freestyle.rpc.protocol.Utils.client.MyRPCClient
+import mu.rpc.common._
+import mu.rpc.interceptors.metrics._
+import mu.rpc.prometheus.shared.Configuration
+import mu.rpc.protocol.Utils.client.MyRPCClient
 import io.prometheus.client.CollectorRegistry
 import org.scalatest.{Assertion, OptionValues}
 
@@ -29,8 +29,8 @@ import scala.collection.JavaConverters._
 
 class NamespaceClientTests extends RpcBaseTestSuite with OptionValues {
 
-  import freestyle.rpc.prometheus.shared.RegistryHelper._
-  import freestyle.rpc.protocol.Utils.database._
+  import mu.rpc.prometheus.shared.RegistryHelper._
+  import mu.rpc.protocol.Utils.database._
 
   val namespace: String                   = "custom_nsp"
   lazy val maybeNamespace: Option[String] = Some(namespace)

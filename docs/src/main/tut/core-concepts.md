@@ -72,7 +72,7 @@ Let’s start looking at how to define the `Person` message that we saw previous
 Before starting, this is the Scala import we need:
 
 ```tut:silent
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 ```
 
 `Person` definition would be defined as follows:
@@ -226,11 +226,11 @@ trait CommonRuntime {
 ```tut:silent
 import cats.effect.IO
 import cats.implicits._
-import freestyle.rpc._
-import freestyle.rpc.config._
-import freestyle.rpc.client._
-import freestyle.rpc.client.config._
-import freestyle.rpc.client.implicits._
+import mu.rpc._
+import mu.rpc.config._
+import mu.rpc.client._
+import mu.rpc.client.config._
+import mu.rpc.client.implicits._
 import monix.eval.Task
 import io.grpc.CallOptions
 import io.grpc.ManagedChannel
@@ -378,37 +378,37 @@ object protocol {
 [frees-rpc] provides serializers for `BigDecimal`, `BigDecimal` with tagged 'precision' and 'scale' (like `BigDecimal @@ (Nat._8, Nat._2)`), `java.time.LocalDate` and `java.time.LocalDateTime`. The only thing you need to do is to add the following import to your service:
 
 * `BigDecimal` in `Protobuf`
-  * `import freestyle.rpc.internal.encoders.pbd.bigDecimal._`
+  * `import mu.rpc.internal.encoders.pbd.bigDecimal._`
 * `java.time.LocalDate` and `java.time.LocalDateTime` in `Protobuf`
-  * `import freestyle.rpc.internal.encoders.pbd.javatime._`
+  * `import mu.rpc.internal.encoders.pbd.javatime._`
 * `BigDecimal` in `Avro` (**note**: this encoder is not avro spec compliant)
-  * `import freestyle.rpc.internal.encoders.avro.bigdecimal._`
+  * `import mu.rpc.internal.encoders.avro.bigdecimal._`
 * Tagged `BigDecimal` in `Avro`
-  * `import freestyle.rpc.internal.encoders.avro.bigDecimalTagged._`
+  * `import mu.rpc.internal.encoders.avro.bigDecimalTagged._`
 * `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
-  * `import freestyle.rpc.internal.encoders.avro.javatime._`
+  * `import mu.rpc.internal.encoders.avro.javatime._`
 
 It also provides the instances for `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime`, but you need the `frees-rpc-marshallers-jodatime` extra dependency. See the [quickstart section](/docs/rpc/quickstart) for the SBT instructions.
 
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Protobuf`
-  * `import freestyle.rpc.marshallers.jodaTimeEncoders.pbd._`
+  * `import mu.rpc.marshallers.jodaTimeEncoders.pbd._`
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
-  * `import freestyle.rpc.marshallers.jodaTimeEncoders.avro._`
+  * `import mu.rpc.marshallers.jodaTimeEncoders.avro._`
   
 **Note**: If you want to send one of these instances directly as a request or response through Avro, you need to provide an instance of `Marshaller`. [frees-rpc] provides the marshallers for `BigDecimal`, `java.time.LocalDate`, `java.time.LocalDateTime`, `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in a separated package:
 * `BigDecimal` in `Avro`
-  * `import freestyle.rpc.internal.encoders.avro.bigdecimal.marshallers._`
+  * `import mu.rpc.internal.encoders.avro.bigdecimal.marshallers._`
 * Tagged `BigDecimal` in `Avro` (**note**: this encoder is not avro spec compliant)
-  * `import freestyle.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._`
+  * `import mu.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._`
 * `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
-  * `import freestyle.rpc.internal.encoders.avro.javatime.marshallers._`
+  * `import mu.rpc.internal.encoders.avro.javatime.marshallers._`
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
-  * `import freestyle.rpc.marshallers.jodaTimeEncoders.avro.marshallers._`
+  * `import mu.rpc.marshallers.jodaTimeEncoders.avro.marshallers._`
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/frees-io/freestyle-rpc
+[frees-rpc]: https://github.com/higherkindness/freestyle-rpc
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
