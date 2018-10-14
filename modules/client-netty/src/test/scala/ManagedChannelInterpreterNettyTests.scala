@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package client
 package netty
 
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
 
-import freestyle.rpc.common.SC
+import mu.rpc.common.SC
 import io.grpc.ManagedChannel
 import io.grpc.internal.GrpcUtil
 import io.grpc.netty.{GrpcSslContexts, NegotiationType, NettyChannelBuilder}

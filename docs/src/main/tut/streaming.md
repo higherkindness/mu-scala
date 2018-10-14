@@ -15,7 +15,7 @@ In the previous section, we saw that [frees-rpc] allows you to define unary serv
 Let's keep going completing our protocol's example with the three streaming service methods:
 
 ```tut:silent
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 
 object service {
 
@@ -99,7 +99,7 @@ Thanks to this new data type, [frees-rpc] supports `fs2.Stream[F, ?]` for all th
 Let's compare our previous protocol's using `fs2.Stream` instead of `Observable`.
 
 ```tut:silent
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 
 object service {
 
@@ -148,7 +148,7 @@ As you can see, it is really similar to the Observable service.
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/frees-io/freestyle-rpc
+[frees-rpc]: https://github.com/higherkindness/freestyle-rpc
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

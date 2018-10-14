@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package mu.rpc.idlgen
 
 import java.io.File
 
-import freestyle.rpc.idlgen.Model._
+import mu.rpc.idlgen.Model._
 import sbt.Keys._
 import sbt._
 import sbt.io.{Path, PathFinder}
@@ -30,10 +30,10 @@ object IdlGenPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val idlGen: TaskKey[Seq[File]] =
-      taskKey[Seq[File]]("Generates IDL files from freestyle-rpc service definitions")
+      taskKey[Seq[File]]("Generates IDL files from mu-rpc service definitions")
 
     lazy val srcGen: TaskKey[Seq[File]] =
-      taskKey[Seq[File]]("Generates freestyle-rpc Scala files from IDL definitions")
+      taskKey[Seq[File]]("Generates mu-rpc Scala files from IDL definitions")
 
     @deprecated("This setting has been deprecated in favor of srcGen", "0.13.3")
     val srcGenFromJars =
@@ -54,12 +54,12 @@ object IdlGenPlugin extends AutoPlugin {
 
     lazy val idlGenSourceDir: SettingKey[File] =
       settingKey[File](
-        "The Scala source directory, where your freestyle-rpc service definitions are placed.")
+        "The Scala source directory, where your mu-rpc service definitions are placed.")
 
     lazy val idlGenTargetDir: SettingKey[File] =
       settingKey[File](
         "The IDL target directory, where the `idlGen` task will write the generated files " +
-          "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on freestyle-rpc service definitions.")
+          "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on mu-rpc service definitions.")
 
     @deprecated("This setting has been deprecated in favor of srcGenSourceDirs", "0.13.3")
     lazy val srcGenSourceDir: SettingKey[File] =
@@ -103,7 +103,7 @@ object IdlGenPlugin extends AutoPlugin {
           "By default, this include the instances for serializing `BigDecimal`, `java.time.LocalDate`, and `java.time.LocalDateTime`")
   }
 
-  import freestyle.rpc.idlgen.IdlGenPlugin.autoImport._
+  import mu.rpc.idlgen.IdlGenPlugin.autoImport._
 
   lazy val defaultSettings: Seq[Def.Setting[_]] = Seq(
     idlType := "(missing arg)",

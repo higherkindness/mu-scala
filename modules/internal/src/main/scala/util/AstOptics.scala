@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package internal
 package util
 
 import monocle._
 import monocle.function.all._
 import scala.Function.{const => κ}
-import freestyle.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
+import mu.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
 
 trait AstOptics {
 

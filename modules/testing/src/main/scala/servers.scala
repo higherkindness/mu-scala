@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package testing
 
 import java.util.UUID

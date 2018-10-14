@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.benchmarks
+package mu.rpc.benchmarks
 package shared
 
-import freestyle.rpc.benchmarks.shared.models._
+import mu.rpc.benchmarks.shared.models._
 
 import scala.concurrent.duration._
 

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package protocol
 
 import cats.Applicative
 import cats.syntax.applicative._
 import org.scalatest._
-import freestyle.rpc.common._
-import freestyle.rpc.internal.encoders.avro.bigDecimalTagged._
-import freestyle.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._
-import freestyle.rpc.internal.encoders.pbd.bigDecimal._
-import freestyle.rpc.testing.servers.withServerChannel
+import mu.rpc.common._
+import mu.rpc.internal.encoders.avro.bigDecimalTagged._
+import mu.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._
+import mu.rpc.internal.encoders.pbd.bigDecimal._
+import mu.rpc.testing.servers.withServerChannel
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Prop._
 import org.scalatest.prop.Checkers

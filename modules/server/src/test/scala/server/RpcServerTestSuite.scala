@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package server
 
 import java.util.concurrent.{Executor, TimeUnit}
 
 import cats.effect.Sync
 import cats.syntax.functor._
-import freestyle.rpc.common.{RpcBaseTestSuite, SC}
-import freestyle.rpc.server.netty._
+import mu.rpc.common.{RpcBaseTestSuite, SC}
+import mu.rpc.server.netty._
 import io.grpc._
 import io.grpc.internal.GrpcUtil
 import io.grpc.netty.{GrpcSslContexts, ProtocolNegotiators}

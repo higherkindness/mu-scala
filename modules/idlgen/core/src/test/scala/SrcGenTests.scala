@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package mu.rpc.idlgen
 
-import freestyle.rpc.common.RpcBaseTestSuite
-import freestyle.rpc.idlgen.AvroScalaGeneratorArbitrary._
-import freestyle.rpc.idlgen.avro._
+import mu.rpc.common.RpcBaseTestSuite
+import mu.rpc.idlgen.AvroScalaGeneratorArbitrary._
+import mu.rpc.idlgen.avro._
 import org.scalatest.prop.Checkers
 import org.scalacheck.Prop.forAll
 

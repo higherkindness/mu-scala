@@ -220,12 +220,12 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
       micrositeName := "Frees-rpc",
-      micrositeBaseUrl := "/freestyle-rpc",
+      micrositeBaseUrl := "/mu-rpc",
       micrositeDescription := "A purely functional library for building RPC endpoint-based services",
       micrositeDocumentationUrl := "docs/rpc/core-concepts.html",
       micrositeGithubOwner := "higherkindness",
-      micrositeGithubRepo := "freestyle-rpc",
-      micrositeGitterChannelUrl := "47deg/freestyle",
+      micrositeGithubRepo := "mu-rpc",
+      micrositeGitterChannelUrl := "47deg/mu",
       micrositeOrganizationHomepage := "http://www.47deg.com",
       includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
       micrositePushSiteWith := GitHub4s
@@ -243,7 +243,7 @@ object ProjectPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] =
     sharedReleaseProcess ++ warnUnusedImport ++ Seq(
-      description := "Freestyle RPC is a purely functional library for " +
+      description := "mu RPC is a purely functional library for " +
         "building RPC endpoint based services with support for RPC and HTTP/2",
       startYear := Some(2017),
       orgProjectName := "frees-rpc",
@@ -278,7 +278,7 @@ object ProjectPlugin extends AutoPlugin {
         ScalaLangBadge.apply,
         LicenseBadge.apply,
         // Gitter badge (owner field) can be configured with default value if we migrate it to the higherkindness organization
-        { info => GitterBadge.apply(info.copy(owner = "47deg", repo = "freestyle")) },
+        { info => GitterBadge.apply(info.copy(owner = "47deg", repo = "mu")) },
         GitHubIssuesBadge.apply
       ),
       orgEnforcedFilesSetting := List(
@@ -286,7 +286,7 @@ object ProjectPlugin extends AutoPlugin {
         ContributingFileType(
           orgProjectName.value,
           // Organization field can be configured with default value if we migrate it to the higherkindness organization
-          orgGithubSetting.value.copy(organization = "47deg", project = "freestyle")
+          orgGithubSetting.value.copy(organization = "47deg", project = "mu")
         ),
         AuthorsFileType(
           name.value,

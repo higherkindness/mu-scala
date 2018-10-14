@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 
 import cats.data.Kleisli
-import freestyle.rpc.server.netty._
+import mu.rpc.server.netty._
 import io.grpc.{ServerBuilder, _}
 import io.grpc.netty.NettyServerBuilder
 

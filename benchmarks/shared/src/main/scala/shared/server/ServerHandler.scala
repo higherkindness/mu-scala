@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.benchmarks
+package mu.rpc.benchmarks
 package shared
 package server
 
 import cats.effect._
-import freestyle.rpc.benchmarks.shared.models._
-import freestyle.rpc.benchmarks.shared.protocols._
-import freestyle.rpc.protocol.Empty
-import freestyle.rpc.server._
+import mu.rpc.benchmarks.shared.models._
+import mu.rpc.benchmarks.shared.protocols._
+import mu.rpc.protocol.Empty
+import mu.rpc.server._
 
 abstract class HandlerImpl[F[_]: Effect](implicit persistenceService: PersistenceService[F]) {
 

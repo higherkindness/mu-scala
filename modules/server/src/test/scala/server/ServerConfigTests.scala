@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package server
 
 import java.net.InetSocketAddress
 
 import cats.effect.IO
-import freestyle.rpc.common.SC
+import mu.rpc.common.SC
 
 class ServerConfigTests extends RpcServerTestSuite {
 

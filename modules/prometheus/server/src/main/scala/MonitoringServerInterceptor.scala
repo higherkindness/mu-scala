@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package prometheus
 package server
 
 import java.time.{Clock, Instant}
 
-import freestyle.rpc.interceptors.GrpcMethodInfo
-import freestyle.rpc.prometheus.shared.Configuration
+import mu.rpc.interceptors.GrpcMethodInfo
+import mu.rpc.prometheus.shared.Configuration
 import io.grpc._
 
 case class MonitoringServerInterceptor(clock: Clock)(implicit CFG: Configuration)

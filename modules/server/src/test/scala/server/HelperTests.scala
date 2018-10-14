@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package server
 
-import freestyle.rpc.common.ConcurrentMonad
+import mu.rpc.common.ConcurrentMonad
 
 class HelperTests extends RpcServerTestSuite {
 

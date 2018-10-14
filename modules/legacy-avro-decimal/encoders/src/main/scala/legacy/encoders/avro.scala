@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.protocol.legacy
+package mu.rpc.protocol.legacy
 
 import java.io.{ByteArrayInputStream, InputStream}
 import java.nio.ByteBuffer
 
 import com.google.common.io.ByteStreams
 import com.sksamuel.avro4s.{FromValue, ToSchema, ToValue}
-import freestyle.rpc.internal.util.BigDecimalUtil
+import mu.rpc.internal.util.BigDecimalUtil
 import io.grpc.MethodDescriptor.Marshaller
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Field

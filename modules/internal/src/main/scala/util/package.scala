@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.internal
+package mu.rpc.internal
 
 import scala.reflect.runtime.universe.runtimeMirror
 import scala.tools.reflect.ToolBox

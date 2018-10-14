@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.benchmarks
+package mu.rpc.benchmarks
 
 import java.util.concurrent.TimeUnit
 
 import cats.effect.IO
 import cats.syntax.functor._
-import freestyle.rpc.benchmarks.shared.Utils._
-import freestyle.rpc.benchmarks.shared.protocols.PersonServiceAvroWithSchema
-import freestyle.rpc.benchmarks.shared.Runtime
-import freestyle.rpc.benchmarks.shared.models._
-import freestyle.rpc.benchmarks.shared.server._
-import freestyle.rpc.protocol.Empty
-import freestyle.rpc.testing.servers.ServerChannel
+import mu.rpc.benchmarks.shared.Utils._
+import mu.rpc.benchmarks.shared.protocols.PersonServiceAvroWithSchema
+import mu.rpc.benchmarks.shared.Runtime
+import mu.rpc.benchmarks.shared.models._
+import mu.rpc.benchmarks.shared.server._
+import mu.rpc.protocol.Empty
+import mu.rpc.testing.servers.ServerChannel
 import org.openjdk.jmh.annotations._
 
 @State(Scope.Thread)

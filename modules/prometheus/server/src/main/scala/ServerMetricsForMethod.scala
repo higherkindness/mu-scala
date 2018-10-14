@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package prometheus
 package server
 
-import freestyle.rpc.interceptors.GrpcMethodInfo
+import mu.rpc.interceptors.GrpcMethodInfo
 import io.grpc.Status.Code
 import io.prometheus.client.SimpleCollector
 

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package prometheus
 package client
 
-import freestyle.rpc.prometheus.shared.Configuration
+import mu.rpc.prometheus.shared.Configuration
 
 class MonitorClientInterceptorTests extends BaseMonitorClientInterceptorTests {
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package internal
 package server
 
@@ -30,7 +30,7 @@ import monix.reactive.Observable
 
 object fs2Calls {
 
-  import freestyle.rpc.internal.converters._
+  import mu.rpc.internal.converters._
 
   def unaryMethod[F[_]: Effect, Req, Res](
       f: Req => F[Res],

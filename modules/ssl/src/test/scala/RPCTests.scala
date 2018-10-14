@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package ssl
 
-import freestyle.rpc.client.OverrideAuthority
-import freestyle.rpc.client.netty.{
+import mu.rpc.client.OverrideAuthority
+import mu.rpc.client.netty.{
   NettyChannelInterpreter,
   NettyNegotiationType,
   NettySslContext,
   NettyUsePlaintext
 }
-import freestyle.rpc.common._
-import freestyle.rpc.server._
+import mu.rpc.common._
+import mu.rpc.server._
 import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.NegotiationType
 import org.scalatest._
 
 class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
-  import freestyle.rpc.ssl.Utils._
-  import freestyle.rpc.ssl.Utils.database._
-  import freestyle.rpc.ssl.Utils.service._
-  import freestyle.rpc.ssl.Utils.implicits._
+  import mu.rpc.ssl.Utils._
+  import mu.rpc.ssl.Utils.database._
+  import mu.rpc.ssl.Utils.service._
+  import mu.rpc.ssl.Utils.implicits._
 
   override protected def beforeAll(): Unit =
     serverStart[ConcurrentMonad].unsafeRunSync()

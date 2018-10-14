@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package mu.rpc.idlgen
 
 import java.io.File
 import java.nio.file.{Files, Paths}
-import freestyle.rpc.protocol.SerializationType
-import freestyle.rpc.internal.util._
+import mu.rpc.protocol.SerializationType
+import mu.rpc.internal.util._
 import scala.collection.JavaConverters._
 
 trait IdlGenerator extends Generator {

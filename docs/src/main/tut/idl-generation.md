@@ -28,7 +28,7 @@ Note that the plugin is only available for Scala 2.12.
 
 Let's take our previous service, and add an Avro-specific request and some useful annotations described in the [Annotations section](/docs/rpc/annotations):
 ```tut:silent
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 
 @option("java_multiple_files", true)
 @option("java_outer_classname", "Quickstart")
@@ -189,7 +189,7 @@ In the case of the `.avpr` file we generated above, the file `GreeterService.sca
 ```
 package quickstart
 
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 
 @message case class HelloRequest(greeting: String)
 
@@ -228,7 +228,7 @@ Just like `idlGen`, `srcGen` and `srcGenFromJars` has some configurable settings
   * `List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)` if `srcGenSerializationType` is `Protobuf`.
 
 The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also available, but they need the dependency `frees-rpc-marshallers-jodatime`. You can also specify custom imports with the following:
-  * `idlGenMarshallerImports := List(freestyle.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))`
+  * `idlGenMarshallerImports := List(mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))`
   * See the [Custom codecs section in core concepts](/docs/rpc/core-concepts#custom-codecs) for more information.
 
 The source directory must exist, otherwise, the `srcGen` task will fail. Target directories will be created upon generation.
@@ -260,7 +260,7 @@ The following example shows how to set up a dependency with another artifact or 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/frees-io/freestyle-rpc
+[frees-rpc]: https://github.com/higherkindness/freestyle-rpc
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

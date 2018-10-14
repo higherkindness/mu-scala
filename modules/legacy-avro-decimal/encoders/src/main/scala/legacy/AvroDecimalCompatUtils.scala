@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.protocol.legacy
+package mu.rpc.protocol.legacy
 
 object AvroDecimalCompatUtils {
 

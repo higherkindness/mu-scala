@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package internal.encoders
 
 import java.io.{ByteArrayInputStream, InputStream}
 import java.time.{Instant, LocalDate, LocalDateTime}
 
 import com.google.protobuf.{CodedInputStream, CodedOutputStream}
-import freestyle.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTimeUtil}
+import mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTimeUtil}
 import io.grpc.MethodDescriptor.Marshaller
 
 object pbd {

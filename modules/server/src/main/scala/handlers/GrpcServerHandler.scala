@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package server.handlers
 
 import cats.data.Kleisli
 import cats.effect.Sync
 import cats.syntax.functor._
-import freestyle.rpc.server.{GrpcServer, GrpcServerOps}
+import mu.rpc.server.{GrpcServer, GrpcServerOps}
 import io.grpc.{Server, ServerServiceDefinition}
 
 import scala.collection.JavaConverters._

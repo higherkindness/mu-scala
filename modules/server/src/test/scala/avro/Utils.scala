@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package avro
 
-import freestyle.rpc.common._
-import freestyle.rpc.protocol._
+import mu.rpc.common._
+import mu.rpc.protocol._
 import cats.effect.Effect
 import shapeless.{:+:, CNil, Coproduct}
 

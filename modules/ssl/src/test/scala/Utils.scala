@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package ssl
 
 import java.io.File
 import java.security.cert.X509Certificate
 
 import cats.effect.Effect
-import freestyle.rpc.common._
-import freestyle.rpc.protocol._
-import freestyle.rpc.server.netty.SetSslContext
-import freestyle.rpc.server.{AddService, GrpcConfig, GrpcServer}
+import mu.rpc.common._
+import mu.rpc.protocol._
+import mu.rpc.server.netty.SetSslContext
+import mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
 import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.GrpcSslContexts
 import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}

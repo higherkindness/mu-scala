@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle
+package mu
 package rpc
 package internal
 

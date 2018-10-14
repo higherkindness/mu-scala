@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package protocol
 
 import cats.{Monad, MonadError}
@@ -22,16 +22,16 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import com.google.protobuf.InvalidProtocolBufferException
 import org.scalatest._
-import freestyle.rpc.common._
-import freestyle.rpc.protocol.Utils.handlers.client._
-import freestyle.rpc.server._
+import mu.rpc.common._
+import mu.rpc.protocol.Utils.handlers.client._
+import mu.rpc.server._
 
 class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
-  import freestyle.rpc.protocol.Utils._
-  import freestyle.rpc.protocol.Utils.client.MyRPCClient
-  import freestyle.rpc.protocol.Utils.database._
-  import freestyle.rpc.protocol.Utils.implicits._
+  import mu.rpc.protocol.Utils._
+  import mu.rpc.protocol.Utils.client.MyRPCClient
+  import mu.rpc.protocol.Utils.database._
+  import mu.rpc.protocol.Utils.implicits._
 
   override protected def beforeAll(): Unit =
     serverStart[ConcurrentMonad].unsafeRunSync()
@@ -137,7 +137,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run client bidirectional streaming services" in {
 
       ignoreOnTravis(
-        "TODO: restore once https://github.com/higherkindness/freestyle-rpc/issues/281 is fixed")
+        "TODO: restore once https://github.com/higherkindness/mu-rpc/issues/281 is fixed")
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[E] =
         APP.bs(eList)
@@ -312,7 +312,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run client bidirectional streaming services" in {
 
       ignoreOnTravis(
-        "TODO: restore once https://github.com/higherkindness/freestyle-rpc/issues/281 is fixed")
+        "TODO: restore once https://github.com/higherkindness/mu-rpc/issues/281 is fixed")
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[E] =
         APP.bs(eList)
