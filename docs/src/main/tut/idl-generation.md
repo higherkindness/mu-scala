@@ -228,7 +228,7 @@ Just like `idlGen`, `srcGen` and `srcGenFromJars` has some configurable settings
   * `List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)` if `srcGenSerializationType` is `Protobuf`.
 
 The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also available, but they need the dependency `frees-rpc-marshallers-jodatime`. You can also specify custom imports with the following:
-  * `idlGenMarshallerImports := List(freestyle.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))`
+  * `idlGenMarshallerImports := List(mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))`
   * See the [Custom codecs section in core concepts](/docs/rpc/core-concepts#custom-codecs) for more information.
 
 The source directory must exist, otherwise, the `srcGen` task will fail. Target directories will be created upon generation.

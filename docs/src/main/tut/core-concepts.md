@@ -133,7 +133,7 @@ In the above example, we can see that `sayHello` returns an `F[HelloReply]`. How
 * Receive an empty request.
 * A combination of both.
 
-`frees-rpc` provides an `Empty` object, defined at `freestyle.rpc.protocol`, that you might want to use for these purposes.
+`frees-rpc` provides an `Empty` object, defined at `mu.rpc.protocol`, that you might want to use for these purposes.
 
 For instance:
 

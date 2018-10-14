@@ -25,7 +25,7 @@ Let's see it with an example. Suppose the following service definition:
 `models.avdl`
 
 ```avdl
-@namespace("freestyle.rpc.protocols")
+@namespace("mu.rpc.protocols")
 
 protocol StockInfoModels {
 
@@ -45,20 +45,20 @@ protocol StockInfoModels {
 `services.avdl`
 
 ```avdl
-@namespace("freestyle.rpc.protocols")
+@namespace("mu.rpc.protocols")
 
 protocol StockInfoService {
 
   import idl "models.avdl";
   
-  freestyle.rpc.protocols.StockInfoResponse getStockInfo(freestyle.rpc.protocols.StockInfoRequest request);
+  mu.rpc.protocols.StockInfoResponse getStockInfo(mu.rpc.protocols.StockInfoRequest request);
 
 }
 ```
 
 **Scala**
 ```scala
-package freestyle.rpc.protocols
+package mu.rpc.protocols
 
 import mu.rpc.internal.encoders.avro.bigdecimal._
 import mu.rpc.internal.encoders.avro.javatime._
@@ -70,7 +70,7 @@ import mu.rpc.protocol._
 
 @service(AvroWithSchema) trait StockInfoService[F[_]] {
 
-  def getStockInfo(request: freestyle.rpc.protocols.StockInfoRequest): F[freestyle.rpc.protocols.StockInfoResponse]
+  def getStockInfo(request: mu.rpc.protocols.StockInfoRequest): F[mu.rpc.protocols.StockInfoResponse]
 
 }
 ```
@@ -80,7 +80,7 @@ With the *Scala* definition, you could serialize the `BigDecimal`s accordingly t
 Starting from `0.15.1` you could generate the following service in *Scala* (manually or through the `idlgen` plugin with the setting `idlGenBigDecimal := ScalaBigDecimalTaggedGen`)
 
 ```scala
-package freestyle.rpc.protocols
+package mu.rpc.protocols
 
 import mu.rpc.internal.encoders.avro.bigDecimalTagged._
 import mu.rpc.internal.encoders.avro.javatime._
@@ -93,7 +93,7 @@ import shapeless.{@@, Nat}
 
 @service(AvroWithSchema) trait StockInfoService[F[_]] {
 
-  def getStockInfo(request: freestyle.rpc.protocols.StockInfoRequest): F[freestyle.rpc.protocols.StockInfoResponse]
+  def getStockInfo(request: mu.rpc.protocols.StockInfoRequest): F[mu.rpc.protocols.StockInfoResponse]
 
 }
 ```
@@ -122,10 +122,10 @@ Luckily, there are a couple of modules created for easing this task:
 
 * `"io.frees" % "legacy-avro-decimal-compat-protocol" % "x.x.x"`
 
-Provides an avdl file (`legacyAvroDecimalCompatProtocol.avdl`) with the custom type (`freestyle.rpc.protocols.LegacyAvroDecimalCompat`) to replace your old `decimal` values. In that way, you could go from this:
+Provides an avdl file (`legacyAvroDecimalCompatProtocol.avdl`) with the custom type (`mu.rpc.protocols.LegacyAvroDecimalCompat`) to replace your old `decimal` values. In that way, you could go from this:
 
 ```avdl
-@namespace("freestyle.rpc.protocols")
+@namespace("mu.rpc.protocols")
 
 protocol StockInfoModels {
 
@@ -145,7 +145,7 @@ protocol StockInfoModels {
 To this:
 
 ```avdl
-@namespace("freestyle.rpc.protocols")
+@namespace("mu.rpc.protocols")
 
 protocol StockInfoModel {
 
@@ -157,8 +157,8 @@ protocol StockInfoModel {
 
   record StockInfoResponse {
     string stockId;
-    freestyle.rpc.protocols.LegacyAvroDecimalCompat price;
-    freestyle.rpc.protocols.LegacyAvroDecimalCompat rate;
+    mu.rpc.protocols.LegacyAvroDecimalCompat price;
+    mu.rpc.protocols.LegacyAvroDecimalCompat rate;
     decimal(10,2) stockPrice;
     decimal(5,4) stockRate;
   }
