@@ -1,7 +1,7 @@
 
 # Route Guide Example
 
-This module shows a simple example using [freestyle-rpc](https://github.com/higherkindness/freestyle-rpc), based on the Route Guide Demo (using Scala annotations for service definitions),
+This module shows a simple example using [mu-rpc](https://github.com/higherkindness/mu-rpc), based on the Route Guide Demo (using Scala annotations for service definitions),
 from [this example in grpc-java](https://github.com/grpc/grpc-java/tree/v1.10.x/examples/src/main/java/io/grpc/examples/routeguide).
 
 ## Running the Example

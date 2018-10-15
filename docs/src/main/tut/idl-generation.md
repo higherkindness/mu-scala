@@ -73,7 +73,7 @@ Using this example, the resulting Protobuf IDL would be generated in `/src/main/
 ```
 // This file has been automatically generated for use by
 // the idlGen plugin, from frees-rpc service definitions.
-// Read more at: http://frees.io/docs/rpc/
+// Read more at: https://higherkindness.github.io/mu-rpc/
 
 syntax = "proto3";
 
@@ -159,7 +159,7 @@ The source directory must exist, otherwise, the `idlGen` task will fail. Target 
 ## Generating source files from IDL
 
 You can also use this process in reverse and generate [frees-rpc] Scala classes from IDL definitions. Currently only Avro is supported, in both `.avpr` (JSON) and `.avdl` (Avro IDL) formats.
-The plugin's implementation basically wraps the [avrohugger] library and adds some freestyle-specific extensions.
+The plugin's implementation basically wraps the [avrohugger] library and adds some mu-specific extensions.
 
 To use it, run:
 ```bash
@@ -249,7 +249,7 @@ The following example shows how to set up a dependency with another artifact or 
       srcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
       sourceGenerators in Compile += (Compile / srcGen).taskValue,
       libraryDependencies ++= Seq(
-        "io.frees" %% "frees-rpc-client-core" % V.freestyleRPC
+        "io.frees" %% "frees-rpc-client-core" % V.muRPC
       )
   )
 )
@@ -260,7 +260,7 @@ The following example shows how to set up a dependency with another artifact or 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/higherkindness/freestyle-rpc
+[frees-rpc]: https://github.com/higherkindness/mu-rpc
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

@@ -1,11 +1,11 @@
 
 [comment]: # (Start Badges)
 
-[![Build Status](https://travis-ci.org/higherkindness/freestyle-rpc.svg?branch=master)](https://travis-ci.org/higherkindness/freestyle-rpc) [![codecov.io](http://codecov.io/github/higherkindness/freestyle-rpc/coverage.svg?branch=master)](http://codecov.io/github/higherkindness/freestyle-rpc?branch=master) [![Maven Central](https://img.shields.io/badge/maven%20central-0.15.1-green.svg)](https://oss.sonatype.org/#nexus-search;gav~io.frees~frees-rpc*) [![Latest version](https://img.shields.io/badge/freestyle--rpc-0.15.1-green.svg)](https://index.scala-lang.org/higherkindness/freestyle-rpc) [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/higherkindness/freestyle-rpc/master/LICENSE) [![Join the chat at https://gitter.im/47deg/freestyle](https://badges.gitter.im/47deg/freestyle.svg)](https://gitter.im/47deg/freestyle?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![GitHub Issues](https://img.shields.io/github/issues/higherkindness/freestyle-rpc.svg)](https://github.com/higherkindness/freestyle-rpc/issues)
+[![Build Status](https://travis-ci.org/higherkindness/mu-rpc.svg?branch=master)](https://travis-ci.org/higherkindness/mu-rpc) [![codecov.io](http://codecov.io/github/higherkindness/mu-rpc/coverage.svg?branch=master)](http://codecov.io/github/higherkindness/mu-rpc?branch=master) [![Maven Central](https://img.shields.io/badge/maven%20central-0.15.1-green.svg)](https://oss.sonatype.org/#nexus-search;gav~io.frees~frees-rpc*) [![Latest version](https://img.shields.io/badge/mu--rpc-0.15.1-green.svg)](https://index.scala-lang.org/higherkindness/mu-rpc) [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/higherkindness/mu-rpc/master/LICENSE) [![Join the chat at https://gitter.im/47deg/mu](https://badges.gitter.im/47deg/mu.svg)](https://gitter.im/47deg/mu?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![GitHub Issues](https://img.shields.io/github/issues/higherkindness/mu-rpc.svg)](https://github.com/higherkindness/mu-rpc/issues)
 
 [comment]: # (End Badges)
 
-# freestyle-rpc
+# mu-rpc
 
 Freestyle RPC is a purely functional library for building [RPC] endpoint-based services with support for [RPC] and [HTTP/2].
 
@@ -89,7 +89,7 @@ libraryDependencies += "io.frees" %% "frees-rpc-marshallers-jodatime" % "0.15.1"
 
 ## Documentation
 
-The full documentation is available at the [frees-rpc](http://frees.io/docs/rpc) site.
+The full documentation is available at the [frees-rpc](https://higherkindness.github.io/mu-rpc) site.
 
 ## Demo
 
@@ -98,7 +98,7 @@ See the [examples](/modules/examples) module.
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: http://frees.io/docs/rpc/
+[frees-rpc]: https://higherkindness.github.io/mu-rpc/
 [frees-config]: http://frees.io/docs/patterns/config/
 
 [comment]: # (Start Copyright)

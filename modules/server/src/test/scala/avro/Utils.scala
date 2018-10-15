@@ -392,7 +392,7 @@ object Utils extends CommonUtils {
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    implicit val freesRPCServiceClient: service.RPCService.Client[ConcurrentMonad] =
+    implicit val muRPCServiceClient: service.RPCService.Client[ConcurrentMonad] =
       service.RPCService.client[ConcurrentMonad](createChannelFor)
 
   }

@@ -26,7 +26,7 @@ import examples.todolist.protocol.Protocols._
 import examples.todolist.runtime.CommonRuntime
 import examples.todolist.server.handlers._
 
-import freestyle.tagless.loggingJVM.log4s.implicits._
+import mu.tagless.loggingJVM.log4s.implicits._
 import java.util.Properties
 
 sealed trait ServerImplicits extends CommonRuntime with RepositoriesImplicits {

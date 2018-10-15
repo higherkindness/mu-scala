@@ -32,7 +32,7 @@ If you want to delve deeper into [frees-rpc], we have a complete example at the 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/higherkindness/freestyle-rpc
+[frees-rpc]: https://github.com/higherkindness/mu-rpc
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
@@ -42,4 +42,4 @@ If you want to delve deeper into [frees-rpc], we have a complete example at the 
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
 [Metrifier]: https://github.com/47deg/metrifier
-[examples]: https://github.com/higherkindness/freestyle-rpc/tree/master/modules/examples
+[examples]: https://github.com/higherkindness/mu-rpc/tree/master/modules/examples

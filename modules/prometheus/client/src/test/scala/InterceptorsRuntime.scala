@@ -48,7 +48,7 @@ case class InterceptorsRuntime(
   implicit lazy val grpcServer: GrpcServer[ConcurrentMonad] =
     createServerConfOnRandomPort[ConcurrentMonad](grpcConfigs).unsafeRunSync
 
-  implicit lazy val freesRPCHandler: ServerRPCService[ConcurrentMonad] =
+  implicit lazy val muRPCHandler: ServerRPCService[ConcurrentMonad] =
     new ServerRPCService[ConcurrentMonad]
 
   implicit val CR: CollectorRegistry = cr
@@ -57,26 +57,26 @@ case class InterceptorsRuntime(
     AddInterceptor(MonitoringClientInterceptor(configuration.withCollectorRegistry(cr)))
   )
 
-  implicit lazy val freesProtoRPCServiceClient: ProtoRPCService.Client[ConcurrentMonad] =
+  implicit lazy val muProtoRPCServiceClient: ProtoRPCService.Client[ConcurrentMonad] =
     ProtoRPCService.client[ConcurrentMonad](
       channelFor = createChannelForPort(pickUnusedPort),
       channelConfigList = configList
     )
 
-  implicit lazy val freesAvroRPCServiceClient: AvroRPCService.Client[ConcurrentMonad] =
+  implicit lazy val muAvroRPCServiceClient: AvroRPCService.Client[ConcurrentMonad] =
     AvroRPCService.client[ConcurrentMonad](
       channelFor = createChannelForPort(pickUnusedPort),
       channelConfigList = configList
     )
 
-  implicit lazy val freesAvroWithSchemaRPCServiceClient: AvroWithSchemaRPCService.Client[
+  implicit lazy val muAvroWithSchemaRPCServiceClient: AvroWithSchemaRPCService.Client[
     ConcurrentMonad] =
     AvroWithSchemaRPCService.client[ConcurrentMonad](
       channelFor = createChannelForPort(pickUnusedPort),
       channelConfigList = configList
     )
 
-  implicit lazy val freesRPCServiceClientHandler: FreesRPCServiceClientHandler[ConcurrentMonad] =
+  implicit lazy val muRPCServiceClientHandler: FreesRPCServiceClientHandler[ConcurrentMonad] =
     new FreesRPCServiceClientHandler[ConcurrentMonad]
 
 }

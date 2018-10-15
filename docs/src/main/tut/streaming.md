@@ -148,7 +148,7 @@ As you can see, it is really similar to the Observable service.
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/higherkindness/freestyle-rpc
+[frees-rpc]: https://github.com/higherkindness/mu-rpc
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

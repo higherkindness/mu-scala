@@ -139,7 +139,7 @@ Now, we need to implicitly provide two things:
 * A runtime interpreter of our `ServiceHandler` tied to a specific type. In our case, we'll use `cats.effects.IO`.
 * A `ServerW` implicit evidence, compounded by:
 	* RPC port where the server will bootstrap.
-	* The set of configurations we want to add to our [gRPC] server, like our `Greeter` service definition. All these configurations are aggregated in a `List[GrpcConfig]`. Later on, an internal builder will build the final server based on this list. The full list of exposed settings is available in [this file](https://github.com/higherkindness/freestyle-rpc/blob/master/modules/server/src/main/scala/GrpcConfig.scala).
+	* The set of configurations we want to add to our [gRPC] server, like our `Greeter` service definition. All these configurations are aggregated in a `List[GrpcConfig]`. Later on, an internal builder will build the final server based on this list. The full list of exposed settings is available in [this file](https://github.com/higherkindness/mu-rpc/blob/master/modules/server/src/main/scala/GrpcConfig.scala).
 
 In summary, the result would be as follows:
 
@@ -261,7 +261,7 @@ First of all, we need to configure how the client will reach the server in terms
 * By Address (host/port): brings the ability to create a channel with the target's address and port number.
 * By Target: it can create a channel with a target string, which can be either a valid [NameResolver](https://grpc.io/grpc-java/javadoc/io/grpc/NameResolver.html)-compliant URI or an authority string.
 
-Additionally, we can add more optional configurations that can be used when the connection is occurring. All the options are available [here](https://github.com/higherkindness/freestyle-rpc/blob/6b0e926a5a14fbe3d9282e8c78340f2d9a0421f3/rpc/src/main/scala/client/ChannelConfig.scala#L33-L46). As we will see shortly in our example, we are going to skip the negotiation (`UsePlaintext()`).
+Additionally, we can add more optional configurations that can be used when the connection is occurring. All the options are available [here](https://github.com/higherkindness/mu-rpc/blob/6b0e926a5a14fbe3d9282e8c78340f2d9a0421f3/rpc/src/main/scala/client/ChannelConfig.scala#L33-L46). As we will see shortly in our example, we are going to skip the negotiation (`UsePlaintext()`).
 
 Given the transport settings and a list of optional configurations, we can create the [ManagedChannel.html](https://grpc.io/grpc-java/javadoc/io/grpc/ManagedChannel.html) object, using the `ManagedChannelInterpreter` builder.
 
@@ -326,7 +326,7 @@ object RPCDemoApp {
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/higherkindness/freestyle-rpc
+[frees-rpc]: https://github.com/higherkindness/mu-rpc
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
