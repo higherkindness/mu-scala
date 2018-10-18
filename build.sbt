@@ -258,7 +258,7 @@ lazy val `example-todolist-protocol` = project
 lazy val `example-todolist-runtime` = project
   .in(file("modules/examples/todolist/runtime"))
   .settings(noPublishSettings)
-  .settings(moduleName := "frees-rpc-example-todolist-runtime")
+  .settings(moduleName := "mu-rpc-example-todolist-runtime")
 
 lazy val `example-todolist-server` = project
   .in(file("modules/examples/todolist/server"))
@@ -267,7 +267,7 @@ lazy val `example-todolist-server` = project
   .dependsOn(server)
   .dependsOn(config)
   .settings(noPublishSettings)
-  .settings(moduleName := "frees-rpc-example-todolist-server")
+  .settings(moduleName := "mu-rpc-example-todolist-server")
   .settings(exampleTodolistCommonSettings)
 
 lazy val `example-todolist-client` = project
@@ -277,7 +277,7 @@ lazy val `example-todolist-client` = project
   .dependsOn(`client-netty`)
   .dependsOn(config)
   .settings(noPublishSettings)
-  .settings(moduleName := "frees-rpc-example-todolist-client")
+  .settings(moduleName := "mu-rpc-example-todolist-client")
   .settings(exampleTodolistCommonSettings)
 
 /////////////////////
@@ -290,7 +290,7 @@ lazy val `marshallers-jodatime` = project
   .dependsOn(client % "compile->compile;test->test")
   .dependsOn(internal % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
-  .settings(moduleName := "frees-rpc-marshallers-jodatime")
+  .settings(moduleName := "mu-rpc-marshallers-jodatime")
   .settings(marshallersJodatimeSettings)
 
 ///////////////////////////
@@ -365,7 +365,7 @@ lazy val root = project
 lazy val docs = project
   .in(file("docs"))
   .dependsOn(allModulesDeps: _*)
-  .settings(name := "frees-rpc-docs")
+  .settings(name := "mu-rpc-docs")
   .settings(micrositeSettings: _*)
   .settings(noPublishSettings: _*)
   .settings(
