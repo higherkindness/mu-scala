@@ -30,10 +30,10 @@ object IdlGenPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val idlGen: TaskKey[Seq[File]] =
-      taskKey[Seq[File]]("Generates IDL files from mu-rpc service definitions")
+      taskKey[Seq[File]]("Generates IDL files from mu service definitions")
 
     lazy val srcGen: TaskKey[Seq[File]] =
-      taskKey[Seq[File]]("Generates mu-rpc Scala files from IDL definitions")
+      taskKey[Seq[File]]("Generates mu Scala files from IDL definitions")
 
     @deprecated("This setting has been deprecated in favor of srcGen", "0.13.3")
     val srcGenFromJars =
@@ -54,12 +54,12 @@ object IdlGenPlugin extends AutoPlugin {
 
     lazy val idlGenSourceDir: SettingKey[File] =
       settingKey[File](
-        "The Scala source directory, where your mu-rpc service definitions are placed.")
+        "The Scala source directory, where your mu service definitions are placed.")
 
     lazy val idlGenTargetDir: SettingKey[File] =
       settingKey[File](
         "The IDL target directory, where the `idlGen` task will write the generated files " +
-          "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on mu-rpc service definitions.")
+          "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on mu service definitions.")
 
     @deprecated("This setting has been deprecated in favor of srcGenSourceDirs", "0.13.3")
     lazy val srcGenSourceDir: SettingKey[File] =

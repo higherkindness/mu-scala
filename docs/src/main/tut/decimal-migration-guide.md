@@ -171,4 +171,4 @@ protocol StockInfoModel {
 Provides the serializers for the custom type.
 
 There is a repository that shows an example about how to make this process:
-* https://github.com/higherkindness/mu-rpc-protocol-decimal-update
+* https://github.com/frees-io/freestyle-rpc-protocol-decimal-update

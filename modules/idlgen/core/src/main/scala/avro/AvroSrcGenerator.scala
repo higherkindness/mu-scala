@@ -130,7 +130,7 @@ case class AvroSrcGenerator(
         try comment ++ Seq(parseMessage(name, message.getRequest, message.getResponse), "")
         catch {
           case ParseException(msg) =>
-            logger.warn(s"$msg, cannot be converted to mu-rpc: $message")
+            logger.warn(s"$msg, cannot be converted to mu: $message")
             Seq.empty
         }
     }

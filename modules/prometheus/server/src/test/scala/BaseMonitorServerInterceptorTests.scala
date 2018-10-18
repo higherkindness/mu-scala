@@ -75,8 +75,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
 
     "work for client streaming RPC metrics" in {
 
-      ignoreOnTravis(
-        "TODO: restore once https://github.com/higherkindness/mu-rpc/issues/168 is fixed")
+      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/168 is fixed")
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[D] =
         APP.cs(cList, i)
@@ -263,8 +262,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
 
     "work when combining multiple calls" in {
 
-      ignoreOnTravis(
-        "TODO: restore once https://github.com/higherkindness/mu-rpc/issues/168 is fixed")
+      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/168 is fixed")
 
       def unary[F[_]](implicit APP: MyRPCClient[F]): F[C] =
         APP.u(a1.x, a1.y)
