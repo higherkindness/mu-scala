@@ -7,7 +7,7 @@
 
 # mu-rpc
 
-Freestyle RPC is a purely functional library for building [RPC] endpoint-based services with support for [RPC] and [HTTP/2].
+Mu RPC is a purely functional library for building [RPC] endpoint-based services with support for [RPC] and [HTTP/2].
 
 Also known as [frees-rpc], it brings the ability to combine [RPC] protocols, services, and clients in your `Freestyle` program, thanks to [gRPC].
 
