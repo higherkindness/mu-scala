@@ -67,7 +67,7 @@ object Utils extends CommonUtils {
 
   }
 
-  trait FreesRuntime {
+  trait MuRuntime {
 
     import service._
     import handlers.server._
@@ -76,7 +76,7 @@ object Utils extends CommonUtils {
     // Server Runtime Configuration //
     //////////////////////////////////
 
-    implicit val freesRPCHandler: ServerRPCService[ConcurrentMonad] =
+    implicit val muRPCHandler: ServerRPCService[ConcurrentMonad] =
       new ServerRPCService[ConcurrentMonad]
 
     val serverCertFile: File                         = TestUtils.loadCert("server1.pem")
@@ -118,6 +118,6 @@ object Utils extends CommonUtils {
 
   }
 
-  object implicits extends FreesRuntime
+  object implicits extends MuRuntime
 
 }

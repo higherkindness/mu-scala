@@ -120,7 +120,7 @@ On step **2**, the types to the old decimals needs to be changed to a custom typ
 
 Luckily, there are a couple of modules created for easing this task:
 
-* `"io.frees" % "legacy-avro-decimal-compat-protocol" % "x.x.x"`
+* `"io.higherkindness" % "legacy-avro-decimal-compat-protocol" % "x.x.x"`
 
 Provides an avdl file (`legacyAvroDecimalCompatProtocol.avdl`) with the custom type (`mu.rpc.protocols.LegacyAvroDecimalCompat`) to replace your old `decimal` values. In that way, you could go from this:
 
@@ -166,9 +166,9 @@ protocol StockInfoModel {
 }
 ```
 
-* `"io.frees" %% "legacy-avro-decimal-compat-encoders" % "x.x.x"`
+* `"io.higherkindness" %% "legacy-avro-decimal-compat-encoders" % "x.x.x"`
 
 Provides the serializers for the custom type.
 
 There is a repository that shows an example about how to make this process:
-* https://github.com/higherkindness/freestyle-rpc-protocol-decimal-update
+* https://github.com/higherkindness/mu-rpc-protocol-decimal-update

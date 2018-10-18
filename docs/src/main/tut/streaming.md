@@ -6,7 +6,7 @@ permalink: /docs/rpc/streaming
 
 # Streaming
 
-In the previous section, we saw that [frees-rpc] allows you to define unary services. It additionally supports the following streaming options:
+In the previous section, we saw that [mu-rpc] allows you to define unary services. It additionally supports the following streaming options:
 
 * **Server streaming RPC**: similar to the unary, but in this case, the server will send back a stream of responses for a client request.
 * **Client streaming RPC**: in this case is the client who sends a stream of requests. The server will respond with a single response.
@@ -80,7 +80,7 @@ The code might be explanatory by itself but let's review the different services 
 
 ## Integrations
 
-In [frees-rpc], the streaming features have been implemented based on two data types. You can choose one of them and start to use the data type that fits you better.
+In [mu-rpc], the streaming features have been implemented based on two data types. You can choose one of them and start to use the data type that fits you better.
 
 ### Observable
 
@@ -94,7 +94,7 @@ _Disclaimer_: it's considered experimental for now.
 
 The second data type is `fs2.Stream` streaming, see the [FS2 Docs](https://github.com/functional-streams-for-scala/fs2) for a wider explanation. 
 
-Thanks to this new data type, [frees-rpc] supports `fs2.Stream[F, ?]` for all the types of streaming, mentioned before.
+Thanks to this new data type, [mu-rpc] supports `fs2.Stream[F, ?]` for all the types of streaming, mentioned before.
 
 Let's compare our previous protocol's using `fs2.Stream` instead of `Observable`.
 
@@ -148,7 +148,7 @@ As you can see, it is really similar to the Observable service.
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/higherkindness/freestyle-rpc
+[mu-rpc]: https://github.com/higherkindness/mu-rpc
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

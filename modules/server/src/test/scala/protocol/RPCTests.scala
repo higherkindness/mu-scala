@@ -39,7 +39,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
   override protected def afterAll(): Unit =
     serverStop[ConcurrentMonad].unsafeRunSync()
 
-  "frees-rpc server" should {
+  "mu-rpc server" should {
 
     "allow to startup a server and check if it's alive" in {
 
@@ -61,10 +61,10 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   }
 
-  "frees-rpc client" should {
+  "mu-rpc client" should {
 
-    implicit val freesRPCServiceClientHandler: FreesRPCServiceClientHandler[ConcurrentMonad] =
-      new FreesRPCServiceClientHandler[ConcurrentMonad]
+    implicit val muRPCServiceClientHandler: MuRPCServiceClientHandler[ConcurrentMonad] =
+      new MuRPCServiceClientHandler[ConcurrentMonad]
 
     "be able to run unary services" in {
 
@@ -268,11 +268,10 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   }
 
-  "frees-rpc client with compression" should {
+  "mu-rpc client with compression" should {
 
-    implicit val freesRPCServiceClientHandler: FreesRPCServiceClientCompressedHandler[
-      ConcurrentMonad] =
-      new FreesRPCServiceClientCompressedHandler[ConcurrentMonad]
+    implicit val muRPCServiceClientHandler: MuRPCServiceClientCompressedHandler[ConcurrentMonad] =
+      new MuRPCServiceClientCompressedHandler[ConcurrentMonad]
 
     "be able to run unary services" in {
 

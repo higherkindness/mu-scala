@@ -10,26 +10,26 @@ pgpSecretRing := file(s"$gpgFolder/secring.gpg")
 
 lazy val common = project
   .in(file("modules/common"))
-  .settings(moduleName := "frees-rpc-common")
+  .settings(moduleName := "mu-rpc-common")
   .settings(commonSettings)
 
 lazy val internal = project
   .in(file("modules/internal"))
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
-  .settings(moduleName := "frees-rpc-internal")
+  .settings(moduleName := "mu-rpc-internal")
   .settings(internalSettings)
 
 lazy val testing = project
   .in(file("modules/testing"))
-  .settings(moduleName := "frees-rpc-testing")
+  .settings(moduleName := "mu-rpc-testing")
   .settings(testingSettings)
 
 lazy val ssl = project
   .in(file("modules/ssl"))
   .dependsOn(server % "test->test")
   .dependsOn(`client-netty` % "compile->compile;test->test")
-  .settings(moduleName := "frees-rpc-netty-ssl")
+  .settings(moduleName := "mu-rpc-netty-ssl")
   .settings(nettySslSettings)
 
 lazy val config = project
@@ -38,7 +38,7 @@ lazy val config = project
   .dependsOn(client % "compile->compile;test->test")
   .dependsOn(server % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
-  .settings(moduleName := "frees-rpc-config")
+  .settings(moduleName := "mu-rpc-config")
   .settings(configSettings)
 
 ////////////////
@@ -50,24 +50,24 @@ lazy val client = project
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(internal)
   .dependsOn(testing % "test->test")
-  .settings(moduleName := "frees-rpc-client-core")
+  .settings(moduleName := "mu-rpc-client-core")
   .settings(clientCoreSettings)
 
 lazy val `client-netty` = project
   .in(file("modules/client-netty"))
   .dependsOn(client % "compile->compile;test->test")
-  .settings(moduleName := "frees-rpc-client-netty")
+  .settings(moduleName := "mu-rpc-client-netty")
   .settings(clientNettySettings)
 
 lazy val `client-okhttp` = project
   .in(file("modules/client-okhttp"))
   .dependsOn(client % "compile->compile;test->test")
-  .settings(moduleName := "frees-rpc-client-okhttp")
+  .settings(moduleName := "mu-rpc-client-okhttp")
   .settings(clientOkHttpSettings)
 
 lazy val `client-cache` = project
   .in(file("modules/client-cache"))
-  .settings(moduleName := "frees-rpc-client-cache")
+  .settings(moduleName := "mu-rpc-client-cache")
   .settings(clientCacheSettings)
 
 ////////////////
@@ -80,7 +80,7 @@ lazy val server = project
   .dependsOn(client % "test->test")
   .dependsOn(internal % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
-  .settings(moduleName := "frees-rpc-server")
+  .settings(moduleName := "mu-rpc-server")
   .settings(serverSettings)
 
 //////////////////////
@@ -89,7 +89,7 @@ lazy val server = project
 
 lazy val interceptors = project
   .in(file("modules/interceptors"))
-  .settings(moduleName := "frees-rpc-interceptors")
+  .settings(moduleName := "mu-rpc-interceptors")
   .settings(interceptorsSettings)
 
 ////////////////////
@@ -99,21 +99,21 @@ lazy val interceptors = project
 lazy val `prometheus-shared` = project
   .in(file("modules/prometheus/shared"))
   .dependsOn(interceptors % "compile->compile;test->test")
-  .settings(moduleName := "frees-rpc-prometheus-shared")
+  .settings(moduleName := "mu-rpc-prometheus-shared")
   .settings(prometheusSettings)
 
 lazy val `prometheus-server` = project
   .in(file("modules/prometheus/server"))
   .dependsOn(`prometheus-shared` % "compile->compile;test->test")
   .dependsOn(server % "compile->compile;test->test")
-  .settings(moduleName := "frees-rpc-prometheus-server")
+  .settings(moduleName := "mu-rpc-prometheus-server")
 
 lazy val `prometheus-client` = project
   .in(file("modules/prometheus/client"))
   .dependsOn(`prometheus-shared` % "compile->compile;test->test")
   .dependsOn(client % "compile->compile;test->test")
   .dependsOn(server % "test->test")
-  .settings(moduleName := "frees-rpc-prometheus-client")
+  .settings(moduleName := "mu-rpc-prometheus-client")
   .settings(prometheusClientSettings)
 
 ////////////////////
@@ -124,7 +124,7 @@ lazy val `dropwizard-server` = project
   .in(file("modules/dropwizard/server"))
   .dependsOn(`prometheus-server` % "compile->compile;test->test")
   .dependsOn(server % "compile->compile;test->test")
-  .settings(moduleName := "frees-rpc-dropwizard-server")
+  .settings(moduleName := "mu-rpc-dropwizard-server")
   .settings(dropwizardSettings)
 
 lazy val `dropwizard-client` = project
@@ -132,7 +132,7 @@ lazy val `dropwizard-client` = project
   .dependsOn(`prometheus-client` % "compile->compile;test->test")
   .dependsOn(client % "compile->compile;test->test")
   .dependsOn(server % "test->test")
-  .settings(moduleName := "frees-rpc-dropwizard-client")
+  .settings(moduleName := "mu-rpc-dropwizard-client")
   .settings(dropwizardSettings)
 
 ////////////////
@@ -143,13 +143,13 @@ lazy val `idlgen-core` = project
   .in(file("modules/idlgen/core"))
   .dependsOn(internal % "compile->compile;test->test")
   .dependsOn(client % "test->test")
-  .settings(moduleName := "frees-rpc-idlgen-core")
+  .settings(moduleName := "mu-rpc-idlgen-core")
   .settings(idlGenSettings)
 
 lazy val `idlgen-sbt` = project
   .in(file("modules/idlgen/plugin"))
   .dependsOn(`idlgen-core`)
-  .settings(moduleName := "sbt-frees-rpc-idlgen")
+  .settings(moduleName := "sbt-mu-rpc-idlgen")
   .settings(crossScalaVersions := Seq(scalac.`2.12`))
   .settings(sbtPluginSettings: _*)
   .enablePlugins(BuildInfoPlugin)
@@ -168,16 +168,16 @@ lazy val `benchmarks-vprev` = project
   // TODO: temporarily disabled until the project is migrated
 //  .settings(
 //    libraryDependencies ++= Seq(
-//      "io.frees" %% "frees-rpc-client-core" % lastReleasedV,
-//      "io.frees" %% "frees-rpc-server"      % lastReleasedV,
-//      "io.frees" %% "frees-rpc-testing"     % lastReleasedV
+//      "io.higherkindness" %% "mu-rpc-client-core" % lastReleasedV,
+//      "io.higherkindness" %% "mu-rpc-server"      % lastReleasedV,
+//      "io.higherkindness" %% "mu-rpc-testing"     % lastReleasedV
 //    )
 //  )
   // TODO: remove dependsOn and uncomment the lines above
   .dependsOn(client)
   .dependsOn(server)
   .dependsOn(testing)
-  .settings(moduleName := "frees-rpc-benchmarks-vprev")
+  .settings(moduleName := "mu-rpc-benchmarks-vprev")
   .settings(crossSettings)
   .settings(noPublishSettings)
   .enablePlugins(JmhPlugin)
@@ -187,7 +187,7 @@ lazy val `benchmarks-vnext` = project
   .dependsOn(client)
   .dependsOn(server)
   .dependsOn(testing)
-  .settings(moduleName := "frees-rpc-benchmarks-vnext")
+  .settings(moduleName := "mu-rpc-benchmarks-vnext")
   .settings(crossSettings)
   .settings(noPublishSettings)
   .enablePlugins(JmhPlugin)
@@ -204,12 +204,12 @@ lazy val `example-routeguide-protocol` = project
   .in(file("modules/examples/routeguide/protocol"))
   .dependsOn(client)
   .settings(noPublishSettings)
-  .settings(moduleName := "frees-rpc-example-routeguide-protocol")
+  .settings(moduleName := "mu-rpc-example-routeguide-protocol")
 
 lazy val `example-routeguide-runtime` = project
   .in(file("modules/examples/routeguide/runtime"))
   .settings(noPublishSettings)
-  .settings(moduleName := "frees-rpc-example-routeguide-runtime")
+  .settings(moduleName := "mu-rpc-example-routeguide-runtime")
   .settings(exampleRouteguideRuntimeSettings)
 
 lazy val `example-routeguide-common` = project
@@ -217,7 +217,7 @@ lazy val `example-routeguide-common` = project
   .dependsOn(`example-routeguide-protocol`)
   .dependsOn(config)
   .settings(noPublishSettings)
-  .settings(moduleName := "frees-rpc-example-routeguide-common")
+  .settings(moduleName := "mu-rpc-example-routeguide-common")
   .settings(exampleRouteguideCommonSettings)
 
 lazy val `example-routeguide-server` = project
@@ -226,7 +226,7 @@ lazy val `example-routeguide-server` = project
   .dependsOn(`example-routeguide-runtime`)
   .dependsOn(server)
   .settings(noPublishSettings)
-  .settings(moduleName := "frees-rpc-example-routeguide-server")
+  .settings(moduleName := "mu-rpc-example-routeguide-server")
 
 lazy val `example-routeguide-client` = project
   .in(file("modules/examples/routeguide/client"))
@@ -234,7 +234,7 @@ lazy val `example-routeguide-client` = project
   .dependsOn(`example-routeguide-runtime`)
   .dependsOn(`client-netty`)
   .settings(noPublishSettings)
-  .settings(moduleName := "frees-rpc-example-routeguide-client")
+  .settings(moduleName := "mu-rpc-example-routeguide-client")
   .settings(
     Compile / unmanagedSourceDirectories ++= Seq(
       baseDirectory.value / "src" / "main" / "scala-io",
@@ -253,12 +253,12 @@ lazy val `example-todolist-protocol` = project
   .in(file("modules/examples/todolist/protocol"))
   .dependsOn(client)
   .settings(noPublishSettings)
-  .settings(moduleName := "frees-rpc-example-todolist-protocol")
+  .settings(moduleName := "mu-rpc-example-todolist-protocol")
 
 lazy val `example-todolist-runtime` = project
   .in(file("modules/examples/todolist/runtime"))
   .settings(noPublishSettings)
-  .settings(moduleName := "frees-rpc-example-todolist-runtime")
+  .settings(moduleName := "mu-rpc-example-todolist-runtime")
 
 lazy val `example-todolist-server` = project
   .in(file("modules/examples/todolist/server"))
@@ -267,7 +267,7 @@ lazy val `example-todolist-server` = project
   .dependsOn(server)
   .dependsOn(config)
   .settings(noPublishSettings)
-  .settings(moduleName := "frees-rpc-example-todolist-server")
+  .settings(moduleName := "mu-rpc-example-todolist-server")
   .settings(exampleTodolistCommonSettings)
 
 lazy val `example-todolist-client` = project
@@ -277,7 +277,7 @@ lazy val `example-todolist-client` = project
   .dependsOn(`client-netty`)
   .dependsOn(config)
   .settings(noPublishSettings)
-  .settings(moduleName := "frees-rpc-example-todolist-client")
+  .settings(moduleName := "mu-rpc-example-todolist-client")
   .settings(exampleTodolistCommonSettings)
 
 /////////////////////
@@ -290,7 +290,7 @@ lazy val `marshallers-jodatime` = project
   .dependsOn(client % "compile->compile;test->test")
   .dependsOn(internal % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
-  .settings(moduleName := "frees-rpc-marshallers-jodatime")
+  .settings(moduleName := "mu-rpc-marshallers-jodatime")
   .settings(marshallersJodatimeSettings)
 
 ///////////////////////////
@@ -365,7 +365,7 @@ lazy val root = project
 lazy val docs = project
   .in(file("docs"))
   .dependsOn(allModulesDeps: _*)
-  .settings(name := "frees-rpc-docs")
+  .settings(name := "mu-rpc-docs")
   .settings(micrositeSettings: _*)
   .settings(noPublishSettings: _*)
   .settings(
