@@ -10,7 +10,7 @@ pgpSecretRing := file(s"$gpgFolder/secring.gpg")
 
 lazy val common = project
   .in(file("modules/common"))
-  .settings(moduleName := "mu-rpc-common")
+  .settings(moduleName := "mu-common")
   .settings(commonSettings)
 
 lazy val internal = project
@@ -38,7 +38,7 @@ lazy val config = project
   .dependsOn(client % "compile->compile;test->test")
   .dependsOn(server % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
-  .settings(moduleName := "mu-rpc-config")
+  .settings(moduleName := "mu-config")
   .settings(configSettings)
 
 ////////////////
@@ -143,13 +143,13 @@ lazy val `idlgen-core` = project
   .in(file("modules/idlgen/core"))
   .dependsOn(internal % "compile->compile;test->test")
   .dependsOn(client % "test->test")
-  .settings(moduleName := "mu-rpc-idlgen-core")
+  .settings(moduleName := "mu-idlgen-core")
   .settings(idlGenSettings)
 
 lazy val `idlgen-sbt` = project
   .in(file("modules/idlgen/plugin"))
   .dependsOn(`idlgen-core`)
-  .settings(moduleName := "sbt-mu-rpc-idlgen")
+  .settings(moduleName := "sbt-mu-idlgen")
   .settings(crossScalaVersions := Seq(scalac.`2.12`))
   .settings(sbtPluginSettings: _*)
   .enablePlugins(BuildInfoPlugin)
@@ -177,7 +177,7 @@ lazy val `benchmarks-vprev` = project
   .dependsOn(client)
   .dependsOn(server)
   .dependsOn(testing)
-  .settings(moduleName := "mu-rpc-benchmarks-vprev")
+  .settings(moduleName := "mu-benchmarks-vprev")
   .settings(crossSettings)
   .settings(noPublishSettings)
   .enablePlugins(JmhPlugin)
@@ -187,7 +187,7 @@ lazy val `benchmarks-vnext` = project
   .dependsOn(client)
   .dependsOn(server)
   .dependsOn(testing)
-  .settings(moduleName := "mu-rpc-benchmarks-vnext")
+  .settings(moduleName := "mu-benchmarks-vnext")
   .settings(crossSettings)
   .settings(noPublishSettings)
   .enablePlugins(JmhPlugin)
@@ -357,7 +357,7 @@ lazy val allModulesDeps: Seq[ClasspathDependency] =
 
 lazy val root = project
   .in(file("."))
-  .settings(name := "mu-rpc")
+  .settings(name := "mu")
   .settings(noPublishSettings)
   .aggregate(allModules: _*)
   .dependsOn(allModulesDeps: _*)
@@ -365,7 +365,7 @@ lazy val root = project
 lazy val docs = project
   .in(file("docs"))
   .dependsOn(allModulesDeps: _*)
-  .settings(name := "mu-rpc-docs")
+  .settings(name := "mu-docs")
   .settings(micrositeSettings: _*)
   .settings(noPublishSettings: _*)
   .settings(

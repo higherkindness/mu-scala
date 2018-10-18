@@ -11,7 +11,7 @@ technologies:
 
 ## What’s mu-rpc
 
-[mu-rpc] provides the ability to combine [RPC] protocols, services, and clients in your `Freestyle` program, thanks to [gRPC]. Although it's fully integrated with [gRPC], there are some important differences when defining the protocols, as we’ll see later on, since [mu-rpc] follows the same philosophy as `Freestyle` core, being macro-powered.
+[mu] provides the ability to combine [RPC] protocols, services, and clients in your `Freestyle` program, thanks to [gRPC]. Although it's fully integrated with [gRPC], there are some important differences when defining the protocols, as we’ll see later on, since [mu] follows the same philosophy as `Freestyle` core, being macro-powered.
 
 ## Installation
 
@@ -30,7 +30,7 @@ It's divided into multiple and different artifacts, grouped by scope:
 `mu-rpc-client-core` | Client | Yes | Mandatory to define protocols and auto-derived clients.
 `mu-rpc-client-netty` | Client | Yes* | Mandatory on the client side if we are using `Netty` in the server side.
 `mu-rpc-client-okhttp` | Client | Yes* | Mandatory on the client side if we are using `OkHttp` in the server side.
-`mu-rpc-config` | Server/Client | No | Provides configuration helpers using [mu-config] to load the application configuration values.
+`mu-config` | Server/Client | No | Provides configuration helpers using [mu-config] to load the application configuration values.
 `mu-rpc-marshallers-jodatime` | Server/Client | No | Provides marshallers for serializing and deserializing the `LocalDate` and `LocalDateTime` joda instances.
 `mu-rpc-prometheus-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, on the _Server_ side.
 `mu-rpc-prometheus-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, on the _Client_ side.
@@ -39,7 +39,7 @@ It's divided into multiple and different artifacts, grouped by scope:
 `mu-rpc-dropwizard-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics, on the _Client_ side.
 `mu-rpc-interceptors` | Server/Client | No | Commons related to gRPC interceptors.
 `mu-rpc-testing` | Test | No | Utilities to test out `mu-rpc` applications. It provides the `grpc-testing` library as the transitive dependency.
-`mu-rpc-common` | Server/Client | Provided* | Common things that are used throughout the project.
+`mu-common` | Server/Client | Provided* | Common things that are used throughout the project.
 `mu-rpc-internal` | Server/Client | Provided* | Macros.
 `mu-rpc-async` | Server/Client | Provided* | Async instances useful for interacting with the RPC services on both sides, server and the client.
 `mu-rpc-netty-ssl` | Server/Client | No | Adds the `io.netty:netty-tcnative-boringssl-static:jar` dependency, aligned with the Netty version (if that's the case) used in the `mu-rpc` build. See [this section](https://github.com/grpc/grpc-java/blob/master/SECURITY.md#netty) for more information. Adding this you wouldn't need to figure out which would be the right version, `mu-rpc` gives you the right one.
@@ -64,7 +64,7 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-client-netty"      % "0.15
 libraryDependencies += "io.higherkindness" %% "mu-rpc-client-okhttp"     % "0.15.1"
 
 // optional - for both server and client configuration.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-config"            % "0.15.1"
+libraryDependencies += "io.higherkindness" %% "mu-config"                % "0.15.1"
 
 // optional - for both server and client metrics reporting, using Prometheus.
 libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus-server" % "0.15.1"
@@ -86,7 +86,7 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-marshallers-jodatime" % "0
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[mu-rpc]: https://github.com/higherkindness/mu-rpc
+[mu]: https://github.com/higherkindness/mu
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

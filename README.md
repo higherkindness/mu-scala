@@ -1,7 +1,7 @@
 
 [comment]: # (Start Badges)
 
-[![Build Status](https://travis-ci.org/higherkindness/mu-rpc.svg?branch=master)](https://travis-ci.org/higherkindness/mu-rpc) [![codecov.io](http://codecov.io/github/higherkindness/mu-rpc/coverage.svg?branch=master)](http://codecov.io/github/higherkindness/mu-rpc?branch=master) [![Maven Central](https://img.shields.io/badge/maven%20central-0.15.1-green.svg)](https://oss.sonatype.org/#nexus-search;gav~io.higherkindness~mu-rpc*) [![Latest version](https://img.shields.io/badge/mu--rpc-0.15.1-green.svg)](https://index.scala-lang.org/higherkindness/mu-rpc) [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/higherkindness/mu-rpc/master/LICENSE) [![Join the chat at https://gitter.im/47deg/mu](https://badges.gitter.im/47deg/mu.svg)](https://gitter.im/47deg/mu?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![GitHub Issues](https://img.shields.io/github/issues/higherkindness/mu-rpc.svg)](https://github.com/higherkindness/mu-rpc/issues)
+[![Build Status](https://travis-ci.org/higherkindness/mu.svg?branch=master)](https://travis-ci.org/higherkindness/mu) [![codecov.io](http://codecov.io/github/higherkindness/mu/coverage.svg?branch=master)](http://codecov.io/github/higherkindness/mu?branch=master) [![Maven Central](https://img.shields.io/badge/maven%20central-0.15.1-green.svg)](https://oss.sonatype.org/#nexus-search;gav~io.higherkindness~mu-rpc*) [![Latest version](https://img.shields.io/badge/mu--rpc-0.15.1-green.svg)](https://index.scala-lang.org/higherkindness/mu) [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/higherkindness/mu/master/LICENSE) [![Join the chat at https://gitter.im/47deg/mu](https://badges.gitter.im/47deg/mu.svg)](https://gitter.im/47deg/mu?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![GitHub Issues](https://img.shields.io/github/issues/higherkindness/mu.svg)](https://github.com/higherkindness/mu/issues)
 
 [comment]: # (End Badges)
 
@@ -9,7 +9,7 @@
 
 Mu RPC is a purely functional library for building [RPC] endpoint-based services with support for [RPC] and [HTTP/2].
 
-Also known as [mu-rpc], it brings the ability to combine [RPC] protocols, services, and clients in your `Freestyle` program, thanks to [gRPC].
+Also known as [mu], it brings the ability to combine [RPC] protocols, services, and clients in your `Freestyle` program, thanks to [gRPC].
 
 ## Installation
 
@@ -28,7 +28,7 @@ It's divided into multiple and different artifacts, grouped by scope:
 `mu-rpc-client-core` | Client | Yes | Mandatory to define protocols and auto-derived clients.
 `mu-rpc-client-netty` | Client | Yes* | Mandatory on the client side if we are using `Netty` in the server side.
 `mu-rpc-client-okhttp` | Client | Yes* | Mandatory on the client side if we are using `OkHttp` in the server side.
-`mu-rpc-config` | Server/Client | No | Provides configuration helpers using [mu-config] to load the application configuration values.
+`mu-config` | Server/Client | No | Provides configuration helpers using [mu-config] to load the application configuration values.
 `mu-rpc-marshallers-jodatime` | Server/Client | No | Provides marshallers for serializing and deserializing the `LocalDate` and `LocalDateTime` joda instances.
 `mu-rpc-prometheus-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, on the _Server_ side.
 `mu-rpc-prometheus-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, on the _Client_ side.
@@ -37,7 +37,7 @@ It's divided into multiple and different artifacts, grouped by scope:
 `mu-rpc-dropwizard-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics, on the _Client_ side.
 `mu-rpc-interceptors` | Server/Client | No | Commons related to gRPC interceptors.
 `mu-rpc-testing` | Test | No | Utilities to test out `mu-rpc` applications. It provides the `grpc-testing` library as the transitive dependency.
-`mu-rpc-common` | Server/Client | Provided* | Common things that are used throughout the project.
+`mu-common` | Server/Client | Provided* | Common things that are used throughout the project.
 `mu-rpc-internal` | Server/Client | Provided* | Macros.
 `mu-rpc-async` | Server/Client | Provided* | Async instances useful for interacting with the RPC services on both sides, server and the client.
 `mu-rpc-netty-ssl` | Server/Client | No | Adds the `io.netty:netty-tcnative-boringssl-static:jar` dependency, aligned with the Netty version (if that's the case) used in the `mu-rpc` build. See [this section](https://github.com/grpc/grpc-java/blob/master/SECURITY.md#netty) for more information. Adding this you wouldn't need to figure out which would be the right version, `mu-rpc` gives you the right one.
@@ -68,7 +68,7 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-client-netty"      % "0.15
 libraryDependencies += "io.higherkindness" %% "mu-rpc-client-okhttp"     % "0.15.1"
 
 // optional - for both server and client configuration.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-config"            % "0.15.1"
+libraryDependencies += "io.higherkindness" %% "mu-config"                % "0.15.1"
 
 // optional - for both server and client metrics reporting, using Prometheus.
 libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus-server" % "0.15.1"
@@ -89,7 +89,7 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-marshallers-jodatime" % "0
 
 ## Documentation
 
-The full documentation is available at the [mu-rpc](https://higherkindness.github.io/mu-rpc) site.
+The full documentation is available at the [mu](https://higherkindness.github.io/mu) site.
 
 ## Demo
 
@@ -98,7 +98,7 @@ See the [examples](/modules/examples) module.
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[mu-rpc]: https://higherkindness.github.io/mu-rpc/
+[mu]: https://higherkindness.github.io/mu/
 [frees-config]: http://frees.io/docs/patterns/config/
 
 [comment]: # (Start Copyright)

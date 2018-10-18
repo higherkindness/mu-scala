@@ -39,7 +39,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
   override protected def afterAll(): Unit =
     serverStop[ConcurrentMonad].unsafeRunSync()
 
-  "mu-rpc server" should {
+  "mu server" should {
 
     "allow to startup a server and check if it's alive" in {
 
@@ -61,7 +61,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   }
 
-  "mu-rpc client" should {
+  "mu client" should {
 
     implicit val muRPCServiceClientHandler: MuRPCServiceClientHandler[ConcurrentMonad] =
       new MuRPCServiceClientHandler[ConcurrentMonad]
@@ -136,8 +136,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run client bidirectional streaming services" in {
 
-      ignoreOnTravis(
-        "TODO: restore once https://github.com/higherkindness/mu-rpc/issues/281 is fixed")
+      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/281 is fixed")
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[E] =
         APP.bs(eList)
@@ -268,7 +267,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   }
 
-  "mu-rpc client with compression" should {
+  "mu client with compression" should {
 
     implicit val muRPCServiceClientHandler: MuRPCServiceClientCompressedHandler[ConcurrentMonad] =
       new MuRPCServiceClientCompressedHandler[ConcurrentMonad]
@@ -310,8 +309,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run client bidirectional streaming services" in {
 
-      ignoreOnTravis(
-        "TODO: restore once https://github.com/higherkindness/mu-rpc/issues/281 is fixed")
+      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/281 is fixed")
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[E] =
         APP.bs(eList)

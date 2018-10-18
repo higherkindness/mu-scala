@@ -1,1 +1,1 @@
-addSbtPlugin("io.higherkindness" %% "sbt-mu-rpc-idlgen" % sys.props("version"))
+addSbtPlugin("io.higherkindness" %% "sbt-mu-idlgen" % sys.props("version"))
