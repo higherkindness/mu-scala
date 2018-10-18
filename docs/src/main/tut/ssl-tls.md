@@ -96,7 +96,7 @@ import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}
 
 trait Runtime extends CommonRuntime {
 
-    implicit val freesRPCHandler: ServiceHandler[IO] =
+    implicit val muRPCHandler: ServiceHandler[IO] =
       new ServiceHandler[IO]
 
     // First of all, we have to load the certs into files. These files have to be placed in the resources folder.
@@ -184,7 +184,7 @@ object MainApp extends CommonRuntime {
         )
     )
 
-    val freesRPCServiceClient: Greeter.Client[IO] = 
+    val muRPCServiceClient: Greeter.Client[IO] = 
     	Greeter.clientFromChannel[IO](channelInterpreter.build)
 
 }

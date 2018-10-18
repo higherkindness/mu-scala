@@ -76,7 +76,7 @@ object Utils extends CommonUtils {
     // Server Runtime Configuration //
     //////////////////////////////////
 
-    implicit val freesRPCHandler: ServerRPCService[ConcurrentMonad] =
+    implicit val muRPCHandler: ServerRPCService[ConcurrentMonad] =
       new ServerRPCService[ConcurrentMonad]
 
     val serverCertFile: File                         = TestUtils.loadCert("server1.pem")
