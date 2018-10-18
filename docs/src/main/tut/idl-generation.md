@@ -17,7 +17,7 @@ Add the following line to _project/plugins.sbt_:
 [comment]: # (Start Replace)
 
 ```scala
-addSbtPlugin("io.frees" % "sbt-frees-rpc-idlgen" % "0.15.1")
+addSbtPlugin("io.higherkindness" % "sbt-frees-rpc-idlgen" % "0.15.1")
 ```
 
 [comment]: # (End Replace)
@@ -249,7 +249,7 @@ The following example shows how to set up a dependency with another artifact or 
       srcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
       sourceGenerators in Compile += (Compile / srcGen).taskValue,
       libraryDependencies ++= Seq(
-        "io.frees" %% "frees-rpc-client-core" % V.muRPC
+        "io.higherkindness" %% "frees-rpc-client-core" % V.muRPC
       )
   )
 )

@@ -168,9 +168,9 @@ lazy val `benchmarks-vprev` = project
   // TODO: temporarily disabled until the project is migrated
 //  .settings(
 //    libraryDependencies ++= Seq(
-//      "io.frees" %% "frees-rpc-client-core" % lastReleasedV,
-//      "io.frees" %% "frees-rpc-server"      % lastReleasedV,
-//      "io.frees" %% "frees-rpc-testing"     % lastReleasedV
+//      "io.higherkindness" %% "frees-rpc-client-core" % lastReleasedV,
+//      "io.higherkindness" %% "frees-rpc-server"      % lastReleasedV,
+//      "io.higherkindness" %% "frees-rpc-testing"     % lastReleasedV
 //    )
 //  )
   // TODO: remove dependsOn and uncomment the lines above
