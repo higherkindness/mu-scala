@@ -8,9 +8,9 @@ permalink: /docs/rpc/ssl-tls
 
 > [gRPC](https://grpc.io/docs/guides/auth.html) has SSL/TLS integration and promotes the use of SSL/TLS to authenticate the server, and encrypt all the data exchanged between the client and the server. Optional mechanisms are available for clients to provide certificates for mutual authentication.
 
-[frees-rpc] allows you to encrypt the connection between the server and the client through SSL/TLS. The main goal of using SSL is to protect your sensitive information and keeps your data secure between servers and clients.
+[mu] allows you to encrypt the connection between the server and the client through SSL/TLS. The main goal of using SSL is to protect your sensitive information and keeps your data secure between servers and clients.
 
-As we mentioned in the [Quickstart](/docs/rpc/quickstart) section, we can choose and configure our client with `OkHttp` or `Netty` but if we want to encrypt our service, it's mandatory to use `Netty` because currently, [frees-rpc] only supports encryption over *Netty*.
+As we mentioned in the [Quickstart](/docs/rpc/quickstart) section, we can choose and configure our client with `OkHttp` or `Netty` but if we want to encrypt our service, it's mandatory to use `Netty` because currently, [mu] only supports encryption over *Netty*.
 
 ## Requirements 
 
@@ -22,7 +22,7 @@ On the server and client side, we will need two files to configure the `SslConte
 
 ## Usage
 
-The first step to secure our [frees-rpc] services is adding the library dependencies `frees-rpc-netty-ssl` and `frees-rpc-client-netty` in your build.
+The first step to secure our [mu] services is adding the library dependencies `mu-rpc-netty-ssl` and `mu-rpc-client-netty` in your build.
 
 In second place, we have to move both server/client certificates and private keys to the `resources` folder.
 
@@ -43,7 +43,7 @@ trait CommonRuntime {
 ```
 
 ```tut:invisible
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 import monix.execution.Scheduler
 
 object service {
@@ -67,7 +67,7 @@ object service {
 import cats.effect.Async
 import cats.syntax.applicative._
 import freestyle.free._
-import freestyle.rpc.server.implicits._
+import mu.rpc.server.implicits._
 import monix.execution.Scheduler
 import monix.eval.Task
 import monix.reactive.Observable
@@ -87,16 +87,16 @@ import java.security.cert.X509Certificate
 
 import cats.effect.IO
 import cats.effect.Effect
-import freestyle.rpc.protocol._
-import freestyle.rpc.server.netty.SetSslContext
-import freestyle.rpc.server.{AddService, GrpcConfig, GrpcServer}
+import mu.rpc.protocol._
+import mu.rpc.server.netty.SetSslContext
+import mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
 import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.GrpcSslContexts
 import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}
 
 trait Runtime extends CommonRuntime {
 
-    implicit val freesRPCHandler: ServiceHandler[IO] =
+    implicit val muRPCHandler: ServiceHandler[IO] =
       new ServiceHandler[IO]
 
     // First of all, we have to load the certs into files. These files have to be placed in the resources folder.
@@ -125,7 +125,7 @@ trait Runtime extends CommonRuntime {
     )
 
     // Important. We have to create the server with Netty. OkHttp is not supported for the Ssl 
-    // encryption in frees-rpc at this moment.
+    // encryption in mu-rpc at this moment.
 
     val server: IO[GrpcServer[IO]] = GrpcServer.netty[IO](8080, grpcConfigs)
 
@@ -138,9 +138,9 @@ object implicits extends Runtime
 Lastly, as we did before with the server side, let's see what happens on the client side.
 
 ```tut:silent
-import freestyle.rpc.ChannelForAddress
-import freestyle.rpc.client.OverrideAuthority
-import freestyle.rpc.client.netty.{
+import mu.rpc.ChannelForAddress
+import mu.rpc.client.OverrideAuthority
+import mu.rpc.client.netty.{
   NettyChannelInterpreter,
   NettyNegotiationType,
   NettySslContext,
@@ -184,7 +184,7 @@ object MainApp extends CommonRuntime {
         )
     )
 
-    val freesRPCServiceClient: Greeter.Client[IO] = 
+    val muRPCServiceClient: Greeter.Client[IO] = 
     	Greeter.clientFromChannel[IO](channelInterpreter.build)
 
 }
@@ -194,7 +194,7 @@ object MainApp extends CommonRuntime {
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/frees-io/freestyle-rpc
+[mu]: https://github.com/higherkindness/mu
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

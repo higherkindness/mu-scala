@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen.proto
+package mu.rpc.idlgen.proto
 
-import freestyle.rpc.idlgen._
-import freestyle.rpc.protocol._
-import freestyle.rpc.internal.util.{AstOptics, Toolbox}
+import mu.rpc.idlgen._
+import mu.rpc.protocol._
+import mu.rpc.internal.util.{AstOptics, Toolbox}
 
 object ProtoIdlGenerator extends IdlGenerator {
 
@@ -33,8 +33,8 @@ object ProtoIdlGenerator extends IdlGenerator {
 
   private val HeaderLines = Seq(
     "// This file has been automatically generated for use by",
-    "// the idlGen plugin, from frees-rpc service definitions.",
-    "// Read more at: http://frees.io/docs/rpc",
+    "// the idlGen plugin, from mu service definitions.",
+    "// Read more at: https://higherkindness.github.io/mu",
     "",
     "syntax = \"proto3\";",
     ""

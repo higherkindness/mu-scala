@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 
-import freestyle.rpc.idlgen.avro._
-import freestyle.rpc.idlgen.proto.ProtoIdlGenerator
-import freestyle.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
-import freestyle.rpc.internal.util.Toolbox.u._
-import freestyle.rpc.internal.util.AstOptics.ast
+import mu.rpc.idlgen.avro._
+import mu.rpc.idlgen.proto.ProtoIdlGenerator
+import mu.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
+import mu.rpc.internal.util.Toolbox.u._
+import mu.rpc.internal.util.AstOptics.ast
 
 package object idlgen {
 

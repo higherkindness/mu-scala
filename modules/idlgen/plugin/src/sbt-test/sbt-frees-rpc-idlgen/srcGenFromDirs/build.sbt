@@ -12,7 +12,7 @@ lazy val root = project
     srcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
     sourceGenerators in Compile += (Compile / srcGen).taskValue,
     libraryDependencies ++= Seq(
-      "io.frees"    %% "frees-rpc-client-core" % sys.props("version"),
+      "io.higherkindness"    %% "mu-rpc-client-core" % sys.props("version"),
       "com.chuusai" %% "shapeless"        % "2.3.2"
     )
   ))

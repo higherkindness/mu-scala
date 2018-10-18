@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package ssl
 
 import java.io.File
 import java.security.cert.X509Certificate
 
 import cats.effect.Effect
-import freestyle.rpc.common._
-import freestyle.rpc.protocol._
-import freestyle.rpc.server.netty.SetSslContext
-import freestyle.rpc.server.{AddService, GrpcConfig, GrpcServer}
+import mu.rpc.common._
+import mu.rpc.protocol._
+import mu.rpc.server.netty.SetSslContext
+import mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
 import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.GrpcSslContexts
 import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}
@@ -67,7 +67,7 @@ object Utils extends CommonUtils {
 
   }
 
-  trait FreesRuntime {
+  trait MuRuntime {
 
     import service._
     import handlers.server._
@@ -76,7 +76,7 @@ object Utils extends CommonUtils {
     // Server Runtime Configuration //
     //////////////////////////////////
 
-    implicit val freesRPCHandler: ServerRPCService[ConcurrentMonad] =
+    implicit val muRPCHandler: ServerRPCService[ConcurrentMonad] =
       new ServerRPCService[ConcurrentMonad]
 
     val serverCertFile: File                         = TestUtils.loadCert("server1.pem")
@@ -118,6 +118,6 @@ object Utils extends CommonUtils {
 
   }
 
-  object implicits extends FreesRuntime
+  object implicits extends MuRuntime
 
 }

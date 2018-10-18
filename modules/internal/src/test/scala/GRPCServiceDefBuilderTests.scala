@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package internal
 
-import freestyle.rpc.common.RpcBaseTestSuite
-import freestyle.rpc.internal.service.GRPCServiceDefBuilder
+import mu.rpc.common.RpcBaseTestSuite
+import mu.rpc.internal.service.GRPCServiceDefBuilder
 import io.grpc._
 import io.grpc.testing.TestMethodDescriptors
 

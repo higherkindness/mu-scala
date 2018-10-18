@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package internal
 
 import io.grpc.stub.{ServerCallStreamObserver, StreamObserver}
@@ -42,7 +42,7 @@ package object server {
       override def onNext(value: Req): Future[Ack] = in.onNext(value)
     }
 
-  import freestyle.rpc.internal.converters._
+  import mu.rpc.internal.converters._
 
   private[server] def transformStreamObserver[Req, Res](
       transformer: Observable[Req] => Observable[Res],

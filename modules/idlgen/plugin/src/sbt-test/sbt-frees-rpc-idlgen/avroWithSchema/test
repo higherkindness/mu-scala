@@ -3,12 +3,12 @@ $ exists src/main/resources/service.avdl
 > 'set srcGenSerializationType := "Avro"'
 > srcGen
 > compile
-$ exists target/scala-2.12/src_managed/main/io/frees/service.scala
-$ delete target/scala-2.12/src_managed/main/io/frees/service.scala
+$ exists target/scala-2.12/src_managed/main/io/higherkindness/service.scala
+$ delete target/scala-2.12/src_managed/main/io/higherkindness/service.scala
 
 $ exists src/main/resources/service.avdl
 > 'set idlType := "avro"'
 > 'set srcGenSerializationType := "AvroWithSchema"'
 > srcGen
 > compile
-$ exists target/scala-2.12/src_managed/main/io/frees/service.scala
+$ exists target/scala-2.12/src_managed/main/io/higherkindness/service.scala

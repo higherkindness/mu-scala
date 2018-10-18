@@ -6,9 +6,9 @@ permalink: /docs/rpc/idl-generation
 
 # IDL Generation
 
-Before entering implementation details, we mentioned that the [frees-rpc] ecosystem brings the ability to generate `.proto` files from the Scala definition, in order to maintain compatibility with other languages and systems outside of Scala.
+Before entering implementation details, we mentioned that the [mu] ecosystem brings the ability to generate `.proto` files from the Scala definition, in order to maintain compatibility with other languages and systems outside of Scala.
 
-This relies on `idlGen`, an sbt plugin to generate Protobuf and Avro IDL files from the [frees-rpc] service definitions.
+This relies on `idlGen`, an sbt plugin to generate Protobuf and Avro IDL files from the [mu] service definitions.
 
 ## Plugin Installation
 
@@ -17,7 +17,7 @@ Add the following line to _project/plugins.sbt_:
 [comment]: # (Start Replace)
 
 ```scala
-addSbtPlugin("io.frees" % "sbt-frees-rpc-idlgen" % "0.15.1")
+addSbtPlugin("io.higherkindness" % "sbt-mu-idlgen" % "0.15.1")
 ```
 
 [comment]: # (End Replace)
@@ -28,7 +28,7 @@ Note that the plugin is only available for Scala 2.12.
 
 Let's take our previous service, and add an Avro-specific request and some useful annotations described in the [Annotations section](/docs/rpc/annotations):
 ```tut:silent
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 
 @option("java_multiple_files", true)
 @option("java_outer_classname", "Quickstart")
@@ -72,8 +72,8 @@ Using this example, the resulting Protobuf IDL would be generated in `/src/main/
 
 ```
 // This file has been automatically generated for use by
-// the idlGen plugin, from frees-rpc service definitions.
-// Read more at: http://frees.io/docs/rpc/
+// the idlGen plugin, from mu-rpc service definitions.
+// Read more at: https://higherkindness.github.io/mu/
 
 syntax = "proto3";
 
@@ -151,15 +151,15 @@ Note that due to limitations in the Avro IDL, currently only unary RPC services 
 When using `idlGen`, there are a couple key settings that can be configured according to various needs:
 
 * **`idlType`**: the type of IDL to be generated, either `proto` or `avro`.
-* **`idlGenSourceDir`**: the Scala source base directory, where your [frees-rpc] definitions are placed. By default: `Compile / sourceDirectory`, typically `src/main/scala/`.
-* **`idlGenTargetDir`**: the IDL target base directory, where the `idlGen` task will write the IDL files in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on [frees-rpc] service definitions. By default: `Compile / resourceManaged`, typically `target/scala-2.12/resource_managed/main/`.
+* **`idlGenSourceDir`**: the Scala source base directory, where your [mu] definitions are placed. By default: `Compile / sourceDirectory`, typically `src/main/scala/`.
+* **`idlGenTargetDir`**: the IDL target base directory, where the `idlGen` task will write the IDL files in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on [mu] service definitions. By default: `Compile / resourceManaged`, typically `target/scala-2.12/resource_managed/main/`.
 
 The source directory must exist, otherwise, the `idlGen` task will fail. Target directories will be created upon generation.
 
 ## Generating source files from IDL
 
-You can also use this process in reverse and generate [frees-rpc] Scala classes from IDL definitions. Currently only Avro is supported, in both `.avpr` (JSON) and `.avdl` (Avro IDL) formats.
-The plugin's implementation basically wraps the [avrohugger] library and adds some freestyle-specific extensions.
+You can also use this process in reverse and generate [mu] Scala classes from IDL definitions. Currently only Avro is supported, in both `.avpr` (JSON) and `.avdl` (Avro IDL) formats.
+The plugin's implementation basically wraps the [avrohugger] library and adds some mu-specific extensions.
 
 To use it, run:
 ```bash
@@ -189,7 +189,7 @@ In the case of the `.avpr` file we generated above, the file `GreeterService.sca
 ```
 package quickstart
 
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 
 @message case class HelloRequest(greeting: String)
 
@@ -227,8 +227,8 @@ Just like `idlGen`, `srcGen` and `srcGenFromJars` has some configurable settings
   * `List(BigDecimalTaggedAvroMarshallers, JavaTimeDateAvroMarshallers)` if `srcGenSerializationType` is `Avro` or `AvroWithSchema` and `idlGenBigDecimal` is `ScalaBigDecimalTaggedGen`
   * `List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)` if `srcGenSerializationType` is `Protobuf`.
 
-The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also available, but they need the dependency `frees-rpc-marshallers-jodatime`. You can also specify custom imports with the following:
-  * `idlGenMarshallerImports := List(freestyle.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))`
+The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also available, but they need the dependency `mu-rpc-marshallers-jodatime`. You can also specify custom imports with the following:
+  * `idlGenMarshallerImports := List(mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))`
   * See the [Custom codecs section in core concepts](/docs/rpc/core-concepts#custom-codecs) for more information.
 
 The source directory must exist, otherwise, the `srcGen` task will fail. Target directories will be created upon generation.
@@ -249,7 +249,7 @@ The following example shows how to set up a dependency with another artifact or 
       srcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
       sourceGenerators in Compile += (Compile / srcGen).taskValue,
       libraryDependencies ++= Seq(
-        "io.frees" %% "frees-rpc-client-core" % V.freestyleRPC
+        "io.higherkindness" %% "mu-rpc-client-core" % V.muRPC
       )
   )
 )
@@ -260,7 +260,7 @@ The following example shows how to set up a dependency with another artifact or 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/frees-io/freestyle-rpc
+[mu]: https://github.com/higherkindness/mu
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package avro
 
-import freestyle.rpc.common._
-import freestyle.rpc.protocol._
+import mu.rpc.common._
+import mu.rpc.protocol._
 import cats.effect.Effect
 import shapeless.{:+:, CNil, Coproduct}
 
@@ -317,7 +317,7 @@ object Utils extends CommonUtils {
 
   }
 
-  trait FreesRuntime {
+  trait MuRuntime {
 
     import handlers._
 
@@ -392,11 +392,11 @@ object Utils extends CommonUtils {
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    implicit val freesRPCServiceClient: service.RPCService.Client[ConcurrentMonad] =
+    implicit val muRPCServiceClient: service.RPCService.Client[ConcurrentMonad] =
       service.RPCService.client[ConcurrentMonad](createChannelFor)
 
   }
 
-  object implicits extends FreesRuntime
+  object implicits extends MuRuntime
 
 }

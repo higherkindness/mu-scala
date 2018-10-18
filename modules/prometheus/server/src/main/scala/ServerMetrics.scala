@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package prometheus
 package server
 
-import freestyle.rpc.prometheus.shared.Configuration
+import mu.rpc.prometheus.shared.Configuration
 import io.prometheus.client._
 
 case class ServerMetrics(cfg: Configuration) {
 
-  import freestyle.rpc.interceptors.metrics._
-  import freestyle.rpc.prometheus.implicits._
+  import mu.rpc.interceptors.metrics._
+  import mu.rpc.prometheus.implicits._
 
   private[this] val serverStartedBuilder: Counter.Builder =
     serverMetricRpcStarted(cfg.namespace).toCounterBuilder

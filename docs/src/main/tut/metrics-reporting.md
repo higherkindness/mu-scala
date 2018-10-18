@@ -6,7 +6,7 @@ permalink: /docs/rpc/metrics-reporting
 
 # Metrics Reporting
 
-Currently, [frees-rpc] provides two different ways to monitor [gRPC] services: `Prometheus` and `Dropwizard` (using the `Prometheus` extension). The usage is quite similar for both.
+Currently, [mu] provides two different ways to monitor [gRPC] services: `Prometheus` and `Dropwizard` (using the `Prometheus` extension). The usage is quite similar for both.
 
 ## Monitor Server Calls
 
@@ -23,7 +23,7 @@ trait CommonRuntime {
 ```
 
 ```tut:invisible
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 
 object service {
 
@@ -46,7 +46,7 @@ object service {
 import cats.effect.Async
 import cats.syntax.applicative._
 import freestyle.free._
-import freestyle.rpc.server.implicits._
+import mu.rpc.server.implicits._
 import monix.execution.Scheduler
 import monix.eval.Task
 import monix.reactive.Observable
@@ -63,17 +63,17 @@ class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
 ```tut:silent
 import cats.~>
 import cats.effect.IO
-import freestyle.rpc.server._
-import freestyle.rpc.server.handlers._
-import freestyle.rpc.server.implicits._
-import freestyle.rpc.prometheus.shared.Configuration
-import freestyle.rpc.prometheus.server.MonitoringServerInterceptor
+import mu.rpc.server._
+import mu.rpc.server.handlers._
+import mu.rpc.server.implicits._
+import mu.rpc.prometheus.shared.Configuration
+import mu.rpc.prometheus.server.MonitoringServerInterceptor
 import io.prometheus.client.CollectorRegistry
 import service._
 
 object InterceptingServerCalls extends CommonRuntime {
 
-  import freestyle.rpc.interceptors.implicits._
+  import mu.rpc.interceptors.implicits._
 
   lazy val cr: CollectorRegistry = new CollectorRegistry()
   lazy val monitorInterceptor = MonitoringServerInterceptor(
@@ -99,19 +99,19 @@ In this case, in order to intercept the client calls we need additional configur
 ```tut:silent
 import cats.implicits._
 import cats.effect.IO
-import freestyle.rpc._
-import freestyle.rpc.config._
-import freestyle.rpc.client._
-import freestyle.rpc.client.config._
-import freestyle.rpc.client.implicits._
+import mu.rpc._
+import mu.rpc.config._
+import mu.rpc.client._
+import mu.rpc.client.config._
+import mu.rpc.client.implicits._
 import monix.eval.Task
 import io.grpc.ManagedChannel
 import service._
 
 import scala.util.{Failure, Success, Try}
 
-import freestyle.rpc.prometheus.shared.Configuration
-import freestyle.rpc.prometheus.client.MonitoringClientInterceptor
+import mu.rpc.prometheus.shared.Configuration
+import mu.rpc.prometheus.client.MonitoringClientInterceptor
 
 object InterceptingClientCalls extends CommonRuntime {
 
@@ -151,7 +151,7 @@ configuration.collectorRegistry.register(new DropwizardExports(metrics))
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/frees-io/freestyle-rpc
+[mu]: https://github.com/higherkindness/mu
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package client
 
-import freestyle.rpc.internal.TaskImplicits
+import mu.rpc.internal.TaskImplicits
 
 object implicits extends TaskImplicits

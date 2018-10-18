@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package protocol
 
 import cats.MonadError
 import cats.effect.Async
 import cats.syntax.applicative._
-import freestyle.rpc.common._
+import mu.rpc.common._
 import io.grpc.Status
 import monix.execution.Scheduler
 import monix.reactive.Observable
@@ -124,7 +124,7 @@ object Utils extends CommonUtils {
 
       import database._
       import service._
-      import freestyle.rpc.protocol._
+      import mu.rpc.protocol._
 
       class ServerRPCService[F[_]: Async](implicit M: MonadError[F, Throwable])
           extends ProtoRPCService[F]
@@ -259,10 +259,10 @@ object Utils extends CommonUtils {
     object client {
 
       import service._
-      import freestyle.rpc.protocol.Utils.client.MyRPCClient
-      import freestyle.rpc.protocol._
+      import mu.rpc.protocol.Utils.client.MyRPCClient
+      import mu.rpc.protocol._
 
-      class FreesRPCServiceClientHandler[F[_]: Async](
+      class MuRPCServiceClientHandler[F[_]: Async](
           implicit
           proto: ProtoRPCService.Client[F],
           aws: AvroWithSchemaRPCService.Client[F],
@@ -373,7 +373,7 @@ object Utils extends CommonUtils {
 
       }
 
-      class FreesRPCServiceClientCompressedHandler[F[_]: Async](
+      class MuRPCServiceClientCompressedHandler[F[_]: Async](
           implicit proto: CompressedProtoRPCService.Client[F],
           aws: CompressedAvroWithSchemaRPCService.Client[F],
           avro: CompressedAvroRPCService.Client[F],
@@ -487,17 +487,17 @@ object Utils extends CommonUtils {
 
   }
 
-  trait FreesRuntime {
+  trait MuRuntime {
 
     import service._
     import handlers.server._
-    import freestyle.rpc.server._
+    import mu.rpc.server._
 
     //////////////////////////////////
     // Server Runtime Configuration //
     //////////////////////////////////
 
-    implicit val freesRPCHandler: ServerRPCService[ConcurrentMonad] =
+    implicit val muRPCHandler: ServerRPCService[ConcurrentMonad] =
       new ServerRPCService[ConcurrentMonad]
 
     val grpcConfigs: List[GrpcConfig] = List(
@@ -533,6 +533,6 @@ object Utils extends CommonUtils {
 
   }
 
-  object implicits extends FreesRuntime
+  object implicits extends MuRuntime
 
 }

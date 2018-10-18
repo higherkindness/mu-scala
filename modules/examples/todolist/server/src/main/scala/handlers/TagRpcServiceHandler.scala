@@ -23,7 +23,7 @@ import examples.todolist.protocol._
 import examples.todolist.protocol.Protocols._
 import examples.todolist.service.TagService
 import examples.todolist.Tag
-import freestyle.rpc.protocol.Empty
+import mu.rpc.protocol.Empty
 
 class TagRpcServiceHandler[F[_]](implicit M: Monad[F], service: TagService[F])
     extends TagRpcService[F] {

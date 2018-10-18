@@ -9,13 +9,13 @@ We are using the [Java Microbenchmark Harness (JMH)](http://openjdk.java.net/pro
 Last released version:
 
 ```bash
-sbt "benchmarks-vprev/jmh:run -o proto-benchmark-results.txt -i 10 -wi 10 -f 2 -t 1 -r 1 -w 1 freestyle.rpc.benchmarks.ProtoBenchmark"
+sbt "benchmarks-vprev/jmh:run -o proto-benchmark-results.txt -i 10 -wi 10 -f 2 -t 1 -r 1 -w 1 mu.rpc.benchmarks.ProtoBenchmark"
 ```
 
 Next version:
 
 ```bash
-sbt "benchmarks-vnext/jmh:run -o proto-benchmark-results.txt -i 10 -wi 10 -f 2 -t 1 -r 1 -w 1 freestyle.rpc.benchmarks.ProtoBenchmark"
+sbt "benchmarks-vnext/jmh:run -o proto-benchmark-results.txt -i 10 -wi 10 -f 2 -t 1 -r 1 -w 1 mu.rpc.benchmarks.ProtoBenchmark"
 ```
 
 ### Avro Benchmarks
@@ -23,13 +23,13 @@ sbt "benchmarks-vnext/jmh:run -o proto-benchmark-results.txt -i 10 -wi 10 -f 2 -
 Last released version:
 
 ```bash
-sbt "benchmarks-vprev/jmh:run -o avro-benchmark-results.txt -i 10 -wi 10 -f 2 -t 1 -r 1 -w 1 freestyle.rpc.benchmarks.AvroBenchmark"
+sbt "benchmarks-vprev/jmh:run -o avro-benchmark-results.txt -i 10 -wi 10 -f 2 -t 1 -r 1 -w 1 mu.rpc.benchmarks.AvroBenchmark"
 ```
 
 Next version:
 
 ```bash
-sbt "benchmarks-vnext/jmh:run -o avro-benchmark-results.txt -i 10 -wi 10 -f 2 -t 1 -r 1 -w 1 freestyle.rpc.benchmarks.AvroBenchmark"
+sbt "benchmarks-vnext/jmh:run -o avro-benchmark-results.txt -i 10 -wi 10 -f 2 -t 1 -r 1 -w 1 mu.rpc.benchmarks.AvroBenchmark"
 ```
 
 ### AvroWithSchema Benchmarks
@@ -37,13 +37,13 @@ sbt "benchmarks-vnext/jmh:run -o avro-benchmark-results.txt -i 10 -wi 10 -f 2 -t
 Last released version:
 
 ```bash
-sbt "benchmarks-vprev/jmh:run -o avrowithschema-benchmark-results.txt -i 10 -wi 10 -f 2 -t 1 -r 1 -w 1 freestyle.rpc.benchmarks.AvroWithSchemaBenchmark"
+sbt "benchmarks-vprev/jmh:run -o avrowithschema-benchmark-results.txt -i 10 -wi 10 -f 2 -t 1 -r 1 -w 1 mu.rpc.benchmarks.AvroWithSchemaBenchmark"
 ```
 
 Next version:
 
 ```bash
-sbt "benchmarks-vnext/jmh:run -o avrowithschema-benchmark-results.txt -i 10 -wi 10 -f 2 -t 1 -r 1 -w 1 freestyle.rpc.benchmarks.AvroWithSchemaBenchmark"
+sbt "benchmarks-vnext/jmh:run -o avrowithschema-benchmark-results.txt -i 10 -wi 10 -f 2 -t 1 -r 1 -w 1 mu.rpc.benchmarks.AvroWithSchemaBenchmark"
 ```
 
 ### Parameters

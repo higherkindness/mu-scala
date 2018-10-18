@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen.avro
+package mu.rpc.idlgen.avro
 
 import java.io.File
 import scala.annotation.tailrec

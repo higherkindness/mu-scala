@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package client
 
 import java.net.URI
 import java.util.concurrent.{Callable, Executor, Executors, TimeUnit}
 
 import com.google.common.util.concurrent.{ListenableFuture, ListeningExecutorService, MoreExecutors}
-import freestyle.rpc.client.utils.StringMarshaller
-import freestyle.rpc.common.{RpcBaseTestSuite, SC}
-import freestyle.rpc.testing.client.FakeNameResolverFactory
-import freestyle.rpc.testing.interceptors.NoopInterceptor
+import mu.rpc.client.utils.StringMarshaller
+import mu.rpc.common.{RpcBaseTestSuite, SC}
+import mu.rpc.testing.client.FakeNameResolverFactory
+import mu.rpc.testing.interceptors.NoopInterceptor
 import io.grpc.internal.testing.TestUtils
 import io.grpc.util.RoundRobinLoadBalancerFactory
 import io.grpc._

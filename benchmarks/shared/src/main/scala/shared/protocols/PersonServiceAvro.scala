@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.benchmarks
+package mu.rpc.benchmarks
 package shared
 package protocols
 
-import freestyle.rpc.benchmarks.shared.models._
-import freestyle.rpc.protocol._
+import mu.rpc.benchmarks.shared.models._
+import mu.rpc.protocol._
 
 @service(Avro)
 trait PersonServiceAvro[F[_]] {

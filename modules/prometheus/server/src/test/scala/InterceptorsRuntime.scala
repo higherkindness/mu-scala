@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package prometheus
 package server
 
-import freestyle.rpc.common.ConcurrentMonad
-import freestyle.rpc.prometheus.shared.Configuration
-import freestyle.rpc.protocol.Utils._
+import mu.rpc.common.ConcurrentMonad
+import mu.rpc.prometheus.shared.Configuration
+import mu.rpc.protocol.Utils._
 import io.prometheus.client.CollectorRegistry
 
 case class InterceptorsRuntime(
@@ -31,8 +31,8 @@ case class InterceptorsRuntime(
   import service._
   import handlers.server._
   import handlers.client._
-  import freestyle.rpc.server._
-  import freestyle.rpc.interceptors.implicits._
+  import mu.rpc.server._
+  import mu.rpc.interceptors.implicits._
 
   //////////////////////////////////
   // Server Runtime Configuration //
@@ -52,30 +52,30 @@ case class InterceptorsRuntime(
   implicit lazy val grpcServer: GrpcServer[ConcurrentMonad] =
     createServerConfOnRandomPort[ConcurrentMonad](grpcConfigs).unsafeRunSync
 
-  implicit lazy val freesRPCHandler: ServerRPCService[ConcurrentMonad] =
+  implicit lazy val muRPCHandler: ServerRPCService[ConcurrentMonad] =
     new ServerRPCService[ConcurrentMonad]
 
   //////////////////////////////////
   // Client Runtime Configuration //
   //////////////////////////////////
 
-  implicit lazy val freesProtoRPCServiceClient: ProtoRPCService.Client[ConcurrentMonad] =
+  implicit lazy val muProtoRPCServiceClient: ProtoRPCService.Client[ConcurrentMonad] =
     ProtoRPCService.client[ConcurrentMonad](
       channelFor = createChannelForPort(pickUnusedPort)
     )
 
-  implicit lazy val freesAvroRPCServiceClient: AvroRPCService.Client[ConcurrentMonad] =
+  implicit lazy val muAvroRPCServiceClient: AvroRPCService.Client[ConcurrentMonad] =
     AvroRPCService.client[ConcurrentMonad](
       channelFor = createChannelForPort(pickUnusedPort)
     )
 
-  implicit lazy val freesAvroWithSchemaRPCServiceClient: AvroWithSchemaRPCService.Client[
+  implicit lazy val muAvroWithSchemaRPCServiceClient: AvroWithSchemaRPCService.Client[
     ConcurrentMonad] =
     AvroWithSchemaRPCService.client[ConcurrentMonad](
       channelFor = createChannelForPort(pickUnusedPort)
     )
 
-  implicit lazy val freesRPCServiceClientHandler: FreesRPCServiceClientHandler[ConcurrentMonad] =
-    new FreesRPCServiceClientHandler[ConcurrentMonad]
+  implicit lazy val muRPCServiceClientHandler: MuRPCServiceClientHandler[ConcurrentMonad] =
+    new MuRPCServiceClientHandler[ConcurrentMonad]
 
 }

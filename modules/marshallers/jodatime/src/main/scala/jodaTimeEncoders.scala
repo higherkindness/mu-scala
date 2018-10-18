@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package marshallers
 
 import java.io.{ByteArrayInputStream, InputStream}
 
 import com.google.common.io.ByteStreams
 import com.google.protobuf.{CodedInputStream, CodedOutputStream}
-import freestyle.rpc.internal.util.EncoderUtil
-import freestyle.rpc.jodatime.util.JodaTimeUtil
+import mu.rpc.internal.util.EncoderUtil
+import mu.rpc.jodatime.util.JodaTimeUtil
 import io.grpc.MethodDescriptor.Marshaller
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Field

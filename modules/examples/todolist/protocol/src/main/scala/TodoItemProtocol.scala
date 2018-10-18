@@ -33,7 +33,7 @@
 package examples.todolist
 package protocol
 
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 
 trait TodoItemProtocol {
 

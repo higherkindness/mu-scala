@@ -219,13 +219,13 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
-      micrositeName := "Frees-rpc",
-      micrositeBaseUrl := "/freestyle-rpc",
+      micrositeName := "Mu",
+      micrositeBaseUrl := "/mu",
       micrositeDescription := "A purely functional library for building RPC endpoint-based services",
       micrositeDocumentationUrl := "docs/rpc/core-concepts.html",
       micrositeGithubOwner := "higherkindness",
-      micrositeGithubRepo := "freestyle-rpc",
-      micrositeGitterChannelUrl := "47deg/freestyle",
+      micrositeGithubRepo := "mu",
+      micrositeGitterChannelUrl := "47deg/mu",
       micrositeOrganizationHomepage := "http://www.47deg.com",
       includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
       micrositePushSiteWith := GitHub4s
@@ -243,15 +243,15 @@ object ProjectPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] =
     sharedReleaseProcess ++ warnUnusedImport ++ Seq(
-      description := "Freestyle RPC is a purely functional library for " +
+      description := "mu RPC is a purely functional library for " +
         "building RPC endpoint based services with support for RPC and HTTP/2",
       startYear := Some(2017),
-      orgProjectName := "frees-rpc",
+      orgProjectName := "mu",
       orgGithubSetting := GitHubSettings(
         organization = "higherkindness",
         project = (name in LocalRootProject).value,
         organizationName = "47 Degrees",
-        groupId = "io.frees",
+        groupId = "io.higherkindness",
         organizationHomePage = url("http://47deg.com"),
         organizationEmail = "hello@47deg.com"
       ),
@@ -274,19 +274,19 @@ object ProjectPlugin extends AutoPlugin {
       orgMaintainersSetting := List(Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
       orgBadgeListSetting := List(
         TravisBadge.apply,
-        CodecovBadge.apply, { info => MavenCentralBadge.apply(info.copy(libName = "frees-rpc")) },
+        CodecovBadge.apply, { info => MavenCentralBadge.apply(info.copy(libName = "mu")) },
         ScalaLangBadge.apply,
         LicenseBadge.apply,
-        // Gitter badge (owner field) can be configured with default value if we migrate it to the frees-io organization
-        { info => GitterBadge.apply(info.copy(owner = "47deg", repo = "freestyle")) },
+        // Gitter badge (owner field) can be configured with default value if we migrate it to the higherkindness organization
+        { info => GitterBadge.apply(info.copy(owner = "47deg", repo = "mu")) },
         GitHubIssuesBadge.apply
       ),
       orgEnforcedFilesSetting := List(
         LicenseFileType(orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
         ContributingFileType(
           orgProjectName.value,
-          // Organization field can be configured with default value if we migrate it to the frees-io organization
-          orgGithubSetting.value.copy(organization = "47deg", project = "freestyle")
+          // Organization field can be configured with default value if we migrate it to the higherkindness organization
+          orgGithubSetting.value.copy(organization = "47deg", project = "mu")
         ),
         AuthorsFileType(
           name.value,

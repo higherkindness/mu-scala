@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package mu.rpc.idlgen
 
-import freestyle.rpc.internal.util.Toolbox
-import freestyle.rpc.internal.util.StringUtil._
-import freestyle.rpc.protocol._
+import mu.rpc.internal.util.Toolbox
+import mu.rpc.internal.util.StringUtil._
+import mu.rpc.protocol._
 
 object Model {
 
@@ -70,19 +70,19 @@ object Model {
 
   final case class CustomMarshallersImport(mi: String) extends MarshallersImport(mi)
   case object BigDecimalAvroMarshallers
-      extends MarshallersImport("freestyle.rpc.internal.encoders.avro.bigdecimal._")
+      extends MarshallersImport("mu.rpc.internal.encoders.avro.bigdecimal._")
   case object BigDecimalTaggedAvroMarshallers
-      extends MarshallersImport("freestyle.rpc.internal.encoders.avro.bigDecimalTagged._")
+      extends MarshallersImport("mu.rpc.internal.encoders.avro.bigDecimalTagged._")
   case object JavaTimeDateAvroMarshallers
-      extends MarshallersImport("freestyle.rpc.internal.encoders.avro.javatime._")
+      extends MarshallersImport("mu.rpc.internal.encoders.avro.javatime._")
   case object JodaDateTimeAvroMarshallers
-      extends MarshallersImport("freestyle.rpc.marshallers.jodaTimeEncoders.avro._")
+      extends MarshallersImport("mu.rpc.marshallers.jodaTimeEncoders.avro._")
   case object BigDecimalProtobufMarshallers
-      extends MarshallersImport("freestyle.rpc.internal.encoders.pbd.bigdecimal._")
+      extends MarshallersImport("mu.rpc.internal.encoders.pbd.bigdecimal._")
   case object JavaTimeDateProtobufMarshallers
-      extends MarshallersImport("freestyle.rpc.internal.encoders.pbd.javatime._")
+      extends MarshallersImport("mu.rpc.internal.encoders.pbd.javatime._")
   case object JodaDateTimeProtobufMarshallers
-      extends MarshallersImport("freestyle.rpc.marshallers.jodaTimeEncoders.pbd._")
+      extends MarshallersImport("mu.rpc.marshallers.jodaTimeEncoders.pbd._")
 
   sealed trait BigDecimalTypeGen       extends Product with Serializable
   case object ScalaBigDecimalGen       extends BigDecimalTypeGen

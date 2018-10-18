@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package mu.rpc.idlgen
 
-import freestyle.rpc.common.RpcBaseTestSuite
-import freestyle.rpc.idlgen.avro.{AvroIdlGenerator, AvroWithSchemaIdlGenerator}
-import freestyle.rpc.idlgen.proto.ProtoIdlGenerator
-import freestyle.rpc.idlgen.Model._
-import freestyle.rpc.protocol._
-import freestyle.rpc.internal.util._
+import mu.rpc.common.RpcBaseTestSuite
+import mu.rpc.idlgen.avro.{AvroIdlGenerator, AvroWithSchemaIdlGenerator}
+import mu.rpc.idlgen.proto.ProtoIdlGenerator
+import mu.rpc.idlgen.Model._
+import mu.rpc.protocol._
+import mu.rpc.internal.util._
 
 class IdlGenTests extends RpcBaseTestSuite {
   // format: OFF

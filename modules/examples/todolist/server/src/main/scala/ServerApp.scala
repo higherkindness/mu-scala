@@ -19,8 +19,8 @@ package examples.todolist.server
 import cats.effect.IO
 import examples.todolist.protocol.Protocols._
 import examples.todolist.server.implicits._
-import freestyle.rpc.server.config.BuildServerFromConfig
-import freestyle.rpc.server.{AddService, GrpcConfig, GrpcServer}
+import mu.rpc.server.config.BuildServerFromConfig
+import mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
 
 object ServerApp {
 

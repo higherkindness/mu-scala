@@ -1,4 +1,4 @@
-@namespace("io.frees")
+@namespace("io.higherkindness")
 protocol service {
 
   record Foo {
@@ -11,6 +11,6 @@ protocol service {
     union { null, string } email;
   }
 
-  io.frees.Person hi(io.frees.Foo request);
+  io.higherkindness.Person hi(io.higherkindness.Foo request);
 
 }

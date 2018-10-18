@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package protocol
 
 import org.joda.time._
@@ -23,8 +23,8 @@ import cats.Applicative
 import cats.syntax.applicative._
 import com.fortysevendeg.scalacheck.datetime.instances.joda._
 import com.fortysevendeg.scalacheck.datetime.GenDateTime._
-import freestyle.rpc.common._
-import freestyle.rpc.testing.servers.withServerChannel
+import mu.rpc.common._
+import mu.rpc.testing.servers.withServerChannel
 import org.scalacheck.Arbitrary
 import org.scalatest._
 import org.scalacheck.Prop._
@@ -39,7 +39,7 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
     case class Response(date: LocalDate, label: String, check: Boolean)
 
     object ProtobufService {
-      import freestyle.rpc.marshallers.jodaTimeEncoders.pbd._
+      import mu.rpc.marshallers.jodaTimeEncoders.pbd._
       @service(Protobuf)
       trait Def[F[_]] {
         def jodaLocalDateProto(date: LocalDate): F[LocalDate]
@@ -48,8 +48,8 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
     }
 
     object AvroService {
-      import freestyle.rpc.marshallers.jodaTimeEncoders.avro._
-      import freestyle.rpc.marshallers.jodaTimeEncoders.avro.marshallers._
+      import mu.rpc.marshallers.jodaTimeEncoders.avro._
+      import mu.rpc.marshallers.jodaTimeEncoders.avro.marshallers._
       @service(Avro)
       trait Def[F[_]] {
         def jodaLocalDateAvro(date: LocalDate): F[LocalDate]

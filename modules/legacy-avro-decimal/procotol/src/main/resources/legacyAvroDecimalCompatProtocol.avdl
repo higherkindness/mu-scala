@@ -1,4 +1,4 @@
-@namespace("freestyle.rpc.protocol.legacy")
+@namespace("mu.rpc.protocol.legacy")
 
 protocol AvroDecimalCompat {
 

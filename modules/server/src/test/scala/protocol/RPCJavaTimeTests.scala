@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package protocol
 
 import java.time._
@@ -24,11 +24,11 @@ import cats.syntax.applicative._
 import com.fortysevendeg.scalacheck.datetime.instances.jdk8._
 import com.fortysevendeg.scalacheck.datetime.GenDateTime._
 import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.seconds
-import freestyle.rpc.common._
-import freestyle.rpc.internal.encoders.avro.javatime._
-import freestyle.rpc.internal.encoders.avro.javatime.marshallers._
-import freestyle.rpc.internal.encoders.pbd.javatime._
-import freestyle.rpc.testing.servers.withServerChannel
+import mu.rpc.common._
+import mu.rpc.internal.encoders.avro.javatime._
+import mu.rpc.internal.encoders.avro.javatime.marshallers._
+import mu.rpc.internal.encoders.pbd.javatime._
+import mu.rpc.testing.servers.withServerChannel
 import org.scalacheck.Arbitrary
 import org.scalatest._
 import org.scalacheck.Prop._

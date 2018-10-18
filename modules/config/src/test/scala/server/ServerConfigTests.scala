@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package server
 package config
 
-import freestyle.rpc.common.{ConcurrentMonad, SC}
+import mu.rpc.common.{ConcurrentMonad, SC}
 
 import scala.concurrent.ExecutionContext
 
