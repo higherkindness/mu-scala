@@ -219,7 +219,7 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
-      micrositeName := "Frees-rpc",
+      micrositeName := "Mu-rpc",
       micrositeBaseUrl := "/mu-rpc",
       micrositeDescription := "A purely functional library for building RPC endpoint-based services",
       micrositeDocumentationUrl := "docs/rpc/core-concepts.html",

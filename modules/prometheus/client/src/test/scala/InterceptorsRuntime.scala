@@ -22,7 +22,7 @@ import mu.rpc.client._
 import mu.rpc.common.ConcurrentMonad
 import mu.rpc.prometheus.shared.Configuration
 import mu.rpc.protocol.Utils._
-import mu.rpc.protocol.Utils.handlers.client.FreesRPCServiceClientHandler
+import mu.rpc.protocol.Utils.handlers.client.MuRPCServiceClientHandler
 import io.prometheus.client.CollectorRegistry
 
 case class InterceptorsRuntime(
@@ -76,7 +76,7 @@ case class InterceptorsRuntime(
       channelConfigList = configList
     )
 
-  implicit lazy val muRPCServiceClientHandler: FreesRPCServiceClientHandler[ConcurrentMonad] =
-    new FreesRPCServiceClientHandler[ConcurrentMonad]
+  implicit lazy val muRPCServiceClientHandler: MuRPCServiceClientHandler[ConcurrentMonad] =
+    new MuRPCServiceClientHandler[ConcurrentMonad]
 
 }

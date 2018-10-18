@@ -63,8 +63,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   "mu-rpc client" should {
 
-    implicit val muRPCServiceClientHandler: FreesRPCServiceClientHandler[ConcurrentMonad] =
-      new FreesRPCServiceClientHandler[ConcurrentMonad]
+    implicit val muRPCServiceClientHandler: MuRPCServiceClientHandler[ConcurrentMonad] =
+      new MuRPCServiceClientHandler[ConcurrentMonad]
 
     "be able to run unary services" in {
 
@@ -270,9 +270,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   "mu-rpc client with compression" should {
 
-    implicit val muRPCServiceClientHandler: FreesRPCServiceClientCompressedHandler[
-      ConcurrentMonad] =
-      new FreesRPCServiceClientCompressedHandler[ConcurrentMonad]
+    implicit val muRPCServiceClientHandler: MuRPCServiceClientCompressedHandler[ConcurrentMonad] =
+      new MuRPCServiceClientCompressedHandler[ConcurrentMonad]
 
     "be able to run unary services" in {
 

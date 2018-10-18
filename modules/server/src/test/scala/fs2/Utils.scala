@@ -137,7 +137,7 @@ object Utils extends CommonUtils {
 
   }
 
-  trait FreesRuntime {
+  trait MuRuntime {
 
     import service._
     import handlers.server._
@@ -185,6 +185,6 @@ object Utils extends CommonUtils {
 
   }
 
-  object implicits extends FreesRuntime
+  object implicits extends MuRuntime
 
 }

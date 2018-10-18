@@ -317,7 +317,7 @@ object Utils extends CommonUtils {
 
   }
 
-  trait FreesRuntime {
+  trait MuRuntime {
 
     import handlers._
 
@@ -397,6 +397,6 @@ object Utils extends CommonUtils {
 
   }
 
-  object implicits extends FreesRuntime
+  object implicits extends MuRuntime
 
 }

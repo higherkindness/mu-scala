@@ -262,7 +262,7 @@ object Utils extends CommonUtils {
       import mu.rpc.protocol.Utils.client.MyRPCClient
       import mu.rpc.protocol._
 
-      class FreesRPCServiceClientHandler[F[_]: Async](
+      class MuRPCServiceClientHandler[F[_]: Async](
           implicit
           proto: ProtoRPCService.Client[F],
           aws: AvroWithSchemaRPCService.Client[F],
@@ -373,7 +373,7 @@ object Utils extends CommonUtils {
 
       }
 
-      class FreesRPCServiceClientCompressedHandler[F[_]: Async](
+      class MuRPCServiceClientCompressedHandler[F[_]: Async](
           implicit proto: CompressedProtoRPCService.Client[F],
           aws: CompressedAvroWithSchemaRPCService.Client[F],
           avro: CompressedAvroRPCService.Client[F],
@@ -487,7 +487,7 @@ object Utils extends CommonUtils {
 
   }
 
-  trait FreesRuntime {
+  trait MuRuntime {
 
     import service._
     import handlers.server._
@@ -533,6 +533,6 @@ object Utils extends CommonUtils {
 
   }
 
-  object implicits extends FreesRuntime
+  object implicits extends MuRuntime
 
 }
