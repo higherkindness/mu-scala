@@ -114,7 +114,7 @@ As you can see, the generic handler above requires `F` as the type parameter, wh
 
 ### Execution Context
 
-In [frees-rpc] programs, we'll at least need an implicit evidence related to the [Monix] Execution Context: `monix.execution.Scheduler`.
+In [mu-rpc] programs, we'll at least need an implicit evidence related to the [Monix] Execution Context: `monix.execution.Scheduler`.
 
 > The `monix.execution.Scheduler` is inspired by `ReactiveX`, being an enhanced Scala `ExecutionContext` and also a replacement for Java’s `ScheduledExecutorService`, but also for Javascript’s `setTimeout`.
 
@@ -132,7 +132,7 @@ As a side note, `CommonRuntime` will also be used later on for the client exampl
 
 ### Runtime Implicits
 
-For the server bootstrapping, remember adding `frees-rpc-server` dependency to your build.
+For the server bootstrapping, remember adding `mu-rpc-server` dependency to your build.
 
 Now, we need to implicitly provide two things:
 
@@ -240,9 +240,9 @@ run(new ServiceSpec)
 
 ## Client
 
-[frees-rpc] derives a client automatically based on the protocol. This is especially useful because you can distribute it depending on the protocol/service definitions. If you change something in your protocol definition, you will get a new client for free without having to write anything.
+[mu-rpc] derives a client automatically based on the protocol. This is especially useful because you can distribute it depending on the protocol/service definitions. If you change something in your protocol definition, you will get a new client for free without having to write anything.
 
-You will need to add either `frees-rpc-client-netty` or `frees-rpc-client-okhttp` to your build.
+You will need to add either `mu-rpc-client-netty` or `mu-rpc-client-okhttp` to your build.
 
 ### Client Runtime
 
@@ -252,7 +252,7 @@ Similarly in this section, as we saw for the server case, we are defining all th
 
 In our example, we are going to use the same Execution Context described for the Server. However, for the sake of observing a slightly different runtime configuration, our client will be interpreting to `monix.eval.Task`. Hence, in this case, we would only need the `monix.execution.Scheduler` implicit evidence.
 
-We are going to interpret to `monix.eval.Task`, however, behind the scenes, we will use the [cats-effect] `IO` monad as an abstraction. Concretely, Freestyle has an integration with `cats-effect` that is included transitively in the classpath through `frees-async-cats-effect` dependency.
+We are going to interpret to `monix.eval.Task`, however, behind the scenes, we will use the [cats-effect] `IO` monad as an abstraction. Concretely, Freestyle has an integration with `cats-effect` that is included transitively in the classpath through `mu-async-cats-effect` dependency.
 
 ### Runtime Implicits
 
@@ -295,7 +295,7 @@ object gclient {
 **Notes**:
 
 * `host` and `port` would be read from the application configuration file.
-* To be able to use the `ConfigForAddress` helper, you need to add the `frees-rpc-config` dependency to your build.
+* To be able to use the `ConfigForAddress` helper, you need to add the `mu-rpc-config` dependency to your build.
 
 ### Client Program
 
@@ -326,7 +326,7 @@ object RPCDemoApp {
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/higherkindness/mu-rpc
+[mu-rpc]: https://github.com/higherkindness/mu-rpc
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

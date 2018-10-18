@@ -6,9 +6,9 @@ permalink: /docs/rpc/idl-generation
 
 # IDL Generation
 
-Before entering implementation details, we mentioned that the [frees-rpc] ecosystem brings the ability to generate `.proto` files from the Scala definition, in order to maintain compatibility with other languages and systems outside of Scala.
+Before entering implementation details, we mentioned that the [mu-rpc] ecosystem brings the ability to generate `.proto` files from the Scala definition, in order to maintain compatibility with other languages and systems outside of Scala.
 
-This relies on `idlGen`, an sbt plugin to generate Protobuf and Avro IDL files from the [frees-rpc] service definitions.
+This relies on `idlGen`, an sbt plugin to generate Protobuf and Avro IDL files from the [mu-rpc] service definitions.
 
 ## Plugin Installation
 
@@ -17,7 +17,7 @@ Add the following line to _project/plugins.sbt_:
 [comment]: # (Start Replace)
 
 ```scala
-addSbtPlugin("io.higherkindness" % "sbt-frees-rpc-idlgen" % "0.15.1")
+addSbtPlugin("io.higherkindness" % "sbt-mu-rpc-idlgen" % "0.15.1")
 ```
 
 [comment]: # (End Replace)
@@ -72,7 +72,7 @@ Using this example, the resulting Protobuf IDL would be generated in `/src/main/
 
 ```
 // This file has been automatically generated for use by
-// the idlGen plugin, from frees-rpc service definitions.
+// the idlGen plugin, from mu-rpc service definitions.
 // Read more at: https://higherkindness.github.io/mu-rpc/
 
 syntax = "proto3";
@@ -151,14 +151,14 @@ Note that due to limitations in the Avro IDL, currently only unary RPC services 
 When using `idlGen`, there are a couple key settings that can be configured according to various needs:
 
 * **`idlType`**: the type of IDL to be generated, either `proto` or `avro`.
-* **`idlGenSourceDir`**: the Scala source base directory, where your [frees-rpc] definitions are placed. By default: `Compile / sourceDirectory`, typically `src/main/scala/`.
-* **`idlGenTargetDir`**: the IDL target base directory, where the `idlGen` task will write the IDL files in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on [frees-rpc] service definitions. By default: `Compile / resourceManaged`, typically `target/scala-2.12/resource_managed/main/`.
+* **`idlGenSourceDir`**: the Scala source base directory, where your [mu-rpc] definitions are placed. By default: `Compile / sourceDirectory`, typically `src/main/scala/`.
+* **`idlGenTargetDir`**: the IDL target base directory, where the `idlGen` task will write the IDL files in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on [mu-rpc] service definitions. By default: `Compile / resourceManaged`, typically `target/scala-2.12/resource_managed/main/`.
 
 The source directory must exist, otherwise, the `idlGen` task will fail. Target directories will be created upon generation.
 
 ## Generating source files from IDL
 
-You can also use this process in reverse and generate [frees-rpc] Scala classes from IDL definitions. Currently only Avro is supported, in both `.avpr` (JSON) and `.avdl` (Avro IDL) formats.
+You can also use this process in reverse and generate [mu-rpc] Scala classes from IDL definitions. Currently only Avro is supported, in both `.avpr` (JSON) and `.avdl` (Avro IDL) formats.
 The plugin's implementation basically wraps the [avrohugger] library and adds some mu-specific extensions.
 
 To use it, run:
@@ -227,7 +227,7 @@ Just like `idlGen`, `srcGen` and `srcGenFromJars` has some configurable settings
   * `List(BigDecimalTaggedAvroMarshallers, JavaTimeDateAvroMarshallers)` if `srcGenSerializationType` is `Avro` or `AvroWithSchema` and `idlGenBigDecimal` is `ScalaBigDecimalTaggedGen`
   * `List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)` if `srcGenSerializationType` is `Protobuf`.
 
-The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also available, but they need the dependency `frees-rpc-marshallers-jodatime`. You can also specify custom imports with the following:
+The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also available, but they need the dependency `mu-rpc-marshallers-jodatime`. You can also specify custom imports with the following:
   * `idlGenMarshallerImports := List(mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))`
   * See the [Custom codecs section in core concepts](/docs/rpc/core-concepts#custom-codecs) for more information.
 
@@ -249,7 +249,7 @@ The following example shows how to set up a dependency with another artifact or 
       srcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
       sourceGenerators in Compile += (Compile / srcGen).taskValue,
       libraryDependencies ++= Seq(
-        "io.higherkindness" %% "frees-rpc-client-core" % V.muRPC
+        "io.higherkindness" %% "mu-rpc-client-core" % V.muRPC
       )
   )
 )
@@ -260,7 +260,7 @@ The following example shows how to set up a dependency with another artifact or 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/higherkindness/mu-rpc
+[mu-rpc]: https://github.com/higherkindness/mu-rpc
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

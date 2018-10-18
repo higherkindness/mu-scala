@@ -43,7 +43,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
   override protected def afterAll(): Unit =
     serverStop[ConcurrentMonad].unsafeRunSync()
 
-  "frees-rpc server" should {
+  "mu-rpc server" should {
 
     "allow to startup a server and check if it's alive" in {
 
@@ -65,7 +65,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   }
 
-  "frees-rpc client should work with SSL/TSL connection" should {
+  "mu-rpc client should work with SSL/TSL connection" should {
 
     "work when certificates are valid" in {
 

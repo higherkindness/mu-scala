@@ -246,7 +246,7 @@ object ProjectPlugin extends AutoPlugin {
       description := "mu RPC is a purely functional library for " +
         "building RPC endpoint based services with support for RPC and HTTP/2",
       startYear := Some(2017),
-      orgProjectName := "frees-rpc",
+      orgProjectName := "mu-rpc",
       orgGithubSetting := GitHubSettings(
         organization = "higherkindness",
         project = (name in LocalRootProject).value,
@@ -274,7 +274,7 @@ object ProjectPlugin extends AutoPlugin {
       orgMaintainersSetting := List(Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
       orgBadgeListSetting := List(
         TravisBadge.apply,
-        CodecovBadge.apply, { info => MavenCentralBadge.apply(info.copy(libName = "frees-rpc")) },
+        CodecovBadge.apply, { info => MavenCentralBadge.apply(info.copy(libName = "mu-rpc")) },
         ScalaLangBadge.apply,
         LicenseBadge.apply,
         // Gitter badge (owner field) can be configured with default value if we migrate it to the higherkindness organization

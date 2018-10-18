@@ -6,7 +6,7 @@ permalink: /docs/rpc/metrics-reporting
 
 # Metrics Reporting
 
-Currently, [frees-rpc] provides two different ways to monitor [gRPC] services: `Prometheus` and `Dropwizard` (using the `Prometheus` extension). The usage is quite similar for both.
+Currently, [mu-rpc] provides two different ways to monitor [gRPC] services: `Prometheus` and `Dropwizard` (using the `Prometheus` extension). The usage is quite similar for both.
 
 ## Monitor Server Calls
 
@@ -151,7 +151,7 @@ configuration.collectorRegistry.register(new DropwizardExports(metrics))
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/higherkindness/mu-rpc
+[mu-rpc]: https://github.com/higherkindness/mu-rpc
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
