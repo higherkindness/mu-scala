@@ -8,5 +8,4 @@ The maintainers of the project are:
 
 ## Contributors
 
-These are the people that have contributed to the mu-rpc project:
-
+These are the people that have contributed to the mu project:
