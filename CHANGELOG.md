@@ -1,5 +1,13 @@
 # Changelog
 
+## 10/20/2018 - Version 0.16.0
+
+Release changes:
+
+* Renames Project ([#444](https://github.com/higherkindness/mu/pull/444))
+* Adds New Publish Settings to Travis ([#445](https://github.com/higherkindness/mu/pull/445))
+* Releases 0.16.0 ([#446](https://github.com/higherkindness/mu/pull/446))
+
 ## 10/12/2018 - Version 0.15.1
 
 Release changes:
@@ -11,7 +19,7 @@ Release changes:
 * Migration guide for decimals ([#412](https://github.com/higherkindness/mu/pull/412))
 * Fixes the tagged decimal code generation ([#410](https://github.com/higherkindness/mu/pull/410))
 * Releases version 0.15.1 ([#413](https://github.com/higherkindness/mu/pull/413))
-* Decoupling sbt-mu ([#414](https://github.com/higherkindness/mu/pull/414))
+* Decoupling sbt-freestyle ([#414](https://github.com/higherkindness/mu/pull/414))
 
 
 ## 09/26/2018 - Version 0.15.0
