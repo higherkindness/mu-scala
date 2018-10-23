@@ -26,16 +26,16 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String             = "1.8.3"
+      val avro4s: String             = "1.9.0"
       val avrohugger: String         = "1.0.0-RC14"
       val betterMonadicFor: String   = "0.2.4"
       val catsEffect: String         = "0.10.1"
-      val circe: String              = "0.9.3"
+      val circe: String              = "0.10.0"
       val frees: String              = "0.8.2"
       val fs2: String                = "0.10.6"
       val fs2ReactiveStreams: String = "0.5.1"
       val jodaTime: String           = "2.10"
-      val grpc: String               = "1.15.0"
+      val grpc: String               = "1.15.1"
       val log4s: String              = "1.6.1"
       val logback: String            = "1.2.3"
       val monix: String              = "3.0.0-RC1"
