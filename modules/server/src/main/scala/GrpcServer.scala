@@ -88,8 +88,7 @@ object GrpcServer {
     def shutdownEventually(endProcess: Either[Throwable, Unit] => Unit): Unit = {
       Runtime.getRuntime.addShutdownHook(new Thread() {
         override def run(): Unit =
-          F.runAsync(S.shutdown *> S.awaitTermination)(cb => IO(endProcess(cb.void)))
-            .unsafeRunSync
+          F.runAsync(S.shutdown *> S.awaitTermination)(cb => IO(endProcess(cb.void))).unsafeRunSync
       })
     }
 
