@@ -102,7 +102,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run client bidirectional streaming services" in {
 
-      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/164 is fixed")
+//      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/164 is fixed")
 
       muAvroRPCServiceClient
         .biStreaming(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
@@ -115,7 +115,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run client bidirectional streaming services with avro schema" in {
 
-      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/164 is fixed")
+//      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/164 is fixed")
 
       muAvroWithSchemaRPCServiceClient
         .biStreamingWithSchema(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
@@ -128,7 +128,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run multiple rpc services" in {
 
-      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/164 is fixed")
+//      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/164 is fixed")
 
       val tuple =
         (
@@ -188,7 +188,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run client bidirectional streaming services" in {
 
-      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/164 is fixed")
+//      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/164 is fixed")
 
       muCompressedAvroRPCServiceClient
         .biStreamingCompressed(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
@@ -201,7 +201,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run client bidirectional streaming services with avro schema" in {
 
-      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/164 is fixed")
+//      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/164 is fixed")
 
       muCompressedAvroWithSchemaRPCServiceClient
         .biStreamingCompressedWithSchema(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
@@ -214,7 +214,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run multiple rpc services" in {
 
-      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/164 is fixed")
+//      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/164 is fixed")
 
       val tuple =
         (

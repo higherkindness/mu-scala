@@ -68,7 +68,8 @@ object ProjectPlugin extends AutoPlugin {
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
         "org.scala-lang"         % "scala-compiler" % scalaVersion.value,
-        %%("scalamockScalatest") % Test
+        "org.lyranthe.fs2-grpc" %% "java-runtime" % "0.4.0-M2",
+          %%("scalamockScalatest") % Test
       )
     )
 
