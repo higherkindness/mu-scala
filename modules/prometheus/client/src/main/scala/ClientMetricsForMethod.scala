@@ -30,7 +30,7 @@ case class ClientMetricsForMethod(method: GrpcMethodInfo, clientMetrics: ClientM
     addLabels(rpcStarted).inc()
 
   def recordClientHandled(code: Code): Unit =
-    addLabels(rpcCompleted, code.toString).inc()
+    addLabels(rpcCompleted, code.value().toString).inc()
 
   def recordStreamMessageReceived(): Unit =
     addLabels(streamMessagesReceived).inc()
@@ -39,8 +39,7 @@ case class ClientMetricsForMethod(method: GrpcMethodInfo, clientMetrics: ClientM
     addLabels(streamMessagesSent).inc()
 
   def recordLatency(latencySec: Double): Unit =
-    completedLatencySeconds foreach (_ =>
-      addLabels(completedLatencySeconds.get).observe(latencySec))
+    completedLatencySeconds.foreach(addLabels(_).observe(latencySec))
 
   private def addLabels[T](collector: SimpleCollector[T], labels: String*): T =
     collector.labels(
