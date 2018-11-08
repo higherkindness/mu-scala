@@ -26,7 +26,7 @@ Note that the plugin is only available for Scala 2.12.
 
 ## Generating IDL files from source
 
-Let's take our previous service, and add an Avro-specific request and some useful annotations described in the [Annotations section](/docs/rpc/annotations):
+Let's take our previous service, and add an Avro-specific request and some useful annotations described in the [Annotations section](annotations):
 ```tut:silent
 import mu.rpc.protocol._
 
@@ -229,7 +229,7 @@ Just like `idlGen`, `srcGen` and `srcGenFromJars` has some configurable settings
 
 The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also available, but they need the dependency `mu-rpc-marshallers-jodatime`. You can also specify custom imports with the following:
   * `idlGenMarshallerImports := List(mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))`
-  * See the [Custom codecs section in core concepts](/docs/rpc/core-concepts#custom-codecs) for more information.
+  * See the [Custom codecs section in core concepts](core-concepts#custom-codecs) for more information.
 
 The source directory must exist, otherwise, the `srcGen` task will fail. Target directories will be created upon generation.
 

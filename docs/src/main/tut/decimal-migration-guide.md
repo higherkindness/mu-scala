@@ -6,11 +6,11 @@ permalink: /docs/rpc/decimal-migration-guide
 
 # Migration guide for decimal types (available from 0.15.1)
 
-## Intended audience
+## Intended audience
 
 This guide is only for projects that are in a prior version to `0.15.1` **and** have decimals in some of their protocols **and** want to serialize those decimals following the avro specs.
 
-If you're starting a new project, you can use safely tagged `BigDecimal`s. Check the [Custom codecs section in Core concepts](/docs/rpc/core-concepts#custom-codecs) and [Plugin Settings section in IDL Generation](/docs/rpc/idl-generation#plugin-settings) for more information.
+If you're starting a new project, you can use safely tagged `BigDecimal`s. Check the [Custom codecs section in Core concepts](core-concepts#custom-codecs) and [Plugin Settings section in IDL Generation](idl-generation#plugin-settings) for more information.
 
 ## Background
 
@@ -24,7 +24,7 @@ Let's see it with an example. Suppose the following service definition:
 
 `models.avdl`
 
-```avdl
+```avroidl
 @namespace("mu.rpc.protocols")
 
 protocol StockInfoModels {
@@ -44,7 +44,7 @@ protocol StockInfoModels {
 
 `services.avdl`
 
-```avdl
+```avroidl
 @namespace("mu.rpc.protocols")
 
 protocol StockInfoService {
@@ -124,7 +124,7 @@ Luckily, there are a couple of modules created for easing this task:
 
 Provides an avdl file (`legacyAvroDecimalCompatProtocol.avdl`) with the custom type (`mu.rpc.protocols.LegacyAvroDecimalCompat`) to replace your old `decimal` values. In that way, you could go from this:
 
-```avdl
+```avroidl
 @namespace("mu.rpc.protocols")
 
 protocol StockInfoModels {
@@ -144,7 +144,7 @@ protocol StockInfoModels {
 
 To this:
 
-```avdl
+```avroidl
 @namespace("mu.rpc.protocols")
 
 protocol StockInfoModel {
@@ -171,4 +171,4 @@ protocol StockInfoModel {
 Provides the serializers for the custom type.
 
 There is a repository that shows an example about how to make this process:
-* https://github.com/frees-io/freestyle-rpc-protocol-decimal-update
+* [frees-io/freestyle-rpc-protocol-decimal-update](https://github.com/frees-io/freestyle-rpc-protocol-decimal-update)
