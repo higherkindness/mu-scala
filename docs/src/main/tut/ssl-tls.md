@@ -10,7 +10,7 @@ permalink: /docs/rpc/ssl-tls
 
 [mu] allows you to encrypt the connection between the server and the client through SSL/TLS. The main goal of using SSL is to protect your sensitive information and keeps your data secure between servers and clients.
 
-As we mentioned in the [Quickstart](/docs/rpc/quickstart) section, we can choose and configure our client with `OkHttp` or `Netty` but if we want to encrypt our service, it's mandatory to use `Netty` because currently, [mu] only supports encryption over *Netty*.
+As we mentioned in the [Main](/mu/) section, we can choose and configure our client with `OkHttp` or `Netty` but if we want to encrypt our service, it's mandatory to use `Netty` because currently, [mu] only supports encryption over *Netty*.
 
 ## Requirements 
 
@@ -30,7 +30,7 @@ If we haven't yet generated or obtained our own certificates, we can test using 
 
 Thirdly, let's see a piece of code where we will explain line by line, what we are doing on the server side.
 
-We won't cover the details regarding creation of `RPCService`, `ServerRPCService` and runtime implicits. You can find more information about these in the [Patterns](/docs/rpc/patterns) section.
+We won't cover the details regarding creation of `RPCService`, `ServerRPCService` and runtime implicits. You can find more information about these in the [Patterns](patterns) section.
 
 ```tut:invisible
 import monix.execution.Scheduler
