@@ -26,25 +26,24 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String             = "1.8.3"
+      val avro4s: String             = "2.0.2"
       val avrohugger: String         = "1.0.0-RC14"
       val betterMonadicFor: String   = "0.2.4"
-      val catsEffect: String         = "0.10.1"
-      val circe: String              = "0.10.0"
+      val catsEffect: String         = "1.1.0-M1"
+      val circe: String              = "0.10.1"
       val frees: String              = "0.8.2"
-      val fs2: String                = "0.10.6"
-      val fs2ReactiveStreams: String = "0.5.1"
-      val jodaTime: String           = "2.10"
-      val grpc: String               = "1.15.1"
+      val fs2: String                = "1.0.0"
+      val jodaTime: String           = "2.10.1"
+      val grpc: String               = "1.16.1"
       val log4s: String              = "1.6.1"
       val logback: String            = "1.2.3"
-      val monix: String              = "3.0.0-RC1"
+      val monix: String              = "3.0.0-RC2"
       val monocle: String            = "1.5.1-cats"
-      val nettySSL: String           = "2.0.12.Final"
+      val nettySSL: String           = "2.0.17.Final"
       val paradise: String           = "2.1.1"
       val pbdirect: String           = "0.1.0"
       val prometheus: String         = "0.5.0"
-      val pureconfig: String         = "0.9.2"
+      val pureconfig: String         = "0.10.0"
       val scala: String              = "2.12.7"
       val scalacheckToolbox: String  = "0.2.5"
     }
@@ -63,7 +62,7 @@ object ProjectPlugin extends AutoPlugin {
         %("grpc-stub", V.grpc),
         %%("monix", V.monix),
         %%("monocle-core", V.monocle),
-        %%("fs2-reactive-streams", V.fs2ReactiveStreams),
+        %%("fs2-reactive-streams", V.fs2),
         %%("fs2-core", V.fs2),
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
@@ -111,7 +110,7 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val configSettings = Seq(
+    lazy val configSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("pureconfig", V.pureconfig)
       )
