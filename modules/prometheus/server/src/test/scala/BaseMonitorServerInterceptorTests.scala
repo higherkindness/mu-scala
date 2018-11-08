@@ -68,7 +68,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
           "UNARY",
           "AvroRPCService",
           "unary",
-          "OK")
+          OK)
       }
 
     }
@@ -106,7 +106,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
           "CLIENT_STREAMING",
           "ProtoRPCService",
           "clientStreaming",
-          "OK")
+          OK)
       }
     }
 
@@ -140,7 +140,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
           "SERVER_STREAMING",
           "ProtoRPCService",
           "serverStreaming",
-          "OK"
+          OK
         )
       }
 
@@ -189,7 +189,7 @@ abstract class BaseMonitorServerInterceptorTests extends RpcBaseTestSuite {
           "BIDI_STREAMING",
           "AvroRPCService",
           "biStreaming",
-          "OK")
+          OK)
       }
 
     }

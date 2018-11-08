@@ -38,6 +38,8 @@ trait RpcBaseTestSuite extends WordSpec with Matchers with OneInstancePerTest wi
       Platform.EOL + Prettifier.default(x) // initial linebreak makes expected/actual results line up nicely
   }
 
+  protected[this] val OK: String = "0"
+
   // delegating the check to a def gets its name used in the cancellation message (cleaner than the boolean comparison result)
   private[this] def runningLocally: Boolean = System.getenv("TRAVIS") != "true"
 
