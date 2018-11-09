@@ -92,7 +92,7 @@ object GrpcServer {
       })
     }
 
-    S.start() *> F.liftIO(IO.async[Unit](cb => shutdownEventually(cb)))
+    S.start() *> F.async[Unit](cb => shutdownEventually(cb))
   }
 
   def default[F[_]](port: Int, configList: List[GrpcConfig])(
