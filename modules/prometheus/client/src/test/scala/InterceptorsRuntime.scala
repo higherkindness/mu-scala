@@ -30,6 +30,7 @@ case class InterceptorsRuntime(
     cr: CollectorRegistry = new CollectorRegistry())
     extends CommonUtils {
 
+  import TestsImplicits._
   import service._
   import handlers.server._
   import handlers.client._

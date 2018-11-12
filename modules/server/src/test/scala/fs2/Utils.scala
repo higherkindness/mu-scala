@@ -139,6 +139,7 @@ object Utils extends CommonUtils {
 
   trait MuRuntime {
 
+    import TestsImplicits._
     import service._
     import handlers.server._
     import mu.rpc.server._

@@ -20,7 +20,7 @@ package server
 
 import _root_.fs2.Stream
 import _root_.fs2.interop.reactivestreams._
-import cats.effect.Effect
+import cats.effect.{ConcurrentEffect, Effect}
 import io.grpc.stub.ServerCalls._
 import io.grpc.stub.StreamObserver
 import monix.execution.Scheduler
@@ -37,7 +37,7 @@ object fs2Calls {
       maybeCompression: Option[String]): UnaryMethod[Req, Res] =
     monixCalls.unaryMethod(f, maybeCompression)
 
-  def clientStreamingMethod[F[_]: Effect, Req, Res](
+  def clientStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Stream[F, Req] => F[Res],
       maybeCompression: Option[String])(
       implicit EC: ExecutionContext): ClientStreamingMethod[Req, Res] =
@@ -47,14 +47,13 @@ object fs2Calls {
         addCompression(responseObserver, maybeCompression)
         transformStreamObserver[Req, Res](
           inputObservable =>
-            Observable.fromEffect(
-              f(inputObservable.toReactivePublisher(Scheduler(EC)).toStream[F])),
+            Observable.from(f(inputObservable.toReactivePublisher(Scheduler(EC)).toStream[F])),
           responseObserver
         )
       }
     }
 
-  def serverStreamingMethod[F[_]: Effect, Req, Res](
+  def serverStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Req => Stream[F, Res],
       maybeCompression: Option[String])(
       implicit EC: ExecutionContext): ServerStreamingMethod[Req, Res] =
@@ -66,7 +65,7 @@ object fs2Calls {
       }
     }
 
-  def bidiStreamingMethod[F[_]: Effect, Req, Res](
+  def bidiStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Stream[F, Req] => Stream[F, Res],
       maybeCompression: Option[String])(
       implicit EC: ExecutionContext): BidiStreamingMethod[Req, Res] =

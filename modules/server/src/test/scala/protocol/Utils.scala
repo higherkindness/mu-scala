@@ -22,7 +22,6 @@ import cats.effect.Async
 import cats.syntax.applicative._
 import mu.rpc.common._
 import io.grpc.Status
-import monix.execution.Scheduler
 import monix.reactive.Observable
 
 object Utils extends CommonUtils {
@@ -122,6 +121,7 @@ object Utils extends CommonUtils {
 
     object server {
 
+      import mu.rpc.internal.task._
       import database._
       import service._
       import mu.rpc.protocol._
@@ -134,30 +134,30 @@ object Utils extends CommonUtils {
           with CompressedAvroRPCService[F]
           with CompressedAvroWithSchemaRPCService[F] {
 
-        implicit val S: Scheduler = Scheduler(EC)
+        import scala.concurrent.ExecutionContext.Implicits.global
 
-        def notAllowed(b: Boolean): F[C] = c1.pure
+        def notAllowed(b: Boolean): F[C] = c1.pure[F]
 
-        def empty(empty: Empty.type): F[Empty.type] = Empty.pure
+        def empty(empty: Empty.type): F[Empty.type] = Empty.pure[F]
 
-        def emptyParam(a: A): F[Empty.type] = Empty.pure
+        def emptyParam(a: A): F[Empty.type] = Empty.pure[F]
 
-        def emptyParamResponse(empty: Empty.type): F[A] = a4.pure
+        def emptyParamResponse(empty: Empty.type): F[A] = a4.pure[F]
 
-        def emptyAvro(empty: Empty.type): F[Empty.type] = Empty.pure
+        def emptyAvro(empty: Empty.type): F[Empty.type] = Empty.pure[F]
 
         def emptyAvroWithSchema(empty: Empty.type): F[Empty.type] = emptyAvro(empty)
 
-        def emptyAvroParam(a: A): F[Empty.type] = Empty.pure
+        def emptyAvroParam(a: A): F[Empty.type] = Empty.pure[F]
 
         def emptyAvroWithSchemaParam(a: A): F[Empty.type] = emptyAvroParam(a)
 
-        def emptyAvroParamResponse(empty: Empty.type): F[A] = a4.pure
+        def emptyAvroParamResponse(empty: Empty.type): F[A] = a4.pure[F]
 
         def emptyAvroWithSchemaParamResponse(empty: Empty.type): F[A] =
           emptyAvroParamResponse(empty)
 
-        def unary(a: A): F[C] = c1.pure
+        def unary(a: A): F[C] = c1.pure[F]
 
         def unaryWithError(e: E): F[C] = e.foo match {
           case "SE" =>
@@ -194,7 +194,7 @@ object Utils extends CommonUtils {
                 debug(s"[SERVER] Current -> $current / a -> $a")
                 D(current.bar + a.x + a.y)
             }
-            .to[F]
+            .toAsync[F]
 
         def biStreaming(oe: Observable[E]): Observable[E] =
           oe.flatMap { e: E =>
@@ -209,7 +209,7 @@ object Utils extends CommonUtils {
 
         def notAllowedCompressed(b: Boolean): F[C] = notAllowed(b)
 
-        def emptyCompressed(empty: Empty.type): F[Empty.type] = Empty.pure
+        def emptyCompressed(empty: Empty.type): F[Empty.type] = Empty.pure[F]
 
         def emptyParamCompressed(a: A): F[Empty.type] = emptyParam(a)
 
@@ -249,15 +249,16 @@ object Utils extends CommonUtils {
 
         import ExternalScope._
 
-        def scope(empty: protocol.Empty.type): F[External] = External(e1).pure
+        def scope(empty: protocol.Empty.type): F[External] = External(e1).pure[F]
 
-        def scopeCompressed(empty: protocol.Empty.type): F[External] = External(e1).pure
+        def scopeCompressed(empty: protocol.Empty.type): F[External] = External(e1).pure[F]
       }
 
     }
 
     object client {
 
+      import mu.rpc.internal.task._
       import service._
       import mu.rpc.protocol.Utils.client.MyRPCClient
       import mu.rpc.protocol._
@@ -270,7 +271,7 @@ object Utils extends CommonUtils {
           M: MonadError[F, Throwable])
           extends MyRPCClient[F] {
 
-        implicit val S: Scheduler = Scheduler(EC)
+        import scala.concurrent.ExecutionContext.Implicits.global
 
         override def notAllowed(b: Boolean): F[C] =
           proto.notAllowed(b)
@@ -321,13 +322,13 @@ object Utils extends CommonUtils {
                 c
             }
             .toListL
-            .to[F]
+            .toAsync[F]
 
         override def ss192(a: Int, b: Int): F[List[C]] =
           proto
             .serverStreaming(B(A(a, a), A(b, b)))
             .toListL
-            .to[F]
+            .toAsync[F]
 
         override def sswe(a: A, err: String): F[List[C]] =
           proto
@@ -339,7 +340,7 @@ object Utils extends CommonUtils {
                 c
             }
             .toListL
-            .to[F]
+            .toAsync[F]
 
         override def cs(cList: List[C], bar: Int): F[D] =
           proto.clientStreaming(Observable.fromIterable(cList.map(c => c.a)))
@@ -355,7 +356,7 @@ object Utils extends CommonUtils {
                 c
             }
             .toListL
-            .to[F]
+            .toAsync[F]
             .map(_.head)
 
         override def bsws(eList: List[E]): F[E] =
@@ -368,7 +369,7 @@ object Utils extends CommonUtils {
                 c
             }
             .toListL
-            .to[F]
+            .toAsync[F]
             .map(_.head)
 
       }
@@ -380,7 +381,7 @@ object Utils extends CommonUtils {
           M: MonadError[F, Throwable])
           extends MyRPCClient[F] {
 
-        implicit val S: Scheduler = Scheduler(EC)
+        import scala.concurrent.ExecutionContext.Implicits.global
 
         override def notAllowed(b: Boolean): F[C] =
           proto.notAllowedCompressed(b)
@@ -431,13 +432,13 @@ object Utils extends CommonUtils {
                 c
             }
             .toListL
-            .to[F]
+            .toAsync[F]
 
         override def ss192(a: Int, b: Int): F[List[C]] =
           proto
             .serverStreamingCompressed(B(A(a, a), A(b, b)))
             .toListL
-            .to[F]
+            .toAsync[F]
 
         override def sswe(a: A, err: String): F[List[C]] =
           proto
@@ -449,7 +450,7 @@ object Utils extends CommonUtils {
                 c
             }
             .toListL
-            .to[F]
+            .toAsync[F]
 
         override def cs(cList: List[C], bar: Int): F[D] =
           proto.clientStreamingCompressed(Observable.fromIterable(cList.map(c => c.a)))
@@ -465,7 +466,7 @@ object Utils extends CommonUtils {
                 c
             }
             .toListL
-            .to[F]
+            .toAsync[F]
             .map(_.head)
 
         override def bsws(eList: List[E]): F[E] =
@@ -478,7 +479,7 @@ object Utils extends CommonUtils {
                 c
             }
             .toListL
-            .to[F]
+            .toAsync[F]
             .map(_.head)
 
       }
@@ -489,6 +490,7 @@ object Utils extends CommonUtils {
 
   trait MuRuntime {
 
+    import TestsImplicits._
     import service._
     import handlers.server._
     import mu.rpc.server._

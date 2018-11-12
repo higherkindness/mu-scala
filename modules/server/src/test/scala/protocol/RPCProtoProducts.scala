@@ -81,8 +81,8 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
   "A RPC server" should {
 
+    import TestsImplicits._
     import RPCService._
-    import scala.concurrent.ExecutionContext.Implicits.global
 
     implicit val H: RPCServiceDefImpl[ConcurrentMonad] =
       new RPCServiceDefImpl[ConcurrentMonad]

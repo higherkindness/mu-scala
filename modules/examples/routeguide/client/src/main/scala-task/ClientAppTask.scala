@@ -31,7 +31,7 @@ object ClientAppTask {
 
     logger.info(s"${Thread.currentThread().getName} Starting client, interpreting to Task ...")
 
-    Await.result(clientProgram[Task].runAsync, Duration.Inf)
+    Await.result(clientProgram[Task].runToFuture, Duration.Inf)
 
     logger.info(s"${Thread.currentThread().getName} Finishing program interpretation ...")
 

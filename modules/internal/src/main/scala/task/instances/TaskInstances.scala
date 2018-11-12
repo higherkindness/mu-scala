@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package mu.rpc
-package internal
+package mu.rpc.internal.task.instances
 
+import cats.effect.Effect
 import monix.eval.Task
+import monix.eval.instances.CatsEffectForTask
+import monix.execution.Scheduler
 
-trait TaskImplicits {
+import scala.concurrent.ExecutionContext
 
-  implicit def taskToOps[A](task: Task[A]): TaskOps[A] = new TaskOps(task)
-}
+trait TaskInstances {
 
-private[internal] class TaskOps[A](private val task: Task[A]) extends AnyVal {
-
-  def to[F[_]](implicit F: LiftTask[F]): F[A] = F.liftTask(task)
+  implicit def taskEffect(implicit EC: ExecutionContext): Effect[Task] =
+    new CatsEffectForTask()(Scheduler(EC), Task.defaultOptions)
 
 }

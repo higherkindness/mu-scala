@@ -18,13 +18,15 @@ package mu.rpc
 package internal
 package client
 
-import cats.effect.{Async, LiftIO}
+import java.util.concurrent.{Executor => JavaExecutor}
+
+import cats.effect.Async
 import com.google.common.util.concurrent._
 import io.grpc.stub.{ClientCalls, StreamObserver}
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
-import java.util.concurrent.{Executor => JavaExecutor}
-import scala.concurrent.ExecutionContext
 import monix.reactive.Observable
+import mu.rpc.internal.task._
+
 import scala.concurrent.ExecutionContext
 
 object monixCalls {
@@ -36,7 +38,7 @@ object monixCalls {
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
       options: CallOptions)(implicit EC: ExecutionContext): F[Res] =
-    listenableFuture2Async(
+    listenableFuture2Async[F, Res](
       ClientCalls
         .futureUnaryCall(channel.newCall(descriptor, options), request))
 
@@ -48,24 +50,23 @@ object monixCalls {
     Observable
       .fromReactivePublisher(createPublisher(request, descriptor, channel, options))
 
-  def clientStreaming[F[_]: LiftIO, Req, Res](
+  def clientStreaming[F[_]: Async, Req, Res](
       input: Observable[Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit EC: ExecutionContext, L: LiftTask[F]): F[Res] =
-    L.liftTask {
-      input
-        .liftByOperator(
-          StreamObserver2MonixOperator(
-            (outputObserver: StreamObserver[Res]) =>
-              ClientCalls.asyncClientStreamingCall(
-                channel.newCall(descriptor, options),
-                outputObserver
-            )
+      options: CallOptions)(implicit EC: ExecutionContext): F[Res] =
+    input
+      .liftByOperator(
+        StreamObserver2MonixOperator(
+          (outputObserver: StreamObserver[Res]) =>
+            ClientCalls.asyncClientStreamingCall(
+              channel.newCall(descriptor, options),
+              outputObserver
           )
         )
-        .firstL
-    }
+      )
+      .firstL
+      .toAsync[F]
 
   def bidiStreaming[Req, Res](
       input: Observable[Req],

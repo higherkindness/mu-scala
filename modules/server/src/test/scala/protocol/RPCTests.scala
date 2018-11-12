@@ -26,6 +26,15 @@ import mu.rpc.common._
 import mu.rpc.protocol.Utils.handlers.client._
 import mu.rpc.server._
 
+/*
+[error] 	mu.rpc.protocol.RPCTests
+[error] 	mu.rpc.fs2.RPCTests
+[error] 	mu.rpc.avro.RPCTests
+[error] 	mu.rpc.protocol.RPCBigDecimalTests
+[error] 	mu.rpc.protocol.RPCProtoProducts
+[error] 	mu.rpc.protocol.RPCJavaTimeTests
+ */
+
 class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   import mu.rpc.protocol.Utils._

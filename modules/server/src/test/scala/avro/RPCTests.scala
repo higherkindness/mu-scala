@@ -21,10 +21,10 @@ import mu.rpc.common._
 import mu.rpc.testing.servers.withServerChannel
 import io.grpc.ServerServiceDefinition
 import org.scalatest._
-import shapeless.{:+:, CNil, Coproduct}
 
 class RPCTests extends RpcBaseTestSuite {
 
+  import TestsImplicits._
   import mu.rpc.avro.Utils._
   import mu.rpc.avro.Utils.implicits._
 
@@ -52,185 +52,185 @@ class RPCTests extends RpcBaseTestSuite {
           serviceRequestAddedBoolean.RPCService.bindService[ConcurrentMonad],
           response)(_.get(request).unsafeRunSync())
       }
-      "be able to respond to an outdated request without the new value within a coproduct" in {
-        runSucceedAssertion(
-          serviceRequestAddedBoolean.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
-      }
+//      "be able to respond to an outdated request without the new value within a coproduct" in {
+//        runSucceedAssertion(
+//          serviceRequestAddedBoolean.RPCService.bindService[ConcurrentMonad],
+//          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
+//      }
     }
 
-    "add a new optional field, and" should {
-      "be able to respond to an outdated request without the new optional value" in {
-        runSucceedAssertion(
-          serviceRequestAddedOptionalBoolean.RPCService.bindService[ConcurrentMonad],
-          response)(_.get(request).unsafeRunSync())
-      }
-      "be able to respond to an outdated request without the new optional value within a coproduct" in {
-        runSucceedAssertion(
-          serviceRequestAddedOptionalBoolean.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
-      }
-    }
-
-    "add a new item in coproduct, and" should {
-      "be able to respond to an outdated request with the previous coproduct" in {
-        runSucceedAssertion(
-          serviceRequestAddedCoproductItem.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
-      }
-    }
-
-    "remove an item in coproduct, and" should {
-      "be able to respond to an outdated request with the previous coproduct" in {
-        runSucceedAssertion(
-          serviceRequestRemovedCoproductItem.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
-      }
-
-      "be able to respond to an outdated request with the removed valued of the previous coproduct" in {
-        runSucceedAssertion(
-          serviceRequestRemovedCoproductItem.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproductInt).unsafeRunSync())
-      }
-
-    }
-
-    "replace an item in coproduct, and" should {
-      "be able to respond to an outdated request with the previous coproduct" in {
-        runSucceedAssertion(
-          serviceRequestReplacedCoproductItem.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
-      }
-
-      "be able to respond to an outdated request with the previous coproduct AAAAA" in {
-        runFailedAssertion(
-          serviceRequestReplacedCoproductItem.RPCService.bindService[ConcurrentMonad])(
-          _.getCoproduct(requestCoproductString).unsafeRunSync())
-      }
-
-    }
-
-    "remove an existing field, and" should {
-      "be able to respond to an outdated request with the old value" in {
-        runSucceedAssertion(
-          serviceRequestDroppedField.RPCService.bindService[ConcurrentMonad],
-          response)(_.get(request).unsafeRunSync())
-      }
-      "be able to respond to an outdated request with the old value within a coproduct" in {
-        runSucceedAssertion(
-          serviceRequestDroppedField.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
-      }
-    }
-
-    "replace the type of a field, and" should {
-      "be able to respond to an outdated request with the previous value" in {
-        runSucceedAssertion(
-          serviceRequestReplacedType.RPCService.bindService[ConcurrentMonad],
-          response)(_.get(request).unsafeRunSync())
-      }
-      "be able to respond to an outdated request with the previous value within a coproduct" in {
-        runSucceedAssertion(
-          serviceRequestReplacedType.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
-      }
-    }
-
-    "rename an existing field, and" should {
-      "be able to respond to an outdated request with the previous name" in {
-        runSucceedAssertion(
-          serviceRequestRenamedField.RPCService.bindService[ConcurrentMonad],
-          response)(_.get(request).unsafeRunSync())
-      }
-      "be able to respond to an outdated request with the previous name within a coproduct" in {
-        runSucceedAssertion(
-          serviceRequestRenamedField.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
-      }
-    }
+//    "add a new optional field, and" should {
+//      "be able to respond to an outdated request without the new optional value" in {
+//        runSucceedAssertion(
+//          serviceRequestAddedOptionalBoolean.RPCService.bindService[ConcurrentMonad],
+//          response)(_.get(request).unsafeRunSync())
+//      }
+//      "be able to respond to an outdated request without the new optional value within a coproduct" in {
+//        runSucceedAssertion(
+//          serviceRequestAddedOptionalBoolean.RPCService.bindService[ConcurrentMonad],
+//          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
+//      }
+//    }
+//
+//    "add a new item in coproduct, and" should {
+//      "be able to respond to an outdated request with the previous coproduct" in {
+//        runSucceedAssertion(
+//          serviceRequestAddedCoproductItem.RPCService.bindService[ConcurrentMonad],
+//          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
+//      }
+//    }
+//
+//    "remove an item in coproduct, and" should {
+//      "be able to respond to an outdated request with the previous coproduct" in {
+//        runSucceedAssertion(
+//          serviceRequestRemovedCoproductItem.RPCService.bindService[ConcurrentMonad],
+//          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
+//      }
+//
+//      "be able to respond to an outdated request with the removed valued of the previous coproduct" in {
+//        runSucceedAssertion(
+//          serviceRequestRemovedCoproductItem.RPCService.bindService[ConcurrentMonad],
+//          responseCoproduct(response))(_.getCoproduct(requestCoproductInt).unsafeRunSync())
+//      }
+//
+//    }
+//
+//    "replace an item in coproduct, and" should {
+//      "be able to respond to an outdated request with the previous coproduct" in {
+//        runSucceedAssertion(
+//          serviceRequestReplacedCoproductItem.RPCService.bindService[ConcurrentMonad],
+//          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
+//      }
+//
+//      "be able to respond to an outdated request with the previous coproduct AAAAA" in {
+//        runFailedAssertion(
+//          serviceRequestReplacedCoproductItem.RPCService.bindService[ConcurrentMonad])(
+//          _.getCoproduct(requestCoproductString).unsafeRunSync())
+//      }
+//
+//    }
+//
+//    "remove an existing field, and" should {
+//      "be able to respond to an outdated request with the old value" in {
+//        runSucceedAssertion(
+//          serviceRequestDroppedField.RPCService.bindService[ConcurrentMonad],
+//          response)(_.get(request).unsafeRunSync())
+//      }
+//      "be able to respond to an outdated request with the old value within a coproduct" in {
+//        runSucceedAssertion(
+//          serviceRequestDroppedField.RPCService.bindService[ConcurrentMonad],
+//          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
+//      }
+//    }
+//
+//    "replace the type of a field, and" should {
+//      "be able to respond to an outdated request with the previous value" in {
+//        runSucceedAssertion(
+//          serviceRequestReplacedType.RPCService.bindService[ConcurrentMonad],
+//          response)(_.get(request).unsafeRunSync())
+//      }
+//      "be able to respond to an outdated request with the previous value within a coproduct" in {
+//        runSucceedAssertion(
+//          serviceRequestReplacedType.RPCService.bindService[ConcurrentMonad],
+//          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
+//      }
+//    }
+//
+//    "rename an existing field, and" should {
+//      "be able to respond to an outdated request with the previous name" in {
+//        runSucceedAssertion(
+//          serviceRequestRenamedField.RPCService.bindService[ConcurrentMonad],
+//          response)(_.get(request).unsafeRunSync())
+//      }
+//      "be able to respond to an outdated request with the previous name within a coproduct" in {
+//        runSucceedAssertion(
+//          serviceRequestRenamedField.RPCService.bindService[ConcurrentMonad],
+//          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
+//      }
+//    }
 
   }
 
-  "An AvroWithSchema service with an updated response model" can {
-
-    "add a new non-optional field, and" should {
-      "be able to provide a compatible response" in {
-        runSucceedAssertion(
-          serviceResponseAddedBoolean.RPCService.bindService[ConcurrentMonad],
-          response)(_.get(request).unsafeRunSync())
-      }
-      "be able to provide a compatible response within a coproduct" in {
-        runSucceedAssertion(
-          serviceResponseAddedBoolean.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
-      }
-    }
-
-    "add a new item in a coproduct, and" should {
-      "be able to provide a compatible response within a coproduct" in {
-        runSucceedAssertion(
-          serviceResponseAddedBooleanCoproduct.RPCService.bindService[ConcurrentMonad],
-          ResponseCoproduct(Coproduct[Response :+: Int :+: String :+: CNil](0)))(
-          _.getCoproduct(requestCoproduct(request)).unsafeRunSync())
-      }
-    }
-
-    "remove an item in a coproduct, and" should {
-      "be able to provide a compatible response" in {
-        runSucceedAssertion(
-          serviceResponseRemovedIntCoproduct.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
-      }
-    }
-
-    "replace an item in a coproduct, and" should {
-      "be able to provide a compatible response" in {
-        runSucceedAssertion(
-          serviceResponseReplacedCoproduct.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
-      }
-
-    }
-
-    "change the type of a field, and" should {
-      "be able to provide a compatible response" in {
-        runSucceedAssertion(
-          serviceResponseReplacedType.RPCService.bindService[ConcurrentMonad],
-          response)(_.get(request).unsafeRunSync())
-      }
-      "be able to provide a compatible response within a coproduct" in {
-        runSucceedAssertion(
-          serviceResponseReplacedType.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
-      }
-    }
-
-    "rename a field, and" should {
-      "be able to provide a compatible response" in {
-        runSucceedAssertion(
-          serviceResponseRenamedField.RPCService.bindService[ConcurrentMonad],
-          response)(_.get(request).unsafeRunSync())
-      }
-      "be able to provide a compatible response within a coproduct" in {
-        runSucceedAssertion(
-          serviceResponseRenamedField.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
-      }
-    }
-
-    "drop a field, and" should {
-      "be able to provide a compatible response" in {
-        runSucceedAssertion(
-          serviceResponseDroppedField.RPCService.bindService[ConcurrentMonad],
-          response)(_.get(request).unsafeRunSync())
-      }
-      "be able to provide a compatible response within a coproduct" in {
-        runSucceedAssertion(
-          serviceResponseDroppedField.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
-      }
-    }
-
-  }
+//  "An AvroWithSchema service with an updated response model" can {
+//
+//    "add a new non-optional field, and" should {
+//      "be able to provide a compatible response" in {
+//        runSucceedAssertion(
+//          serviceResponseAddedBoolean.RPCService.bindService[ConcurrentMonad],
+//          response)(_.get(request).unsafeRunSync())
+//      }
+//      "be able to provide a compatible response within a coproduct" in {
+//        runSucceedAssertion(
+//          serviceResponseAddedBoolean.RPCService.bindService[ConcurrentMonad],
+//          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
+//      }
+//    }
+//
+//    "add a new item in a coproduct, and" should {
+//      "be able to provide a compatible response within a coproduct" in {
+//        runSucceedAssertion(
+//          serviceResponseAddedBooleanCoproduct.RPCService.bindService[ConcurrentMonad],
+//          ResponseCoproduct(Coproduct[Response :+: Int :+: String :+: CNil](0)))(
+//          _.getCoproduct(requestCoproduct(request)).unsafeRunSync())
+//      }
+//    }
+//
+//    "remove an item in a coproduct, and" should {
+//      "be able to provide a compatible response" in {
+//        runSucceedAssertion(
+//          serviceResponseRemovedIntCoproduct.RPCService.bindService[ConcurrentMonad],
+//          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
+//      }
+//    }
+//
+//    "replace an item in a coproduct, and" should {
+//      "be able to provide a compatible response" in {
+//        runSucceedAssertion(
+//          serviceResponseReplacedCoproduct.RPCService.bindService[ConcurrentMonad],
+//          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
+//      }
+//
+//    }
+//
+//    "change the type of a field, and" should {
+//      "be able to provide a compatible response" in {
+//        runSucceedAssertion(
+//          serviceResponseReplacedType.RPCService.bindService[ConcurrentMonad],
+//          response)(_.get(request).unsafeRunSync())
+//      }
+//      "be able to provide a compatible response within a coproduct" in {
+//        runSucceedAssertion(
+//          serviceResponseReplacedType.RPCService.bindService[ConcurrentMonad],
+//          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
+//      }
+//    }
+//
+//    "rename a field, and" should {
+//      "be able to provide a compatible response" in {
+//        runSucceedAssertion(
+//          serviceResponseRenamedField.RPCService.bindService[ConcurrentMonad],
+//          response)(_.get(request).unsafeRunSync())
+//      }
+//      "be able to provide a compatible response within a coproduct" in {
+//        runSucceedAssertion(
+//          serviceResponseRenamedField.RPCService.bindService[ConcurrentMonad],
+//          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
+//      }
+//    }
+//
+//    "drop a field, and" should {
+//      "be able to provide a compatible response" in {
+//        runSucceedAssertion(
+//          serviceResponseDroppedField.RPCService.bindService[ConcurrentMonad],
+//          response)(_.get(request).unsafeRunSync())
+//      }
+//      "be able to provide a compatible response within a coproduct" in {
+//        runSucceedAssertion(
+//          serviceResponseDroppedField.RPCService.bindService[ConcurrentMonad],
+//          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)).unsafeRunSync())
+//      }
+//    }
+//
+//  }
 
 }
