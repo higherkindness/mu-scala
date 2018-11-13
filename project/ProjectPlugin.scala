@@ -230,6 +230,13 @@ object ProjectPlugin extends AutoPlugin {
       micrositePushSiteWith := GitHub4s
     )
 
+    lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("scalatest")
+      ),
+      scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
+    )
+
     lazy val legacyAvroDecimalProtocolSettings: Seq[Def.Setting[_]] = Seq(
       publishMavenStyle := true,
       crossPaths := false,

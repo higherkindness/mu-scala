@@ -366,10 +366,7 @@ lazy val docs = project
   .in(file("docs"))
   .dependsOn(allModulesDeps: _*)
   .settings(name := "mu-docs")
+  .settings(docsSettings: _*)
   .settings(micrositeSettings: _*)
   .settings(noPublishSettings: _*)
-  .settings(
-    libraryDependencies ++= Seq(%%("scalamockScalatest") % "tut"),
-    scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
-  )
   .enablePlugins(MicrositesPlugin)

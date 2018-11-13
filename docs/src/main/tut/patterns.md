@@ -64,19 +64,19 @@ Next, our dummy `Greeter` server implementation:
 ```tut:silent
 import cats.effect.Async
 import cats.syntax.applicative._
-import mu.rpc.server.implicits._
-import monix.execution.Scheduler
-import monix.eval.Task
+import mu.rpc.internal.task._
 import monix.reactive.Observable
 import service._
 
-class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
+import scala.concurrent.ExecutionContext
+
+class ServiceHandler[F[_]: Async](implicit EC: ExecutionContext) extends Greeter[F] {
 
   private[this] val dummyObservableResponse: Observable[HelloResponse] =
     Observable.fromIterable(1 to 5 map (i => HelloResponse(s"Reply $i")))
 
   override def sayHello(request: HelloRequest): F[HelloResponse] =
-    HelloResponse(reply = "Good bye!").pure
+    HelloResponse(reply = "Good bye!").pure[F]
 
   override def lotsOfReplies(request: HelloRequest): Observable[HelloResponse] =
     dummyObservableResponse
@@ -92,7 +92,7 @@ class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
               reply = s"$currentReply\nRequest ${currentRequest.greeting} -> Response: Reply $i"))
       }
       .map(_._2)
-      .to[F]
+      .toAsync[F]
 
   override def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse] =
     request
@@ -119,11 +119,13 @@ In [mu] programs, we'll at least need an implicit evidence related to the [Monix
 > The `monix.execution.Scheduler` is inspired by `ReactiveX`, being an enhanced Scala `ExecutionContext` and also a replacement for Java’s `ScheduledExecutorService`, but also for Javascript’s `setTimeout`.
 
 ```tut:silent
-import monix.execution.Scheduler
-
 trait CommonRuntime {
 
-  implicit val S: Scheduler = monix.execution.Scheduler.Implicits.global
+  implicit val EC: scala.concurrent.ExecutionContext =
+    scala.concurrent.ExecutionContext.Implicits.global
+
+  implicit val timer: cats.effect.Timer[cats.effect.IO]     = cats.effect.IO.timer(EC)
+  implicit val cs: cats.effect.ContextShift[cats.effect.IO] = cats.effect.IO.contextShift(EC)
 
 }
 ```
@@ -144,11 +146,8 @@ Now, we need to implicitly provide two things:
 In summary, the result would be as follows:
 
 ```tut:silent
-import cats.~>
 import cats.effect.IO
 import mu.rpc.server._
-import mu.rpc.server.handlers._
-import mu.rpc.server.implicits._
 import service._
 
 object gserver {
@@ -210,15 +209,15 @@ import service._
 class ServiceSpec extends FunSuite with Matchers with Checkers with OneInstancePerTest {
 
   import gserver.implicits._
-  
+
   def sayHelloTest(requestGen: Gen[HelloRequest], expected: HelloResponse): Assertion =
     withServerChannel(Greeter.bindService[IO]) { sc =>
-        val client = Greeter.clientFromChannel[IO](sc.channel)
-        check {
-          forAll(requestGen) { request =>
-            client.sayHello(request).unsafeRunSync() == expected
-          }
+      val client = Greeter.clientFromChannel[IO](sc.channel)
+      check {
+        forAll(requestGen) { request =>
+          client.sayHello(request).unsafeRunSync() == expected
         }
+      }
     }
 
   val requestGen: Gen[HelloRequest] = Gen.alphaStr map HelloRequest
@@ -228,7 +227,6 @@ class ServiceSpec extends FunSuite with Matchers with Checkers with OneInstanceP
   }
 
 }
-
 ```
 
 Running the test:
@@ -271,10 +269,7 @@ So, taking into account all we have just said, how would our code look?
 import cats.effect.IO
 import mu.rpc._
 import mu.rpc.config._
-import mu.rpc.client._
 import mu.rpc.client.config._
-import mu.rpc.client.implicits._
-import monix.eval.Task
 import service._
 
 object gclient {
@@ -284,8 +279,8 @@ object gclient {
     val channelFor: ChannelFor =
       ConfigForAddress[IO]("rpc.host", "rpc.port").unsafeRunSync
 
-    implicit val serviceClient: Greeter.Client[Task] =
-      Greeter.client[Task](channelFor)
+    implicit val serviceClient: Greeter.Client[IO] =
+      Greeter.client[IO](channelFor)
   }
 
   object implicits extends Implicits
@@ -302,22 +297,19 @@ object gclient {
 Once we have our runtime configuration defined as above, everything gets easier. This is an example of a client application, following our dummy quickstart:
 
 ```tut:silent
+import cats.effect.IO
 import service._
 import gclient.implicits._
-import monix.eval.Task
-
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 
 object RPCDemoApp {
 
   def main(args: Array[String]): Unit = {
 
     val hello = serviceClient.sayHello(HelloRequest("foo")).flatMap { result =>
-      Task.eval(println(s"Result = $result"))
+      IO(println(s"Result = $result"))
     }
 
-    Await.result(hello.runAsync, Duration.Inf)
+    hello.unsafeRunSync()
   }
 
 }

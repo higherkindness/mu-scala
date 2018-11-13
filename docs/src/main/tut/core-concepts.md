@@ -79,12 +79,12 @@ import mu.rpc.protocol._
 
 ```tut:silent
 /**
-  * Message Example.
-  *
-  * @param name Person name.
-  * @param id Person Id.
-  * @param has_ponycopter Has Ponycopter check.
-  */
+ * Message Example.
+ *
+ * @param name Person name.
+ * @param id Person Id.
+ * @param has_ponycopter Has Ponycopter check.
+ */
 @message
 case class Person(name: String, id: Int, has_ponycopter: Boolean)
 ```
@@ -97,16 +97,16 @@ By the same token, let’s see now how the `Greeter` service would be translated
 object protocol {
 
   /**
-   * The request message containing the user's name.
-   * @param name User's name.
-   */
+    * The request message containing the user's name.
+    * @param name User's name.
+    */
   @message
   case class HelloRequest(name: String)
 
   /**
-   * The response message,
-   * @param message Message containing the greetings.
-   */
+    * The response message,
+    * @param message Message containing the greetings.
+    */
   @message
   case class HelloReply(message: String)
 
@@ -114,11 +114,11 @@ object protocol {
   trait Greeter[F[_]] {
 
     /**
-     * The greeter service definition.
-     *
-     * @param request Say Hello Request.
-     * @return HelloReply.
-     */
+      * The greeter service definition.
+      *
+      * @param request Say Hello Request.
+      * @return HelloReply.
+      */
     def sayHello(request: HelloRequest): F[HelloReply]
 
   }
@@ -214,40 +214,35 @@ On the client, to enable it, we only have to add an option to the client in the 
 Let's see an example of a client with the compression enabled.
 
 ```tut:invisible
-import monix.execution.Scheduler
-
 trait CommonRuntime {
 
-  implicit val S: Scheduler = monix.execution.Scheduler.Implicits.global
+  implicit val EC: scala.concurrent.ExecutionContext =
+    scala.concurrent.ExecutionContext.Implicits.global
+
+  implicit val timer: cats.effect.Timer[cats.effect.IO]     = cats.effect.IO.timer(EC)
+  implicit val cs: cats.effect.ContextShift[cats.effect.IO] = cats.effect.IO.contextShift(EC)
 
 }
 ```
 
 ```tut:silent
 import cats.effect.IO
-import cats.implicits._
 import mu.rpc._
 import mu.rpc.config._
-import mu.rpc.client._
 import mu.rpc.client.config._
-import mu.rpc.client.implicits._
-import monix.eval.Task
 import io.grpc.CallOptions
-import io.grpc.ManagedChannel
 import service._
-import scala.util.{Failure, Success, Try}
 
-trait Implicits extends CommonRuntime {
+trait ChannelImplicits extends CommonRuntime {
 
   val channelFor: ChannelFor =
     ConfigForAddress[IO]("rpc.host", "rpc.port").unsafeRunSync
 
-  implicit val serviceClient: Greeter.Client[Task] =
-    Greeter.client[Task](channelFor, options = CallOptions.DEFAULT.withCompression("gzip"))
+  implicit val serviceClient: Greeter.Client[IO] =
+    Greeter.client[IO](channelFor, options = CallOptions.DEFAULT.withCompression("gzip"))
 }
 
-object implicits extends Implicits
-
+object implicits extends ChannelImplicits
 ```
 
 ## Service Methods
@@ -261,8 +256,6 @@ Let's complete our protocol's example with an unary service method:
 
 ```tut:silent
 object service {
-
-  import monix.reactive.Observable
 
   @message
   case class HelloRequest(greeting: String)
@@ -306,15 +299,15 @@ object protocol {
 
   import java.time._
   import java.time.format._
-  
+
   import com.google.protobuf.{CodedInputStream, CodedOutputStream}
   import pbdirect._
-  
+
   implicit object LocalDateWriter extends PBWriter[LocalDate] {
     override def writeTo(index: Int, value: LocalDate, out: CodedOutputStream): Unit =
       out.writeString(index, value.format(DateTimeFormatter.ISO_LOCAL_DATE))
   }
-  
+
   implicit object LocalDateReader extends PBReader[LocalDate] {
     override def read(input: CodedInputStream): LocalDate =
       LocalDate.parse(input.readString(), DateTimeFormatter.ISO_LOCAL_DATE)
@@ -341,24 +334,23 @@ object protocol {
 
   import java.time._
   import java.time.format._
-  
+
   import com.sksamuel.avro4s._
   import org.apache.avro.Schema
-  import org.apache.avro.Schema.Field
-  
-  implicit object LocalDateToSchema extends ToSchema[LocalDate] {
-    override val schema: Schema = 
-      Schema.create(Schema.Type.STRING)
+  import org.apache.avro.SchemaBuilder
+
+  implicit object LocalDateToSchema extends SchemaFor[LocalDate] {
+    override val schema: Schema = SchemaBuilder.builder().stringType()
   }
 
-  implicit object LocalDateToValue extends ToValue[LocalDate] {
-    override def apply(value: LocalDate): String = 
+  implicit object LocalDateToValue extends Encoder[LocalDate] {
+    override def encode(value: LocalDate, schema: Schema): AnyRef =
       value.format(DateTimeFormatter.ISO_LOCAL_DATE)
   }
 
-  implicit object LocalDateFromValue extends FromValue[LocalDate] {
-    override def apply(value: Any, field: Field): LocalDate = 
-      LocalDate.parse(value.toString(), DateTimeFormatter.ISO_LOCAL_DATE)
+  implicit object LocalDateFromValue extends Decoder[LocalDate] {
+    override def decode(value: Any, schema: Schema): LocalDate =
+      LocalDate.parse(value.toString, DateTimeFormatter.ISO_LOCAL_DATE)
   }
 
   @message
