@@ -6,11 +6,11 @@ permalink: /docs/rpc/ssl-tls
 
 # SSL/TLS Encryption
 
-> [gRPC](https://grpc.io/docs/guides/auth.html) has SSL/TLS integration and promotes the use of SSL/TLS to authenticate the server, and encrypt all the data exchanged between the client and the server. Optional mechanisms are available for clients to provide certificates for mutual authentication.
+> [gRPC](https://grpc.io/docs/guides/auth.html) has SSL/TLS integration and promotes the use of SSL/TLS to authenticate the server and encrypt all the data exchanged between the client and the server. Optional mechanisms are available for clients to provide certificates for mutual authentication.
 
-[mu] allows you to encrypt the connection between the server and the client through SSL/TLS. The main goal of using SSL is to protect your sensitive information and keeps your data secure between servers and clients.
+[mu] allows you to encrypt the connection between the server and the client through SSL/TLS. The main goal of using SSL is to protect your sensitive information and to keep your data secure between servers and clients.
 
-As we mentioned in the [Main](/mu/) section, we can choose and configure our client with `OkHttp` or `Netty` but if we want to encrypt our service, it's mandatory to use `Netty` because currently, [mu] only supports encryption over *Netty*.
+As we mentioned in the [Main](/mu/) section, we can choose to configure our client with `OkHttp` or `Netty` but if we want to encrypt our service, it's mandatory to use `Netty`. Currently, [mu] only supports encryption over *Netty*.
 
 ## Requirements 
 
@@ -22,9 +22,9 @@ On the server and client side, we will need two files to configure the `SslConte
 
 ## Usage
 
-The first step to secure our [mu] services is adding the library dependencies `mu-rpc-netty-ssl` and `mu-rpc-client-netty` in your build.
+The first step to secure our [mu] services is to add the library dependencies `mu-rpc-netty-ssl` and `mu-rpc-client-netty` in our build.
 
-In second place, we have to move both server/client certificates and private keys to the `resources` folder.
+For the second step, we have to move both server/client certificates and private keys to the `resources` folder.
 
 If we haven't yet generated or obtained our own certificates, we can test using certificates found [here](https://github.com/grpc/grpc-java/tree/master/testing/src/main/resources/certs).
 
