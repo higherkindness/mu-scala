@@ -27,6 +27,8 @@ To use the project, add the following to your build.sbt:
 
 ```addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch)```
 
+We've found that the compiler plugin needs to be added to your build.sbt file *after* your library dependencies due to the manner in which SBT evaluates the build file. 
+
 [mu] is divided into multiple artifacts, grouped by scope:
 
 * `Server`: specifically for the RPC server.
