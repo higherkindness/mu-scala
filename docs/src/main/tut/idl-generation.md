@@ -6,7 +6,7 @@ permalink: /docs/rpc/idl-generation
 
 # IDL Generation
 
-Before entering implementation details, we mentioned that the [mu] ecosystem brings the ability to generate `.proto` files from the Scala definition, in order to maintain compatibility with other languages and systems outside of Scala.
+Before going into implementation details, we mentioned that the [mu] ecosystem gives us the ability to generate `.proto` files from Scala definitions, in order to maintain compatibility with other languages and systems outside of Scala.
 
 This relies on `idlGen`, an sbt plugin to generate Protobuf and Avro IDL files from the [mu] service definitions.
 
@@ -26,7 +26,7 @@ Note that the plugin is only available for Scala 2.12.
 
 ## Generating IDL files from source
 
-Let's take our previous service, and add an Avro-specific request and some useful annotations described in the [Annotations section](annotations):
+Let's take our previous service and add an Avro-specific request and some useful annotations described in the [Annotations section](annotations):
 ```tut:silent
 import mu.rpc.protocol._
 
@@ -68,7 +68,7 @@ At this point, each time you want to update your `.proto` IDL files from the sca
 ```bash
 sbt "idlGen proto"
 ```
-Using this example, the resulting Protobuf IDL would be generated in `/src/main/resources/proto/service.proto`, in the case that the scala file is named `service.scala`. The content should be similar to:
+Using this example, the resulting Protobuf IDL would be generated in `/src/main/resources/proto/service.proto`, assuming that the scala file is named `service.scala`. The content should be similar to:
 
 ```
 // This file has been automatically generated for use by
@@ -144,7 +144,7 @@ And the resulting Avro IDL would be generated in `target/scala-2.12/resource_man
 }
 ```
 
-Note that due to limitations in the Avro IDL, currently only unary RPC services are converted (client- and/or server-streaming services are ignored).
+Note that due to limitations in the Avro IDL, currently only unary RPC services are converted (client and/or server-streaming services are ignored).
 
 ### Plugin Settings
 
@@ -166,7 +166,7 @@ To use it, run:
 sbt "srcGen avro"
 ```
 
-You could even use `IDL` definitions packaged into artifacts, within your classpath. In that particular situation, you need to setup `srcGenJarNames`, specifying the artifact names (or sbt module names) that will be unzipped/used to extract the `IDL` files.
+You can even use `IDL` definitions packaged into artifacts within your classpath. In that particular situation, you need to setup `srcGenJarNames`, specifying the artifact names (or sbt module names) that will be unzipped/used to extract the `IDL` files.
 
 `srcGenJarNames ` can be very useful when you want to distribute your `IDL` files without binary code (to prevent binary conflicts in clients). In that case, you might want to include some additional settings in the build where your `IDL` files are placed, for instance:
 
@@ -214,14 +214,14 @@ Just like `idlGen`, `srcGen` and `srcGenFromJars` has some configurable settings
 
 * **`idlType`**: the type of IDL to generate from, currently only `avro`.
 * **`srcGenSerializationType`**: the serialization type when generating Scala sources from the IDL definitions. `Protobuf`, `Avro` or `AvroWithSchema` are the current supported serialization types. By default, the serialization type is `Avro`.
-* **`srcGenJarNames`**: the list of jar names or sbt modules containing the IDL definitions that will be used at compilation time by `srcGen` to generate the Scala Sources. By default, this sequence is empty.
+* **`srcGenJarNames`**: the list of jar names or sbt modules containing the IDL definitions that will be used at compilation time by `srcGen` to generate the Scala sources. By default, this sequence is empty.
 * **`srcGenSourceDirs`**: the list of directories where your IDL files are placed. By default: `Compile / resourceDirectory`, typically `src/main/resources/`.
-* **`srcGenIDLTargetDir`**: the directory where all the IDL files will be placed. By default, it's defined as `(Compile / resourceManaged).value / idlType.value`, typically `target/scala-2.12/resource_managed/main/avro`. Given this configuration, the plugin will automatically copy to this target directory:
+* **`srcGenIDLTargetDir`**: the directory where all the IDL files will be placed. By default, it's defined as `(Compile / resourceManaged).value / idlType.value`, typically `target/scala-2.12/resource_managed/main/avro`. Given this configuration, the plugin will automatically copy the following to this target directory:
   * All the definitions extracted from the different `jar` or `sbt` modules, and also,
   * All the source folders specified in the `srcGenSourceDirs` setting.
 * **`srcGenTargetDir`**: the Scala target base directory, where the `srcGen` task will write the Scala files in subdirectories/packages based on the namespaces of the IDL files. By default: `Compile / sourceManaged`, typically `target/scala-2.12/src_managed/main/`.
 * **`genOptions`**: additional options to add to the generated `@service` annotations, after the IDL type. Currently only supports `"Gzip"`.
-* **`idlGenBigDecimal`**: specify how the `decimal` types will be generated. `ScalaBigDecimalGen` produces `scala.math.BigDecimal` and `ScalaBigDecimalTaggedGen` produces `scala.math.BigDecimal` but tagged with the 'precision' and 'scale'. i.e. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`.
+* **`idlGenBigDecimal`**: specifies how the `decimal` types will be generated. `ScalaBigDecimalGen` produces `scala.math.BigDecimal` and `ScalaBigDecimalTaggedGen` produces `scala.math.BigDecimal` but tagged with the 'precision' and 'scale'. i.e. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`.
 * **`idlGenMarshallerImports`**: additional imports to add on top to the generated service files. This property can be used for importing extra codecs for your services. By default:
   * `List(BigDecimalAvroMarshallers, JavaTimeDateAvroMarshallers)` if `srcGenSerializationType` is `Avro` or `AvroWithSchema` and `idlGenBigDecimal` is `ScalaBigDecimalGen`
   * `List(BigDecimalTaggedAvroMarshallers, JavaTimeDateAvroMarshallers)` if `srcGenSerializationType` is `Avro` or `AvroWithSchema` and `idlGenBigDecimal` is `ScalaBigDecimalTaggedGen`
@@ -233,7 +233,7 @@ The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also
 
 The source directory must exist, otherwise, the `srcGen` task will fail. Target directories will be created upon generation.
 
-*Note*: regarding `srcGenSourceDirs`, all the directories configured as the source, will be distributed in the resulting jar artifact preserving the same folder structure as in the source.
+*Note*: regarding `srcGenSourceDirs`, all the directories configured as the source will be distributed in the resulting jar artifact preserving the same folder structure as in the source.
 
 The following example shows how to set up a dependency with another artifact or sbt module containing the IDL definitions (`foo-domain`):
 
