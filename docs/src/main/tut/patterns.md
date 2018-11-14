@@ -6,13 +6,13 @@ permalink: /docs/rpc/patterns
 
 # Patterns
 
-So far so good, not too much code, no business logic, in the previous sections we have seen some protocol definitions with Scala annotations and the generation of IDL files from the Scala definitions. Conversely, in this section, we are going to see how to complete our quickstart example. We'll take a look at both sides, the server and the client.
+So far so good, we haven't seen too much code or implemented any business logic. In the previous sections we have seen some protocol definitions with Scala annotations and the generation of IDL files from the Scala definitions. Finally, in this section, we are going to see how to complete our quickstart example. We'll take a look at both sides, the server and the client.
 
 ## Server
 
-Predictably, generating the server code is just implementing a service [Handler](http://frees.io/docs/core/interpreters/).
+Predictably, generating the server code is just implementing a service [Handler](http://frees.io/docs/core/handlers/).
 
-First of all, our `Greeter` RPC protocol definition:
+First, here's our `Greeter` RPC protocol definition:
 
 ```tut:invisible
 import mu.rpc.protocol._
@@ -106,7 +106,7 @@ class ServiceHandler[F[_]: Async](implicit EC: ExecutionContext) extends Greeter
 }
 ```
 
-That's all. We have exposed a potential implementation on the server side.
+That's it! We have exposed a potential implementation on the server side.
 
 ### Server Runtime
 
@@ -114,7 +114,7 @@ As you can see, the generic handler above requires `F` as the type parameter, wh
 
 ### Execution Context
 
-In [mu] programs, we'll at least need an implicit evidence related to the [Monix] Execution Context: `monix.execution.Scheduler`.
+In [mu] programs, we need an implicit [Monix] Execution Context in scope. In other words, we need a value of type `monix.execution.Scheduler` provided when we run our program.
 
 > The `monix.execution.Scheduler` is inspired by `ReactiveX`, being an enhanced Scala `ExecutionContext` and also a replacement for Java’s `ScheduledExecutorService`, but also for Javascript’s `setTimeout`.
 
@@ -134,7 +134,7 @@ As a side note, `CommonRuntime` will also be used later on for the client exampl
 
 ### Runtime Implicits
 
-For the server bootstrapping, remember adding `mu-rpc-server` dependency to your build.
+For the server bootstrapping, remember to add the `mu-rpc-server` dependency to your build.
 
 Now, we need to implicitly provide two things:
 
@@ -244,26 +244,26 @@ You will need to add either `mu-rpc-client-netty` or `mu-rpc-client-okhttp` to y
 
 ### Client Runtime
 
-Similarly in this section, as we saw for the server case, we are defining all the client runtime configurations needed for communication with the server.
+Similarly in this section, just like we saw for the server, we are defining all the client runtime configurations needed for communication with the server.
 
 ### Execution Context
 
-In our example, we are going to use the same Execution Context described for the Server. However, for the sake of observing a slightly different runtime configuration, our client will be interpreting to `monix.eval.Task`. Hence, in this case, we would only need the `monix.execution.Scheduler` implicit evidence.
+In our example, we are going to use the same Execution Context described for the server. However, for the sake of observing a slightly different runtime configuration, our client will be interpreting to `monix.eval.Task`. Hence, in this case, we would only need the `monix.execution.Scheduler` implicit evidence.
 
-We are going to interpret to `monix.eval.Task`, however, behind the scenes, we will use the [cats-effect] `IO` monad as an abstraction. Concretely, Freestyle has an integration with `cats-effect` that is included transitively in the classpath through `mu-async-cats-effect` dependency.
+Even though we're interpreting our program to `monix.eval.Task`, behind the scenes, [mu] is using the [cats-effect] `IO` monad as an abstraction. Concretely, Freestyle has an integration with `cats-effect` that is included transitively in the classpath through `mu-async-cats-effect` dependency.
 
 ### Runtime Implicits
 
-First of all, we need to configure how the client will reach the server in terms of the transport layer. There are two supported methods:
+First, we need to configure how the client will reach the server in terms of the transport layer. There are two supported methods:
 
-* By Address (host/port): brings the ability to create a channel with the target's address and port number.
-* By Target: it can create a channel with a target string, which can be either a valid [NameResolver](https://grpc.io/grpc-java/javadoc/io/grpc/NameResolver.html)-compliant URI or an authority string.
+* By Address (host/port): enables us to create a channel with the target's address and port number.
+* By Target: we can create a channel with a target string, which can be either a valid [NameResolver](https://grpc.io/grpc-java/javadoc/io/grpc/NameResolver.html)-compliant URI or an authority string.
 
-Additionally, we can add more optional configurations that can be used when the connection is occurring. All the options are available [here](https://github.com/higherkindness/mu/blob/6b0e926a5a14fbe3d9282e8c78340f2d9a0421f3/rpc/src/main/scala/client/ChannelConfig.scala#L33-L46). As we will see shortly in our example, we are going to skip the negotiation (`UsePlaintext()`).
+Additionally, we can add more optional configurations that can be used when the connection occurs. All the options are available [here](https://github.com/higherkindness/mu/blob/6b0e926a5a14fbe3d9282e8c78340f2d9a0421f3/rpc/src/main/scala/client/ChannelConfig.scala#L33-L46). As we will see shortly in our example, we are going to skip the negotiation (`UsePlaintext()`).
 
 Given the transport settings and a list of optional configurations, we can create the [ManagedChannel.html](https://grpc.io/grpc-java/javadoc/io/grpc/ManagedChannel.html) object, using the `ManagedChannelInterpreter` builder.
 
-So, taking into account all we have just said, how would our code look?
+So, taking into account all of that, how would our code look?
 
 ```tut:silent
 import cats.effect.IO
@@ -289,12 +289,12 @@ object gclient {
 
 **Notes**:
 
-* `host` and `port` would be read from the application configuration file.
+* In the code above, `host` and `port` would be read from an application configuration file.
 * To be able to use the `ConfigForAddress` helper, you need to add the `mu-config` dependency to your build.
 
 ### Client Program
 
-Once we have our runtime configuration defined as above, everything gets easier. This is an example of a client application, following our dummy quickstart:
+Once we have our runtime configuration defined as above, everything gets easier on the client side. This is an example of a client application, following our dummy quickstart:
 
 ```tut:silent
 import cats.effect.IO

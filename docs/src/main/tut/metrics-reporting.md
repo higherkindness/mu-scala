@@ -119,11 +119,11 @@ object InterceptingClientCalls extends CommonRuntime {
 }
 ```
 
-That's using `Prometheus` to monitor both [gRPC] ends.
+That is how we use `Prometheus` to monitor both [gRPC] ends.
 
 ## Dropwizard Metrics
 
-The usage is equivalent, however, in this case, we need to put an instance of `com.codahale.metrics.MetricRegistry` on the scene, then, using the _Dropwizard_ integration that _Prometheus_ already provides (`DropwizardExports`) you can associate it with the collector registry:
+The usage the same as before, but in this case we need to put an instance of `com.codahale.metrics.MetricRegistry` in our code. Then using the _Dropwizard_ integration that _Prometheus_ already provides (`DropwizardExports`) we can associate it with the collector registry:
 
 ```tut:silent
 import com.codahale.metrics.MetricRegistry

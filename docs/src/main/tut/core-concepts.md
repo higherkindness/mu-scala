@@ -21,7 +21,7 @@ In the upcoming sections, we'll take a look at how we can implement RPC protocol
 As you might know, [gRPC] uses protocol buffers (a.k.a. *protobuf*) by default:
 
 * As the Interface Definition Language (IDL) - for describing both the service interface and the structure of the payload messages. It is possible to use other alternatives if desired.
-* For serializing/deserializing structure data - similarly, as you do with [JSON] data, defining files `.json` extension, with protobuf you have to define proto files with `.proto` as an extension.
+* For serializing/deserializing structured data - just as you define [JSON] data with a `.json` file extension, with protobufs you define files with `.proto` as an extension.
 
 In the example given in the [gRPC guide], you might have a proto file like this:
 
@@ -55,18 +55,18 @@ message HelloReply {
 }
 ```
 
-Correspondingly, [gRPC] also uses protoc with a special [gRPC] plugin to generate code from your proto file for this `Greeter` RPC service.
+Correspondingly, [gRPC] uses protoc with a special [gRPC] plugin to generate code from your proto file for this `Greeter` RPC service.
 
 You can find more information about Protocol Buffers in the [Protocol Buffers' documentation](https://developers.google.com/protocol-buffers/docs/overview).
 
 ### mu-rpc
 
-In the previous section, we’ve seen an overview of what [gRPC] offers for defining protocols and generating code (compiling protocol buffers). Now, we'll show how [mu] offers the same, but in the **Freestyle** fashion, following the FP principles.
+In the previous section, we’ve seen an overview of what [gRPC] offers for defining protocols and generating code (compiling protocol buffers). Now, we'll show how [mu] offers the same thing, but in the **Freestyle** fashion, following FP principles.
 
-First things first, the main difference in respect to [gRPC] is that [mu] doesn’t need `.proto` files, but it still uses protobuf, thanks to the [PBDirect] library, which allows to read and write Scala objects directly to protobuf with no `.proto` file definitions. Therefore, in summary, we have:
+First things first, the main difference with respect to [gRPC] is that [mu] doesn’t need `.proto` files, but can still use protobuf thanks to the [PBDirect] library, which allows it to read and write Scala objects directly to protobuf with no `.proto` file definitions. In summary:
 
-* Your protocols, both messages, and services, will reside with your business-logic in your Scala files using [scalamacros] annotations to set them up. We’ll see more details on this shortly.
-* Instead of reading `.proto` files to set up the [RPC] messages and services, [mu] offers (as an optional feature) to generate them, based on your protocols defined in your Scala code. This feature is offered to maintain compatibility with other languages and systems outside of Scala. We'll check out this feature further in [this section](/docs/rpc/idl-generation).
+* Your protocols, both messages and services, will reside with your business-logic in your Scala files using [scalamacros] annotations to set them up. We’ll see more details on this shortly.
+* Instead of reading `.proto` files to set up the [RPC] messages and services, [mu] offers (as an optional feature) the ability to generate them based on the protocols defined in your Scala code. This feature is offered to maintain compatibility with other languages and systems outside of Scala. We'll check out this feature further in [this section](idl-generation).
 
 Let’s start looking at how to define the `Person` message that we saw previously.
 Before starting, this is the Scala import we need:
@@ -75,7 +75,7 @@ Before starting, this is the Scala import we need:
 import mu.rpc.protocol._
 ```
 
-`Person` definition would be defined as follows:
+`Person` would be defined as follows:
 
 ```tut:silent
 /**
@@ -89,7 +89,7 @@ import mu.rpc.protocol._
 case class Person(name: String, id: Int, has_ponycopter: Boolean)
 ```
 
-As we can see, it’s quite simple since it’s just a Scala case class preceded by the `@message` annotation (`@message` is optional though and used exclusively by `idlGen`):
+As we can see, this is quite simple - it’s just a Scala case class preceded by the `@message` annotation (though, `@message` is optional and used exclusively by `idlGen`):
 
 By the same token, let’s see now how the `Greeter` service would be translated to the [mu] style (in your `.scala` file):
 
@@ -125,13 +125,13 @@ object protocol {
 }
 ```
 
-Naturally, the [RPC] services are grouped in a [@tagless algebra](/docs/core/algebras/). Therefore, we are following one of the primary principles of Freestyle; you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.
+Naturally, the [RPC] services are grouped in a `@tagless algebra`. Therefore, we are following one of the primary principles of Freestyle; you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.
 
 In the above example, we can see that `sayHello` returns an `F[HelloReply]`. However, very often the services might:
 
 * Return an empty response.
 * Receive an empty request.
-* A combination of both.
+* Return and receive a combination of both.
 
 `mu-rpc` provides an `Empty` object, defined at `mu.rpc.protocol`, that you might want to use for these purposes.
 
@@ -148,7 +148,7 @@ object protocol {
   case class HelloRequest(name: String)
 
   /**
-   * The response message,
+   * The response message.
    * @param message Message containing the greetings.
    */
   @message
@@ -176,7 +176,7 @@ object protocol {
 
 We are also using some additional annotations:
 
-* `@service(Protobuf)`: tags the trait as an [RPC] service, in order to derive server and client code (macro expansion). It receives as argument the type of serialization that will be used to encode/decode data, `Protocol Buffers` in the example. `Avro` is also supported as another type of serialization.
+* `@service(Protobuf)`: tags the trait as an [RPC] service, in order to derive server and client code (macro expansion). It receives as its argument the type of serialization that will be used to encode/decode data. Our serialization type is `Protocol Buffers` in the example. `Avro` is also supported as another type of serialization.
 
 We'll see more details about these and other annotations in the following sections.
 
@@ -186,9 +186,9 @@ We'll see more details about these and other annotations in the following sectio
 
 [mu] supports `Gzip` as compression format.
 
-On the server side, we only have to add the annotation `Gzip` in our defined services.
+For server side compression, we just have to add the annotation `Gzip` in our defined services.
 
-Let's see an example of a unary service on the server side.
+Let's see an example of a unary service:
 
 ```tut:silent
 object service {
@@ -209,9 +209,9 @@ object service {
 }
 ```
 
-On the client, to enable it, we only have to add an option to the client in the channel builder.
+To enable compression on the client side, we just have to add an option to the client in the channel builder.
 
-Let's see an example of a client with the compression enabled.
+Let's see an example of a client with the compression enabled:
 
 ```tut:invisible
 trait CommonRuntime {
@@ -249,8 +249,8 @@ object implicits extends ChannelImplicits
 
 As [gRPC], [mu] allows you to define two main kinds of service methods:
 
-* **Unary RPC**: the simplest way of communication, one client request, and one server response.
-* **Streaming RPC**: similar to the unary, but depending the kind of streaming, the client or server or both will send back a stream of responses. There are three kinds of streaming, server, client and bidirectional streaming.
+* **Unary RPC**: the simplest way of communicating, one client request, and one server response.
+* **Streaming RPC**: similar to unary, but depending the kind of streaming, the client, server, or both will send back a stream of responses. There are three kinds of streaming, server, client and bidirectional streaming.
 
 Let's complete our protocol's example with an unary service method:
 
@@ -288,11 +288,11 @@ In the `Streaming` section, we are going to see all the streaming options.
 
 ## Custom codecs
 
-[mu] allows you to use custom decoders and encoders. It creates implicits `Marshaller` instances for your messages using existing serializers/deserializers for the serialization type you're using.
+[mu] allows you to use custom decoders and encoders. It creates implicit `Marshaller` instances for your messages using existing serializers/deserializers for the serialization type you're using.
 
-In the case of `Protobuf`, [mu] uses instances of [PBDirect] for creating the `Marshaller` instances. In the case of `Avro`, it uses instances of [Avro4s].
+If you're using `Protobuf`, [mu] uses instances of [PBDirect] for creating the `Marshaller` instances. For `Avro`, it uses instances of [Avro4s].
 
-Let's see a couple of samples, one per each type of serialization. Suppose you want to serialize `java.time.LocalDate` as part of your messages in `String` format. With `Probobuf`, as we've mentioned, you need to provide the instances of [PBDirect] for that type. Concretely, you need to provide a `PBWriter` and a `PBReader`.
+Let's see a couple of samples, one per each type of serialization. Suppose you want to serialize `java.time.LocalDate` as part of your messages in `String` format. With `Probobuf`, as we've mentioned, you need to provide the instances of [PBDirect] for that type. Specifically, you need to provide a `PBWriter` and a `PBReader`.
 
 ```tut:silent
 object protocol {
@@ -327,7 +327,7 @@ object protocol {
 }
 ```
 
-For `Avro` is quite similar, but in this case we need to provide three instances of [Avro4s]. `ToSchema`, `FromValue`, and `ToValue`.
+For `Avro` the process is quite similar, but in this case we need to provide three instances of [Avro4s]. `ToSchema`, `FromValue`, and `ToValue`.
 
 ```tut:silent
 object protocol {
@@ -367,7 +367,7 @@ object protocol {
 }
 ```
 
-[mu] provides serializers for `BigDecimal`, `BigDecimal` with tagged 'precision' and 'scale' (like `BigDecimal @@ (Nat._8, Nat._2)`), `java.time.LocalDate` and `java.time.LocalDateTime`. The only thing you need to do is to add the following import to your service:
+[mu] provides serializers for `BigDecimal`, `BigDecimal` with tagged 'precision' and 'scale' (like `BigDecimal @@ (Nat._8, Nat._2)`), `java.time.LocalDate` and `java.time.LocalDateTime`. The only thing you need to do is add the following import to your service:
 
 * `BigDecimal` in `Protobuf`
   * `import mu.rpc.internal.encoders.pbd.bigDecimal._`
@@ -380,14 +380,14 @@ object protocol {
 * `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
   * `import mu.rpc.internal.encoders.avro.javatime._`
 
-It also provides the instances for `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime`, but you need the `mu-rpc-marshallers-jodatime` extra dependency. See the [quickstart section](/docs/rpc/quickstart) for the SBT instructions.
+Mu also provides instances for `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime`, but you need the `mu-rpc-marshallers-jodatime` extra dependency. See the [main section](/mu/) for the SBT instructions.
 
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Protobuf`
   * `import mu.rpc.marshallers.jodaTimeEncoders.pbd._`
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
   * `import mu.rpc.marshallers.jodaTimeEncoders.avro._`
   
-**Note**: If you want to send one of these instances directly as a request or response through Avro, you need to provide an instance of `Marshaller`. [mu] provides the marshallers for `BigDecimal`, `java.time.LocalDate`, `java.time.LocalDateTime`, `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in a separated package:
+**Note**: If you want to send one of these instances directly as a request or response through Avro, you need to provide an instance of `Marshaller`. [mu] provides the marshallers for `BigDecimal`, `java.time.LocalDate`, `java.time.LocalDateTime`, `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in a separate package:
 * `BigDecimal` in `Avro`
   * `import mu.rpc.internal.encoders.avro.bigdecimal.marshallers._`
 * Tagged `BigDecimal` in `Avro` (**note**: this encoder is not avro spec compliant)
