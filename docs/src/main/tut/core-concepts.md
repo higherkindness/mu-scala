@@ -211,7 +211,13 @@ object service {
 
 To enable compression on the client side, we just have to add an option to the client in the channel builder.
 
-Let's see an example of a client with the compression enabled:
+Let's see an example of a client with the compression enabled.
+
+Since [mu] relies on `ConcurrentEffect` from the [cats-effect library](https://github.com/typelevel/cats-effect), we'll need a runtime for executing our effects. 
+
+We'll be using `IO` from `cats-effect`, but you can use any type that has a `ConcurrentEffect` instance.
+
+For executing `IO` we need a `ContextShift[IO]` used for running `IO` instances and a `Timer[IO]` that is used for scheduling, let's go ahead and create them.
 
 ```tut:invisible
 trait CommonRuntime {
@@ -327,7 +333,7 @@ object protocol {
 }
 ```
 
-For `Avro` the process is quite similar, but in this case we need to provide three instances of [Avro4s]. `ToSchema`, `FromValue`, and `ToValue`.
+For `Avro` the process is quite similar, but in this case we need to provide three instances of [Avro4s]. `SchemaFor`, `Encoder`, and `Decoder`.
 
 ```tut:silent
 object protocol {
@@ -367,7 +373,9 @@ object protocol {
 }
 ```
 
-[mu] provides serializers for `BigDecimal`, `BigDecimal` with tagged 'precision' and 'scale' (like `BigDecimal @@ (Nat._8, Nat._2)`), `java.time.LocalDate` and `java.time.LocalDateTime`. The only thing you need to do is add the following import to your service:
+[mu] provides serializers for `BigDecimal` and `BigDecimal` with tagged 'precision' and 'scale' (like `BigDecimal @@ (Nat._8, Nat._2)`). It also provides serializers for `java.time.LocalDate` and `java.time.LocalDateTime` but only for [PBDirect] since [Avro4s] provides their owns. 
+
+The only thing you need to do is add the following import to your service:
 
 * `BigDecimal` in `Protobuf`
   * `import mu.rpc.internal.encoders.pbd.bigDecimal._`
@@ -377,8 +385,6 @@ object protocol {
   * `import mu.rpc.internal.encoders.avro.bigdecimal._`
 * Tagged `BigDecimal` in `Avro`
   * `import mu.rpc.internal.encoders.avro.bigDecimalTagged._`
-* `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
-  * `import mu.rpc.internal.encoders.avro.javatime._`
 
 Mu also provides instances for `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime`, but you need the `mu-rpc-marshallers-jodatime` extra dependency. See the [main section](/mu/) for the SBT instructions.
 

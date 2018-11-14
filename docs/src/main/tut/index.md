@@ -15,7 +15,11 @@ technologies:
 
 ## Installation
 
+[comment]: # (Start Replace)
+
 The current version for [mu] is `0.16.0` using the following common libraries and versions. 
+
+[comment]: # (End Replace)
 
  * [cats-effect] 0.10.1
  * [Monix] 3.0.0-RC1

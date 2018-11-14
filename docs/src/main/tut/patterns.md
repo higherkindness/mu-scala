@@ -112,11 +112,13 @@ That's it! We have exposed a potential implementation on the server side.
 
 As you can see, the generic handler above requires `F` as the type parameter, which corresponds with our target `Monad` when interpreting our program. In this section, we will satisfy all the runtime requirements, in order to make our server runnable.
 
-### Execution Context
+### Creating a runtime
 
-In [mu] programs, we need an implicit [Monix] Execution Context in scope. In other words, we need a value of type `monix.execution.Scheduler` provided when we run our program.
+Since [mu] relies on `ConcurrentEffect` from the [cats-effect library](https://github.com/typelevel/cats-effect), we'll need a runtime for executing our effects. 
 
-> The `monix.execution.Scheduler` is inspired by `ReactiveX`, being an enhanced Scala `ExecutionContext` and also a replacement for Java’s `ScheduledExecutorService`, but also for Javascript’s `setTimeout`.
+We'll be using `IO` from `cats-effect`, but you can use any type that has a `ConcurrentEffect` instance.
+
+For executing `IO` we need a `ContextShift[IO]` used for running `IO` instances and a `Timer[IO]` that is used for scheduling, let's go ahead and create them.
 
 ```tut:silent
 trait CommonRuntime {
@@ -132,7 +134,7 @@ trait CommonRuntime {
 
 As a side note, `CommonRuntime` will also be used later on for the client example program.
 
-### Runtime Implicits
+### Transport Implicits
 
 For the server bootstrapping, remember to add the `mu-rpc-server` dependency to your build.
 
@@ -163,11 +165,6 @@ object gserver {
 }
 ```
 
-Here are a few additional notes related to the previous snippet of code:
-
-* The Server will bootstrap on port `8080`.
-* `Greeter.bindService` is an auto-derived method which creates, behind the scenes, the binding service for [gRPC]. It requires `F[_]` as the type parameter, the target/concurrent monad, in our example: `cats.effects.IO`.
-
 ### Server Bootstrap
 
 What else is needed? We just need to define a `main` method:
@@ -191,6 +188,8 @@ object RPCServer {
 
 }
 ```
+
+The Server will bootstrap on port `8080`.
 
 Fortunately, once all the runtime requirements are in place (**`import gserver.implicits._`**), we only have to write the previous piece of code, which primarily, should be the same in all cases (except if your target Monad is different from `cats.effects.IO`).
 
@@ -229,6 +228,8 @@ class ServiceSpec extends FunSuite with Matchers with Checkers with OneInstanceP
 }
 ```
 
+`Greeter.bindService` is an auto-derived method which creates, behind the scenes, the binding service for [gRPC]. It requires `F[_]` as the type parameter, the target/concurrent monad, in our example: `cats.effects.IO`.
+
 Running the test:
 
 ```tut
@@ -246,22 +247,22 @@ You will need to add either `mu-rpc-client-netty` or `mu-rpc-client-okhttp` to y
 
 Similarly in this section, just like we saw for the server, we are defining all the client runtime configurations needed for communication with the server.
 
-### Execution Context
+### Creating a runtime
 
-In our example, we are going to use the same Execution Context described for the server. However, for the sake of observing a slightly different runtime configuration, our client will be interpreting to `monix.eval.Task`. Hence, in this case, we would only need the `monix.execution.Scheduler` implicit evidence.
+In our example, we are going to use the same runtime described for the server. Remember we're relying on the `ConcurrentEffect`, so you can use any type that has a `ConcurrentEffect` instance. 
 
-Even though we're interpreting our program to `monix.eval.Task`, behind the scenes, [mu] is using the [cats-effect] `IO` monad as an abstraction. Concretely, Freestyle has an integration with `cats-effect` that is included transitively in the classpath through `mu-async-cats-effect` dependency.
-
-### Runtime Implicits
+### Transport Implicits
 
 First, we need to configure how the client will reach the server in terms of the transport layer. There are two supported methods:
 
 * By Address (host/port): enables us to create a channel with the target's address and port number.
 * By Target: we can create a channel with a target string, which can be either a valid [NameResolver](https://grpc.io/grpc-java/javadoc/io/grpc/NameResolver.html)-compliant URI or an authority string.
 
-Additionally, we can add more optional configurations that can be used when the connection occurs. All the options are available [here](https://github.com/higherkindness/mu/blob/6b0e926a5a14fbe3d9282e8c78340f2d9a0421f3/rpc/src/main/scala/client/ChannelConfig.scala#L33-L46). As we will see shortly in our example, we are going to skip the negotiation (`UsePlaintext()`).
+Additionally, we can add more optional configurations that can be used when the connection occurs. All the options are available [here](https://github.com/higherkindness/mu/blob/48b8578cbafc59dc59e61e93c13fdb4709b7e540/modules/client/src/main/scala/ManagedChannelConfig.scala).
 
 Given the transport settings and a list of optional configurations, we can create the [ManagedChannel.html](https://grpc.io/grpc-java/javadoc/io/grpc/ManagedChannel.html) object, using the `ManagedChannelInterpreter` builder.
+
+As we will see shortly in our example, we are going relay on the default behaviour passing directly the `ChannelFor` to the client builder.
 
 So, taking into account all of that, how would our code look?
 

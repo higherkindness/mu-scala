@@ -71,7 +71,6 @@ trait AvroScalaGeneratorArbitrary {
       case "Avro" | "AvroWithSchema" =>
         Gen.oneOf(
           Gen.const(BigDecimalAvroMarshallers),
-          Gen.const(JavaTimeDateAvroMarshallers),
           Gen.const(JodaDateTimeAvroMarshallers),
           customMarshallersImportsGen
         )

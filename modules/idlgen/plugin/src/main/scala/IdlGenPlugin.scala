@@ -53,8 +53,7 @@ object IdlGenPlugin extends AutoPlugin {
           "By default, the serialization type is 'Avro'.")
 
     lazy val idlGenSourceDir: SettingKey[File] =
-      settingKey[File](
-        "The Scala source directory, where your mu service definitions are placed.")
+      settingKey[File]("The Scala source directory, where your mu service definitions are placed.")
 
     lazy val idlGenTargetDir: SettingKey[File] =
       settingKey[File](
@@ -126,7 +125,7 @@ object IdlGenPlugin extends AutoPlugin {
         (idlGenBigDecimal.value match {
           case ScalaBigDecimalGen       => BigDecimalAvroMarshallers
           case ScalaBigDecimalTaggedGen => BigDecimalTaggedAvroMarshallers
-        }) :: JavaTimeDateAvroMarshallers :: List.empty[MarshallersImport]
+        }) :: Nil
       else if (srcGenSerializationType.value == "Protobuf")
         List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)
       else Nil
