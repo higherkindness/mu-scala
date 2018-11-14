@@ -18,7 +18,7 @@ package mu.rpc
 package internal
 package server
 
-import cats.effect.{Effect, IO}
+import cats.effect.{ConcurrentEffect, Effect, IO}
 import io.grpc.stub.ServerCalls.{
   BidiStreamingMethod,
   ClientStreamingMethod,
@@ -27,6 +27,7 @@ import io.grpc.stub.ServerCalls.{
 }
 import io.grpc.stub.StreamObserver
 import io.grpc.{Status, StatusException, StatusRuntimeException}
+
 import scala.concurrent.ExecutionContext
 import monix.reactive.Observable
 
@@ -42,11 +43,12 @@ object monixCalls {
         addCompression(responseObserver, maybeCompression)
         Effect[F]
           .runAsync(f(request))(either => IO(completeObserver(responseObserver)(either)))
+          .toIO
           .unsafeRunAsync(_ => ())
       }
     }
 
-  def clientStreamingMethod[F[_]: Effect, Req, Res](
+  def clientStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Observable[Req] => F[Res],
       maybeCompression: Option[String])(
       implicit EC: ExecutionContext): ClientStreamingMethod[Req, Res] =
@@ -55,7 +57,7 @@ object monixCalls {
       override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
         addCompression(responseObserver, maybeCompression)
         transformStreamObserver[Req, Res](
-          inputObservable => Observable.fromEffect(f(inputObservable)),
+          inputObservable => Observable.from(f(inputObservable)),
           responseObserver
         )
       }

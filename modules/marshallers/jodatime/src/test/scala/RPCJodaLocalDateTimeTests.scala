@@ -85,8 +85,8 @@ class RPCJodaLocalDateTimeTests extends RpcBaseTestSuite with BeforeAndAfter wit
 
   "RPCJodaService" should {
 
+    import TestsImplicits._
     import RPCJodaLocalDateTimeService._
-    import scala.concurrent.ExecutionContext.Implicits.global
 
     implicit val H: RPCJodaServiceDefHandler[ConcurrentMonad] =
       new RPCJodaServiceDefHandler[ConcurrentMonad]

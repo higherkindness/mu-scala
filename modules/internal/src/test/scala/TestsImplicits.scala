@@ -15,8 +15,15 @@
  */
 
 package mu.rpc
-package server
 
-import mu.rpc.internal.TaskImplicits
+import cats.effect.{ContextShift, IO, Timer}
 
-object implicits extends TaskImplicits
+object TestsImplicits {
+
+  implicit val EC: scala.concurrent.ExecutionContext =
+    scala.concurrent.ExecutionContext.Implicits.global
+
+  implicit val timer: Timer[IO]     = IO.timer(EC)
+  implicit val cs: ContextShift[IO] = IO.contextShift(EC)
+
+}

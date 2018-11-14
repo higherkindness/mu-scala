@@ -15,11 +15,16 @@ technologies:
 
 ## Installation
 
+[comment]: # (Start Replace)
+
 The current version for [mu] is `0.16.0` using the following common libraries and versions. 
 
- * [cats-effect] 0.10.1
- * [Monix] 3.0.0-RC1
- * [fs2] 0.10.6
+[comment]: # (End Replace)
+
+ * [avro4s] 2.0.2
+ * [cats-effect] 1.1.0-M1
+ * [fs2] 1.0.0
+ * [Monix] 3.0.0-RC2
 
 `mu-rpc` is cross-built for Scala `2.11.x` and `2.12.x`.
 
@@ -109,3 +114,4 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-marshallers-jodatime" % "0
 [cats-effect]: https://github.com/typelevel/cats-effect
 [Metrifier]: https://github.com/47deg/metrifier
 [fs2]: https://github.com/functional-streams-for-scala/fs2
+[avro4s]: https://github.com/sksamuel/avro4s

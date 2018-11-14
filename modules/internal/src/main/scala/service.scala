@@ -173,7 +173,7 @@ object serviceImpl {
         rpcRequests.map(_.descriptorAndHandler)
       val bindService: DefDef = q"""
         def bindService[$F_](implicit
-          F: _root_.cats.effect.Effect[$F],
+          F: _root_.cats.effect.ConcurrentEffect[$F],
           algebra: $serviceName[$F],
           EC: _root_.scala.concurrent.ExecutionContext
         ): _root_.io.grpc.ServerServiceDefinition =
@@ -188,7 +188,7 @@ object serviceImpl {
           channel: _root_.io.grpc.Channel,
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit
-          F: _root_.cats.effect.Effect[$F],
+          F: _root_.cats.effect.ConcurrentEffect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
         ) extends _root_.io.grpc.stub.AbstractStub[$Client[$F]](channel, options) {
           override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $Client[F] =
@@ -205,7 +205,7 @@ object serviceImpl {
             _root_.mu.rpc.client.UsePlaintext()),
             options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
           )(implicit
-          F: _root_.cats.effect.Effect[$F],
+          F: _root_.cats.effect.ConcurrentEffect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
         ): $Client[$F] = {
           val managedChannelInterpreter =
@@ -219,7 +219,7 @@ object serviceImpl {
           channel: _root_.io.grpc.Channel,
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit
-          F: _root_.cats.effect.Effect[$F],
+          F: _root_.cats.effect.ConcurrentEffect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
         ): $Client[$F] = new $Client[$F](channel, options)
         """.supressWarts("DefaultArguments")

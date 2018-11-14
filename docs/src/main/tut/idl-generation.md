@@ -27,6 +27,7 @@ Note that the plugin is only available for Scala 2.12.
 ## Generating IDL files from source
 
 Let's take our previous service and add an Avro-specific request and some useful annotations described in the [Annotations section](annotations):
+
 ```tut:silent
 import mu.rpc.protocol._
 
@@ -65,9 +66,11 @@ object service {
 ```
 
 At this point, each time you want to update your `.proto` IDL files from the scala definitions, you have to run the following sbt task:
+
 ```bash
 sbt "idlGen proto"
 ```
+
 Using this example, the resulting Protobuf IDL would be generated in `/src/main/resources/proto/service.proto`, assuming that the scala file is named `service.scala`. The content should be similar to:
 
 ```
@@ -99,9 +102,11 @@ service ProtoGreeter {
 ```
 
 To generate Avro IDL instead, use:
+
 ```bash
 sbt "idlGen avro"
 ```
+
 And the resulting Avro IDL would be generated in `target/scala-2.12/resource_managed/main/avro/service.avpr`:
 
 ```
@@ -162,6 +167,7 @@ You can also use this process in reverse and generate [mu] Scala classes from ID
 The plugin's implementation basically wraps the [avrohugger] library and adds some mu-specific extensions.
 
 To use it, run:
+
 ```bash
 sbt "srcGen avro"
 ```
@@ -223,8 +229,8 @@ Just like `idlGen`, `srcGen` and `srcGenFromJars` has some configurable settings
 * **`genOptions`**: additional options to add to the generated `@service` annotations, after the IDL type. Currently only supports `"Gzip"`.
 * **`idlGenBigDecimal`**: specifies how the `decimal` types will be generated. `ScalaBigDecimalGen` produces `scala.math.BigDecimal` and `ScalaBigDecimalTaggedGen` produces `scala.math.BigDecimal` but tagged with the 'precision' and 'scale'. i.e. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`.
 * **`idlGenMarshallerImports`**: additional imports to add on top to the generated service files. This property can be used for importing extra codecs for your services. By default:
-  * `List(BigDecimalAvroMarshallers, JavaTimeDateAvroMarshallers)` if `srcGenSerializationType` is `Avro` or `AvroWithSchema` and `idlGenBigDecimal` is `ScalaBigDecimalGen`
-  * `List(BigDecimalTaggedAvroMarshallers, JavaTimeDateAvroMarshallers)` if `srcGenSerializationType` is `Avro` or `AvroWithSchema` and `idlGenBigDecimal` is `ScalaBigDecimalTaggedGen`
+  * `List(BigDecimalAvroMarshallers)` if `srcGenSerializationType` is `Avro` or `AvroWithSchema` and `idlGenBigDecimal` is `ScalaBigDecimalGen`
+  * `List(BigDecimalTaggedAvroMarshallers)` if `srcGenSerializationType` is `Avro` or `AvroWithSchema` and `idlGenBigDecimal` is `ScalaBigDecimalTaggedGen`
   * `List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)` if `srcGenSerializationType` is `Protobuf`.
 
 The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also available, but they need the dependency `mu-rpc-marshallers-jodatime`. You can also specify custom imports with the following:

@@ -18,7 +18,7 @@ package mu.rpc
 package internal
 package client
 
-import cats.effect.Effect
+import cats.effect.{ConcurrentEffect, Effect}
 import _root_.fs2._
 import _root_.fs2.interop.reactivestreams._
 
@@ -36,7 +36,7 @@ object fs2Calls {
       options: CallOptions)(implicit EC: ExecutionContext): F[Res] =
     monixCalls.unary(request, descriptor, channel, options)
 
-  def serverStreaming[F[_]: Effect, Req, Res](
+  def serverStreaming[F[_]: ConcurrentEffect, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
@@ -46,7 +46,7 @@ object fs2Calls {
       .toReactivePublisher(Scheduler(EC))
       .toStream[F]
 
-  def clientStreaming[F[_]: Effect, Req, Res](
+  def clientStreaming[F[_]: ConcurrentEffect, Req, Res](
       input: Stream[F, Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
@@ -58,7 +58,7 @@ object fs2Calls {
       channel,
       options)
 
-  def bidiStreaming[F[_]: Effect, Req, Res](
+  def bidiStreaming[F[_]: ConcurrentEffect, Req, Res](
       input: Stream[F, Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,

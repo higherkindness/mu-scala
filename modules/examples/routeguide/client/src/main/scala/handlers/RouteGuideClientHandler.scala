@@ -17,6 +17,7 @@
 package example.routeguide.client.handlers
 
 import cats._
+import cats.effect.{Async, ConcurrentEffect, Effect}
 import cats.implicits._
 import example.routeguide.client.RouteGuideClient
 import io.grpc.{Status, StatusRuntimeException}
@@ -28,17 +29,15 @@ import example.routeguide.common.Utils._
 
 import scala.concurrent.duration._
 
-class RouteGuideClientHandler[F[_]: Monad](
+class RouteGuideClientHandler[F[_]: ConcurrentEffect](
     implicit client: RouteGuideService.Client[F],
-    M: MonadError[F, Throwable],
-    T2F: Task ~> F)
+    E: Effect[Task])
     extends RouteGuideClient[F] {
 
   val logger = getLogger
 
   override def getFeature(lat: Int, lon: Int): F[Unit] =
-    M.handleErrorWith {
-      logger.info(s"*** GetFeature: lat=$lat lon=$lon")
+    Async[F].delay(logger.info(s"*** GetFeature: lat=$lat lon=$lon")) *>
       client
         .getFeature(Point(lat, lon))
         .map { feature: Feature =>
@@ -46,13 +45,14 @@ class RouteGuideClientHandler[F[_]: Monad](
             logger.info(s"Found feature called '${feature.name}' at ${feature.location.pretty}")
           else logger.info(s"Found no feature at ${feature.location.pretty}")
         }
-    } {
-      case e: StatusRuntimeException =>
-        logger.warn(s"RPC failed:${e.getStatus} $e")
-        M.raiseError(e)
-    }
+        .handleErrorWith {
+          case e: StatusRuntimeException =>
+            Async[F].delay(logger.warn(s"RPC failed:${e.getStatus} $e")) *> ApplicativeError[
+              F,
+              Throwable].raiseError(e)
+        }
 
-  override def listFeatures(lowLat: Int, lowLon: Int, hiLat: Int, hiLon: Int): F[Unit] = T2F.apply {
+  override def listFeatures(lowLat: Int, lowLon: Int, hiLat: Int, hiLon: Int): F[Unit] = {
     logger.info(s"*** ListFeatures: lowLat=$lowLat lowLon=$lowLon hiLat=$hiLat hiLon=$hiLon")
     client
       .listFeatures(
@@ -71,15 +71,13 @@ class RouteGuideClientHandler[F[_]: Monad](
           throw e
       }
       .completedL
-  }
+  }.toAsync[F]
 
   override def recordRoute(features: List[Feature], numPoints: Int): F[Unit] = {
     def takeN: List[Feature] = scala.util.Random.shuffle(features).take(numPoints)
 
-    M.handleErrorWith {
-      val points = takeN.map(_.location)
-      logger.info(s"*** RecordRoute. Points: ${points.map(_.pretty).mkString(";")}")
-
+    val points = takeN.map(_.location)
+    Async[F].delay(logger.info(s"*** RecordRoute. Points: ${points.map(_.pretty).mkString(";")}")) *>
       client
         .recordRoute(
           Observable
@@ -90,13 +88,13 @@ class RouteGuideClientHandler[F[_]: Monad](
             s"Finished trip with ${summary.point_count} points. Passed ${summary.feature_count} features. " +
               s"Travelled ${summary.distance} meters. It took ${summary.elapsed_time} seconds.")
         }
-    } { e: Throwable =>
-      logger.warn(s"RecordRoute Failed: ${Status.fromThrowable(e)} $e")
-      M.raiseError(e)
-    }
+        .handleErrorWith { e: Throwable =>
+          Async[F].delay(logger.warn(s"RecordRoute Failed: ${Status.fromThrowable(e)} $e")) *> e
+            .raiseError[F, Unit]
+        }
   }
 
-  override def routeChat: F[Unit] = T2F.apply {
+  override def routeChat: F[Unit] = {
     logger.info("*** RouteChat")
     client
       .routeChat(
@@ -115,8 +113,9 @@ class RouteGuideClientHandler[F[_]: Monad](
           }
       )
       .map { note: RouteNote =>
-        logger.info(s"Got message '${note.message}' at " +
-          s"${note.location.latitude}, ${note.location.longitude}")
+        logger.info(
+          s"Got message '${note.message}' at " +
+            s"${note.location.latitude}, ${note.location.longitude}")
       }
       .onErrorHandle {
         case e: Throwable =>
@@ -124,6 +123,6 @@ class RouteGuideClientHandler[F[_]: Monad](
           throw e
       }
       .completedL
-  }
+  }.toAsync[F]
 
 }

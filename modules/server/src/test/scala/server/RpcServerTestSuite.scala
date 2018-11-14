@@ -88,10 +88,10 @@ trait RpcServerTestSuite extends RpcBaseTestSuite {
         override def bindService(): ServerServiceDefinition = sd1
       }),
       AddTransportFilter(new ServerTransportFilter() {
-        val key1: Attributes.Key[String] = Attributes.Key.of("key1")
-        val key2: Attributes.Key[String] = Attributes.Key.of("key2")
+        val key1: Attributes.Key[String] = Attributes.Key.create("key1")
+        val key2: Attributes.Key[String] = Attributes.Key.create("key2")
         override def transportReady(attrs: Attributes): Attributes =
-          Attributes.newBuilder(attrs).set(key1, "foo").set(key2, "bar").build
+          attrs.toBuilder.set(key1, "foo").set(key2, "bar").build()
 
         override def transportTerminated(attrs: Attributes): Unit = (): Unit
       }),

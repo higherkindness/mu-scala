@@ -74,9 +74,6 @@ trait CommonUtils {
 
   def debug(str: String): Unit = logger.debug(str)
 
-  implicit val EC: scala.concurrent.ExecutionContext =
-    scala.concurrent.ExecutionContext.Implicits.global
-
   val pickUnusedPort: Int =
     Try {
       val serverSocket: ServerSocket = new ServerSocket(0)

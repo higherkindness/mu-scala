@@ -133,8 +133,8 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
   "A RPC server" should {
 
+    import TestsImplicits._
     import RPCService._
-    import scala.concurrent.ExecutionContext.Implicits.global
 
     implicit val H: RPCServiceDefImpl[ConcurrentMonad] = new RPCServiceDefImpl[ConcurrentMonad]
 
@@ -250,8 +250,8 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
   "A RPC server with an implicit rounding mode" should {
 
+    import TestsImplicits._
     import RPCServiceWithImplicitRM._
-    import scala.concurrent.ExecutionContext.Implicits.global
 
     implicit val H: RPCServiceDefImpl[ConcurrentMonad] = new RPCServiceDefImpl[ConcurrentMonad]
 

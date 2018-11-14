@@ -17,13 +17,16 @@
 package mu.rpc.benchmarks
 package shared
 
-import cats.effect.IO
+import cats.effect.{ContextShift, IO, Timer}
 
 import scala.concurrent.ExecutionContext
 
 trait Runtime {
 
   implicit val EC: ExecutionContext = ExecutionContext.Implicits.global
+
+  implicit val timer: Timer[IO]     = IO.timer(EC)
+  implicit val cs: ContextShift[IO] = IO.contextShift(EC)
 
   implicit val persistenceService: PersistenceService[IO] = PersistenceService[IO]
 

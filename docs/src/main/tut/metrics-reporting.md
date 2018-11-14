@@ -13,11 +13,13 @@ Currently, [mu] provides two different ways to monitor [gRPC] services: `Prometh
 In order to monitor the RPC calls on the server side, it's necessary to intercept them. We'll see how to do this in the next code fragment:
 
 ```tut:invisible
-import monix.execution.Scheduler
-
 trait CommonRuntime {
 
-  implicit val S: Scheduler = monix.execution.Scheduler.Implicits.global
+  implicit val EC: scala.concurrent.ExecutionContext =
+    scala.concurrent.ExecutionContext.Implicits.global
+
+  implicit val timer: cats.effect.Timer[cats.effect.IO]     = cats.effect.IO.timer(EC)
+  implicit val cs: cats.effect.ContextShift[cats.effect.IO] = cats.effect.IO.contextShift(EC)
 
 }
 ```
@@ -26,8 +28,6 @@ trait CommonRuntime {
 import mu.rpc.protocol._
 
 object service {
-
-  import monix.reactive.Observable
 
   @message
   case class HelloRequest(greeting: String)
@@ -43,16 +43,11 @@ object service {
 ```
 
 ```tut:invisible
-import cats.effect.Async
+import cats.Applicative
 import cats.syntax.applicative._
-import freestyle.free._
-import mu.rpc.server.implicits._
-import monix.execution.Scheduler
-import monix.eval.Task
-import monix.reactive.Observable
 import service._
 
-class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
+class ServiceHandler[F[_]: Applicative] extends Greeter[F] {
 
   override def sayHello(request: service.HelloRequest): F[service.HelloResponse] =
     HelloResponse(reply = "Good bye!").pure
@@ -61,11 +56,8 @@ class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
 ```
 
 ```tut:silent
-import cats.~>
 import cats.effect.IO
 import mu.rpc.server._
-import mu.rpc.server.handlers._
-import mu.rpc.server.implicits._
 import mu.rpc.prometheus.shared.Configuration
 import mu.rpc.prometheus.server.MonitoringServerInterceptor
 import io.prometheus.client.CollectorRegistry
@@ -87,7 +79,7 @@ object InterceptingServerCalls extends CommonRuntime {
     AddService(Greeter.bindService[IO].interceptWith(monitorInterceptor))
   )
 
-  val server: IO[GrpcServer[IO]]= GrpcServer.default[IO](8080, grpcConfigs)
+  val server: IO[GrpcServer[IO]] = GrpcServer.default[IO](8080, grpcConfigs)
 
 }
 ```
@@ -97,18 +89,12 @@ object InterceptingServerCalls extends CommonRuntime {
 In this case, in order to intercept the client calls we need additional configuration settings (by using `AddInterceptor`):
 
 ```tut:silent
-import cats.implicits._
 import cats.effect.IO
 import mu.rpc._
 import mu.rpc.config._
 import mu.rpc.client._
 import mu.rpc.client.config._
-import mu.rpc.client.implicits._
-import monix.eval.Task
-import io.grpc.ManagedChannel
 import service._
-
-import scala.util.{Failure, Success, Try}
 
 import mu.rpc.prometheus.shared.Configuration
 import mu.rpc.prometheus.client.MonitoringClientInterceptor
@@ -118,8 +104,8 @@ object InterceptingClientCalls extends CommonRuntime {
   val channelFor: ChannelFor =
     ConfigForAddress[IO]("rpc.host", "rpc.port").unsafeRunSync
 
-  implicit val serviceClient: Greeter.Client[Task] =
-    Greeter.client[Task](
+  implicit val serviceClient: Greeter.Client[IO] =
+    Greeter.client[IO](
       channelFor = channelFor,
       channelConfigList = List(
         UsePlaintext(),

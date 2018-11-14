@@ -25,7 +25,6 @@ import com.fortysevendeg.scalacheck.datetime.instances.jdk8._
 import com.fortysevendeg.scalacheck.datetime.GenDateTime._
 import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.seconds
 import mu.rpc.common._
-import mu.rpc.internal.encoders.avro.javatime._
 import mu.rpc.internal.encoders.avro.javatime.marshallers._
 import mu.rpc.internal.encoders.pbd.javatime._
 import mu.rpc.testing.servers.withServerChannel
@@ -97,8 +96,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
   "A RPC server" should {
 
+    import TestsImplicits._
     import RPCDateService._
-    import scala.concurrent.ExecutionContext.Implicits.global
 
     implicit val H: RPCDateServiceDefImpl[ConcurrentMonad] =
       new RPCDateServiceDefImpl[ConcurrentMonad]

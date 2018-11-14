@@ -16,7 +16,7 @@
 
 package examples.todolist.client
 
-import cats.effect.IO
+import cats.effect.{ContextShift, IO, Timer}
 import examples.todolist.client.handlers._
 import examples.todolist.protocol.Protocols._
 import freestyle.tagless.loggingJVM.log4s.implicits._
@@ -25,6 +25,9 @@ import mu.rpc.ChannelFor
 import mu.rpc.client.config.ConfigForAddress
 
 trait ClientImplicits extends CommonRuntime {
+
+  implicit val timer: Timer[IO]     = IO.timer(EC)
+  implicit val cs: ContextShift[IO] = IO.contextShift(EC)
 
   val channelFor: ChannelFor =
     ConfigForAddress[IO]("rpc.client.host", "rpc.client.port").unsafeRunSync()

@@ -33,22 +33,21 @@ Thirdly, let's see a piece of code where we will explain line by line, what we a
 We won't cover the details regarding creation of `RPCService`, `ServerRPCService` and runtime implicits. You can find more information about these in the [Patterns](patterns) section.
 
 ```tut:invisible
-import monix.execution.Scheduler
-
 trait CommonRuntime {
 
-  implicit val S: Scheduler = monix.execution.Scheduler.Implicits.global
+  implicit val EC: scala.concurrent.ExecutionContext =
+    scala.concurrent.ExecutionContext.Implicits.global
+
+  implicit val timer: cats.effect.Timer[cats.effect.IO]     = cats.effect.IO.timer(EC)
+  implicit val cs: cats.effect.ContextShift[cats.effect.IO] = cats.effect.IO.contextShift(EC)
 
 }
 ```
 
 ```tut:invisible
 import mu.rpc.protocol._
-import monix.execution.Scheduler
 
 object service {
-
-  import monix.reactive.Observable
 
   @message
   case class HelloRequest(greeting: String)
@@ -64,16 +63,11 @@ object service {
 ```
 
 ```tut:invisible
-import cats.effect.Async
+import cats.Applicative
 import cats.syntax.applicative._
-import freestyle.free._
-import mu.rpc.server.implicits._
-import monix.execution.Scheduler
-import monix.eval.Task
-import monix.reactive.Observable
 import service._
 
-class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
+class ServiceHandler[F[_]: Applicative] extends Greeter[F] {
 
   override def sayHello(request: service.HelloRequest): F[service.HelloResponse] =
     HelloResponse(reply = "Good bye!").pure
@@ -86,8 +80,6 @@ import java.io.File
 import java.security.cert.X509Certificate
 
 import cats.effect.IO
-import cats.effect.Effect
-import mu.rpc.protocol._
 import mu.rpc.server.netty.SetSslContext
 import mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
 import io.grpc.internal.testing.TestUtils
@@ -96,43 +88,42 @@ import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}
 
 trait Runtime extends CommonRuntime {
 
-    implicit val muRPCHandler: ServiceHandler[IO] =
-      new ServiceHandler[IO]
+  implicit val muRPCHandler: ServiceHandler[IO] =
+    new ServiceHandler[IO]
 
-    // First of all, we have to load the certs into files. These files have to be placed in the resources folder.
+  // First of all, we have to load the certs into files. These files have to be placed in the resources folder.
 
-    val serverCertFile: File                         = TestUtils.loadCert("server1.pem")
-    val serverPrivateKeyFile: File                   = TestUtils.loadCert("server1.key")
-    val serverTrustedCaCerts: Array[X509Certificate] = Array(TestUtils.loadX509Cert("ca.pem"))
+  val serverCertFile: File                         = TestUtils.loadCert("server1.pem")
+  val serverPrivateKeyFile: File                   = TestUtils.loadCert("server1.key")
+  val serverTrustedCaCerts: Array[X509Certificate] = Array(TestUtils.loadX509Cert("ca.pem"))
 
-    // We have to build the SslContext passing our server certificates, configuring the OpenSSL
-    // and requiring the client auth.
+  // We have to build the SslContext passing our server certificates, configuring the OpenSSL
+  // and requiring the client auth.
 
-    val serverSslContext: SslContext =
-      GrpcSslContexts
-        .configure(
-          GrpcSslContexts.forServer(serverCertFile, serverPrivateKeyFile),
-          SslProvider.OPENSSL)
-        .trustManager(serverTrustedCaCerts: _*)
-        .clientAuth(ClientAuth.REQUIRE)
-        .build()
+  val serverSslContext: SslContext =
+    GrpcSslContexts
+      .configure(
+        GrpcSslContexts.forServer(serverCertFile, serverPrivateKeyFile),
+        SslProvider.OPENSSL)
+      .trustManager(serverTrustedCaCerts: _*)
+      .clientAuth(ClientAuth.REQUIRE)
+      .build()
 
-    // Adding to the GrpConfig list the SslContext:
+  // Adding to the GrpConfig list the SslContext:
 
-    val grpcConfigs: List[GrpcConfig] = List(
-      SetSslContext(serverSslContext),
-      AddService(Greeter.bindService[IO])
-    )
+  val grpcConfigs: List[GrpcConfig] = List(
+    SetSslContext(serverSslContext),
+    AddService(Greeter.bindService[IO])
+  )
 
-    // Important. We have to create the server with Netty. OkHttp is not supported for the Ssl 
-    // encryption in mu-rpc at this moment.
+  // Important. We have to create the server with Netty. OkHttp is not supported for the Ssl
+  // encryption in mu-rpc at this moment.
 
-    val server: IO[GrpcServer[IO]] = GrpcServer.netty[IO](8080, grpcConfigs)
+  val server: IO[GrpcServer[IO]] = GrpcServer.netty[IO](8080, grpcConfigs)
 
 }
 
 object implicits extends Runtime
-
 ```
 
 Lastly, as we did before with the server side, let's see what happens on the client side.
@@ -150,45 +141,44 @@ import io.grpc.netty.NegotiationType
 
 object client {
 
-    // First of all, we have to load the certs files.
+  // First of all, we have to load the certs files.
 
-    val clientCertChainFile: File                    = TestUtils.loadCert("client.pem")
-    val clientPrivateKeyFile: File                   = TestUtils.loadCert("client.key")
-    val clientTrustedCaCerts: Array[X509Certificate] = Array(TestUtils.loadX509Cert("ca.pem"))
+  val clientCertChainFile: File                    = TestUtils.loadCert("client.pem")
+  val clientPrivateKeyFile: File                   = TestUtils.loadCert("client.key")
+  val clientTrustedCaCerts: Array[X509Certificate] = Array(TestUtils.loadX509Cert("ca.pem"))
 
-    // We have to create the SslContext for the client like as we did in the server.
+  // We have to create the SslContext for the client like as we did in the server.
 
-    val clientSslContext: SslContext =
-      GrpcSslContexts.forClient
-        .keyManager(clientCertChainFile, clientPrivateKeyFile)
-        .trustManager(clientTrustedCaCerts: _*)
-        .build()
+  val clientSslContext: SslContext =
+    GrpcSslContexts.forClient
+      .keyManager(clientCertChainFile, clientPrivateKeyFile)
+      .trustManager(clientTrustedCaCerts: _*)
+      .build()
 }
 
 object MainApp extends CommonRuntime {
 
-	import client._
+  import client._
 
-	// Important, the channel interpreter have to be NettyChannelInterpreter.
+  // Important, the channel interpreter have to be NettyChannelInterpreter.
 
-	// In this case, we are creating the channel interpreter with a specific ManagedChannelConfig
-	// These configs allow us to encrypt the connection with the server.
+  // In this case, we are creating the channel interpreter with a specific ManagedChannelConfig
+  // These configs allow us to encrypt the connection with the server.
 
-	val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
-  		ChannelForAddress("localhost", 8080),
-        List(
-          OverrideAuthority(TestUtils.TEST_SERVER_HOST),
-          NettyUsePlaintext(),
-          NettyNegotiationType(NegotiationType.TLS),
-          NettySslContext(clientSslContext)
-        )
+  val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
+    ChannelForAddress("localhost", 8080),
+    List(
+      OverrideAuthority(TestUtils.TEST_SERVER_HOST),
+      NettyUsePlaintext(),
+      NettyNegotiationType(NegotiationType.TLS),
+      NettySslContext(clientSslContext)
     )
+  )
 
-    val muRPCServiceClient: Greeter.Client[IO] = 
-    	Greeter.clientFromChannel[IO](channelInterpreter.build)
+  val muRPCServiceClient: Greeter.Client[IO] =
+    Greeter.clientFromChannel[IO](channelInterpreter.build)
 
 }
-
 ```
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call

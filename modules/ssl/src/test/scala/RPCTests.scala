@@ -32,6 +32,7 @@ import org.scalatest._
 
 class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
+  import TestsImplicits._
   import mu.rpc.ssl.Utils._
   import mu.rpc.ssl.Utils.database._
   import mu.rpc.ssl.Utils.service._

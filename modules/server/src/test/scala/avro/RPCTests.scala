@@ -25,6 +25,7 @@ import shapeless.{:+:, CNil, Coproduct}
 
 class RPCTests extends RpcBaseTestSuite {
 
+  import TestsImplicits._
   import mu.rpc.avro.Utils._
   import mu.rpc.avro.Utils.implicits._
 
