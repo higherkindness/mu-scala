@@ -281,11 +281,6 @@ object serviceImpl {
           case MonixObservable => q"_root_.mu.rpc.internal.client.monixCalls"
         }
 
-        private val serverCallsImpl = streamingImpl match {
-          case Fs2Stream       => q"_root_.mu.rpc.internal.server.fs2Calls"
-          case MonixObservable => q"_root_.mu.rpc.internal.server.monixCalls"
-        }
-
         private val streamingMethodType = {
           val suffix = streamingType match {
             case Some(RequestStreaming)       => "CLIENT_STREAMING"
@@ -344,17 +339,25 @@ object serviceImpl {
         }
 
         private def serverCallMethodFor(serverMethodName: String) =
-          q"$serverCallsImpl.${TermName(serverMethodName)}(algebra.$methodName, $compressionOption)"
+          q"_root_.mu.rpc.internal.server.monixCalls.${TermName(serverMethodName)}(algebra.$methodName, $compressionOption)"
 
         val descriptorAndHandler: Tree = {
-          val handler = streamingType match {
-            case Some(RequestStreaming) =>
+          val handler = (streamingType, streamingImpl) match {
+            case (Some(RequestStreaming), Fs2Stream) =>
+              q"_root_.mu.rpc.internal.server.fs2Calls.clientStreamingMethod(algebra.$methodName, $compressionOption)"
+            case (Some(RequestStreaming), MonixObservable) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(${serverCallMethodFor("clientStreamingMethod")})"
-            case Some(ResponseStreaming) =>
+            case (Some(ResponseStreaming), Fs2Stream) =>
+              q"_root_.mu.rpc.internal.server.fs2Calls.serverStreamingMethod(algebra.$methodName, $compressionOption)"
+            case (Some(ResponseStreaming), MonixObservable) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(${serverCallMethodFor("serverStreamingMethod")})"
-            case Some(BidirectionalStreaming) =>
+            case (Some(BidirectionalStreaming), Fs2Stream) =>
+              q"_root_.mu.rpc.internal.server.fs2Calls.bidiStreamingMethod(algebra.$methodName, $compressionOption)"
+            case (Some(BidirectionalStreaming), MonixObservable) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(${serverCallMethodFor("bidiStreamingMethod")})"
-            case None =>
+            case (None, Fs2Stream) =>
+              q"_root_.mu.rpc.internal.server.fs2Calls.unaryMethod(algebra.$methodName, $compressionOption)"
+            case (None, MonixObservable) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncUnaryCall(${serverCallMethodFor("unaryMethod")})"
           }
           q"($methodDescriptorName, $handler)"

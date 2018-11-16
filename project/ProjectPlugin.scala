@@ -33,6 +33,7 @@ object ProjectPlugin extends AutoPlugin {
       val circe: String              = "0.10.1"
       val frees: String              = "0.8.2"
       val fs2: String                = "1.0.0"
+      val fs2Grpc: String            = "0.4.0-M2"
       val jodaTime: String           = "2.10.1"
       val grpc: String               = "1.16.1"
       val log4s: String              = "1.6.1"
@@ -67,6 +68,7 @@ object ProjectPlugin extends AutoPlugin {
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
+        "org.lyranthe.fs2-grpc"  %% "java-runtime" % V.fs2Grpc,
         "org.scala-lang"         % "scala-compiler" % scalaVersion.value,
         %%("scalamockScalatest") % Test
       )
