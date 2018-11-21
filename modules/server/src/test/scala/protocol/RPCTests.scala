@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package protocol
 
 import cats.{Monad, MonadError}
@@ -22,16 +22,16 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import com.google.protobuf.InvalidProtocolBufferException
 import org.scalatest._
-import freestyle.rpc.common._
-import freestyle.rpc.protocol.Utils.handlers.client._
-import freestyle.rpc.server._
+import mu.rpc.common._
+import mu.rpc.protocol.Utils.handlers.client._
+import mu.rpc.server._
 
 class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
-  import freestyle.rpc.protocol.Utils._
-  import freestyle.rpc.protocol.Utils.client.MyRPCClient
-  import freestyle.rpc.protocol.Utils.database._
-  import freestyle.rpc.protocol.Utils.implicits._
+  import mu.rpc.protocol.Utils._
+  import mu.rpc.protocol.Utils.client.MyRPCClient
+  import mu.rpc.protocol.Utils.database._
+  import mu.rpc.protocol.Utils.implicits._
 
   override protected def beforeAll(): Unit =
     serverStart[ConcurrentMonad].unsafeRunSync()
@@ -39,7 +39,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
   override protected def afterAll(): Unit =
     serverStop[ConcurrentMonad].unsafeRunSync()
 
-  "frees-rpc server" should {
+  "mu server" should {
 
     "allow to startup a server and check if it's alive" in {
 
@@ -61,10 +61,10 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   }
 
-  "frees-rpc client" should {
+  "mu client" should {
 
-    implicit val freesRPCServiceClientHandler: FreesRPCServiceClientHandler[ConcurrentMonad] =
-      new FreesRPCServiceClientHandler[ConcurrentMonad]
+    implicit val muRPCServiceClientHandler: MuRPCServiceClientHandler[ConcurrentMonad] =
+      new MuRPCServiceClientHandler[ConcurrentMonad]
 
     "be able to run unary services" in {
 
@@ -136,8 +136,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run client bidirectional streaming services" in {
 
-      ignoreOnTravis(
-        "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/281 is fixed")
+      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/281 is fixed")
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[E] =
         APP.bs(eList)
@@ -268,11 +267,10 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   }
 
-  "frees-rpc client with compression" should {
+  "mu client with compression" should {
 
-    implicit val freesRPCServiceClientHandler: FreesRPCServiceClientCompressedHandler[
-      ConcurrentMonad] =
-      new FreesRPCServiceClientCompressedHandler[ConcurrentMonad]
+    implicit val muRPCServiceClientHandler: MuRPCServiceClientCompressedHandler[ConcurrentMonad] =
+      new MuRPCServiceClientCompressedHandler[ConcurrentMonad]
 
     "be able to run unary services" in {
 
@@ -311,8 +309,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run client bidirectional streaming services" in {
 
-      ignoreOnTravis(
-        "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/281 is fixed")
+      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/281 is fixed")
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[E] =
         APP.bs(eList)

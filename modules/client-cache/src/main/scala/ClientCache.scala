@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.client.cache
+package mu.rpc.client.cache
 
-import cats.effect.{Effect, Timer}
+import cats.effect.concurrent.Ref
+import cats.effect._
 import cats.instances.list._
 import cats.instances.tuple._
 import cats.syntax.apply._
@@ -24,8 +25,9 @@ import cats.syntax.bifunctor._
 import cats.syntax.flatMap._
 import cats.syntax.foldable._
 import cats.syntax.functor._
-import fs2.{async, Stream}
+import fs2.Stream
 import org.log4s.{getLogger, Logger}
+
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.{Duration, DurationLong, FiniteDuration, MILLISECONDS}
 
@@ -47,7 +49,7 @@ object ClientCache {
       tryToRemoveUnusedEvery: FiniteDuration,
       removeUnusedAfter: FiniteDuration
   )(
-      implicit F: Effect[F],
+      implicit CE: ConcurrentEffect[F],
       ec: ExecutionContext,
       timer: Timer[F]): Stream[F, ClientCache[Client, F]] = {
 
@@ -56,9 +58,9 @@ object ClientCache {
     type State = (Map[HostPort, ClientMeta], UnixMillis)
 
     val nowUnix: F[UnixMillis] =
-      timer.clockRealTime(MILLISECONDS).map(_.millis)
+      timer.clock.realTime(MILLISECONDS).map(_.millis)
 
-    def create(ref: async.Ref[F, State]) = new ClientCache[Client, F] {
+    def create(ref: Ref[F, State]): ClientCache[Client, F] = new ClientCache[Client, F] {
       val getClient: F[Client[F]] = for {
         hostAndPort <- getHostAndPort
         now         <- nowUnix
@@ -68,41 +70,42 @@ object ClientCache {
           .fold {
             createClient(hostAndPort).flatMap {
               case (client, close) =>
-                F.delay(logger.info(s"Created new RPC client for $hostAndPort")) *>
+                CE.delay(logger.info(s"Created new RPC client for $hostAndPort")) *>
                   ref
-                    .modify(_.leftMap(_ + (hostAndPort -> ClientMeta(client, close, now))))
+                    .update(_.leftMap(_ + (hostAndPort -> ClientMeta(client, close, now))))
                     .as(client)
             }
           }(
             clientMeta =>
-              F.delay(logger.debug(s"Reuse existing RPC client for $hostAndPort")) *>
+              CE.delay(logger.debug(s"Reuse existing RPC client for $hostAndPort")) *>
                 ref
-                  .modify(_.leftMap(_.updated(hostAndPort, clientMeta.copy(lastAccessed = now))))
+                  .update(_.leftMap(_.updated(hostAndPort, clientMeta.copy(lastAccessed = now))))
                   .as(clientMeta.client))
         (_, lastClean) <- ref.get
         _ <- if (lastClean < (now - tryToRemoveUnusedEvery))
-          async.fork(cleanup(ref, _.lastAccessed < (now - removeUnusedAfter)))
-        else F.unit
+          Concurrent[F].start(
+            Async.shift(ec) *> cleanup(ref, _.lastAccessed < (now - removeUnusedAfter)))
+        else CE.unit
       } yield client
     }
 
-    def cleanup(ref: async.Ref[F, State], canBeRemoved: ClientMeta => Boolean): F[Unit] =
+    def cleanup(ref: Ref[F, State], canBeRemoved: ClientMeta => Boolean): F[Unit] =
       for {
         now <- nowUnix
-        change <- ref.modify2 {
+        change <- ref.modify {
           case (map, _) =>
             val (remove, keep) = map.partition { case (_, clientMeta) => canBeRemoved(clientMeta) }
             ((keep, now), remove)
         }
-        noLongerUsed = change._2.values.toList
+        noLongerUsed = change.values.toList
         _ <- noLongerUsed.traverse_(_.close)
-        _ <- F.delay(logger.info(s"Removed ${noLongerUsed.length} RPC clients from cache."))
+        _ <- CE.delay(logger.info(s"Removed ${noLongerUsed.length} RPC clients from cache."))
       } yield ()
 
-    val refState: F[async.Ref[F, State]] =
-      nowUnix.tupleLeft(Map.empty[HostPort, ClientMeta]).flatMap(async.refOf[F, State])
+    val refState: F[Ref[F, State]] =
+      nowUnix.tupleLeft(Map.empty[HostPort, ClientMeta]).flatMap(Ref.of[F, State])
 
-    Stream.bracket(refState)(ref => Stream.emit(create(ref)), cleanup(_, _ => true))
+    Stream.bracket(refState)(cleanup(_, _ => true)).map(create)
   }
 
 }

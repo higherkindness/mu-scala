@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package prometheus
 package client
 
-import freestyle.rpc.common._
-import freestyle.rpc.protocol.Utils.client.MyRPCClient
+import mu.rpc.common._
+import mu.rpc.protocol.Utils.client.MyRPCClient
 import io.prometheus.client.{Collector, CollectorRegistry}
-import freestyle.rpc.interceptors.metrics._
+import mu.rpc.interceptors.metrics._
 import io.prometheus.client.Collector.MetricFamilySamples
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.Assertion
@@ -32,10 +32,11 @@ import scala.collection.JavaConverters._
 
 abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
 
-  import freestyle.rpc.protocol.Utils.database._
-  import freestyle.rpc.prometheus.shared.RegistryHelper._
+  import mu.rpc.protocol.Utils.database._
+  import mu.rpc.prometheus.shared.RegistryHelper._
 
   def name: String
+  def namespace: Option[String]
   def defaultClientRuntime: InterceptorsRuntime
   def allMetricsClientRuntime: InterceptorsRuntime
   def clientRuntimeWithNonDefaultBuckets(buckets: Vector[Double]): InterceptorsRuntime
@@ -81,14 +82,14 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
         APP.u(a1.x, a1.y)
 
       def check(implicit CR: CollectorRegistry): ConcurrentMonad[Assertion] = suspendM {
-        val startedTotal: Double = extractMetricValue(clientMetricRpcStarted)
+        val startedTotal: Double = extractMetricValue(clientMetricRpcStarted(namespace))
         startedTotal should be >= 0d
         startedTotal should be <= 1d
-        findRecordedMetricOrThrow(clientMetricStreamMessagesReceived).samples shouldBe empty
-        findRecordedMetricOrThrow(clientMetricStreamMessagesSent).samples shouldBe empty
+        findRecordedMetricOrThrow(clientMetricStreamMessagesReceived(namespace)).samples shouldBe empty
+        findRecordedMetricOrThrow(clientMetricStreamMessagesSent(namespace)).samples shouldBe empty
 
         val handledSamples =
-          findRecordedMetricOrThrow(clientMetricRpcCompleted).samples.asScala.toList
+          findRecordedMetricOrThrow(clientMetricRpcCompleted(namespace)).samples.asScala.toList
         handledSamples.size shouldBe 1
         handledSamples.headOption should beASampleMetric(
           List("AvroRPCService", "OK", "UNARY", "unary"))
@@ -108,8 +109,7 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
 
     "work for client streaming RPC metrics" in {
 
-      ignoreOnTravis(
-        "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/168 is fixed")
+      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/168 is fixed")
 
       def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[D] =
         APP.cs(cList, i)
@@ -122,28 +122,28 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
 
       def check1(implicit CR: CollectorRegistry): ConcurrentMonad[Assertion] = suspendM {
 
-        val startedTotal: Double = extractMetricValue(clientMetricRpcStarted)
+        val startedTotal: Double = extractMetricValue(clientMetricRpcStarted(namespace))
 
         startedTotal should be >= 0d
         startedTotal should be <= 1d
 
-        val msgSentTotal: Double = extractMetricValue(clientMetricStreamMessagesSent)
+        val msgSentTotal: Double = extractMetricValue(clientMetricStreamMessagesSent(namespace))
         msgSentTotal should be >= 0d
         msgSentTotal should be <= 2d
 
         checkWithRetry(() =>
-          findRecordedMetricOrThrow(clientMetricStreamMessagesReceived).samples shouldBe empty)()
+          findRecordedMetricOrThrow(clientMetricStreamMessagesReceived(namespace)).samples shouldBe empty)()
       }
 
       def check2(implicit CR: CollectorRegistry): ConcurrentMonad[Assertion] = suspendM {
 
-        val msgSentTotal2: Double = extractMetricValue(clientMetricStreamMessagesSent)
+        val msgSentTotal2: Double = extractMetricValue(clientMetricStreamMessagesSent(namespace))
         msgSentTotal2 should be >= 0d
         msgSentTotal2 should be <= 3d
 
         def completedAssertion: Assertion = {
           val handledSamples =
-            findRecordedMetricOrThrow(clientMetricRpcCompleted).samples.asScala.toList
+            findRecordedMetricOrThrow(clientMetricRpcCompleted(namespace)).samples.asScala.toList
           handledSamples.size shouldBe 1
           handledSamples.headOption should beASampleMetric(
             labels = List("CLIENT_STREAMING", "ProtoRPCService", "clientStreaming", "OK"),
@@ -170,9 +170,10 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
         APP.ss(a2.x, a2.y)
 
       def check(implicit CR: CollectorRegistry): ConcurrentMonad[Assertion] = suspendM {
-        val startedTotal: Double     = extractMetricValue(clientMetricRpcStarted)
-        val msgReceivedTotal: Double = extractMetricValue(clientMetricStreamMessagesReceived)
-        findRecordedMetricOrThrow(clientMetricStreamMessagesSent).samples shouldBe empty
+        val startedTotal: Double = extractMetricValue(clientMetricRpcStarted(namespace))
+        val msgReceivedTotal: Double =
+          extractMetricValue(clientMetricStreamMessagesReceived(namespace))
+        findRecordedMetricOrThrow(clientMetricStreamMessagesSent(namespace)).samples shouldBe empty
 
         startedTotal should be >= 0d
         startedTotal should be <= 1d
@@ -180,7 +181,7 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
         msgReceivedTotal should be <= 2d
 
         val handledSamples =
-          findRecordedMetricOrThrow(clientMetricRpcCompleted).samples.asScala.toList
+          findRecordedMetricOrThrow(clientMetricRpcCompleted(namespace)).samples.asScala.toList
         handledSamples.size shouldBe 1
         handledSamples.headOption should beASampleMetric(
           List("SERVER_STREAMING", "ProtoRPCService", "serverStreaming", "OK"))
@@ -204,9 +205,10 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
         APP.bs(eList)
 
       def check(implicit CR: CollectorRegistry): ConcurrentMonad[Assertion] = suspendM {
-        val startedTotal: Double     = extractMetricValue(clientMetricRpcStarted)
-        val msgReceivedTotal: Double = extractMetricValue(clientMetricStreamMessagesReceived)
-        val msgSentTotal: Double     = extractMetricValue(clientMetricStreamMessagesSent)
+        val startedTotal: Double = extractMetricValue(clientMetricRpcStarted(namespace))
+        val msgReceivedTotal: Double =
+          extractMetricValue(clientMetricStreamMessagesReceived(namespace))
+        val msgSentTotal: Double = extractMetricValue(clientMetricStreamMessagesSent(namespace))
 
         startedTotal should be >= 0d
         startedTotal should be <= 1d
@@ -216,7 +218,7 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
         msgSentTotal should be <= 2d
 
         val handledSamples =
-          findRecordedMetricOrThrow(clientMetricRpcCompleted).samples.asScala.toList
+          findRecordedMetricOrThrow(clientMetricRpcCompleted(namespace)).samples.asScala.toList
         handledSamples.size shouldBe 1
         handledSamples.headOption should be
 
@@ -244,10 +246,11 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
       import clientRuntime._
 
       (for {
-        _         <- serverStart[ConcurrentMonad]
-        _         <- clientProgram[ConcurrentMonad]
-        assertion <- suspendM(findRecordedMetric(clientMetricCompletedLatencySeconds) shouldBe None)
-        _         <- serverStop[ConcurrentMonad]
+        _ <- serverStart[ConcurrentMonad]
+        _ <- clientProgram[ConcurrentMonad]
+        assertion <- suspendM(
+          findRecordedMetric(clientMetricCompletedLatencySeconds(namespace)) shouldBe None)
+        _ <- serverStop[ConcurrentMonad]
       } yield assertion).unsafeRunSync()
 
     }
@@ -259,7 +262,7 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
 
       def check(implicit CR: CollectorRegistry): ConcurrentMonad[Assertion] = suspendM {
         val metric: Option[Collector.MetricFamilySamples] =
-          findRecordedMetric(clientMetricCompletedLatencySeconds)
+          findRecordedMetric(clientMetricCompletedLatencySeconds(namespace))
 
         metric shouldBe defined
         metric.fold(true)(_.samples.size > 0) shouldBe true
@@ -286,7 +289,7 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
 
       def check(implicit CR: CollectorRegistry): ConcurrentMonad[Assertion] = suspendM {
         countSamples(
-          clientMetricCompletedLatencySeconds,
+          clientMetricCompletedLatencySeconds(namespace),
           "grpc_client_completed_latency_seconds_bucket") shouldBe (buckets.size + 1)
       }
 
@@ -304,8 +307,7 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
 
     "work when combining multiple calls" in {
 
-      ignoreOnTravis(
-        "TODO: restore once https://github.com/frees-io/freestyle-rpc/issues/168 is fixed")
+      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/168 is fixed")
 
       def unary[F[_]](implicit APP: MyRPCClient[F]): F[C] =
         APP.u(a1.x, a1.y)
@@ -314,9 +316,11 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
         APP.cs(cList, i)
 
       def check(implicit CR: CollectorRegistry): ConcurrentMonad[Assertion] = suspendM {
-        findRecordedMetricOrThrow(clientMetricRpcStarted).samples.size() shouldBe 2
+        findRecordedMetricOrThrow(clientMetricRpcStarted(namespace)).samples.size() shouldBe 2
         checkWithRetry(
-          () => findRecordedMetricOrThrow(clientMetricRpcCompleted).samples.size() shouldBe 2)()
+          () =>
+            findRecordedMetricOrThrow(clientMetricRpcCompleted(namespace)).samples
+              .size() shouldBe 2)()
       }
 
       val clientRuntime: InterceptorsRuntime = defaultClientRuntime

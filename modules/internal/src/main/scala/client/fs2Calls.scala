@@ -14,60 +14,51 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package internal
 package client
 
-import cats.effect.Effect
-import _root_.fs2._
-import _root_.fs2.interop.reactivestreams._
-import monix.execution.Scheduler
-import io.grpc.{CallOptions, Channel, MethodDescriptor}
-import monix.reactive.Observable
+import cats.effect.ConcurrentEffect
+import cats.syntax.flatMap._
+import fs2.Stream
+import io.grpc.{CallOptions, Channel, Metadata, MethodDescriptor}
+import org.lyranthe.fs2_grpc.java_runtime.client.Fs2ClientCall
+
+import scala.concurrent.ExecutionContext
 
 object fs2Calls {
 
-  def unary[F[_]: Effect, Req, Res](
+  def unary[F[_]: ConcurrentEffect, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler): F[Res] =
-    monixCalls.unary(request, descriptor, channel, options)
+      options: CallOptions)(implicit EC: ExecutionContext): F[Res] =
+    Fs2ClientCall[F](channel, descriptor, options)
+      .flatMap(_.unaryToUnaryCall(request, new Metadata()))
 
-  def serverStreaming[F[_]: Effect, Req, Res](
+  def serverStreaming[F[_]: ConcurrentEffect, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler): Stream[F, Res] =
-    monixCalls
-      .serverStreaming(request, descriptor, channel, options)
-      .toReactivePublisher
-      .toStream[F]
+      options: CallOptions)(implicit EC: ExecutionContext): Stream[F, Res] =
+    Stream
+      .eval(Fs2ClientCall[F](channel, descriptor, options))
+      .flatMap(_.unaryToStreamingCall(request, new Metadata()))
 
-  def clientStreaming[F[_]: Effect, Req, Res](
+  def clientStreaming[F[_]: ConcurrentEffect, Req, Res](
       input: Stream[F, Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler): F[Res] =
-    monixCalls.clientStreaming(
-      Observable
-        .fromReactivePublisher(input.toUnicastPublisher),
-      descriptor,
-      channel,
-      options)
+      options: CallOptions)(implicit EC: ExecutionContext): F[Res] =
+    Fs2ClientCall[F](channel, descriptor, options)
+      .flatMap(_.streamingToUnaryCall(input, new Metadata()))
 
-  def bidiStreaming[F[_]: Effect, Req, Res](
+  def bidiStreaming[F[_]: ConcurrentEffect, Req, Res](
       input: Stream[F, Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler): Stream[F, Res] =
-    monixCalls
-      .bidiStreaming(
-        Observable
-          .fromReactivePublisher(input.toUnicastPublisher),
-        descriptor,
-        channel,
-        options)
-      .toReactivePublisher
-      .toStream[F]
+      options: CallOptions)(implicit EC: ExecutionContext): Stream[F, Res] =
+    Stream
+      .eval(Fs2ClientCall[F](channel, descriptor, options))
+      .flatMap(_.streamingToStreamingCall(input, new Metadata()))
 }

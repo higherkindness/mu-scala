@@ -14,29 +14,31 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package internal
 package client
 
-import cats.effect.{Async, LiftIO}
+import java.util.concurrent.{Executor => JavaExecutor}
+
+import cats.effect.Async
 import com.google.common.util.concurrent._
 import io.grpc.stub.{ClientCalls, StreamObserver}
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
-import java.util.concurrent.{Executor => JavaExecutor}
-import monix.execution.Scheduler
 import monix.reactive.Observable
+import mu.rpc.internal.task._
+
 import scala.concurrent.ExecutionContext
 
 object monixCalls {
 
-  import freestyle.rpc.internal.converters._
+  import mu.rpc.internal.converters._
 
   def unary[F[_]: Async, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler): F[Res] =
-    listenableFuture2Async(
+      options: CallOptions)(implicit EC: ExecutionContext): F[Res] =
+    listenableFuture2Async[F, Res](
       ClientCalls
         .futureUnaryCall(channel.newCall(descriptor, options), request))
 
@@ -48,24 +50,23 @@ object monixCalls {
     Observable
       .fromReactivePublisher(createPublisher(request, descriptor, channel, options))
 
-  def clientStreaming[F[_]: LiftIO, Req, Res](
+  def clientStreaming[F[_]: Async, Req, Res](
       input: Observable[Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler, L: LiftTask[F]): F[Res] =
-    L.liftTask {
-      input
-        .liftByOperator(
-          StreamObserver2MonixOperator(
-            (outputObserver: StreamObserver[Res]) =>
-              ClientCalls.asyncClientStreamingCall(
-                channel.newCall(descriptor, options),
-                outputObserver
-            )
+      options: CallOptions)(implicit EC: ExecutionContext): F[Res] =
+    input
+      .liftByOperator(
+        StreamObserver2MonixOperator(
+          (outputObserver: StreamObserver[Res]) =>
+            ClientCalls.asyncClientStreamingCall(
+              channel.newCall(descriptor, options),
+              outputObserver
           )
         )
-        .firstL
-    }
+      )
+      .firstL
+      .toAsync[F]
 
   def bidiStreaming[Req, Res](
       input: Observable[Req],
@@ -82,7 +83,7 @@ object monixCalls {
     )
 
   private[this] def listenableFuture2Async[F[_], A](
-      fa: => ListenableFuture[A])(implicit F: Async[F], E: ExecutionContext): F[A] =
+      fa: => ListenableFuture[A])(implicit F: Async[F], EC: ExecutionContext): F[A] =
     F.async { cb =>
       Futures.addCallback(
         fa,
@@ -92,7 +93,7 @@ object monixCalls {
           override def onFailure(t: Throwable): Unit = cb(Left(t))
         },
         new JavaExecutor {
-          override def execute(command: Runnable): Unit = E.execute(command)
+          override def execute(command: Runnable): Unit = EC.execute(command)
         }
       )
     }

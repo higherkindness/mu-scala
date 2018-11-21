@@ -14,67 +14,41 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package internal
 package server
 
-import _root_.fs2.Stream
-import _root_.fs2.interop.reactivestreams._
-import cats.effect.Effect
-import io.grpc.stub.ServerCalls._
-import io.grpc.stub.StreamObserver
-import monix.execution.Scheduler
-import monix.reactive.Observable
+import fs2.Stream
+import cats.effect.ConcurrentEffect
+import io.grpc.ServerCallHandler
+import org.lyranthe.fs2_grpc.java_runtime.server.Fs2ServerCallHandler
+
+import scala.concurrent.ExecutionContext
 
 object fs2Calls {
 
-  import freestyle.rpc.internal.converters._
-
-  def unaryMethod[F[_]: Effect, Req, Res](
+  def unaryMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Req => F[Res],
-      maybeCompression: Option[String]): UnaryMethod[Req, Res] =
-    monixCalls.unaryMethod(f, maybeCompression)
+      maybeCompression: Option[String])(
+      implicit EC: ExecutionContext): ServerCallHandler[Req, Res] =
+    Fs2ServerCallHandler[F].unaryToUnaryCall[Req, Res]((req, _) => f(req))
 
-  def clientStreamingMethod[F[_]: Effect, Req, Res](
+  def clientStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Stream[F, Req] => F[Res],
-      maybeCompression: Option[String])(implicit S: Scheduler): ClientStreamingMethod[Req, Res] =
-    new ClientStreamingMethod[Req, Res] {
+      maybeCompression: Option[String])(
+      implicit EC: ExecutionContext): ServerCallHandler[Req, Res] =
+    Fs2ServerCallHandler[F].streamingToUnaryCall[Req, Res]((stream, _) => f(stream))
 
-      override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
-        addCompression(responseObserver, maybeCompression)
-        transformStreamObserver[Req, Res](
-          inputObservable =>
-            Observable.fromEffect(f(inputObservable.toReactivePublisher.toStream[F])),
-          responseObserver
-        )
-      }
-    }
-
-  def serverStreamingMethod[F[_]: Effect, Req, Res](
+  def serverStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Req => Stream[F, Res],
-      maybeCompression: Option[String])(implicit S: Scheduler): ServerStreamingMethod[Req, Res] =
-    new ServerStreamingMethod[Req, Res] {
+      maybeCompression: Option[String])(
+      implicit EC: ExecutionContext): ServerCallHandler[Req, Res] =
+    Fs2ServerCallHandler[F].unaryToStreamingCall[Req, Res]((req, _) => f(req))
 
-      override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
-        addCompression(responseObserver, maybeCompression)
-        f(request).toUnicastPublisher.subscribe(responseObserver.toSubscriber.toReactive)
-      }
-    }
-
-  def bidiStreamingMethod[F[_]: Effect, Req, Res](
+  def bidiStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Stream[F, Req] => Stream[F, Res],
-      maybeCompression: Option[String])(implicit S: Scheduler): BidiStreamingMethod[Req, Res] =
-    new BidiStreamingMethod[Req, Res] {
-
-      override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
-        addCompression(responseObserver, maybeCompression)
-        transformStreamObserver[Req, Res](
-          (inputObservable: Observable[Req]) =>
-            Observable.fromReactivePublisher(
-              f(inputObservable.toReactivePublisher.toStream[F]).toUnicastPublisher),
-          responseObserver
-        )
-      }
-    }
+      maybeCompression: Option[String])(
+      implicit EC: ExecutionContext): ServerCallHandler[Req, Res] =
+    Fs2ServerCallHandler[F].streamingToStreamingCall[Req, Res]((stream, _) => f(stream))
 
 }

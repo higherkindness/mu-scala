@@ -19,16 +19,16 @@ package example.routeguide.server.handlers
 import java.util.concurrent.atomic.AtomicReference
 import java.util.function.UnaryOperator
 
-import cats.{~>, Applicative}
+import cats.effect.{Async, ConcurrentEffect, Effect}
+import example.routeguide.protocol.Protocols._
+import example.routeguide.common.Utils._
 import monix.eval.Task
 import monix.reactive.Observable
 import org.log4s._
-import example.routeguide.protocol.Protocols._
-import example.routeguide.common.Utils._
 
 import scala.concurrent.duration.NANOSECONDS
 
-class RouteGuideServiceHandler[F[_]](implicit A: Applicative[F], T2F: Task ~> F)
+class RouteGuideServiceHandler[F[_]: ConcurrentEffect](implicit E: Effect[Task])
     extends RouteGuideService[F] {
 
   // AtomicReference as an alternative to ConcurrentMap<Point, List<RouteNote>>?
@@ -38,7 +38,7 @@ class RouteGuideServiceHandler[F[_]](implicit A: Applicative[F], T2F: Task ~> F)
   val logger = getLogger
 
   override def getFeature(point: Point): F[Feature] =
-    A.pure {
+    Async[F].delay {
       logger.info(s"Fetching feature at ${point.pretty} ...")
       point.findFeatureIn(features)
     }
@@ -70,22 +70,21 @@ class RouteGuideServiceHandler[F[_]](implicit A: Applicative[F], T2F: Task ~> F)
     // We have to applyApplies a binary operator to a start value and all elements of
     // the source, going left to right and returns a new `Task` that
     // upon evaluation will eventually emit the final result.
-    T2F(
-      points
-        .foldLeftL((RouteSummary(0, 0, 0, 0), None: Option[Point], System.nanoTime())) {
-          case ((summary, previous, startTime), point) =>
-            val feature  = point.findFeatureIn(features)
-            val distance = previous.map(calcDistance(_, point)) getOrElse 0
-            val updated = summary.copy(
-              point_count = summary.point_count + 1,
-              feature_count = summary.feature_count + (if (feature.valid) 1 else 0),
-              distance = summary.distance + distance,
-              elapsed_time = NANOSECONDS.toSeconds(System.nanoTime() - startTime).toInt
-            )
-            (updated, Some(point), startTime)
-        }
-        .map(_._1)
-    )
+    points
+      .foldLeftL((RouteSummary(0, 0, 0, 0), None: Option[Point], System.nanoTime())) {
+        case ((summary, previous, startTime), point) =>
+          val feature  = point.findFeatureIn(features)
+          val distance = previous.map(calcDistance(_, point)) getOrElse 0
+          val updated = summary.copy(
+            point_count = summary.point_count + 1,
+            feature_count = summary.feature_count + (if (feature.valid) 1 else 0),
+            distance = summary.distance + distance,
+            elapsed_time = NANOSECONDS.toSeconds(System.nanoTime() - startTime).toInt
+          )
+          (updated, Some(point), startTime)
+      }
+      .map(_._1)
+      .toAsync[F]
 
   override def routeChat(routeNotes: Observable[RouteNote]): Observable[RouteNote] =
     routeNotes

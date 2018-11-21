@@ -6,16 +6,16 @@ permalink: /docs/rpc/patterns
 
 # Patterns
 
-So far so good, not too much code, no business logic, in the previous sections we have seen some protocol definitions with Scala annotations and the generation of IDL files from the Scala definitions. Conversely, in this section, we are going to see how to complete our quickstart example. We'll take a look at both sides, the server and the client.
+So far so good, we haven't seen too much code or implemented any business logic. In the previous sections we have seen some protocol definitions with Scala annotations and the generation of IDL files from the Scala definitions. Finally, in this section, we are going to see how to complete our quickstart example. We'll take a look at both sides, the server and the client.
 
 ## Server
 
-Predictably, generating the server code is just implementing a service [Handler](http://frees.io/docs/core/interpreters/).
+Predictably, generating the server code is just implementing a service [Handler](http://frees.io/docs/core/handlers/).
 
-First of all, our `Greeter` RPC protocol definition:
+First, here's our `Greeter` RPC protocol definition:
 
 ```tut:invisible
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 
 object service {
 
@@ -64,19 +64,19 @@ Next, our dummy `Greeter` server implementation:
 ```tut:silent
 import cats.effect.Async
 import cats.syntax.applicative._
-import freestyle.rpc.server.implicits._
-import monix.execution.Scheduler
-import monix.eval.Task
+import mu.rpc.internal.task._
 import monix.reactive.Observable
 import service._
 
-class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
+import scala.concurrent.ExecutionContext
+
+class ServiceHandler[F[_]: Async](implicit EC: ExecutionContext) extends Greeter[F] {
 
   private[this] val dummyObservableResponse: Observable[HelloResponse] =
     Observable.fromIterable(1 to 5 map (i => HelloResponse(s"Reply $i")))
 
   override def sayHello(request: HelloRequest): F[HelloResponse] =
-    HelloResponse(reply = "Good bye!").pure
+    HelloResponse(reply = "Good bye!").pure[F]
 
   override def lotsOfReplies(request: HelloRequest): Observable[HelloResponse] =
     dummyObservableResponse
@@ -92,7 +92,7 @@ class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
               reply = s"$currentReply\nRequest ${currentRequest.greeting} -> Response: Reply $i"))
       }
       .map(_._2)
-      .to[F]
+      .toAsync[F]
 
   override def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse] =
     request
@@ -106,49 +106,50 @@ class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
 }
 ```
 
-That's all. We have exposed a potential implementation on the server side.
+That's it! We have exposed a potential implementation on the server side.
 
 ### Server Runtime
 
 As you can see, the generic handler above requires `F` as the type parameter, which corresponds with our target `Monad` when interpreting our program. In this section, we will satisfy all the runtime requirements, in order to make our server runnable.
 
-### Execution Context
+### Creating a runtime
 
-In [frees-rpc] programs, we'll at least need an implicit evidence related to the [Monix] Execution Context: `monix.execution.Scheduler`.
+Since [mu] relies on `ConcurrentEffect` from the [cats-effect library](https://github.com/typelevel/cats-effect), we'll need a runtime for executing our effects. 
 
-> The `monix.execution.Scheduler` is inspired by `ReactiveX`, being an enhanced Scala `ExecutionContext` and also a replacement for Java’s `ScheduledExecutorService`, but also for Javascript’s `setTimeout`.
+We'll be using `IO` from `cats-effect`, but you can use any type that has a `ConcurrentEffect` instance.
+
+For executing `IO` we need a `ContextShift[IO]` used for running `IO` instances and a `Timer[IO]` that is used for scheduling, let's go ahead and create them.
 
 ```tut:silent
-import monix.execution.Scheduler
-
 trait CommonRuntime {
 
-  implicit val S: Scheduler = monix.execution.Scheduler.Implicits.global
+  implicit val EC: scala.concurrent.ExecutionContext =
+    scala.concurrent.ExecutionContext.Implicits.global
+
+  implicit val timer: cats.effect.Timer[cats.effect.IO]     = cats.effect.IO.timer(EC)
+  implicit val cs: cats.effect.ContextShift[cats.effect.IO] = cats.effect.IO.contextShift(EC)
 
 }
 ```
 
 As a side note, `CommonRuntime` will also be used later on for the client example program.
 
-### Runtime Implicits
+### Transport Implicits
 
-For the server bootstrapping, remember adding `frees-rpc-server` dependency to your build.
+For the server bootstrapping, remember to add the `mu-rpc-server` dependency to your build.
 
 Now, we need to implicitly provide two things:
 
 * A runtime interpreter of our `ServiceHandler` tied to a specific type. In our case, we'll use `cats.effects.IO`.
 * A `ServerW` implicit evidence, compounded by:
 	* RPC port where the server will bootstrap.
-	* The set of configurations we want to add to our [gRPC] server, like our `Greeter` service definition. All these configurations are aggregated in a `List[GrpcConfig]`. Later on, an internal builder will build the final server based on this list. The full list of exposed settings is available in [this file](https://github.com/frees-io/freestyle-rpc/blob/master/modules/server/src/main/scala/GrpcConfig.scala).
+	* The set of configurations we want to add to our [gRPC] server, like our `Greeter` service definition. All these configurations are aggregated in a `List[GrpcConfig]`. Later on, an internal builder will build the final server based on this list. The full list of exposed settings is available in [this file](https://github.com/higherkindness/mu/blob/master/modules/server/src/main/scala/GrpcConfig.scala).
 
 In summary, the result would be as follows:
 
 ```tut:silent
-import cats.~>
 import cats.effect.IO
-import freestyle.rpc.server._
-import freestyle.rpc.server.handlers._
-import freestyle.rpc.server.implicits._
+import mu.rpc.server._
 import service._
 
 object gserver {
@@ -164,18 +165,13 @@ object gserver {
 }
 ```
 
-Here are a few additional notes related to the previous snippet of code:
-
-* The Server will bootstrap on port `8080`.
-* `Greeter.bindService` is an auto-derived method which creates, behind the scenes, the binding service for [gRPC]. It requires `F[_]` as the type parameter, the target/concurrent monad, in our example: `cats.effects.IO`.
-
 ### Server Bootstrap
 
 What else is needed? We just need to define a `main` method:
 
 ```tut:silent
 import cats.effect.IO
-import freestyle.rpc.server.GrpcServer
+import mu.rpc.server.GrpcServer
 
 object RPCServer {
 
@@ -193,14 +189,16 @@ object RPCServer {
 }
 ```
 
+The Server will bootstrap on port `8080`.
+
 Fortunately, once all the runtime requirements are in place (**`import gserver.implicits._`**), we only have to write the previous piece of code, which primarily, should be the same in all cases (except if your target Monad is different from `cats.effects.IO`).
 
 ### Service testing
 
-Thanks to `withServerChannel` from the package `freestyle.rpc.testing.servers`, you will be able to run in-memory instances of the server, which is very convenient for testing purposes. Below, a very simple property-based test for proving `Greeter.sayHello`:
+Thanks to `withServerChannel` from the package `mu.rpc.testing.servers`, you will be able to run in-memory instances of the server, which is very convenient for testing purposes. Below, a very simple property-based test for proving `Greeter.sayHello`:
 
 ```tut:silent
-import freestyle.rpc.testing.servers.withServerChannel
+import mu.rpc.testing.servers.withServerChannel
 import org.scalatest.prop.Checkers
 import org.scalatest._
 import org.scalacheck.Gen
@@ -210,15 +208,15 @@ import service._
 class ServiceSpec extends FunSuite with Matchers with Checkers with OneInstancePerTest {
 
   import gserver.implicits._
-  
+
   def sayHelloTest(requestGen: Gen[HelloRequest], expected: HelloResponse): Assertion =
     withServerChannel(Greeter.bindService[IO]) { sc =>
-        val client = Greeter.clientFromChannel[IO](sc.channel)
-        check {
-          forAll(requestGen) { request =>
-            client.sayHello(request).unsafeRunSync() == expected
-          }
+      val client = Greeter.clientFromChannel[IO](sc.channel)
+      check {
+        forAll(requestGen) { request =>
+          client.sayHello(request).unsafeRunSync() == expected
         }
+      }
     }
 
   val requestGen: Gen[HelloRequest] = Gen.alphaStr map HelloRequest
@@ -228,8 +226,9 @@ class ServiceSpec extends FunSuite with Matchers with Checkers with OneInstanceP
   }
 
 }
-
 ```
+
+`Greeter.bindService` is an auto-derived method which creates, behind the scenes, the binding service for [gRPC]. It requires `F[_]` as the type parameter, the target/concurrent monad, in our example: `cats.effects.IO`.
 
 Running the test:
 
@@ -240,41 +239,38 @@ run(new ServiceSpec)
 
 ## Client
 
-[frees-rpc] derives a client automatically based on the protocol. This is especially useful because you can distribute it depending on the protocol/service definitions. If you change something in your protocol definition, you will get a new client for free without having to write anything.
+[mu] derives a client automatically based on the protocol. This is especially useful because you can distribute it depending on the protocol/service definitions. If you change something in your protocol definition, you will get a new client for free without having to write anything.
 
-You will need to add either `frees-rpc-client-netty` or `frees-rpc-client-okhttp` to your build.
+You will need to add either `mu-rpc-client-netty` or `mu-rpc-client-okhttp` to your build.
 
 ### Client Runtime
 
-Similarly in this section, as we saw for the server case, we are defining all the client runtime configurations needed for communication with the server.
+Similarly in this section, just like we saw for the server, we are defining all the client runtime configurations needed for communication with the server.
 
-### Execution Context
+### Creating a runtime
 
-In our example, we are going to use the same Execution Context described for the Server. However, for the sake of observing a slightly different runtime configuration, our client will be interpreting to `monix.eval.Task`. Hence, in this case, we would only need the `monix.execution.Scheduler` implicit evidence.
+In our example, we are going to use the same runtime described for the server. Remember we're relying on the `ConcurrentEffect`, so you can use any type that has a `ConcurrentEffect` instance. 
 
-We are going to interpret to `monix.eval.Task`, however, behind the scenes, we will use the [cats-effect] `IO` monad as an abstraction. Concretely, Freestyle has an integration with `cats-effect` that is included transitively in the classpath through `frees-async-cats-effect` dependency.
+### Transport Implicits
 
-### Runtime Implicits
+First, we need to configure how the client will reach the server in terms of the transport layer. There are two supported methods:
 
-First of all, we need to configure how the client will reach the server in terms of the transport layer. There are two supported methods:
+* By Address (host/port): enables us to create a channel with the target's address and port number.
+* By Target: we can create a channel with a target string, which can be either a valid [NameResolver](https://grpc.io/grpc-java/javadoc/io/grpc/NameResolver.html)-compliant URI or an authority string.
 
-* By Address (host/port): brings the ability to create a channel with the target's address and port number.
-* By Target: it can create a channel with a target string, which can be either a valid [NameResolver](https://grpc.io/grpc-java/javadoc/io/grpc/NameResolver.html)-compliant URI or an authority string.
-
-Additionally, we can add more optional configurations that can be used when the connection is occurring. All the options are available [here](https://github.com/frees-io/freestyle-rpc/blob/6b0e926a5a14fbe3d9282e8c78340f2d9a0421f3/rpc/src/main/scala/client/ChannelConfig.scala#L33-L46). As we will see shortly in our example, we are going to skip the negotiation (`UsePlaintext()`).
+Additionally, we can add more optional configurations that can be used when the connection occurs. All the options are available [here](https://github.com/higherkindness/mu/blob/48b8578cbafc59dc59e61e93c13fdb4709b7e540/modules/client/src/main/scala/ManagedChannelConfig.scala).
 
 Given the transport settings and a list of optional configurations, we can create the [ManagedChannel.html](https://grpc.io/grpc-java/javadoc/io/grpc/ManagedChannel.html) object, using the `ManagedChannelInterpreter` builder.
 
-So, taking into account all we have just said, how would our code look?
+As we will see shortly in our example, we are going relay on the default behaviour passing directly the `ChannelFor` to the client builder.
+
+So, taking into account all of that, how would our code look?
 
 ```tut:silent
 import cats.effect.IO
-import freestyle.rpc._
-import freestyle.rpc.config._
-import freestyle.rpc.client._
-import freestyle.rpc.client.config._
-import freestyle.rpc.client.implicits._
-import monix.eval.Task
+import mu.rpc._
+import mu.rpc.config._
+import mu.rpc.client.config._
 import service._
 
 object gclient {
@@ -284,8 +280,8 @@ object gclient {
     val channelFor: ChannelFor =
       ConfigForAddress[IO]("rpc.host", "rpc.port").unsafeRunSync
 
-    implicit val serviceClient: Greeter.Client[Task] =
-      Greeter.client[Task](channelFor)
+    implicit val serviceClient: Greeter.Client[IO] =
+      Greeter.client[IO](channelFor)
   }
 
   object implicits extends Implicits
@@ -294,30 +290,27 @@ object gclient {
 
 **Notes**:
 
-* `host` and `port` would be read from the application configuration file.
-* To be able to use the `ConfigForAddress` helper, you need to add the `frees-rpc-config` dependency to your build.
+* In the code above, `host` and `port` would be read from an application configuration file.
+* To be able to use the `ConfigForAddress` helper, you need to add the `mu-config` dependency to your build.
 
 ### Client Program
 
-Once we have our runtime configuration defined as above, everything gets easier. This is an example of a client application, following our dummy quickstart:
+Once we have our runtime configuration defined as above, everything gets easier on the client side. This is an example of a client application, following our dummy quickstart:
 
 ```tut:silent
+import cats.effect.IO
 import service._
 import gclient.implicits._
-import monix.eval.Task
-
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 
 object RPCDemoApp {
 
   def main(args: Array[String]): Unit = {
 
     val hello = serviceClient.sayHello(HelloRequest("foo")).flatMap { result =>
-      Task.eval(println(s"Result = $result"))
+      IO(println(s"Result = $result"))
     }
 
-    Await.result(hello.runAsync, Duration.Inf)
+    hello.unsafeRunSync()
   }
 
 }
@@ -326,7 +319,7 @@ object RPCDemoApp {
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/frees-io/freestyle-rpc
+[mu]: https://github.com/higherkindness/mu
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

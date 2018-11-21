@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package mu.rpc.idlgen
 
-import freestyle.rpc.internal.util.FileUtil._
+import mu.rpc.internal.util.FileUtil._
 import java.io.File
 import org.log4s.getLogger
 

@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package prometheus
 package server
 
-import freestyle.rpc.prometheus.shared.Configuration
+import mu.rpc.prometheus.shared.Configuration
 
 class MonitorServerInterceptorTests extends BaseMonitorServerInterceptorTests {
 
   override def name: String = "Prometheus"
+
+  override def namespace: Option[String] = Some("grpc")
 
   override def defaultInterceptorsRuntime: InterceptorsRuntime =
     InterceptorsRuntime(Configuration.defaultBasicMetrics)

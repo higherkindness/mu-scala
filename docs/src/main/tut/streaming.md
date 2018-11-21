@@ -6,16 +6,16 @@ permalink: /docs/rpc/streaming
 
 # Streaming
 
-In the previous section, we saw that [frees-rpc] allows you to define unary services. It additionally supports the following streaming options:
+In the previous section, we saw that [mu] allows you to define unary services. Additionally, it supports the following streaming options:
 
-* **Server streaming RPC**: similar to the unary, but in this case, the server will send back a stream of responses for a client request.
-* **Client streaming RPC**: in this case is the client who sends a stream of requests. The server will respond with a single response.
-* **Bidirectional streaming RPC**: it would be a mix of server and client streaming since both sides will be sending a stream of data.
+* **Server streaming RPC**: similar to the unary service, but in this case the server will send back a stream of responses for a client request.
+* **Client streaming RPC**: in this case is the client which sends a stream of requests. The server will respond with a single response.
+* **Bidirectional streaming RPC**: a mix of server and client streaming as both sides will be sending a stream of data.
 
-Let's keep going completing our protocol's example with the three streaming service methods:
+Let's keep going. We'll be completing our protocol's example with the three streaming options:
 
 ```tut:silent
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 
 object service {
 
@@ -72,7 +72,7 @@ object service {
 }
 ```
 
-The code might be explanatory by itself but let's review the different services one by one:
+This code might be self-explanatory but let's review the different services one by one:
 
 * `lotsOfReplies `: Server streaming RPC.
 * `lotsOfGreetings `: Client streaming RPC.
@@ -80,26 +80,26 @@ The code might be explanatory by itself but let's review the different services 
 
 ## Integrations
 
-In [frees-rpc], the streaming features have been implemented based on two data types. You can choose one of them and start to use the data type that fits you better.
+In [mu], the streaming features have been implemented based on two data types. You can choose whichever data type fits your application's needs best.
 
 ### Observable
 
-The first data type is `monix.reactive.Observable`, see the [Monix Docs](https://monix.io/docs/2x/reactive/observable.html) for a wider explanation. These monix extensions have been implemented on top of the [gRPC Java API](https://grpc.io/grpc-java/javadoc/) and the `StreamObserver` interface.
+The first data type is `monix.reactive.Observable`, see the [Monix Docs](https://monix.io/docs/2x/reactive/observable.html) for a more detailed explanation. These monix extensions have been implemented on top of the [gRPC Java API](https://grpc.io/grpc-java/javadoc/) and the `StreamObserver` interface.
 
-In the above example, we can see an example of how to use this data type for streaming.
+The example above shows a basic implementation of how to use this data type for streaming.
 
 ### FS2: Functional Streams
 
-_Disclaimer_: it's considered experimental for now.
+_Disclaimer_: this feature is considered experimental, for now.
 
-The second data type is `fs2.Stream` streaming, see the [FS2 Docs](https://github.com/functional-streams-for-scala/fs2) for a wider explanation. 
+The second data type available for implementing streaming protocols is `fs2.Stream`, see the [FS2 Docs](https://github.com/functional-streams-for-scala/fs2) for more details. 
 
-Thanks to this new data type, [frees-rpc] supports `fs2.Stream[F, ?]` for all the types of streaming, mentioned before.
+Thanks to this new data type, [mu] supports `fs2.Stream[F, ?]` for all the types of streaming mentioned before.
 
-Let's compare our previous protocol's using `fs2.Stream` instead of `Observable`.
+Let's compare our previous protocols using `fs2.Stream` instead of `Observable`.
 
 ```tut:silent
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 
 object service {
 
@@ -143,12 +143,12 @@ object service {
 }
 ```
 
-As you can see, it is really similar to the Observable service.
+As you can see, the Fs2 service is very similar to the Observable service.
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/frees-io/freestyle-rpc
+[mu]: https://github.com/higherkindness/mu
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

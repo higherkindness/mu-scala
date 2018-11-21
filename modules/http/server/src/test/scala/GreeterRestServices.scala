@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.http
+package mu.rpc.http
 
 import cats.MonadError
 import cats.effect._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import freestyle.rpc.http.Utils._
 import io.circe.generic.auto._
 import io.circe.syntax._
+import mu.rpc.http.Utils._
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
@@ -31,11 +31,11 @@ class UnaryGreeterRestService[F[_]: Sync](handler: UnaryGreeter[F])(
     implicit F: MonadError[F, Throwable])
     extends Http4sDsl[F] {
 
-  import freestyle.rpc.protocol.Empty
+  import mu.rpc.protocol.Empty
 
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
 
-  def service: HttpService[F] = HttpService[F] {
+  def service: HttpRoutes[F] = HttpRoutes.of[F] {
 
     case GET -> Root / "getHello" => Ok(handler.getHello(Empty).map(_.asJson))
 
@@ -51,7 +51,7 @@ class Fs2GreeterRestService[F[_]: Sync](handler: Fs2Greeter[F]) extends Http4sDs
 
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
 
-  def service: HttpService[F] = HttpService[F] {
+  def service: HttpRoutes[F] = HttpRoutes.of[F] {
 
     case msg @ POST -> Root / "sayHellos" =>
       val requests = msg.asStream[HelloRequest]
@@ -69,13 +69,13 @@ class Fs2GreeterRestService[F[_]: Sync](handler: Fs2Greeter[F]) extends Http4sDs
   }
 }
 
-class MonixGreeterRestService[F[_]: Effect](handler: MonixGreeter[F])(
+class MonixGreeterRestService[F[_]: ConcurrentEffect](handler: MonixGreeter[F])(
     implicit sc: monix.execution.Scheduler)
     extends Http4sDsl[F] {
 
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
 
-  def service: HttpService[F] = HttpService[F] {
+  def service: HttpRoutes[F] = HttpRoutes.of[F] {
 
     case msg @ POST -> Root / "sayHellos" =>
       val requests = msg.asStream[HelloRequest]

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package internal
 
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 import scala.reflect.macros.blackbox
 
 // $COVERAGE-OFF$
@@ -160,12 +160,12 @@ object serviceImpl {
           List(
             q"import _root_.cats.instances.list._",
             q"import _root_.cats.instances.option._",
-            q"import _root_.freestyle.rpc.internal.encoders.pbd._"
+            q"import _root_.mu.rpc.internal.encoders.pbd._"
           )
         case Avro =>
-          List(q"import _root_.freestyle.rpc.internal.encoders.avro._")
+          List(q"import _root_.mu.rpc.internal.encoders.avro._")
         case AvroWithSchema =>
-          List(q"import _root_.freestyle.rpc.internal.encoders.avrowithschema._")
+          List(q"import _root_.mu.rpc.internal.encoders.avrowithschema._")
       }
 
       val methodDescriptors: List[Tree] = rpcRequests.map(_.methodDescriptor)
@@ -173,11 +173,11 @@ object serviceImpl {
         rpcRequests.map(_.descriptorAndHandler)
       val bindService: DefDef = q"""
         def bindService[$F_](implicit
-          F: _root_.cats.effect.Effect[$F],
+          F: _root_.cats.effect.ConcurrentEffect[$F],
           algebra: $serviceName[$F],
-          S: _root_.monix.execution.Scheduler
+          EC: _root_.scala.concurrent.ExecutionContext
         ): _root_.io.grpc.ServerServiceDefinition =
-          new _root_.freestyle.rpc.internal.service.GRPCServiceDefBuilder(${lit(serviceName)}, ..$serverCallDescriptorsAndHandlers).apply
+          new _root_.mu.rpc.internal.service.GRPCServiceDefBuilder(${lit(serviceName)}, ..$serverCallDescriptorsAndHandlers).apply
         """
 
       private val clientCallMethods: List[Tree] = rpcRequests.map(_.clientDef)
@@ -188,8 +188,8 @@ object serviceImpl {
           channel: _root_.io.grpc.Channel,
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit
-          F: _root_.cats.effect.Effect[$F],
-          S: _root_.monix.execution.Scheduler
+          F: _root_.cats.effect.ConcurrentEffect[$F],
+          EC: _root_.scala.concurrent.ExecutionContext
         ) extends _root_.io.grpc.stub.AbstractStub[$Client[$F]](channel, options) {
           override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $Client[F] =
               new $Client[$F](channel, options)
@@ -200,16 +200,16 @@ object serviceImpl {
       val client: DefDef =
         q"""
         def client[$F_](
-          channelFor: _root_.freestyle.rpc.ChannelFor,
-          channelConfigList: List[_root_.freestyle.rpc.client.ManagedChannelConfig] = List(
-            _root_.freestyle.rpc.client.UsePlaintext()),
+          channelFor: _root_.mu.rpc.ChannelFor,
+          channelConfigList: List[_root_.mu.rpc.client.ManagedChannelConfig] = List(
+            _root_.mu.rpc.client.UsePlaintext()),
             options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
           )(implicit
-          F: _root_.cats.effect.Effect[$F],
-          S: _root_.monix.execution.Scheduler
+          F: _root_.cats.effect.ConcurrentEffect[$F],
+          EC: _root_.scala.concurrent.ExecutionContext
         ): $Client[$F] = {
           val managedChannelInterpreter =
-            new _root_.freestyle.rpc.client.ManagedChannelInterpreter[F](channelFor, channelConfigList)
+            new _root_.mu.rpc.client.ManagedChannelInterpreter[F](channelFor, channelConfigList)
           new $Client[$F](managedChannelInterpreter.build(channelFor, channelConfigList), options)
         }""".supressWarts("DefaultArguments")
 
@@ -219,8 +219,8 @@ object serviceImpl {
           channel: _root_.io.grpc.Channel,
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit
-          F: _root_.cats.effect.Effect[$F],
-          S: _root_.monix.execution.Scheduler
+          F: _root_.cats.effect.ConcurrentEffect[$F],
+          EC: _root_.scala.concurrent.ExecutionContext
         ): $Client[$F] = new $Client[$F](channel, options)
         """.supressWarts("DefaultArguments")
 
@@ -277,13 +277,8 @@ object serviceImpl {
         }
 
         private val clientCallsImpl = streamingImpl match {
-          case Fs2Stream       => q"_root_.freestyle.rpc.internal.client.fs2Calls"
-          case MonixObservable => q"_root_.freestyle.rpc.internal.client.monixCalls"
-        }
-
-        private val serverCallsImpl = streamingImpl match {
-          case Fs2Stream       => q"_root_.freestyle.rpc.internal.server.fs2Calls"
-          case MonixObservable => q"_root_.freestyle.rpc.internal.server.monixCalls"
+          case Fs2Stream       => q"_root_.mu.rpc.internal.client.fs2Calls"
+          case MonixObservable => q"_root_.mu.rpc.internal.client.monixCalls"
         }
 
         private val streamingMethodType = {
@@ -344,17 +339,25 @@ object serviceImpl {
         }
 
         private def serverCallMethodFor(serverMethodName: String) =
-          q"$serverCallsImpl.${TermName(serverMethodName)}(algebra.$methodName, $compressionOption)"
+          q"_root_.mu.rpc.internal.server.monixCalls.${TermName(serverMethodName)}(algebra.$methodName, $compressionOption)"
 
         val descriptorAndHandler: Tree = {
-          val handler = streamingType match {
-            case Some(RequestStreaming) =>
+          val handler = (streamingType, streamingImpl) match {
+            case (Some(RequestStreaming), Fs2Stream) =>
+              q"_root_.mu.rpc.internal.server.fs2Calls.clientStreamingMethod(algebra.$methodName, $compressionOption)"
+            case (Some(RequestStreaming), MonixObservable) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(${serverCallMethodFor("clientStreamingMethod")})"
-            case Some(ResponseStreaming) =>
+            case (Some(ResponseStreaming), Fs2Stream) =>
+              q"_root_.mu.rpc.internal.server.fs2Calls.serverStreamingMethod(algebra.$methodName, $compressionOption)"
+            case (Some(ResponseStreaming), MonixObservable) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(${serverCallMethodFor("serverStreamingMethod")})"
-            case Some(BidirectionalStreaming) =>
+            case (Some(BidirectionalStreaming), Fs2Stream) =>
+              q"_root_.mu.rpc.internal.server.fs2Calls.bidiStreamingMethod(algebra.$methodName, $compressionOption)"
+            case (Some(BidirectionalStreaming), MonixObservable) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(${serverCallMethodFor("bidiStreamingMethod")})"
-            case None =>
+            case (None, Fs2Stream) =>
+              q"_root_.mu.rpc.internal.server.fs2Calls.unaryMethod(algebra.$methodName, $compressionOption)"
+            case (None, MonixObservable) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncUnaryCall(${serverCallMethodFor("unaryMethod")})"
           }
           q"($methodDescriptorName, $handler)"

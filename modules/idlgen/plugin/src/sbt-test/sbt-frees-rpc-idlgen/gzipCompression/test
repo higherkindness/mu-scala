@@ -2,12 +2,14 @@ $ exists src/main/resources/service.avdl
 > 'set idlType := "avro"'
 > 'set srcGenSerializationType := "Avro"'
 > srcGen
-$ exists target/scala-2.12/src_managed/main/io/frees/service.scala
-$ delete target/scala-2.12/src_managed/main/io/frees/service.scala
+> compile
+$ exists target/scala-2.12/src_managed/main/io/higherkindness/service.scala
+$ delete target/scala-2.12/src_managed/main/io/higherkindness/service.scala
 
 $ exists src/main/resources/service.avdl
 > 'set idlType := "avro"'
 > 'set srcGenSerializationType := "AvroWithSchema"'
 > 'set genOptions := Seq("Gzip")'
 > srcGen
-$ exists target/scala-2.12/src_managed/main/io/frees/service.scala
+> compile
+$ exists target/scala-2.12/src_managed/main/io/higherkindness/service.scala

@@ -24,7 +24,7 @@ import examples.todolist.service.TodoItemService
 import examples.todolist.TodoItem
 import examples.todolist.protocol.Protocols._
 import examples.todolist.protocol._
-import freestyle.rpc.protocol.Empty
+import mu.rpc.protocol.Empty
 
 class TodoItemRpcServiceHandler[F[_]](implicit M: Monad[F], service: TodoItemService[F])
     extends TodoItemRpcService[F] {

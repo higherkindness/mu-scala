@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package foo.bar
+package mu.rpc.internal.task.instances
 
-import freestyle.rpc.protocol._
+import cats.effect.Effect
+import monix.eval.Task
+import monix.eval.instances.CatsEffectForTask
+import monix.execution.Scheduler
 
-@message case class HelloRequest(arg1: String, arg2: Option[String], arg3: List[String])
+import scala.concurrent.ExecutionContext
 
-@message case class HelloResponse(arg1: String, arg2: Option[String], arg3: List[String])
+trait TaskInstances {
 
-@service(AvroWithSchema, Gzip) trait MyGreeterService[F[_]] {
-
-  def sayHelloAvro(arg: foo.bar.HelloRequest): F[foo.bar.HelloResponse]
-
-  def sayNothingAvro(arg: Empty.type): F[Empty.type]
+  implicit def taskEffect(implicit EC: ExecutionContext): Effect[Task] =
+    new CatsEffectForTask()(Scheduler(EC), Task.defaultOptions)
 
 }

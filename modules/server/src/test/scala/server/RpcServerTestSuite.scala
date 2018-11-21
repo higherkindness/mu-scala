@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package server
 
 import java.util.concurrent.{Executor, TimeUnit}
 
 import cats.effect.Sync
 import cats.syntax.functor._
-import freestyle.rpc.common.{RpcBaseTestSuite, SC}
-import freestyle.rpc.server.netty._
+import mu.rpc.common.{RpcBaseTestSuite, SC}
+import mu.rpc.server.netty._
 import io.grpc._
 import io.grpc.internal.GrpcUtil
 import io.grpc.netty.{GrpcSslContexts, ProtocolNegotiators}
@@ -88,10 +88,10 @@ trait RpcServerTestSuite extends RpcBaseTestSuite {
         override def bindService(): ServerServiceDefinition = sd1
       }),
       AddTransportFilter(new ServerTransportFilter() {
-        val key1: Attributes.Key[String] = Attributes.Key.of("key1")
-        val key2: Attributes.Key[String] = Attributes.Key.of("key2")
+        val key1: Attributes.Key[String] = Attributes.Key.create("key1")
+        val key2: Attributes.Key[String] = Attributes.Key.create("key2")
         override def transportReady(attrs: Attributes): Attributes =
-          Attributes.newBuilder(attrs).set(key1, "foo").set(key2, "bar").build
+          attrs.toBuilder.set(key1, "foo").set(key2, "bar").build()
 
         override def transportTerminated(attrs: Attributes): Unit = (): Unit
       }),

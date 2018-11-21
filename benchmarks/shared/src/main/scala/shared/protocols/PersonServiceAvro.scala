@@ -14,9 +14,22 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
-package client
+package mu.rpc.benchmarks
+package shared
+package protocols
 
-import freestyle.rpc.internal.TaskImplicits
+import mu.rpc.benchmarks.shared.models._
+import mu.rpc.protocol._
 
-object implicits extends TaskImplicits
+@service(Avro)
+trait PersonServiceAvro[F[_]] {
+
+  def listPersons(empty: Empty.type): F[PersonList]
+
+  def getPerson(id: PersonId): F[Person]
+
+  def getPersonLinks(id: PersonId): F[PersonLinkList]
+
+  def createPerson(person: Person): F[Person]
+
+}

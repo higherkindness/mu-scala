@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package interceptors
 
 sealed abstract class MetricsFor(val value: String) extends Product with Serializable
@@ -29,17 +29,6 @@ final case class MetricType(
     description: String) {
 
   def toMetricString = s"${namespace}_${subsystem.value}_$name"
-
-}
-
-object MetricType {
-
-  def apply(
-      subsystem: MetricsFor,
-      name: String,
-      labelNames: List[String],
-      description: String): MetricType =
-    MetricType(metrics.namespace, subsystem, name, labelNames, description)
 
 }
 
@@ -72,32 +61,38 @@ object metrics {
 
   // Client - Predefined metrics:
 
-  val clientMetricRpcStarted: MetricType =
+  def clientMetricRpcStarted(nsp: Option[String]): MetricType =
     MetricType(
+      nsp.getOrElse(namespace),
       ClientMetrics,
       startedTotal,
       baseLabels,
       "Total number of RPCs started on the client.")
-  val clientMetricRpcCompleted: MetricType =
+  def clientMetricRpcCompleted(nsp: Option[String]): MetricType =
     MetricType(
+      nsp.getOrElse(namespace),
       ClientMetrics,
       completed,
       baseLabels :+ grpcCode,
-      "Total number of RPCs completed on the client, regardless of success or failure.")
-  val clientMetricCompletedLatencySeconds: MetricType =
+      "Total number of RPCs completed on the client, regardless of success or failure."
+    )
+  def clientMetricCompletedLatencySeconds(nsp: Option[String]): MetricType =
     MetricType(
+      nsp.getOrElse(namespace),
       ClientMetrics,
       completedLatencySeconds,
       baseLabels,
       "Histogram of rpc response latency (in seconds) for completed rpcs.")
-  val clientMetricStreamMessagesReceived: MetricType =
+  def clientMetricStreamMessagesReceived(nsp: Option[String]): MetricType =
     MetricType(
+      nsp.getOrElse(namespace),
       ClientMetrics,
       msgReceivedTotal,
       baseLabels,
       "Total number of stream messages received from the server.")
-  val clientMetricStreamMessagesSent: MetricType =
+  def clientMetricStreamMessagesSent(nsp: Option[String]): MetricType =
     MetricType(
+      nsp.getOrElse(namespace),
       ClientMetrics,
       msgSentTotal,
       baseLabels,
@@ -105,33 +100,39 @@ object metrics {
 
   // Server - Predefined metrics:
 
-  val serverMetricRpcStarted: MetricType =
+  def serverMetricRpcStarted(nsp: Option[String]): MetricType =
     MetricType(
+      nsp.getOrElse(namespace),
       ServerMetrics,
       startedTotal,
       baseLabels,
       "Total number of RPCs started on the server.")
-  val serverMetricHandledCompleted: MetricType =
+  def serverMetricHandledCompleted(nsp: Option[String]): MetricType =
     MetricType(
+      nsp.getOrElse(namespace),
       ServerMetrics,
       handledTotal,
       baseLabels :+ grpcCode,
-      "Total number of RPCs completed on the server, regardless of success or failure.")
-  val serverMetricHandledLatencySeconds: MetricType =
+      "Total number of RPCs completed on the server, regardless of success or failure."
+    )
+  def serverMetricHandledLatencySeconds(nsp: Option[String]): MetricType =
     MetricType(
+      nsp.getOrElse(namespace),
       ServerMetrics,
       handledLatencySeconds,
       baseLabels,
       "Histogram of response latency (seconds) of gRPC that had been application-level handled by the server."
     )
-  val serverMetricStreamMessagesReceived: MetricType =
+  def serverMetricStreamMessagesReceived(nsp: Option[String]): MetricType =
     MetricType(
+      nsp.getOrElse(namespace),
       ServerMetrics,
       msgReceivedTotal,
       baseLabels,
       "Total number of stream messages received from the client.")
-  val serverMetricStreamMessagesSent: MetricType =
+  def serverMetricStreamMessagesSent(nsp: Option[String]): MetricType =
     MetricType(
+      nsp.getOrElse(namespace),
       ServerMetrics,
       msgSentTotal,
       baseLabels,

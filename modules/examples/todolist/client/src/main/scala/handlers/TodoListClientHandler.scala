@@ -22,7 +22,7 @@ import cats.Monad.ops._
 import examples.todolist.client.clients.TodoListClient
 import examples.todolist.protocol.Protocols._
 import examples.todolist.protocol._
-import freestyle.rpc.protocol.Empty
+import mu.rpc.protocol.Empty
 import freestyle.tagless.logging.LoggingM
 
 class TodoListClientHandler[F[_]](

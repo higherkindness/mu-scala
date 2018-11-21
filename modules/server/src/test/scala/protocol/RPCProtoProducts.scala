@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package protocol
 
 import cats.Applicative
 import cats.syntax.applicative._
-import freestyle.rpc.common._
-import freestyle.rpc.testing.servers.withServerChannel
+import mu.rpc.common._
+import mu.rpc.testing.servers.withServerChannel
 import org.scalatest._
 import org.scalacheck.Prop._
 import org.scalatest.prop.Checkers
@@ -81,8 +81,8 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
   "A RPC server" should {
 
+    import TestsImplicits._
     import RPCService._
-    import monix.execution.Scheduler.Implicits.global
 
     implicit val H: RPCServiceDefImpl[ConcurrentMonad] =
       new RPCServiceDefImpl[ConcurrentMonad]

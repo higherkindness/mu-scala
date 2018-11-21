@@ -1,49 +1,61 @@
-import freestyle.FreestylePlugin
-import freestyle.FreestylePlugin.autoImport._
+import com.typesafe.sbt.site.jekyll.JekyllPlugin.autoImport._
+import microsites.MicrositeKeys._
 import sbt.Keys._
 import sbt.ScriptedPlugin.autoImport._
 import sbt._
+import sbtorgpolicies.OrgPoliciesPlugin
 import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
+import sbtorgpolicies.model._
+import sbtorgpolicies.runnable.SetSetting
+import sbtorgpolicies.runnable.syntax._
+import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
 import sbtrelease.ReleasePlugin.autoImport._
+import scoverage.ScoverageKeys
+import scoverage.ScoverageKeys._
 
 import scala.language.reflectiveCalls
 import tut.TutPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
 
-  override def requires: Plugins = FreestylePlugin
+  override def requires: Plugins = OrgPoliciesPlugin
 
   override def trigger: PluginTrigger = allRequirements
 
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String             = "1.8.3"
-      val avrohugger: String         = "1.0.0-RC10"
+      val avro4s: String             = "2.0.2"
+      val avrohugger: String         = "1.0.0-RC14"
       val betterMonadicFor: String   = "0.2.4"
-      val catsEffect: String         = "0.10.1"
-      val circe: String              = "0.9.3"
-      val frees: String              = "0.8.1"
-      val fs2: String                = "0.10.5"
-      val fs2ReactiveStreams: String = "0.5.1"
-      val grpc: String               = "1.11.0"
-      val http4s                     = "0.18.9"
+      val catsEffect: String         = "1.1.0-M1"
+      val circe: String              = "0.10.1"
+      val frees: String              = "0.8.2"
+      val fs2: String                = "1.0.0"
+      val fs2Grpc: String            = "0.4.0-M2"
+      val jodaTime: String           = "2.10.1"
+      val grpc: String               = "1.16.1"
+      val http4s                     = "0.19.0"
       val log4s: String              = "1.6.1"
       val logback: String            = "1.2.3"
-      val monix: String              = "3.0.0-RC1"
-      val nettySSL: String           = "2.0.8.Final"
+      val monix: String              = "3.0.0-RC2"
+      val monocle: String            = "1.5.1-cats"
+      val nettySSL: String           = "2.0.17.Final"
+      val paradise: String           = "2.1.1"
       val pbdirect: String           = "0.1.0"
-      val prometheus: String         = "0.3.0"
-      val monocle: String            = "1.5.0-cats"
+      val prometheus: String         = "0.5.0"
+      val pureconfig: String         = "0.10.0"
+      val scala: String              = "2.12.7"
       val scalacheck: String         = "1.14.0"
+      val scalacheckToolbox: String  = "0.2.5"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("cats-effect", V.catsEffect) % Test,
-        %%("scalamockScalatest")        % Test,
-        %%("scheckToolboxDatetime")     % Test
+        %%("cats-effect", V.catsEffect)                  % Test,
+        %%("scalamockScalatest")                         % Test,
+        %%("scheckToolboxDatetime", V.scalacheckToolbox) % Test
       )
     )
 
@@ -53,11 +65,12 @@ object ProjectPlugin extends AutoPlugin {
         %("grpc-stub", V.grpc),
         %%("monix", V.monix),
         %%("monocle-core", V.monocle),
-        %%("fs2-reactive-streams", V.fs2ReactiveStreams),
+        %%("fs2-reactive-streams", V.fs2),
         %%("fs2-core", V.fs2),
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
+        "org.lyranthe.fs2-grpc"  %% "java-runtime" % V.fs2Grpc,
         "org.scala-lang"         % "scala-compiler" % scalaVersion.value,
         %%("scalamockScalatest") % Test
       )
@@ -101,9 +114,21 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val configSettings = Seq(
+    lazy val rpcHttpServerSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("pureconfig")
+        %%("http4s-dsl", V.http4s),
+        %%("http4s-blaze-server", V.http4s),
+        %%("http4s-circe", V.http4s),
+        %%("circe-generic"),
+        %%("http4s-blaze-client", V.http4s) % Test,
+        %%("scalacheck", V.scalacheck) % Test,
+        "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
+      )
+    )
+
+    lazy val configSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("pureconfig", V.pureconfig)
       )
     )
 
@@ -157,6 +182,13 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+    lazy val marshallersJodatimeSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %("joda-time", V.jodaTime),
+        %%("scheckToolboxDatetime", V.scalacheckToolbox) % Test
+      )
+    )
+
     lazy val exampleRouteguideCommonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("circe-core", V.circe),
@@ -164,12 +196,6 @@ object ProjectPlugin extends AutoPlugin {
         %%("circe-parser", V.circe),
         %%("log4s", V.log4s),
         %("logback-classic", V.logback)
-      )
-    )
-
-    lazy val exampleTodolistRuntimeSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        %%("monix", V.monix)
       )
     )
 
@@ -198,45 +224,126 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val rpcHttpServerSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        %%("http4s-dsl", V.http4s),
-        %%("http4s-blaze-server", V.http4s),
-        %%("http4s-circe", V.http4s),
-        %%("circe-generic"),
-        %%("http4s-blaze-client", V.http4s) % Test,
-        %%("scalacheck", V.scalacheck) % Test,
-        "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
-      )
+    lazy val crossSettings: Seq[Def.Setting[_]] = Seq(
+      unmanagedSourceDirectories in Compile += {
+        baseDirectory.value.getParentFile / "shared" / "src" / "main" / "scala"
+      },
+      unmanagedSourceDirectories in Test += {
+        baseDirectory.value.getParentFile / "shared" / "src" / "test" / "scala"
+      }
     )
 
-    lazy val docsSettings = Seq(
-      // Pointing to https://github.com/frees-io/freestyle/tree/master/docs/src/main/tut/docs/rpc
-      tutTargetDirectory := baseDirectory.value.getParentFile.getParentFile / "docs" / "src" / "main" / "tut" / "docs" / "rpc",
-      libraryDependencies ++= Seq(%%("scalamockScalatest") % "tut")
+    lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
+      micrositeName := "Mu",
+      micrositeBaseUrl := "/mu",
+      micrositeDescription := "A purely functional library for building RPC endpoint-based services",
+      micrositeDocumentationUrl := "docs/rpc/core-concepts.html",
+      micrositeGithubOwner := "higherkindness",
+      micrositeGithubRepo := "mu",
+      micrositeGitterChannelUrl := "47deg/mu",
+      micrositeOrganizationHomepage := "http://www.47deg.com",
+      includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
+      micrositePushSiteWith := GitHub4s
+    )
+
+    lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("scalatest")
+      ),
+      scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
+    )
+
+    lazy val legacyAvroDecimalProtocolSettings: Seq[Def.Setting[_]] = Seq(
+      publishMavenStyle := true,
+      crossPaths := false,
+      libraryDependencies := Nil
     )
 
   }
 
+  import autoImport._
+
   override def projectSettings: Seq[Def.Setting[_]] =
-    // format: OFF
     sharedReleaseProcess ++ warnUnusedImport ++ Seq(
-      addCompilerPlugin(%%("paradise") cross CrossVersion.full),
-      libraryDependencies ++= commonDeps :+ %("slf4j-nop") % Test,
-      scalaVersion := "2.12.6",
-      crossScalaVersions := Seq("2.11.12", "2.12.6"),
+      description := "mu RPC is a purely functional library for " +
+        "building RPC endpoint based services with support for RPC and HTTP/2",
+      startYear := Some(2017),
+      orgProjectName := "mu",
+      orgGithubSetting := GitHubSettings(
+        organization = "higherkindness",
+        project = (name in LocalRootProject).value,
+        organizationName = "47 Degrees",
+        groupId = "io.higherkindness",
+        organizationHomePage = url("http://47deg.com"),
+        organizationEmail = "hello@47deg.com"
+      ),
+      scalaVersion := V.scala,
+      crossScalaVersions := Seq("2.11.12", V.scala),
+      scalacOptions ++= scalacAdvancedOptions,
+      scalacOptions ~= (_ filterNot Set("-Yliteral-types", "-Xlint").contains),
       Test / fork := true,
       Tut / scalacOptions -= "-Ywarn-unused-import",
-      orgAfterCISuccessTaskListSetting ~= (_.filterNot(_ == defaultPublishMicrosite)),
+      compileOrder in Compile := CompileOrder.JavaThenScala,
+      coverageFailOnMinimum := false,
+      addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
+      libraryDependencies ++= Seq(
+        %%("scalatest") % "test",
+        %("slf4j-nop")  % Test
+      )
+    ) ++ Seq(
+      // sbt-org-policies settings:
+      // format: OFF
+      orgMaintainersSetting := List(Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
       orgBadgeListSetting := List(
         TravisBadge.apply,
-        CodecovBadge.apply,
-        { info => MavenCentralBadge.apply(info.copy(libName = "frees-rpc")) },
+        CodecovBadge.apply, { info => MavenCentralBadge.apply(info.copy(libName = "mu")) },
         ScalaLangBadge.apply,
         LicenseBadge.apply,
-        // Gitter badge (owner field) can be configured with default value if we migrate it to the frees-io organization
-        { info => GitterBadge.apply(info.copy(owner = "47deg", repo = "freestyle")) },
+        // Gitter badge (owner field) can be configured with default value if we migrate it to the higherkindness organization
+        { info => GitterBadge.apply(info.copy(owner = "47deg", repo = "mu")) },
         GitHubIssuesBadge.apply
+      ),
+      orgEnforcedFilesSetting := List(
+        LicenseFileType(orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
+        ContributingFileType(
+          orgProjectName.value,
+          // Organization field can be configured with default value if we migrate it to the higherkindness organization
+          orgGithubSetting.value.copy(organization = "47deg", project = "mu")
+        ),
+        AuthorsFileType(
+          name.value,
+          orgGithubSetting.value,
+          orgMaintainersSetting.value,
+          orgContributorsSetting.value),
+        NoticeFileType(orgProjectName.value, orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
+        VersionSbtFileType,
+        ChangelogFileType,
+        ReadmeFileType(
+          orgProjectName.value,
+          orgGithubSetting.value,
+          startYear.value,
+          orgLicenseSetting.value,
+          orgCommitBranchSetting.value,
+          sbtPlugin.value,
+          name.value,
+          version.value,
+          scalaBinaryVersion.value,
+          sbtBinaryVersion.value,
+          orgSupportedScalaJSVersion.value,
+          orgBadgeListSetting.value
+        ),
+        ScalafmtFileType,
+        TravisFileType(crossScalaVersions.value, orgScriptCICommandKey, orgAfterCISuccessCommandKey)
+      ),
+      orgScriptTaskListSetting := List(
+        (clean in Global).asRunnableItemFull,
+        SetSetting(coverageEnabled in Global, true).asRunnableItem,
+        (compile in Compile).asRunnableItemFull,
+        (test in Test).asRunnableItemFull,
+        (ScoverageKeys.coverageReport in Test).asRunnableItemFull,
+        (ScoverageKeys.coverageAggregate in Test).asRunnableItemFull,
+        SetSetting(coverageEnabled in Global, false).asRunnableItem,
+        "docs/tut".asRunnableItem,
       )
     )
   // format: ON

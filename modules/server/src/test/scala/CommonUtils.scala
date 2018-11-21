@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 
 import java.net.ServerSocket
 
 import cats.Functor
 import cats.effect.Sync
 import cats.syntax.functor._
-import freestyle.rpc.common._
-import freestyle.rpc.server._
+import mu.rpc.common._
+import mu.rpc.server._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
@@ -73,8 +73,6 @@ trait CommonUtils {
     S.awaitTermination().void
 
   def debug(str: String): Unit = logger.debug(str)
-
-  implicit val S: monix.execution.Scheduler = monix.execution.Scheduler.Implicits.global
 
   val pickUnusedPort: Int =
     Try {

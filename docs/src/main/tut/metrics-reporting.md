@@ -6,28 +6,28 @@ permalink: /docs/rpc/metrics-reporting
 
 # Metrics Reporting
 
-Currently, [frees-rpc] provides two different ways to monitor [gRPC] services: `Prometheus` and `Dropwizard` (using the `Prometheus` extension). The usage is quite similar for both.
+Currently, [mu] provides two different ways to monitor [gRPC] services: `Prometheus` and `Dropwizard` (using the `Prometheus` extension). The usage is quite similar for both.
 
 ## Monitor Server Calls
 
 In order to monitor the RPC calls on the server side, it's necessary to intercept them. We'll see how to do this in the next code fragment:
 
 ```tut:invisible
-import monix.execution.Scheduler
-
 trait CommonRuntime {
 
-  implicit val S: Scheduler = monix.execution.Scheduler.Implicits.global
+  implicit val EC: scala.concurrent.ExecutionContext =
+    scala.concurrent.ExecutionContext.Implicits.global
+
+  implicit val timer: cats.effect.Timer[cats.effect.IO]     = cats.effect.IO.timer(EC)
+  implicit val cs: cats.effect.ContextShift[cats.effect.IO] = cats.effect.IO.contextShift(EC)
 
 }
 ```
 
 ```tut:invisible
-import freestyle.rpc.protocol._
+import mu.rpc.protocol._
 
 object service {
-
-  import monix.reactive.Observable
 
   @message
   case class HelloRequest(greeting: String)
@@ -43,16 +43,11 @@ object service {
 ```
 
 ```tut:invisible
-import cats.effect.Async
+import cats.Applicative
 import cats.syntax.applicative._
-import freestyle.free._
-import freestyle.rpc.server.implicits._
-import monix.execution.Scheduler
-import monix.eval.Task
-import monix.reactive.Observable
 import service._
 
-class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
+class ServiceHandler[F[_]: Applicative] extends Greeter[F] {
 
   override def sayHello(request: service.HelloRequest): F[service.HelloResponse] =
     HelloResponse(reply = "Good bye!").pure
@@ -61,19 +56,16 @@ class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
 ```
 
 ```tut:silent
-import cats.~>
 import cats.effect.IO
-import freestyle.rpc.server._
-import freestyle.rpc.server.handlers._
-import freestyle.rpc.server.implicits._
-import freestyle.rpc.prometheus.shared.Configuration
-import freestyle.rpc.prometheus.server.MonitoringServerInterceptor
+import mu.rpc.server._
+import mu.rpc.prometheus.shared.Configuration
+import mu.rpc.prometheus.server.MonitoringServerInterceptor
 import io.prometheus.client.CollectorRegistry
 import service._
 
 object InterceptingServerCalls extends CommonRuntime {
 
-  import freestyle.rpc.interceptors.implicits._
+  import mu.rpc.interceptors.implicits._
 
   lazy val cr: CollectorRegistry = new CollectorRegistry()
   lazy val monitorInterceptor = MonitoringServerInterceptor(
@@ -87,7 +79,7 @@ object InterceptingServerCalls extends CommonRuntime {
     AddService(Greeter.bindService[IO].interceptWith(monitorInterceptor))
   )
 
-  val server: IO[GrpcServer[IO]]= GrpcServer.default[IO](8080, grpcConfigs)
+  val server: IO[GrpcServer[IO]] = GrpcServer.default[IO](8080, grpcConfigs)
 
 }
 ```
@@ -97,29 +89,23 @@ object InterceptingServerCalls extends CommonRuntime {
 In this case, in order to intercept the client calls we need additional configuration settings (by using `AddInterceptor`):
 
 ```tut:silent
-import cats.implicits._
 import cats.effect.IO
-import freestyle.rpc._
-import freestyle.rpc.config._
-import freestyle.rpc.client._
-import freestyle.rpc.client.config._
-import freestyle.rpc.client.implicits._
-import monix.eval.Task
-import io.grpc.ManagedChannel
+import mu.rpc._
+import mu.rpc.config._
+import mu.rpc.client._
+import mu.rpc.client.config._
 import service._
 
-import scala.util.{Failure, Success, Try}
-
-import freestyle.rpc.prometheus.shared.Configuration
-import freestyle.rpc.prometheus.client.MonitoringClientInterceptor
+import mu.rpc.prometheus.shared.Configuration
+import mu.rpc.prometheus.client.MonitoringClientInterceptor
 
 object InterceptingClientCalls extends CommonRuntime {
 
   val channelFor: ChannelFor =
     ConfigForAddress[IO]("rpc.host", "rpc.port").unsafeRunSync
 
-  implicit val serviceClient: Greeter.Client[Task] =
-    Greeter.client[Task](
+  implicit val serviceClient: Greeter.Client[IO] =
+    Greeter.client[IO](
       channelFor = channelFor,
       channelConfigList = List(
         UsePlaintext(),
@@ -133,11 +119,11 @@ object InterceptingClientCalls extends CommonRuntime {
 }
 ```
 
-That's using `Prometheus` to monitor both [gRPC] ends.
+That is how we use `Prometheus` to monitor both [gRPC] ends.
 
 ## Dropwizard Metrics
 
-The usage is equivalent, however, in this case, we need to put an instance of `com.codahale.metrics.MetricRegistry` on the scene, then, using the _Dropwizard_ integration that _Prometheus_ already provides (`DropwizardExports`) you can associate it with the collector registry:
+The usage the same as before, but in this case we need to put an instance of `com.codahale.metrics.MetricRegistry` in our code. Then using the _Dropwizard_ integration that _Prometheus_ already provides (`DropwizardExports`) we can associate it with the collector registry:
 
 ```tut:silent
 import com.codahale.metrics.MetricRegistry
@@ -151,7 +137,7 @@ configuration.collectorRegistry.register(new DropwizardExports(metrics))
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[frees-rpc]: https://github.com/frees-io/freestyle-rpc
+[mu]: https://github.com/higherkindness/mu
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

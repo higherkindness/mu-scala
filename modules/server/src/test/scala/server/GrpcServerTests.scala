@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package server
 
 import java.util.concurrent.TimeUnit
 
 import cats.Apply
 import cats.syntax.apply._
-import freestyle.rpc.common.{ConcurrentMonad, SC}
+import mu.rpc.common.{ConcurrentMonad, SC}
 import io.grpc.{Server, ServerServiceDefinition}
 
 class GrpcServerTests extends RpcServerTestSuite {

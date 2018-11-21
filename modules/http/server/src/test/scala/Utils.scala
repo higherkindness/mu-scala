@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.http
+package mu.rpc.http
 
+import cats.ApplicativeError
 import cats.effect._
 import cats.implicits._
-import fs2.Stream
 import fs2.interop.reactivestreams._
+import fs2.{RaiseThrowable, Stream}
 import io.grpc.Status.Code._
 import jawn.ParseException
 import io.circe._
@@ -27,7 +28,6 @@ import io.circe.generic.auto._
 import io.circe.jawn.CirceSupportParser.facade
 import io.circe.syntax._
 import io.grpc.{Status => _, _}
-import java.util.concurrent._
 import jawnfs2._
 import monix.execution._
 import monix.reactive.Observable
@@ -38,18 +38,17 @@ import scala.util.control.NoStackTrace
 
 object Utils {
 
-  private[http] val singleThreadedEC =
-    ExecutionContext.fromExecutorService(Executors.newSingleThreadExecutor)
+  private[http] implicit class MessageOps[F[_]](val message: Message[F]) extends AnyVal {
 
-  private[http] implicit class MessageOps[F[_]](message: Message[F]) {
-
-    def jsonBodyAsStream[A](implicit decoder: Decoder[A]): Stream[F, A] =
+    def jsonBodyAsStream[A](
+        implicit decoder: Decoder[A],
+        F: ApplicativeError[F, Throwable]): Stream[F, A] =
       message.body.chunks.parseJsonStream.map(_.as[A]).rethrow
   }
 
-  private[http] implicit class RequestOps[F[_]](request: Request[F]) {
+  private[http] implicit class RequestOps[F[_]](val request: Request[F]) {
 
-    def asStream[A](implicit decoder: Decoder[A]): Stream[F, A] =
+    def asStream[A](implicit decoder: Decoder[A], F: ApplicativeError[F, Throwable]): Stream[F, A] =
       request
         .jsonBodyAsStream[A]
         .adaptError { // mimic behavior of MessageOps.as[T] in handling of parsing errors
@@ -58,7 +57,7 @@ object Utils {
         }
   }
 
-  private[http] implicit class ResponseOps[F[_]](response: Response[F]) {
+  private[http] implicit class ResponseOps[F[_]](val response: Response[F]) {
 
     implicit private val throwableDecoder: Decoder[Throwable] =
       Decoder.decodeTuple2[String, String].map {
@@ -70,29 +69,29 @@ object Utils {
             .asInstanceOf[Throwable]
       }
 
-    def asStream[A](implicit decoder: Decoder[A]): Stream[F, A] =
+    def asStream[A](
+        implicit decoder: Decoder[A],
+        F: ApplicativeError[F, Throwable],
+        R: RaiseThrowable[F]): Stream[F, A] =
       if (response.status.code != 200) Stream.raiseError(ResponseError(response.status))
       else response.jsonBodyAsStream[Either[Throwable, A]].rethrow
   }
 
   private[http] implicit class Fs2StreamOps[F[_], A](stream: Stream[F, A]) {
 
-    implicit private val throwableEncoder: Encoder[Throwable] = new Encoder[Throwable] {
-      def apply(ex: Throwable): Json = (ex.getClass.getName, ex.getMessage).asJson
-    }
+    implicit private val throwableEncoder: Encoder[Throwable] =
+      (ex: Throwable) => (ex.getClass.getName, ex.getMessage).asJson
 
     def asJsonEither(implicit encoder: Encoder[A]): Stream[F, Json] = stream.attempt.map(_.asJson)
 
-    def toObservable(implicit F: Effect[F], ec: ExecutionContext): Observable[A] =
+    def toObservable(implicit F: ConcurrentEffect[F], ec: ExecutionContext): Observable[A] =
       Observable.fromReactivePublisher(stream.toUnicastPublisher)
   }
 
-  private[http] implicit class MonixStreamOps[A](stream: Observable[A]) {
+  private[http] implicit class MonixStreamOps[A](val stream: Observable[A]) extends AnyVal {
 
-    def toFs2Stream[F[_]](implicit F: Effect[F], sc: Scheduler): Stream[F, A] =
-      stream.toReactivePublisher
-        .toStream[F]()(F, singleThreadedEC)
-    // singleThreadedEC, because tests intermittently hang on socket reads when using the default Monix Scheduler
+    def toFs2Stream[F[_]](implicit F: ConcurrentEffect[F], sc: Scheduler): Stream[F, A] =
+      stream.toReactivePublisher.toStream[F]()
   }
 
   private[http] implicit class FResponseOps[F[_]: Sync](response: F[Response[F]])

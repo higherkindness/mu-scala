@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package internal
 package util
 
@@ -51,6 +51,17 @@ class JavaTimeUtilTests extends WordSpec with Matchers with Checkers {
           val date  = zdt.toLocalDateTime
           val value = JavaTimeUtil.localDateTimeToLong(date)
           JavaTimeUtil.longToLocalDateTime(value) == date
+        }
+      }
+    }
+
+    "allow to convert Instant to and from long" in {
+      import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.seconds
+      check {
+        forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
+          val date  = zdt.toInstant
+          val value = JavaTimeUtil.instantToLong(date)
+          JavaTimeUtil.longToInstant(value) == date
         }
       }
     }

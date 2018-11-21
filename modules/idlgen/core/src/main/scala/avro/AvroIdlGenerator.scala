@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen.avro
+package mu.rpc.idlgen.avro
 
-import freestyle.rpc.idlgen._
-import freestyle.rpc.protocol._
-import freestyle.rpc.internal.util._
+import mu.rpc.idlgen._
+import mu.rpc.protocol._
+import mu.rpc.internal.util._
 import io.circe._
 import io.circe.generic.auto._
 import io.circe.syntax._

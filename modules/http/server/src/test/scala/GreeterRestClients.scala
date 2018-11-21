@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.http
+package mu.rpc.http
 
 import cats.effect._
-import freestyle.rpc.http.Utils._
 import fs2.Stream
 import io.circe.generic.auto._
 import io.circe.syntax._
+import mu.rpc.http.Utils._
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.client._
@@ -37,7 +37,7 @@ class UnaryGreeterRestClient[F[_]: Sync](uri: Uri) {
 
   def sayHello(arg: HelloRequest)(implicit client: Client[F]): F[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHello")
-    client.expectOr[HelloResponse](request.withBody(arg.asJson))(handleResponseError)
+    client.expectOr[HelloResponse](request.withEntity(arg.asJson))(handleResponseError)
   }
 
 }
@@ -48,45 +48,47 @@ class Fs2GreeterRestClient[F[_]: Sync](uri: Uri) {
 
   def sayHellos(arg: Stream[F, HelloRequest])(implicit client: Client[F]): F[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellos")
-    client.expectOr[HelloResponse](request.withBody(arg.map(_.asJson)))(handleResponseError)
+    client.expectOr[HelloResponse](request.withEntity(arg.map(_.asJson)))(handleResponseError)
   }
 
   def sayHelloAll(arg: HelloRequest)(implicit client: Client[F]): Stream[F, HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHelloAll")
-    client.streaming(request.withBody(arg.asJson))(_.asStream[HelloResponse])
+    client.stream(request.withEntity(arg.asJson)).flatMap(_.asStream[HelloResponse])
   }
 
   def sayHellosAll(arg: Stream[F, HelloRequest])(
       implicit client: Client[F]): Stream[F, HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellosAll")
-    client.streaming(request.withBody(arg.map(_.asJson)))(_.asStream[HelloResponse])
+    client.stream(request.withEntity(arg.map(_.asJson))).flatMap(_.asStream[HelloResponse])
   }
 
 }
 
-class MonixGreeterRestClient[F[_]: Effect](uri: Uri)(implicit sc: monix.execution.Scheduler) {
+class MonixGreeterRestClient[F[_]: ConcurrentEffect](uri: Uri)(
+    implicit sc: monix.execution.Scheduler) {
 
-  import freestyle.rpc.http.Utils._
   import monix.reactive.Observable
+  import mu.rpc.http.Utils._
 
   private implicit val responseDecoder: EntityDecoder[F, HelloResponse] = jsonOf[F, HelloResponse]
 
   def sayHellos(arg: Observable[HelloRequest])(implicit client: Client[F]): F[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellos")
-    client.expectOr[HelloResponse](request.withBody(arg.toFs2Stream.map(_.asJson)))(
+    client.expectOr[HelloResponse](request.withEntity(arg.toFs2Stream.map(_.asJson)))(
       handleResponseError)
   }
 
   def sayHelloAll(arg: HelloRequest)(implicit client: Client[F]): Observable[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHelloAll")
-    client.streaming(request.withBody(arg.asJson))(_.asStream[HelloResponse]).toObservable
+    client.stream(request.withEntity(arg.asJson)).flatMap(_.asStream[HelloResponse]).toObservable
   }
 
   def sayHellosAll(arg: Observable[HelloRequest])(
       implicit client: Client[F]): Observable[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellosAll")
     client
-      .streaming(request.withBody(arg.toFs2Stream.map(_.asJson)))(_.asStream[HelloResponse])
+      .stream(request.withEntity(arg.toFs2Stream.map(_.asJson)))
+      .flatMap(_.asStream[HelloResponse])
       .toObservable
   }
 

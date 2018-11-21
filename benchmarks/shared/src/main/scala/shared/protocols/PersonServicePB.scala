@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
-package internal
+package mu.rpc.benchmarks
+package shared
+package protocols
 
-import monix.eval.Task
+import mu.rpc.benchmarks.shared.models._
+import mu.rpc.protocol._
 
-trait TaskImplicits {
+@service(Protobuf)
+trait PersonServicePB[F[_]] {
 
-  implicit def taskToOps[A](task: Task[A]): TaskOps[A] = new TaskOps(task)
-}
+  def listPersons(empty: Empty.type): F[PersonList]
 
-private[internal] class TaskOps[A](private val task: Task[A]) extends AnyVal {
+  def getPerson(id: PersonId): F[Person]
 
-  def to[F[_]](implicit F: LiftTask[F]): F[A] = F.liftTask(task)
+  def getPersonLinks(id: PersonId): F[PersonLinkList]
+
+  def createPerson(person: Person): F[Person]
 
 }

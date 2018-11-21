@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package mu.rpc.idlgen
 
 trait SrcGenerator extends Generator

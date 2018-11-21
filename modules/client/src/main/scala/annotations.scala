@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package freestyle
+package mu
 package rpc
 
-import freestyle.rpc.internal.serviceImpl
+import mu.rpc.internal.serviceImpl
 
 import scala.annotation.{compileTimeOnly, StaticAnnotation}
 

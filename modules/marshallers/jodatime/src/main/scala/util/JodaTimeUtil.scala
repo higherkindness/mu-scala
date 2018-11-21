@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package jodatime
 package util
 
@@ -22,7 +22,7 @@ import org.joda.time._
 
 object JodaTimeUtil {
 
-  private[this] val initialDate = DateTime.now(DateTimeZone.UTC).withMillis(0)
+  private[this] val initialDate = new DateTime(0, DateTimeZone.UTC)
 
   def jodaLocalDateToInt(value: LocalDate): Int =
     Days

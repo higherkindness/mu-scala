@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package internal
 
 import io.grpc.stub.{ServerCallStreamObserver, StreamObserver}
@@ -22,7 +22,7 @@ import monix.execution.{Ack, Scheduler}
 import monix.reactive.{Observable, Observer, Pipe}
 import monix.reactive.observers.Subscriber
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 package object server {
 
@@ -42,12 +42,12 @@ package object server {
       override def onNext(value: Req): Future[Ack] = in.onNext(value)
     }
 
-  import freestyle.rpc.internal.converters._
+  import mu.rpc.internal.converters._
 
   private[server] def transformStreamObserver[Req, Res](
       transformer: Observable[Req] => Observable[Res],
       responseObserver: StreamObserver[Res]
-  )(implicit S: Scheduler): StreamObserver[Req] =
+  )(implicit EC: ExecutionContext): StreamObserver[Req] =
     transform(transformer, responseObserver.toSubscriber).toStreamObserver
 
   private[server] def addCompression[A](

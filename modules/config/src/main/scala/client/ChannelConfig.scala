@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package client
 package config
 
@@ -23,14 +23,14 @@ import cats.syntax.functor._
 import cats.syntax.flatMap._
 import cats.syntax.either._
 
-import freestyle.rpc.config.ConfigM
+import mu.rpc.config.ConfigM
 
 import com.typesafe.config.ConfigException.Missing
 
 class ChannelConfig[F[_]](implicit S: Sync[F], C: ConfigM[F]) {
 
   val defaultHost: String = "localhost"
-  val defaultPort: Int    = freestyle.rpc.server.defaultPort
+  val defaultPort: Int    = mu.rpc.server.defaultPort
 
   def loadChannelAddress(hostPath: String, portPath: String): F[ChannelForAddress] =
     for {

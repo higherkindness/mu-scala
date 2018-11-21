@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package client
 
 class ManagedChannelInterpreterClientTests extends ManagedChannelInterpreterTests

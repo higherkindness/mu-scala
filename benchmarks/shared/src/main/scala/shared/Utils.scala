@@ -14,28 +14,27 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
-package server
+package mu.rpc.benchmarks
+package shared
 
-import freestyle.rpc.common.ConcurrentMonad
+import mu.rpc.benchmarks.shared.models._
 
-class HelperTests extends RpcServerTestSuite {
+import scala.concurrent.duration._
 
-  import implicits._
+object Utils {
 
-  "GrpcServer.server helper" should {
+  val defaultTimeOut: FiniteDuration = 30.seconds
 
-    "work as expected" in {
-
-      val grpcServer: GrpcServer[ConcurrentMonad] = grpcServerHandlerTests[ConcurrentMonad]
-
-      GrpcServer
-        .server[ConcurrentMonad](grpcServer)
-        .unsafeRunSync() shouldBe ((): Unit)
-
-      (serverMock.start _: () => io.grpc.Server).verify()
-    }
-
-  }
-
+  val person: Person = Person(
+    id = "5",
+    name = PersonName(title = "ms", first = "valentine", last = "lacroix"),
+    gender = "female",
+    location = Location(
+      street = "1494 avenue du fort-caire",
+      city = "orléans",
+      state = "aveyron",
+      postCode = 91831),
+    email = "valentine.lacroix@example.com",
+    picture = None
+  )
 }

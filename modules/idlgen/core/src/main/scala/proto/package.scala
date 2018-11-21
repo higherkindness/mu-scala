@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package mu.rpc.idlgen
 
 package object proto {
   val IdlType        = "proto"

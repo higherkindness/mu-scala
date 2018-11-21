@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package server
 package config
 
@@ -23,7 +23,7 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.either._
 
-import freestyle.rpc.config.ConfigM
+import mu.rpc.config.ConfigM
 
 import com.typesafe.config.ConfigException.Missing
 

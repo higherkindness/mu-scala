@@ -1,0 +1,9 @@
+@namespace("mu.rpc.protocol.legacy")
+
+protocol AvroDecimalCompat {
+
+  record AvroDecimalCompat {
+    string value;
+  }
+
+}

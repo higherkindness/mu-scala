@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package prometheus
 package shared
 
@@ -23,13 +23,16 @@ import io.prometheus.client.CollectorRegistry
 case class Configuration(
     isIncludeLatencyHistograms: Boolean,
     collectorRegistry: CollectorRegistry,
-    latencyBuckets: Vector[Double]) {
+    latencyBuckets: Vector[Double],
+    namespace: Option[String] = None) {
 
   def withCollectorRegistry(c: CollectorRegistry): Configuration =
     this.copy(collectorRegistry = c)
 
   def withLatencyBuckets(lb: Vector[Double]): Configuration =
     this.copy(latencyBuckets = lb)
+
+  def withNamespace(namespace: String): Configuration = this.copy(namespace = Some(namespace))
 
 }
 

@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package mu.rpc.idlgen
 
-import freestyle.rpc.idlgen.avro.AvroSrcGenerator
+import mu.rpc.idlgen.Model.{BigDecimalTypeGen, MarshallersImport, ScalaBigDecimalGen}
+import mu.rpc.idlgen.avro.AvroSrcGenerator
 
-object SrcGenApplication extends GeneratorApplication(AvroSrcGenerator) {
-  def main(args: Array[String]): Unit = generateFrom(args)
+object SrcGenApplication {
+  def apply(
+      marshallersImports: List[MarshallersImport] = Nil,
+      bigDecimalTypeGen: BigDecimalTypeGen = ScalaBigDecimalGen): GeneratorApplication[
+    AvroSrcGenerator] =
+    new GeneratorApplication(AvroSrcGenerator(marshallersImports, bigDecimalTypeGen)) {
+      def main(args: Array[String]): Unit = generateFrom(args)
+    }
 }

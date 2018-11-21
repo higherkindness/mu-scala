@@ -14,25 +14,36 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen.avro
+package mu.rpc.idlgen.avro
+
+import java.io.File
 
 import avrohugger.Generator
 import avrohugger.format.Standard
 import avrohugger.types._
-import freestyle.rpc.idlgen._
-import java.io.File
+import mu.rpc.idlgen._
+import mu.rpc.idlgen.Model._
 import org.apache.avro._
 import org.log4s._
+
 import scala.collection.JavaConverters._
 import scala.util.Right
 
-object AvroSrcGenerator extends SrcGenerator {
+case class AvroSrcGenerator(
+    marshallersImports: List[MarshallersImport] = Nil,
+    bigDecimalTypeGen: BigDecimalTypeGen = ScalaBigDecimalGen)
+    extends SrcGenerator {
 
   private[this] val logger = getLogger
 
-  private val mainGenerator = Generator(Standard)
-  private val adtGenerator = mainGenerator.copy(avroScalaCustomTypes =
-    Some(AvroScalaTypes.defaults.copy(protocol = ScalaADT))) // ScalaADT: sealed trait hierarchies
+  private val avroBigDecimal: AvroScalaDecimalType = bigDecimalTypeGen match {
+    case ScalaBigDecimalGen       => ScalaBigDecimal
+    case ScalaBigDecimalTaggedGen => ScalaBigDecimalWithPrecision
+  }
+  private val avroScalaCustomTypes = Standard.defaultTypes.copy(decimal = avroBigDecimal)
+  private val mainGenerator        = Generator(Standard, avroScalaCustomTypes = Some(avroScalaCustomTypes))
+  private val adtGenerator = mainGenerator.copy(avroScalaCustomTypes = Some(
+    mainGenerator.avroScalaTypes.copy(protocol = ScalaADT))) // ScalaADT: sealed trait hierarchies
 
   val idlType: String = avro.IdlType
 
@@ -105,7 +116,10 @@ object AvroSrcGenerator extends SrcGenerator {
 
     val packageLines = Seq(schemaLines.head, "")
 
-    val importLines = Seq("import freestyle.rpc.protocol._")
+    val importLines =
+      ("import mu.rpc.protocol._" :: marshallersImports
+        .map(_.marshallersImport)
+        .map("import " + _)).sorted
 
     val messageLines = schemaLines.tail.map(line =>
       if (line.contains("case class")) s"@message $line" else line) :+ "" // note: can be "final case class"
@@ -116,7 +130,7 @@ object AvroSrcGenerator extends SrcGenerator {
         try comment ++ Seq(parseMessage(name, message.getRequest, message.getResponse), "")
         catch {
           case ParseException(msg) =>
-            logger.warn(s"$msg, cannot be converted to freestyle-rpc: $message")
+            logger.warn(s"$msg, cannot be converted to mu: $message")
             Seq.empty
         }
     }

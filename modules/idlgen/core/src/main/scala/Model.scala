@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package mu.rpc.idlgen
 
-import freestyle.rpc.internal.util.Toolbox
-import freestyle.rpc.internal.util.StringUtil._
-import freestyle.rpc.protocol._
+import mu.rpc.internal.util.Toolbox
+import mu.rpc.internal.util.StringUtil._
+import mu.rpc.protocol._
 
 object Model {
 
@@ -63,4 +63,26 @@ object Model {
       case _ => false
     }
   }
+
+  sealed abstract class MarshallersImport(val marshallersImport: String)
+      extends Product
+      with Serializable
+
+  final case class CustomMarshallersImport(mi: String) extends MarshallersImport(mi)
+  case object BigDecimalAvroMarshallers
+      extends MarshallersImport("mu.rpc.internal.encoders.avro.bigdecimal._")
+  case object BigDecimalTaggedAvroMarshallers
+      extends MarshallersImport("mu.rpc.internal.encoders.avro.bigDecimalTagged._")
+  case object JodaDateTimeAvroMarshallers
+      extends MarshallersImport("mu.rpc.marshallers.jodaTimeEncoders.avro._")
+  case object BigDecimalProtobufMarshallers
+      extends MarshallersImport("mu.rpc.internal.encoders.pbd.bigdecimal._")
+  case object JavaTimeDateProtobufMarshallers
+      extends MarshallersImport("mu.rpc.internal.encoders.pbd.javatime._")
+  case object JodaDateTimeProtobufMarshallers
+      extends MarshallersImport("mu.rpc.marshallers.jodaTimeEncoders.pbd._")
+
+  sealed trait BigDecimalTypeGen       extends Product with Serializable
+  case object ScalaBigDecimalGen       extends BigDecimalTypeGen
+  case object ScalaBigDecimalTaggedGen extends BigDecimalTypeGen
 }

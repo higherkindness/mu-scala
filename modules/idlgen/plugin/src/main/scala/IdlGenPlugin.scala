@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package mu.rpc.idlgen
 
 import java.io.File
 
+import mu.rpc.idlgen.Model._
 import sbt.Keys._
 import sbt._
 import sbt.io.{Path, PathFinder}
@@ -29,10 +30,10 @@ object IdlGenPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val idlGen: TaskKey[Seq[File]] =
-      taskKey[Seq[File]]("Generates IDL files from freestyle-rpc service definitions")
+      taskKey[Seq[File]]("Generates IDL files from mu service definitions")
 
     lazy val srcGen: TaskKey[Seq[File]] =
-      taskKey[Seq[File]]("Generates freestyle-rpc Scala files from IDL definitions")
+      taskKey[Seq[File]]("Generates mu Scala files from IDL definitions")
 
     @deprecated("This setting has been deprecated in favor of srcGen", "0.13.3")
     val srcGenFromJars =
@@ -52,13 +53,12 @@ object IdlGenPlugin extends AutoPlugin {
           "By default, the serialization type is 'Avro'.")
 
     lazy val idlGenSourceDir: SettingKey[File] =
-      settingKey[File](
-        "The Scala source directory, where your freestyle-rpc service definitions are placed.")
+      settingKey[File]("The Scala source directory, where your mu service definitions are placed.")
 
     lazy val idlGenTargetDir: SettingKey[File] =
       settingKey[File](
         "The IDL target directory, where the `idlGen` task will write the generated files " +
-          "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on freestyle-rpc service definitions.")
+          "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on mu service definitions.")
 
     @deprecated("This setting has been deprecated in favor of srcGenSourceDirs", "0.13.3")
     lazy val srcGenSourceDir: SettingKey[File] =
@@ -90,9 +90,19 @@ object IdlGenPlugin extends AutoPlugin {
     lazy val genOptions: SettingKey[Seq[String]] =
       settingKey[Seq[String]](
         "Options for the generator, such as additional @service annotation parameters in srcGen.")
+
+    lazy val idlGenBigDecimal: SettingKey[BigDecimalTypeGen] =
+      settingKey[BigDecimalTypeGen](
+        "The Scala generated type for `decimals`. Possible values are `ScalaBigDecimalGen` and `ScalaBigDecimalTaggedGen`" +
+          "The difference is that `ScalaBigDecimalTaggedGen` will append the 'precision' and the 'scale' as tagged types, i.e. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`")
+
+    lazy val idlGenMarshallerImports: SettingKey[List[MarshallersImport]] =
+      settingKey[List[MarshallersImport]](
+        "List of imports needed for creating the request/response marshallers. " +
+          "By default, this include the instances for serializing `BigDecimal`, `java.time.LocalDate`, and `java.time.LocalDateTime`")
   }
 
-  import freestyle.rpc.idlgen.IdlGenPlugin.autoImport._
+  import mu.rpc.idlgen.IdlGenPlugin.autoImport._
 
   lazy val defaultSettings: Seq[Def.Setting[_]] = Seq(
     idlType := "(missing arg)",
@@ -108,7 +118,18 @@ object IdlGenPlugin extends AutoPlugin {
     srcGenSourceDirs := Seq(srcGenSourceDir.value),
     srcGenIDLTargetDir := (Compile / resourceManaged).value / idlType.value,
     srcGenTargetDir := (Compile / sourceManaged).value,
-    genOptions := Seq.empty
+    genOptions := Seq.empty,
+    idlGenBigDecimal := ScalaBigDecimalGen,
+    idlGenMarshallerImports := {
+      if (srcGenSerializationType.value == "Avro" || srcGenSerializationType.value == "AvroWithSchema")
+        (idlGenBigDecimal.value match {
+          case ScalaBigDecimalGen       => BigDecimalAvroMarshallers
+          case ScalaBigDecimalTaggedGen => BigDecimalTaggedAvroMarshallers
+        }) :: Nil
+      else if (srcGenSerializationType.value == "Protobuf")
+        List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)
+      else Nil
+    }
   )
 
   lazy val taskSettings: Seq[Def.Setting[_]] = {
@@ -145,12 +166,13 @@ object IdlGenPlugin extends AutoPlugin {
           },
           Def.task {
             idlGenTask(
-              SrcGenApplication,
+              SrcGenApplication(idlGenMarshallerImports.value, idlGenBigDecimal.value),
               idlType.value,
               srcGenSerializationType.value,
               genOptions.value,
               srcGenTargetDir.value,
-              target.value / "srcGen")(srcGenIDLTargetDir.value.allPaths.get.toSet).toSeq
+              target.value / "srcGen"
+            )(srcGenIDLTargetDir.value.allPaths.get.toSet).toSeq
           }
         )
         .value,

@@ -1,53 +1,44 @@
 language: scala
-
 jdk:
 - oraclejdk8
-
 scala:
 - 2.11.12
-- 2.12.6
-
-
+- 2.12.7
 before_cache:
 - du -h -d 1 $HOME/.ivy2/
 - du -h -d 2 $HOME/.sbt/
 - du -h -d 4 $HOME/.coursier/
 - find $HOME/.sbt -name "*.lock" -type f -delete
 - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
-
 cache:
   directories:
-  - $HOME/.sbt/cache
-  - $HOME/.sbt/1.0
-  - $HOME/.sbt/boot/
-  - $HOME/.sbt/boot/scala*
-  - $HOME/.sbt/launchers
-  - $HOME/.ivy2/cache
-  - $HOME/.ivy2
-
+  - "$HOME/.sbt/cache"
+  - "$HOME/.sbt/1.0"
+  - "$HOME/.sbt/boot/"
+  - "$HOME/.sbt/boot/scala*"
+  - "$HOME/.sbt/launchers"
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.ivy2"
 before_install:
-- if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
-    openssl aes-256-cbc -K $encrypted_80bb47bfd841_key -iv $encrypted_80bb47bfd841_iv -in secring.gpg.enc -out secring.gpg -d;
+- if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then openssl aes-256-cbc -K $encrypted_95edac5cb8ef_key -iv $encrypted_95edac5cb8ef_iv
+  -in secring.gpg.enc -out secring.gpg -d;
   fi
-
 script:
 - sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
-
 stages:
 - test
 - plugin
 - deploy
-
 jobs:
   include:
     - stage: plugin
-      scala: 2.12.6
+      scala: 2.12.7
       script:
         - sbt ++$TRAVIS_SCALA_VERSION idlgen-core/test
         - sbt ++$TRAVIS_SCALA_VERSION idlgen-sbt/test
         - sbt ++$TRAVIS_SCALA_VERSION publishLocal idlgen-sbt/publishLocal idlgen-sbt/scripted
     - stage: deploy
-      scala: 2.12.6
+      scala: 2.12.7
       script:
         - bash <(curl -s https://codecov.io/bash) -t 5b75b318-ab71-4fbc-9203-bfa7765cdbdc
         - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then

@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package foo.bar
+package mu.rpc.benchmarks
+package shared
 
-import freestyle.rpc.protocol._
+import cats.effect.{ContextShift, IO, Timer}
 
-@message case class HelloRequest(arg1: String, arg2: Option[String], arg3: List[String])
+import scala.concurrent.ExecutionContext
 
-@message case class HelloResponse(arg1: String, arg2: Option[String], arg3: List[String])
+trait Runtime {
 
-@service(Avro, Gzip) trait MyGreeterService[F[_]] {
+  implicit val EC: ExecutionContext = ExecutionContext.Implicits.global
 
-  def sayHelloAvro(arg: foo.bar.HelloRequest): F[foo.bar.HelloResponse]
+  implicit val timer: Timer[IO]     = IO.timer(EC)
+  implicit val cs: ContextShift[IO] = IO.contextShift(EC)
 
-  def sayNothingAvro(arg: Empty.type): F[Empty.type]
+  implicit val persistenceService: PersistenceService[IO] = PersistenceService[IO]
 
 }

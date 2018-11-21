@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.http
+package mu.rpc.http
 
 import cats.{Applicative, MonadError}
 import cats.effect._
@@ -23,7 +23,7 @@ class UnaryGreeterHandler[F[_]: Applicative](implicit F: MonadError[F, Throwable
     extends UnaryGreeter[F] {
 
   import cats.syntax.applicative._
-  import freestyle.rpc.protocol.Empty
+  import mu.rpc.protocol.Empty
   import io.grpc.Status._
 
   def getHello(request: Empty.type): F[HelloResponse] = HelloResponse("hey").pure
@@ -60,7 +60,6 @@ class Fs2GreeterHandler[F[_]: Sync] extends Fs2Greeter[F] {
 class MonixGreeterHandler[F[_]: Async](implicit sc: monix.execution.Scheduler)
     extends MonixGreeter[F] {
 
-  import freestyle.rpc.server.implicits._
   import monix.reactive.Observable
 
   def sayHellos(requests: Observable[HelloRequest]): F[HelloResponse] =

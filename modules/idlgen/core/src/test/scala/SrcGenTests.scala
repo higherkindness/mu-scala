@@ -14,48 +14,41 @@
  * limitations under the License.
  */
 
-package freestyle.rpc.idlgen
+package mu.rpc.idlgen
 
-import freestyle.rpc.common.RpcBaseTestSuite
-import freestyle.rpc.idlgen.avro._
+import mu.rpc.common.RpcBaseTestSuite
+import mu.rpc.idlgen.AvroScalaGeneratorArbitrary._
+import mu.rpc.idlgen.avro._
+import org.scalatest.prop.Checkers
+import org.scalacheck.Prop.forAll
 
-class SrcGenTests extends RpcBaseTestSuite {
+class SrcGenTests extends RpcBaseTestSuite with Checkers {
 
   "Avro Scala Generator" should {
-    "generate correct Scala classes from .avpr" in
-      test(
-        "/avro/GreeterService.avpr",
-        "/avro/MyGreeterService.scala",
-        "foo/bar/MyGreeterService.scala")
 
-    "generate correct Scala classes from .avdl" in
-      test(
-        "/avro/GreeterService.avdl",
-        "/avro/MyGreeterService.scala",
-        "foo/bar/MyGreeterService.scala")
-
-    "generate correct Scala classes from .avdl for AvroWithSchema serialization type" in
-      test(
-        "/avro/GreeterService.avdl",
-        "/avro/MyGreeterWithSchemaService.scala",
-        "foo/bar/MyGreeterService.scala",
-        "AvroWithSchema")
+    "generate correct Scala classes" in {
+      check {
+        forAll { scenario: Scenario =>
+          test(scenario)
+        }
+      }
+    }
   }
 
-  private def test(
-      inputResourcePath: String,
-      outputResourcePath: String,
-      outputFilePath: String,
-      serializationType: String = "Avro"): Unit = {
-    val expectedOutput = resource(outputResourcePath).getLines.toList
-      .dropWhile(line => line.startsWith("/*") || line.startsWith(" *"))
-      .tail
+  private def test(scenario: Scenario): Boolean = {
     val output =
-      AvroSrcGenerator.generateFrom(resource(inputResourcePath).mkString, serializationType, "Gzip")
+      AvroSrcGenerator(scenario.marshallersImports)
+        .generateFrom(
+          resource(scenario.inputResourcePath).mkString,
+          scenario.serializationType,
+          scenario.options: _*)
     output should not be empty
-    val (filePath, contents) = output.get
-    filePath shouldBe outputFilePath
-    contents.toList shouldBe expectedOutput
+    output forall {
+      case (filePath, contents) =>
+        filePath shouldBe scenario.expectedOutputFilePath
+        contents.toList.filter(_.length > 0) shouldBe scenario.expectedOutput
+        true
+    }
   }
 
 }

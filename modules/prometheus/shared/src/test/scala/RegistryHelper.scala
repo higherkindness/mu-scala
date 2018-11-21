@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package freestyle.rpc
+package mu.rpc
 package prometheus
 package shared
 
-import freestyle.rpc.interceptors.MetricType
+import mu.rpc.interceptors.MetricType
 import io.prometheus.client._
 
 import scala.collection.JavaConverters._
