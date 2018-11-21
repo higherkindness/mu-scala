@@ -25,7 +25,7 @@ script:
   - curl -s https://codecov.io/bash > .codecov
   - sed -i -e 's/TRAVIS_.*_VERSION/^TRAVIS_.*_VERSION=/' .codecov
   - chmod +x .codecov
-  - if [ $TRAVIS_SCALA_VERSION = "2.12.7" ]; then sbt ++$TRAVIS_SCALA_VERSION clean coverage test docs/tut; fi
+  - if [ $TRAVIS_SCALA_VERSION = "2.12.7" ]; then sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut; fi
   - if [ $TRAVIS_SCALA_VERSION = "2.12.7" ]; then ./.codecov -X gcov; fi
   - if [ $TRAVIS_SCALA_VERSION = "2.11.12" ]; then sbt ++$TRAVIS_SCALA_VERSION clean test; fi
 stages:
