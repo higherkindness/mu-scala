@@ -320,16 +320,6 @@ object ProjectPlugin extends AutoPlugin {
         ),
         ScalafmtFileType,
         TravisFileType(crossScalaVersions.value, orgScriptCICommandKey, orgAfterCISuccessCommandKey)
-      ),
-      orgScriptTaskListSetting := List(
-        (clean in Global).asRunnableItemFull,
-        SetSetting(coverageEnabled in Global, true).asRunnableItem,
-        (compile in Compile).asRunnableItemFull,
-        (test in Test).asRunnableItemFull,
-        (ScoverageKeys.coverageReport in Test).asRunnableItemFull,
-        (ScoverageKeys.coverageAggregate in Test).asRunnableItemFull,
-        SetSetting(coverageEnabled in Global, false).asRunnableItem,
-        "docs/tut".asRunnableItem,
       )
     )
   // format: ON

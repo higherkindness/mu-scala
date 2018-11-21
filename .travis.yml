@@ -1,15 +1,15 @@
 language: scala
 jdk:
-- oraclejdk8
+  - oraclejdk8
 scala:
-- 2.11.12
-- 2.12.7
+  - 2.11.12
+  - 2.12.7
 before_cache:
-- du -h -d 1 $HOME/.ivy2/
-- du -h -d 2 $HOME/.sbt/
-- du -h -d 4 $HOME/.coursier/
-- find $HOME/.sbt -name "*.lock" -type f -delete
-- find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
+  - du -h -d 1 $HOME/.ivy2/
+  - du -h -d 2 $HOME/.sbt/
+  - du -h -d 4 $HOME/.coursier/
+  - find $HOME/.sbt -name "*.lock" -type f -delete
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
 cache:
   directories:
   - "$HOME/.sbt/cache"
@@ -20,11 +20,14 @@ cache:
   - "$HOME/.ivy2/cache"
   - "$HOME/.ivy2"
 before_install:
-- if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then openssl aes-256-cbc -K $encrypted_95edac5cb8ef_key -iv $encrypted_95edac5cb8ef_iv
-  -in secring.gpg.enc -out secring.gpg -d;
-  fi
+  - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then openssl aes-256-cbc -K $encrypted_95edac5cb8ef_key -iv $encrypted_95edac5cb8ef_iv -in secring.gpg.enc -out secring.gpg -d; fi
 script:
-- sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
+  - curl -s https://codecov.io/bash > .codecov
+  - sed -i -e 's/TRAVIS_.*_VERSION/^TRAVIS_.*_VERSION=/' .codecov
+  - chmod +x .codecov
+  - if [ $TRAVIS_SCALA_VERSION = "2.12.7" ]; then sbt ++$TRAVIS_SCALA_VERSION clean coverage test docs/tut; fi
+  - if [ $TRAVIS_SCALA_VERSION = "2.12.7" ]; then ./.codecov -X gcov; fi
+  - if [ $TRAVIS_SCALA_VERSION = "2.11.12" ]; then sbt ++$TRAVIS_SCALA_VERSION clean test; fi
 stages:
 - test
 - plugin
