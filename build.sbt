@@ -177,6 +177,7 @@ lazy val `benchmarks-vprev` = project
   .dependsOn(client)
   .dependsOn(server)
   .dependsOn(testing)
+  .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vprev")
   .settings(crossSettings)
   .settings(noPublishSettings)
@@ -187,6 +188,7 @@ lazy val `benchmarks-vnext` = project
   .dependsOn(client)
   .dependsOn(server)
   .dependsOn(testing)
+  .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vnext")
   .settings(crossSettings)
   .settings(noPublishSettings)
@@ -203,12 +205,14 @@ lazy val `benchmarks-vnext` = project
 lazy val `example-routeguide-protocol` = project
   .in(file("modules/examples/routeguide/protocol"))
   .dependsOn(client)
+  .settings(coverageEnabled := false)
   .settings(noPublishSettings)
   .settings(moduleName := "mu-rpc-example-routeguide-protocol")
 
 lazy val `example-routeguide-runtime` = project
   .in(file("modules/examples/routeguide/runtime"))
   .settings(noPublishSettings)
+  .settings(coverageEnabled := false)
   .settings(moduleName := "mu-rpc-example-routeguide-runtime")
   .settings(exampleRouteguideRuntimeSettings)
 
@@ -216,6 +220,7 @@ lazy val `example-routeguide-common` = project
   .in(file("modules/examples/routeguide/common"))
   .dependsOn(`example-routeguide-protocol`)
   .dependsOn(config)
+  .settings(coverageEnabled := false)
   .settings(noPublishSettings)
   .settings(moduleName := "mu-rpc-example-routeguide-common")
   .settings(exampleRouteguideCommonSettings)
@@ -225,6 +230,7 @@ lazy val `example-routeguide-server` = project
   .dependsOn(`example-routeguide-common`)
   .dependsOn(`example-routeguide-runtime`)
   .dependsOn(server)
+  .settings(coverageEnabled := false)
   .settings(noPublishSettings)
   .settings(moduleName := "mu-rpc-example-routeguide-server")
 
@@ -233,6 +239,7 @@ lazy val `example-routeguide-client` = project
   .dependsOn(`example-routeguide-common`)
   .dependsOn(`example-routeguide-runtime`)
   .dependsOn(`client-netty`)
+  .settings(coverageEnabled := false)
   .settings(noPublishSettings)
   .settings(moduleName := "mu-rpc-example-routeguide-client")
   .settings(
@@ -252,11 +259,13 @@ lazy val `example-routeguide-client` = project
 lazy val `example-todolist-protocol` = project
   .in(file("modules/examples/todolist/protocol"))
   .dependsOn(client)
+  .settings(coverageEnabled := false)
   .settings(noPublishSettings)
   .settings(moduleName := "mu-rpc-example-todolist-protocol")
 
 lazy val `example-todolist-runtime` = project
   .in(file("modules/examples/todolist/runtime"))
+  .settings(coverageEnabled := false)
   .settings(noPublishSettings)
   .settings(moduleName := "mu-rpc-example-todolist-runtime")
 
@@ -266,6 +275,7 @@ lazy val `example-todolist-server` = project
   .dependsOn(`example-todolist-runtime`)
   .dependsOn(server)
   .dependsOn(config)
+  .settings(coverageEnabled := false)
   .settings(noPublishSettings)
   .settings(moduleName := "mu-rpc-example-todolist-server")
   .settings(exampleTodolistCommonSettings)
@@ -276,6 +286,7 @@ lazy val `example-todolist-client` = project
   .dependsOn(`example-todolist-runtime`)
   .dependsOn(`client-netty`)
   .dependsOn(config)
+  .settings(coverageEnabled := false)
   .settings(noPublishSettings)
   .settings(moduleName := "mu-rpc-example-todolist-client")
   .settings(exampleTodolistCommonSettings)
