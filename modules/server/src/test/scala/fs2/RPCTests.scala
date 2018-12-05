@@ -60,52 +60,55 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run unary services" in {
 
-      muAvroRPCServiceClient.unary(a1).unsafeRunSync() shouldBe c1
+      muAvroRPCServiceClient.use(_.unary(a1)).unsafeRunSync() shouldBe c1
 
     }
 
     "be able to run unary services with avro schemas" in {
 
-      muAvroWithSchemaRPCServiceClient.unaryWithSchema(a1).unsafeRunSync() shouldBe c1
+      muAvroWithSchemaRPCServiceClient.use(_.unaryWithSchema(a1)).unsafeRunSync() shouldBe c1
 
     }
 
     "be able to run server streaming services" in {
 
-      muProtoRPCServiceClient.serverStreaming(b1).compile.toList.unsafeRunSync() shouldBe cList
+      muProtoRPCServiceClient
+        .use(_.serverStreaming(b1).compile.toList)
+        .unsafeRunSync() shouldBe cList
 
     }
 
     "handle errors in server streaming services" in {
 
-      def clientProgram(errorCode: String): Stream[ConcurrentMonad, C] =
+      def clientProgram(errorCode: String): ConcurrentMonad[List[C]] =
         muProtoRPCServiceClient
-          .serverStreamingWithError(E(a1, errorCode))
-          .handleErrorWith(ex => Stream(C(ex.getMessage, a1)))
+          .use(
+            _.serverStreamingWithError(E(a1, errorCode))
+              .handleErrorWith(ex => Stream(C(ex.getMessage, a1)))
+              .compile
+              .toList)
 
-      clientProgram("SE").compile.toList
+      clientProgram("SE")
         .unsafeRunSync() shouldBe List(C("INVALID_ARGUMENT: SE", a1))
-      clientProgram("SRE").compile.toList
+      clientProgram("SRE")
         .unsafeRunSync() shouldBe List(C("INVALID_ARGUMENT: SRE", a1))
-      clientProgram("RTE").compile.toList
+      clientProgram("RTE")
         .unsafeRunSync() shouldBe List(C("INTERNAL: RTE", a1))
-      clientProgram("Thrown").compile.toList
+      clientProgram("Thrown")
         .unsafeRunSync() shouldBe List(C("INTERNAL: Thrown", a1))
     }
 
     "be able to run client streaming services" in {
 
       muProtoRPCServiceClient
-        .clientStreaming(Stream.fromIterator[ConcurrentMonad, A](aList.iterator))
+        .use(_.clientStreaming(Stream.fromIterator[ConcurrentMonad, A](aList.iterator)))
         .unsafeRunSync() shouldBe dResult33
     }
 
     "be able to run client bidirectional streaming services" in {
 
       muAvroRPCServiceClient
-        .biStreaming(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
-        .compile
-        .toList
+        .use(_.biStreaming(Stream.fromIterator[ConcurrentMonad, E](eList.iterator)).compile.toList)
         .unsafeRunSync()
         .distinct shouldBe eList
 
@@ -114,9 +117,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run client bidirectional streaming services with avro schema" in {
 
       muAvroWithSchemaRPCServiceClient
-        .biStreamingWithSchema(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
-        .compile
-        .toList
+        .use(
+          _.biStreamingWithSchema(Stream.fromIterator[ConcurrentMonad, E](eList.iterator)).compile.toList)
         .unsafeRunSync()
         .distinct shouldBe eList
 
@@ -126,22 +128,22 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       val tuple =
         (
-          muAvroRPCServiceClient.unary(a1),
-          muAvroWithSchemaRPCServiceClient.unaryWithSchema(a1),
-          muProtoRPCServiceClient.serverStreaming(b1),
-          muProtoRPCServiceClient.clientStreaming(
-            Stream.fromIterator[ConcurrentMonad, A](aList.iterator)),
-          muAvroRPCServiceClient.biStreaming(
-            Stream.fromIterator[ConcurrentMonad, E](eList.iterator)),
-          muAvroWithSchemaRPCServiceClient.biStreamingWithSchema(
-            Stream.fromIterator[ConcurrentMonad, E](eList.iterator)))
+          muAvroRPCServiceClient.use(_.unary(a1)),
+          muAvroWithSchemaRPCServiceClient.use(_.unaryWithSchema(a1)),
+          muProtoRPCServiceClient.use(_.serverStreaming(b1).compile.toList),
+          muProtoRPCServiceClient.use(
+            _.clientStreaming(Stream.fromIterator[ConcurrentMonad, A](aList.iterator))),
+          muAvroRPCServiceClient.use(
+            _.biStreaming(Stream.fromIterator[ConcurrentMonad, E](eList.iterator)).compile.toList),
+          muAvroWithSchemaRPCServiceClient.use(_.biStreamingWithSchema(
+            Stream.fromIterator[ConcurrentMonad, E](eList.iterator)).compile.toList))
 
       tuple._1.unsafeRunSync() shouldBe c1
       tuple._2.unsafeRunSync() shouldBe c1
-      tuple._3.compile.toList.unsafeRunSync() shouldBe cList
+      tuple._3.unsafeRunSync() shouldBe cList
       tuple._4.unsafeRunSync() shouldBe dResult33
-      tuple._5.compile.toList.unsafeRunSync().distinct shouldBe eList
-      tuple._6.compile.toList.unsafeRunSync().distinct shouldBe eList
+      tuple._5.unsafeRunSync().distinct shouldBe eList
+      tuple._6.unsafeRunSync().distinct shouldBe eList
 
     }
 
@@ -151,14 +153,14 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to run unary services" in {
 
-      muCompressedAvroRPCServiceClient.unaryCompressed(a1).unsafeRunSync() shouldBe c1
+      muCompressedAvroRPCServiceClient.use(_.unaryCompressed(a1)).unsafeRunSync() shouldBe c1
 
     }
 
     "be able to run unary services with avro schema" in {
 
       muCompressedAvroWithSchemaRPCServiceClient
-        .unaryCompressedWithSchema(a1)
+        .use(_.unaryCompressedWithSchema(a1))
         .unsafeRunSync() shouldBe c1
 
     }
@@ -166,9 +168,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run server streaming services" in {
 
       muCompressedProtoRPCServiceClient
-        .serverStreamingCompressed(b1)
-        .compile
-        .toList
+        .use(_.serverStreamingCompressed(b1).compile.toList)
         .unsafeRunSync shouldBe cList
 
     }
@@ -176,16 +176,15 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run client streaming services" in {
 
       muCompressedProtoRPCServiceClient
-        .clientStreamingCompressed(Stream.fromIterator[ConcurrentMonad, A](aList.iterator))
+        .use(_.clientStreamingCompressed(Stream.fromIterator[ConcurrentMonad, A](aList.iterator)))
         .unsafeRunSync() shouldBe dResult33
     }
 
     "be able to run client bidirectional streaming services" in {
 
       muCompressedAvroRPCServiceClient
-        .biStreamingCompressed(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
-        .compile
-        .toList
+        .use(
+          _.biStreamingCompressed(Stream.fromIterator[ConcurrentMonad, E](eList.iterator)).compile.toList)
         .unsafeRunSync()
         .distinct shouldBe eList
 
@@ -194,9 +193,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run client bidirectional streaming services with avro schema" in {
 
       muCompressedAvroWithSchemaRPCServiceClient
-        .biStreamingCompressedWithSchema(Stream.fromIterator[ConcurrentMonad, E](eList.iterator))
-        .compile
-        .toList
+        .use(_.biStreamingCompressedWithSchema(
+          Stream.fromIterator[ConcurrentMonad, E](eList.iterator)).compile.toList)
         .unsafeRunSync()
         .distinct shouldBe eList
 
@@ -206,22 +204,24 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       val tuple =
         (
-          muCompressedAvroRPCServiceClient.unaryCompressed(a1),
-          muCompressedAvroWithSchemaRPCServiceClient.unaryCompressedWithSchema(a1),
-          muCompressedProtoRPCServiceClient.serverStreamingCompressed(b1),
-          muCompressedProtoRPCServiceClient.clientStreamingCompressed(
-            Stream.fromIterator[ConcurrentMonad, A](aList.iterator)),
-          muCompressedAvroRPCServiceClient.biStreamingCompressed(
-            Stream.fromIterator[ConcurrentMonad, E](eList.iterator)),
-          muCompressedAvroWithSchemaRPCServiceClient.biStreamingCompressedWithSchema(
-            Stream.fromIterator[ConcurrentMonad, E](eList.iterator)))
+          muCompressedAvroRPCServiceClient.use(_.unaryCompressed(a1)),
+          muCompressedAvroWithSchemaRPCServiceClient.use(_.unaryCompressedWithSchema(a1)),
+          muCompressedProtoRPCServiceClient.use(_.serverStreamingCompressed(b1).compile.toList),
+          muCompressedProtoRPCServiceClient.use(
+            _.clientStreamingCompressed(Stream.fromIterator[ConcurrentMonad, A](aList.iterator))),
+          muCompressedAvroRPCServiceClient.use(_.biStreamingCompressed(
+            Stream.fromIterator[ConcurrentMonad, E](eList.iterator)).compile.toList),
+          muCompressedAvroWithSchemaRPCServiceClient
+            .use(
+              _.biStreamingCompressedWithSchema(
+                Stream.fromIterator[ConcurrentMonad, E](eList.iterator)).compile.toList))
 
       tuple._1.unsafeRunSync() shouldBe c1
       tuple._2.unsafeRunSync() shouldBe c1
-      tuple._3.compile.toList.unsafeRunSync() shouldBe cList
+      tuple._3.unsafeRunSync() shouldBe cList
       tuple._4.unsafeRunSync() shouldBe dResult33
-      tuple._5.compile.toList.unsafeRunSync().distinct shouldBe eList
-      tuple._6.compile.toList.unsafeRunSync().distinct shouldBe eList
+      tuple._5.unsafeRunSync().distinct shouldBe eList
+      tuple._6.unsafeRunSync().distinct shouldBe eList
 
     }
 

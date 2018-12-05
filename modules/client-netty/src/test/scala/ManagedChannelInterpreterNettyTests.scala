@@ -85,7 +85,7 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
         NettyUseTransportSecurity.asRight[ManagedChannelConfig],
         NettyKeepAliveTime(1, TimeUnit.MINUTES).asRight[ManagedChannelConfig],
         NettyKeepAliveTimeout(1, TimeUnit.MINUTES).asRight[ManagedChannelConfig],
-        NettyKeepAliveWithoutCalls(false).asRight[ManagedChannelConfig],
+        NettyKeepAliveWithoutCalls(false).asRight[ManagedChannelConfig]
       )
 
       val interpreter = new NettyChannelInterpreter(channelFor, channelConfigList)

@@ -18,12 +18,14 @@ package mu.rpc
 package protocol
 
 import cats.Applicative
+import cats.effect.IO
 import cats.syntax.applicative._
 import org.scalatest._
 import mu.rpc.common._
 import mu.rpc.internal.encoders.avro.bigDecimalTagged._
 import mu.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._
 import mu.rpc.internal.encoders.pbd.bigDecimal._
+import mu.rpc.protocol.Utils.withClient
 import mu.rpc.testing.servers.withServerChannel
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Prop._
@@ -141,15 +143,14 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
     "be able to serialize and deserialize BigDecimal using proto format" in {
 
       withServerChannel(ProtoRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: ConcurrentMonad[ProtoRPCServiceDef.Client[ConcurrentMonad]] =
-          ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](IO.pure(sc.channel))
-
-        check {
-          forAll { bd: BigDecimal =>
-            client.bigDecimalProto(bd).unsafeRunSync() == bd
-          }
+        withClient(ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))) {
+          client =>
+            check {
+              forAll { bd: BigDecimal =>
+                client.bigDecimalProto(bd).unsafeRunSync() == bd
+              }
+            }
         }
-
       }
 
     }
@@ -157,18 +158,17 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
     "be able to serialize and deserialize BigDecimal in a Request using proto format" in {
 
       withServerChannel(ProtoRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: ProtoRPCServiceDef.Client[ConcurrentMonad] =
-          ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
-
-        check {
-          forAll { (bd: BigDecimal, s: String) =>
-            client.bigDecimalProtoWrapper(Request(bd, s)).unsafeRunSync() == Response(
-              bd,
-              s,
-              check = true)
-          }
+        withClient(ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))) {
+          client =>
+            check {
+              forAll { (bd: BigDecimal, s: String) =>
+                client.bigDecimalProtoWrapper(Request(bd, s)).unsafeRunSync() == Response(
+                  bd,
+                  s,
+                  check = true)
+              }
+            }
         }
-
       }
 
     }
@@ -176,15 +176,13 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
     "be able to serialize and deserialize BigDecimal using avro format" in {
 
       withServerChannel(AvroRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: AvroRPCServiceDef.Client[ConcurrentMonad] =
-          AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
-
-        check {
-          forAll(bigDecimalGen(2)) { bd =>
-            client.bigDecimalAvro(tag[(Nat._8, Nat._2)][BigDecimal](bd)).unsafeRunSync() == bd
+        withClient(AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))) { client =>
+          check {
+            forAll(bigDecimalGen(2)) { bd =>
+              client.bigDecimalAvro(tag[(Nat._8, Nat._2)][BigDecimal](bd)).unsafeRunSync() == bd
+            }
           }
         }
-
       }
 
     }
@@ -192,57 +190,56 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
     "be able to serialize and deserialize BigDecimal in a Request using avro format" in {
 
       withServerChannel(AvroRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: AvroRPCServiceDef.Client[ConcurrentMonad] =
-          AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
-
-        check {
-          forAll { request: RequestPS =>
-            client.bigDecimalAvroWrapper(request).unsafeRunSync() == ResponsePS(
-              request.bd1,
-              request.bd2,
-              request.bd3,
-              request.label,
-              check = true)
+        withClient(AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))) { client =>
+          check {
+            forAll { request: RequestPS =>
+              client.bigDecimalAvroWrapper(request).unsafeRunSync() == ResponsePS(
+                request.bd1,
+                request.bd2,
+                request.bd3,
+                request.label,
+                check = true)
+            }
           }
         }
 
       }
-
     }
 
     "be able to serialize and deserialize BigDecimal using avro with schema format" in {
 
       withServerChannel(AvroWithSchemaRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: AvroWithSchemaRPCServiceDef.Client[ConcurrentMonad] =
-          AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
-
-        check {
-          forAll(bigDecimalGen(2)) { bd =>
-            client
-              .bigDecimalAvroWithSchema(tag[(Nat._8, Nat._2)][BigDecimal](bd))
-              .unsafeRunSync() == bd
-          }
+        withClient(AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))) {
+          client =>
+            check {
+              forAll(bigDecimalGen(2)) { bd =>
+                client
+                  .bigDecimalAvroWithSchema(tag[(Nat._8, Nat._2)][BigDecimal](bd))
+                  .unsafeRunSync() == bd
+              }
+            }
         }
 
       }
-
     }
 
     "be able to serialize and deserialize BigDecimal in a Request using avro with schema format" in {
 
       withServerChannel(AvroWithSchemaRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: AvroWithSchemaRPCServiceDef.Client[ConcurrentMonad] =
-          AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))
-
-        check {
-          forAll { request: RequestPS =>
-            client.bigDecimalAvroWithSchemaWrapper(request).unsafeRunSync() == ResponsePS(
-              request.bd1,
-              request.bd2,
-              request.bd3,
-              request.label,
-              check = true)
-          }
+        withClient(AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))) {
+          client =>
+            check {
+              forAll { request: RequestPS =>
+                client
+                  .bigDecimalAvroWithSchemaWrapper(request)
+                  .unsafeRunSync() == ResponsePS(
+                  request.bd1,
+                  request.bd2,
+                  request.bd3,
+                  request.label,
+                  check = true)
+              }
+            }
         }
       }
     }
@@ -258,16 +255,16 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
     "be able to serialize and deserialize BigDecimal using avro format" in {
 
       withServerChannel(AvroRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: AvroRPCServiceDef.Client[ConcurrentMonad] =
-          AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
-
-        check {
-          forAll(bigDecimalGen(12)) { bd =>
-            client.bigDecimalAvro(tag[(Nat._8, Nat._2)][BigDecimal](bd)).unsafeRunSync() == bd
-              .setScale(2, RM)
+        withClient(AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))) { client =>
+          check {
+            forAll(bigDecimalGen(12)) { bd =>
+              client
+                .bigDecimalAvro(tag[(Nat._8, Nat._2)][BigDecimal](bd))
+                .unsafeRunSync() == bd
+                .setScale(2, RM)
+            }
           }
         }
-
       }
 
     }
@@ -275,18 +272,17 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
     "be able to serialize and deserialize BigDecimal in a Request using avro" in {
 
       withServerChannel(AvroRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        val client: AvroRPCServiceDef.Client[ConcurrentMonad] =
-          AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](sc.channel)
-
-        check {
-          forAll(bigDecimalGen(12)) { bd =>
-            val bdTagged = tag[(Nat._8, Nat._2)][BigDecimal](bd)
-            client
-              .bigDecimalAvroWrapper(Request(tag[(Nat._8, Nat._2)][BigDecimal](bd), "label"))
-              .unsafeRunSync() == Response(
-              tag[(Nat._8, Nat._2)][BigDecimal](bd.setScale(2, RM)),
-              "label",
-              check = true)
+        withClient(AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))) { client =>
+          check {
+            forAll(bigDecimalGen(12)) { bd =>
+              val bdTagged = tag[(Nat._8, Nat._2)][BigDecimal](bd)
+              client
+                .bigDecimalAvroWrapper(Request(tag[(Nat._8, Nat._2)][BigDecimal](bd), "label"))
+                .unsafeRunSync() == Response(
+                tag[(Nat._8, Nat._2)][BigDecimal](bd.setScale(2, RM)),
+                "label",
+                check = true)
+            }
           }
         }
       }

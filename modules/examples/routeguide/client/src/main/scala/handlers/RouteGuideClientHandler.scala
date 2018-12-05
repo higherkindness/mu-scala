@@ -17,7 +17,7 @@
 package example.routeguide.client.handlers
 
 import cats._
-import cats.effect.{Async, ConcurrentEffect, Effect}
+import cats.effect.{Async, ConcurrentEffect, Effect, Resource}
 import cats.implicits._
 import example.routeguide.client.RouteGuideClient
 import io.grpc.{Status, StatusRuntimeException}
@@ -30,7 +30,7 @@ import example.routeguide.common.Utils._
 import scala.concurrent.duration._
 
 class RouteGuideClientHandler[F[_]: ConcurrentEffect](
-    implicit client: RouteGuideService.Client[F],
+    implicit client: Resource[F, RouteGuideService.Client[F]],
     E: Effect[Task])
     extends RouteGuideClient[F] {
 
@@ -39,7 +39,7 @@ class RouteGuideClientHandler[F[_]: ConcurrentEffect](
   override def getFeature(lat: Int, lon: Int): F[Unit] =
     Async[F].delay(logger.info(s"*** GetFeature: lat=$lat lon=$lon")) *>
       client
-        .getFeature(Point(lat, lon))
+        .use(_.getFeature(Point(lat, lon)))
         .map { feature: Feature =>
           if (feature.valid)
             logger.info(s"Found feature called '${feature.name}' at ${feature.location.pretty}")
@@ -52,26 +52,27 @@ class RouteGuideClientHandler[F[_]: ConcurrentEffect](
               Throwable].raiseError(e)
         }
 
-  override def listFeatures(lowLat: Int, lowLon: Int, hiLat: Int, hiLon: Int): F[Unit] = {
-    logger.info(s"*** ListFeatures: lowLat=$lowLat lowLon=$lowLon hiLat=$hiLat hiLon=$hiLon")
-    client
-      .listFeatures(
-        Rectangle(
-          lo = Point(lowLat, lowLon),
-          hi = Point(hiLat, hiLon)
-        ))
-      .zipWithIndex
-      .map {
-        case (feature, i) =>
-          logger.info(s"Result #$i: $feature")
-      }
-      .onErrorHandle {
-        case e: StatusRuntimeException =>
-          logger.warn(s"RPC failed: ${e.getStatus} $e")
-          throw e
-      }
-      .completedL
-  }.toAsync[F]
+  override def listFeatures(lowLat: Int, lowLon: Int, hiLat: Int, hiLon: Int): F[Unit] =
+    Async[F].delay(
+      logger.info(s"*** ListFeatures: lowLat=$lowLat lowLon=$lowLon hiLat=$hiLat hiLon=$hiLon")) *>
+      client
+        .use(
+          _.listFeatures(
+            Rectangle(
+              lo = Point(lowLat, lowLon),
+              hi = Point(hiLat, hiLon)
+            )).zipWithIndex
+            .map {
+              case (feature, i) =>
+                logger.info(s"Result #$i: $feature")
+            }
+            .onErrorHandle {
+              case e: StatusRuntimeException =>
+                logger.warn(s"RPC failed: ${e.getStatus} $e")
+                throw e
+            }
+            .completedL
+            .toAsync[F])
 
   override def recordRoute(features: List[Feature], numPoints: Int): F[Unit] = {
     def takeN: List[Feature] = scala.util.Random.shuffle(features).take(numPoints)
@@ -79,10 +80,11 @@ class RouteGuideClientHandler[F[_]: ConcurrentEffect](
     val points = takeN.map(_.location)
     Async[F].delay(logger.info(s"*** RecordRoute. Points: ${points.map(_.pretty).mkString(";")}")) *>
       client
-        .recordRoute(
-          Observable
-            .fromIterable(points)
-            .delayOnNext(500.milliseconds))
+        .use(
+          _.recordRoute(
+            Observable
+              .fromIterable(points)
+              .delayOnNext(500.milliseconds)))
         .map { summary: RouteSummary =>
           logger.info(
             s"Finished trip with ${summary.point_count} points. Passed ${summary.feature_count} features. " +
@@ -94,35 +96,34 @@ class RouteGuideClientHandler[F[_]: ConcurrentEffect](
         }
   }
 
-  override def routeChat: F[Unit] = {
-    logger.info("*** RouteChat")
-    client
-      .routeChat(
-        Observable
-          .fromIterable(List(
-            RouteNote(message = "First message", location = Point(0, 0)),
-            RouteNote(message = "Second message", location = Point(0, 1)),
-            RouteNote(message = "Third message", location = Point(1, 0)),
-            RouteNote(message = "Fourth message", location = Point(1, 1))
-          ))
-          .delayOnNext(10.milliseconds)
-          .map { routeNote =>
-            logger.info(s"Sending message '${routeNote.message}' at " +
-              s"${routeNote.location.latitude}, ${routeNote.location.longitude}")
-            routeNote
-          }
-      )
-      .map { note: RouteNote =>
-        logger.info(
-          s"Got message '${note.message}' at " +
-            s"${note.location.latitude}, ${note.location.longitude}")
-      }
-      .onErrorHandle {
-        case e: Throwable =>
-          logger.warn(s"RouteChat Failed: ${Status.fromThrowable(e)} $e")
-          throw e
-      }
-      .completedL
-  }.toAsync[F]
+  override def routeChat: F[Unit] =
+    Async[F].delay(logger.info("*** RouteChat")) *>
+      client
+        .use(
+          _.routeChat(
+            Observable
+              .fromIterable(List(
+                RouteNote(message = "First message", location = Point(0, 0)),
+                RouteNote(message = "Second message", location = Point(0, 1)),
+                RouteNote(message = "Third message", location = Point(1, 0)),
+                RouteNote(message = "Fourth message", location = Point(1, 1))
+              ))
+              .delayOnNext(10.milliseconds)
+              .map { routeNote =>
+                logger.info(s"Sending message '${routeNote.message}' at " +
+                  s"${routeNote.location.latitude}, ${routeNote.location.longitude}")
+                routeNote
+              }
+          ).map { note: RouteNote =>
+              logger.info(s"Got message '${note.message}' at " +
+                s"${note.location.latitude}, ${note.location.longitude}")
+            }
+            .onErrorHandle {
+              case e: Throwable =>
+                logger.warn(s"RouteChat Failed: ${Status.fromThrowable(e)} $e")
+                throw e
+            }
+            .completedL
+            .toAsync[F])
 
 }

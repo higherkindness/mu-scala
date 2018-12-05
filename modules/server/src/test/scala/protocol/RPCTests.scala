@@ -17,6 +17,7 @@
 package mu.rpc
 package protocol
 
+import cats.effect.{Bracket, Resource}
 import cats.{Monad, MonadError}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
@@ -258,9 +259,10 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "be able to have non request methods" in {
 
-      def clientProgram[F[_]: cats.Functor](
-          implicit client: service.ProtoRPCService.Client[F]): F[Int] =
-        client.sumA
+      def clientProgram[F[_]](
+          implicit client: Resource[F, service.ProtoRPCService.Client[F]],
+          B: Bracket[F, Throwable]): F[Int] =
+        client.use(_.sumA)
 
       clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe 3000
     }

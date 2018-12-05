@@ -20,7 +20,7 @@ package fs2
 import mu.rpc.common._
 import mu.rpc.protocol._
 import _root_.fs2._
-import cats.effect.Effect
+import cats.effect.{Effect, Resource}
 import io.grpc.Status
 
 object Utils extends CommonUtils {
@@ -167,21 +167,29 @@ object Utils extends CommonUtils {
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    implicit val muProtoRPCServiceClient: ConcurrentMonad[ProtoRPCService.Client[ConcurrentMonad]] =
+    implicit val muProtoRPCServiceClient: Resource[
+      ConcurrentMonad,
+      ProtoRPCService.Client[ConcurrentMonad]] =
       ProtoRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val muAvroRPCServiceClient: ConcurrentMonad[AvroRPCService.Client[ConcurrentMonad]] =
+    implicit val muAvroRPCServiceClient: Resource[
+      ConcurrentMonad,
+      AvroRPCService.Client[ConcurrentMonad]] =
       AvroRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val muAvroWithSchemaRPCServiceClient: ConcurrentMonad[AvroWithSchemaRPCService.Client[
-      ConcurrentMonad]] =
+    implicit val muAvroWithSchemaRPCServiceClient: Resource[
+      ConcurrentMonad,
+      AvroWithSchemaRPCService.Client[ConcurrentMonad]] =
       AvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val muCompressedProtoRPCServiceClient: ConcurrentMonad[CompressedProtoRPCService.Client[
-      ConcurrentMonad]] =
+    implicit val muCompressedProtoRPCServiceClient: Resource[
+      ConcurrentMonad,
+      CompressedProtoRPCService.Client[ConcurrentMonad]] =
       CompressedProtoRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val muCompressedAvroRPCServiceClient: ConcurrentMonad[CompressedAvroRPCService.Client[
-      ConcurrentMonad]] =
+    implicit val muCompressedAvroRPCServiceClient: Resource[
+      ConcurrentMonad,
+      CompressedAvroRPCService.Client[ConcurrentMonad]] =
       CompressedAvroRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val muCompressedAvroWithSchemaRPCServiceClient: ConcurrentMonad[CompressedAvroWithSchemaRPCService.Client[
-      ConcurrentMonad]] =
+    implicit val muCompressedAvroWithSchemaRPCServiceClient: Resource[
+      ConcurrentMonad,
+      CompressedAvroWithSchemaRPCService.Client[ConcurrentMonad]] =
       CompressedAvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
 
   }
