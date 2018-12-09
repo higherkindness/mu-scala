@@ -10,7 +10,7 @@ This section is about how data flows through the network, and how are they encod
 
 [mu] brings the ability to encode data in bytes based on... (_to be continued_).
 
-* [Avro](schema-evolution/avro)
-* [Protocol Buffers](schema-evolution/proto)
+* [Avro](avro)
+* [Protocol Buffers](proto)
 
 [mu]: https://github.com/higherkindness/mu
