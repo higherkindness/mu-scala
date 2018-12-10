@@ -11,7 +11,6 @@ import sbtorgpolicies.runnable.syntax._
 import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
 import sbtrelease.ReleasePlugin.autoImport._
-import scoverage.ScoverageKeys
 import scoverage.ScoverageKeys._
 
 import scala.language.reflectiveCalls
@@ -27,7 +26,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String             = "2.0.2"
-      val avrohugger: String         = "1.0.0-RC14"
+      val avrohugger: String         = "1.0.0-RC15"
       val betterMonadicFor: String   = "0.2.4"
       val catsEffect: String         = "1.1.0-M1"
       val circe: String              = "0.10.1"
