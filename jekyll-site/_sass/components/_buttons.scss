@@ -1,0 +1,30 @@
+// Buttons 
+// -----------------------------------------------
+// -----------------------------------------------
+.button {
+    display: inline-block;
+    font-weight: $font-semibold;
+    text-decoration: none;
+    text-transform: uppercase;
+    background: none;
+    color: $white;
+    border: 2px solid $white;
+    transition: background $base-duration $base-timing;
+
+    &:visited {
+        color: $white;
+    }
+    &:hover {
+        color: $gray-primary;
+        background: $white;
+        text-decoration: none;
+    }
+    &:active {
+        background: $white;
+    }
+
+    &.button-large {
+        padding: ($base-point-grid * 1.7) ($base-point-grid * 8);
+        font-size: .875rem;
+    }
+} 

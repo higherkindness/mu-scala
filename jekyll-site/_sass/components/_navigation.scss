@@ -1,0 +1,9 @@
+// Navigation
+// -----------------------------------------------
+// -----------------------------------------------
+#navigation {
+    padding: $base-point-grid 0;
+    position: fixed;
+    width: 100%;
+    background: darken($brand-secondary, 3%);
+}

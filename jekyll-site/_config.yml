@@ -1,0 +1,20 @@
+title: Mu 
+#-------------------------
+name: Mu
+#-------------------------
+description: Mu is purely functional library for building micro services.
+#-------------------------
+author: 47 Degrees
+keywords: functional-programming, kotlin-library, monads, monad-transformers, functional-data-structure, kotlin, fp-types, adt, free-monads, tagless-final, mtl, for-comprehension, category-theory
+#-------------------------
+url: https://www.47deg.com
+#-------------------------
+markdown: kramdown
+sass:
+    sass_dir: _sass
+    style: compressed
+#-------------------------
+permalink: pretty
+#-------------------------
+exclude: ['config.ru', 'Gemfile', 'Gemfile.lock', 'vendor', 'Procfile', 'Rakefile']
+    

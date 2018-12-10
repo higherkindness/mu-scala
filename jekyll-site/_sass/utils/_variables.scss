@@ -1,0 +1,40 @@
+// Variables
+// -----------------------------------------------
+// -----------------------------------------------
+
+// Google Fonts
+@import url('https://fonts.googleapis.com/css?family=Titillium+Web:400,600,700');
+
+// Colors
+$brand-primary: rgb(18, 203, 196);
+$brand-secondary: rgb(18, 137, 167);
+$gray-primary: rgb(20, 113, 131);
+$gray-secondary: rgba($gray-primary, 0.80);
+$white: rgb(255, 255, 255);
+$link-color: darken($brand-primary, 10%);
+$link-hover: darken($brand-primary, 15%);
+
+// Typography
+$base-font-family: 'Titillium Web', sans-serif;
+$header-font-family: $base-font-family;
+$base-font-color: $gray-secondary;
+$header-font-color: $gray-primary;
+$font-regular: 400;
+$font-medium: 300;
+$font-semibold: 600;
+$font-bold: 700;
+$base-font-size: 15px;
+$base-line-height: 1.6;
+// Sizes
+$base-point-grid: 8px;
+// Animations
+$base-duration: 350ms;
+$base-timing: ease;
+
+// Breakpoint
+$bp-small: 480px;
+$bp-medium: 768px;
+$bp-large: 992px;
+$bp-xlarge: 1130px;
+// Border
+$border-color: rgba($gray-primary, 0.1);

@@ -1,0 +1,19 @@
+<footer id="footer">
+   
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 col-md-9 col-sm-8 col-xs-12">
+                <p>Ank is designed and developed by <a href="https://github.com/arrow-kt">{{ site.title }}</a> <br>with support from <a href="https://www.47deg.com/">47 Degrees</a></p>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+                <ul class="footer-navigation-menu">
+                    {% for item in site.data.nav.nav %}
+                    <li>
+                        <a href="{{ item.url }}" alt="{{ item.title }}">{{ item.title }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>

@@ -1,0 +1,59 @@
+// Masthead 
+// -----------------------------------------------
+// -----------------------------------------------
+#masthead {
+    background: $brand-secondary;
+    .masthead-content {
+        padding: ($base-point-grid * 14) 0 ($base-point-grid * 12) 0;
+        @include flexbox;
+        @include align-items (center);
+        .masthead-text {
+            @include flex(1); //background: rgba(#456, 0.4);
+            h1 {
+                margin-bottom: ($base-point-grid * 3);
+                font-size: 1.5rem;
+                font-weight: $font-bold;
+                text-transform: uppercase;
+                color: $brand-primary;
+            }
+
+            h2 {
+                margin-bottom: ($base-point-grid * 5);
+                font-size: 2.533rem;
+            }
+
+        }
+        .masthead-brand {
+            @include flex(1); //background: rgba(#321, 0.2);
+        }
+    }
+}
+
+// Responsive mode
+@include bp(medium) {
+    #masthead {
+        margin-bottom: ($base-point-grid * 6);
+        .masthead-content {
+            @include flex-wrap(wrap);
+            padding-top: ($base-point-grid * 8);
+            .masthead-text,
+            .masthead-brand {
+                @include flex(0 0 100%);
+            }
+
+            .masthead-text {
+                @include order(2);
+                text-align: center;
+            }
+            .masthead-brand {
+                @include order(1);
+                text-align: center;
+                svg {
+                    width: 300px;
+                    height: auto;
+                }
+
+            }
+        }
+    }
+}

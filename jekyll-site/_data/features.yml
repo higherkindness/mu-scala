@@ -1,0 +1,12 @@
+content:
+    - title: HTTP
+      description: Lorem ip amet, consectetur adipiscing elit. Nullam blandit odio nec button amet, consectetur adip.
+      icon: /img/feature-icon-primary.svg
+
+    - title: RPC
+      description: Lorem ip amet, consectetur adipiscing elit. Nullam blandit odio nec button amet, consectetur adip.
+      icon: /img/feature-icon-secondary.svg
+
+    - title: Metrics
+      description: Lorem ip amet, consectetur adipiscing elit. Nullam blandit odio nec button amet, consectetur adip.
+      icon: /img/feature-icon-tertiary.svg
