@@ -8,14 +8,14 @@
     text-transform: uppercase;
     background: none;
     color: $white;
-    border: 2px solid $white;
+    border: 2px solid rgba($white, 0.7);
     transition: background $base-duration $base-timing;
 
     &:visited {
         color: $white;
     }
     &:hover {
-        color: $gray-primary;
+        color: $brand-secondary;
         background: $white;
         text-decoration: none;
     }
@@ -24,7 +24,7 @@
     }
 
     &.button-large {
-        padding: ($base-point-grid * 1.7) ($base-point-grid * 8);
+        padding: ($base-point-grid * 1.6) ($base-point-grid * 6);
         font-size: .875rem;
     }
 } 

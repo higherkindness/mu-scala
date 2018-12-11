@@ -23,7 +23,7 @@ html {
 // -----------------------------------------------
 body {
     color: $white;
-    background: $white;
+    background: darken($brand-secondary, 3%);
     font-family: $base-font-family;
     line-height: $base-line-height;
 }

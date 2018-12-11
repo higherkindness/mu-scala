@@ -8,11 +8,11 @@
 // Colors
 $brand-primary: rgb(18, 203, 196);
 $brand-secondary: rgb(18, 137, 167);
-$gray-primary: rgb(20, 113, 131);
-$gray-secondary: rgba($gray-primary, 0.80);
+$gray-primary: darken($brand-secondary, 10%);
+$gray-secondary: darken($brand-secondary, 5%);
 $white: rgb(255, 255, 255);
-$link-color: darken($brand-primary, 10%);
-$link-hover: darken($brand-primary, 15%);
+$link-color: $brand-primary;
+$link-hover: darken($brand-primary, 4%);
 
 // Typography
 $base-font-family: 'Titillium Web', sans-serif;
