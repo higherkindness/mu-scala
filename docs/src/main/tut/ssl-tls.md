@@ -79,7 +79,7 @@ class ServiceHandler[F[_]: Applicative] extends Greeter[F] {
 import java.io.File
 import java.security.cert.X509Certificate
 
-import cats.effect.IO
+import cats.effect.{IO, Resource}
 import mu.rpc.server.netty.SetSslContext
 import mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
 import io.grpc.internal.testing.TestUtils
@@ -129,6 +129,7 @@ object implicits extends Runtime
 Lastly, as we did before with the server side, let's see what happens on the client side.
 
 ```tut:silent
+import cats.syntax.either._
 import mu.rpc.ChannelForAddress
 import mu.rpc.client.OverrideAuthority
 import mu.rpc.client.netty.{
@@ -168,15 +169,15 @@ object MainApp extends CommonRuntime {
   val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
     ChannelForAddress("localhost", 8080),
     List(
-      OverrideAuthority(TestUtils.TEST_SERVER_HOST),
-      NettyUsePlaintext(),
-      NettyNegotiationType(NegotiationType.TLS),
-      NettySslContext(clientSslContext)
+      OverrideAuthority(TestUtils.TEST_SERVER_HOST).asLeft,
+      NettyUsePlaintext().asRight,
+      NettyNegotiationType(NegotiationType.TLS).asRight,
+      NettySslContext(clientSslContext).asRight
     )
   )
 
-  val muRPCServiceClient: Greeter.Client[IO] =
-    Greeter.clientFromChannel[IO](channelInterpreter.build)
+  val muRPCServiceClient: Resource[IO, Greeter.Client[IO]] =
+    Greeter.clientFromChannel[IO](IO(channelInterpreter.build))
 
 }
 ```

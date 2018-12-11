@@ -89,7 +89,7 @@ object InterceptingServerCalls extends CommonRuntime {
 In this case, in order to intercept the client calls we need additional configuration settings (by using `AddInterceptor`):
 
 ```tut:silent
-import cats.effect.IO
+import cats.effect.{IO, Resource}
 import mu.rpc._
 import mu.rpc.config._
 import mu.rpc.client._
@@ -104,7 +104,7 @@ object InterceptingClientCalls extends CommonRuntime {
   val channelFor: ChannelFor =
     ConfigForAddress[IO]("rpc.host", "rpc.port").unsafeRunSync
 
-  implicit val serviceClient: Greeter.Client[IO] =
+  implicit val serviceClient: Resource[IO, Greeter.Client[IO]] =
     Greeter.client[IO](
       channelFor = channelFor,
       channelConfigList = List(
