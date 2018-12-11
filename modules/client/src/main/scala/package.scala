@@ -20,7 +20,6 @@ import cats.effect.Sync
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.data.Kleisli
-import cats.~>
 
 import scala.collection.JavaConverters._
 import io.grpc._
@@ -51,6 +50,22 @@ package object client {
         configured <- F.delay(configList.foldLeft(b)(configureChannel))
         built      <- F.delay(configured.build())
       } yield built
+    }
+
+    def unsafeBuild[T <: ManagedChannelBuilder[T]](
+        initConfig: ChannelFor,
+        configList: List[ManagedChannelConfig]): ManagedChannel = {
+
+      val builder: T = initConfig match {
+        case ChannelForAddress(name, port) =>
+          ManagedChannelBuilder.forAddress(name, port).asInstanceOf[T]
+        case ChannelForTarget(target) =>
+          ManagedChannelBuilder.forTarget(target).asInstanceOf[T]
+        case e =>
+          throw new IllegalArgumentException(s"ManagedChannel not supported for $e")
+      }
+
+      configList.foldLeft(builder)(configureChannel).build()
     }
 
     def apply[A](fa: ManagedChannelOps[F, A]): F[A] =

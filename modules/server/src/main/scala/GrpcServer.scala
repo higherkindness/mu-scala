@@ -21,7 +21,6 @@ import cats.~>
 import cats.effect.{Effect, IO, Sync}
 import cats.instances.either._
 import cats.syntax.apply._
-import cats.syntax.either._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import io.grpc.{Server, ServerBuilder, ServerServiceDefinition}
