@@ -6,5 +6,7 @@
     padding: ($base-point-grid * 6) /*48px*/ 0;
     font-size: 0.875rem;
     //background: darken($brand-secondary, 6%);
-    
+    p {
+        color: $gray-primary;
+    }
 }
