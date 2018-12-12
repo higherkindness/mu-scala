@@ -31,7 +31,7 @@ import scala.util.Right
 
 case class AvroSrcGenerator(
     marshallersImports: List[MarshallersImport] = Nil,
-    bigDecimalTypeGen: BigDecimalTypeGen = ScalaBigDecimalGen)
+    bigDecimalTypeGen: BigDecimalTypeGen = ScalaBigDecimalTaggedGen)
     extends SrcGenerator {
 
   private[this] val logger = getLogger

@@ -119,7 +119,7 @@ object IdlGenPlugin extends AutoPlugin {
     srcGenIDLTargetDir := (Compile / resourceManaged).value / idlType.value,
     srcGenTargetDir := (Compile / sourceManaged).value,
     genOptions := Seq.empty,
-    idlGenBigDecimal := ScalaBigDecimalGen,
+    idlGenBigDecimal := ScalaBigDecimalTaggedGen,
     idlGenMarshallerImports := {
       if (srcGenSerializationType.value == "Avro" || srcGenSerializationType.value == "AvroWithSchema")
         (idlGenBigDecimal.value match {

@@ -16,13 +16,13 @@
 
 package mu.rpc.idlgen
 
-import mu.rpc.idlgen.Model.{BigDecimalTypeGen, MarshallersImport, ScalaBigDecimalGen}
+import mu.rpc.idlgen.Model.{BigDecimalTypeGen, MarshallersImport, ScalaBigDecimalTaggedGen}
 import mu.rpc.idlgen.avro.AvroSrcGenerator
 
 object SrcGenApplication {
   def apply(
       marshallersImports: List[MarshallersImport] = Nil,
-      bigDecimalTypeGen: BigDecimalTypeGen = ScalaBigDecimalGen): GeneratorApplication[
+      bigDecimalTypeGen: BigDecimalTypeGen = ScalaBigDecimalTaggedGen): GeneratorApplication[
     AvroSrcGenerator] =
     new GeneratorApplication(AvroSrcGenerator(marshallersImports, bigDecimalTypeGen)) {
       def main(args: Array[String]): Unit = generateFrom(args)

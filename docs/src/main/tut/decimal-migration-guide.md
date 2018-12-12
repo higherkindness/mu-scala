@@ -12,6 +12,10 @@ This guide is only for projects that are using a version prior to `0.15.1` **and
 
 If you're starting a new project, you can use safely tagged `BigDecimal`s. Check the [Custom codecs section in Core concepts](core-concepts#custom-codecs) and [Plugin Settings section in IDL Generation](idl-generation#plugin-settings) for more information.
 
+## Disclaimer
+
+**IMPORTANT**: If you are using a version prior to `0.15.1` **and** do not want to serialize the decimals following the avro specs **and** you are using the plugin for generating the protocols, you need to set the `idlGenBigDecimal` setting key to `ScalaBigDecimalGen`.
+
 ## Background
 
 The `0.13.5` version introduced custom encoders for `BigDecimal` values that serialize the values as byte arrays in a way not compliant with the avro specs.
