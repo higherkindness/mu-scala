@@ -17,7 +17,8 @@
 package examples.todolist.client
 package handlers
 
-import cats.Monad.ops._
+import cats.syntax.flatMap._
+import cats.syntax.functor._
 import cats.effect.{Resource, Sync}
 import examples.todolist.client.clients.TodoListClient
 import examples.todolist.protocol.Protocols._
@@ -25,9 +26,8 @@ import examples.todolist.protocol._
 import mu.rpc.protocol.Empty
 import freestyle.tagless.logging.LoggingM
 
-class TodoListClientHandler[F[_]: Sync](
-    implicit log: LoggingM[F],
-    client: Resource[F, TodoListRpcService.Client[F]])
+class TodoListClientHandler[F[_]: Sync](client: Resource[F, TodoListRpcService.Client[F]])(
+    implicit log: LoggingM[F])
     extends TodoListClient[F] {
 
   override def reset(): F[Int] =

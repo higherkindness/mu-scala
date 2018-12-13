@@ -32,29 +32,29 @@ trait ClientImplicits extends CommonRuntime {
   val channelFor: ChannelFor =
     ConfigForAddress[IO]("rpc.client.host", "rpc.client.port").unsafeRunSync()
 
-  implicit val pingPongServiceClient: Resource[IO, PingPongService.Client[IO]] =
+  val pingPongServiceClient: Resource[IO, PingPongService.Client[IO]] =
     PingPongService.client[IO](channelFor)
 
   implicit val pingPongClientHandler: PingPongClientHandler[IO] =
-    new PingPongClientHandler[IO]
+    new PingPongClientHandler[IO](pingPongServiceClient)
 
-  implicit val tagRpcServiceClient: Resource[IO, TagRpcService.Client[IO]] =
+  val tagRpcServiceClient: Resource[IO, TagRpcService.Client[IO]] =
     TagRpcService.client[IO](channelFor)
 
   implicit val tagClientHandler: TagClientHandler[IO] =
-    new TagClientHandler[IO]
+    new TagClientHandler[IO](tagRpcServiceClient)
 
-  implicit val todoListRpcServiceClient: Resource[IO, TodoListRpcService.Client[IO]] =
+  val todoListRpcServiceClient: Resource[IO, TodoListRpcService.Client[IO]] =
     TodoListRpcService.client[IO](channelFor)
 
   implicit val todoListClientHandler: TodoListClientHandler[IO] =
-    new TodoListClientHandler[IO]
+    new TodoListClientHandler[IO](todoListRpcServiceClient)
 
-  implicit val todoItemRpcServiceClient: Resource[IO, TodoItemRpcService.Client[IO]] =
+  val todoItemRpcServiceClient: Resource[IO, TodoItemRpcService.Client[IO]] =
     TodoItemRpcService.client[IO](channelFor)
 
   implicit val todoItemClientHandler: TodoItemClientHandler[IO] =
-    new TodoItemClientHandler[IO]
+    new TodoItemClientHandler[IO](todoItemRpcServiceClient)
 
 }
 

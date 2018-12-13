@@ -17,14 +17,14 @@
 package examples.todolist.client
 package handlers
 
-import cats.Monad.ops._
+import cats.syntax.functor._
 import cats.effect.{Resource, Sync}
 import examples.todolist.client.clients.PingPongClient
 import examples.todolist.protocol.Protocols.PingPongService
 import mu.rpc.protocol.Empty
 import org.log4s._
 
-class PingPongClientHandler[F[_]: Sync](implicit client: Resource[F, PingPongService.Client[F]])
+class PingPongClientHandler[F[_]: Sync](client: Resource[F, PingPongService.Client[F]])
     extends PingPongClient[F] {
 
   val logger: Logger = getLogger

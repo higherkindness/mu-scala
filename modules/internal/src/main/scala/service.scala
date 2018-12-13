@@ -185,14 +185,14 @@ object serviceImpl {
       val clientClass: ClassDef =
         q"""
         class $Client[$F_](
-          channel: _root_.io.grpc.ManagedChannel,
+          channel: _root_.io.grpc.Channel,
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit
           F: _root_.cats.effect.ConcurrentEffect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
         ) extends _root_.io.grpc.stub.AbstractStub[$Client[$F]](channel, options) {
           override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $Client[$F] =
-              new $Client[$F](channel.asInstanceOf[_root_.io.grpc.ManagedChannel], options)
+              new $Client[$F](channel, options)
 
           ..$clientCallMethods
           ..$nonRpcDefs
@@ -248,7 +248,7 @@ object serviceImpl {
       val unsafeClientFromChannel: DefDef =
         q"""
         def unsafeClientFromChannel[$F_](
-          channel: _root_.io.grpc.ManagedChannel,
+          channel: _root_.io.grpc.Channel,
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit
           F: _root_.cats.effect.ConcurrentEffect[$F],

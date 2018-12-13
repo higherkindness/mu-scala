@@ -168,11 +168,11 @@ object MainApp extends CommonRuntime {
 
   val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
     ChannelForAddress("localhost", 8080),
+    List(OverrideAuthority(TestUtils.TEST_SERVER_HOST)),
     List(
-      OverrideAuthority(TestUtils.TEST_SERVER_HOST).asLeft,
-      NettyUsePlaintext().asRight,
-      NettyNegotiationType(NegotiationType.TLS).asRight,
-      NettySslContext(clientSslContext).asRight
+      NettyUsePlaintext(),
+      NettyNegotiationType(NegotiationType.TLS),
+      NettySslContext(clientSslContext)
     )
   )
 
