@@ -251,8 +251,8 @@ object ProjectPlugin extends AutoPlugin {
     override def badgeIcon: Option[BadgeIcon] =
       BadgeIcon(
         title = "codecov.io",
-        icon = s"http://codecov.io/github/${info.owner}/${info.repo}/branch/master/graph/badge.svg",
-        url = s"http://codecov.io/github/${info.owner}/${info.repo}"
+        icon = s"http://codecov.io/gh/${info.owner}/${info.repo}/branch/master/graph/badge.svg",
+        url = s"http://codecov.io/gh/${info.owner}/${info.repo}"
       ).some
   }
 
