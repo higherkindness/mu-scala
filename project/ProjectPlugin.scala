@@ -6,8 +6,6 @@ import sbt._
 import sbtorgpolicies.OrgPoliciesPlugin
 import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
 import sbtorgpolicies.model._
-import sbtorgpolicies.runnable.SetSetting
-import sbtorgpolicies.runnable.syntax._
 import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
 import sbtrelease.ReleasePlugin.autoImport._
@@ -44,6 +42,7 @@ object ProjectPlugin extends AutoPlugin {
       val pbdirect: String           = "0.1.0"
       val prometheus: String         = "0.5.0"
       val pureconfig: String         = "0.10.0"
+      val reactiveStreams: String    = "1.0.2"
       val scala: String              = "2.12.7"
       val scalacheckToolbox: String  = "0.2.5"
     }
@@ -62,7 +61,7 @@ object ProjectPlugin extends AutoPlugin {
         %("grpc-stub", V.grpc),
         %%("monix", V.monix),
         %%("monocle-core", V.monocle),
-        %%("fs2-reactive-streams", V.fs2),
+        "org.reactivestreams" % "reactive-streams" % V.reactiveStreams,
         %%("fs2-core", V.fs2),
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
@@ -233,7 +232,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("scalatest")
+        %%("scalatest") % "tut"
       ),
       scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
     )
@@ -247,6 +246,16 @@ object ProjectPlugin extends AutoPlugin {
   }
 
   import autoImport._
+
+  case class FixedCodecovBadge(info: BadgeInformation) extends Badge(info) {
+
+    override def badgeIcon: Option[BadgeIcon] =
+      BadgeIcon(
+        title = "codecov.io",
+        icon = s"http://codecov.io/gh/${info.owner}/${info.repo}/branch/master/graph/badge.svg",
+        url = s"http://codecov.io/gh/${info.owner}/${info.repo}"
+      ).some
+  }
 
   override def projectSettings: Seq[Def.Setting[_]] =
     sharedReleaseProcess ++ warnUnusedImport ++ Seq(
@@ -281,7 +290,8 @@ object ProjectPlugin extends AutoPlugin {
       orgMaintainersSetting := List(Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
       orgBadgeListSetting := List(
         TravisBadge.apply,
-        CodecovBadge.apply, { info => MavenCentralBadge.apply(info.copy(libName = "mu")) },
+        FixedCodecovBadge.apply,
+        { info => MavenCentralBadge.apply(info.copy(libName = "mu")) },
         ScalaLangBadge.apply,
         LicenseBadge.apply,
         // Gitter badge (owner field) can be configured with default value if we migrate it to the higherkindness organization
