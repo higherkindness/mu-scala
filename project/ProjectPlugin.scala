@@ -6,8 +6,6 @@ import sbt._
 import sbtorgpolicies.OrgPoliciesPlugin
 import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
 import sbtorgpolicies.model._
-import sbtorgpolicies.runnable.SetSetting
-import sbtorgpolicies.runnable.syntax._
 import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
 import sbtrelease.ReleasePlugin.autoImport._
@@ -248,6 +246,16 @@ object ProjectPlugin extends AutoPlugin {
 
   import autoImport._
 
+  case class FixedCodecovBadge(info: BadgeInformation) extends Badge(info) {
+
+    override def badgeIcon: Option[BadgeIcon] =
+      BadgeIcon(
+        title = "codecov.io",
+        icon = s"http://codecov.io/github/${info.owner}/${info.repo}/branch/master/graph/badge.svg",
+        url = s"http://codecov.io/github/${info.owner}/${info.repo}"
+      ).some
+  }
+
   override def projectSettings: Seq[Def.Setting[_]] =
     sharedReleaseProcess ++ warnUnusedImport ++ Seq(
       description := "mu RPC is a purely functional library for " +
@@ -281,7 +289,8 @@ object ProjectPlugin extends AutoPlugin {
       orgMaintainersSetting := List(Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
       orgBadgeListSetting := List(
         TravisBadge.apply,
-        CodecovBadge.apply, { info => MavenCentralBadge.apply(info.copy(libName = "mu")) },
+        FixedCodecovBadge.apply,
+        { info => MavenCentralBadge.apply(info.copy(libName = "mu")) },
         ScalaLangBadge.apply,
         LicenseBadge.apply,
         // Gitter badge (owner field) can be configured with default value if we migrate it to the higherkindness organization
