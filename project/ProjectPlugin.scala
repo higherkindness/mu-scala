@@ -42,6 +42,7 @@ object ProjectPlugin extends AutoPlugin {
       val pbdirect: String           = "0.1.0"
       val prometheus: String         = "0.5.0"
       val pureconfig: String         = "0.10.0"
+      val reactiveStreams: String    = "1.0.2"
       val scala: String              = "2.12.7"
       val scalacheckToolbox: String  = "0.2.5"
     }
@@ -60,7 +61,7 @@ object ProjectPlugin extends AutoPlugin {
         %("grpc-stub", V.grpc),
         %%("monix", V.monix),
         %%("monocle-core", V.monocle),
-        "co.fs2" %% "fs2-reactive-streams" % V.fs2,
+        "org.reactivestreams" % "reactive-streams" % V.reactiveStreams,
         %%("fs2-core", V.fs2),
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
