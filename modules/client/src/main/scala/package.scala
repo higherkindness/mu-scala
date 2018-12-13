@@ -16,7 +16,7 @@
 
 package mu.rpc
 
-import cats.effect.Sync
+import cats.effect.{Effect, Sync}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.data.Kleisli
@@ -54,19 +54,8 @@ package object client {
 
     def unsafeBuild[T <: ManagedChannelBuilder[T]](
         initConfig: ChannelFor,
-        configList: List[ManagedChannelConfig]): ManagedChannel = {
-
-      val builder: T = initConfig match {
-        case ChannelForAddress(name, port) =>
-          ManagedChannelBuilder.forAddress(name, port).asInstanceOf[T]
-        case ChannelForTarget(target) =>
-          ManagedChannelBuilder.forTarget(target).asInstanceOf[T]
-        case e =>
-          throw new IllegalArgumentException(s"ManagedChannel not supported for $e")
-      }
-
-      configList.foldLeft(builder)(configureChannel).build()
-    }
+        configList: List[ManagedChannelConfig])(implicit E: Effect[F]): ManagedChannel =
+      E.toIO(build(initConfig, configList)).unsafeRunSync()
 
     def apply[A](fa: ManagedChannelOps[F, A]): F[A] =
       fa(build(initConfig, configList))

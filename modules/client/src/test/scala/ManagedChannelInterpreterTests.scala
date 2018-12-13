@@ -37,8 +37,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
       val managedChannelInterpreter =
         new ManagedChannelInterpreter[IO](channelFor, channelConfigList)
 
-      val mc: ManagedChannel =
-        managedChannelInterpreter.build(channelFor, channelConfigList).unsafeRunSync
+      val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild(channelFor, channelConfigList)
 
       mc shouldBe a[ManagedChannel]
 
@@ -54,8 +53,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
       val managedChannelInterpreter =
         new ManagedChannelInterpreter[IO](channelFor, channelConfigList)
 
-      val mc: ManagedChannel =
-        managedChannelInterpreter.build(channelFor, channelConfigList).unsafeRunSync
+      val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild(channelFor, channelConfigList)
 
       mc shouldBe a[ManagedChannel]
 
@@ -86,8 +84,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
       val managedChannelInterpreter =
         new ManagedChannelInterpreter[IO](channelFor, channelConfigList)
 
-      val mc: ManagedChannel =
-        managedChannelInterpreter.build(channelFor, channelConfigList).unsafeRunSync
+      val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild(channelFor, channelConfigList)
 
       mc shouldBe a[ManagedChannel]
 

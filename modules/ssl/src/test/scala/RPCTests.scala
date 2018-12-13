@@ -18,7 +18,6 @@ package mu.rpc
 package ssl
 
 import cats.effect.{IO, Resource}
-import cats.syntax.either._
 import mu.rpc.client.OverrideAuthority
 import mu.rpc.client.netty.{
   NettyChannelInterpreter,
@@ -54,7 +53,6 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         S.isShutdown
 
       check[ConcurrentMonad].unsafeRunSync() shouldBe false
-
     }
 
     "allow to get the port where it's running" in {
@@ -63,7 +61,6 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         S.getPort
 
       check[ConcurrentMonad].unsafeRunSync() shouldBe SC.port
-
     }
 
   }
@@ -74,11 +71,11 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
         createChannelFor,
+        List(OverrideAuthority(TestUtils.TEST_SERVER_HOST)),
         List(
-          OverrideAuthority(TestUtils.TEST_SERVER_HOST).asLeft,
-          NettyUsePlaintext().asRight,
-          NettyNegotiationType(NegotiationType.TLS).asRight,
-          NettySslContext(clientSslContext).asRight
+          NettyUsePlaintext(),
+          NettyNegotiationType(NegotiationType.TLS),
+          NettySslContext(clientSslContext)
         )
       )
 
@@ -98,10 +95,10 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
         createChannelFor,
+        List(OverrideAuthority(TestUtils.TEST_SERVER_HOST)),
         List(
-          OverrideAuthority(TestUtils.TEST_SERVER_HOST).asLeft,
-          NettyUsePlaintext().asRight,
-          NettyNegotiationType(NegotiationType.TLS).asRight
+          NettyUsePlaintext(),
+          NettyNegotiationType(NegotiationType.TLS)
         )
       )
 
@@ -124,10 +121,10 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
         createChannelFor,
+        List(OverrideAuthority(TestUtils.TEST_SERVER_HOST)),
         List(
-          OverrideAuthority(TestUtils.TEST_SERVER_HOST).asLeft,
-          NettyUsePlaintext().asRight,
-          NettySslContext(clientSslContext).asRight
+          NettyUsePlaintext(),
+          NettySslContext(clientSslContext)
         )
       )
 

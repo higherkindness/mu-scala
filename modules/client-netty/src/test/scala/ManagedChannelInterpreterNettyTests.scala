@@ -18,8 +18,6 @@ package mu.rpc
 package client
 package netty
 
-import cats.syntax.either._
-
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
 
@@ -41,10 +39,9 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
 
       val channelFor: ChannelFor = ChannelForSocketAddress(new InetSocketAddress(SC.host, 45455))
 
-      val channelConfigList =
-        List(UsePlaintext().asLeft[NettyChannelConfig])
+      val channelConfigList = List(UsePlaintext())
 
-      val interpreter = new NettyChannelInterpreter(channelFor, channelConfigList)
+      val interpreter = new NettyChannelInterpreter(channelFor, channelConfigList, Nil)
 
       val mc: ManagedChannel = interpreter.build
 
@@ -57,7 +54,7 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
 
       val channelFor: ChannelFor = ChannelForTarget(SC.host)
 
-      val interpreter = new NettyChannelInterpreter(channelFor, Nil)
+      val interpreter = new NettyChannelInterpreter(channelFor, Nil, Nil)
 
       val mc: ManagedChannel = interpreter.build
 
@@ -70,25 +67,23 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
 
       val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
 
-      val channelConfigList: List[Either[ManagedChannelConfig, NettyChannelConfig]] = managedChannelConfigAllList
-        .map(_.asLeft[NettyChannelConfig]) ++ List(
-        NettyChannelType((new LocalChannel).getClass).asRight[ManagedChannelConfig],
-        NettyWithOption[Boolean](ChannelOption.valueOf("ALLOCATOR"), true)
-          .asRight[ManagedChannelConfig],
-        NettyNegotiationType(NegotiationType.PLAINTEXT).asRight[ManagedChannelConfig],
-        NettyEventLoopGroup(new NioEventLoopGroup(0)).asRight[ManagedChannelConfig],
-        NettySslContext(GrpcSslContexts.forClient.build).asRight[ManagedChannelConfig],
-        NettyFlowControlWindow(NettyChannelBuilder.DEFAULT_FLOW_CONTROL_WINDOW)
-          .asRight[ManagedChannelConfig],
-        NettyMaxHeaderListSize(GrpcUtil.DEFAULT_MAX_HEADER_LIST_SIZE).asRight[ManagedChannelConfig],
-        NettyUsePlaintext().asRight[ManagedChannelConfig],
-        NettyUseTransportSecurity.asRight[ManagedChannelConfig],
-        NettyKeepAliveTime(1, TimeUnit.MINUTES).asRight[ManagedChannelConfig],
-        NettyKeepAliveTimeout(1, TimeUnit.MINUTES).asRight[ManagedChannelConfig],
-        NettyKeepAliveWithoutCalls(false).asRight[ManagedChannelConfig]
+      val nettyChannelConfigList: List[NettyChannelConfig] = List(
+        NettyChannelType((new LocalChannel).getClass),
+        NettyWithOption[Boolean](ChannelOption.valueOf("ALLOCATOR"), true),
+        NettyNegotiationType(NegotiationType.PLAINTEXT),
+        NettyEventLoopGroup(new NioEventLoopGroup(0)),
+        NettySslContext(GrpcSslContexts.forClient.build),
+        NettyFlowControlWindow(NettyChannelBuilder.DEFAULT_FLOW_CONTROL_WINDOW),
+        NettyMaxHeaderListSize(GrpcUtil.DEFAULT_MAX_HEADER_LIST_SIZE),
+        NettyUsePlaintext(),
+        NettyUseTransportSecurity,
+        NettyKeepAliveTime(1, TimeUnit.MINUTES),
+        NettyKeepAliveTimeout(1, TimeUnit.MINUTES),
+        NettyKeepAliveWithoutCalls(false)
       )
 
-      val interpreter = new NettyChannelInterpreter(channelFor, channelConfigList)
+      val interpreter =
+        new NettyChannelInterpreter(channelFor, managedChannelConfigAllList, nettyChannelConfigList)
 
       val mc: ManagedChannel = interpreter.build
 
@@ -101,7 +96,7 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
 
       val channelFor: ChannelFor = ChannelForPort(SC.port)
 
-      val interpreter = new NettyChannelInterpreter(channelFor, Nil)
+      val interpreter = new NettyChannelInterpreter(channelFor, Nil, Nil)
 
       an[IllegalArgumentException] shouldBe thrownBy(interpreter.build)
     }

@@ -24,7 +24,8 @@ package object netty {
 
   class NettyChannelInterpreter(
       initConfig: ChannelFor,
-      configList: List[Either[ManagedChannelConfig, NettyChannelConfig]]) {
+      configList: List[ManagedChannelConfig],
+      nettyConfigList: List[NettyChannelConfig]) {
 
     def build: ManagedChannel = {
       val builder: NettyChannelBuilder = initConfig match {
@@ -35,16 +36,16 @@ package object netty {
           throw new IllegalArgumentException(s"ManagedChannel not supported for $e")
       }
 
-      configList
-        .foldLeft(builder) { (acc, cfg) =>
-          cfg.fold(c => configureChannel(acc, c), c => NettyChannelB(acc)(c))
-        }
+      nettyConfigList
+        .foldLeft(
+          configList
+            .foldLeft(builder)((acc, cfg) => configureChannel(acc, cfg)))((acc, cfg) =>
+          configureNettyChannel(acc)(cfg))
         .build()
     }
   }
 
-  def NettyChannelB(
-      mcb: NettyChannelBuilder): PartialFunction[NettyChannelConfig, NettyChannelBuilder] = {
+  def configureNettyChannel(mcb: NettyChannelBuilder): NettyChannelConfig => NettyChannelBuilder = {
     case NettyChannelType(channelType)       => mcb.channelType(channelType)
     case NettyWithOption(option, value)      => mcb.withOption(option, value)
     case NettyNegotiationType(nt)            => mcb.negotiationType(nt)
