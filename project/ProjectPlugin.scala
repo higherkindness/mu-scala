@@ -60,7 +60,7 @@ object ProjectPlugin extends AutoPlugin {
         %("grpc-stub", V.grpc),
         %%("monix", V.monix),
         %%("monocle-core", V.monocle),
-        %%("fs2-reactive-streams", V.fs2),
+        "co.fs2" %% "fs2-reactive-streams" % V.fs2,
         %%("fs2-core", V.fs2),
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
