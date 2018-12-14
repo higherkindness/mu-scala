@@ -17,6 +17,7 @@
 package mu.rpc
 package protocol
 
+import cats.effect.{Bracket, Resource}
 import cats.{Monad, MonadError}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
