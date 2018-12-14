@@ -41,7 +41,7 @@ trait RpcBaseTestSuite extends WordSpec with Matchers with OneInstancePerTest wi
   // delegating the check to a def gets its name used in the cancellation message (cleaner than the boolean comparison result)
   private[this] def runningLocally: Boolean = System.getenv("TRAVIS") != "true"
 
-  def ignoreOnTravis(msg: => String): Unit = assume(runningLocally, msg)
+  def ignoreOnTravis(msg: => String): Assertion = assume(runningLocally, msg)
 
   def resource(path: String): BufferedSource =
     Source.fromInputStream(getClass.getResourceAsStream(path))
