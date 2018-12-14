@@ -17,55 +17,54 @@
 package examples.todolist.client
 package handlers
 
-import cats.Monad
-import cats.Monad.ops._
+import cats.syntax.flatMap._
+import cats.syntax.functor._
+import cats.effect.{Resource, Sync}
 import examples.todolist.client.clients.TodoItemClient
 import examples.todolist.protocol._
 import examples.todolist.protocol.Protocols._
 import mu.rpc.protocol.Empty
 import freestyle.tagless.logging.LoggingM
 
-class TodoItemClientHandler[F[_]](
-    implicit M: Monad[F],
-    log: LoggingM[F],
-    client: TodoItemRpcService.Client[F])
+class TodoItemClientHandler[F[_]: Sync](client: Resource[F, TodoItemRpcService.Client[F]])(
+    implicit log: LoggingM[F])
     extends TodoItemClient[F] {
 
   override def reset(): F[Int] =
     for {
       _ <- log.debug(s"Calling to restart todo items data")
-      r <- client.reset(Empty)
+      r <- client.use(_.reset(Empty))
     } yield r.value
 
   override def insert(request: TodoItemRequest): F[Option[TodoItemMessage]] =
     for {
       _ <- log.debug(
         s"Calling to insert todo item with item ${request.item} to list ${request.todoListId}")
-      t <- client.insert(request)
+      t <- client.use(_.insert(request))
     } yield t.msg
 
   override def retrieve(id: Int): F[Option[TodoItemMessage]] =
     for {
       _ <- log.debug(s"Calling to get todo item with id: $id")
-      r <- client.retrieve(MessageId(id))
+      r <- client.use(_.retrieve(MessageId(id)))
     } yield r.msg
 
   override def list(): F[TodoItemList] =
     for {
       _ <- log.debug(s"Calling to get all todo items")
-      r <- client.list(Empty)
+      r <- client.use(_.list(Empty))
     } yield r
 
   override def update(todoItem: TodoItemMessage): F[Option[TodoItemMessage]] =
     for {
       _ <- log.debug(
         s"Calling to update todo item ${todoItem.id} with item ${todoItem.id} from list ${todoItem.todoListId} and completed status ${todoItem.completed}")
-      r <- client.update(todoItem)
+      r <- client.use(_.update(todoItem))
     } yield r.msg
 
   override def remove(id: Int): F[Int] =
     for {
       _ <- log.debug(s"Calling to delete todo item with id: $id")
-      r <- client.destroy(MessageId(id))
+      r <- client.use(_.destroy(MessageId(id)))
     } yield r.value
 }

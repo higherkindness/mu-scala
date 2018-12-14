@@ -19,7 +19,7 @@ package mu.rpc
 import java.net.ServerSocket
 
 import cats.Functor
-import cats.effect.Sync
+import cats.effect.{IO, Resource, Sync}
 import cats.syntax.functor._
 import mu.rpc.common._
 import mu.rpc.server._
@@ -85,4 +85,7 @@ trait CommonUtils {
       case Failure(e) =>
         throw new RuntimeException(e)
     }
+
+  def withClient[Client, A](resource: Resource[ConcurrentMonad, Client])(f: Client => A): A =
+    resource.use(client => IO(f(client))).unsafeRunSync()
 }

@@ -22,7 +22,10 @@ import io.grpc.netty.NettyChannelBuilder
 
 package object netty {
 
-  class NettyChannelInterpreter(initConfig: ChannelFor, configList: List[ManagedChannelConfig]) {
+  class NettyChannelInterpreter(
+      initConfig: ChannelFor,
+      configList: List[ManagedChannelConfig],
+      nettyConfigList: List[NettyChannelConfig]) {
 
     def build: ManagedChannel = {
       val builder: NettyChannelBuilder = initConfig match {
@@ -33,16 +36,16 @@ package object netty {
           throw new IllegalArgumentException(s"ManagedChannel not supported for $e")
       }
 
-      configList
-        .foldLeft(builder) { (acc, cfg) =>
-          (ManagedChannelB(acc) orElse NettyChannelB(acc))(cfg)
-        }
-        .build()
+      val baseBuilder: NettyChannelBuilder => NettyChannelBuilder =
+        configList.foldLeft(_)((acc, cfg) => configureChannel(acc, cfg))
+      val nettyBuilder: NettyChannelBuilder => NettyChannelBuilder =
+        nettyConfigList.foldLeft(_)((acc, cfg) => configureNettyChannel(acc)(cfg))
+
+      (baseBuilder andThen nettyBuilder)(builder).build()
     }
   }
 
-  def NettyChannelB(
-      mcb: NettyChannelBuilder): PartialFunction[ManagedChannelConfig, NettyChannelBuilder] = {
+  def configureNettyChannel(mcb: NettyChannelBuilder): NettyChannelConfig => NettyChannelBuilder = {
     case NettyChannelType(channelType)       => mcb.channelType(channelType)
     case NettyWithOption(option, value)      => mcb.withOption(option, value)
     case NettyNegotiationType(nt)            => mcb.negotiationType(nt)

@@ -198,6 +198,7 @@ Fortunately, once all the runtime requirements are in place (**`import gserver.i
 Thanks to `withServerChannel` from the package `mu.rpc.testing.servers`, you will be able to run in-memory instances of the server, which is very convenient for testing purposes. Below, a very simple property-based test for proving `Greeter.sayHello`:
 
 ```tut:silent
+import cats.effect.Resource
 import mu.rpc.testing.servers.withServerChannel
 import org.scalatest.prop.Checkers
 import org.scalatest._
@@ -209,12 +210,16 @@ class ServiceSpec extends FunSuite with Matchers with Checkers with OneInstanceP
 
   import gserver.implicits._
 
+  def withClient[Client, A](resource: Resource[IO, Client])(f: Client => A): A =
+    resource.use(client => IO(f(client))).unsafeRunSync()
+
   def sayHelloTest(requestGen: Gen[HelloRequest], expected: HelloResponse): Assertion =
     withServerChannel(Greeter.bindService[IO]) { sc =>
-      val client = Greeter.clientFromChannel[IO](sc.channel)
-      check {
-        forAll(requestGen) { request =>
-          client.sayHello(request).unsafeRunSync() == expected
+      withClient(Greeter.clientFromChannel[IO](IO(sc.channel))) { client =>
+        check {
+          forAll(requestGen) { request =>
+            client.sayHello(request).unsafeRunSync() == expected
+          }
         }
       }
     }
@@ -267,7 +272,7 @@ As we will see shortly in our example, we are going relay on the default behavio
 So, taking into account all of that, how would our code look?
 
 ```tut:silent
-import cats.effect.IO
+import cats.effect.{IO, Resource}
 import mu.rpc._
 import mu.rpc.config._
 import mu.rpc.client.config._
@@ -280,7 +285,7 @@ object gclient {
     val channelFor: ChannelFor =
       ConfigForAddress[IO]("rpc.host", "rpc.port").unsafeRunSync
 
-    implicit val serviceClient: Greeter.Client[IO] =
+    implicit val serviceClient: Resource[IO, Greeter.Client[IO]] =
       Greeter.client[IO](channelFor)
   }
 
@@ -306,7 +311,7 @@ object RPCDemoApp {
 
   def main(args: Array[String]): Unit = {
 
-    val hello = serviceClient.sayHello(HelloRequest("foo")).flatMap { result =>
+    val hello = serviceClient.use(_.sayHello(HelloRequest("foo"))).flatMap { result =>
       IO(println(s"Result = $result"))
     }
 

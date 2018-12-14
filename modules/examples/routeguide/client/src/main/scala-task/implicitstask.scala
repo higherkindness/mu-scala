@@ -16,6 +16,7 @@
 
 package example.routeguide.client.task
 
+import cats.effect.Resource
 import example.routeguide.client.handlers.RouteGuideClientHandler
 import example.routeguide.protocol.Protocols._
 import example.routeguide.runtime._
@@ -24,7 +25,7 @@ import monix.eval.Task
 
 trait ClientTaskImplicits extends RouteGuide with ClientConf {
 
-  implicit val routeGuideServiceClient: RouteGuideService.Client[Task] =
+  implicit val routeGuideServiceClient: Resource[Task, RouteGuideService.Client[Task]] =
     RouteGuideService.client[Task](channelFor)
 
   implicit val routeGuideClientHandler: RouteGuideClientHandler[Task] =

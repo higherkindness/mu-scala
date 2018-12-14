@@ -17,6 +17,7 @@
 package mu.rpc
 package ssl
 
+import cats.effect.{IO, Resource}
 import mu.rpc.client.OverrideAuthority
 import mu.rpc.client.netty.{
   NettyChannelInterpreter,
@@ -52,7 +53,6 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         S.isShutdown
 
       check[ConcurrentMonad].unsafeRunSync() shouldBe false
-
     }
 
     "allow to get the port where it's running" in {
@@ -61,7 +61,6 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         S.getPort
 
       check[ConcurrentMonad].unsafeRunSync() shouldBe SC.port
-
     }
 
   }
@@ -72,21 +71,23 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
         createChannelFor,
+        List(OverrideAuthority(TestUtils.TEST_SERVER_HOST)),
         List(
-          OverrideAuthority(TestUtils.TEST_SERVER_HOST),
           NettyUsePlaintext(),
           NettyNegotiationType(NegotiationType.TLS),
           NettySslContext(clientSslContext)
         )
       )
 
-      val avroRpcService: AvroRPCService.Client[ConcurrentMonad] =
-        AvroRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
-      val avroWithSchemaRpcService: AvroWithSchemaRPCService.Client[ConcurrentMonad] =
-        AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
+      val avroRpcService: Resource[ConcurrentMonad, AvroRPCService.Client[ConcurrentMonad]] =
+        AvroRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
+      val avroWithSchemaRpcService: Resource[
+        ConcurrentMonad,
+        AvroWithSchemaRPCService.Client[ConcurrentMonad]] =
+        AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
 
-      avroRpcService.unary(a1).unsafeRunSync() shouldBe c1
-      avroWithSchemaRpcService.unaryWithSchema(a1).unsafeRunSync() shouldBe c1
+      avroRpcService.use(_.unary(a1)).unsafeRunSync() shouldBe c1
+      avroWithSchemaRpcService.use(_.unaryWithSchema(a1)).unsafeRunSync() shouldBe c1
 
     }
 
@@ -94,22 +95,25 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
         createChannelFor,
+        List(OverrideAuthority(TestUtils.TEST_SERVER_HOST)),
         List(
-          OverrideAuthority(TestUtils.TEST_SERVER_HOST),
           NettyUsePlaintext(),
           NettyNegotiationType(NegotiationType.TLS)
         )
       )
 
-      val avroRpcService: AvroRPCService.Client[ConcurrentMonad] =
-        AvroRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
-      val avroWithSchemaRpcService: AvroWithSchemaRPCService.Client[ConcurrentMonad] =
-        AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
-
-      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(avroRpcService.unary(a1).unsafeRunSync())
+      val avroRpcService: Resource[ConcurrentMonad, AvroRPCService.Client[ConcurrentMonad]] =
+        AvroRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
+      val avroWithSchemaRpcService: Resource[
+        ConcurrentMonad,
+        AvroWithSchemaRPCService.Client[ConcurrentMonad]] =
+        AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
 
       a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
-        avroWithSchemaRpcService.unaryWithSchema(a1).unsafeRunSync())
+        avroRpcService.use(_.unary(a1)).unsafeRunSync())
+
+      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
+        avroWithSchemaRpcService.use(_.unaryWithSchema(a1)).unsafeRunSync())
 
     }
 
@@ -117,22 +121,25 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
         createChannelFor,
+        List(OverrideAuthority(TestUtils.TEST_SERVER_HOST)),
         List(
-          OverrideAuthority(TestUtils.TEST_SERVER_HOST),
           NettyUsePlaintext(),
           NettySslContext(clientSslContext)
         )
       )
 
-      val avroRpcService: AvroRPCService.Client[ConcurrentMonad] =
-        AvroRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
-      val avroWithSchemaRpcService: AvroWithSchemaRPCService.Client[ConcurrentMonad] =
-        AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](channelInterpreter.build)
-
-      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(avroRpcService.unary(a1).unsafeRunSync())
+      val avroRpcService: Resource[ConcurrentMonad, AvroRPCService.Client[ConcurrentMonad]] =
+        AvroRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
+      val avroWithSchemaRpcService: Resource[
+        ConcurrentMonad,
+        AvroWithSchemaRPCService.Client[ConcurrentMonad]] =
+        AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
 
       a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
-        avroWithSchemaRpcService.unaryWithSchema(a1).unsafeRunSync())
+        avroRpcService.use(_.unary(a1)).unsafeRunSync())
+
+      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
+        avroWithSchemaRpcService.use(_.unaryWithSchema(a1)).unsafeRunSync())
 
     }
 

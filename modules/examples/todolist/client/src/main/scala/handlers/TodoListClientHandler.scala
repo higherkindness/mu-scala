@@ -17,55 +17,54 @@
 package examples.todolist.client
 package handlers
 
-import cats.Monad
-import cats.Monad.ops._
+import cats.syntax.flatMap._
+import cats.syntax.functor._
+import cats.effect.{Resource, Sync}
 import examples.todolist.client.clients.TodoListClient
 import examples.todolist.protocol.Protocols._
 import examples.todolist.protocol._
 import mu.rpc.protocol.Empty
 import freestyle.tagless.logging.LoggingM
 
-class TodoListClientHandler[F[_]](
-    implicit M: Monad[F],
-    log: LoggingM[F],
-    client: TodoListRpcService.Client[F])
+class TodoListClientHandler[F[_]: Sync](client: Resource[F, TodoListRpcService.Client[F]])(
+    implicit log: LoggingM[F])
     extends TodoListClient[F] {
 
   override def reset(): F[Int] =
     for {
       _ <- log.debug(s"Calling to restart todo list data")
-      r <- client.reset(Empty)
+      r <- client.use(_.reset(Empty))
     } yield r.value
 
   override def insert(request: TodoListRequest): F[Option[TodoListMessage]] =
     for {
       _ <- log.debug(
         s"Calling to insert todo list with name: ${request.title} and id: ${request.tagId}")
-      t <- client.insert(request)
+      t <- client.use(_.insert(request))
     } yield t.msg
 
   override def retrieve(id: Int): F[Option[TodoListMessage]] =
     for {
       _ <- log.debug(s"Calling to get todo list with id: $id")
-      r <- client.retrieve(MessageId(id))
+      r <- client.use(_.retrieve(MessageId(id)))
     } yield r.msg
 
   override def list(): F[TodoListList] =
     for {
       _ <- log.debug(s"Calling to get all todo lists")
-      r <- client.list(Empty)
+      r <- client.use(_.list(Empty))
     } yield r
 
   override def update(todoList: TodoListMessage): F[Option[TodoListMessage]] =
     for {
       _ <- log.debug(
         s"Calling to update todo list with title: ${todoList.title}, tagId: ${todoList.tagId} and id: ${todoList.id}")
-      r <- client.update(todoList)
+      r <- client.use(_.update(todoList))
     } yield r.msg
 
   override def remove(id: Int): F[Int] =
     for {
       _ <- log.debug(s"Calling to delete tag with id: $id")
-      r <- client.destroy(MessageId(id))
+      r <- client.use(_.destroy(MessageId(id)))
     } yield r.value
 }

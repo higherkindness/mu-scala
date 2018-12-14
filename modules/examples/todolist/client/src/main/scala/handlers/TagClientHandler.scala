@@ -17,53 +17,52 @@
 package examples.todolist.client
 package handlers
 
-import cats.Monad
-import cats.Monad.ops._
+import cats.syntax.flatMap._
+import cats.syntax.functor._
+import cats.effect.{Resource, Sync}
 import examples.todolist.client.clients.TagClient
 import examples.todolist.protocol._
 import examples.todolist.protocol.Protocols._
 import mu.rpc.protocol.Empty
 import freestyle.tagless.logging.LoggingM
 
-class TagClientHandler[F[_]](
-    implicit M: Monad[F],
-    log: LoggingM[F],
-    client: TagRpcService.Client[F])
+class TagClientHandler[F[_]: Sync](client: Resource[F, TagRpcService.Client[F]])(
+    implicit log: LoggingM[F])
     extends TagClient[F] {
 
   override def reset(): F[Int] =
     for {
       _ <- log.debug(s"Calling to restart tags data")
-      r <- client.reset(Empty)
+      r <- client.use(_.reset(Empty))
     } yield r.value
 
   override def insert(request: TagRequest): F[Option[TagMessage]] =
     for {
       _ <- log.debug(s"Calling to insert tag with name: ${request.name}")
-      t <- client.insert(request)
+      t <- client.use(_.insert(request))
     } yield t.tag
 
   override def retrieve(id: Int): F[Option[TagMessage]] =
     for {
       _ <- log.debug(s"Calling to get tag with id: $id")
-      r <- client.retrieve(MessageId(id))
+      r <- client.use(_.retrieve(MessageId(id)))
     } yield r.tag
 
   override def list(): F[TagList] =
     for {
       _ <- log.debug(s"Calling to get all tags")
-      r <- client.list(Empty)
+      r <- client.use(_.list(Empty))
     } yield r
 
   override def update(tag: TagMessage): F[Option[TagMessage]] =
     for {
       _ <- log.debug(s"Calling to update tag ${tag.id} with name ${tag.name}")
-      r <- client.update(tag)
+      r <- client.use(_.update(tag))
     } yield r.tag
 
   override def remove(id: Int): F[Int] =
     for {
       _ <- log.debug(s"Calling to delete tag with id: $id")
-      r <- client.destroy(MessageId(id))
+      r <- client.use(_.destroy(MessageId(id)))
     } yield r.value
 }

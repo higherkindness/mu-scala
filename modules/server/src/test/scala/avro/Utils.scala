@@ -19,7 +19,7 @@ package avro
 
 import mu.rpc.common._
 import mu.rpc.protocol._
-import cats.effect.{ConcurrentEffect, Effect}
+import cats.effect.{ConcurrentEffect, Effect, Resource}
 import shapeless.{:+:, CNil, Coproduct}
 
 object Utils extends CommonUtils {
@@ -393,7 +393,9 @@ object Utils extends CommonUtils {
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    implicit val muRPCServiceClient: service.RPCService.Client[ConcurrentMonad] =
+    implicit val muRPCServiceClient: Resource[
+      ConcurrentMonad,
+      service.RPCService.Client[ConcurrentMonad]] =
       service.RPCService.client[ConcurrentMonad](createChannelFor)
 
   }

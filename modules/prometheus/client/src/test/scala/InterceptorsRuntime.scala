@@ -18,6 +18,7 @@ package mu.rpc
 package prometheus
 package client
 
+import cats.effect.Resource
 import mu.rpc.client._
 import mu.rpc.common.ConcurrentMonad
 import mu.rpc.prometheus.shared.Configuration
@@ -58,20 +59,25 @@ case class InterceptorsRuntime(
     AddInterceptor(MonitoringClientInterceptor(configuration.withCollectorRegistry(cr)))
   )
 
-  implicit lazy val muProtoRPCServiceClient: ProtoRPCService.Client[ConcurrentMonad] =
+  implicit lazy val muProtoRPCServiceClient: Resource[
+    ConcurrentMonad,
+    ProtoRPCService.Client[ConcurrentMonad]] =
     ProtoRPCService.client[ConcurrentMonad](
       channelFor = createChannelForPort(pickUnusedPort),
       channelConfigList = configList
     )
 
-  implicit lazy val muAvroRPCServiceClient: AvroRPCService.Client[ConcurrentMonad] =
+  implicit lazy val muAvroRPCServiceClient: Resource[
+    ConcurrentMonad,
+    AvroRPCService.Client[ConcurrentMonad]] =
     AvroRPCService.client[ConcurrentMonad](
       channelFor = createChannelForPort(pickUnusedPort),
       channelConfigList = configList
     )
 
-  implicit lazy val muAvroWithSchemaRPCServiceClient: AvroWithSchemaRPCService.Client[
-    ConcurrentMonad] =
+  implicit lazy val muAvroWithSchemaRPCServiceClient: Resource[
+    ConcurrentMonad,
+    AvroWithSchemaRPCService.Client[ConcurrentMonad]] =
     AvroWithSchemaRPCService.client[ConcurrentMonad](
       channelFor = createChannelForPort(pickUnusedPort),
       channelConfigList = configList

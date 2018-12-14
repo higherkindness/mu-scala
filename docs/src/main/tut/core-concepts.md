@@ -232,7 +232,7 @@ trait CommonRuntime {
 ```
 
 ```tut:silent
-import cats.effect.IO
+import cats.effect.{IO, Resource}
 import mu.rpc._
 import mu.rpc.config._
 import mu.rpc.client.config._
@@ -244,7 +244,7 @@ trait ChannelImplicits extends CommonRuntime {
   val channelFor: ChannelFor =
     ConfigForAddress[IO]("rpc.host", "rpc.port").unsafeRunSync
 
-  implicit val serviceClient: Greeter.Client[IO] =
+  implicit val serviceClient: Resource[IO, Greeter.Client[IO]] =
     Greeter.client[IO](channelFor, options = CallOptions.DEFAULT.withCompression("gzip"))
 }
 

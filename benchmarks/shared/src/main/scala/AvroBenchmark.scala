@@ -16,7 +16,7 @@
 
 package mu.rpc.benchmarks
 
-import cats.effect.IO
+import cats.effect.{IO, Resource}
 import cats.syntax.functor._
 import mu.rpc.protocol.Empty
 import java.util.concurrent.TimeUnit
@@ -36,29 +36,29 @@ class AvroBenchmark extends Runtime {
 
   implicit val handler: AvroHandler[IO]    = new AvroHandler[IO]
   val sc: ServerChannel                    = ServerChannel(PersonServiceAvro.bindService[IO])
-  val client: PersonServiceAvro.Client[IO] = PersonServiceAvro.clientFromChannel[IO](sc.channel)
+  val clientIO: Resource[IO, PersonServiceAvro.Client[IO]] = PersonServiceAvro.clientFromChannel[IO](IO(sc.channel))
 
   @TearDown
   def shutdown(): Unit = IO(sc.shutdown()).void.unsafeRunSync()
 
   @Benchmark
-  def listPersons: PersonList = client.listPersons(Empty).unsafeRunTimed(defaultTimeOut).get
+  def listPersons: PersonList = clientIO.use(_.listPersons(Empty)).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
-  def getPerson: Person = client.getPerson(PersonId("1")).unsafeRunTimed(defaultTimeOut).get
+  def getPerson: Person = clientIO.use(_.getPerson(PersonId("1"))).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
   def getPersonLinks: PersonLinkList =
-    client.getPersonLinks(PersonId("1")).unsafeRunTimed(defaultTimeOut).get
+    clientIO.use(_.getPersonLinks(PersonId("1"))).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
   def createPerson: Person =
-    client.createPerson(person).unsafeRunTimed(defaultTimeOut).get
+    clientIO.use(_.createPerson(person)).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
   def programComposition: PersonAggregation = {
 
-    def clientProgram: IO[PersonAggregation] = {
+    def clientProgram: IO[PersonAggregation] = clientIO.use { client =>
       for {
         personList <- client.listPersons(Empty)
         p1         <- client.getPerson(PersonId("1"))

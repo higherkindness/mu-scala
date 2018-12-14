@@ -16,7 +16,7 @@
 
 package example.routeguide.client.io
 
-import cats.effect.IO
+import cats.effect.{IO, Resource}
 import example.routeguide.client.handlers.RouteGuideClientHandler
 import example.routeguide.protocol.Protocols._
 import example.routeguide.runtime._
@@ -24,7 +24,7 @@ import example.routeguide.client.runtime._
 
 trait ClientIOImplicits extends RouteGuide with ClientConf {
 
-  implicit val routeGuideServiceClient: RouteGuideService.Client[IO] =
+  implicit val routeGuideServiceClient: Resource[IO, RouteGuideService.Client[IO]] =
     RouteGuideService.client[IO](channelFor)
 
   implicit val routeGuideClientHandler: RouteGuideClientHandler[IO] =

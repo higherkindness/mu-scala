@@ -39,9 +39,9 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
 
       val channelFor: ChannelFor = ChannelForSocketAddress(new InetSocketAddress(SC.host, 45455))
 
-      val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext())
+      val channelConfigList = List(UsePlaintext())
 
-      val interpreter = new NettyChannelInterpreter(channelFor, channelConfigList)
+      val interpreter = new NettyChannelInterpreter(channelFor, channelConfigList, Nil)
 
       val mc: ManagedChannel = interpreter.build
 
@@ -54,7 +54,7 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
 
       val channelFor: ChannelFor = ChannelForTarget(SC.host)
 
-      val interpreter = new NettyChannelInterpreter(channelFor, Nil)
+      val interpreter = new NettyChannelInterpreter(channelFor, Nil, Nil)
 
       val mc: ManagedChannel = interpreter.build
 
@@ -67,7 +67,7 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
 
       val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
 
-      val channelConfigList: List[ManagedChannelConfig] = managedChannelConfigAllList ++ List(
+      val nettyChannelConfigList: List[NettyChannelConfig] = List(
         NettyChannelType((new LocalChannel).getClass),
         NettyWithOption[Boolean](ChannelOption.valueOf("ALLOCATOR"), true),
         NettyNegotiationType(NegotiationType.PLAINTEXT),
@@ -82,7 +82,8 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
         NettyKeepAliveWithoutCalls(false)
       )
 
-      val interpreter = new NettyChannelInterpreter(channelFor, channelConfigList)
+      val interpreter =
+        new NettyChannelInterpreter(channelFor, managedChannelConfigAllList, nettyChannelConfigList)
 
       val mc: ManagedChannel = interpreter.build
 
@@ -91,23 +92,11 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
       mc.shutdownNow()
     }
 
-    "throw an exception when configuration is not recognized" in {
-
-      val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
-
-      case object Unexpected extends ManagedChannelConfig
-      val channelConfigList: List[ManagedChannelConfig] = List(Unexpected)
-
-      val interpreter = new NettyChannelInterpreter(channelFor, channelConfigList)
-
-      a[MatchError] shouldBe thrownBy(interpreter.build)
-    }
-
     "throw an exception when ChannelFor is not recognized" in {
 
       val channelFor: ChannelFor = ChannelForPort(SC.port)
 
-      val interpreter = new NettyChannelInterpreter(channelFor, Nil)
+      val interpreter = new NettyChannelInterpreter(channelFor, Nil, Nil)
 
       an[IllegalArgumentException] shouldBe thrownBy(interpreter.build)
     }
