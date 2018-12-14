@@ -20,5 +20,8 @@ import mu.rpc.idlgen.avro.AvroIdlGenerator
 import mu.rpc.idlgen.proto.ProtoIdlGenerator
 
 object IdlGenApplication extends GeneratorApplication(ProtoIdlGenerator, AvroIdlGenerator) {
-  def main(args: Array[String]): Unit = generateFrom(args)
+  def main(args: Array[String]): Unit = {
+    generateFrom(args)
+    (): Unit
+  }
 }

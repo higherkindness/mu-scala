@@ -212,7 +212,7 @@ object serviceImpl {
           _root_.cats.effect.Resource.make {
             val managedChannelInterpreter = new _root_.mu.rpc.client.ManagedChannelInterpreter[$F](channelFor, channelConfigList)
             managedChannelInterpreter.build(channelFor, channelConfigList)
-          }(channel => F.delay(channel.shutdown())).flatMap(ch =>
+          }(channel => F.void(F.delay(channel.shutdown()))).flatMap(ch =>
           _root_.cats.effect.Resource.make(F.delay(new $Client[$F](ch, options)))(_ => F.unit))
         """.supressWarts("DefaultArguments")
 
@@ -225,7 +225,7 @@ object serviceImpl {
           F: _root_.cats.effect.ConcurrentEffect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
         ): _root_.cats.effect.Resource[F, $Client[$F]] = _root_.cats.effect.Resource.make(channel)(channel =>
-        F.delay(channel.shutdown())).flatMap(ch =>
+        F.void(F.delay(channel.shutdown()))).flatMap(ch =>
         _root_.cats.effect.Resource.make(F.delay(new $Client[$F](ch, options)))(_ => F.unit))
         """.supressWarts("DefaultArguments")
 
@@ -269,13 +269,6 @@ object serviceImpl {
           }
           .getOrElse(if (params.isDefinedAt(pos)) params(pos).toString
           else default.getOrElse(sys.error(s"Missing annotation parameter $name")))
-
-      private def findAnnotation(mods: Modifiers, name: String): Option[Tree] =
-        mods.annotations find {
-          case Apply(Select(New(Ident(TypeName(`name`))), _), _)     => true
-          case Apply(Select(New(Select(_, TypeName(`name`))), _), _) => true
-          case _                                                     => false
-        }
 
       //todo: validate that the request and responses are case classes, if possible
       case class RpcRequest(

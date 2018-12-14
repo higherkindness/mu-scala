@@ -99,9 +99,9 @@ class RouteGuideServiceHandler[F[_]: ConcurrentEffect](implicit E: Effect[Task])
         throw e
       }
 
-  private[this] def addNote(note: RouteNote): Unit =
+  private[this] def addNote(note: RouteNote): Map[Point, List[RouteNote]] =
     routeNotes.updateAndGet(new UnaryOperator[Map[Point, List[RouteNote]]] {
-      override def apply(notes: Map[Point, List[RouteNote]]) = {
+      override def apply(notes: Map[Point, List[RouteNote]]): Map[Point, List[RouteNote]] = {
         val newRouteNotes = notes.getOrElse(note.location, Nil) :+ note
         notes + (note.location -> newRouteNotes)
       }
