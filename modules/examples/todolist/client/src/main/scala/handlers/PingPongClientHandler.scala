@@ -24,7 +24,7 @@ import examples.todolist.protocol.Protocols.PingPongService
 import mu.rpc.protocol.Empty
 import org.log4s._
 
-class PingPongClientHandler[F[_]: Sync](client: Resource[F, PingPongService.Client[F]])
+class PingPongClientHandler[F[_]: Sync](client: Resource[F, PingPongService[F]])
     extends PingPongClient[F] {
 
   val logger: Logger = getLogger

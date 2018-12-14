@@ -20,9 +20,9 @@ package protocol
 import cats.MonadError
 import cats.effect.{Async, Resource}
 import cats.syntax.applicative._
-import mu.rpc.common._
 import io.grpc.Status
 import monix.reactive.Observable
+import mu.rpc.common._
 
 object Utils extends CommonUtils {
 
@@ -77,9 +77,6 @@ object Utils extends CommonUtils {
       def serverStreamingWithError(e: E): Observable[C]
       def clientStreaming(oa: Observable[A]): F[D]
       def scope(empty: Empty.type): F[External]
-
-      def sumA(implicit F: cats.Functor[F]): F[Int] =
-        F.map(emptyParamResponse(Empty))(a => a.x + a.y)
     }
 
     @service(AvroWithSchema) trait AvroWithSchemaRPCService[F[_]] {
@@ -264,11 +261,9 @@ object Utils extends CommonUtils {
       import mu.rpc.protocol._
 
       class MuRPCServiceClientHandler[F[_]: Async](
-          implicit
-          proto: Resource[F, ProtoRPCService.Client[F]],
-          aws: Resource[F, AvroWithSchemaRPCService.Client[F]],
-          avro: Resource[F, AvroRPCService.Client[F]],
-          M: MonadError[F, Throwable])
+          proto: Resource[F, ProtoRPCService[F]],
+          avro: Resource[F, AvroRPCService[F]],
+          aws: Resource[F, AvroWithSchemaRPCService[F]])(implicit M: MonadError[F, Throwable])
           extends MyRPCClient[F] {
 
         import scala.concurrent.ExecutionContext.Implicits.global
@@ -375,10 +370,10 @@ object Utils extends CommonUtils {
       }
 
       class MuRPCServiceClientCompressedHandler[F[_]: Async](
-          implicit proto: Resource[F, CompressedProtoRPCService.Client[F]],
-          aws: Resource[F, CompressedAvroWithSchemaRPCService.Client[F]],
-          avro: Resource[F, CompressedAvroRPCService.Client[F]],
-          M: MonadError[F, Throwable])
+          proto: Resource[F, CompressedProtoRPCService[F]],
+          avro: Resource[F, CompressedAvroRPCService[F]],
+          aws: Resource[F, CompressedAvroWithSchemaRPCService[F]])(
+          implicit M: MonadError[F, Throwable])
           extends MyRPCClient[F] {
 
         import scala.concurrent.ExecutionContext.Implicits.global
@@ -518,29 +513,24 @@ object Utils extends CommonUtils {
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    implicit val protoRPCServiceClient: Resource[
-      ConcurrentMonad,
-      ProtoRPCService.Client[ConcurrentMonad]] =
+    val protoRPCServiceClient: Resource[ConcurrentMonad, ProtoRPCService[ConcurrentMonad]] =
       ProtoRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val avroRPCServiceClient: Resource[
-      ConcurrentMonad,
-      AvroRPCService.Client[ConcurrentMonad]] =
+    val avroRPCServiceClient: Resource[ConcurrentMonad, AvroRPCService[ConcurrentMonad]] =
       AvroRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val awsRPCServiceClient: Resource[
-      ConcurrentMonad,
-      AvroWithSchemaRPCService.Client[ConcurrentMonad]] =
+    val awsRPCServiceClient: Resource[ConcurrentMonad, AvroWithSchemaRPCService[ConcurrentMonad]] =
       AvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val compressedprotoRPCServiceClient: Resource[
+
+    val compressedprotoRPCServiceClient: Resource[
       ConcurrentMonad,
-      CompressedProtoRPCService.Client[ConcurrentMonad]] =
+      CompressedProtoRPCService[ConcurrentMonad]] =
       CompressedProtoRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val compressedavroRPCServiceClient: Resource[
+    val compressedavroRPCServiceClient: Resource[
       ConcurrentMonad,
-      CompressedAvroRPCService.Client[ConcurrentMonad]] =
+      CompressedAvroRPCService[ConcurrentMonad]] =
       CompressedAvroRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val compressedawsRPCServiceClient: Resource[
+    val compressedawsRPCServiceClient: Resource[
       ConcurrentMonad,
-      CompressedAvroWithSchemaRPCService.Client[ConcurrentMonad]] =
+      CompressedAvroWithSchemaRPCService[ConcurrentMonad]] =
       CompressedAvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
 
   }

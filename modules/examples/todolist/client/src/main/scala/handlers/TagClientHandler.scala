@@ -26,8 +26,7 @@ import examples.todolist.protocol.Protocols._
 import mu.rpc.protocol.Empty
 import freestyle.tagless.logging.LoggingM
 
-class TagClientHandler[F[_]: Sync](client: Resource[F, TagRpcService.Client[F]])(
-    implicit log: LoggingM[F])
+class TagClientHandler[F[_]: Sync](client: Resource[F, TagRpcService[F]])(implicit log: LoggingM[F])
     extends TagClient[F] {
 
   override def reset(): F[Int] =

@@ -25,6 +25,9 @@ object SrcGenApplication {
       bigDecimalTypeGen: BigDecimalTypeGen = ScalaBigDecimalTaggedGen): GeneratorApplication[
     AvroSrcGenerator] =
     new GeneratorApplication(AvroSrcGenerator(marshallersImports, bigDecimalTypeGen)) {
-      def main(args: Array[String]): Unit = generateFrom(args)
+      def main(args: Array[String]): Unit = {
+        generateFrom(args)
+        (): Unit
+      }
     }
 }

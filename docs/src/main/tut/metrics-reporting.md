@@ -104,7 +104,7 @@ object InterceptingClientCalls extends CommonRuntime {
   val channelFor: ChannelFor =
     ConfigForAddress[IO]("rpc.host", "rpc.port").unsafeRunSync
 
-  implicit val serviceClient: Resource[IO, Greeter.Client[IO]] =
+  implicit val serviceClient: Resource[IO, Greeter[IO]] =
     Greeter.client[IO](
       channelFor = channelFor,
       channelConfigList = List(

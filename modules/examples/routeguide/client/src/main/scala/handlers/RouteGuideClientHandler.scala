@@ -30,7 +30,7 @@ import example.routeguide.common.Utils._
 import scala.concurrent.duration._
 
 class RouteGuideClientHandler[F[_]: ConcurrentEffect](
-    implicit client: Resource[F, RouteGuideService.Client[F]],
+    implicit client: Resource[F, RouteGuideService[F]],
     E: Effect[Task])
     extends RouteGuideClient[F] {
 

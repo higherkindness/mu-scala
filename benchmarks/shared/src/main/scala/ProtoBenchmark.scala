@@ -36,7 +36,7 @@ class ProtoBenchmark extends Runtime {
 
   implicit val handler: ProtoHandler[IO] = new ProtoHandler[IO]
   val sc: ServerChannel                  = ServerChannel(PersonServicePB.bindService[IO])
-  val clientIO: Resource[IO, PersonServicePB.Client[IO]] = PersonServicePB.clientFromChannel[IO](IO(sc.channel))
+  val clientIO: Resource[IO, PersonServicePB[IO]] = PersonServicePB.clientFromChannel[IO](IO(sc.channel))
 
   @TearDown
   def shutdown(): Unit = IO(sc.shutdown()).void.unsafeRunSync()

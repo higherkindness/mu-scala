@@ -244,7 +244,7 @@ trait ChannelImplicits extends CommonRuntime {
   val channelFor: ChannelFor =
     ConfigForAddress[IO]("rpc.host", "rpc.port").unsafeRunSync
 
-  implicit val serviceClient: Resource[IO, Greeter.Client[IO]] =
+  implicit val serviceClient: Resource[IO, Greeter[IO]] =
     Greeter.client[IO](channelFor, options = CallOptions.DEFAULT.withCompression("gzip"))
 }
 
