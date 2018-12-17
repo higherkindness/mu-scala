@@ -31,7 +31,7 @@ class RPCTests extends RpcBaseTestSuite {
   import mu.rpc.avro.Utils.implicits._
 
   def runSucceedAssertion[A](ssd: ServerServiceDefinition, response: A)(
-      f: service.RPCService.Client[ConcurrentMonad] => ConcurrentMonad[A]): Assertion = {
+      f: service.RPCService[ConcurrentMonad] => ConcurrentMonad[A]): Assertion = {
     withServerChannel(ssd) { sc =>
       service.RPCService
         .clientFromChannel[ConcurrentMonad](IO(sc.channel))
@@ -41,7 +41,7 @@ class RPCTests extends RpcBaseTestSuite {
   }
 
   def runFailedAssertion[A](ssd: ServerServiceDefinition)(
-      f: service.RPCService.Client[ConcurrentMonad] => ConcurrentMonad[A]): Assertion = {
+      f: service.RPCService[ConcurrentMonad] => ConcurrentMonad[A]): Assertion = {
     withServerChannel(ssd) { sc =>
       assertThrows[io.grpc.StatusRuntimeException] {
         service.RPCService.clientFromChannel[ConcurrentMonad](IO(sc.channel)).use(f).unsafeRunSync()

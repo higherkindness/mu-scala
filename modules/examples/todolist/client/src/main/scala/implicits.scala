@@ -19,8 +19,8 @@ package examples.todolist.client
 import cats.effect.{ContextShift, IO, Resource, Timer}
 import examples.todolist.client.handlers._
 import examples.todolist.protocol.Protocols._
-import freestyle.tagless.loggingJVM.log4s.implicits._
 import examples.todolist.runtime.CommonRuntime
+import freestyle.tagless.loggingJVM.log4s.implicits._
 import mu.rpc.ChannelFor
 import mu.rpc.client.config.ConfigForAddress
 
@@ -32,25 +32,25 @@ trait ClientImplicits extends CommonRuntime {
   val channelFor: ChannelFor =
     ConfigForAddress[IO]("rpc.client.host", "rpc.client.port").unsafeRunSync()
 
-  val pingPongServiceClient: Resource[IO, PingPongService.Client[IO]] =
+  val pingPongServiceClient: Resource[IO, PingPongService[IO]] =
     PingPongService.client[IO](channelFor)
 
   implicit val pingPongClientHandler: PingPongClientHandler[IO] =
     new PingPongClientHandler[IO](pingPongServiceClient)
 
-  val tagRpcServiceClient: Resource[IO, TagRpcService.Client[IO]] =
+  val tagRpcServiceClient: Resource[IO, TagRpcService[IO]] =
     TagRpcService.client[IO](channelFor)
 
   implicit val tagClientHandler: TagClientHandler[IO] =
     new TagClientHandler[IO](tagRpcServiceClient)
 
-  val todoListRpcServiceClient: Resource[IO, TodoListRpcService.Client[IO]] =
+  val todoListRpcServiceClient: Resource[IO, TodoListRpcService[IO]] =
     TodoListRpcService.client[IO](channelFor)
 
   implicit val todoListClientHandler: TodoListClientHandler[IO] =
     new TodoListClientHandler[IO](todoListRpcServiceClient)
 
-  val todoItemRpcServiceClient: Resource[IO, TodoItemRpcService.Client[IO]] =
+  val todoItemRpcServiceClient: Resource[IO, TodoItemRpcService[IO]] =
     TodoItemRpcService.client[IO](channelFor)
 
   implicit val todoItemClientHandler: TodoItemClientHandler[IO] =

@@ -176,7 +176,7 @@ object MainApp extends CommonRuntime {
     )
   )
 
-  val muRPCServiceClient: Resource[IO, Greeter.Client[IO]] =
+  val muRPCServiceClient: Resource[IO, Greeter[IO]] =
     Greeter.clientFromChannel[IO](IO(channelInterpreter.build))
 
 }

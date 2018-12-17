@@ -17,7 +17,6 @@
 package mu.rpc
 package protocol
 
-import cats.effect.{Bracket, Resource}
 import cats.{Monad, MonadError}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
@@ -65,7 +64,10 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
   "mu client" should {
 
     implicit val muRPCServiceClientHandler: MuRPCServiceClientHandler[ConcurrentMonad] =
-      new MuRPCServiceClientHandler[ConcurrentMonad]
+      new MuRPCServiceClientHandler[ConcurrentMonad](
+        protoRPCServiceClient,
+        avroRPCServiceClient,
+        awsRPCServiceClient)
 
     "be able to run unary services" in {
 
@@ -257,22 +259,15 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     }
 
-    "be able to have non request methods" in {
-
-      def clientProgram[F[_]](
-          implicit client: Resource[F, service.ProtoRPCService.Client[F]],
-          B: Bracket[F, Throwable]): F[Int] =
-        client.use(_.sumA)
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe 3000
-    }
-
   }
 
   "mu client with compression" should {
 
     implicit val muRPCServiceClientHandler: MuRPCServiceClientCompressedHandler[ConcurrentMonad] =
-      new MuRPCServiceClientCompressedHandler[ConcurrentMonad]
+      new MuRPCServiceClientCompressedHandler[ConcurrentMonad](
+        compressedprotoRPCServiceClient,
+        compressedavroRPCServiceClient,
+        compressedawsRPCServiceClient)
 
     "be able to run unary services" in {
 

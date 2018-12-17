@@ -79,11 +79,11 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         )
       )
 
-      val avroRpcService: Resource[ConcurrentMonad, AvroRPCService.Client[ConcurrentMonad]] =
+      val avroRpcService: Resource[ConcurrentMonad, AvroRPCService[ConcurrentMonad]] =
         AvroRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
       val avroWithSchemaRpcService: Resource[
         ConcurrentMonad,
-        AvroWithSchemaRPCService.Client[ConcurrentMonad]] =
+        AvroWithSchemaRPCService[ConcurrentMonad]] =
         AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
 
       avroRpcService.use(_.unary(a1)).unsafeRunSync() shouldBe c1
@@ -102,11 +102,11 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         )
       )
 
-      val avroRpcService: Resource[ConcurrentMonad, AvroRPCService.Client[ConcurrentMonad]] =
+      val avroRpcService: Resource[ConcurrentMonad, AvroRPCService[ConcurrentMonad]] =
         AvroRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
       val avroWithSchemaRpcService: Resource[
         ConcurrentMonad,
-        AvroWithSchemaRPCService.Client[ConcurrentMonad]] =
+        AvroWithSchemaRPCService[ConcurrentMonad]] =
         AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
 
       a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
@@ -128,11 +128,11 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         )
       )
 
-      val avroRpcService: Resource[ConcurrentMonad, AvroRPCService.Client[ConcurrentMonad]] =
+      val avroRpcService: Resource[ConcurrentMonad, AvroRPCService[ConcurrentMonad]] =
         AvroRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
       val avroWithSchemaRpcService: Resource[
         ConcurrentMonad,
-        AvroWithSchemaRPCService.Client[ConcurrentMonad]] =
+        AvroWithSchemaRPCService[ConcurrentMonad]] =
         AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
 
       a[io.grpc.StatusRuntimeException] shouldBe thrownBy(

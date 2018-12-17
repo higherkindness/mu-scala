@@ -190,7 +190,7 @@ object serviceImpl {
         )(implicit
           F: _root_.cats.effect.ConcurrentEffect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
-        ) extends _root_.io.grpc.stub.AbstractStub[$Client[$F]](channel, options) {
+        ) extends _root_.io.grpc.stub.AbstractStub[$Client[$F]](channel, options) with $serviceName[$F] {
           override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $Client[$F] =
               new $Client[$F](channel, options)
 
@@ -208,12 +208,12 @@ object serviceImpl {
           )(implicit
           F: _root_.cats.effect.ConcurrentEffect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
-        ): _root_.cats.effect.Resource[F, $Client[$F]] =
+        ): _root_.cats.effect.Resource[F, $serviceName[$F]] =
           _root_.cats.effect.Resource.make {
             val managedChannelInterpreter = new _root_.mu.rpc.client.ManagedChannelInterpreter[$F](channelFor, channelConfigList)
             managedChannelInterpreter.build(channelFor, channelConfigList)
           }(channel => F.void(F.delay(channel.shutdown()))).flatMap(ch =>
-          _root_.cats.effect.Resource.make(F.delay(new $Client[$F](ch, options)))(_ => F.unit))
+          _root_.cats.effect.Resource.make[F, $serviceName[$F]](F.delay(new $Client[$F](ch, options)))(_ => F.unit))
         """.supressWarts("DefaultArguments")
 
       val clientFromChannel: DefDef =
@@ -224,9 +224,9 @@ object serviceImpl {
         )(implicit
           F: _root_.cats.effect.ConcurrentEffect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
-        ): _root_.cats.effect.Resource[F, $Client[$F]] = _root_.cats.effect.Resource.make(channel)(channel =>
+        ): _root_.cats.effect.Resource[F, $serviceName[$F]] = _root_.cats.effect.Resource.make(channel)(channel =>
         F.void(F.delay(channel.shutdown()))).flatMap(ch =>
-        _root_.cats.effect.Resource.make(F.delay(new $Client[$F](ch, options)))(_ => F.unit))
+        _root_.cats.effect.Resource.make[F, $serviceName[$F]](F.delay(new $Client[$F](ch, options)))(_ => F.unit))
         """.supressWarts("DefaultArguments")
 
       val unsafeClient: DefDef =
@@ -239,7 +239,7 @@ object serviceImpl {
           )(implicit
           F: _root_.cats.effect.ConcurrentEffect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
-        ): $Client[$F] = {
+        ): $serviceName[$F] = {
           val managedChannelInterpreter =
             new _root_.mu.rpc.client.ManagedChannelInterpreter[$F](channelFor, channelConfigList)
           new $Client[$F](managedChannelInterpreter.unsafeBuild(channelFor, channelConfigList), options)
@@ -253,7 +253,7 @@ object serviceImpl {
         )(implicit
           F: _root_.cats.effect.ConcurrentEffect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
-        ): $Client[$F] = new $Client[$F](channel, options)
+        ): $serviceName[$F] = new $Client[$F](channel, options)
         """.supressWarts("DefaultArguments")
 
       private def lit(x: Any): Literal = Literal(Constant(x.toString))

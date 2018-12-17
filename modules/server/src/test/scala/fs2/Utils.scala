@@ -167,29 +167,29 @@ object Utils extends CommonUtils {
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    implicit val muProtoRPCServiceClient: Resource[
+    val muProtoRPCServiceClient: Resource[
       ConcurrentMonad,
-      ProtoRPCService.Client[ConcurrentMonad]] =
+      ProtoRPCService[ConcurrentMonad]] =
       ProtoRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val muAvroRPCServiceClient: Resource[
+    val muAvroRPCServiceClient: Resource[
       ConcurrentMonad,
-      AvroRPCService.Client[ConcurrentMonad]] =
+      AvroRPCService[ConcurrentMonad]] =
       AvroRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val muAvroWithSchemaRPCServiceClient: Resource[
+    val muAvroWithSchemaRPCServiceClient: Resource[
       ConcurrentMonad,
-      AvroWithSchemaRPCService.Client[ConcurrentMonad]] =
+      AvroWithSchemaRPCService[ConcurrentMonad]] =
       AvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val muCompressedProtoRPCServiceClient: Resource[
+    val muCompressedProtoRPCServiceClient: Resource[
       ConcurrentMonad,
-      CompressedProtoRPCService.Client[ConcurrentMonad]] =
+      CompressedProtoRPCService[ConcurrentMonad]] =
       CompressedProtoRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val muCompressedAvroRPCServiceClient: Resource[
+    val muCompressedAvroRPCServiceClient: Resource[
       ConcurrentMonad,
-      CompressedAvroRPCService.Client[ConcurrentMonad]] =
+      CompressedAvroRPCService[ConcurrentMonad]] =
       CompressedAvroRPCService.client[ConcurrentMonad](createChannelFor)
-    implicit val muCompressedAvroWithSchemaRPCServiceClient: Resource[
+    val muCompressedAvroWithSchemaRPCServiceClient: Resource[
       ConcurrentMonad,
-      CompressedAvroWithSchemaRPCService.Client[ConcurrentMonad]] =
+      CompressedAvroWithSchemaRPCService[ConcurrentMonad]] =
       CompressedAvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
 
   }

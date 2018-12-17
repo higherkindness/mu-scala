@@ -52,7 +52,7 @@ package object netty {
     case NettyEventLoopGroup(eventLoopGroup) => mcb.eventLoopGroup(eventLoopGroup)
     case NettySslContext(sslContext)         => mcb.sslContext(sslContext)
     case NettyFlowControlWindow(fcw)         => mcb.flowControlWindow(fcw)
-    case NettyMaxHeaderListSize(mhls)        => mcb.maxHeaderListSize(mhls)
+    case NettyMaxHeaderListSize(mhls)        => mcb.maxInboundMetadataSize(mhls)
     case NettyUsePlaintext()                 => mcb.usePlaintext()
     case NettyUseTransportSecurity           => mcb.useTransportSecurity()
     case NettyKeepAliveTime(kat, tu)         => mcb.keepAliveTime(kat, tu)
