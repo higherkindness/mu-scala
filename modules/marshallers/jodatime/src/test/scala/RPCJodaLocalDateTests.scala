@@ -19,12 +19,12 @@ package protocol
 
 import org.joda.time._
 import cats.Applicative
-import cats.effect.{IO, Resource}
+import cats.effect.Resource
 import cats.syntax.applicative._
 import com.fortysevendeg.scalacheck.datetime.instances.joda._
 import com.fortysevendeg.scalacheck.datetime.GenDateTime._
 import mu.rpc.common._
-import mu.rpc.testing.servers.withServerChannel
+import mu.rpc.testing.servers.{withServerChannel, ServerChannel}
 import org.scalacheck.Arbitrary
 import org.scalatest._
 import org.scalacheck.Prop._
@@ -33,7 +33,7 @@ import org.scalatest.prop.Checkers
 class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with Checkers {
 
   def withClient[Client, A](resource: Resource[ConcurrentMonad, Client])(f: Client => A): A =
-    resource.use(client => IO(f(client))).unsafeRunSync()
+    resource.use(client => suspendM(f(client))).unsafeRunSync()
 
   object RPCJodaLocalDateService {
 
@@ -90,6 +90,22 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
     import TestsImplicits._
     import RPCJodaLocalDateService._
 
+    def protoClient(
+        sc: ServerChannel): Resource[ConcurrentMonad, ProtobufService.Def[ConcurrentMonad]] =
+      ProtobufService.Def
+        .clientFromChannel[ConcurrentMonad, ProtobufService.Def[ConcurrentMonad]](
+          suspendM(sc.channel))
+
+    def avroClient(sc: ServerChannel): Resource[ConcurrentMonad, AvroService.Def[ConcurrentMonad]] =
+      AvroService.Def
+        .clientFromChannel[ConcurrentMonad, AvroService.Def[ConcurrentMonad]](suspendM(sc.channel))
+
+    def avroWSClient(
+        sc: ServerChannel): Resource[ConcurrentMonad, AvroService.WithSchemaDef[ConcurrentMonad]] =
+      AvroService.WithSchemaDef
+        .clientFromChannel[ConcurrentMonad, AvroService.WithSchemaDef[ConcurrentMonad]](
+          suspendM(sc.channel))
+
     implicit val H: RPCLocalDateServiceDefHandler[ConcurrentMonad] =
       new RPCLocalDateServiceDefHandler[ConcurrentMonad]
 
@@ -99,15 +115,14 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
     "be able to serialize and deserialize joda.time.LocalDate using proto format" in {
 
       withServerChannel(ProtobufService.Def.bindService[ConcurrentMonad]) { sc =>
-        withClient(ProtobufService.Def.clientFromChannel[ConcurrentMonad](IO(sc.channel))) {
-          client =>
-            check {
-              forAll(genDateTimeWithinRange(from, range)) { dt: DateTime =>
-                val date = dt.toLocalDate
-                client.jodaLocalDateProto(date).unsafeRunSync() == date
+        withClient(protoClient(sc)) { client =>
+          check {
+            forAll(genDateTimeWithinRange(from, range)) { dt: DateTime =>
+              val date = dt.toLocalDate
+              client.jodaLocalDateProto(date).unsafeRunSync() == date
 
-              }
             }
+          }
         }
 
       }
@@ -116,19 +131,18 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
     "be able to serialize and deserialize joda.time.LocalDate in a Request using proto format" in {
 
       withServerChannel(ProtobufService.Def.bindService[ConcurrentMonad]) { sc =>
-        withClient(ProtobufService.Def.clientFromChannel[ConcurrentMonad](IO(sc.channel))) {
-          client =>
-            check {
-              forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
-                (dt: DateTime, s: String) =>
-                  val date = dt.toLocalDate
-                  client.jodaLocalDateReqProto(Request(date, s)).unsafeRunSync() == Response(
-                    date,
-                    s,
-                    check = true
-                  )
-              }
+        withClient(protoClient(sc)) { client =>
+          check {
+            forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
+              (dt: DateTime, s: String) =>
+                val date = dt.toLocalDate
+                client.jodaLocalDateReqProto(Request(date, s)).unsafeRunSync() == Response(
+                  date,
+                  s,
+                  check = true
+                )
             }
+          }
         }
 
       }
@@ -137,7 +151,7 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
     "be able to serialize and deserialize joda.time.LocalDate using avro format" in {
 
       withServerChannel(AvroService.Def.bindService[ConcurrentMonad]) { sc =>
-        withClient(AvroService.Def.clientFromChannel[ConcurrentMonad](IO(sc.channel))) { client =>
+        withClient(avroClient(sc)) { client =>
           check {
             forAll(genDateTimeWithinRange(from, range)) { dt: DateTime =>
               val date = dt.toLocalDate
@@ -153,7 +167,7 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
     "be able to serialize and deserialize joda.time.LocalDate in a Request using avro format" in {
 
       withServerChannel(AvroService.Def.bindService[ConcurrentMonad]) { sc =>
-        withClient(AvroService.Def.clientFromChannel[ConcurrentMonad](IO(sc.channel))) { client =>
+        withClient(avroClient(sc)) { client =>
           check {
             forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
               (dt: DateTime, s: String) =>
@@ -172,14 +186,13 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
     "be able to serialize and deserialize joda.time.LocalDate using avro with schema format" in {
 
       withServerChannel(AvroService.WithSchemaDef.bindService[ConcurrentMonad]) { sc =>
-        withClient(AvroService.WithSchemaDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))) {
-          client =>
-            check {
-              forAll(genDateTimeWithinRange(from, range)) { dt: DateTime =>
-                val date = dt.toLocalDate
-                client.localDateAvroWithSchema(date).unsafeRunSync() == date
-              }
+        withClient(avroWSClient(sc)) { client =>
+          check {
+            forAll(genDateTimeWithinRange(from, range)) { dt: DateTime =>
+              val date = dt.toLocalDate
+              client.localDateAvroWithSchema(date).unsafeRunSync() == date
             }
+          }
         }
 
       }
@@ -188,21 +201,20 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
     "be able to serialize and deserialize joda.time.LocalDate in a Request using avro with schema format" in {
 
       withServerChannel(AvroService.WithSchemaDef.bindService[ConcurrentMonad]) { sc =>
-        withClient(AvroService.WithSchemaDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))) {
-          client =>
-            check {
-              forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
-                (dt: DateTime, s: String) =>
-                  val date = dt.toLocalDate
-                  client
-                    .jodaLocalDateReqAvroWithSchema(Request(date, s))
-                    .unsafeRunSync() == Response(
-                    date,
-                    s,
-                    check = true
-                  )
-              }
+        withClient(avroWSClient(sc)) { client =>
+          check {
+            forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
+              (dt: DateTime, s: String) =>
+                val date = dt.toLocalDate
+                client
+                  .jodaLocalDateReqAvroWithSchema(Request(date, s))
+                  .unsafeRunSync() == Response(
+                  date,
+                  s,
+                  check = true
+                )
             }
+          }
         }
       }
     }

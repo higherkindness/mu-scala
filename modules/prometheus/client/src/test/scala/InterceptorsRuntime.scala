@@ -60,13 +60,13 @@ case class InterceptorsRuntime(
   )
 
   lazy val muProtoRPCServiceClient: Resource[ConcurrentMonad, ProtoRPCService[ConcurrentMonad]] =
-    ProtoRPCService.client[ConcurrentMonad](
+    ProtoRPCService.client[ConcurrentMonad, ProtoRPCService[ConcurrentMonad]](
       channelFor = createChannelForPort(pickUnusedPort),
       channelConfigList = configList
     )
 
   lazy val muAvroRPCServiceClient: Resource[ConcurrentMonad, AvroRPCService[ConcurrentMonad]] =
-    AvroRPCService.client[ConcurrentMonad](
+    AvroRPCService.client[ConcurrentMonad, AvroRPCService[ConcurrentMonad]](
       channelFor = createChannelForPort(pickUnusedPort),
       channelConfigList = configList
     )
@@ -74,7 +74,7 @@ case class InterceptorsRuntime(
   lazy val muAvroWithSchemaRPCServiceClient: Resource[
     ConcurrentMonad,
     AvroWithSchemaRPCService[ConcurrentMonad]] =
-    AvroWithSchemaRPCService.client[ConcurrentMonad](
+    AvroWithSchemaRPCService.client[ConcurrentMonad, AvroWithSchemaRPCService[ConcurrentMonad]](
       channelFor = createChannelForPort(pickUnusedPort),
       channelConfigList = configList
     )

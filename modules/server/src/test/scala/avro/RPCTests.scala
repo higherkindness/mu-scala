@@ -17,7 +17,6 @@
 package mu.rpc
 package avro
 
-import cats.effect.IO
 import io.grpc.ServerServiceDefinition
 import mu.rpc.common._
 import mu.rpc.testing.servers.withServerChannel
@@ -34,7 +33,8 @@ class RPCTests extends RpcBaseTestSuite {
       f: service.RPCService[ConcurrentMonad] => ConcurrentMonad[A]): Assertion = {
     withServerChannel(ssd) { sc =>
       service.RPCService
-        .clientFromChannel[ConcurrentMonad](IO(sc.channel))
+        .clientFromChannel[ConcurrentMonad, service.RPCService[ConcurrentMonad]](
+          suspendM(sc.channel))
         .use(f)
         .unsafeRunSync() shouldBe response
     }
@@ -44,7 +44,11 @@ class RPCTests extends RpcBaseTestSuite {
       f: service.RPCService[ConcurrentMonad] => ConcurrentMonad[A]): Assertion = {
     withServerChannel(ssd) { sc =>
       assertThrows[io.grpc.StatusRuntimeException] {
-        service.RPCService.clientFromChannel[ConcurrentMonad](IO(sc.channel)).use(f).unsafeRunSync()
+        service.RPCService
+          .clientFromChannel[ConcurrentMonad, service.RPCService[ConcurrentMonad]](
+            suspendM(sc.channel))
+          .use(f)
+          .unsafeRunSync()
       }
     }
   }

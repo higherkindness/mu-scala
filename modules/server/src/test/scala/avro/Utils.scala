@@ -396,7 +396,8 @@ object Utils extends CommonUtils {
     implicit val muRPCServiceClient: Resource[
       ConcurrentMonad,
       service.RPCService[ConcurrentMonad]] =
-      service.RPCService.client[ConcurrentMonad](createChannelFor)
+      service.RPCService.client[ConcurrentMonad, service.RPCService[ConcurrentMonad]](
+        createChannelFor)
 
   }
 

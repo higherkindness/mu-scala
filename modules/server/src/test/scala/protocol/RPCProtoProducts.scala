@@ -18,11 +18,11 @@ package mu.rpc
 package protocol
 
 import cats.Applicative
-import cats.effect.IO
+import cats.effect.Resource
 import cats.syntax.applicative._
 import mu.rpc.common._
 import mu.rpc.protocol.Utils.withClient
-import mu.rpc.testing.servers.withServerChannel
+import mu.rpc.testing.servers.{withServerChannel, ServerChannel}
 import org.scalatest._
 import org.scalacheck.Prop._
 import org.scalatest.prop.Checkers
@@ -86,21 +86,39 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     import TestsImplicits._
     import RPCService._
 
+    def protoClient(
+        sc: ServerChannel): Resource[ConcurrentMonad, ProtoRPCServiceDef[ConcurrentMonad]] =
+      ProtoRPCServiceDef
+        .clientFromChannel[ConcurrentMonad, ProtoRPCServiceDef[ConcurrentMonad]](
+          suspendM(sc.channel))
+
+    def avroClient(
+        sc: ServerChannel): Resource[ConcurrentMonad, AvroRPCServiceDef[ConcurrentMonad]] =
+      AvroRPCServiceDef
+        .clientFromChannel[ConcurrentMonad, AvroRPCServiceDef[ConcurrentMonad]](
+          suspendM(sc.channel))
+
+    def avroWSClient(sc: ServerChannel): Resource[
+      ConcurrentMonad,
+      AvroWithSchemaRPCServiceDef[ConcurrentMonad]] =
+      AvroWithSchemaRPCServiceDef
+        .clientFromChannel[ConcurrentMonad, AvroWithSchemaRPCServiceDef[ConcurrentMonad]](
+          suspendM(sc.channel))
+
     implicit val H: RPCServiceDefImpl[ConcurrentMonad] =
       new RPCServiceDefImpl[ConcurrentMonad]
 
     "be able to serialize and deserialize Options in the request/response using proto format" in {
 
       withServerChannel(ProtoRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        withClient(ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))) {
-          client =>
-            check {
-              forAll { maybeString: Option[String] =>
-                client
-                  .optionProto(RequestOption(maybeString.map(MyParam)))
-                  .unsafeRunSync() == ResponseOption(maybeString, true)
-              }
+        withClient(protoClient(sc)) { client =>
+          check {
+            forAll { maybeString: Option[String] =>
+              client
+                .optionProto(RequestOption(maybeString.map(MyParam)))
+                .unsafeRunSync() == ResponseOption(maybeString, true)
             }
+          }
         }
 
       }
@@ -110,7 +128,7 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     "be able to serialize and deserialize Options in the request/response using avro format" in {
 
       withServerChannel(AvroRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        withClient(AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))) { client =>
+        withClient(avroClient(sc)) { client =>
           check {
             forAll { maybeString: Option[String] =>
               client
@@ -126,15 +144,14 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     "be able to serialize and deserialize Options in the request/response using avro with schema format" in {
 
       withServerChannel(AvroWithSchemaRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        withClient(AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))) {
-          client =>
-            check {
-              forAll { maybeString: Option[String] =>
-                client
-                  .optionAvroWithSchema(RequestOption(maybeString.map(MyParam)))
-                  .unsafeRunSync() == ResponseOption(maybeString, true)
-              }
+        withClient(avroWSClient(sc)) { client =>
+          check {
+            forAll { maybeString: Option[String] =>
+              client
+                .optionAvroWithSchema(RequestOption(maybeString.map(MyParam)))
+                .unsafeRunSync() == ResponseOption(maybeString, true)
             }
+          }
         }
       }
 
@@ -143,15 +160,14 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     "be able to serialize and deserialize Lists in the request/response using proto format" in {
 
       withServerChannel(ProtoRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        withClient(ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))) {
-          client =>
-            check {
-              forAll { list: List[String] =>
-                client
-                  .listProto(RequestList(list.map(MyParam)))
-                  .unsafeRunSync() == ResponseList(list, true)
-              }
+        withClient(protoClient(sc)) { client =>
+          check {
+            forAll { list: List[String] =>
+              client
+                .listProto(RequestList(list.map(MyParam)))
+                .unsafeRunSync() == ResponseList(list, true)
             }
+          }
         }
       }
 
@@ -160,7 +176,7 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     "be able to serialize and deserialize Lists in the request/response using avro format" in {
 
       withServerChannel(AvroRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        withClient(AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))) { client =>
+        withClient(avroClient(sc)) { client =>
           check {
             forAll { list: List[String] =>
               client
@@ -176,15 +192,14 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     "be able to serialize and deserialize Lists in the request/response using avro with schema format" in {
 
       withServerChannel(AvroWithSchemaRPCServiceDef.bindService[ConcurrentMonad]) { sc =>
-        withClient(AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](IO(sc.channel))) {
-          client =>
-            check {
-              forAll { list: List[String] =>
-                client
-                  .listAvroWithSchema(RequestList(list.map(MyParam)))
-                  .unsafeRunSync() == ResponseList(list, true)
-              }
+        withClient(avroWSClient(sc)) { client =>
+          check {
+            forAll { list: List[String] =>
+              client
+                .listAvroWithSchema(RequestList(list.map(MyParam)))
+                .unsafeRunSync() == ResponseList(list, true)
             }
+          }
         }
       }
 

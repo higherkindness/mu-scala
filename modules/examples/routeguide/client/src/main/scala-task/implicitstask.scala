@@ -26,7 +26,7 @@ import monix.eval.Task
 trait ClientTaskImplicits extends RouteGuide with ClientConf {
 
   implicit val routeGuideServiceClient: Resource[Task, RouteGuideService[Task]] =
-    RouteGuideService.client[Task](channelFor)
+    RouteGuideService.client[Task, RouteGuideService[Task]](channelFor)
 
   implicit val routeGuideClientHandler: RouteGuideClientHandler[Task] =
     new RouteGuideClientHandler[Task]

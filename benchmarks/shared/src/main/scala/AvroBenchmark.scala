@@ -36,7 +36,7 @@ class AvroBenchmark extends Runtime {
 
   implicit val handler: AvroHandler[IO]    = new AvroHandler[IO]
   val sc: ServerChannel                    = ServerChannel(PersonServiceAvro.bindService[IO])
-  val clientIO: Resource[IO, PersonServiceAvro[IO]] = PersonServiceAvro.clientFromChannel[IO](IO(sc.channel))
+  val clientIO: Resource[IO, PersonServiceAvro[IO]] = PersonServiceAvro.clientFromChannel[IO, PersonServiceAvro[IO]](IO(sc.channel))
 
   @TearDown
   def shutdown(): Unit = IO(sc.shutdown()).void.unsafeRunSync()

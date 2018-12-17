@@ -25,7 +25,7 @@ import example.routeguide.client.runtime._
 trait ClientIOImplicits extends RouteGuide with ClientConf {
 
   implicit val routeGuideServiceClient: Resource[IO, RouteGuideService[IO]] =
-    RouteGuideService.client[IO](channelFor)
+    RouteGuideService.client[IO, RouteGuideService[IO]](channelFor)
 
   implicit val routeGuideClientHandler: RouteGuideClientHandler[IO] =
     new RouteGuideClientHandler[IO]
