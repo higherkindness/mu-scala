@@ -167,13 +167,9 @@ object Utils extends CommonUtils {
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    val muProtoRPCServiceClient: Resource[
-      ConcurrentMonad,
-      ProtoRPCService[ConcurrentMonad]] =
+    val muProtoRPCServiceClient: Resource[ConcurrentMonad, ProtoRPCService[ConcurrentMonad]] =
       ProtoRPCService.client[ConcurrentMonad](createChannelFor)
-    val muAvroRPCServiceClient: Resource[
-      ConcurrentMonad,
-      AvroRPCService[ConcurrentMonad]] =
+    val muAvroRPCServiceClient: Resource[ConcurrentMonad, AvroRPCService[ConcurrentMonad]] =
       AvroRPCService.client[ConcurrentMonad](createChannelFor)
     val muAvroWithSchemaRPCServiceClient: Resource[
       ConcurrentMonad,

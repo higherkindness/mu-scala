@@ -210,8 +210,7 @@ object serviceImpl {
           EC: _root_.scala.concurrent.ExecutionContext
         ): _root_.cats.effect.Resource[F, $serviceName[$F]] =
           _root_.cats.effect.Resource.make {
-            val managedChannelInterpreter = new _root_.mu.rpc.client.ManagedChannelInterpreter[$F](channelFor, channelConfigList)
-            managedChannelInterpreter.build(channelFor, channelConfigList)
+            new _root_.mu.rpc.client.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
           }(channel => F.void(F.delay(channel.shutdown()))).flatMap(ch =>
           _root_.cats.effect.Resource.make[F, $serviceName[$F]](F.delay(new $Client[$F](ch, options)))(_ => F.unit))
         """.supressWarts("DefaultArguments")
@@ -241,8 +240,8 @@ object serviceImpl {
           EC: _root_.scala.concurrent.ExecutionContext
         ): $serviceName[$F] = {
           val managedChannelInterpreter =
-            new _root_.mu.rpc.client.ManagedChannelInterpreter[$F](channelFor, channelConfigList)
-          new $Client[$F](managedChannelInterpreter.unsafeBuild(channelFor, channelConfigList), options)
+            new _root_.mu.rpc.client.ManagedChannelInterpreter[$F](channelFor, channelConfigList).unsafeBuild
+          new $Client[$F](managedChannelInterpreter, options)
         }""".supressWarts("DefaultArguments")
 
       val unsafeClientFromChannel: DefDef =

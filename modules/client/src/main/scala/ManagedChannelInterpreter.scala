@@ -23,17 +23,14 @@ import cats.syntax.functor._
 
 import io.grpc._
 
-object ManagedChannelInterpreter {
+class ManagedChannelInterpreter[F[_]](
+    initConfig: ChannelFor,
+    configList: List[ManagedChannelConfig])(implicit F: Sync[F]) {
 
-  def apply[F[_], A](
-      initConfig: ChannelFor,
-      configList: List[ManagedChannelConfig],
-      fa: ManagedChannelOps[F, A])(implicit F: Sync[F]): F[A] =
-    fa(build(initConfig, configList))
+  def apply[A](fa: ManagedChannelOps[F, A]): F[A] =
+    fa(new ManagedChannelInterpreter(initConfig, configList).build)
 
-  def build[F[_], T <: ManagedChannelBuilder[T]](
-      initConfig: ChannelFor,
-      configList: List[ManagedChannelConfig])(implicit F: Sync[F]): F[ManagedChannel] = {
+  def build[T <: ManagedChannelBuilder[T]]: F[ManagedChannel] = {
 
     val builder: F[T] = initConfig match {
       case ChannelForAddress(name, port) =>
@@ -51,9 +48,7 @@ object ManagedChannelInterpreter {
     } yield built
   }
 
-  def unsafeBuild[F[_], T <: ManagedChannelBuilder[T]](
-      initConfig: ChannelFor,
-      configList: List[ManagedChannelConfig])(implicit E: Effect[F]): ManagedChannel =
-    E.toIO(build(initConfig, configList)).unsafeRunSync()
+  def unsafeBuild[T <: ManagedChannelBuilder[T]](implicit E: Effect[F]): ManagedChannel =
+    E.toIO(new ManagedChannelInterpreter(initConfig, configList).build).unsafeRunSync()
 
 }
