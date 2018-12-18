@@ -28,7 +28,7 @@ class ManagedChannelInterpreter[F[_]](
     configList: List[ManagedChannelConfig])(implicit F: Sync[F]) {
 
   def apply[A](fa: ManagedChannelOps[F, A]): F[A] =
-    fa(new ManagedChannelInterpreter(initConfig, configList).build)
+    fa(build)
 
   def build[T <: ManagedChannelBuilder[T]]: F[ManagedChannel] = {
 
@@ -49,6 +49,6 @@ class ManagedChannelInterpreter[F[_]](
   }
 
   def unsafeBuild[T <: ManagedChannelBuilder[T]](implicit E: Effect[F]): ManagedChannel =
-    E.toIO(new ManagedChannelInterpreter(initConfig, configList).build).unsafeRunSync()
+    E.toIO(build).unsafeRunSync()
 
 }
