@@ -14,10 +14,22 @@
                 font-size: 2.533rem;
             }
 
+            a {
+                margin-right: $base-point-grid;
+            }
+
+            @include fadeInDown( $duration: 1s,
+            $delay: .2s,
+            $function: ease);
+
         }
         .masthead-brand {
             @include flex(1); //background: rgba(#321, 0.2);
             max-width: 100%;
+
+            @include fadeInDown( $duration: 1s,
+            $delay: .6s,
+            $function: ease);
         }
     }
 }
@@ -25,7 +37,7 @@
 // Responsive mode
 @include bp(medium) {
     #masthead {
-       
+
         .masthead-content {
             @include flex-wrap(wrap);
             padding: ($base-point-grid * 8) 0;
