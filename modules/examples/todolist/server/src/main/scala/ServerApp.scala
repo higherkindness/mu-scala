@@ -19,8 +19,8 @@ package examples.todolist.server
 import cats.effect.IO
 import examples.todolist.protocol.Protocols._
 import examples.todolist.server.implicits._
-import mu.rpc.server.config.BuildServerFromConfig
-import mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
+import higherkindness.mu.rpc.server.config.BuildServerFromConfig
+import higherkindness.mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
 
 object ServerApp {
 

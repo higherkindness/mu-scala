@@ -45,7 +45,7 @@ trait CommonRuntime {
 ```
 
 ```tut:invisible
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 
 object service {
 
@@ -80,8 +80,8 @@ import java.io.File
 import java.security.cert.X509Certificate
 
 import cats.effect.{IO, Resource}
-import mu.rpc.server.netty.SetSslContext
-import mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
+import higherkindness.mu.rpc.server.netty.SetSslContext
+import higherkindness.mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
 import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.GrpcSslContexts
 import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}
@@ -130,9 +130,9 @@ Lastly, as we did before with the server side, let's see what happens on the cli
 
 ```tut:silent
 import cats.syntax.either._
-import mu.rpc.ChannelForAddress
-import mu.rpc.client.OverrideAuthority
-import mu.rpc.client.netty.{
+import higherkindness.mu.rpc.ChannelForAddress
+import higherkindness.mu.rpc.client.OverrideAuthority
+import higherkindness.mu.rpc.client.netty.{
   NettyChannelInterpreter,
   NettyNegotiationType,
   NettySslContext,

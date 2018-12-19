@@ -20,7 +20,7 @@ package handlers
 import cats.Applicative
 import cats.syntax.applicative._
 import examples.todolist.protocol.Protocols.{PingPongService, Pong}
-import mu.rpc.protocol.Empty
+import higherkindness.mu.rpc.protocol.Empty
 
 class PingPongServiceHandler[F[_]](implicit M: Applicative[F]) extends PingPongService[F] {
 

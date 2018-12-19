@@ -15,7 +15,7 @@ Predictably, generating the server code is just implementing a service [Handler]
 First, here's our `Greeter` RPC protocol definition:
 
 ```tut:invisible
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 
 object service {
 
@@ -64,7 +64,7 @@ Next, our dummy `Greeter` server implementation:
 ```tut:silent
 import cats.effect.Async
 import cats.syntax.applicative._
-import mu.rpc.internal.task._
+import higherkindness.mu.rpc.internal.task._
 import monix.reactive.Observable
 import service._
 
@@ -149,7 +149,7 @@ In summary, the result would be as follows:
 
 ```tut:silent
 import cats.effect.IO
-import mu.rpc.server._
+import higherkindness.mu.rpc.server._
 import service._
 
 object gserver {
@@ -171,7 +171,7 @@ What else is needed? We just need to define a `main` method:
 
 ```tut:silent
 import cats.effect.IO
-import mu.rpc.server.GrpcServer
+import higherkindness.mu.rpc.server.GrpcServer
 
 object RPCServer {
 
@@ -199,7 +199,7 @@ Thanks to `withServerChannel` from the package `mu.rpc.testing.servers`, you wil
 
 ```tut:silent
 import cats.effect.Resource
-import mu.rpc.testing.servers.withServerChannel
+import higherkindness.mu.rpc.testing.servers.withServerChannel
 import org.scalatest.prop.Checkers
 import org.scalatest._
 import org.scalacheck.Gen
@@ -273,9 +273,9 @@ So, taking into account all of that, how would our code look?
 
 ```tut:silent
 import cats.effect.{IO, Resource}
-import mu.rpc._
-import mu.rpc.config._
-import mu.rpc.client.config._
+import higherkindness.mu.rpc._
+import higherkindness.mu.rpc.config._
+import higherkindness.mu.rpc.client.config._
 import service._
 
 object gclient {

@@ -23,7 +23,7 @@ import cats.effect.{Resource, Sync}
 import examples.todolist.client.clients.TodoListClient
 import examples.todolist.protocol.Protocols._
 import examples.todolist.protocol._
-import mu.rpc.protocol.Empty
+import higherkindness.mu.rpc.protocol.Empty
 import freestyle.tagless.logging.LoggingM
 
 class TodoListClientHandler[F[_]: Sync](client: Resource[F, TodoListRpcService[F]])(

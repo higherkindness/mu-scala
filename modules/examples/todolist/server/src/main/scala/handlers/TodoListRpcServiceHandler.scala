@@ -24,7 +24,7 @@ import examples.todolist.protocol._
 import examples.todolist.protocol.Protocols._
 import examples.todolist.service.TodoListService
 import examples.todolist.TodoList
-import mu.rpc.protocol.Empty
+import higherkindness.mu.rpc.protocol.Empty
 
 class TodoListRpcServiceHandler[F[_]](implicit M: Monad[F], service: TodoListService[F])
     extends TodoListRpcService[F] {

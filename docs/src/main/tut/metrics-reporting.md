@@ -25,7 +25,7 @@ trait CommonRuntime {
 ```
 
 ```tut:invisible
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 
 object service {
 
@@ -57,15 +57,15 @@ class ServiceHandler[F[_]: Applicative] extends Greeter[F] {
 
 ```tut:silent
 import cats.effect.IO
-import mu.rpc.server._
-import mu.rpc.prometheus.shared.Configuration
-import mu.rpc.prometheus.server.MonitoringServerInterceptor
+import higherkindness.mu.rpc.server._
+import higherkindness.mu.rpc.prometheus.shared.Configuration
+import higherkindness.mu.rpc.prometheus.server.MonitoringServerInterceptor
 import io.prometheus.client.CollectorRegistry
 import service._
 
 object InterceptingServerCalls extends CommonRuntime {
 
-  import mu.rpc.interceptors.implicits._
+  import higherkindness.mu.rpc.interceptors.implicits._
 
   lazy val cr: CollectorRegistry = new CollectorRegistry()
   lazy val monitorInterceptor = MonitoringServerInterceptor(
@@ -90,14 +90,14 @@ In this case, in order to intercept the client calls we need additional configur
 
 ```tut:silent
 import cats.effect.{IO, Resource}
-import mu.rpc._
-import mu.rpc.config._
-import mu.rpc.client._
-import mu.rpc.client.config._
+import higherkindness.mu.rpc._
+import higherkindness.mu.rpc.config._
+import higherkindness.mu.rpc.client._
+import higherkindness.mu.rpc.client.config._
 import service._
 
-import mu.rpc.prometheus.shared.Configuration
-import mu.rpc.prometheus.client.MonitoringClientInterceptor
+import higherkindness.mu.rpc.prometheus.shared.Configuration
+import higherkindness.mu.rpc.prometheus.client.MonitoringClientInterceptor
 
 object InterceptingClientCalls extends CommonRuntime {
 

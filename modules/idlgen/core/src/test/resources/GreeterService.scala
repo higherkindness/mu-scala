@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 
 @outputName("MyGreeterService")
 @outputPackage("foo.bar")
