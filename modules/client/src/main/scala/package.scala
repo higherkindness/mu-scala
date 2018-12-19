@@ -16,9 +16,6 @@
 
 package mu.rpc
 
-import cats.effect.{Effect, Sync}
-import cats.syntax.flatMap._
-import cats.syntax.functor._
 import cats.data.Kleisli
 
 import scala.collection.JavaConverters._
@@ -27,39 +24,6 @@ import io.grpc._
 package object client {
 
   type ManagedChannelOps[F[_], A] = Kleisli[F, F[ManagedChannel], A]
-
-  class ManagedChannelInterpreter[F[_]](
-      initConfig: ChannelFor,
-      configList: List[ManagedChannelConfig])(implicit F: Sync[F]) {
-
-    def build[T <: ManagedChannelBuilder[T]](
-        initConfig: ChannelFor,
-        configList: List[ManagedChannelConfig]): F[ManagedChannel] = {
-
-      val builder: F[T] = initConfig match {
-        case ChannelForAddress(name, port) =>
-          F.delay(ManagedChannelBuilder.forAddress(name, port).asInstanceOf[T])
-        case ChannelForTarget(target) =>
-          F.delay(ManagedChannelBuilder.forTarget(target).asInstanceOf[T])
-        case e =>
-          F.raiseError(new IllegalArgumentException(s"ManagedChannel not supported for $e"))
-      }
-
-      for {
-        b          <- builder
-        configured <- F.delay(configList.foldLeft(b)(configureChannel))
-        built      <- F.delay(configured.build())
-      } yield built
-    }
-
-    def unsafeBuild[T <: ManagedChannelBuilder[T]](
-        initConfig: ChannelFor,
-        configList: List[ManagedChannelConfig])(implicit E: Effect[F]): ManagedChannel =
-      E.toIO(build(initConfig, configList)).unsafeRunSync()
-
-    def apply[A](fa: ManagedChannelOps[F, A]): F[A] =
-      fa(build(initConfig, configList))
-  }
 
   def configureChannel[T <: ManagedChannelBuilder[T]](mcb: T, conf: ManagedChannelConfig): T =
     conf match {

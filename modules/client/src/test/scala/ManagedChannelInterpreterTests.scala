@@ -37,7 +37,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
       val managedChannelInterpreter =
         new ManagedChannelInterpreter[IO](channelFor, channelConfigList)
 
-      val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild(channelFor, channelConfigList)
+      val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild
 
       mc shouldBe a[ManagedChannel]
 
@@ -53,7 +53,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
       val managedChannelInterpreter =
         new ManagedChannelInterpreter[IO](channelFor, channelConfigList)
 
-      val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild(channelFor, channelConfigList)
+      val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild
 
       mc shouldBe a[ManagedChannel]
 
@@ -84,7 +84,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
       val managedChannelInterpreter =
         new ManagedChannelInterpreter[IO](channelFor, channelConfigList)
 
-      val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild(channelFor, channelConfigList)
+      val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild
 
       mc shouldBe a[ManagedChannel]
 
@@ -98,8 +98,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
       val managedChannelInterpreter =
         new ManagedChannelInterpreter[IO](channelFor, Nil)
 
-      an[IllegalArgumentException] shouldBe thrownBy(
-        managedChannelInterpreter.build(channelFor, Nil).unsafeRunSync)
+      an[IllegalArgumentException] shouldBe thrownBy(managedChannelInterpreter.build.unsafeRunSync)
     }
   }
 }
