@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package mu.rpc.benchmarks
+package higherkindness.mu.rpc.benchmarks
 package shared
 
-import mu.rpc.benchmarks.shared.models._
+import higherkindness.mu.rpc.benchmarks.shared.models._
 
 object database {
 

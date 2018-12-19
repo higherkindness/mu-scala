@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package mu
+package higherkindness.mu
 package rpc
 
-import mu.rpc.internal.serviceImpl
+import higherkindness.mu.rpc.internal.serviceImpl
 
 import scala.annotation.{compileTimeOnly, StaticAnnotation}
 

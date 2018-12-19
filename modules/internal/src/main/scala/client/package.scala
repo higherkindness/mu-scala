@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package internal
 
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
@@ -24,7 +24,7 @@ import org.reactivestreams.{Publisher, Subscriber}
 
 package object client {
 
-  import mu.rpc.internal.converters._
+  import higherkindness.mu.rpc.internal.converters._
 
   private[client] def createPublisher[Res, Req](
       request: Req,

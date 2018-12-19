@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu
+package higherkindness.mu
 package rpc
 package internal
 

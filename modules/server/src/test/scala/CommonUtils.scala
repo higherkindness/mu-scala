@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 
 import java.net.ServerSocket
 
 import cats.Functor
 import cats.effect.{IO, Resource, Sync}
 import cats.syntax.functor._
-import mu.rpc.common._
-import mu.rpc.server._
+import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.server._
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}

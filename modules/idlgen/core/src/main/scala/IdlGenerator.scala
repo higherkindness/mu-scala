@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package mu.rpc.idlgen
+package higherkindness.mu.rpc.idlgen
 
 import java.io.File
 import java.nio.file.{Files, Paths}
-import mu.rpc.protocol.SerializationType
-import mu.rpc.internal.util._
+import higherkindness.mu.rpc.protocol.SerializationType
+import higherkindness.mu.rpc.internal.util._
 import scala.collection.JavaConverters._
 
 trait IdlGenerator extends Generator {

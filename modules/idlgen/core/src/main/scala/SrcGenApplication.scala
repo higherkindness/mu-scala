@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package mu.rpc.idlgen
+package higherkindness.mu.rpc.idlgen
 
-import mu.rpc.idlgen.Model.{BigDecimalTypeGen, MarshallersImport, ScalaBigDecimalTaggedGen}
-import mu.rpc.idlgen.avro.AvroSrcGenerator
+import higherkindness.mu.rpc.idlgen.Model.{
+  BigDecimalTypeGen,
+  MarshallersImport,
+  ScalaBigDecimalTaggedGen
+}
+import higherkindness.mu.rpc.idlgen.avro.AvroSrcGenerator
 
 object SrcGenApplication {
   def apply(

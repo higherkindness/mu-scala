@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package prometheus
 package client
 
 import cats.effect.Resource
-import mu.rpc.client._
-import mu.rpc.common.ConcurrentMonad
-import mu.rpc.prometheus.shared.Configuration
-import mu.rpc.protocol.Utils._
-import mu.rpc.protocol.Utils.handlers.client.MuRPCServiceClientHandler
+import higherkindness.mu.rpc.client._
+import higherkindness.mu.rpc.common.ConcurrentMonad
+import higherkindness.mu.rpc.prometheus.shared.Configuration
+import higherkindness.mu.rpc.protocol.Utils._
+import higherkindness.mu.rpc.protocol.Utils.handlers.client.MuRPCServiceClientHandler
 import io.prometheus.client.CollectorRegistry
 
 case class InterceptorsRuntime(
@@ -35,7 +35,7 @@ case class InterceptorsRuntime(
   import service._
   import handlers.server._
   import handlers.client._
-  import mu.rpc.server._
+  import higherkindness.mu.rpc.server._
 
   //////////////////////////////////
   // Server Runtime Configuration //

@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package mu.rpc.benchmarks
+package higherkindness.mu.rpc.benchmarks
 
 import cats.effect.{IO, Resource}
 import cats.syntax.functor._
-import mu.rpc.protocol.Empty
+import higherkindness.mu.rpc.protocol.Empty
 import java.util.concurrent.TimeUnit
 
-import mu.rpc.benchmarks.shared.Utils._
-import mu.rpc.benchmarks.shared.models._
-import mu.rpc.benchmarks.shared.protocols.PersonServiceAvro
-import mu.rpc.benchmarks.shared.Runtime
-import mu.rpc.benchmarks.shared.server._
-import mu.rpc.testing.servers.ServerChannel
+import higherkindness.mu.rpc.benchmarks.shared.Utils._
+import higherkindness.mu.rpc.benchmarks.shared.models._
+import higherkindness.mu.rpc.benchmarks.shared.protocols.PersonServiceAvro
+import higherkindness.mu.rpc.benchmarks.shared.Runtime
+import higherkindness.mu.rpc.benchmarks.shared.server._
+import higherkindness.mu.rpc.testing.servers.ServerChannel
 import org.openjdk.jmh.annotations._
 
 @State(Scope.Thread)

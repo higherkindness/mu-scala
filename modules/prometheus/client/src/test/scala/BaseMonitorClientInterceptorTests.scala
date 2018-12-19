@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package prometheus
 package client
 
-import mu.rpc.common._
-import mu.rpc.protocol.Utils.client.MyRPCClient
+import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.protocol.Utils.client.MyRPCClient
 import io.prometheus.client.{Collector, CollectorRegistry}
-import mu.rpc.interceptors.metrics._
+import higherkindness.mu.rpc.interceptors.metrics._
 import io.prometheus.client.Collector.MetricFamilySamples
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.Assertion
@@ -32,8 +32,8 @@ import scala.collection.JavaConverters._
 
 abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
 
-  import mu.rpc.protocol.Utils.database._
-  import mu.rpc.prometheus.shared.RegistryHelper._
+  import higherkindness.mu.rpc.protocol.Utils.database._
+  import higherkindness.mu.rpc.prometheus.shared.RegistryHelper._
 
   def name: String
   def namespace: Option[String]

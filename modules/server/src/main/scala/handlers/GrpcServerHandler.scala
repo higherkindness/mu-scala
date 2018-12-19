@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package server.handlers
 
 import cats.data.Kleisli
 import cats.effect.Sync
 import cats.syntax.functor._
-import mu.rpc.server.{GrpcServer, GrpcServerOps}
+import higherkindness.mu.rpc.server.{GrpcServer, GrpcServerOps}
 import io.grpc.{Server, ServerServiceDefinition}
 
 import scala.collection.JavaConverters._

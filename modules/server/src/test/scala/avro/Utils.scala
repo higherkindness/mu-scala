@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package avro
 
-import mu.rpc.common._
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.protocol._
 import cats.effect.{ConcurrentEffect, Effect, Resource}
 import shapeless.{:+:, CNil, Coproduct}
 

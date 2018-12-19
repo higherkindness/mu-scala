@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package fs2
 
-import mu.rpc.common._
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.protocol._
 import _root_.fs2._
 import cats.effect.{Effect, Resource}
 import io.grpc.Status
@@ -142,7 +142,7 @@ object Utils extends CommonUtils {
     import TestsImplicits._
     import service._
     import handlers.server._
-    import mu.rpc.server._
+    import higherkindness.mu.rpc.server._
 
     //////////////////////////////////
     // Server Runtime Configuration //

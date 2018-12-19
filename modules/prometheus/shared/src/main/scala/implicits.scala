@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package prometheus
 
-import mu.rpc.interceptors.MetricType
+import higherkindness.mu.rpc.interceptors.MetricType
 import io.prometheus.client.{Counter, Histogram}
 
 trait MetricsTypeSyntax {

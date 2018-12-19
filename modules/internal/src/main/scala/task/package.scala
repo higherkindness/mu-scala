@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-package mu.rpc.internal
+package higherkindness.mu.rpc.internal
 
-import mu.rpc.internal.task.instances.TaskInstances
+import higherkindness.mu.rpc.internal.task.instances.TaskInstances
 
 package object task extends TaskInstances

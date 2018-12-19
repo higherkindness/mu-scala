@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package server
 
 import java.net.InetSocketAddress
 
 import cats.effect.IO
-import mu.rpc.common.SC
+import higherkindness.mu.rpc.common.SC
 
 class ServerConfigTests extends RpcServerTestSuite {
 

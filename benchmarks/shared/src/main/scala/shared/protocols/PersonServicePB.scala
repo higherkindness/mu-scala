@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package mu.rpc.benchmarks
+package higherkindness.mu.rpc.benchmarks
 package shared
 package protocols
 
-import mu.rpc.benchmarks.shared.models._
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.benchmarks.shared.models._
+import higherkindness.mu.rpc.protocol._
 
 @service(Protobuf)
 trait PersonServicePB[F[_]] {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package common
 
 case class A(x: Int, y: Int)

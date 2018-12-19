@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package server
 
 import java.util.concurrent.TimeUnit
 
 import cats.Apply
 import cats.syntax.apply._
-import mu.rpc.common.{ConcurrentMonad, SC}
+import higherkindness.mu.rpc.common.{ConcurrentMonad, SC}
 import io.grpc.{Server, ServerServiceDefinition}
 
 class GrpcServerTests extends RpcServerTestSuite {

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package client
 
 import cats.effect.IO
 import cats.data.Kleisli
-import mu.rpc.common.SC
+import higherkindness.mu.rpc.common.SC
 import io.grpc.ManagedChannel
 
 abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {

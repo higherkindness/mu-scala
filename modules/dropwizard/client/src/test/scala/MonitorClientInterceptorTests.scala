@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package dropwizard
 package client
 
 import com.codahale.metrics.MetricRegistry
-import mu.rpc.prometheus.client.{BaseMonitorClientInterceptorTests, InterceptorsRuntime}
-import mu.rpc.prometheus.shared.Configuration
+import higherkindness.mu.rpc.prometheus.client.{
+  BaseMonitorClientInterceptorTests,
+  InterceptorsRuntime
+}
+import higherkindness.mu.rpc.prometheus.shared.Configuration
 import io.prometheus.client.dropwizard.DropwizardExports
 
 class MonitorClientInterceptorTests extends BaseMonitorClientInterceptorTests {

@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package mu.rpc.idlgen
+package higherkindness.mu.rpc.idlgen
 
 trait SrcGenerator extends Generator

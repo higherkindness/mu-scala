@@ -62,11 +62,11 @@ protocol StockInfoService {
 
 **Scala**
 ```scala
-package mu.rpc.protocols
+package higherkindness.mu.rpc.protocols
 
-import mu.rpc.internal.encoders.avro.bigdecimal._
-import mu.rpc.internal.encoders.avro.javatime._
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.internal.encoders.avro.bigdecimal._
+import higherkindness.mu.rpc.internal.encoders.avro.javatime._
+import higherkindness.mu.rpc.protocol._
 
 @message case class StockInfoRequest(stockId: String)
 
@@ -84,11 +84,11 @@ With the *Scala* definition, you can serialize the `BigDecimal`s according to th
 Starting with `0.15.1` you can generate the following service in *Scala* (manually or through the `idlgen` plugin with the setting `idlGenBigDecimal := ScalaBigDecimalTaggedGen`)
 
 ```scala
-package mu.rpc.protocols
+package higherkindness.mu.rpc.protocols
 
-import mu.rpc.internal.encoders.avro.bigDecimalTagged._
-import mu.rpc.internal.encoders.avro.javatime._
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._
+import higherkindness.mu.rpc.internal.encoders.avro.javatime._
+import higherkindness.mu.rpc.protocol._
 import shapeless.{@@, Nat}
 
 @message case class StockInfoRequest(stockId: String)

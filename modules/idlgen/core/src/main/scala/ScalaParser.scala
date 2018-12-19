@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package idlgen
 
-import mu.rpc.internal.util.StringUtil._
-import mu.rpc.internal.util.{AstOptics, Toolbox}
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.internal.util.StringUtil._
+import higherkindness.mu.rpc.internal.util.{AstOptics, Toolbox}
+import higherkindness.mu.rpc.protocol._
 
 object ScalaParser {
 

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package mu.rpc.idlgen
+package higherkindness.mu.rpc.idlgen
 
-import mu.rpc.common.RpcBaseTestSuite
-import mu.rpc.idlgen.avro.{AvroIdlGenerator, AvroWithSchemaIdlGenerator}
-import mu.rpc.idlgen.proto.ProtoIdlGenerator
-import mu.rpc.idlgen.Model._
-import mu.rpc.protocol._
-import mu.rpc.internal.util._
+import higherkindness.mu.rpc.common.RpcBaseTestSuite
+import higherkindness.mu.rpc.idlgen.avro.{AvroIdlGenerator, AvroWithSchemaIdlGenerator}
+import higherkindness.mu.rpc.idlgen.proto.ProtoIdlGenerator
+import higherkindness.mu.rpc.idlgen.Model._
+import higherkindness.mu.rpc.protocol._
+import higherkindness.mu.rpc.internal.util._
 
 class IdlGenTests extends RpcBaseTestSuite {
   // format: OFF

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package prometheus
 package server
 
 import java.time.{Clock, Instant}
 
-import mu.rpc.interceptors.GrpcMethodInfo
-import mu.rpc.prometheus.shared.Configuration
+import higherkindness.mu.rpc.interceptors.GrpcMethodInfo
+import higherkindness.mu.rpc.prometheus.shared.Configuration
 import io.grpc._
 
 case class MonitoringServerInterceptor(clock: Clock)(implicit CFG: Configuration)

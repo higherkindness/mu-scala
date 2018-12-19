@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package server.handlers
 
-import mu.rpc.common.{ConcurrentMonad, SC}
-import mu.rpc.server.RpcServerTestSuite
+import higherkindness.mu.rpc.common.{ConcurrentMonad, SC}
+import higherkindness.mu.rpc.server.RpcServerTestSuite
 import io.grpc.{Server, ServerServiceDefinition}
 
 import scala.concurrent.ExecutionContext

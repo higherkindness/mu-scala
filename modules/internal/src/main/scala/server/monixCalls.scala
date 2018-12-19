@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package internal
 package server
 
@@ -33,7 +33,7 @@ import monix.reactive.Observable
 
 object monixCalls {
 
-  import mu.rpc.internal.converters._
+  import higherkindness.mu.rpc.internal.converters._
 
   def unaryMethod[F[_]: Effect, Req, Res](
       f: Req => F[Res],

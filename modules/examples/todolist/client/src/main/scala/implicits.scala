@@ -21,8 +21,8 @@ import examples.todolist.client.handlers._
 import examples.todolist.protocol.Protocols._
 import examples.todolist.runtime.CommonRuntime
 import freestyle.tagless.loggingJVM.log4s.implicits._
-import mu.rpc.ChannelFor
-import mu.rpc.client.config.ConfigForAddress
+import higherkindness.mu.rpc.ChannelFor
+import higherkindness.mu.rpc.client.config.ConfigForAddress
 
 trait ClientImplicits extends CommonRuntime {
 

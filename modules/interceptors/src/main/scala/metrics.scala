@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package interceptors
 
 sealed abstract class MetricsFor(val value: String) extends Product with Serializable

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package protocol
 
 import cats.{Monad, MonadError}
@@ -22,16 +22,16 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import com.google.protobuf.InvalidProtocolBufferException
 import org.scalatest._
-import mu.rpc.common._
-import mu.rpc.protocol.Utils.handlers.client._
-import mu.rpc.server._
+import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.protocol.Utils.handlers.client._
+import higherkindness.mu.rpc.server._
 
 class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
-  import mu.rpc.protocol.Utils._
-  import mu.rpc.protocol.Utils.client.MyRPCClient
-  import mu.rpc.protocol.Utils.database._
-  import mu.rpc.protocol.Utils.implicits._
+  import higherkindness.mu.rpc.protocol.Utils._
+  import higherkindness.mu.rpc.protocol.Utils.client.MyRPCClient
+  import higherkindness.mu.rpc.protocol.Utils.database._
+  import higherkindness.mu.rpc.protocol.Utils.implicits._
 
   override protected def beforeAll(): Unit =
     serverStart[ConcurrentMonad].unsafeRunSync()

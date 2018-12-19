@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 
 import cats.data.Kleisli
-import mu.rpc.server.netty._
+import higherkindness.mu.rpc.server.netty._
 import io.grpc.{ServerBuilder, _}
 import io.grpc.netty.NettyServerBuilder
 

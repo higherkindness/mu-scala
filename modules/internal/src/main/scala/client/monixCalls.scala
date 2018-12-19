@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package internal
 package client
 
@@ -25,13 +25,13 @@ import com.google.common.util.concurrent._
 import io.grpc.stub.{ClientCalls, StreamObserver}
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
 import monix.reactive.Observable
-import mu.rpc.internal.task._
+import higherkindness.mu.rpc.internal.task._
 
 import scala.concurrent.ExecutionContext
 
 object monixCalls {
 
-  import mu.rpc.internal.converters._
+  import higherkindness.mu.rpc.internal.converters._
 
   def unary[F[_]: Async, Req, Res](
       request: Req,

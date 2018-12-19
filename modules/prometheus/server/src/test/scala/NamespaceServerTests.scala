@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package prometheus
 package server
 
-import mu.rpc.common._
-import mu.rpc.interceptors.metrics._
-import mu.rpc.prometheus.shared.Configuration
-import mu.rpc.protocol.Utils.client.MyRPCClient
+import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.interceptors.metrics._
+import higherkindness.mu.rpc.prometheus.shared.Configuration
+import higherkindness.mu.rpc.protocol.Utils.client.MyRPCClient
 import org.scalatest.OptionValues
 
 import scala.collection.JavaConverters._
 
 class NamespaceServerTests extends RpcBaseTestSuite with OptionValues {
 
-  import mu.rpc.prometheus.shared.RegistryHelper._
-  import mu.rpc.protocol.Utils.database._
+  import higherkindness.mu.rpc.prometheus.shared.RegistryHelper._
+  import higherkindness.mu.rpc.protocol.Utils.database._
 
   val namespace: String                   = "custom_nsp"
   lazy val maybeNamespace: Option[String] = Some(namespace)

@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package avro
 
 import cats.effect.IO
 import io.grpc.ServerServiceDefinition
-import mu.rpc.common._
-import mu.rpc.testing.servers.withServerChannel
+import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.testing.servers.withServerChannel
 import org.scalatest._
 import shapeless.{:+:, CNil, Coproduct}
 
 class RPCTests extends RpcBaseTestSuite {
 
   import TestsImplicits._
-  import mu.rpc.avro.Utils._
-  import mu.rpc.avro.Utils.implicits._
+  import higherkindness.mu.rpc.avro.Utils._
+  import higherkindness.mu.rpc.avro.Utils.implicits._
 
   def runSucceedAssertion[A](ssd: ServerServiceDefinition, response: A)(
       f: service.RPCService[ConcurrentMonad] => ConcurrentMonad[A]): Assertion = {

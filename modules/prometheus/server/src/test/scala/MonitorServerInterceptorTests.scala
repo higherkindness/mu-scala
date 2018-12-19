@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package prometheus
 package server
 
-import mu.rpc.prometheus.shared.Configuration
+import higherkindness.mu.rpc.prometheus.shared.Configuration
 
 class MonitorServerInterceptorTests extends BaseMonitorServerInterceptorTests {
 

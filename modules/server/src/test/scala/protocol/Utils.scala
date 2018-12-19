@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package protocol
 
 import cats.MonadError
@@ -22,7 +22,7 @@ import cats.effect.{Async, Resource}
 import cats.syntax.applicative._
 import io.grpc.Status
 import monix.reactive.Observable
-import mu.rpc.common._
+import higherkindness.mu.rpc.common._
 
 object Utils extends CommonUtils {
 
@@ -118,10 +118,10 @@ object Utils extends CommonUtils {
 
     object server {
 
-      import mu.rpc.internal.task._
+      import higherkindness.mu.rpc.internal.task._
       import database._
       import service._
-      import mu.rpc.protocol._
+      import higherkindness.mu.rpc.protocol._
 
       class ServerRPCService[F[_]: Async](implicit M: MonadError[F, Throwable])
           extends ProtoRPCService[F]
@@ -255,10 +255,10 @@ object Utils extends CommonUtils {
 
     object client {
 
-      import mu.rpc.internal.task._
+      import higherkindness.mu.rpc.internal.task._
       import service._
-      import mu.rpc.protocol.Utils.client.MyRPCClient
-      import mu.rpc.protocol._
+      import higherkindness.mu.rpc.protocol.Utils.client.MyRPCClient
+      import higherkindness.mu.rpc.protocol._
 
       class MuRPCServiceClientHandler[F[_]: Async](
           proto: Resource[F, ProtoRPCService[F]],
@@ -488,7 +488,7 @@ object Utils extends CommonUtils {
     import TestsImplicits._
     import service._
     import handlers.server._
-    import mu.rpc.server._
+    import higherkindness.mu.rpc.server._
 
     //////////////////////////////////
     // Server Runtime Configuration //

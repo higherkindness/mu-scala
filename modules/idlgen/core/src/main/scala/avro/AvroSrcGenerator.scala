@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package mu.rpc.idlgen.avro
+package higherkindness.mu.rpc.idlgen.avro
 
 import java.io.File
 
 import avrohugger.Generator
 import avrohugger.format.Standard
 import avrohugger.types._
-import mu.rpc.idlgen._
-import mu.rpc.idlgen.Model._
+import higherkindness.mu.rpc.idlgen._
+import higherkindness.mu.rpc.idlgen.Model._
 import org.apache.avro._
 import org.log4s._
 
@@ -117,7 +117,7 @@ case class AvroSrcGenerator(
     val packageLines = Seq(schemaLines.head, "")
 
     val importLines =
-      ("import mu.rpc.protocol._" :: marshallersImports
+      ("import higherkindness.mu.rpc.protocol._" :: marshallersImports
         .map(_.marshallersImport)
         .map("import " + _)).sorted
 

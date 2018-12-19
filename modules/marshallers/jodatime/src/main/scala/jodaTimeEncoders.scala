@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package marshallers
 
 import java.io.{ByteArrayInputStream, InputStream}
@@ -23,8 +23,8 @@ import com.google.common.io.ByteStreams
 import com.google.protobuf.{CodedInputStream, CodedOutputStream}
 import com.sksamuel.avro4s.Decoder.{IntDecoder, LongDecoder}
 import com.sksamuel.avro4s.Encoder.{IntEncoder, LongEncoder}
-import mu.rpc.internal.util.EncoderUtil
-import mu.rpc.jodatime.util.JodaTimeUtil
+import higherkindness.mu.rpc.internal.util.EncoderUtil
+import higherkindness.mu.rpc.jodatime.util.JodaTimeUtil
 import io.grpc.MethodDescriptor.Marshaller
 import org.apache.avro.{Schema, SchemaBuilder}
 import org.joda.time.{LocalDate, LocalDateTime}

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package internal
 
-import mu.rpc.common.RpcBaseTestSuite
-import mu.rpc.internal.service.GRPCServiceDefBuilder
+import higherkindness.mu.rpc.common.RpcBaseTestSuite
+import higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder
 import io.grpc._
 import io.grpc.testing.TestMethodDescriptors
 

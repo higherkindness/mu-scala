@@ -16,7 +16,7 @@
 
 package example.routeguide.protocol
 
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 import monix.reactive.Observable
 
 @outputPackage("routeguide")

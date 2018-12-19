@@ -29,7 +29,7 @@ Note that the plugin is only available for Scala 2.12.
 Let's take our previous service and add an Avro-specific request and some useful annotations described in the [Annotations section](annotations):
 
 ```tut:silent
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 
 @option("java_multiple_files", true)
 @option("java_outer_classname", "Quickstart")
@@ -195,7 +195,7 @@ In the case of the `.avpr` file we generated above, the file `GreeterService.sca
 ```
 package quickstart
 
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 
 @message case class HelloRequest(greeting: String)
 

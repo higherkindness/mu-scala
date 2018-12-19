@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc.idlgen
+package higherkindness.mu.rpc.idlgen
 
 package object avro {
   val IdlType       = "avro"

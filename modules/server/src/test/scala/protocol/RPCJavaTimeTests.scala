@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package protocol
 
 import java.time._
@@ -25,11 +25,11 @@ import cats.syntax.applicative._
 import com.fortysevendeg.scalacheck.datetime.instances.jdk8._
 import com.fortysevendeg.scalacheck.datetime.GenDateTime._
 import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.seconds
-import mu.rpc.common._
-import mu.rpc.internal.encoders.avro.javatime.marshallers._
-import mu.rpc.internal.encoders.pbd.javatime._
-import mu.rpc.protocol.Utils.withClient
-import mu.rpc.testing.servers.withServerChannel
+import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.internal.encoders.avro.javatime.marshallers._
+import higherkindness.mu.rpc.internal.encoders.pbd.javatime._
+import higherkindness.mu.rpc.protocol.Utils.withClient
+import higherkindness.mu.rpc.testing.servers.withServerChannel
 import org.scalacheck.Arbitrary
 import org.scalatest._
 import org.scalacheck.Prop._

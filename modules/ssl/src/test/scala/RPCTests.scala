@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package ssl
 
 import cats.effect.{IO, Resource}
-import mu.rpc.client.OverrideAuthority
-import mu.rpc.client.netty.{
+import higherkindness.mu.rpc.client.OverrideAuthority
+import higherkindness.mu.rpc.client.netty.{
   NettyChannelInterpreter,
   NettyNegotiationType,
   NettySslContext,
   NettyUsePlaintext
 }
-import mu.rpc.common._
-import mu.rpc.server._
+import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.server._
 import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.NegotiationType
 import org.scalatest._
@@ -34,10 +34,10 @@ import org.scalatest._
 class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
   import TestsImplicits._
-  import mu.rpc.ssl.Utils._
-  import mu.rpc.ssl.Utils.database._
-  import mu.rpc.ssl.Utils.service._
-  import mu.rpc.ssl.Utils.implicits._
+  import higherkindness.mu.rpc.ssl.Utils._
+  import higherkindness.mu.rpc.ssl.Utils.database._
+  import higherkindness.mu.rpc.ssl.Utils.service._
+  import higherkindness.mu.rpc.ssl.Utils.implicits._
 
   override protected def beforeAll(): Unit =
     serverStart[ConcurrentMonad].unsafeRunSync()

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc.idlgen.avro
+package higherkindness.mu.rpc.idlgen.avro
 
 import java.io.File
 import scala.annotation.tailrec

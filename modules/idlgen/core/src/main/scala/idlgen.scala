@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 
-import mu.rpc.idlgen.avro._
-import mu.rpc.idlgen.proto.ProtoIdlGenerator
-import mu.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
-import mu.rpc.internal.util.Toolbox.u._
-import mu.rpc.internal.util.AstOptics.ast
+import higherkindness.mu.rpc.idlgen.avro._
+import higherkindness.mu.rpc.idlgen.proto.ProtoIdlGenerator
+import higherkindness.mu.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
+import higherkindness.mu.rpc.internal.util.Toolbox.u._
+import higherkindness.mu.rpc.internal.util.AstOptics.ast
 
 package object idlgen {
 

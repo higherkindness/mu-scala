@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc.protocol.legacy
+package higherkindness.mu.rpc.protocol.legacy
 
 object AvroDecimalCompatUtils {
 

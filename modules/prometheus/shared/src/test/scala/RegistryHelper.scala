@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package prometheus
 package shared
 
-import mu.rpc.interceptors.MetricType
+import higherkindness.mu.rpc.interceptors.MetricType
 import io.prometheus.client._
 
 import scala.collection.JavaConverters._

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package mu.rpc.idlgen
+package higherkindness.mu.rpc.idlgen
 
 import java.io.File
 
-import mu.rpc.idlgen.Model._
+import higherkindness.mu.rpc.idlgen.Model._
 import sbt.Keys._
 import sbt._
 import sbt.io.{Path, PathFinder}
@@ -102,7 +102,7 @@ object IdlGenPlugin extends AutoPlugin {
           "By default, this include the instances for serializing `BigDecimal`, `java.time.LocalDate`, and `java.time.LocalDateTime`")
   }
 
-  import mu.rpc.idlgen.IdlGenPlugin.autoImport._
+  import higherkindness.mu.rpc.idlgen.IdlGenPlugin.autoImport._
 
   lazy val defaultSettings: Seq[Def.Setting[_]] = Seq(
     idlType := "(missing arg)",

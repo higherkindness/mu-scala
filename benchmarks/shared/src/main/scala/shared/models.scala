@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc.benchmarks
+package higherkindness.mu.rpc.benchmarks
 package shared
 
 object models {

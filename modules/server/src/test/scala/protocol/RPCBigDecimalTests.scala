@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package protocol
 
 import cats.Applicative
 import cats.effect.IO
 import cats.syntax.applicative._
 import org.scalatest._
-import mu.rpc.common._
-import mu.rpc.internal.encoders.avro.bigDecimalTagged._
-import mu.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._
-import mu.rpc.internal.encoders.pbd.bigDecimal._
-import mu.rpc.protocol.Utils.withClient
-import mu.rpc.testing.servers.withServerChannel
+import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._
+import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._
+import higherkindness.mu.rpc.internal.encoders.pbd.bigDecimal._
+import higherkindness.mu.rpc.protocol.Utils.withClient
+import higherkindness.mu.rpc.testing.servers.withServerChannel
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Prop._
 import org.scalatest.prop.Checkers

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package client
 package netty
 
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
 
-import mu.rpc.common.SC
+import higherkindness.mu.rpc.common.SC
 import io.grpc.ManagedChannel
 import io.grpc.internal.GrpcUtil
 import io.grpc.netty.{GrpcSslContexts, NegotiationType, NettyChannelBuilder}

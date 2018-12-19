@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package prometheus
 package server
 
-import mu.rpc.interceptors.GrpcMethodInfo
+import higherkindness.mu.rpc.interceptors.GrpcMethodInfo
 import io.grpc.Status.Code
 import io.prometheus.client.SimpleCollector
 

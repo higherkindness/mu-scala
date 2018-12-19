@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package mu.rpc.benchmarks
+package higherkindness.mu.rpc.benchmarks
 package shared
 
 import cats.effect.Effect
 import cats.syntax.applicative._
-import mu.rpc.benchmarks.shared.models._
+import higherkindness.mu.rpc.benchmarks.shared.models._
 
 class PersistenceService[F[_]: Effect] {
 

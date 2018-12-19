@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package client
 package config
 
@@ -23,14 +23,14 @@ import cats.syntax.functor._
 import cats.syntax.flatMap._
 import cats.syntax.either._
 
-import mu.rpc.config.ConfigM
+import higherkindness.mu.rpc.config.ConfigM
 
 import com.typesafe.config.ConfigException.Missing
 
 class ChannelConfig[F[_]](implicit S: Sync[F], C: ConfigM[F]) {
 
   val defaultHost: String = "localhost"
-  val defaultPort: Int    = mu.rpc.server.defaultPort
+  val defaultPort: Int    = higherkindness.mu.rpc.server.defaultPort
 
   def loadChannelAddress(hostPath: String, portPath: String): F[ChannelForAddress] =
     for {

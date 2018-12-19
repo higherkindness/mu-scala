@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc.benchmarks
+package higherkindness.mu.rpc.benchmarks
 package shared
 
 import cats.effect.{ContextShift, IO, Timer}

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package mu.rpc.protocol.legacy
+package higherkindness.mu.rpc.protocol.legacy
 
 import java.io.{ByteArrayInputStream, InputStream}
 import java.nio.ByteBuffer
 
 import com.google.common.io.ByteStreams
 import com.sksamuel.avro4s.{Decoder, Encoder, SchemaFor}
-import mu.rpc.internal.util.BigDecimalUtil
+import higherkindness.mu.rpc.internal.util.BigDecimalUtil
 import io.grpc.MethodDescriptor.Marshaller
 import org.apache.avro.{Schema, SchemaBuilder}
 

@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package prometheus
 package client
 
-import mu.rpc.prometheus.shared.Configuration
+import higherkindness.mu.rpc.prometheus.shared.Configuration
 import io.prometheus.client._
 
 case class ClientMetrics(cfg: Configuration) {
 
-  import mu.rpc.interceptors.metrics._
-  import mu.rpc.prometheus.implicits._
+  import higherkindness.mu.rpc.interceptors.metrics._
+  import higherkindness.mu.rpc.prometheus.implicits._
 
   private[this] val rpcStartedBuilder: Counter.Builder =
     clientMetricRpcStarted(cfg.namespace).toCounterBuilder

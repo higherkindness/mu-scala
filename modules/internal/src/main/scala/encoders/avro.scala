@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package internal.encoders
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
@@ -22,8 +22,8 @@ import java.nio.ByteBuffer
 import java.time.{Instant, LocalDate, LocalDateTime}
 
 import com.google.common.io.ByteStreams
-import mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil}
-import mu.rpc.protocol.Empty
+import higherkindness.mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil}
+import higherkindness.mu.rpc.protocol.Empty
 import io.grpc.MethodDescriptor.Marshaller
 import org.apache.avro.{Conversions, LogicalTypes, Schema, SchemaBuilder}
 import shapeless.Nat

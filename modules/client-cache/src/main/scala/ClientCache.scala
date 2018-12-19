@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc.client.cache
+package higherkindness.mu.rpc.client.cache
 
 import cats.effect.concurrent.Ref
 import cats.effect._

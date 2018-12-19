@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package internal
 
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 import scala.reflect.macros.blackbox
 
 // $COVERAGE-OFF$
@@ -160,12 +160,12 @@ object serviceImpl {
           List(
             q"import _root_.cats.instances.list._",
             q"import _root_.cats.instances.option._",
-            q"import _root_.mu.rpc.internal.encoders.pbd._"
+            q"import _root_.higherkindness.mu.rpc.internal.encoders.pbd._"
           )
         case Avro =>
-          List(q"import _root_.mu.rpc.internal.encoders.avro._")
+          List(q"import _root_.higherkindness.mu.rpc.internal.encoders.avro._")
         case AvroWithSchema =>
-          List(q"import _root_.mu.rpc.internal.encoders.avrowithschema._")
+          List(q"import _root_.higherkindness.mu.rpc.internal.encoders.avrowithschema._")
       }
 
       val methodDescriptors: List[Tree] = rpcRequests.map(_.methodDescriptor)
@@ -177,7 +177,7 @@ object serviceImpl {
           algebra: $serviceName[$F],
           EC: _root_.scala.concurrent.ExecutionContext
         ): _root_.io.grpc.ServerServiceDefinition =
-          new _root_.mu.rpc.internal.service.GRPCServiceDefBuilder(${lit(serviceName)}, ..$serverCallDescriptorsAndHandlers).apply
+          new _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder(${lit(serviceName)}, ..$serverCallDescriptorsAndHandlers).apply
         """
 
       private val clientCallMethods: List[Tree] = rpcRequests.map(_.clientDef)
@@ -201,16 +201,16 @@ object serviceImpl {
       val client: DefDef =
         q"""
         def client[$F_](
-          channelFor: _root_.mu.rpc.ChannelFor,
-          channelConfigList: List[_root_.mu.rpc.client.ManagedChannelConfig] = List(
-            _root_.mu.rpc.client.UsePlaintext()),
+          channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
+          channelConfigList: List[_root_.higherkindness.mu.rpc.client.ManagedChannelConfig] = List(
+            _root_.higherkindness.mu.rpc.client.UsePlaintext()),
             options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
           )(implicit
           F: _root_.cats.effect.ConcurrentEffect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
         ): _root_.cats.effect.Resource[F, $serviceName[$F]] =
           _root_.cats.effect.Resource.make {
-            new _root_.mu.rpc.client.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
+            new _root_.higherkindness.mu.rpc.client.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
           }(channel => F.void(F.delay(channel.shutdown()))).flatMap(ch =>
           _root_.cats.effect.Resource.make[F, $serviceName[$F]](F.delay(new $Client[$F](ch, options)))(_ => F.unit))
         """.supressWarts("DefaultArguments")
@@ -231,16 +231,16 @@ object serviceImpl {
       val unsafeClient: DefDef =
         q"""
         def unsafeClient[$F_](
-          channelFor: _root_.mu.rpc.ChannelFor,
-          channelConfigList: List[_root_.mu.rpc.client.ManagedChannelConfig] = List(
-            _root_.mu.rpc.client.UsePlaintext()),
+          channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
+          channelConfigList: List[_root_.higherkindness.mu.rpc.client.ManagedChannelConfig] = List(
+            _root_.higherkindness.mu.rpc.client.UsePlaintext()),
             options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
           )(implicit
           F: _root_.cats.effect.ConcurrentEffect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
         ): $serviceName[$F] = {
           val managedChannelInterpreter =
-            new _root_.mu.rpc.client.ManagedChannelInterpreter[$F](channelFor, channelConfigList).unsafeBuild
+            new _root_.higherkindness.mu.rpc.client.ManagedChannelInterpreter[$F](channelFor, channelConfigList).unsafeBuild
           new $Client[$F](managedChannelInterpreter, options)
         }""".supressWarts("DefaultArguments")
 
@@ -301,8 +301,8 @@ object serviceImpl {
         }
 
         private val clientCallsImpl = streamingImpl match {
-          case Fs2Stream       => q"_root_.mu.rpc.internal.client.fs2Calls"
-          case MonixObservable => q"_root_.mu.rpc.internal.client.monixCalls"
+          case Fs2Stream       => q"_root_.higherkindness.mu.rpc.internal.client.fs2Calls"
+          case MonixObservable => q"_root_.higherkindness.mu.rpc.internal.client.monixCalls"
         }
 
         private val streamingMethodType = {
@@ -363,24 +363,24 @@ object serviceImpl {
         }
 
         private def serverCallMethodFor(serverMethodName: String) =
-          q"_root_.mu.rpc.internal.server.monixCalls.${TermName(serverMethodName)}(algebra.$methodName, $compressionOption)"
+          q"_root_.higherkindness.mu.rpc.internal.server.monixCalls.${TermName(serverMethodName)}(algebra.$methodName, $compressionOption)"
 
         val descriptorAndHandler: Tree = {
           val handler = (streamingType, streamingImpl) match {
             case (Some(RequestStreaming), Fs2Stream) =>
-              q"_root_.mu.rpc.internal.server.fs2Calls.clientStreamingMethod(algebra.$methodName, $compressionOption)"
+              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.clientStreamingMethod(algebra.$methodName, $compressionOption)"
             case (Some(RequestStreaming), MonixObservable) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(${serverCallMethodFor("clientStreamingMethod")})"
             case (Some(ResponseStreaming), Fs2Stream) =>
-              q"_root_.mu.rpc.internal.server.fs2Calls.serverStreamingMethod(algebra.$methodName, $compressionOption)"
+              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.serverStreamingMethod(algebra.$methodName, $compressionOption)"
             case (Some(ResponseStreaming), MonixObservable) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(${serverCallMethodFor("serverStreamingMethod")})"
             case (Some(BidirectionalStreaming), Fs2Stream) =>
-              q"_root_.mu.rpc.internal.server.fs2Calls.bidiStreamingMethod(algebra.$methodName, $compressionOption)"
+              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.bidiStreamingMethod(algebra.$methodName, $compressionOption)"
             case (Some(BidirectionalStreaming), MonixObservable) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(${serverCallMethodFor("bidiStreamingMethod")})"
             case (None, Fs2Stream) =>
-              q"_root_.mu.rpc.internal.server.fs2Calls.unaryMethod(algebra.$methodName, $compressionOption)"
+              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.unaryMethod(algebra.$methodName, $compressionOption)"
             case (None, MonixObservable) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncUnaryCall(${serverCallMethodFor("unaryMethod")})"
           }

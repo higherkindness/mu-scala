@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc.internal.task.instances
+package higherkindness.mu.rpc.internal.task.instances
 
 import cats.effect.Effect
 import monix.eval.Task

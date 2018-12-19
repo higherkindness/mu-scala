@@ -17,7 +17,7 @@
 package examples.todolist
 package protocol
 
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 
 trait TodoItemProtocol {
 

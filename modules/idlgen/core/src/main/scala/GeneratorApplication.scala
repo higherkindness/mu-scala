@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package mu.rpc.idlgen
+package higherkindness.mu.rpc.idlgen
 
-import mu.rpc.internal.util.FileUtil._
+import higherkindness.mu.rpc.internal.util.FileUtil._
 import java.io.File
 import org.log4s.getLogger
 

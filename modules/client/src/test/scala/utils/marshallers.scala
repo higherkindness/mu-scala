@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package client.utils
 
 import com.google.common.base.Charsets.UTF_8

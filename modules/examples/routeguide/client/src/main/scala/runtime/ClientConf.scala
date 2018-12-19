@@ -17,8 +17,8 @@
 package example.routeguide.client.runtime
 
 import cats.effect.IO
-import mu.rpc.ChannelFor
-import mu.rpc.client.config.ConfigForAddress
+import higherkindness.mu.rpc.ChannelFor
+import higherkindness.mu.rpc.client.config.ConfigForAddress
 
 trait ClientConf {
 

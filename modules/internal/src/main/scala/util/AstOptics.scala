@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package internal
 package util
 
 import monocle._
 import monocle.function.all._
 import scala.Function.{const => κ}
-import mu.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
+import higherkindness.mu.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
 
 trait AstOptics {
 

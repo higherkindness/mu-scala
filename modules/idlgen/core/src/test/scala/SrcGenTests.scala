@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package mu.rpc.idlgen
+package higherkindness.mu.rpc.idlgen
 
-import mu.rpc.common.RpcBaseTestSuite
-import mu.rpc.idlgen.AvroScalaGeneratorArbitrary._
-import mu.rpc.idlgen.avro._
+import higherkindness.mu.rpc.common.RpcBaseTestSuite
+import higherkindness.mu.rpc.idlgen.AvroScalaGeneratorArbitrary._
+import higherkindness.mu.rpc.idlgen.avro._
 import org.scalatest.prop.Checkers
 import org.scalacheck.Prop.forAll
 

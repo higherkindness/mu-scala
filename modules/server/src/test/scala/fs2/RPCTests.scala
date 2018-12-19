@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package mu.rpc
+package higherkindness.mu.rpc
 package fs2
 
-import mu.rpc.common._
-import mu.rpc.server._
+import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.server._
 import _root_.fs2.Stream
 import org.scalatest._
 
 class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
-  import mu.rpc.fs2.Utils._
-  import mu.rpc.fs2.Utils.database._
-  import mu.rpc.fs2.Utils.implicits._
+  import higherkindness.mu.rpc.fs2.Utils._
+  import higherkindness.mu.rpc.fs2.Utils.database._
+  import higherkindness.mu.rpc.fs2.Utils.implicits._
 
   override protected def beforeAll(): Unit =
     serverStart[ConcurrentMonad].unsafeRunSync()

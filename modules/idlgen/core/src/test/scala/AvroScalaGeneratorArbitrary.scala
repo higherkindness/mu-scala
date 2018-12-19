@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package mu.rpc.idlgen
+package higherkindness.mu.rpc.idlgen
 
-import mu.rpc.idlgen.Model._
+import higherkindness.mu.rpc.idlgen.Model._
 import org.scalacheck.{Arbitrary, Gen}
 
 trait AvroScalaGeneratorArbitrary {
@@ -34,7 +34,7 @@ trait AvroScalaGeneratorArbitrary {
       marshallersImports: List[MarshallersImport],
       options: Option[String]): List[String] = {
 
-    val imports: String = ("import mu.rpc.protocol._" :: marshallersImports
+    val imports: String = ("import higherkindness.mu.rpc.protocol._" :: marshallersImports
       .map(_.marshallersImport)
       .map("import " + _)).sorted
       .mkString("\n")
