@@ -30,3 +30,8 @@ project/plugins/project/
 
 /secring.gpg
 benchmarks/results
+
+# Metals Specific
+.bloop/
+.metals/
+project/.bloop/
