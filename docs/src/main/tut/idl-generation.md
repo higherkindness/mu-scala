@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: IDL Generation
-permalink: /docs/rpc/idl-generation
+permalink: /idl-generation
 ---
 
 # IDL Generation
@@ -76,7 +76,7 @@ Using this example, the resulting Protobuf IDL would be generated in `/src/main/
 ```
 // This file has been automatically generated for use by
 // the idlGen plugin, from mu-rpc service definitions.
-// Read more at: https://higherkindness.github.io/mu/
+// Read more at: https://higherkindness.github.io/mu/scala/
 
 syntax = "proto3";
 

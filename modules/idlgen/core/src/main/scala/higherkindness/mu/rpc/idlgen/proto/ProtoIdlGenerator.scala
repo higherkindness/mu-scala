@@ -34,7 +34,7 @@ object ProtoIdlGenerator extends IdlGenerator {
   private val HeaderLines = Seq(
     "// This file has been automatically generated for use by",
     "// the idlGen plugin, from mu service definitions.",
-    "// Read more at: https://higherkindness.github.io/mu",
+    "// Read more at: https://higherkindness.github.io/mu/scala/",
     "",
     "syntax = \"proto3\";",
     ""

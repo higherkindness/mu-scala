@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Patterns
-permalink: /docs/rpc/patterns
+permalink: /patterns
 ---
 
 # Patterns

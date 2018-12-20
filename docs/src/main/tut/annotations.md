@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Annotations
-permalink: /docs/rpc/annotations
+permalink: /annotations
 ---
 
 # Annotations

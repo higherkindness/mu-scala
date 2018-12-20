@@ -219,15 +219,24 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
       micrositeName := "Mu",
-      micrositeBaseUrl := "/mu",
+      micrositeBaseUrl := "/mu/scala",
       micrositeDescription := "A purely functional library for building RPC endpoint-based services",
-      micrositeDocumentationUrl := "docs/rpc/core-concepts.html",
       micrositeGithubOwner := "higherkindness",
       micrositeGithubRepo := "mu",
       micrositeGitterChannelUrl := "47deg/mu",
       micrositeOrganizationHomepage := "http://www.47deg.com",
       includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
-      micrositePushSiteWith := GitHub4s
+      micrositePushSiteWith := GitHub4s,
+      micrositePalette := Map(
+        "brand-primary"   -> "#01C2C2",
+        "brand-secondary" -> "#142236",
+        "brand-tertiary"  -> "#202D40",
+        "gray-dark"       -> "#383D44",
+        "gray"            -> "#646D7B",
+        "gray-light"      -> "#E6E7EC",
+        "gray-lighter"    -> "#F4F5F9",
+        "white-color"     -> "#E6E7EC"
+      )
     )
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(

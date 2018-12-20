@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Core concepts
-permalink: /docs/rpc/core-concepts
+permalink: /core-concepts
 ---
 
 # Core concepts
@@ -386,7 +386,7 @@ The only thing you need to do is add the following import to your service:
 * Tagged `BigDecimal` in `Avro`
   * `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._`
 
-Mu also provides instances for `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime`, but you need the `mu-rpc-marshallers-jodatime` extra dependency. See the [main section](/mu/) for the SBT instructions.
+Mu also provides instances for `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime`, but you need the `mu-rpc-marshallers-jodatime` extra dependency. See the [main section](/mu/scala/) for the SBT instructions.
 
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Protobuf`
   * `import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.pbd._`
