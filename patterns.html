@@ -1,30 +1,30 @@
-<html><head><title>Mu: Patterns</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="47 Degrees" /><meta name="description" content="A purely functional library for building RPC endpoint-based services" /><meta name="og:image" content="/mu/img/poster.png" /><meta name="og:title" content="Mu: Patterns" /><meta name="og:site_name" content="Mu" /><meta name="og:url" content="https://higherkindness.github.io/mu/" /><meta name="og:type" content="website" /><meta name="og:description" content="A purely functional library for building RPC endpoint-based services" /><link rel="icon" type="image/png" href="/mu/img/favicon.png" /><meta name="twitter:title" content="Mu: Patterns" /><meta name="twitter:image" content="https://higherkindness.github.io/mu/img/poster.png" /><meta name="twitter:description" content="A purely functional library for building RPC endpoint-based services" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/mu/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/mu/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/mu/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/mu/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/mu/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/mu/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/mu/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/mu/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/mu/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/mu/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/mu/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/mu/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/mu/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/mu/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/mu/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/mu/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/mu/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/mu/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/mu/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/mu/img/favicon310x150.png" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/mu/highlight/styles/default.css" /><link rel="stylesheet" href="/mu/css/style.css" /><link rel="stylesheet" href="/mu/css/palette.css" /><link rel="stylesheet" href="/mu/css/codemirror.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><ul id="sidebar" class="sidebar-nav"><li class="sidebar-brand"><a href="/mu/" class="brand"><div class="brand-wrapper"><span>Mu</span></div></a></li> <li><a href="/mu/docs/rpc/core-concepts" class="">Core concepts</a></li> <li><a href="/mu/docs/rpc/streaming" class="">Streaming</a></li> <li><a href="/mu/docs/rpc/annotations" class="">Annotations</a></li> <li><a href="/mu/docs/rpc/idl-generation" class="">IDL Generation</a></li> <li><a href="/mu/docs/rpc/patterns" class=" active ">Patterns</a></li> <li><a href="/mu/docs/rpc/ssl-tls" class="">SSL/TLS</a></li> <li><a href="/mu/docs/rpc/metrics-reporting" class="">Metrics Reporting</a></li> <li><a href="/mu/docs/rpc/decimal-migration-guide" class="">Migration guide for decimal types</a></li> <li><a href="/mu/docs/rpc/references" class="">References</a></li></ul></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li id="gh-eyes-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu"><i class="fa fa-eye"></i><span>WATCH<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu"><i class="fa fa-star-o"></i><span>STARS<span id="stars" class="label label-default">--</span></span></a></li><li><a href="#" onclick="shareSiteTwitter('Mu A purely functional library for building RPC endpoint-based services');"><i class="fa fa-twitter"></i></a></li><li><a href="#" onclick="shareSiteFacebook('Mu A purely functional library for building RPC endpoint-based services');"><i class="fa fa-facebook"></i></a></li><li><a href="#" onclick="shareSiteGoogle();"><i class="fa fa-google-plus"></i></a></li></ul></div></div></div></div><div id="content" data-github-owner="higherkindness" data-github-repo="mu"><div class="content-wrapper"><section><h1 id="patterns">Patterns</h1>
+<html><head><title>Mu: Patterns</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="47 Degrees" /><meta name="description" content="A purely functional library for building RPC endpoint-based services" /><meta name="og:image" content="/mu/scala/img/poster.png" /><meta name="og:title" content="Mu: Patterns" /><meta name="og:site_name" content="Mu" /><meta name="og:url" content="https://higherkindness.github.io/mu/" /><meta name="og:type" content="website" /><meta name="og:description" content="A purely functional library for building RPC endpoint-based services" /><link rel="icon" type="image/png" href="/mu/scala/img/favicon.png" /><meta name="twitter:title" content="Mu: Patterns" /><meta name="twitter:image" content="https://higherkindness.github.io/mu/img/poster.png" /><meta name="twitter:description" content="A purely functional library for building RPC endpoint-based services" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/mu/scala/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/mu/scala/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/mu/scala/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/mu/scala/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/mu/scala/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/mu/scala/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/mu/scala/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/mu/scala/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/mu/scala/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/mu/scala/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/mu/scala/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/mu/scala/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/mu/scala/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/mu/scala/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/mu/scala/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/mu/scala/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/mu/scala/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/mu/scala/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/mu/scala/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/mu/scala/img/favicon310x150.png" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/mu/scala/highlight/styles/default.css" /><link rel="stylesheet" href="/mu/scala/css/style.css" /><link rel="stylesheet" href="/mu/scala/css/palette.css" /><link rel="stylesheet" href="/mu/scala/css/codemirror.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><ul id="sidebar" class="sidebar-nav"><li class="sidebar-brand"><a href="/mu/scala/" class="brand"><div class="brand-wrapper"><span>Mu</span></div></a></li> <li><a href="/mu/scala/" class="">Quickstart</a></li> <li><a href="/mu/scala/core-concepts" class="">Core concepts</a></li> <li><a href="/mu/scala/streaming" class="">Streaming</a></li> <li><a href="/mu/scala/annotations" class="">Annotations</a></li> <li><a href="/mu/scala/idl-generation" class="">IDL Generation</a></li> <li><a href="/mu/scala/patterns" class=" active ">Patterns</a></li> <li><a href="/mu/scala/ssl-tls" class="">SSL/TLS</a></li> <li><a href="/mu/scala/metrics-reporting" class="">Metrics Reporting</a></li> <li><a href="/mu/scala/decimal-migration-guide" class="">Migration guide for decimal types</a></li> <li><a href="/mu/scala/references" class="">References</a></li></ul></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li id="gh-eyes-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu"><i class="fa fa-eye"></i><span>WATCH<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu"><i class="fa fa-star-o"></i><span>STARS<span id="stars" class="label label-default">--</span></span></a></li><li><a href="#" onclick="shareSiteTwitter('Mu A purely functional library for building RPC endpoint-based services');"><i class="fa fa-twitter"></i></a></li><li><a href="#" onclick="shareSiteFacebook('Mu A purely functional library for building RPC endpoint-based services');"><i class="fa fa-facebook"></i></a></li><li><a href="#" onclick="shareSiteGoogle();"><i class="fa fa-google-plus"></i></a></li></ul></div></div></div></div><div id="content" data-github-owner="higherkindness" data-github-repo="mu"><div class="content-wrapper"><section><h1 id="patterns">Patterns</h1>
 
-<p>So far so good, not too much code, no business logic, in the previous sections we have seen some protocol definitions with Scala annotations and the generation of IDL files from the Scala definitions. Conversely, in this section, we are going to see how to complete our quickstart example. We’ll take a look at both sides, the server and the client.</p>
+<p>So far so good, we haven’t seen too much code or implemented any business logic. In the previous sections we have seen some protocol definitions with Scala annotations and the generation of IDL files from the Scala definitions. Finally, in this section, we are going to see how to complete our quickstart example. We’ll take a look at both sides, the server and the client.</p>
 
 <h2 id="server">Server</h2>
 
-<p>Predictably, generating the server code is just implementing a service <a href="http://frees.io/docs/core/interpreters/">Handler</a>.</p>
+<p>Predictably, generating the server code is just implementing a service <a href="http://frees.io/docs/core/handlers/">Handler</a>.</p>
 
-<p>First of all, our <code class="highlighter-rouge">Greeter</code> RPC protocol definition:</p>
+<p>First, here’s our <code class="highlighter-rouge">Greeter</code> RPC protocol definition:</p>
 
 <p>Next, our dummy <code class="highlighter-rouge">Greeter</code> server implementation:</p>
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.Async</span>
 <span class="k">import</span> <span class="nn">cats.syntax.applicative._</span>
-<span class="k">import</span> <span class="nn">mu.rpc.server.implicits._</span>
-<span class="k">import</span> <span class="nn">monix.execution.Scheduler</span>
-<span class="k">import</span> <span class="nn">monix.eval.Task</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.internal.task._</span>
 <span class="k">import</span> <span class="nn">monix.reactive.Observable</span>
 <span class="k">import</span> <span class="nn">service._</span>
 
-<span class="k">class</span> <span class="nc">ServiceHandler</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span><span class="kt">:</span> <span class="kt">Async</span><span class="o">](</span><span class="k">implicit</span> <span class="n">S</span><span class="k">:</span> <span class="kt">Scheduler</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">Greeter</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span> <span class="o">{</span>
+<span class="k">import</span> <span class="nn">scala.concurrent.ExecutionContext</span>
+
+<span class="k">class</span> <span class="nc">ServiceHandler</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span><span class="kt">:</span> <span class="kt">Async</span><span class="o">](</span><span class="k">implicit</span> <span class="nc">EC</span><span class="k">:</span> <span class="kt">ExecutionContext</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">Greeter</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span> <span class="o">{</span>
 
   <span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">val</span> <span class="n">dummyObservableResponse</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span> <span class="k">=</span>
     <span class="nc">Observable</span><span class="o">.</span><span class="n">fromIterable</span><span class="o">(</span><span class="mi">1</span> <span class="n">to</span> <span class="mi">5</span> <span class="n">map</span> <span class="o">(</span><span class="n">i</span> <span class="k">=&gt;</span> <span class="nc">HelloResponse</span><span class="o">(</span><span class="n">s</span><span class="s">"Reply $i"</span><span class="o">)))</span>
 
   <span class="k">override</span> <span class="k">def</span> <span class="n">sayHello</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span> <span class="k">=</span>
-    <span class="nc">HelloResponse</span><span class="o">(</span><span class="n">reply</span> <span class="k">=</span> <span class="s">"Good bye!"</span><span class="o">).</span><span class="n">pure</span>
+    <span class="nc">HelloResponse</span><span class="o">(</span><span class="n">reply</span> <span class="k">=</span> <span class="s">"Good bye!"</span><span class="o">).</span><span class="n">pure</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span>
 
   <span class="k">override</span> <span class="k">def</span> <span class="n">lotsOfReplies</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span> <span class="k">=</span>
     <span class="n">dummyObservableResponse</span>
@@ -40,7 +40,7 @@
               <span class="n">reply</span> <span class="k">=</span> <span class="n">s</span><span class="s">"$currentReply\nRequest ${currentRequest.greeting} -&gt; Response: Reply $i"</span><span class="o">))</span>
       <span class="o">}</span>
       <span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">_2</span><span class="o">)</span>
-      <span class="o">.</span><span class="n">to</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span>
+      <span class="o">.</span><span class="n">toAsync</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span>
 
   <span class="k">override</span> <span class="k">def</span> <span class="n">bidiHello</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span> <span class="k">=</span>
     <span class="n">request</span>
@@ -54,34 +54,36 @@
 <span class="o">}</span>
 </code></pre></div></div>
 
-<p>That’s all. We have exposed a potential implementation on the server side.</p>
+<p>That’s it! We have exposed a potential implementation on the server side.</p>
 
 <h3 id="server-runtime">Server Runtime</h3>
 
 <p>As you can see, the generic handler above requires <code class="highlighter-rouge">F</code> as the type parameter, which corresponds with our target <code class="highlighter-rouge">Monad</code> when interpreting our program. In this section, we will satisfy all the runtime requirements, in order to make our server runnable.</p>
 
-<h3 id="execution-context">Execution Context</h3>
+<h3 id="creating-a-runtime">Creating a runtime</h3>
 
-<p>In <a href="https://github.com/higherkindness/mu">mu</a> programs, we’ll at least need an implicit evidence related to the <a href="https://monix.io/">Monix</a> Execution Context: <code class="highlighter-rouge">monix.execution.Scheduler</code>.</p>
+<p>Since <a href="https://github.com/higherkindness/mu">mu</a> relies on <code class="highlighter-rouge">ConcurrentEffect</code> from the <a href="https://github.com/typelevel/cats-effect">cats-effect library</a>, we’ll need a runtime for executing our effects.</p>
 
-<blockquote>
-  <p>The <code class="highlighter-rouge">monix.execution.Scheduler</code> is inspired by <code class="highlighter-rouge">ReactiveX</code>, being an enhanced Scala <code class="highlighter-rouge">ExecutionContext</code> and also a replacement for Java’s <code class="highlighter-rouge">ScheduledExecutorService</code>, but also for Javascript’s <code class="highlighter-rouge">setTimeout</code>.</p>
-</blockquote>
+<p>We’ll be using <code class="highlighter-rouge">IO</code> from <code class="highlighter-rouge">cats-effect</code>, but you can use any type that has a <code class="highlighter-rouge">ConcurrentEffect</code> instance.</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">monix.execution.Scheduler</span>
+<p>For executing <code class="highlighter-rouge">IO</code> we need a <code class="highlighter-rouge">ContextShift[IO]</code> used for running <code class="highlighter-rouge">IO</code> instances and a <code class="highlighter-rouge">Timer[IO]</code> that is used for scheduling, let’s go ahead and create them.</p>
 
-<span class="k">trait</span> <span class="nc">CommonRuntime</span> <span class="o">{</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="nc">CommonRuntime</span> <span class="o">{</span>
 
-  <span class="k">implicit</span> <span class="k">val</span> <span class="n">S</span><span class="k">:</span> <span class="kt">Scheduler</span> <span class="o">=</span> <span class="n">monix</span><span class="o">.</span><span class="n">execution</span><span class="o">.</span><span class="nc">Scheduler</span><span class="o">.</span><span class="nc">Implicits</span><span class="o">.</span><span class="n">global</span>
+  <span class="k">implicit</span> <span class="k">val</span> <span class="nc">EC</span><span class="k">:</span> <span class="kt">scala.concurrent.ExecutionContext</span> <span class="o">=</span>
+    <span class="n">scala</span><span class="o">.</span><span class="n">concurrent</span><span class="o">.</span><span class="nc">ExecutionContext</span><span class="o">.</span><span class="nc">Implicits</span><span class="o">.</span><span class="n">global</span>
+
+  <span class="k">implicit</span> <span class="k">val</span> <span class="n">timer</span><span class="k">:</span> <span class="kt">cats.effect.Timer</span><span class="o">[</span><span class="kt">cats.effect.IO</span><span class="o">]</span>     <span class="k">=</span> <span class="n">cats</span><span class="o">.</span><span class="n">effect</span><span class="o">.</span><span class="nc">IO</span><span class="o">.</span><span class="n">timer</span><span class="o">(</span><span class="nc">EC</span><span class="o">)</span>
+  <span class="k">implicit</span> <span class="k">val</span> <span class="n">cs</span><span class="k">:</span> <span class="kt">cats.effect.ContextShift</span><span class="o">[</span><span class="kt">cats.effect.IO</span><span class="o">]</span> <span class="k">=</span> <span class="n">cats</span><span class="o">.</span><span class="n">effect</span><span class="o">.</span><span class="nc">IO</span><span class="o">.</span><span class="n">contextShift</span><span class="o">(</span><span class="nc">EC</span><span class="o">)</span>
 
 <span class="o">}</span>
 </code></pre></div></div>
 
 <p>As a side note, <code class="highlighter-rouge">CommonRuntime</code> will also be used later on for the client example program.</p>
 
-<h3 id="runtime-implicits">Runtime Implicits</h3>
+<h3 id="transport-implicits">Transport Implicits</h3>
 
-<p>For the server bootstrapping, remember adding <code class="highlighter-rouge">mu-rpc-server</code> dependency to your build.</p>
+<p>For the server bootstrapping, remember to add the <code class="highlighter-rouge">mu-rpc-server</code> dependency to your build.</p>
 
 <p>Now, we need to implicitly provide two things:</p>
 
@@ -97,11 +99,8 @@
 
 <p>In summary, the result would be as follows:</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.</span><span class="o">~&gt;</span>
-<span class="k">import</span> <span class="nn">cats.effect.IO</span>
-<span class="k">import</span> <span class="nn">mu.rpc.server._</span>
-<span class="k">import</span> <span class="nn">mu.rpc.server.handlers._</span>
-<span class="k">import</span> <span class="nn">mu.rpc.server.implicits._</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.server._</span>
 <span class="k">import</span> <span class="nn">service._</span>
 
 <span class="k">object</span> <span class="nc">gserver</span> <span class="o">{</span>
@@ -117,19 +116,12 @@
 <span class="o">}</span>
 </code></pre></div></div>
 
-<p>Here are a few additional notes related to the previous snippet of code:</p>
-
-<ul>
-  <li>The Server will bootstrap on port <code class="highlighter-rouge">8080</code>.</li>
-  <li><code class="highlighter-rouge">Greeter.bindService</code> is an auto-derived method which creates, behind the scenes, the binding service for <a href="https://grpc.io/">gRPC</a>. It requires <code class="highlighter-rouge">F[_]</code> as the type parameter, the target/concurrent monad, in our example: <code class="highlighter-rouge">cats.effects.IO</code>.</li>
-</ul>
-
 <h3 id="server-bootstrap">Server Bootstrap</h3>
 
 <p>What else is needed? We just need to define a <code class="highlighter-rouge">main</code> method:</p>
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
-<span class="k">import</span> <span class="nn">mu.rpc.server.GrpcServer</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.server.GrpcServer</span>
 
 <span class="k">object</span> <span class="nc">RPCServer</span> <span class="o">{</span>
 
@@ -147,13 +139,16 @@
 <span class="o">}</span>
 </code></pre></div></div>
 
+<p>The Server will bootstrap on port <code class="highlighter-rouge">8080</code>.</p>
+
 <p>Fortunately, once all the runtime requirements are in place (<strong><code class="highlighter-rouge">import gserver.implicits._</code></strong>), we only have to write the previous piece of code, which primarily, should be the same in all cases (except if your target Monad is different from <code class="highlighter-rouge">cats.effects.IO</code>).</p>
 
 <h3 id="service-testing">Service testing</h3>
 
 <p>Thanks to <code class="highlighter-rouge">withServerChannel</code> from the package <code class="highlighter-rouge">mu.rpc.testing.servers</code>, you will be able to run in-memory instances of the server, which is very convenient for testing purposes. Below, a very simple property-based test for proving <code class="highlighter-rouge">Greeter.sayHello</code>:</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">mu.rpc.testing.servers.withServerChannel</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.Resource</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.testing.servers.withServerChannel</span>
 <span class="k">import</span> <span class="nn">org.scalatest.prop.Checkers</span>
 <span class="k">import</span> <span class="nn">org.scalatest._</span>
 <span class="k">import</span> <span class="nn">org.scalacheck.Gen</span>
@@ -163,15 +158,19 @@
 <span class="k">class</span> <span class="nc">ServiceSpec</span> <span class="k">extends</span> <span class="nc">FunSuite</span> <span class="k">with</span> <span class="nc">Matchers</span> <span class="k">with</span> <span class="nc">Checkers</span> <span class="k">with</span> <span class="nc">OneInstancePerTest</span> <span class="o">{</span>
 
   <span class="k">import</span> <span class="nn">gserver.implicits._</span>
-  
+
+  <span class="k">def</span> <span class="n">withClient</span><span class="o">[</span><span class="kt">Client</span>, <span class="kt">A</span><span class="o">](</span><span class="n">resource</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">Client</span><span class="o">])(</span><span class="n">f</span><span class="k">:</span> <span class="kt">Client</span> <span class="o">=&gt;</span> <span class="n">A</span><span class="o">)</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=</span>
+    <span class="n">resource</span><span class="o">.</span><span class="n">use</span><span class="o">(</span><span class="n">client</span> <span class="k">=&gt;</span> <span class="nc">IO</span><span class="o">(</span><span class="n">f</span><span class="o">(</span><span class="n">client</span><span class="o">))).</span><span class="n">unsafeRunSync</span><span class="o">()</span>
+
   <span class="k">def</span> <span class="n">sayHelloTest</span><span class="o">(</span><span class="n">requestGen</span><span class="k">:</span> <span class="kt">Gen</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">],</span> <span class="n">expected</span><span class="k">:</span> <span class="kt">HelloResponse</span><span class="o">)</span><span class="k">:</span> <span class="kt">Assertion</span> <span class="o">=</span>
     <span class="n">withServerChannel</span><span class="o">(</span><span class="nc">Greeter</span><span class="o">.</span><span class="n">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">])</span> <span class="o">{</span> <span class="n">sc</span> <span class="k">=&gt;</span>
-        <span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">Greeter</span><span class="o">.</span><span class="n">clientFromChannel</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="n">sc</span><span class="o">.</span><span class="n">channel</span><span class="o">)</span>
+      <span class="n">withClient</span><span class="o">(</span><span class="nc">Greeter</span><span class="o">.</span><span class="n">clientFromChannel</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="nc">IO</span><span class="o">(</span><span class="n">sc</span><span class="o">.</span><span class="n">channel</span><span class="o">)))</span> <span class="o">{</span> <span class="n">client</span> <span class="k">=&gt;</span>
         <span class="n">check</span> <span class="o">{</span>
           <span class="n">forAll</span><span class="o">(</span><span class="n">requestGen</span><span class="o">)</span> <span class="o">{</span> <span class="n">request</span> <span class="k">=&gt;</span>
             <span class="n">client</span><span class="o">.</span><span class="n">sayHello</span><span class="o">(</span><span class="n">request</span><span class="o">).</span><span class="n">unsafeRunSync</span><span class="o">()</span> <span class="o">==</span> <span class="n">expected</span>
           <span class="o">}</span>
         <span class="o">}</span>
+      <span class="o">}</span>
     <span class="o">}</span>
 
   <span class="k">val</span> <span class="n">requestGen</span><span class="k">:</span> <span class="kt">Gen</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Gen</span><span class="o">.</span><span class="n">alphaStr</span> <span class="n">map</span> <span class="nc">HelloRequest</span>
@@ -181,8 +180,9 @@
   <span class="o">}</span>
 
 <span class="o">}</span>
-
 </code></pre></div></div>
+
+<p><code class="highlighter-rouge">Greeter.bindService</code> is an auto-derived method which creates, behind the scenes, the binding service for <a href="https://grpc.io/">gRPC</a>. It requires <code class="highlighter-rouge">F[_]</code> as the type parameter, the target/concurrent monad, in our example: <code class="highlighter-rouge">cats.effects.IO</code>.</p>
 
 <p>Running the test:</p>
 
@@ -199,36 +199,33 @@
 
 <h3 id="client-runtime">Client Runtime</h3>
 
-<p>Similarly in this section, as we saw for the server case, we are defining all the client runtime configurations needed for communication with the server.</p>
+<p>Similarly in this section, just like we saw for the server, we are defining all the client runtime configurations needed for communication with the server.</p>
 
-<h3 id="execution-context-1">Execution Context</h3>
+<h3 id="creating-a-runtime-1">Creating a runtime</h3>
 
-<p>In our example, we are going to use the same Execution Context described for the Server. However, for the sake of observing a slightly different runtime configuration, our client will be interpreting to <code class="highlighter-rouge">monix.eval.Task</code>. Hence, in this case, we would only need the <code class="highlighter-rouge">monix.execution.Scheduler</code> implicit evidence.</p>
+<p>In our example, we are going to use the same runtime described for the server. Remember we’re relying on the <code class="highlighter-rouge">ConcurrentEffect</code>, so you can use any type that has a <code class="highlighter-rouge">ConcurrentEffect</code> instance.</p>
 
-<p>We are going to interpret to <code class="highlighter-rouge">monix.eval.Task</code>, however, behind the scenes, we will use the <a href="https://github.com/typelevel/cats-effect">cats-effect</a> <code class="highlighter-rouge">IO</code> monad as an abstraction. Concretely, Freestyle has an integration with <code class="highlighter-rouge">cats-effect</code> that is included transitively in the classpath through <code class="highlighter-rouge">mu-async-cats-effect</code> dependency.</p>
+<h3 id="transport-implicits-1">Transport Implicits</h3>
 
-<h3 id="runtime-implicits-1">Runtime Implicits</h3>
-
-<p>First of all, we need to configure how the client will reach the server in terms of the transport layer. There are two supported methods:</p>
+<p>First, we need to configure how the client will reach the server in terms of the transport layer. There are two supported methods:</p>
 
 <ul>
-  <li>By Address (host/port): brings the ability to create a channel with the target’s address and port number.</li>
-  <li>By Target: it can create a channel with a target string, which can be either a valid <a href="https://grpc.io/grpc-java/javadoc/io/grpc/NameResolver.html">NameResolver</a>-compliant URI or an authority string.</li>
+  <li>By Address (host/port): enables us to create a channel with the target’s address and port number.</li>
+  <li>By Target: we can create a channel with a target string, which can be either a valid <a href="https://grpc.io/grpc-java/javadoc/io/grpc/NameResolver.html">NameResolver</a>-compliant URI or an authority string.</li>
 </ul>
 
-<p>Additionally, we can add more optional configurations that can be used when the connection is occurring. All the options are available <a href="https://github.com/higherkindness/mu/blob/6b0e926a5a14fbe3d9282e8c78340f2d9a0421f3/rpc/src/main/scala/client/ChannelConfig.scala#L33-L46">here</a>. As we will see shortly in our example, we are going to skip the negotiation (<code class="highlighter-rouge">UsePlaintext()</code>).</p>
+<p>Additionally, we can add more optional configurations that can be used when the connection occurs. All the options are available <a href="https://github.com/higherkindness/mu/blob/48b8578cbafc59dc59e61e93c13fdb4709b7e540/modules/client/src/main/scala/ManagedChannelConfig.scala">here</a>.</p>
 
 <p>Given the transport settings and a list of optional configurations, we can create the <a href="https://grpc.io/grpc-java/javadoc/io/grpc/ManagedChannel.html">ManagedChannel.html</a> object, using the <code class="highlighter-rouge">ManagedChannelInterpreter</code> builder.</p>
 
-<p>So, taking into account all we have just said, how would our code look?</p>
+<p>As we will see shortly in our example, we are going relay on the default behaviour passing directly the <code class="highlighter-rouge">ChannelFor</code> to the client builder.</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
-<span class="k">import</span> <span class="nn">mu.rpc._</span>
-<span class="k">import</span> <span class="nn">mu.rpc.config._</span>
-<span class="k">import</span> <span class="nn">mu.rpc.client._</span>
-<span class="k">import</span> <span class="nn">mu.rpc.client.config._</span>
-<span class="k">import</span> <span class="nn">mu.rpc.client.implicits._</span>
-<span class="k">import</span> <span class="nn">monix.eval.Task</span>
+<p>So, taking into account all of that, how would our code look?</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc._</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.config._</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.client.config._</span>
 <span class="k">import</span> <span class="nn">service._</span>
 
 <span class="k">object</span> <span class="nc">gclient</span> <span class="o">{</span>
@@ -238,8 +235,8 @@
     <span class="k">val</span> <span class="n">channelFor</span><span class="k">:</span> <span class="kt">ChannelFor</span> <span class="o">=</span>
       <span class="nc">ConfigForAddress</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="s">"rpc.host"</span><span class="o">,</span> <span class="s">"rpc.port"</span><span class="o">).</span><span class="n">unsafeRunSync</span>
 
-    <span class="k">implicit</span> <span class="k">val</span> <span class="n">serviceClient</span><span class="k">:</span> <span class="kt">Greeter.Client</span><span class="o">[</span><span class="kt">Task</span><span class="o">]</span> <span class="k">=</span>
-      <span class="nc">Greeter</span><span class="o">.</span><span class="n">client</span><span class="o">[</span><span class="kt">Task</span><span class="o">](</span><span class="n">channelFor</span><span class="o">)</span>
+    <span class="k">implicit</span> <span class="k">val</span> <span class="n">serviceClient</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">Greeter</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span>
+      <span class="nc">Greeter</span><span class="o">.</span><span class="n">client</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="n">channelFor</span><span class="o">)</span>
   <span class="o">}</span>
 
   <span class="k">object</span> <span class="nc">implicits</span> <span class="k">extends</span> <span class="nc">Implicits</span>
@@ -249,36 +246,35 @@
 <p><strong>Notes</strong>:</p>
 
 <ul>
-  <li><code class="highlighter-rouge">host</code> and <code class="highlighter-rouge">port</code> would be read from the application configuration file.</li>
+  <li>In the code above, <code class="highlighter-rouge">host</code> and <code class="highlighter-rouge">port</code> would be read from an application configuration file.</li>
   <li>To be able to use the <code class="highlighter-rouge">ConfigForAddress</code> helper, you need to add the <code class="highlighter-rouge">mu-config</code> dependency to your build.</li>
 </ul>
 
 <h3 id="client-program">Client Program</h3>
 
-<p>Once we have our runtime configuration defined as above, everything gets easier. This is an example of a client application, following our dummy quickstart:</p>
+<p>Once we have our runtime configuration defined as above, everything gets easier on the client side. This is an example of a client application, following our dummy quickstart:</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">service._</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
+<span class="k">import</span> <span class="nn">service._</span>
 <span class="k">import</span> <span class="nn">gclient.implicits._</span>
-<span class="k">import</span> <span class="nn">monix.eval.Task</span>
-
-<span class="k">import</span> <span class="nn">scala.concurrent.Await</span>
-<span class="k">import</span> <span class="nn">scala.concurrent.duration.Duration</span>
 
 <span class="k">object</span> <span class="nc">RPCDemoApp</span> <span class="o">{</span>
 
   <span class="k">def</span> <span class="n">main</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="o">{</span>
 
-    <span class="k">val</span> <span class="n">hello</span> <span class="k">=</span> <span class="n">serviceClient</span><span class="o">.</span><span class="n">sayHello</span><span class="o">(</span><span class="nc">HelloRequest</span><span class="o">(</span><span class="s">"foo"</span><span class="o">)).</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">result</span> <span class="k">=&gt;</span>
-      <span class="nc">Task</span><span class="o">.</span><span class="n">eval</span><span class="o">(</span><span class="n">println</span><span class="o">(</span><span class="n">s</span><span class="s">"Result = $result"</span><span class="o">))</span>
+    <span class="k">val</span> <span class="n">hello</span> <span class="k">=</span> <span class="n">serviceClient</span><span class="o">.</span><span class="n">use</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">sayHello</span><span class="o">(</span><span class="nc">HelloRequest</span><span class="o">(</span><span class="s">"foo"</span><span class="o">))).</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">result</span> <span class="k">=&gt;</span>
+      <span class="nc">IO</span><span class="o">(</span><span class="n">println</span><span class="o">(</span><span class="n">s</span><span class="s">"Result = $result"</span><span class="o">))</span>
     <span class="o">}</span>
 
-    <span class="nc">Await</span><span class="o">.</span><span class="n">result</span><span class="o">(</span><span class="n">hello</span><span class="o">.</span><span class="n">runAsync</span><span class="o">,</span> <span class="nc">Duration</span><span class="o">.</span><span class="nc">Inf</span><span class="o">)</span>
+    <span class="n">hello</span><span class="o">.</span><span class="n">unsafeRunSync</span><span class="o">()</span>
   <span class="o">}</span>
 
 <span class="o">}</span>
 </code></pre></div></div>
 
-</section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/mu/highlight/highlight.pack.js"></script><script>hljs.configure({languages:['scala','java','bash']});
+</section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/mu/scala/highlight/highlight.pack.js"></script><script>hljs.configure({
+languages:['scala','java','bash']
+});
 hljs.initHighlighting();
-              </script><script>((window.gitter = {}).chat = {}).options = {
-room: '47deg/mu'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/mu/js/main.js"></script></body></html>
+             </script><script>((window.gitter = {}).chat = {}).options = {
+room: '47deg/mu'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/mu/scala/js/main.js"></script></body></html>

@@ -1,4 +1,4 @@
-<html><head><title>Mu: Core concepts</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="47 Degrees" /><meta name="description" content="A purely functional library for building RPC endpoint-based services" /><meta name="og:image" content="/mu/img/poster.png" /><meta name="og:title" content="Mu: Core concepts" /><meta name="og:site_name" content="Mu" /><meta name="og:url" content="https://higherkindness.github.io/mu/" /><meta name="og:type" content="website" /><meta name="og:description" content="A purely functional library for building RPC endpoint-based services" /><link rel="icon" type="image/png" href="/mu/img/favicon.png" /><meta name="twitter:title" content="Mu: Core concepts" /><meta name="twitter:image" content="https://higherkindness.github.io/mu/img/poster.png" /><meta name="twitter:description" content="A purely functional library for building RPC endpoint-based services" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/mu/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/mu/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/mu/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/mu/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/mu/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/mu/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/mu/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/mu/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/mu/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/mu/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/mu/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/mu/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/mu/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/mu/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/mu/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/mu/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/mu/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/mu/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/mu/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/mu/img/favicon310x150.png" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/mu/highlight/styles/default.css" /><link rel="stylesheet" href="/mu/css/style.css" /><link rel="stylesheet" href="/mu/css/palette.css" /><link rel="stylesheet" href="/mu/css/codemirror.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><ul id="sidebar" class="sidebar-nav"><li class="sidebar-brand"><a href="/mu/" class="brand"><div class="brand-wrapper"><span>Mu</span></div></a></li> <li><a href="/mu/docs/rpc/core-concepts" class=" active ">Core concepts</a></li> <li><a href="/mu/docs/rpc/streaming" class="">Streaming</a></li> <li><a href="/mu/docs/rpc/annotations" class="">Annotations</a></li> <li><a href="/mu/docs/rpc/idl-generation" class="">IDL Generation</a></li> <li><a href="/mu/docs/rpc/patterns" class="">Patterns</a></li> <li><a href="/mu/docs/rpc/ssl-tls" class="">SSL/TLS</a></li> <li><a href="/mu/docs/rpc/metrics-reporting" class="">Metrics Reporting</a></li> <li><a href="/mu/docs/rpc/decimal-migration-guide" class="">Migration guide for decimal types</a></li> <li><a href="/mu/docs/rpc/references" class="">References</a></li></ul></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li id="gh-eyes-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu"><i class="fa fa-eye"></i><span>WATCH<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu"><i class="fa fa-star-o"></i><span>STARS<span id="stars" class="label label-default">--</span></span></a></li><li><a href="#" onclick="shareSiteTwitter('Mu A purely functional library for building RPC endpoint-based services');"><i class="fa fa-twitter"></i></a></li><li><a href="#" onclick="shareSiteFacebook('Mu A purely functional library for building RPC endpoint-based services');"><i class="fa fa-facebook"></i></a></li><li><a href="#" onclick="shareSiteGoogle();"><i class="fa fa-google-plus"></i></a></li></ul></div></div></div></div><div id="content" data-github-owner="higherkindness" data-github-repo="mu"><div class="content-wrapper"><section><h1 id="core-concepts">Core concepts</h1>
+<html><head><title>Mu: Core concepts</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="47 Degrees" /><meta name="description" content="A purely functional library for building RPC endpoint-based services" /><meta name="og:image" content="/mu/scala/img/poster.png" /><meta name="og:title" content="Mu: Core concepts" /><meta name="og:site_name" content="Mu" /><meta name="og:url" content="https://higherkindness.github.io/mu/" /><meta name="og:type" content="website" /><meta name="og:description" content="A purely functional library for building RPC endpoint-based services" /><link rel="icon" type="image/png" href="/mu/scala/img/favicon.png" /><meta name="twitter:title" content="Mu: Core concepts" /><meta name="twitter:image" content="https://higherkindness.github.io/mu/img/poster.png" /><meta name="twitter:description" content="A purely functional library for building RPC endpoint-based services" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/mu/scala/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/mu/scala/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/mu/scala/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/mu/scala/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/mu/scala/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/mu/scala/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/mu/scala/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/mu/scala/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/mu/scala/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/mu/scala/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/mu/scala/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/mu/scala/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/mu/scala/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/mu/scala/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/mu/scala/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/mu/scala/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/mu/scala/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/mu/scala/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/mu/scala/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/mu/scala/img/favicon310x150.png" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/mu/scala/highlight/styles/default.css" /><link rel="stylesheet" href="/mu/scala/css/style.css" /><link rel="stylesheet" href="/mu/scala/css/palette.css" /><link rel="stylesheet" href="/mu/scala/css/codemirror.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><ul id="sidebar" class="sidebar-nav"><li class="sidebar-brand"><a href="/mu/scala/" class="brand"><div class="brand-wrapper"><span>Mu</span></div></a></li> <li><a href="/mu/scala/" class="">Quickstart</a></li> <li><a href="/mu/scala/core-concepts" class=" active ">Core concepts</a></li> <li><a href="/mu/scala/streaming" class="">Streaming</a></li> <li><a href="/mu/scala/annotations" class="">Annotations</a></li> <li><a href="/mu/scala/idl-generation" class="">IDL Generation</a></li> <li><a href="/mu/scala/patterns" class="">Patterns</a></li> <li><a href="/mu/scala/ssl-tls" class="">SSL/TLS</a></li> <li><a href="/mu/scala/metrics-reporting" class="">Metrics Reporting</a></li> <li><a href="/mu/scala/decimal-migration-guide" class="">Migration guide for decimal types</a></li> <li><a href="/mu/scala/references" class="">References</a></li></ul></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li id="gh-eyes-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu"><i class="fa fa-eye"></i><span>WATCH<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu"><i class="fa fa-star-o"></i><span>STARS<span id="stars" class="label label-default">--</span></span></a></li><li><a href="#" onclick="shareSiteTwitter('Mu A purely functional library for building RPC endpoint-based services');"><i class="fa fa-twitter"></i></a></li><li><a href="#" onclick="shareSiteFacebook('Mu A purely functional library for building RPC endpoint-based services');"><i class="fa fa-facebook"></i></a></li><li><a href="#" onclick="shareSiteGoogle();"><i class="fa fa-google-plus"></i></a></li></ul></div></div></div></div><div id="content" data-github-owner="higherkindness" data-github-repo="mu"><div class="content-wrapper"><section><h1 id="core-concepts">Core concepts</h1>
 
 <h2 id="about-grpc">About gRPC</h2>
 
@@ -18,7 +18,7 @@
 
 <ul>
   <li>As the Interface Definition Language (IDL) - for describing both the service interface and the structure of the payload messages. It is possible to use other alternatives if desired.</li>
-  <li>For serializing/deserializing structure data - similarly, as you do with <a href="https://en.wikipedia.org/wiki/JSON">JSON</a> data, defining files <code class="highlighter-rouge">.json</code> extension, with protobuf you have to define proto files with <code class="highlighter-rouge">.proto</code> as an extension.</li>
+  <li>For serializing/deserializing structured data - just as you define <a href="https://en.wikipedia.org/wiki/JSON">JSON</a> data with a <code class="highlighter-rouge">.json</code> file extension, with protobufs you define files with <code class="highlighter-rouge">.proto</code> as an extension.</li>
 </ul>
 
 <p>In the example given in the <a href="https://grpc.io/docs/guides/">gRPC guide</a>, you might have a proto file like this:</p>
@@ -51,57 +51,57 @@ message HelloReply {
 }
 </code></pre></div></div>
 
-<p>Correspondingly, <a href="https://grpc.io/">gRPC</a> also uses protoc with a special <a href="https://grpc.io/">gRPC</a> plugin to generate code from your proto file for this <code class="highlighter-rouge">Greeter</code> RPC service.</p>
+<p>Correspondingly, <a href="https://grpc.io/">gRPC</a> uses protoc with a special <a href="https://grpc.io/">gRPC</a> plugin to generate code from your proto file for this <code class="highlighter-rouge">Greeter</code> RPC service.</p>
 
 <p>You can find more information about Protocol Buffers in the <a href="https://developers.google.com/protocol-buffers/docs/overview">Protocol Buffers’ documentation</a>.</p>
 
 <h3 id="mu-rpc">mu-rpc</h3>
 
-<p>In the previous section, we’ve seen an overview of what <a href="https://grpc.io/">gRPC</a> offers for defining protocols and generating code (compiling protocol buffers). Now, we’ll show how <a href="https://github.com/higherkindness/mu">mu</a> offers the same, but in the <strong>Freestyle</strong> fashion, following the FP principles.</p>
+<p>In the previous section, we’ve seen an overview of what <a href="https://grpc.io/">gRPC</a> offers for defining protocols and generating code (compiling protocol buffers). Now, we’ll show how <a href="https://github.com/higherkindness/mu">mu</a> offers the same thing, but in the <strong>Freestyle</strong> fashion, following FP principles.</p>
 
-<p>First things first, the main difference in respect to <a href="https://grpc.io/">gRPC</a> is that <a href="https://github.com/higherkindness/mu">mu</a> doesn’t need <code class="highlighter-rouge">.proto</code> files, but it still uses protobuf, thanks to the <a href="https://github.com/btlines/pbdirect">PBDirect</a> library, which allows to read and write Scala objects directly to protobuf with no <code class="highlighter-rouge">.proto</code> file definitions. Therefore, in summary, we have:</p>
+<p>First things first, the main difference with respect to <a href="https://grpc.io/">gRPC</a> is that <a href="https://github.com/higherkindness/mu">mu</a> doesn’t need <code class="highlighter-rouge">.proto</code> files, but can still use protobuf thanks to the <a href="https://github.com/btlines/pbdirect">PBDirect</a> library, which allows it to read and write Scala objects directly to protobuf with no <code class="highlighter-rouge">.proto</code> file definitions. In summary:</p>
 
 <ul>
-  <li>Your protocols, both messages, and services, will reside with your business-logic in your Scala files using <a href="https://github.com/scalamacros/paradise">scalamacros</a> annotations to set them up. We’ll see more details on this shortly.</li>
-  <li>Instead of reading <code class="highlighter-rouge">.proto</code> files to set up the <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> messages and services, <a href="https://github.com/higherkindness/mu">mu</a> offers (as an optional feature) to generate them, based on your protocols defined in your Scala code. This feature is offered to maintain compatibility with other languages and systems outside of Scala. We’ll check out this feature further in <a href="/docs/rpc/idl-generation">this section</a>.</li>
+  <li>Your protocols, both messages and services, will reside with your business-logic in your Scala files using <a href="https://github.com/scalamacros/paradise">scalamacros</a> annotations to set them up. We’ll see more details on this shortly.</li>
+  <li>Instead of reading <code class="highlighter-rouge">.proto</code> files to set up the <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> messages and services, <a href="https://github.com/higherkindness/mu">mu</a> offers (as an optional feature) the ability to generate them based on the protocols defined in your Scala code. This feature is offered to maintain compatibility with other languages and systems outside of Scala. We’ll check out this feature further in <a href="idl-generation">this section</a>.</li>
 </ul>
 
 <p>Let’s start looking at how to define the <code class="highlighter-rouge">Person</code> message that we saw previously.
 Before starting, this is the Scala import we need:</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">mu.rpc.protocol._</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">higherkindness.mu.rpc.protocol._</span>
 </code></pre></div></div>
 
-<p><code class="highlighter-rouge">Person</code> definition would be defined as follows:</p>
+<p><code class="highlighter-rouge">Person</code> would be defined as follows:</p>
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
-  * Message Example.
-  *
-  * @param name Person name.
-  * @param id Person Id.
-  * @param has_ponycopter Has Ponycopter check.
-  */</span>
+ * Message Example.
+ *
+ * @param name Person name.
+ * @param id Person Id.
+ * @param has_ponycopter Has Ponycopter check.
+ */</span>
 <span class="nd">@message</span>
 <span class="k">case</span> <span class="k">class</span> <span class="nc">Person</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">id</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">has_ponycopter</span><span class="k">:</span> <span class="kt">Boolean</span><span class="o">)</span>
 </code></pre></div></div>
 
-<p>As we can see, it’s quite simple since it’s just a Scala case class preceded by the <code class="highlighter-rouge">@message</code> annotation (<code class="highlighter-rouge">@message</code> is optional though and used exclusively by <code class="highlighter-rouge">idlGen</code>):</p>
+<p>As we can see, this is quite simple - it’s just a Scala case class preceded by the <code class="highlighter-rouge">@message</code> annotation (though, <code class="highlighter-rouge">@message</code> is optional and used exclusively by <code class="highlighter-rouge">idlGen</code>):</p>
 
 <p>By the same token, let’s see now how the <code class="highlighter-rouge">Greeter</code> service would be translated to the <a href="https://github.com/higherkindness/mu">mu</a> style (in your <code class="highlighter-rouge">.scala</code> file):</p>
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">object</span> <span class="nc">protocol</span> <span class="o">{</span>
 
   <span class="cm">/**
-   * The request message containing the user's name.
-   * @param name User's name.
-   */</span>
+    * The request message containing the user's name.
+    * @param name User's name.
+    */</span>
   <span class="nd">@message</span>
   <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloRequest</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
 
   <span class="cm">/**
-   * The response message,
-   * @param message Message containing the greetings.
-   */</span>
+    * The response message,
+    * @param message Message containing the greetings.
+    */</span>
   <span class="nd">@message</span>
   <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloReply</span><span class="o">(</span><span class="n">message</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
 
@@ -109,25 +109,25 @@ Before starting, this is the Scala import we need:</p>
   <span class="k">trait</span> <span class="nc">Greeter</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
 
     <span class="cm">/**
-     * The greeter service definition.
-     *
-     * @param request Say Hello Request.
-     * @return HelloReply.
-     */</span>
+      * The greeter service definition.
+      *
+      * @param request Say Hello Request.
+      * @return HelloReply.
+      */</span>
     <span class="k">def</span> <span class="n">sayHello</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloReply</span><span class="o">]</span>
 
   <span class="o">}</span>
 <span class="o">}</span>
 </code></pre></div></div>
 
-<p>Naturally, the <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> services are grouped in a <a href="/docs/core/algebras/">@tagless algebra</a>. Therefore, we are following one of the primary principles of Freestyle; you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.</p>
+<p>Naturally, the <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> services are grouped in a <code class="highlighter-rouge">@tagless algebra</code>. Therefore, we are following one of the primary principles of Freestyle; you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.</p>
 
 <p>In the above example, we can see that <code class="highlighter-rouge">sayHello</code> returns an <code class="highlighter-rouge">F[HelloReply]</code>. However, very often the services might:</p>
 
 <ul>
   <li>Return an empty response.</li>
   <li>Receive an empty request.</li>
-  <li>A combination of both.</li>
+  <li>Return and receive a combination of both.</li>
 </ul>
 
 <p><code class="highlighter-rouge">mu-rpc</code> provides an <code class="highlighter-rouge">Empty</code> object, defined at <code class="highlighter-rouge">mu.rpc.protocol</code>, that you might want to use for these purposes.</p>
@@ -144,7 +144,7 @@ Before starting, this is the Scala import we need:</p>
   <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloRequest</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
 
   <span class="cm">/**
-   * The response message,
+   * The response message.
    * @param message Message containing the greetings.
    */</span>
   <span class="nd">@message</span>
@@ -173,7 +173,7 @@ Before starting, this is the Scala import we need:</p>
 <p>We are also using some additional annotations:</p>
 
 <ul>
-  <li><code class="highlighter-rouge">@service(Protobuf)</code>: tags the trait as an <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> service, in order to derive server and client code (macro expansion). It receives as argument the type of serialization that will be used to encode/decode data, <code class="highlighter-rouge">Protocol Buffers</code> in the example. <code class="highlighter-rouge">Avro</code> is also supported as another type of serialization.</li>
+  <li><code class="highlighter-rouge">@service(Protobuf)</code>: tags the trait as an <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> service, in order to derive server and client code (macro expansion). It receives as its argument the type of serialization that will be used to encode/decode data. Our serialization type is <code class="highlighter-rouge">Protocol Buffers</code> in the example. <code class="highlighter-rouge">Avro</code> is also supported as another type of serialization.</li>
 </ul>
 
 <p>We’ll see more details about these and other annotations in the following sections.</p>
@@ -184,9 +184,9 @@ Before starting, this is the Scala import we need:</p>
 
 <p><a href="https://github.com/higherkindness/mu">mu</a> supports <code class="highlighter-rouge">Gzip</code> as compression format.</p>
 
-<p>On the server side, we only have to add the annotation <code class="highlighter-rouge">Gzip</code> in our defined services.</p>
+<p>For server side compression, we just have to add the annotation <code class="highlighter-rouge">Gzip</code> in our defined services.</p>
 
-<p>Let’s see an example of a unary service on the server side.</p>
+<p>Let’s see an example of a unary service:</p>
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">object</span> <span class="nc">service</span> <span class="o">{</span>
 
@@ -206,34 +206,33 @@ Before starting, this is the Scala import we need:</p>
 <span class="o">}</span>
 </code></pre></div></div>
 
-<p>On the client, to enable it, we only have to add an option to the client in the channel builder.</p>
+<p>To enable compression on the client side, we just have to add an option to the client in the channel builder.</p>
 
 <p>Let’s see an example of a client with the compression enabled.</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
-<span class="k">import</span> <span class="nn">cats.implicits._</span>
-<span class="k">import</span> <span class="nn">mu.rpc._</span>
-<span class="k">import</span> <span class="nn">mu.rpc.config._</span>
-<span class="k">import</span> <span class="nn">mu.rpc.client._</span>
-<span class="k">import</span> <span class="nn">mu.rpc.client.config._</span>
-<span class="k">import</span> <span class="nn">mu.rpc.client.implicits._</span>
-<span class="k">import</span> <span class="nn">monix.eval.Task</span>
-<span class="k">import</span> <span class="nn">io.grpc.CallOptions</span>
-<span class="k">import</span> <span class="nn">io.grpc.ManagedChannel</span>
-<span class="k">import</span> <span class="nn">service._</span>
-<span class="k">import</span> <span class="nn">scala.util.</span><span class="o">{</span><span class="nc">Failure</span><span class="o">,</span> <span class="nc">Success</span><span class="o">,</span> <span class="nc">Try</span><span class="o">}</span>
+<p>Since <a href="https://github.com/higherkindness/mu">mu</a> relies on <code class="highlighter-rouge">ConcurrentEffect</code> from the <a href="https://github.com/typelevel/cats-effect">cats-effect library</a>, we’ll need a runtime for executing our effects.</p>
 
-<span class="k">trait</span> <span class="nc">Implicits</span> <span class="k">extends</span> <span class="nc">CommonRuntime</span> <span class="o">{</span>
+<p>We’ll be using <code class="highlighter-rouge">IO</code> from <code class="highlighter-rouge">cats-effect</code>, but you can use any type that has a <code class="highlighter-rouge">ConcurrentEffect</code> instance.</p>
+
+<p>For executing <code class="highlighter-rouge">IO</code> we need a <code class="highlighter-rouge">ContextShift[IO]</code> used for running <code class="highlighter-rouge">IO</code> instances and a <code class="highlighter-rouge">Timer[IO]</code> that is used for scheduling, let’s go ahead and create them.</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc._</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.config._</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.client.config._</span>
+<span class="k">import</span> <span class="nn">io.grpc.CallOptions</span>
+<span class="k">import</span> <span class="nn">service._</span>
+
+<span class="k">trait</span> <span class="nc">ChannelImplicits</span> <span class="k">extends</span> <span class="nc">CommonRuntime</span> <span class="o">{</span>
 
   <span class="k">val</span> <span class="n">channelFor</span><span class="k">:</span> <span class="kt">ChannelFor</span> <span class="o">=</span>
     <span class="nc">ConfigForAddress</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="s">"rpc.host"</span><span class="o">,</span> <span class="s">"rpc.port"</span><span class="o">).</span><span class="n">unsafeRunSync</span>
 
-  <span class="k">implicit</span> <span class="k">val</span> <span class="n">serviceClient</span><span class="k">:</span> <span class="kt">Greeter.Client</span><span class="o">[</span><span class="kt">Task</span><span class="o">]</span> <span class="k">=</span>
-    <span class="nc">Greeter</span><span class="o">.</span><span class="n">client</span><span class="o">[</span><span class="kt">Task</span><span class="o">](</span><span class="n">channelFor</span><span class="o">,</span> <span class="n">options</span> <span class="k">=</span> <span class="nc">CallOptions</span><span class="o">.</span><span class="nc">DEFAULT</span><span class="o">.</span><span class="n">withCompression</span><span class="o">(</span><span class="s">"gzip"</span><span class="o">))</span>
+  <span class="k">implicit</span> <span class="k">val</span> <span class="n">serviceClient</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">Greeter</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span>
+    <span class="nc">Greeter</span><span class="o">.</span><span class="n">client</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="n">channelFor</span><span class="o">,</span> <span class="n">options</span> <span class="k">=</span> <span class="nc">CallOptions</span><span class="o">.</span><span class="nc">DEFAULT</span><span class="o">.</span><span class="n">withCompression</span><span class="o">(</span><span class="s">"gzip"</span><span class="o">))</span>
 <span class="o">}</span>
 
-<span class="k">object</span> <span class="nc">implicits</span> <span class="k">extends</span> <span class="nc">Implicits</span>
-
+<span class="k">object</span> <span class="nc">implicits</span> <span class="k">extends</span> <span class="nc">ChannelImplicits</span>
 </code></pre></div></div>
 
 <h2 id="service-methods">Service Methods</h2>
@@ -241,15 +240,13 @@ Before starting, this is the Scala import we need:</p>
 <p>As <a href="https://grpc.io/">gRPC</a>, <a href="https://github.com/higherkindness/mu">mu</a> allows you to define two main kinds of service methods:</p>
 
 <ul>
-  <li><strong>Unary RPC</strong>: the simplest way of communication, one client request, and one server response.</li>
-  <li><strong>Streaming RPC</strong>: similar to the unary, but depending the kind of streaming, the client or server or both will send back a stream of responses. There are three kinds of streaming, server, client and bidirectional streaming.</li>
+  <li><strong>Unary RPC</strong>: the simplest way of communicating, one client request, and one server response.</li>
+  <li><strong>Streaming RPC</strong>: similar to unary, but depending the kind of streaming, the client, server, or both will send back a stream of responses. There are three kinds of streaming, server, client and bidirectional streaming.</li>
 </ul>
 
 <p>Let’s complete our protocol’s example with an unary service method:</p>
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">object</span> <span class="nc">service</span> <span class="o">{</span>
-
-  <span class="k">import</span> <span class="nn">monix.reactive.Observable</span>
 
   <span class="nd">@message</span>
   <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloRequest</span><span class="o">(</span><span class="n">greeting</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
@@ -282,25 +279,25 @@ Before starting, this is the Scala import we need:</p>
 
 <h2 id="custom-codecs">Custom codecs</h2>
 
-<p><a href="https://github.com/higherkindness/mu">mu</a> allows you to use custom decoders and encoders. It creates implicits <code class="highlighter-rouge">Marshaller</code> instances for your messages using existing serializers/deserializers for the serialization type you’re using.</p>
+<p><a href="https://github.com/higherkindness/mu">mu</a> allows you to use custom decoders and encoders. It creates implicit <code class="highlighter-rouge">Marshaller</code> instances for your messages using existing serializers/deserializers for the serialization type you’re using.</p>
 
-<p>In the case of <code class="highlighter-rouge">Protobuf</code>, <a href="https://github.com/higherkindness/mu">mu</a> uses instances of <a href="https://github.com/btlines/pbdirect">PBDirect</a> for creating the <code class="highlighter-rouge">Marshaller</code> instances. In the case of <code class="highlighter-rouge">Avro</code>, it uses instances of <a href="https://github.com/sksamuel/avro4s">Avro4s</a>.</p>
+<p>If you’re using <code class="highlighter-rouge">Protobuf</code>, <a href="https://github.com/higherkindness/mu">mu</a> uses instances of <a href="https://github.com/btlines/pbdirect">PBDirect</a> for creating the <code class="highlighter-rouge">Marshaller</code> instances. For <code class="highlighter-rouge">Avro</code>, it uses instances of <a href="https://github.com/sksamuel/avro4s">Avro4s</a>.</p>
 
-<p>Let’s see a couple of samples, one per each type of serialization. Suppose you want to serialize <code class="highlighter-rouge">java.time.LocalDate</code> as part of your messages in <code class="highlighter-rouge">String</code> format. With <code class="highlighter-rouge">Probobuf</code>, as we’ve mentioned, you need to provide the instances of <a href="https://github.com/btlines/pbdirect">PBDirect</a> for that type. Concretely, you need to provide a <code class="highlighter-rouge">PBWriter</code> and a <code class="highlighter-rouge">PBReader</code>.</p>
+<p>Let’s see a couple of samples, one per each type of serialization. Suppose you want to serialize <code class="highlighter-rouge">java.time.LocalDate</code> as part of your messages in <code class="highlighter-rouge">String</code> format. With <code class="highlighter-rouge">Probobuf</code>, as we’ve mentioned, you need to provide the instances of <a href="https://github.com/btlines/pbdirect">PBDirect</a> for that type. Specifically, you need to provide a <code class="highlighter-rouge">PBWriter</code> and a <code class="highlighter-rouge">PBReader</code>.</p>
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">object</span> <span class="nc">protocol</span> <span class="o">{</span>
 
   <span class="k">import</span> <span class="nn">java.time._</span>
   <span class="k">import</span> <span class="nn">java.time.format._</span>
-  
+
   <span class="k">import</span> <span class="nn">com.google.protobuf.</span><span class="o">{</span><span class="nc">CodedInputStream</span><span class="o">,</span> <span class="nc">CodedOutputStream</span><span class="o">}</span>
   <span class="k">import</span> <span class="nn">pbdirect._</span>
-  
+
   <span class="k">implicit</span> <span class="k">object</span> <span class="nc">LocalDateWriter</span> <span class="k">extends</span> <span class="nc">PBWriter</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="o">{</span>
     <span class="k">override</span> <span class="k">def</span> <span class="n">writeTo</span><span class="o">(</span><span class="n">index</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">value</span><span class="k">:</span> <span class="kt">LocalDate</span><span class="o">,</span> <span class="n">out</span><span class="k">:</span> <span class="kt">CodedOutputStream</span><span class="o">)</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span>
       <span class="n">out</span><span class="o">.</span><span class="n">writeString</span><span class="o">(</span><span class="n">index</span><span class="o">,</span> <span class="n">value</span><span class="o">.</span><span class="n">format</span><span class="o">(</span><span class="nc">DateTimeFormatter</span><span class="o">.</span><span class="nc">ISO_LOCAL_DATE</span><span class="o">))</span>
   <span class="o">}</span>
-  
+
   <span class="k">implicit</span> <span class="k">object</span> <span class="nc">LocalDateReader</span> <span class="k">extends</span> <span class="nc">PBReader</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="o">{</span>
     <span class="k">override</span> <span class="k">def</span> <span class="n">read</span><span class="o">(</span><span class="n">input</span><span class="k">:</span> <span class="kt">CodedInputStream</span><span class="o">)</span><span class="k">:</span> <span class="kt">LocalDate</span> <span class="o">=</span>
       <span class="nc">LocalDate</span><span class="o">.</span><span class="n">parse</span><span class="o">(</span><span class="n">input</span><span class="o">.</span><span class="n">readString</span><span class="o">(),</span> <span class="nc">DateTimeFormatter</span><span class="o">.</span><span class="nc">ISO_LOCAL_DATE</span><span class="o">)</span>
@@ -320,30 +317,29 @@ Before starting, this is the Scala import we need:</p>
 <span class="o">}</span>
 </code></pre></div></div>
 
-<p>For <code class="highlighter-rouge">Avro</code> is quite similar, but in this case we need to provide three instances of <a href="https://github.com/sksamuel/avro4s">Avro4s</a>. <code class="highlighter-rouge">ToSchema</code>, <code class="highlighter-rouge">FromValue</code>, and <code class="highlighter-rouge">ToValue</code>.</p>
+<p>For <code class="highlighter-rouge">Avro</code> the process is quite similar, but in this case we need to provide three instances of <a href="https://github.com/sksamuel/avro4s">Avro4s</a>. <code class="highlighter-rouge">SchemaFor</code>, <code class="highlighter-rouge">Encoder</code>, and <code class="highlighter-rouge">Decoder</code>.</p>
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">object</span> <span class="nc">protocol</span> <span class="o">{</span>
 
   <span class="k">import</span> <span class="nn">java.time._</span>
   <span class="k">import</span> <span class="nn">java.time.format._</span>
-  
+
   <span class="k">import</span> <span class="nn">com.sksamuel.avro4s._</span>
   <span class="k">import</span> <span class="nn">org.apache.avro.Schema</span>
-  <span class="k">import</span> <span class="nn">org.apache.avro.Schema.Field</span>
-  
-  <span class="k">implicit</span> <span class="k">object</span> <span class="nc">LocalDateToSchema</span> <span class="k">extends</span> <span class="nc">ToSchema</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="o">{</span>
-    <span class="k">override</span> <span class="k">val</span> <span class="n">schema</span><span class="k">:</span> <span class="kt">Schema</span> <span class="o">=</span> 
-      <span class="nc">Schema</span><span class="o">.</span><span class="n">create</span><span class="o">(</span><span class="nc">Schema</span><span class="o">.</span><span class="nc">Type</span><span class="o">.</span><span class="nc">STRING</span><span class="o">)</span>
+  <span class="k">import</span> <span class="nn">org.apache.avro.SchemaBuilder</span>
+
+  <span class="k">implicit</span> <span class="k">object</span> <span class="nc">LocalDateToSchema</span> <span class="k">extends</span> <span class="nc">SchemaFor</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="o">{</span>
+    <span class="k">override</span> <span class="k">val</span> <span class="n">schema</span><span class="k">:</span> <span class="kt">Schema</span> <span class="o">=</span> <span class="nc">SchemaBuilder</span><span class="o">.</span><span class="n">builder</span><span class="o">().</span><span class="n">stringType</span><span class="o">()</span>
   <span class="o">}</span>
 
-  <span class="k">implicit</span> <span class="k">object</span> <span class="nc">LocalDateToValue</span> <span class="k">extends</span> <span class="nc">ToValue</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="o">{</span>
-    <span class="k">override</span> <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">LocalDate</span><span class="o">)</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=</span> 
+  <span class="k">implicit</span> <span class="k">object</span> <span class="nc">LocalDateToValue</span> <span class="k">extends</span> <span class="nc">Encoder</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="o">{</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="n">encode</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">LocalDate</span><span class="o">,</span> <span class="n">schema</span><span class="k">:</span> <span class="kt">Schema</span><span class="o">)</span><span class="k">:</span> <span class="kt">AnyRef</span> <span class="o">=</span>
       <span class="n">value</span><span class="o">.</span><span class="n">format</span><span class="o">(</span><span class="nc">DateTimeFormatter</span><span class="o">.</span><span class="nc">ISO_LOCAL_DATE</span><span class="o">)</span>
   <span class="o">}</span>
 
-  <span class="k">implicit</span> <span class="k">object</span> <span class="nc">LocalDateFromValue</span> <span class="k">extends</span> <span class="nc">FromValue</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="o">{</span>
-    <span class="k">override</span> <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">Any</span><span class="o">,</span> <span class="n">field</span><span class="k">:</span> <span class="kt">Field</span><span class="o">)</span><span class="k">:</span> <span class="kt">LocalDate</span> <span class="o">=</span> 
-      <span class="nc">LocalDate</span><span class="o">.</span><span class="n">parse</span><span class="o">(</span><span class="n">value</span><span class="o">.</span><span class="n">toString</span><span class="o">(),</span> <span class="nc">DateTimeFormatter</span><span class="o">.</span><span class="nc">ISO_LOCAL_DATE</span><span class="o">)</span>
+  <span class="k">implicit</span> <span class="k">object</span> <span class="nc">LocalDateFromValue</span> <span class="k">extends</span> <span class="nc">Decoder</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="o">{</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="n">decode</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">Any</span><span class="o">,</span> <span class="n">schema</span><span class="k">:</span> <span class="kt">Schema</span><span class="o">)</span><span class="k">:</span> <span class="kt">LocalDate</span> <span class="o">=</span>
+      <span class="nc">LocalDate</span><span class="o">.</span><span class="n">parse</span><span class="o">(</span><span class="n">value</span><span class="o">.</span><span class="n">toString</span><span class="o">,</span> <span class="nc">DateTimeFormatter</span><span class="o">.</span><span class="nc">ISO_LOCAL_DATE</span><span class="o">)</span>
   <span class="o">}</span>
 
   <span class="nd">@message</span>
@@ -360,76 +356,75 @@ Before starting, this is the Scala import we need:</p>
 <span class="o">}</span>
 </code></pre></div></div>
 
-<p><a href="https://github.com/higherkindness/mu">mu</a> provides serializers for <code class="highlighter-rouge">BigDecimal</code>, <code class="highlighter-rouge">BigDecimal</code> with tagged ‘precision’ and ‘scale’ (like <code class="highlighter-rouge">BigDecimal @@ (Nat._8, Nat._2)</code>), <code class="highlighter-rouge">java.time.LocalDate</code> and <code class="highlighter-rouge">java.time.LocalDateTime</code>. The only thing you need to do is to add the following import to your service:</p>
+<p><a href="https://github.com/higherkindness/mu">mu</a> provides serializers for <code class="highlighter-rouge">BigDecimal</code> and <code class="highlighter-rouge">BigDecimal</code> with tagged ‘precision’ and ‘scale’ (like <code class="highlighter-rouge">BigDecimal @@ (Nat._8, Nat._2)</code>). It also provides serializers for <code class="highlighter-rouge">java.time.LocalDate</code> and <code class="highlighter-rouge">java.time.LocalDateTime</code> but only for <a href="https://github.com/btlines/pbdirect">PBDirect</a> since <a href="https://github.com/sksamuel/avro4s">Avro4s</a> provides their owns.</p>
+
+<p>The only thing you need to do is add the following import to your service:</p>
 
 <ul>
   <li><code class="highlighter-rouge">BigDecimal</code> in <code class="highlighter-rouge">Protobuf</code>
     <ul>
-      <li><code class="highlighter-rouge">import mu.rpc.internal.encoders.pbd.bigDecimal._</code></li>
+      <li><code class="highlighter-rouge">import higherkindness.mu.rpc.internal.encoders.pbd.bigDecimal._</code></li>
     </ul>
   </li>
   <li><code class="highlighter-rouge">java.time.LocalDate</code> and <code class="highlighter-rouge">java.time.LocalDateTime</code> in <code class="highlighter-rouge">Protobuf</code>
     <ul>
-      <li><code class="highlighter-rouge">import mu.rpc.internal.encoders.pbd.javatime._</code></li>
+      <li><code class="highlighter-rouge">import higherkindness.mu.rpc.internal.encoders.pbd.javatime._</code></li>
     </ul>
   </li>
   <li><code class="highlighter-rouge">BigDecimal</code> in <code class="highlighter-rouge">Avro</code> (<strong>note</strong>: this encoder is not avro spec compliant)
     <ul>
-      <li><code class="highlighter-rouge">import mu.rpc.internal.encoders.avro.bigdecimal._</code></li>
+      <li><code class="highlighter-rouge">import higherkindness.mu.rpc.internal.encoders.avro.bigdecimal._</code></li>
     </ul>
   </li>
   <li>Tagged <code class="highlighter-rouge">BigDecimal</code> in <code class="highlighter-rouge">Avro</code>
     <ul>
-      <li><code class="highlighter-rouge">import mu.rpc.internal.encoders.avro.bigDecimalTagged._</code></li>
-    </ul>
-  </li>
-  <li><code class="highlighter-rouge">java.time.LocalDate</code> and <code class="highlighter-rouge">java.time.LocalDateTime</code> in <code class="highlighter-rouge">Avro</code>
-    <ul>
-      <li><code class="highlighter-rouge">import mu.rpc.internal.encoders.avro.javatime._</code></li>
+      <li><code class="highlighter-rouge">import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._</code></li>
     </ul>
   </li>
 </ul>
 
-<p>It also provides the instances for <code class="highlighter-rouge">org.joda.time.LocalDate</code> and <code class="highlighter-rouge">org.joda.time.LocalDateTime</code>, but you need the <code class="highlighter-rouge">mu-rpc-marshallers-jodatime</code> extra dependency. See the <a href="/docs/rpc/quickstart">quickstart section</a> for the SBT instructions.</p>
+<p>Mu also provides instances for <code class="highlighter-rouge">org.joda.time.LocalDate</code> and <code class="highlighter-rouge">org.joda.time.LocalDateTime</code>, but you need the <code class="highlighter-rouge">mu-rpc-marshallers-jodatime</code> extra dependency. See the <a href="/mu/scala/">main section</a> for the SBT instructions.</p>
 
 <ul>
   <li><code class="highlighter-rouge">org.joda.time.LocalDate</code> and <code class="highlighter-rouge">org.joda.time.LocalDateTime</code> in <code class="highlighter-rouge">Protobuf</code>
     <ul>
-      <li><code class="highlighter-rouge">import mu.rpc.marshallers.jodaTimeEncoders.pbd._</code></li>
+      <li><code class="highlighter-rouge">import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.pbd._</code></li>
     </ul>
   </li>
   <li><code class="highlighter-rouge">org.joda.time.LocalDate</code> and <code class="highlighter-rouge">org.joda.time.LocalDateTime</code> in <code class="highlighter-rouge">Avro</code>
     <ul>
-      <li><code class="highlighter-rouge">import mu.rpc.marshallers.jodaTimeEncoders.avro._</code></li>
+      <li><code class="highlighter-rouge">import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.avro._</code></li>
     </ul>
   </li>
 </ul>
 
-<p><strong>Note</strong>: If you want to send one of these instances directly as a request or response through Avro, you need to provide an instance of <code class="highlighter-rouge">Marshaller</code>. <a href="https://github.com/higherkindness/mu">mu</a> provides the marshallers for <code class="highlighter-rouge">BigDecimal</code>, <code class="highlighter-rouge">java.time.LocalDate</code>, <code class="highlighter-rouge">java.time.LocalDateTime</code>, <code class="highlighter-rouge">org.joda.time.LocalDate</code> and <code class="highlighter-rouge">org.joda.time.LocalDateTime</code> in a separated package:</p>
+<p><strong>Note</strong>: If you want to send one of these instances directly as a request or response through Avro, you need to provide an instance of <code class="highlighter-rouge">Marshaller</code>. <a href="https://github.com/higherkindness/mu">mu</a> provides the marshallers for <code class="highlighter-rouge">BigDecimal</code>, <code class="highlighter-rouge">java.time.LocalDate</code>, <code class="highlighter-rouge">java.time.LocalDateTime</code>, <code class="highlighter-rouge">org.joda.time.LocalDate</code> and <code class="highlighter-rouge">org.joda.time.LocalDateTime</code> in a separate package:</p>
 <ul>
   <li><code class="highlighter-rouge">BigDecimal</code> in <code class="highlighter-rouge">Avro</code>
     <ul>
-      <li><code class="highlighter-rouge">import mu.rpc.internal.encoders.avro.bigdecimal.marshallers._</code></li>
+      <li><code class="highlighter-rouge">import higherkindness.mu.rpc.internal.encoders.avro.bigdecimal.marshallers._</code></li>
     </ul>
   </li>
   <li>Tagged <code class="highlighter-rouge">BigDecimal</code> in <code class="highlighter-rouge">Avro</code> (<strong>note</strong>: this encoder is not avro spec compliant)
     <ul>
-      <li><code class="highlighter-rouge">import mu.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._</code></li>
+      <li><code class="highlighter-rouge">import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._</code></li>
     </ul>
   </li>
   <li><code class="highlighter-rouge">java.time.LocalDate</code> and <code class="highlighter-rouge">java.time.LocalDateTime</code> in <code class="highlighter-rouge">Avro</code>
     <ul>
-      <li><code class="highlighter-rouge">import mu.rpc.internal.encoders.avro.javatime.marshallers._</code></li>
+      <li><code class="highlighter-rouge">import higherkindness.mu.rpc.internal.encoders.avro.javatime.marshallers._</code></li>
     </ul>
   </li>
   <li><code class="highlighter-rouge">org.joda.time.LocalDate</code> and <code class="highlighter-rouge">org.joda.time.LocalDateTime</code> in <code class="highlighter-rouge">Avro</code>
     <ul>
-      <li><code class="highlighter-rouge">import mu.rpc.marshallers.jodaTimeEncoders.avro.marshallers._</code></li>
+      <li><code class="highlighter-rouge">import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.avro.marshallers._</code></li>
     </ul>
   </li>
 </ul>
 
-</section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/mu/highlight/highlight.pack.js"></script><script>hljs.configure({languages:['scala','java','bash']});
+</section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/mu/scala/highlight/highlight.pack.js"></script><script>hljs.configure({
+languages:['scala','java','bash']
+});
 hljs.initHighlighting();
-              </script><script>((window.gitter = {}).chat = {}).options = {
-room: '47deg/mu'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/mu/js/main.js"></script></body></html>
+             </script><script>((window.gitter = {}).chat = {}).options = {
+room: '47deg/mu'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/mu/scala/js/main.js"></script></body></html>
