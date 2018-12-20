@@ -43,7 +43,7 @@ object ProjectPlugin extends AutoPlugin {
       val prometheus: String         = "0.5.0"
       val pureconfig: String         = "0.10.0"
       val reactiveStreams: String    = "1.0.2"
-      val scala: String              = "2.12.7"
+      val scala: String              = "2.12.8"
       val scalacheckToolbox: String  = "0.2.5"
     }
 
@@ -219,15 +219,24 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
       micrositeName := "Mu",
-      micrositeBaseUrl := "/mu",
+      micrositeBaseUrl := "/mu/scala",
       micrositeDescription := "A purely functional library for building RPC endpoint-based services",
-      micrositeDocumentationUrl := "docs/rpc/core-concepts.html",
       micrositeGithubOwner := "higherkindness",
       micrositeGithubRepo := "mu",
       micrositeGitterChannelUrl := "47deg/mu",
       micrositeOrganizationHomepage := "http://www.47deg.com",
       includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
-      micrositePushSiteWith := GitHub4s
+      micrositePushSiteWith := GitHub4s,
+      micrositePalette := Map(
+        "brand-primary"   -> "#de3423",
+        "brand-secondary" -> "#852319",
+        "brand-tertiary"  -> "#381C19",
+        "gray-dark"       -> "#333333",
+        "gray"            -> "#666666",
+        "gray-light"      -> "#EDEDED",
+        "gray-lighter"    -> "#F4F5F9",
+        "white-color"     -> "#E6E7EC"
+      )
     )
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(

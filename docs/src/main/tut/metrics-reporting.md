@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Metrics Reporting
-permalink: /docs/rpc/metrics-reporting
+permalink: /metrics-reporting
 ---
 
 # Metrics Reporting

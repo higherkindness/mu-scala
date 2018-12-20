@@ -3,7 +3,7 @@ jdk:
   - oraclejdk8
 scala:
   - 2.11.12
-  - 2.12.7
+  - 2.12.8
 before_cache:
   - du -h -d 1 $HOME/.ivy2/
   - du -h -d 2 $HOME/.sbt/
@@ -25,8 +25,8 @@ script:
   - curl -s https://codecov.io/bash > .codecov
   - sed -i -e 's/TRAVIS_.*_VERSION/^TRAVIS_.*_VERSION=/' .codecov
   - chmod +x .codecov
-  - if [ $TRAVIS_SCALA_VERSION = "2.12.7" ]; then sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut; fi
-  - if [ $TRAVIS_SCALA_VERSION = "2.12.7" ]; then ./.codecov -X gcov; fi
+  - if [ $TRAVIS_SCALA_VERSION = "2.12.8" ]; then sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut; fi
+  - if [ $TRAVIS_SCALA_VERSION = "2.12.8" ]; then ./.codecov -X gcov; fi
   - if [ $TRAVIS_SCALA_VERSION = "2.11.12" ]; then sbt ++$TRAVIS_SCALA_VERSION clean test; fi
 stages:
 - test
@@ -35,13 +35,13 @@ stages:
 jobs:
   include:
     - stage: plugin
-      scala: 2.12.7
+      scala: 2.12.8
       script:
         - sbt ++$TRAVIS_SCALA_VERSION idlgen-core/test
         - sbt ++$TRAVIS_SCALA_VERSION idlgen-sbt/test
         - sbt ++$TRAVIS_SCALA_VERSION publishLocal idlgen-sbt/publishLocal idlgen-sbt/scripted
     - stage: deploy
-      scala: 2.12.7
+      scala: 2.12.8
       script:
         - bash <(curl -s https://codecov.io/bash) -t 5b75b318-ab71-4fbc-9203-bfa7765cdbdc
         - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then

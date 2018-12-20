@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: SSL/TLS
-permalink: /docs/rpc/ssl-tls
+permalink: /ssl-tls
 ---
 
 # SSL/TLS Encryption
@@ -10,7 +10,7 @@ permalink: /docs/rpc/ssl-tls
 
 [mu] allows you to encrypt the connection between the server and the client through SSL/TLS. The main goal of using SSL is to protect your sensitive information and to keep your data secure between servers and clients.
 
-As we mentioned in the [Main](/mu/) section, we can choose to configure our client with `OkHttp` or `Netty` but if we want to encrypt our service, it's mandatory to use `Netty`. Currently, [mu] only supports encryption over *Netty*.
+As we mentioned in the [Main](/mu/scala/) section, we can choose to configure our client with `OkHttp` or `Netty` but if we want to encrypt our service, it's mandatory to use `Netty`. Currently, [mu] only supports encryption over *Netty*.
 
 ## Requirements 
 

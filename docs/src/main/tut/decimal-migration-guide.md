@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Migration guide for decimal types
-permalink: /docs/rpc/decimal-migration-guide
+permalink: /decimal-migration-guide
 ---
 
 # Migration guide for decimal types (available from 0.15.1)

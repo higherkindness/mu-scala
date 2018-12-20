@@ -1,10 +1,7 @@
 ---
-layout: home
-title: Home
-technologies:
- - first: ["Scala", "mu-rpc library is completely written in Scala."]
- - second: ["gRPC", "mu-rpc combines RPC protocols, services and clients thanks to the gRPC framework."]
- - third: ["Functional Programming", "mu-rpc is a purely functional library for building RPC endpoint based services."]
+layout: docs
+title: Mu Home
+permalink: /
 ---
 
 # Quickstart
