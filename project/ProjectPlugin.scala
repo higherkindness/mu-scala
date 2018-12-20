@@ -43,7 +43,7 @@ object ProjectPlugin extends AutoPlugin {
       val prometheus: String         = "0.5.0"
       val pureconfig: String         = "0.10.0"
       val reactiveStreams: String    = "1.0.2"
-      val scala: String              = "2.12.7"
+      val scala: String              = "2.12.8"
       val scalacheckToolbox: String  = "0.2.5"
     }
 
