@@ -228,12 +228,12 @@ object ProjectPlugin extends AutoPlugin {
       includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
       micrositePushSiteWith := GitHub4s,
       micrositePalette := Map(
-        "brand-primary"   -> "#01C2C2",
-        "brand-secondary" -> "#142236",
-        "brand-tertiary"  -> "#202D40",
-        "gray-dark"       -> "#383D44",
-        "gray"            -> "#646D7B",
-        "gray-light"      -> "#E6E7EC",
+        "brand-primary"   -> "#de3423",
+        "brand-secondary" -> "#852319",
+        "brand-tertiary"  -> "#381C19",
+        "gray-dark"       -> "#333333",
+        "gray"            -> "#666666",
+        "gray-light"      -> "#EDEDED",
         "gray-lighter"    -> "#F4F5F9",
         "white-color"     -> "#E6E7EC"
       )
