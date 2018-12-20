@@ -219,7 +219,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
       micrositeName := "Mu",
-      micrositeBaseUrl := "/mu/scala",
+      micrositeBaseUrl := "/mu",
       micrositeDescription := "A purely functional library for building RPC endpoint-based services",
       micrositeGithubOwner := "higherkindness",
       micrositeGithubRepo := "mu",
