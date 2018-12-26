@@ -18,35 +18,18 @@ package higherkindness.mu.rpc
 package internal
 package server
 
-import cats.effect.{ConcurrentEffect, Effect, IO}
-import io.grpc.stub.ServerCalls.{
-  BidiStreamingMethod,
-  ClientStreamingMethod,
-  ServerStreamingMethod,
-  UnaryMethod
-}
+import cats.effect.{ConcurrentEffect, Effect}
+import io.grpc.stub.ServerCalls.{BidiStreamingMethod, ClientStreamingMethod, ServerStreamingMethod}
 import io.grpc.stub.StreamObserver
-import io.grpc.{Status, StatusException, StatusRuntimeException}
+import monix.execution.{Ack, Scheduler}
+import monix.reactive.observers.Subscriber
 
-import scala.concurrent.ExecutionContext
-import monix.reactive.Observable
+import scala.concurrent.{ExecutionContext, Future}
+import monix.reactive.{Observable, Observer, Pipe}
 
 object monixCalls {
 
   import higherkindness.mu.rpc.internal.converters._
-
-  def unaryMethod[F[_]: Effect, Req, Res](
-      f: Req => F[Res],
-      maybeCompression: Option[String]): UnaryMethod[Req, Res] =
-    new UnaryMethod[Req, Res] {
-      override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
-        addCompression(responseObserver, maybeCompression)
-        Effect[F]
-          .runAsync(f(request))(either => IO(completeObserver(responseObserver)(either)))
-          .toIO
-          .unsafeRunAsync(_ => ())
-      }
-    }
 
   def clientStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Observable[Req] => F[Res],
@@ -88,18 +71,26 @@ object monixCalls {
       }
     }
 
-  private[this] def completeObserver[A](observer: StreamObserver[A]): Either[Throwable, A] => Unit = {
-    case Right(value) =>
-      observer.onNext(value)
-      observer.onCompleted()
-    case Left(s: StatusException) =>
-      observer.onError(s)
-    case Left(s: StatusRuntimeException) =>
-      observer.onError(s)
-    case Left(e) =>
-      observer.onError(
-        Status.INTERNAL.withDescription(e.getMessage).withCause(e).asException()
-      )
-  }
+  private[this] def transform[Req, Res](
+      transformer: Observable[Req] => Observable[Res],
+      subscriber: Subscriber[Res]): Subscriber[Req] =
+    new Subscriber[Req] {
+
+      val pipe: Pipe[Req, Res]                      = Pipe.publish[Req].transform[Res](transformer)
+      val (in: Observer[Req], out: Observable[Res]) = pipe.unicast
+
+      out.unsafeSubscribeFn(subscriber)
+
+      override implicit def scheduler: Scheduler   = subscriber.scheduler
+      override def onError(t: Throwable): Unit     = in.onError(t)
+      override def onComplete(): Unit              = in.onComplete()
+      override def onNext(value: Req): Future[Ack] = in.onNext(value)
+    }
+
+  private[this] def transformStreamObserver[Req, Res](
+      transformer: Observable[Req] => Observable[Res],
+      responseObserver: StreamObserver[Res]
+  )(implicit EC: ExecutionContext): StreamObserver[Req] =
+    transform(transformer, responseObserver.toSubscriber).toStreamObserver
 
 }

@@ -14,48 +14,34 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
-package internal
+package higherkindness.mu.rpc.internal
 
+import io.grpc.{Status, StatusException, StatusRuntimeException}
 import io.grpc.stub.{ServerCallStreamObserver, StreamObserver}
-import monix.execution.{Ack, Scheduler}
-import monix.reactive.{Observable, Observer, Pipe}
-import monix.reactive.observers.Subscriber
-
-import scala.concurrent.{ExecutionContext, Future}
 
 package object server {
 
-  private[server] def transform[Req, Res](
-      transformer: Observable[Req] => Observable[Res],
-      subscriber: Subscriber[Res]): Subscriber[Req] =
-    new Subscriber[Req] {
-
-      val pipe: Pipe[Req, Res]                      = Pipe.publish[Req].transform[Res](transformer)
-      val (in: Observer[Req], out: Observable[Res]) = pipe.unicast
-
-      out.unsafeSubscribeFn(subscriber)
-
-      override implicit def scheduler: Scheduler   = subscriber.scheduler
-      override def onError(t: Throwable): Unit     = in.onError(t)
-      override def onComplete(): Unit              = in.onComplete()
-      override def onNext(value: Req): Future[Ack] = in.onNext(value)
-    }
-
-  import higherkindness.mu.rpc.internal.converters._
-
-  private[server] def transformStreamObserver[Req, Res](
-      transformer: Observable[Req] => Observable[Res],
-      responseObserver: StreamObserver[Res]
-  )(implicit EC: ExecutionContext): StreamObserver[Req] =
-    transform(transformer, responseObserver.toSubscriber).toStreamObserver
-
-  private[server] def addCompression[A](
+  private[internal] def addCompression[A](
       observer: StreamObserver[A],
       algorithm: Option[String]): Unit =
     (observer, algorithm) match {
       case (o: ServerCallStreamObserver[_], Some(alg)) => o.setCompression(alg)
       case _                                           =>
     }
+
+  private[internal] def completeObserver[A](
+      observer: StreamObserver[A]): Either[Throwable, A] => Unit = {
+    case Right(value) =>
+      observer.onNext(value)
+      observer.onCompleted()
+    case Left(s: StatusException) =>
+      observer.onError(s)
+    case Left(s: StatusRuntimeException) =>
+      observer.onError(s)
+    case Left(e) =>
+      observer.onError(
+        Status.INTERNAL.withDescription(e.getMessage).withCause(e).asException()
+      )
+  }
 
 }

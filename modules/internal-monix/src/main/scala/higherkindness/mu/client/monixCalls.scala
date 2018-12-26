@@ -18,14 +18,13 @@ package higherkindness.mu.rpc
 package internal
 package client
 
-import java.util.concurrent.{Executor => JavaExecutor}
-
 import cats.effect.Async
-import com.google.common.util.concurrent._
 import io.grpc.stub.{ClientCalls, StreamObserver}
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
 import monix.reactive.Observable
 import higherkindness.mu.rpc.internal.task._
+import monix.execution.rstreams.Subscription
+import org.reactivestreams.{Publisher, Subscriber}
 
 import scala.concurrent.ExecutionContext
 
@@ -82,19 +81,21 @@ object monixCalls {
         ))
     )
 
-  private[this] def listenableFuture2Async[F[_], A](
-      fa: => ListenableFuture[A])(implicit F: Async[F], EC: ExecutionContext): F[A] =
-    F.async { cb =>
-      Futures.addCallback(
-        fa,
-        new FutureCallback[A] {
-          override def onSuccess(result: A): Unit = cb(Right(result))
-
-          override def onFailure(t: Throwable): Unit = cb(Left(t))
-        },
-        new JavaExecutor {
-          override def execute(command: Runnable): Unit = EC.execute(command)
-        }
-      )
+  private[this] def createPublisher[Res, Req](
+      request: Req,
+      descriptor: MethodDescriptor[Req, Res],
+      channel: Channel,
+      options: CallOptions): Publisher[Res] = {
+    new Publisher[Res] {
+      override def subscribe(s: Subscriber[_ >: Res]): Unit = {
+        val subscriber: Subscriber[Res] = s.asInstanceOf[Subscriber[Res]]
+        s.onSubscribe(Subscription.empty)
+        ClientCalls.asyncServerStreamingCall(
+          channel.newCall[Req, Res](descriptor, options),
+          request,
+          subscriber.toStreamObserver
+        )
+      }
     }
+  }
 }

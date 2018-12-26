@@ -59,15 +59,27 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect),
         %("grpc-stub", V.grpc),
-        %%("monix", V.monix),
         %%("monocle-core", V.monocle),
-        "org.reactivestreams" % "reactive-streams" % V.reactiveStreams,
-        %%("fs2-core", V.fs2),
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
-        "org.lyranthe.fs2-grpc"  %% "java-runtime" % V.fs2Grpc,
         "org.scala-lang"         % "scala-compiler" % scalaVersion.value,
+        %%("scalamockScalatest") % Test
+      )
+    )
+
+    lazy val internalMonixSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("monix", V.monix),
+        "org.reactivestreams" % "reactive-streams" % V.reactiveStreams,
+        %%("scalamockScalatest") % Test
+      )
+    )
+
+    lazy val internalFs2Settings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("fs2-core", V.fs2),
+        "org.lyranthe.fs2-grpc"  %% "java-runtime" % V.fs2Grpc,
         %%("scalamockScalatest") % Test
       )
     )
