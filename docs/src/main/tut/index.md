@@ -8,7 +8,7 @@ permalink: /
 
 ## What is mu-rpc?
 
-[mu] provides the ability to combine [RPC] protocols, services, and clients in your `Freestyle` program, thanks to [gRPC]. Although it's fully integrated with [gRPC], there are some important differences when defining the protocols, as we’ll see later on, since [mu] follows the same philosophy as `Freestyle` core, being macro-powered.
+[mu] provides the ability to combine [RPC] protocols, services, and clients in your Scala programs, thanks to [gRPC]. Although it's fully integrated with [gRPC], there are some important differences when defining the protocols, as we’ll see later on, since [mu] is macro-powered.
 
 ## Installation
 
@@ -104,7 +104,6 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-marshallers-jodatime" % "0
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
-[@tagless algebra]: http://frees.io/docs/core/algebras/
 [PBDirect]: https://github.com/btlines/pbdirect
 [scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/

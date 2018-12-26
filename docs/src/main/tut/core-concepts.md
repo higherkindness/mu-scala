@@ -61,7 +61,7 @@ You can find more information about Protocol Buffers in the [Protocol Buffers' d
 
 ### mu-rpc
 
-In the previous section, we’ve seen an overview of what [gRPC] offers for defining protocols and generating code (compiling protocol buffers). Now, we'll show how [mu] offers the same thing, but in the **Freestyle** fashion, following FP principles.
+In the previous section, we’ve seen an overview of what [gRPC] offers for defining protocols and generating code (compiling protocol buffers). Now, we'll show how [mu] offers the same thing, but following FP principles.
 
 First things first, the main difference with respect to [gRPC] is that [mu] doesn’t need `.proto` files, but can still use protobuf thanks to the [PBDirect] library, which allows it to read and write Scala objects directly to protobuf with no `.proto` file definitions. In summary:
 
@@ -125,7 +125,7 @@ object protocol {
 }
 ```
 
-Naturally, the [RPC] services are grouped in a `@tagless algebra`. Therefore, we are following one of the primary principles of Freestyle; you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.
+Naturally, the [RPC] services are grouped in a `@tagless algebra`. Therefore, you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.
 
 In the above example, we can see that `sayHello` returns an `F[HelloReply]`. However, very often the services might:
 
@@ -410,7 +410,6 @@ Mu also provides instances for `org.joda.time.LocalDate` and `org.joda.time.Loca
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
-[@tagless algebra]: http://frees.io/docs/core/algebras/
 [PBDirect]: https://github.com/btlines/pbdirect
 [scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
