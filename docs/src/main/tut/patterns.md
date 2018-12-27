@@ -10,7 +10,7 @@ So far so good, we haven't seen too much code or implemented any business logic.
 
 ## Server
 
-Predictably, generating the server code is just implementing a service [Handler](http://frees.io/docs/core/handlers/).
+Predictably, generating the server code is just creating an implementation for your service algebra.
 
 First, here's our `Greeter` RPC protocol definition:
 
@@ -328,7 +328,6 @@ object RPCDemoApp {
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
-[@tagless algebra]: http://frees.io/docs/core/algebras/
 [PBDirect]: https://github.com/btlines/pbdirect
 [scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
