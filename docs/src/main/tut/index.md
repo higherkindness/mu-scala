@@ -8,7 +8,7 @@ permalink: /
 
 ## What is mu-rpc?
 
-[mu] provides the ability to combine [RPC] protocols, services, and clients in your Scala programs, thanks to [gRPC]. Although it's fully integrated with [gRPC], there are some important differences when defining the protocols, as we’ll see later on, since [mu] is macro-powered.
+[mu] provides the ability to combine [RPC] protocols, services, and clients in your Scala program, thanks to [gRPC]. Although it's fully integrated with [gRPC], there are some important differences when defining the protocols, as we’ll see later on.
 
 ## Installation
 

@@ -125,7 +125,7 @@ object protocol {
 }
 ```
 
-Naturally, the [RPC] services are grouped in a `@tagless algebra`. Therefore, you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.
+Naturally, the [RPC] services are grouped in a *Tagless Final* algebra. Therefore, you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.
 
 In the above example, we can see that `sayHello` returns an `F[HelloReply]`. However, very often the services might:
 
