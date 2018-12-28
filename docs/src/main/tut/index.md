@@ -42,6 +42,8 @@ We've found that the compiler plugin needs to be added to your build.sbt file *a
 --- | --- | --- | ---
 `mu-rpc-server` | Server | Yes | Needed to attach RPC Services and spin-up an RPC Server.
 `mu-rpc-client-core` | Client | Yes | Mandatory to define protocols and auto-derived clients.
+`mu-rpc-client-monix` | Client | Yes | Mandatory to define streaming operations with Monix Observables.
+`mu-rpc-client-fs2` | Client | Yes | Mandatory to define streaming operations with fs2 Streams.
 `mu-rpc-client-netty` | Client | Yes* | Mandatory on the client side if we are using `Netty` on the server side.
 `mu-rpc-client-okhttp` | Client | Yes* | Mandatory on the client side if we are using `OkHttp` on the server side.
 `mu-config` | Server/Client | No | Provides configuration helpers using [mu-config] to load the application configuration values.
@@ -55,6 +57,8 @@ We've found that the compiler plugin needs to be added to your build.sbt file *a
 `mu-rpc-testing` | Test | No | Utilities to test out `mu-rpc` applications. It provides the `grpc-testing` library as the transitive dependency.
 `mu-common` | Server/Client | Provided* | Common things that are used throughout the project.
 `mu-rpc-internal` | Server/Client | Provided* | Macros.
+`mu-rpc-internal-monix` | Server/Client | Provided* | Macros.
+`mu-rpc-internal-fs2` | Server/Client | Provided* | Macros.
 `mu-rpc-async` | Server/Client | Provided* | Async instances useful for interacting with the RPC services on both sides, server and the client.
 `mu-rpc-netty-ssl` | Server/Client | No | Adds the `io.netty:netty-tcnative-boringssl-static:jar` dependency, aligned with the Netty version (if that's the case) used in the `mu-rpc` build. See [this section](https://github.com/grpc/grpc-java/blob/master/SECURITY.md#netty) for more information. By adding this you wouldn't need to figure the right version, `mu-rpc` gives you the right one.
 
@@ -71,6 +75,11 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-server"            % "0.16
 
 // required for a protocol definition:
 libraryDependencies += "io.higherkindness" %% "mu-rpc-client-core"       % "0.16.0"
+
+// required for a protocol definition with streaming operations:
+libraryDependencies += "io.higherkindness" %% "mu-rpc-client-monix"      % "0.16.0"
+// or:
+libraryDependencies += "io.higherkindness" %% "mu-rpc-client-fs2"        % "0.16.0"
 
 // required for the use of the derived RPC client/s, using either Netty or OkHttp as transport layer:
 libraryDependencies += "io.higherkindness" %% "mu-rpc-client-netty"      % "0.16.0"
