@@ -123,29 +123,22 @@ object serviceImpl {
         case imp: Import => imp
       }
 
-      private def getCtorParams(clazz: ClassDef): List[Tree] = clazz.impl collect {
-        case x: ValDef if x.mods.hasFlag(Flag.PARAMACCESSOR) => x
-      }
-
-      private val (serializationType, compression): (SerializationType, CompressionType) =
+      private val serializationType: SerializationType =
         c.prefix.tree match {
           case q"new service($serializationType)" =>
             serializationType.toString match {
-              case "Protobuf"       => (Protobuf, Identity)
-              case "Avro"           => (Avro, Identity)
-              case "AvroWithSchema" => (AvroWithSchema, Identity)
+              case "Protobuf"       => Protobuf
+              case "Avro"           => Avro
+              case "AvroWithSchema" => AvroWithSchema
               case _ =>
                 sys.error(
                   "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema]")
             }
-          case q"new service($serializationType, $compressionType)" =>
-            (serializationType.toString, compressionType.toString) match {
-              case ("Protobuf", "Identity")       => (Protobuf, Identity)
-              case ("Avro", "Identity")           => (Avro, Identity)
-              case ("AvroWithSchema", "Identity") => (AvroWithSchema, Identity)
-              case ("Protobuf", "Gzip")           => (Protobuf, Gzip)
-              case ("Avro", "Gzip")               => (Avro, Gzip)
-              case ("AvroWithSchema", "Gzip")     => (AvroWithSchema, Gzip)
+          case q"new service($serializationType, $_)" =>
+            serializationType.toString match {
+              case "Protobuf"       => Protobuf
+              case "Avro"           => Avro
+              case "AvroWithSchema" => AvroWithSchema
               case _ =>
                 sys.error(
                   "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema], and a CompressionType parameter [Identity|Gzip]")
@@ -157,11 +150,7 @@ object serviceImpl {
 
       val encodersImport = serializationType match {
         case Protobuf =>
-          List(
-            q"import _root_.cats.instances.list._",
-            q"import _root_.cats.instances.option._",
-            q"import _root_.higherkindness.mu.rpc.internal.encoders.pbd._"
-          )
+          List(q"import _root_.higherkindness.mu.rpc.internal.encoders.pbd._")
         case Avro =>
           List(q"import _root_.higherkindness.mu.rpc.internal.encoders.avro._")
         case AvroWithSchema =>
