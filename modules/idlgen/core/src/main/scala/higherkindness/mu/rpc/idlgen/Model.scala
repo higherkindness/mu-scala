@@ -16,7 +16,7 @@
 
 package higherkindness.mu.rpc.idlgen
 
-import higherkindness.mu.rpc.internal.util.Toolbox
+import higherkindness.mu.rpc.idlgen.util.Toolbox
 import higherkindness.mu.rpc.internal.util.StringUtil._
 import higherkindness.mu.rpc.protocol._
 

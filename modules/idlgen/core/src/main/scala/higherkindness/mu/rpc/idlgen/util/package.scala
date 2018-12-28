@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.internal
+package higherkindness.mu.rpc.idlgen
 
 import scala.reflect.runtime.universe.runtimeMirror
 import scala.tools.reflect.ToolBox

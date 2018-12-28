@@ -15,13 +15,14 @@
  */
 
 package higherkindness.mu.rpc
-package internal
+package idlgen
 package util
 
+import higherkindness.mu.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
 import monocle._
 import monocle.function.all._
+
 import scala.Function.{const => κ}
-import higherkindness.mu.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
 
 trait AstOptics {
 

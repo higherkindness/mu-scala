@@ -17,11 +17,11 @@
 package higherkindness.mu.rpc.idlgen
 
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
+import higherkindness.mu.rpc.idlgen.Model._
 import higherkindness.mu.rpc.idlgen.avro.{AvroIdlGenerator, AvroWithSchemaIdlGenerator}
 import higherkindness.mu.rpc.idlgen.proto.ProtoIdlGenerator
-import higherkindness.mu.rpc.idlgen.Model._
+import higherkindness.mu.rpc.idlgen.util._
 import higherkindness.mu.rpc.protocol._
-import higherkindness.mu.rpc.internal.util._
 
 class IdlGenTests extends RpcBaseTestSuite {
   // format: OFF

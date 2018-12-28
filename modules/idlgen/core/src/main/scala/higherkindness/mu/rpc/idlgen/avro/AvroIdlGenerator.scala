@@ -17,8 +17,9 @@
 package higherkindness.mu.rpc.idlgen.avro
 
 import higherkindness.mu.rpc.idlgen._
-import higherkindness.mu.rpc.protocol._
+import higherkindness.mu.rpc.idlgen.util._
 import higherkindness.mu.rpc.internal.util._
+import higherkindness.mu.rpc.protocol._
 import io.circe._
 import io.circe.generic.auto._
 import io.circe.syntax._

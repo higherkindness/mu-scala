@@ -17,8 +17,8 @@
 package higherkindness.mu.rpc.idlgen.proto
 
 import higherkindness.mu.rpc.idlgen._
+import higherkindness.mu.rpc.idlgen.util.{AstOptics, Toolbox}
 import higherkindness.mu.rpc.protocol._
-import higherkindness.mu.rpc.internal.util.{AstOptics, Toolbox}
 
 object ProtoIdlGenerator extends IdlGenerator {
 

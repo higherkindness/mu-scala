@@ -17,8 +17,8 @@
 package higherkindness.mu.rpc
 package idlgen
 
+import higherkindness.mu.rpc.idlgen.util.{AstOptics, Toolbox}
 import higherkindness.mu.rpc.internal.util.StringUtil._
-import higherkindness.mu.rpc.internal.util.{AstOptics, Toolbox}
 import higherkindness.mu.rpc.protocol._
 
 object ScalaParser {
