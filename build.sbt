@@ -13,12 +13,25 @@ lazy val common = project
   .settings(moduleName := "mu-common")
   .settings(commonSettings)
 
-lazy val internal = project
+lazy val `internal-core` = project
   .in(file("modules/internal"))
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
-  .settings(moduleName := "mu-rpc-internal")
+  .settings(moduleName := "mu-rpc-internal-core")
   .settings(internalSettings)
+
+lazy val `internal-monix` = project
+  .in(file("modules/internal-monix"))
+  .dependsOn(`internal-core` % "compile->compile;test->test")
+  .settings(moduleName := "mu-rpc-internal-monix")
+  .settings(internalMonixSettings)
+
+lazy val `internal-fs2` = project
+  .in(file("modules/internal-fs2"))
+  .dependsOn(`internal-core` % "compile->compile;test->test")
+  .dependsOn(testing % "test->test")
+  .settings(moduleName := "mu-rpc-internal-fs2")
+  .settings(internalFs2Settings)
 
 lazy val testing = project
   .in(file("modules/testing"))
@@ -48,10 +61,22 @@ lazy val config = project
 lazy val client = project
   .in(file("modules/client"))
   .dependsOn(common % "compile->compile;test->test")
-  .dependsOn(internal)
+  .dependsOn(`internal-core`)
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-client-core")
   .settings(clientCoreSettings)
+
+lazy val `client-monix` = project
+  .in(file("modules/client-monix"))
+  .dependsOn(client)
+  .dependsOn(`internal-monix`)
+  .settings(moduleName := "mu-rpc-client-monix")
+
+lazy val `client-fs2` = project
+  .in(file("modules/client-fs2"))
+  .dependsOn(client)
+  .dependsOn(`internal-fs2`)
+  .settings(moduleName := "mu-rpc-client-fs2")
 
 lazy val `client-netty` = project
   .in(file("modules/client-netty"))
@@ -77,8 +102,10 @@ lazy val `client-cache` = project
 lazy val server = project
   .in(file("modules/server"))
   .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`internal-core` % "compile->compile;test->test")
   .dependsOn(client % "test->test")
-  .dependsOn(internal % "compile->compile;test->test")
+  .dependsOn(`client-monix` % "test->test")
+  .dependsOn(`client-fs2` % "test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-server")
   .settings(serverSettings)
@@ -141,7 +168,7 @@ lazy val `dropwizard-client` = project
 
 lazy val `idlgen-core` = project
   .in(file("modules/idlgen/core"))
-  .dependsOn(internal % "compile->compile;test->test")
+  .dependsOn(`internal-core` % "compile->compile;test->test")
   .dependsOn(client % "test->test")
   .settings(moduleName := "mu-idlgen-core")
   .settings(idlGenSettings)
@@ -204,7 +231,7 @@ lazy val `benchmarks-vnext` = project
 
 lazy val `example-routeguide-protocol` = project
   .in(file("modules/examples/routeguide/protocol"))
-  .dependsOn(client)
+  .dependsOn(`client-monix`)
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
   .settings(moduleName := "mu-rpc-example-routeguide-protocol")
@@ -299,7 +326,7 @@ lazy val `marshallers-jodatime` = project
   .in(file("modules/marshallers/jodatime"))
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(client % "compile->compile;test->test")
-  .dependsOn(internal % "compile->compile;test->test")
+  .dependsOn(`internal-core` % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-marshallers-jodatime")
   .settings(marshallersJodatimeSettings)
@@ -322,7 +349,7 @@ lazy val `legacy-avro-decimal-compat-encoders` = project
   .in(file("modules/legacy-avro-decimal/encoders"))
   .settings(moduleName := "legacy-avro-decimal-compat-encoders")
   .dependsOn(`legacy-avro-decimal-compat-model` % "provided")
-  .dependsOn(internal)
+  .dependsOn(`internal-core`)
 
 //////////////////////////
 //// MODULES REGISTRY ////
@@ -330,8 +357,12 @@ lazy val `legacy-avro-decimal-compat-encoders` = project
 
 lazy val allModules: Seq[ProjectReference] = Seq(
   common,
-  internal,
+  `internal-core`,
+  `internal-monix`,
+  `internal-fs2`,
   client,
+  `client-monix`,
+  `client-fs2`,
   `client-cache`,
   `client-netty`,
   `client-okhttp`,

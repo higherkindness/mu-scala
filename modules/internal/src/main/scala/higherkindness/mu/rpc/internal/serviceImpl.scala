@@ -123,29 +123,22 @@ object serviceImpl {
         case imp: Import => imp
       }
 
-      private def getCtorParams(clazz: ClassDef): List[Tree] = clazz.impl collect {
-        case x: ValDef if x.mods.hasFlag(Flag.PARAMACCESSOR) => x
-      }
-
-      private val (serializationType, compression): (SerializationType, CompressionType) =
+      private val serializationType: SerializationType =
         c.prefix.tree match {
           case q"new service($serializationType)" =>
             serializationType.toString match {
-              case "Protobuf"       => (Protobuf, Identity)
-              case "Avro"           => (Avro, Identity)
-              case "AvroWithSchema" => (AvroWithSchema, Identity)
+              case "Protobuf"       => Protobuf
+              case "Avro"           => Avro
+              case "AvroWithSchema" => AvroWithSchema
               case _ =>
                 sys.error(
                   "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema]")
             }
-          case q"new service($serializationType, $compressionType)" =>
-            (serializationType.toString, compressionType.toString) match {
-              case ("Protobuf", "Identity")       => (Protobuf, Identity)
-              case ("Avro", "Identity")           => (Avro, Identity)
-              case ("AvroWithSchema", "Identity") => (AvroWithSchema, Identity)
-              case ("Protobuf", "Gzip")           => (Protobuf, Gzip)
-              case ("Avro", "Gzip")               => (Avro, Gzip)
-              case ("AvroWithSchema", "Gzip")     => (AvroWithSchema, Gzip)
+          case q"new service($serializationType, $_)" =>
+            serializationType.toString match {
+              case "Protobuf"       => Protobuf
+              case "Avro"           => Avro
+              case "AvroWithSchema" => AvroWithSchema
               case _ =>
                 sys.error(
                   "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema], and a CompressionType parameter [Identity|Gzip]")
@@ -157,11 +150,7 @@ object serviceImpl {
 
       val encodersImport = serializationType match {
         case Protobuf =>
-          List(
-            q"import _root_.cats.instances.list._",
-            q"import _root_.cats.instances.option._",
-            q"import _root_.higherkindness.mu.rpc.internal.encoders.pbd._"
-          )
+          List(q"import _root_.higherkindness.mu.rpc.internal.encoders.pbd._")
         case Avro =>
           List(q"import _root_.higherkindness.mu.rpc.internal.encoders.avro._")
         case AvroWithSchema =>
@@ -284,8 +273,7 @@ object serviceImpl {
         require(
           streamingImpls.size < 2,
           s"RPC service $serviceName has different streaming implementations for request and response")
-        private val streamingImpl: StreamingImpl =
-          streamingImpls.headOption.getOrElse(MonixObservable)
+        private val streamingImpl: Option[StreamingImpl] = streamingImpls.headOption
 
         private val streamingType: Option[StreamingType] =
           if (requestStreamingImpl.isDefined && responseStreamingImpl.isDefined)
@@ -301,8 +289,9 @@ object serviceImpl {
         }
 
         private val clientCallsImpl = streamingImpl match {
-          case Fs2Stream       => q"_root_.higherkindness.mu.rpc.internal.client.fs2Calls"
-          case MonixObservable => q"_root_.higherkindness.mu.rpc.internal.client.monixCalls"
+          case Some(Fs2Stream)       => q"_root_.higherkindness.mu.rpc.internal.client.fs2Calls"
+          case Some(MonixObservable) => q"_root_.higherkindness.mu.rpc.internal.client.monixCalls"
+          case None                  => q"_root_.higherkindness.mu.rpc.internal.client.unaryCalls"
         }
 
         private val streamingMethodType = {
@@ -358,7 +347,8 @@ object serviceImpl {
             q"""
             def $methodName(input: $requestType): $responseType = ${clientCallMethodFor(
               "bidiStreaming")}"""
-          case None => q"""
+          case None =>
+            q"""
             def $methodName(input: $requestType): $responseType = ${clientCallMethodFor("unary")}"""
         }
 
@@ -367,22 +357,23 @@ object serviceImpl {
 
         val descriptorAndHandler: Tree = {
           val handler = (streamingType, streamingImpl) match {
-            case (Some(RequestStreaming), Fs2Stream) =>
+            case (Some(RequestStreaming), Some(Fs2Stream)) =>
               q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.clientStreamingMethod(algebra.$methodName, $compressionOption)"
-            case (Some(RequestStreaming), MonixObservable) =>
+            case (Some(RequestStreaming), Some(MonixObservable)) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(${serverCallMethodFor("clientStreamingMethod")})"
-            case (Some(ResponseStreaming), Fs2Stream) =>
+            case (Some(ResponseStreaming), Some(Fs2Stream)) =>
               q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.serverStreamingMethod(algebra.$methodName, $compressionOption)"
-            case (Some(ResponseStreaming), MonixObservable) =>
+            case (Some(ResponseStreaming), Some(MonixObservable)) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(${serverCallMethodFor("serverStreamingMethod")})"
-            case (Some(BidirectionalStreaming), Fs2Stream) =>
+            case (Some(BidirectionalStreaming), Some(Fs2Stream)) =>
               q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.bidiStreamingMethod(algebra.$methodName, $compressionOption)"
-            case (Some(BidirectionalStreaming), MonixObservable) =>
+            case (Some(BidirectionalStreaming), Some(MonixObservable)) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(${serverCallMethodFor("bidiStreamingMethod")})"
-            case (None, Fs2Stream) =>
-              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.unaryMethod(algebra.$methodName, $compressionOption)"
-            case (None, MonixObservable) =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncUnaryCall(${serverCallMethodFor("unaryMethod")})"
+            case (None, None) =>
+              q"_root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.higherkindness.mu.rpc.internal.server.unaryCalls.unaryMethod(algebra.$methodName, $compressionOption))"
+            case _ =>
+              sys.error(
+                s"Unable to define a handler for the streaming type $streamingType and $streamingImpl for the method $methodName in the service $serviceName")
           }
           q"($methodDescriptorName, $handler)"
         }

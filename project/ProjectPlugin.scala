@@ -26,7 +26,7 @@ object ProjectPlugin extends AutoPlugin {
       val avro4s: String             = "2.0.2"
       val avrohugger: String         = "1.0.0-RC15"
       val betterMonadicFor: String   = "0.2.4"
-      val catsEffect: String         = "1.1.0-M1"
+      val catsEffect: String         = "1.0.0" // See fs2-grpc transitive deps
       val circe: String              = "0.10.1"
       val frees: String              = "0.8.2"
       val fs2: String                = "1.0.0"
@@ -59,15 +59,26 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect),
         %("grpc-stub", V.grpc),
-        %%("monix", V.monix),
-        %%("monocle-core", V.monocle),
-        "org.reactivestreams" % "reactive-streams" % V.reactiveStreams,
-        %%("fs2-core", V.fs2),
         %%("pbdirect", V.pbdirect),
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
-        "org.lyranthe.fs2-grpc"  %% "java-runtime" % V.fs2Grpc,
         "org.scala-lang"         % "scala-compiler" % scalaVersion.value,
+        %%("scalamockScalatest") % Test
+      )
+    )
+
+    lazy val internalMonixSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("monix", V.monix),
+        "org.reactivestreams" % "reactive-streams" % V.reactiveStreams,
+        %%("scalamockScalatest") % Test
+      )
+    )
+
+    lazy val internalFs2Settings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("fs2-core", V.fs2),
+        "org.lyranthe.fs2-grpc"  %% "java-runtime" % V.fs2Grpc,
         %%("scalamockScalatest") % Test
       )
     )
@@ -155,6 +166,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val idlGenSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
+        %%("monocle-core", V.monocle),
         "com.julianpeeters" %% "avrohugger-core" % V.avrohugger,
         %%("circe-generic", V.circe)
       )

@@ -20,11 +20,16 @@ package internal.encoders
 import java.io.{ByteArrayInputStream, InputStream}
 import java.time.{Instant, LocalDate, LocalDateTime}
 
+import cats.instances._
 import com.google.protobuf.{CodedInputStream, CodedOutputStream}
 import higherkindness.mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTimeUtil}
 import io.grpc.MethodDescriptor.Marshaller
 
-object pbd {
+object pbd
+    extends OptionInstances
+    with OptionInstancesBinCompat0
+    with ListInstances
+    with ListInstancesBinCompat0 {
 
   import pbdirect._
 
