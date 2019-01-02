@@ -23,6 +23,8 @@ import cats.effect.{IO, Resource, Sync}
 import cats.syntax.functor._
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.server._
+import higherkindness.mu.rpc.testing.servers.withServerChannel
+import io.grpc.{ManagedChannel, ServerServiceDefinition}
 import org.slf4j.LoggerFactory
 
 import scala.util.{Failure, Success, Try}
@@ -88,4 +90,13 @@ trait CommonUtils {
 
   def withClient[Client, A](resource: Resource[ConcurrentMonad, Client])(f: Client => A): A =
     resource.use(client => IO(f(client))).unsafeRunSync()
+
+  def withClientF[Client, A](
+      serviceDef: ConcurrentMonad[ServerServiceDefinition],
+      resourceBuilder: ConcurrentMonad[ManagedChannel] => Resource[ConcurrentMonad, Client])(
+      f: Client => A): A =
+    withServerChannel(serviceDef)
+      .flatMap(sc => resourceBuilder(suspendM(sc.channel)))
+      .use(client => suspendM(f(client)))
+      .unsafeRunSync()
 }

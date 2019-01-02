@@ -19,7 +19,6 @@ package higherkindness.mu.rpc.benchmarks
 import java.util.concurrent.TimeUnit
 
 import cats.effect.{IO, Resource}
-import cats.syntax.functor._
 import higherkindness.mu.rpc.benchmarks.shared.Utils._
 import higherkindness.mu.rpc.benchmarks.shared.protocols.PersonServiceAvroWithSchema
 import higherkindness.mu.rpc.benchmarks.shared.Runtime
@@ -35,12 +34,14 @@ import org.openjdk.jmh.annotations._
 class AvroWithSchemaBenchmark extends Runtime {
 
   implicit val handler: AvroWithSchemaHandler[IO] = new AvroWithSchemaHandler[IO]
-  val sc: ServerChannel                           = ServerChannel(PersonServiceAvroWithSchema.bindService[IO])
-  val clientIO: Resource[IO, PersonServiceAvroWithSchema[IO]] =
-    PersonServiceAvroWithSchema.clientFromChannel[IO](IO(sc.channel))
+
+  def clientIO: Resource[IO, PersonServiceAvroWithSchema[IO]] =
+    Resource.liftF(PersonServiceAvroWithSchema.bindService[IO])
+      .flatMap(ServerChannel[IO](_))
+      .flatMap(sc => PersonServiceAvroWithSchema.clientFromChannel[IO](IO(sc.channel)))
 
   @TearDown
-  def shutdown(): Unit = IO(sc.shutdown()).void.unsafeRunSync()
+  def shutdown(): Unit = {}
 
   @Benchmark
   def listPersons: PersonList = clientIO.use(_.listPersons(Empty)).unsafeRunTimed(defaultTimeOut).get

@@ -18,8 +18,10 @@ package higherkindness.mu.rpc
 package testing
 
 import java.util.UUID
-import java.util.concurrent.TimeUnit
 
+import cats.effect.{Resource, Sync}
+import cats.syntax.apply._
+import cats.syntax.functor._
 import io.grpc.inprocess.{InProcessChannelBuilder, InProcessServerBuilder}
 import io.grpc.internal.NoopServerCall.NoopServerCallListener
 import io.grpc.util.MutableHandlerRegistry
@@ -43,39 +45,20 @@ object servers {
     ssdBuilder.build()
   }
 
-  def withServerChannel[A](services: ServerServiceDefinition*)(f: ServerChannel => A): A = {
+  def withServerChannel[F[_]: Sync](
+      service: F[ServerServiceDefinition]): Resource[F, ServerChannel] =
+    withServerChannelList(service.map(List(_)))
 
-    val sc: ServerChannel = ServerChannel(services: _*)
-    val result: A         = f(sc)
-    sc.shutdown()
+  def withServerChannelList[F[_]: Sync](
+      services: F[List[ServerServiceDefinition]]): Resource[F, ServerChannel] =
+    Resource.liftF(services).flatMap(list => ServerChannel(list: _*))
 
-    result
-  }
-
-  final case class ServerChannel(server: Server, channel: ManagedChannel) {
-
-    def shutdown(): Boolean = {
-      channel.shutdown()
-      server.shutdown()
-
-      try {
-        channel.awaitTermination(1, TimeUnit.MINUTES)
-        server.awaitTermination(1, TimeUnit.MINUTES)
-      } catch {
-        case e: InterruptedException =>
-          Thread.currentThread.interrupt()
-          throw new RuntimeException(e)
-      } finally {
-        channel.shutdownNow()
-        server.shutdownNow()
-        (): Unit
-      }
-    }
-  }
+  final case class ServerChannel(server: Server, channel: ManagedChannel)
 
   object ServerChannel {
 
-    def apply(serverServiceDefinitions: ServerServiceDefinition*): ServerChannel = {
+    def apply[F[_]: Sync](
+        serverServiceDefinitions: ServerServiceDefinition*): Resource[F, ServerChannel] = {
       val serviceRegistry =
         new MutableHandlerRegistry
       val serverName: String =
@@ -90,7 +73,11 @@ object servers {
 
       serverServiceDefinitions.toList.map(serverBuilder.addService)
 
-      ServerChannel(serverBuilder.build().start(), channelBuilder.directExecutor.build)
+      Resource.make {
+        (
+          Sync[F].delay(serverBuilder.build().start()),
+          Sync[F].delay(channelBuilder.directExecutor.build)).mapN(ServerChannel(_, _))
+      }(sc => Sync[F].delay(sc.server.shutdown()).void)
     }
 
   }

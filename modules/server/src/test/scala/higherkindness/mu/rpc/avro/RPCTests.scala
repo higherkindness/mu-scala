@@ -17,10 +17,11 @@
 package higherkindness.mu.rpc
 package avro
 
-import cats.effect.IO
+import cats.effect.{IO, Resource}
+import cats.implicits._
 import io.grpc.ServerServiceDefinition
 import higherkindness.mu.rpc.common._
-import higherkindness.mu.rpc.testing.servers.withServerChannel
+import higherkindness.mu.rpc.testing.servers.{withServerChannel, ServerChannel}
 import org.scalatest._
 import shapeless.{:+:, CNil, Coproduct}
 
@@ -30,23 +31,25 @@ class RPCTests extends RpcBaseTestSuite {
   import higherkindness.mu.rpc.avro.Utils._
   import higherkindness.mu.rpc.avro.Utils.implicits._
 
-  def runSucceedAssertion[A](ssd: ServerServiceDefinition, response: A)(
+  def createClient(
+      sc: ServerChannel): Resource[ConcurrentMonad, service.RPCService[ConcurrentMonad]] =
+    service.RPCService.clientFromChannel[ConcurrentMonad](IO(sc.channel))
+
+  def runSucceedAssertion[A](ssd: ConcurrentMonad[ServerServiceDefinition], response: A)(
       f: service.RPCService[ConcurrentMonad] => ConcurrentMonad[A]): Assertion = {
-    withServerChannel(ssd) { sc =>
-      service.RPCService
-        .clientFromChannel[ConcurrentMonad](IO(sc.channel))
-        .use(f)
-        .unsafeRunSync() shouldBe response
-    }
+    (for {
+      serverRes <- withServerChannel[ConcurrentMonad](ssd)
+      clientRes <- createClient(serverRes)
+    } yield clientRes).use(f).unsafeRunSync() shouldBe response
   }
 
-  def runFailedAssertion[A](ssd: ServerServiceDefinition)(
+  def runFailedAssertion[A](ssd: ConcurrentMonad[ServerServiceDefinition])(
       f: service.RPCService[ConcurrentMonad] => ConcurrentMonad[A]): Assertion = {
-    withServerChannel(ssd) { sc =>
-      assertThrows[io.grpc.StatusRuntimeException] {
-        service.RPCService.clientFromChannel[ConcurrentMonad](IO(sc.channel)).use(f).unsafeRunSync()
-      }
-    }
+    (for {
+      serverRes <- withServerChannel[ConcurrentMonad](ssd)
+      clientRes <- createClient(serverRes)
+    } yield
+      clientRes).use(f).attempt.unsafeRunSync() shouldBe an[Left[io.grpc.StatusRuntimeException, A]]
   }
 
   "An AvroWithSchema service with an updated request model" can {

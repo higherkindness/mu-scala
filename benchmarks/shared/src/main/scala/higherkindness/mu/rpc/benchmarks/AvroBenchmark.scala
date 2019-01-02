@@ -19,7 +19,6 @@ package higherkindness.mu.rpc.benchmarks
 import java.util.concurrent.TimeUnit
 
 import cats.effect.{IO, Resource}
-import cats.syntax.functor._
 import higherkindness.mu.rpc.benchmarks.shared.Runtime
 import higherkindness.mu.rpc.benchmarks.shared.Utils._
 import higherkindness.mu.rpc.benchmarks.shared.models._
@@ -34,18 +33,23 @@ import org.openjdk.jmh.annotations._
 @OutputTimeUnit(TimeUnit.SECONDS)
 class AvroBenchmark extends Runtime {
 
-  implicit val handler: AvroHandler[IO]    = new AvroHandler[IO]
-  val sc: ServerChannel                    = ServerChannel(PersonServiceAvro.bindService[IO])
-  val clientIO: Resource[IO, PersonServiceAvro[IO]] = PersonServiceAvro.clientFromChannel[IO](IO(sc.channel))
+  implicit val handler: AvroHandler[IO] = new AvroHandler[IO]
+
+  def clientIO: Resource[IO, PersonServiceAvro[IO]] =
+    Resource.liftF(PersonServiceAvro.bindService[IO])
+      .flatMap(ServerChannel[IO](_))
+      .flatMap(sc => PersonServiceAvro.clientFromChannel[IO](IO(sc.channel)))
 
   @TearDown
-  def shutdown(): Unit = IO(sc.shutdown()).void.unsafeRunSync()
+  def shutdown(): Unit = {}
 
   @Benchmark
-  def listPersons: PersonList = clientIO.use(_.listPersons(Empty)).unsafeRunTimed(defaultTimeOut).get
+  def listPersons: PersonList =
+    clientIO.use(_.listPersons(Empty)).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
-  def getPerson: Person = clientIO.use(_.getPerson(PersonId("1"))).unsafeRunTimed(defaultTimeOut).get
+  def getPerson: Person =
+    clientIO.use(_.getPerson(PersonId("1"))).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
   def getPersonLinks: PersonLinkList =

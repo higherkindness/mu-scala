@@ -17,6 +17,8 @@
 package examples.todolist.server
 
 import cats.effect.IO
+import cats.instances.list._
+import cats.syntax.traverse._
 import examples.todolist.protocol.Protocols._
 import examples.todolist.server.implicits._
 import higherkindness.mu.rpc.server.config.BuildServerFromConfig
@@ -25,16 +27,17 @@ import higherkindness.mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
 object ServerApp {
 
   def main(args: Array[String]): Unit = {
-    val grpcConfigs: List[GrpcConfig] =
+    val grpcConfigs: IO[List[GrpcConfig]] =
       List(
-        AddService(PingPongService.bindService[IO]),
-        AddService(TagRpcService.bindService[IO]),
-        AddService(TodoListRpcService.bindService[IO]),
-        AddService(TodoItemRpcService.bindService[IO])
-      )
+        PingPongService.bindService[IO].map(AddService),
+        TagRpcService.bindService[IO].map(AddService),
+        TodoListRpcService.bindService[IO].map(AddService),
+        TodoItemRpcService.bindService[IO].map(AddService)
+      ).sequence[IO, GrpcConfig]
 
     val runServer = for {
-      server <- BuildServerFromConfig[IO]("rpc.server.port", grpcConfigs)
+      config <- grpcConfigs
+      server <- BuildServerFromConfig[IO]("rpc.server.port", config)
       _      <- GrpcServer.server[IO](server)
     } yield ()
 

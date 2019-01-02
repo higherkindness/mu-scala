@@ -29,12 +29,12 @@ object ServerAppIO {
 
   def main(args: Array[String]): Unit = {
 
-    val grpcConfigs: List[GrpcConfig] = List(
-      AddService(RouteGuideService.bindService[IO])
-    )
+    val grpcConfigs: IO[GrpcConfig] =
+      RouteGuideService.bindService[IO].map(AddService)
 
     val runServer = for {
-      server <- BuildServerFromConfig[IO]("rpc.server.port", grpcConfigs)
+      config <- grpcConfigs
+      server <- BuildServerFromConfig[IO]("rpc.server.port", List(config))
       _      <- IO(logger.info(s"Server is starting ..."))
       _      <- GrpcServer.server[IO](server)
     } yield ()

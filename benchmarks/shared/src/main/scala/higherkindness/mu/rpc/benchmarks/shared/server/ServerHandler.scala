@@ -19,6 +19,8 @@ package shared
 package server
 
 import cats.effect._
+import cats.instances.list._
+import cats.syntax.traverse._
 import higherkindness.mu.rpc.benchmarks.shared.models._
 import higherkindness.mu.rpc.benchmarks.shared.protocols._
 import higherkindness.mu.rpc.protocol.Empty
@@ -58,9 +60,9 @@ trait ServerImplicits extends Runtime {
   implicit private val avroWithSchemaHandler: AvroWithSchemaHandler[IO] =
     new AvroWithSchemaHandler[IO]
 
-  implicit val grpcConfigsAvro: List[GrpcConfig] = List(
-    AddService(PersonServicePB.bindService[IO]),
-    AddService(PersonServiceAvro.bindService[IO]),
-    AddService(PersonServiceAvroWithSchema.bindService[IO])
-  )
+  implicit val grpcConfigsAvro: IO[List[GrpcConfig]] = List(
+    PersonServicePB.bindService[IO].map(AddService),
+    PersonServiceAvro.bindService[IO].map(AddService),
+    PersonServiceAvroWithSchema.bindService[IO].map(AddService)
+  ).sequence[IO, GrpcConfig]
 }

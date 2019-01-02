@@ -36,19 +36,21 @@ case class InterceptorsRuntime(
   import handlers.server._
   import handlers.client._
   import higherkindness.mu.rpc.server._
+  import cats.instances.list._
+  import cats.syntax.traverse._
 
   //////////////////////////////////
   // Server Runtime Configuration //
   //////////////////////////////////
 
-  lazy val grpcConfigs: List[GrpcConfig] = List(
-    AddService(ProtoRPCService.bindService[ConcurrentMonad]),
-    AddService(AvroRPCService.bindService[ConcurrentMonad]),
-    AddService(AvroWithSchemaRPCService.bindService[ConcurrentMonad])
-  )
+  lazy val grpcConfigs: ConcurrentMonad[List[GrpcConfig]] = List(
+    ProtoRPCService.bindService[ConcurrentMonad].map(AddService),
+    AvroRPCService.bindService[ConcurrentMonad].map(AddService),
+    AvroWithSchemaRPCService.bindService[ConcurrentMonad].map(AddService)
+  ).sequence
 
   implicit lazy val grpcServer: GrpcServer[ConcurrentMonad] =
-    createServerConfOnRandomPort[ConcurrentMonad](grpcConfigs).unsafeRunSync
+    grpcConfigs.flatMap(createServerConfOnRandomPort[ConcurrentMonad]).unsafeRunSync
 
   implicit lazy val muRPCHandler: ServerRPCService[ConcurrentMonad] =
     new ServerRPCService[ConcurrentMonad]

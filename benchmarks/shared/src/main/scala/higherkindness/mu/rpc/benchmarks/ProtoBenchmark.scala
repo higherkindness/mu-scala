@@ -17,7 +17,6 @@
 package higherkindness.mu.rpc.benchmarks
 
 import cats.effect.{IO, Resource}
-import cats.syntax.functor._
 import higherkindness.mu.rpc.protocol.Empty
 import java.util.concurrent.TimeUnit
 
@@ -35,11 +34,14 @@ import org.openjdk.jmh.annotations._
 class ProtoBenchmark extends Runtime {
 
   implicit val handler: ProtoHandler[IO] = new ProtoHandler[IO]
-  val sc: ServerChannel                  = ServerChannel(PersonServicePB.bindService[IO])
-  val clientIO: Resource[IO, PersonServicePB[IO]] = PersonServicePB.clientFromChannel[IO](IO(sc.channel))
+
+  def clientIO: Resource[IO, PersonServicePB[IO]] =
+    Resource.liftF(PersonServicePB.bindService[IO])
+      .flatMap(ServerChannel[IO](_))
+      .flatMap(sc => PersonServicePB.clientFromChannel[IO](IO(sc.channel)))
 
   @TearDown
-  def shutdown(): Unit = IO(sc.shutdown()).void.unsafeRunSync()
+  def shutdown(): Unit = {}
 
   @Benchmark
   def listPersons: PersonList = clientIO.use(_.listPersons(Empty)).unsafeRunTimed(defaultTimeOut).get
