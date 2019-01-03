@@ -39,7 +39,7 @@ object ProjectPlugin extends AutoPlugin {
       val monocle: String            = "1.5.1-cats"
       val nettySSL: String           = "2.0.17.Final"
       val paradise: String           = "2.1.1"
-      val pbdirect: String           = "0.1.0"
+      val pbdirect: String           = "0.2.0"
       val prometheus: String         = "0.5.0"
       val pureconfig: String         = "0.10.0"
       val reactiveStreams: String    = "1.0.2"
@@ -59,7 +59,7 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect),
         %("grpc-stub", V.grpc),
-        %%("pbdirect", V.pbdirect),
+        "com.47deg" %% "pbdirect" % V.pbdirect,
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
         "org.scala-lang"         % "scala-compiler" % scalaVersion.value,

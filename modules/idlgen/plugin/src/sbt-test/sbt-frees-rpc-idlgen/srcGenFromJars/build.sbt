@@ -26,7 +26,6 @@ lazy val root = project
   .settings(name := "root")
   .settings(Seq(
     version := sys.props("version"),
-    resolvers += Resolver.bintrayRepo("beyondthelines", "maven"),
     idlType := "avro",
     srcGenJarNames := Seq("domain"),
     srcGenIDLTargetDir := (Compile / sourceManaged).value / "avro",
