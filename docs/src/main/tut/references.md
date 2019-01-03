@@ -11,7 +11,7 @@ permalink: /references
 * [gRPC](https://grpc.io/)
 * [Protocol Buffers Docs](https://developers.google.com/protocol-buffers/docs/overview)
 * [scalamacros](https://github.com/scalamacros/paradise)
-* [PBDirect](https://github.com/btlines/pbdirect)
+* [PBDirect](https://github.com/47deg/pbdirect)
 * [ScalaPB](https://scalapb.github.io/)
 * [Monix](https://monix.io)
 * [gRPC Java API](https://grpc.io/grpc-java/javadoc/)
@@ -36,7 +36,7 @@ If you want to dive deeper into [mu], we have a complete example at the [example
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
-[PBDirect]: https://github.com/btlines/pbdirect
+[PBDirect]: https://github.com/47deg/pbdirect
 [scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect

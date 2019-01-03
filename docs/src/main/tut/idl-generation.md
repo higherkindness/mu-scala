@@ -247,7 +247,6 @@ The following example shows how to set up a dependency with another artifact or 
 //...
 .settings(
   Seq(
-      resolvers += Resolver.bintrayRepo("beyondthelines", "maven"),
       publishMavenStyle := true,
       idlType := "avro",
       srcGenSerializationType := "AvroWithSchema",
@@ -270,7 +269,7 @@ The following example shows how to set up a dependency with another artifact or 
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
-[PBDirect]: https://github.com/btlines/pbdirect
+[PBDirect]: https://github.com/47deg/pbdirect
 [scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
