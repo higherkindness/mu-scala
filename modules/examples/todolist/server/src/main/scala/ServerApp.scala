@@ -27,13 +27,14 @@ import higherkindness.mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
 object ServerApp {
 
   def main(args: Array[String]): Unit = {
+
     val grpcConfigs: IO[List[GrpcConfig]] =
       List(
-        PingPongService.bindService[IO].map(AddService),
-        TagRpcService.bindService[IO].map(AddService),
-        TodoListRpcService.bindService[IO].map(AddService),
-        TodoItemRpcService.bindService[IO].map(AddService)
-      ).sequence[IO, GrpcConfig]
+        PingPongService.bindService[IO],
+        TagRpcService.bindService[IO],
+        TodoListRpcService.bindService[IO],
+        TodoItemRpcService.bindService[IO]
+      ).sequence.map(_.map(AddService))
 
     val runServer = for {
       config <- grpcConfigs

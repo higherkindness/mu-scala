@@ -500,16 +500,16 @@ object Utils extends CommonUtils {
       new ServerRPCService[ConcurrentMonad]
 
     val grpcConfigs: ConcurrentMonad[List[GrpcConfig]] = List(
-      ProtoRPCService.bindService[ConcurrentMonad].map(AddService),
-      AvroRPCService.bindService[ConcurrentMonad].map(AddService),
-      AvroWithSchemaRPCService.bindService[ConcurrentMonad].map(AddService),
-      CompressedProtoRPCService.bindService[ConcurrentMonad].map(AddService),
-      CompressedAvroRPCService.bindService[ConcurrentMonad].map(AddService),
-      CompressedAvroWithSchemaRPCService.bindService[ConcurrentMonad].map(AddService)
-    ).sequence
+      ProtoRPCService.bindService[ConcurrentMonad],
+      AvroRPCService.bindService[ConcurrentMonad],
+      AvroWithSchemaRPCService.bindService[ConcurrentMonad],
+      CompressedProtoRPCService.bindService[ConcurrentMonad],
+      CompressedAvroRPCService.bindService[ConcurrentMonad],
+      CompressedAvroWithSchemaRPCService.bindService[ConcurrentMonad]
+    ).sequence.map(_.map(AddService))
 
     implicit val grpcServer: GrpcServer[ConcurrentMonad] =
-      grpcConfigs.flatMap(createServerConf[ConcurrentMonad](_)).unsafeRunSync
+      grpcConfigs.flatMap(createServerConf[ConcurrentMonad]).unsafeRunSync
 
     //////////////////////////////////
     // Client Runtime Configuration //

@@ -19,7 +19,7 @@ package higherkindness.mu.rpc
 import java.net.ServerSocket
 
 import cats.Functor
-import cats.effect.{IO, Resource, Sync}
+import cats.effect.{Resource, Sync}
 import cats.syntax.functor._
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.server._
@@ -88,10 +88,7 @@ trait CommonUtils {
         throw new RuntimeException(e)
     }
 
-  def withClient[Client, A](resource: Resource[ConcurrentMonad, Client])(f: Client => A): A =
-    resource.use(client => IO(f(client))).unsafeRunSync()
-
-  def withClientF[Client, A](
+  def withClient[Client, A](
       serviceDef: ConcurrentMonad[ServerServiceDefinition],
       resourceBuilder: ConcurrentMonad[ManagedChannel] => Resource[ConcurrentMonad, Client])(
       f: Client => A): A =

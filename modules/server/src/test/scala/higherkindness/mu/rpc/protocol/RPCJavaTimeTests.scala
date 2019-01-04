@@ -107,7 +107,7 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize LocalDate using proto format" in {
 
-      withClientF(
+      withClient(
         ProtoRPCDateServiceDef.bindService[ConcurrentMonad],
         ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -122,7 +122,7 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize LocalDateTime using proto format" in {
 
-      withClientF(
+      withClient(
         ProtoRPCDateServiceDef.bindService[ConcurrentMonad],
         ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -137,7 +137,7 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize Instant using proto format" in {
 
-      withClientF(
+      withClient(
         ProtoRPCDateServiceDef.bindService[ConcurrentMonad],
         ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -152,7 +152,7 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize LocalDate, LocalDateTime, and Instant in a Request using proto format" in {
 
-      withClientF(
+      withClient(
         ProtoRPCDateServiceDef.bindService[ConcurrentMonad],
         ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -173,7 +173,7 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize LocalDate using avro format" in {
 
-      withClientF(
+      withClient(
         AvroRPCDateServiceDef.bindService[ConcurrentMonad],
         AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -189,7 +189,7 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize LocalDateTime using avro format" in {
 
-      withClientF(
+      withClient(
         AvroRPCDateServiceDef.bindService[ConcurrentMonad],
         AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -204,7 +204,7 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize Instant using avro format" in {
 
-      withClientF(
+      withClient(
         AvroRPCDateServiceDef.bindService[ConcurrentMonad],
         AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -220,7 +220,7 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize LocalDate, LocalDateTime, and Instant in a Request using avro format" in {
 
-      withClientF(
+      withClient(
         AvroRPCDateServiceDef.bindService[ConcurrentMonad],
         AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -241,7 +241,7 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize LocalDate using avro format with schema" in {
 
-      withClientF(
+      withClient(
         AvroWithSchemaRPCDateServiceDef.bindService[ConcurrentMonad],
         AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -257,7 +257,7 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize LocalDateTime using avro format with schema" in {
 
-      withClientF(
+      withClient(
         AvroWithSchemaRPCDateServiceDef.bindService[ConcurrentMonad],
         AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -273,7 +273,7 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize Instant using avro format with schema" in {
 
-      withClientF(
+      withClient(
         AvroWithSchemaRPCDateServiceDef.bindService[ConcurrentMonad],
         AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -289,7 +289,7 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize LocalDate, LocalDateTime, and Instant in a Request using avro format with schema" in {
 
-      withClientF(
+      withClient(
         AvroWithSchemaRPCDateServiceDef.bindService[ConcurrentMonad],
         AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {

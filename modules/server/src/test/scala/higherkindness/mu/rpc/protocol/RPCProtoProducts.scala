@@ -89,7 +89,7 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize Options in the request/response using proto format" in {
 
-      withClientF(
+      withClient(
         ProtoRPCServiceDef.bindService[ConcurrentMonad],
         ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -106,7 +106,7 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize Options in the request/response using avro format" in {
 
-      withClientF(
+      withClient(
         AvroRPCServiceDef.bindService[ConcurrentMonad],
         AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -123,7 +123,7 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize Options in the request/response using avro with schema format" in {
 
-      withClientF(
+      withClient(
         AvroWithSchemaRPCServiceDef.bindService[ConcurrentMonad],
         AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -140,7 +140,7 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize Lists in the request/response using proto format" in {
 
-      withClientF(
+      withClient(
         ProtoRPCServiceDef.bindService[ConcurrentMonad],
         ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -157,7 +157,7 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize Lists in the request/response using avro format" in {
 
-      withClientF(
+      withClient(
         AvroRPCServiceDef.bindService[ConcurrentMonad],
         AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -173,7 +173,7 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     "be able to serialize and deserialize Lists in the request/response using avro with schema format" in {
 
-      withClientF(
+      withClient(
         AvroWithSchemaRPCServiceDef.bindService[ConcurrentMonad],
         AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {

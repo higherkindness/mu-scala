@@ -18,7 +18,6 @@ package higherkindness.mu.rpc
 package avro
 
 import cats.effect.{IO, Resource}
-import cats.implicits._
 import io.grpc.ServerServiceDefinition
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.testing.servers.{withServerChannel, ServerChannel}
@@ -36,21 +35,19 @@ class RPCTests extends RpcBaseTestSuite {
     service.RPCService.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
   def runSucceedAssertion[A](ssd: ConcurrentMonad[ServerServiceDefinition], response: A)(
-      f: service.RPCService[ConcurrentMonad] => ConcurrentMonad[A]): Assertion = {
-    (for {
-      serverRes <- withServerChannel[ConcurrentMonad](ssd)
-      clientRes <- createClient(serverRes)
-    } yield clientRes).use(f).unsafeRunSync() shouldBe response
-  }
+      f: service.RPCService[ConcurrentMonad] => ConcurrentMonad[A]): Assertion =
+    withServerChannel[ConcurrentMonad](ssd)
+      .flatMap(createClient)
+      .use(f)
+      .unsafeRunSync() shouldBe response
 
   def runFailedAssertion[A](ssd: ConcurrentMonad[ServerServiceDefinition])(
-      f: service.RPCService[ConcurrentMonad] => ConcurrentMonad[A]): Assertion = {
-    (for {
-      serverRes <- withServerChannel[ConcurrentMonad](ssd)
-      clientRes <- createClient(serverRes)
-    } yield
-      clientRes).use(f).attempt.unsafeRunSync() shouldBe an[Left[io.grpc.StatusRuntimeException, A]]
-  }
+      f: service.RPCService[ConcurrentMonad] => ConcurrentMonad[A]): Assertion =
+    withServerChannel[ConcurrentMonad](ssd)
+      .flatMap(createClient)
+      .use(f)
+      .attempt
+      .unsafeRunSync() shouldBe an[Left[io.grpc.StatusRuntimeException, A]]
 
   "An AvroWithSchema service with an updated request model" can {
 

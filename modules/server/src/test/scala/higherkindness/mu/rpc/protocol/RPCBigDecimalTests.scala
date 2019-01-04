@@ -140,7 +140,7 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
     "be able to serialize and deserialize BigDecimal using proto format" in {
 
-      withClientF(
+      withClient(
         ProtoRPCServiceDef.bindService[ConcurrentMonad],
         ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -154,7 +154,7 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
     "be able to serialize and deserialize BigDecimal in a Request using proto format" in {
 
-      withClientF(
+      withClient(
         ProtoRPCServiceDef.bindService[ConcurrentMonad],
         ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -171,7 +171,7 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
     "be able to serialize and deserialize BigDecimal using avro format" in {
 
-      withClientF(
+      withClient(
         AvroRPCServiceDef.bindService[ConcurrentMonad],
         AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -185,7 +185,7 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
     "be able to serialize and deserialize BigDecimal in a Request using avro format" in {
 
-      withClientF(
+      withClient(
         AvroRPCServiceDef.bindService[ConcurrentMonad],
         AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -204,7 +204,7 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
     "be able to serialize and deserialize BigDecimal using avro with schema format" in {
 
-      withClientF(
+      withClient(
         AvroWithSchemaRPCServiceDef.bindService[ConcurrentMonad],
         AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -220,7 +220,7 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
     "be able to serialize and deserialize BigDecimal in a Request using avro with schema format" in {
 
-      withClientF(
+      withClient(
         AvroWithSchemaRPCServiceDef.bindService[ConcurrentMonad],
         AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -249,7 +249,7 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
     "be able to serialize and deserialize BigDecimal using avro format" in {
 
-      withClientF(
+      withClient(
         AvroRPCServiceDef.bindService[ConcurrentMonad],
         AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
@@ -266,7 +266,7 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
     "be able to serialize and deserialize BigDecimal in a Request using avro" in {
 
-      withClientF(
+      withClient(
         AvroRPCServiceDef.bindService[ConcurrentMonad],
         AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {

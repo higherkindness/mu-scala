@@ -95,11 +95,12 @@ object Utils extends CommonUtils {
         .clientAuth(ClientAuth.REQUIRE)
         .build()
 
-    val grpcConfigs: ConcurrentMonad[List[GrpcConfig]] = List(
-      suspendM(SetSslContext(serverSslContext)),
-      AvroRPCService.bindService[ConcurrentMonad].map(AddService),
-      AvroWithSchemaRPCService.bindService[ConcurrentMonad].map(AddService)
-    ).sequence
+    val grpcConfigs: ConcurrentMonad[List[GrpcConfig]] =
+      List(
+        AvroRPCService.bindService[ConcurrentMonad],
+        AvroWithSchemaRPCService.bindService[ConcurrentMonad]).sequence
+        .map(_.map(AddService))
+        .map(services => SetSslContext(serverSslContext) :: services)
 
     implicit val grpcServer: GrpcServer[ConcurrentMonad] =
       grpcConfigs.flatMap(GrpcServer.netty[ConcurrentMonad](SC.port, _)).unsafeRunSync

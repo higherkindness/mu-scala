@@ -44,10 +44,10 @@ case class InterceptorsRuntime(
   //////////////////////////////////
 
   lazy val grpcConfigs: ConcurrentMonad[List[GrpcConfig]] = List(
-    ProtoRPCService.bindService[ConcurrentMonad].map(AddService),
-    AvroRPCService.bindService[ConcurrentMonad].map(AddService),
-    AvroWithSchemaRPCService.bindService[ConcurrentMonad].map(AddService)
-  ).sequence
+    ProtoRPCService.bindService[ConcurrentMonad],
+    AvroRPCService.bindService[ConcurrentMonad],
+    AvroWithSchemaRPCService.bindService[ConcurrentMonad]
+  ).sequence.map(_.map(AddService))
 
   implicit lazy val grpcServer: GrpcServer[ConcurrentMonad] =
     grpcConfigs.flatMap(createServerConfOnRandomPort[ConcurrentMonad]).unsafeRunSync
