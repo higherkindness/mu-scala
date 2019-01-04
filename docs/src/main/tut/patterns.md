@@ -178,11 +178,13 @@ object RPCServer {
   import gserver.implicits._
 
   def main(args: Array[String]): Unit = {
-    val grpcConfigs: List[GrpcConfig] = List(
-      AddService(Greeter.bindService[IO])
-    )
 
-    val runServer = GrpcServer.default[IO](8080, grpcConfigs).flatMap(GrpcServer.server[IO])
+    val runServer = for {
+      grpcConfig <- Greeter.bindService[IO]
+      server     <- GrpcServer.default[IO](8080, List(AddService(grpcConfig)))
+      runServer  <- GrpcServer.server[IO](server)
+    } yield runServer
+
     runServer.unsafeRunSync()
   }
 
@@ -200,6 +202,7 @@ Thanks to `withServerChannel` from the package `mu.rpc.testing.servers`, you wil
 ```tut:silent
 import cats.effect.Resource
 import higherkindness.mu.rpc.testing.servers.withServerChannel
+import io.grpc.{ManagedChannel, ServerServiceDefinition}
 import org.scalatest.prop.Checkers
 import org.scalatest._
 import org.scalacheck.Gen
@@ -209,20 +212,26 @@ import service._
 class ServiceSpec extends FunSuite with Matchers with Checkers with OneInstancePerTest {
 
   import gserver.implicits._
-
-  def withClient[Client, A](resource: Resource[IO, Client])(f: Client => A): A =
-    resource.use(client => IO(f(client))).unsafeRunSync()
+    
+  def withClient[Client, A](
+      serviceDef: IO[ServerServiceDefinition],
+      resourceBuilder: IO[ManagedChannel] => Resource[IO, Client])(
+      f: Client => A): A =
+    withServerChannel(serviceDef)
+      .flatMap(sc => resourceBuilder(IO(sc.channel)))
+      .use(client => IO(f(client)))
+      .unsafeRunSync()
 
   def sayHelloTest(requestGen: Gen[HelloRequest], expected: HelloResponse): Assertion =
-    withServerChannel(Greeter.bindService[IO]) { sc =>
-      withClient(Greeter.clientFromChannel[IO](IO(sc.channel))) { client =>
+    withClient(
+      Greeter.bindService[IO], 
+      Greeter.clientFromChannel[IO](_)) { client =>
         check {
           forAll(requestGen) { request =>
             client.sayHello(request).unsafeRunSync() == expected
           }
         }
       }
-    }
 
   val requestGen: Gen[HelloRequest] = Gen.alphaStr map HelloRequest
 

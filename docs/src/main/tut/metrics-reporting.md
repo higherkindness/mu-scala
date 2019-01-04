@@ -75,11 +75,13 @@ object InterceptingServerCalls extends CommonRuntime {
   implicit val greeterServiceHandler: ServiceHandler[IO] = new ServiceHandler[IO]
 
   // The Greeter service is the service defined in the Core concepts section
-  val grpcConfigs: List[GrpcConfig] = List(
-    AddService(Greeter.bindService[IO].interceptWith(monitorInterceptor))
-  )
+  val grpcConfigs: IO[List[GrpcConfig]] = 
+    Greeter.bindService[IO]
+      .map(_.interceptWith(monitorInterceptor))
+      .map(AddService)
+      .map(List(_))
 
-  val server: IO[GrpcServer[IO]] = GrpcServer.default[IO](8080, grpcConfigs)
+  val server: IO[GrpcServer[IO]] = grpcConfigs.flatMap(GrpcServer.default[IO](8080, _))
 
 }
 ```
