@@ -17,7 +17,7 @@
 package example.routeguide.server
 
 import cats.effect.IO
-import higherkindness.mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
+import higherkindness.mu.rpc.server.{AddService, GrpcServer}
 import higherkindness.mu.rpc.server.config.BuildServerFromConfig
 import org.log4s._
 import example.routeguide.protocol.Protocols.RouteGuideService
@@ -25,18 +25,14 @@ import example.routeguide.server.implicits._
 
 object ServerAppIO {
 
-  val logger = getLogger
-
   def main(args: Array[String]): Unit = {
 
-    val grpcConfigs: List[GrpcConfig] = List(
-      AddService(RouteGuideService.bindService[IO])
-    )
-
     val runServer = for {
-      server <- BuildServerFromConfig[IO]("rpc.server.port", grpcConfigs)
-      _      <- IO(logger.info(s"Server is starting ..."))
-      _      <- GrpcServer.server[IO](server)
+      logger      <- IO(getLogger)
+      grpcConfigs <- RouteGuideService.bindService[IO].map(AddService)
+      server      <- BuildServerFromConfig[IO]("rpc.server.port", List(grpcConfigs))
+      _           <- IO(logger.info(s"Server is starting ..."))
+      _           <- GrpcServer.server[IO](server)
     } yield ()
 
     runServer.unsafeRunSync

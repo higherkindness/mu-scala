@@ -21,13 +21,13 @@ import higherkindness.mu.rpc.protocol._
 
 trait TagProtocol {
 
-  final case class TagRequest(name: String)
+  case class TagRequest(name: String)
 
-  final case class TagMessage(name: String, id: Int)
+  case class TagMessage(name: String, id: Int)
 
-  final case class TagList(list: List[TagMessage])
+  case class TagList(list: List[TagMessage])
 
-  final case class TagResponse(tag: Option[TagMessage])
+  case class TagResponse(tag: Option[TagMessage])
 
   @service(Avro)
   trait TagRpcService[F[_]] {

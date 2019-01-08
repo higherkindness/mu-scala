@@ -143,6 +143,8 @@ object Utils extends CommonUtils {
     import service._
     import handlers.server._
     import higherkindness.mu.rpc.server._
+    import cats.instances.list._
+    import cats.syntax.traverse._
 
     //////////////////////////////////
     // Server Runtime Configuration //
@@ -151,17 +153,17 @@ object Utils extends CommonUtils {
     implicit val muRPCHandler: ServerRPCService[ConcurrentMonad] =
       new ServerRPCService[ConcurrentMonad]
 
-    val grpcConfigs: List[GrpcConfig] = List(
-      AddService(ProtoRPCService.bindService[ConcurrentMonad]),
-      AddService(AvroRPCService.bindService[ConcurrentMonad]),
-      AddService(AvroWithSchemaRPCService.bindService[ConcurrentMonad]),
-      AddService(CompressedProtoRPCService.bindService[ConcurrentMonad]),
-      AddService(CompressedAvroRPCService.bindService[ConcurrentMonad]),
-      AddService(CompressedAvroWithSchemaRPCService.bindService[ConcurrentMonad])
-    )
+    val grpcConfigs: ConcurrentMonad[List[GrpcConfig]] = List(
+      ProtoRPCService.bindService[ConcurrentMonad],
+      AvroRPCService.bindService[ConcurrentMonad],
+      AvroWithSchemaRPCService.bindService[ConcurrentMonad],
+      CompressedProtoRPCService.bindService[ConcurrentMonad],
+      CompressedAvroRPCService.bindService[ConcurrentMonad],
+      CompressedAvroWithSchemaRPCService.bindService[ConcurrentMonad]
+    ).sequence.map(_.map(AddService))
 
     implicit val grpcServer: GrpcServer[ConcurrentMonad] =
-      createServerConf[ConcurrentMonad](grpcConfigs).unsafeRunSync
+      grpcConfigs.flatMap(createServerConf[ConcurrentMonad]).unsafeRunSync
 
     //////////////////////////////////
     // Client Runtime Configuration //

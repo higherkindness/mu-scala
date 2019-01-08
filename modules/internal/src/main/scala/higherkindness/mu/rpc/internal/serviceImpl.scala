@@ -165,8 +165,9 @@ object serviceImpl {
           F: _root_.cats.effect.ConcurrentEffect[$F],
           algebra: $serviceName[$F],
           EC: _root_.scala.concurrent.ExecutionContext
-        ): _root_.io.grpc.ServerServiceDefinition =
-          new _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder(${lit(serviceName)}, ..$serverCallDescriptorsAndHandlers).apply
+        ): $F[_root_.io.grpc.ServerServiceDefinition] =
+          _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](${lit(
+        serviceName)}, ..$serverCallDescriptorsAndHandlers)
         """
 
       private val clientCallMethods: List[Tree] = rpcRequests.map(_.clientDef)

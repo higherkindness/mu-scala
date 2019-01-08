@@ -72,6 +72,8 @@ object Utils extends CommonUtils {
     import TestsImplicits._
     import service._
     import handlers.server._
+    import cats.instances.list._
+    import cats.syntax.traverse._
 
     //////////////////////////////////
     // Server Runtime Configuration //
@@ -93,14 +95,15 @@ object Utils extends CommonUtils {
         .clientAuth(ClientAuth.REQUIRE)
         .build()
 
-    val grpcConfigs: List[GrpcConfig] = List(
-      SetSslContext(serverSslContext),
-      AddService(AvroRPCService.bindService[ConcurrentMonad]),
-      AddService(AvroWithSchemaRPCService.bindService[ConcurrentMonad])
-    )
+    val grpcConfigs: ConcurrentMonad[List[GrpcConfig]] =
+      List(
+        AvroRPCService.bindService[ConcurrentMonad],
+        AvroWithSchemaRPCService.bindService[ConcurrentMonad]).sequence
+        .map(_.map(AddService))
+        .map(services => SetSslContext(serverSslContext) :: services)
 
     implicit val grpcServer: GrpcServer[ConcurrentMonad] =
-      GrpcServer.netty[ConcurrentMonad](SC.port, grpcConfigs).unsafeRunSync
+      grpcConfigs.flatMap(GrpcServer.netty[ConcurrentMonad](SC.port, _)).unsafeRunSync
 
     //////////////////////////////////
     // Client Runtime Configuration //

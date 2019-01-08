@@ -17,6 +17,7 @@
 package higherkindness.mu.rpc
 package internal
 
+import cats.effect.IO
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
 import higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder
 import io.grpc._
@@ -41,18 +42,19 @@ class GRPCServiceDefBuilderTests extends RpcBaseTestSuite {
     "build a ServerServiceDefinition based on the provided " +
       "MethodDescriptor's and ServerCallHandler's" in {
 
-      val gRPCServiceDefBuilder =
-        new GRPCServiceDefBuilder(serviceName, (flowMethod, handler))
-
-      gRPCServiceDefBuilder.apply.getServiceDescriptor.getName shouldBe serviceName
+      GRPCServiceDefBuilder
+        .build[IO](serviceName, (flowMethod, handler))
+        .map(_.getServiceDescriptor.getName)
+        .unsafeRunSync() shouldBe serviceName
     }
 
     "throw an java.lang.IllegalArgumentException when the serviceName is not valid" in {
 
       val gRPCServiceDefBuilder =
-        new GRPCServiceDefBuilder(invalidServiceName, (flowMethod, handler))
+        GRPCServiceDefBuilder
+          .build[IO](invalidServiceName, (flowMethod, handler))
 
-      an[IllegalArgumentException] should be thrownBy gRPCServiceDefBuilder.apply
+      an[IllegalArgumentException] should be thrownBy gRPCServiceDefBuilder.unsafeRunSync()
     }
 
   }

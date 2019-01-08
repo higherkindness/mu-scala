@@ -111,15 +111,15 @@ trait Runtime extends CommonRuntime {
 
   // Adding to the GrpConfig list the SslContext:
 
-  val grpcConfigs: List[GrpcConfig] = List(
-    SetSslContext(serverSslContext),
-    AddService(Greeter.bindService[IO])
-  )
+  val grpcConfigs: IO[List[GrpcConfig]] =
+     Greeter.bindService[IO]
+       .map(AddService)
+       .map(c => List(SetSslContext(serverSslContext), c))
 
   // Important. We have to create the server with Netty. OkHttp is not supported for the Ssl
   // encryption in mu-rpc at this moment.
 
-  val server: IO[GrpcServer[IO]] = GrpcServer.netty[IO](8080, grpcConfigs)
+  val server: IO[GrpcServer[IO]] = grpcConfigs.flatMap(GrpcServer.netty[IO](8080, _))
 
 }
 
