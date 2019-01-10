@@ -26,11 +26,11 @@ object ProjectPlugin extends AutoPlugin {
       val avro4s: String             = "2.0.2"
       val avrohugger: String         = "1.0.0-RC15"
       val betterMonadicFor: String   = "0.2.4"
-      val catsEffect: String         = "1.0.0" // See fs2-grpc transitive deps
+      val catsEffect: String         = "1.1.0" // See fs2-grpc transitive deps
       val circe: String              = "0.10.1"
       val frees: String              = "0.8.2"
-      val fs2: String                = "1.0.0"
-      val fs2Grpc: String            = "0.4.0-M2"
+      val fs2: String                = "1.0.2"
+      val fs2Grpc: String            = "0.4.0-M3"
       val jodaTime: String           = "2.10.1"
       val grpc: String               = "1.17.1"
       val log4s: String              = "1.6.1"
