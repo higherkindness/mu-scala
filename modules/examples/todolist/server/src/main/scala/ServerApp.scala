@@ -21,7 +21,7 @@ import cats.instances.list._
 import cats.syntax.traverse._
 import examples.todolist.protocol.Protocols._
 import examples.todolist.server.implicits._
-import higherkindness.mu.rpc.server.config.BuildServerFromConfig
+import higherkindness.mu.rpc.config.server.BuildServerFromConfig
 import higherkindness.mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
 
 object ServerApp {

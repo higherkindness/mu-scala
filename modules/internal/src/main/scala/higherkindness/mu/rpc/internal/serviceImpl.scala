@@ -192,15 +192,15 @@ object serviceImpl {
         q"""
         def client[$F_](
           channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
-          channelConfigList: List[_root_.higherkindness.mu.rpc.client.ManagedChannelConfig] = List(
-            _root_.higherkindness.mu.rpc.client.UsePlaintext()),
+          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] = List(
+            _root_.higherkindness.mu.rpc.channel.UsePlaintext()),
             options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
           )(implicit
           F: _root_.cats.effect.ConcurrentEffect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
         ): _root_.cats.effect.Resource[F, $serviceName[$F]] =
           _root_.cats.effect.Resource.make {
-            new _root_.higherkindness.mu.rpc.client.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
+            new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
           }(channel => F.void(F.delay(channel.shutdown()))).flatMap(ch =>
           _root_.cats.effect.Resource.make[F, $serviceName[$F]](F.delay(new $Client[$F](ch, options)))(_ => F.unit))
         """.supressWarts("DefaultArguments")
@@ -222,15 +222,15 @@ object serviceImpl {
         q"""
         def unsafeClient[$F_](
           channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
-          channelConfigList: List[_root_.higherkindness.mu.rpc.client.ManagedChannelConfig] = List(
-            _root_.higherkindness.mu.rpc.client.UsePlaintext()),
+          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] = List(
+            _root_.higherkindness.mu.rpc.channel.UsePlaintext()),
             options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
           )(implicit
           F: _root_.cats.effect.ConcurrentEffect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
         ): $serviceName[$F] = {
           val managedChannelInterpreter =
-            new _root_.higherkindness.mu.rpc.client.ManagedChannelInterpreter[$F](channelFor, channelConfigList).unsafeBuild
+            new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).unsafeBuild
           new $Client[$F](managedChannelInterpreter, options)
         }""".supressWarts("DefaultArguments")
 

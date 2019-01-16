@@ -94,8 +94,8 @@ In this case, in order to intercept the client calls we need additional configur
 import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc._
 import higherkindness.mu.rpc.config._
-import higherkindness.mu.rpc.client._
-import higherkindness.mu.rpc.client.config._
+import higherkindness.mu.rpc.channel._
+import higherkindness.mu.rpc.config.channel._
 import service._
 
 import higherkindness.mu.rpc.prometheus.shared.Configuration

@@ -235,7 +235,7 @@ trait CommonRuntime {
 import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc._
 import higherkindness.mu.rpc.config._
-import higherkindness.mu.rpc.client.config._
+import higherkindness.mu.rpc.config.channel._
 import io.grpc.CallOptions
 import service._
 
