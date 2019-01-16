@@ -131,8 +131,8 @@ Lastly, as we did before with the server side, let's see what happens on the cli
 ```tut:silent
 import cats.syntax.either._
 import higherkindness.mu.rpc.ChannelForAddress
-import higherkindness.mu.rpc.client.OverrideAuthority
-import higherkindness.mu.rpc.client.netty.{
+import higherkindness.mu.rpc.channel.OverrideAuthority
+import higherkindness.mu.rpc.channel.netty.{
   NettyChannelInterpreter,
   NettyNegotiationType,
   NettySslContext,

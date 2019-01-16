@@ -20,7 +20,7 @@ import cats.effect.Sync
 import pureconfig._
 import com.typesafe.config.{Config, ConfigFactory}
 
-object config {
+package object config {
 
   trait ConfigM[F[_]] {
     def load: F[Config]

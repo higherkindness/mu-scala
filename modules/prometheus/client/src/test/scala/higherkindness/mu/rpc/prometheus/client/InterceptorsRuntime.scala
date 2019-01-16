@@ -19,7 +19,7 @@ package prometheus
 package client
 
 import cats.effect.Resource
-import higherkindness.mu.rpc.client._
+import higherkindness.mu.rpc.channel._
 import higherkindness.mu.rpc.common.ConcurrentMonad
 import higherkindness.mu.rpc.prometheus.shared.Configuration
 import higherkindness.mu.rpc.protocol.Utils._

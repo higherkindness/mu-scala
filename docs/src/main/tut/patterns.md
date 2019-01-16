@@ -284,7 +284,7 @@ So, taking into account all of that, how would our code look?
 import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc._
 import higherkindness.mu.rpc.config._
-import higherkindness.mu.rpc.client.config._
+import higherkindness.mu.rpc.config.channel._
 import service._
 
 object gclient {
