@@ -46,19 +46,22 @@ object servers {
   }
 
   def withServerChannel[F[_]: Sync](
-      service: F[ServerServiceDefinition]): Resource[F, ServerChannel] =
-    withServerChannelList(service.map(List(_)))
+      service: F[ServerServiceDefinition],
+      clientInterceptor: Option[ClientInterceptor] = None): Resource[F, ServerChannel] =
+    withServerChannelList(service.map(List(_)), clientInterceptor)
 
   def withServerChannelList[F[_]: Sync](
-      services: F[List[ServerServiceDefinition]]): Resource[F, ServerChannel] =
-    Resource.liftF(services).flatMap(list => ServerChannel(list: _*))
+      services: F[List[ServerServiceDefinition]],
+      clientInterceptor: Option[ClientInterceptor] = None): Resource[F, ServerChannel] =
+    Resource.liftF(services).flatMap(list => ServerChannel(list, clientInterceptor))
 
   final case class ServerChannel(server: Server, channel: ManagedChannel)
 
   object ServerChannel {
 
     def apply[F[_]: Sync](
-        serverServiceDefinitions: ServerServiceDefinition*): Resource[F, ServerChannel] = {
+        serverServiceDefinitions: List[ServerServiceDefinition],
+        clientInterceptor: Option[ClientInterceptor] = None): Resource[F, ServerChannel] = {
       val serviceRegistry =
         new MutableHandlerRegistry
       val serverName: String =
@@ -71,7 +74,11 @@ object servers {
       val channelBuilder: InProcessChannelBuilder =
         InProcessChannelBuilder.forName(serverName)
 
-      serverServiceDefinitions.toList.map(serverBuilder.addService)
+      clientInterceptor.foreach { interceptor =>
+        channelBuilder.intercept(interceptor)
+      }
+
+      serverServiceDefinitions.map(serverBuilder.addService)
 
       Resource.make {
         (

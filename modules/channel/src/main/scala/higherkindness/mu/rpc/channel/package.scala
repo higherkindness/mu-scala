@@ -36,6 +36,7 @@ package object channel {
       case UsePlaintext()                    => mcb.usePlaintext()
       case NameResolverFactory(rf)           => mcb.nameResolverFactory(rf)
       case LoadBalancerFactory(lbf)          => mcb.loadBalancerFactory(lbf)
+      case DefaultLoadBalancingPolicy(p)     => mcb.defaultLoadBalancingPolicy(p)
       case SetDecompressorRegistry(registry) => mcb.decompressorRegistry(registry)
       case SetCompressorRegistry(registry)   => mcb.compressorRegistry(registry)
       case SetIdleTimeout(value, unit)       => mcb.idleTimeout(value, unit)
