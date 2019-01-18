@@ -15,7 +15,7 @@
  */
 
 package higherkindness.mu.rpc
-package interceptors
+package internal.interceptors
 
 import io.grpc.MethodDescriptor
 import io.grpc.MethodDescriptor.MethodType

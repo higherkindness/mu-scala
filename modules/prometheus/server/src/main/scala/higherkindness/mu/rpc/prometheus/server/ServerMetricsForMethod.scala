@@ -18,7 +18,7 @@ package higherkindness.mu.rpc
 package prometheus
 package server
 
-import higherkindness.mu.rpc.interceptors.GrpcMethodInfo
+import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
 import io.grpc.Status.Code
 import io.prometheus.client.SimpleCollector
 

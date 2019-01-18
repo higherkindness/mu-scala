@@ -20,7 +20,7 @@ package client
 
 import java.time.{Clock, Instant}
 
-import higherkindness.mu.rpc.interceptors.GrpcMethodInfo
+import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
 import higherkindness.mu.rpc.prometheus.shared.Configuration
 import io.grpc._
 
