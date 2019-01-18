@@ -26,10 +26,7 @@ trait MetricsOps[F[_]] {
 
   def recordMessageSent(methodInfo: GrpcMethodInfo, classifier: Option[String]): F[Unit]
 
-  def recordMessageReceived(
-      methodInfo: GrpcMethodInfo,
-      status: Status,
-      classifier: Option[String]): F[Unit]
+  def recordMessageReceived(methodInfo: GrpcMethodInfo, classifier: Option[String]): F[Unit]
 
   def recordHeadersTime(
       methodInfo: GrpcMethodInfo,
