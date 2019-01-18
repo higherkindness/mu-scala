@@ -151,6 +151,12 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+    lazy val dropwizardMetricsSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        "io.dropwizard.metrics" % "metrics-core" % "4.0.5"
+      )
+    )
+
     lazy val testingSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %("grpc-testing", V.grpc),

@@ -166,6 +166,14 @@ lazy val `dropwizard-client` = project
   .settings(moduleName := "mu-rpc-dropwizard-client")
   .settings(dropwizardSettings)
 
+lazy val `dropwizard` = project
+  .in(file("modules/dropwizard"))
+  .dependsOn(channel % "compile->compile;test->test")
+  .dependsOn(interceptors % "compile->compile;test->test")
+  .dependsOn(server % "test->test")
+  .settings(moduleName := "mu-rpc-dropwizard")
+  .settings(dropwizardMetricsSettings)
+
 ////////////////
 //// IDLGEN ////
 ////////////////
