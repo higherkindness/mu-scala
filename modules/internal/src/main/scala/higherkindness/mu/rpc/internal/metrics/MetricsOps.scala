@@ -15,23 +15,29 @@
  */
 
 package higherkindness.mu.rpc.internal.metrics
-import io.grpc.MethodDescriptor.MethodType
+import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
 import io.grpc.Status
 
 trait MetricsOps[F[_]] {
 
-  def increaseActiveCalls(classifier: Option[String]): F[Unit]
+  def increaseActiveCalls(methodInfo: GrpcMethodInfo, classifier: Option[String]): F[Unit]
 
-  def decreaseActiveCalls(classifier: Option[String]): F[Unit]
+  def decreaseActiveCalls(methodInfo: GrpcMethodInfo, classifier: Option[String]): F[Unit]
 
-  def recordMessageSent(method: MethodType, classifier: Option[String]): F[Unit]
+  def recordMessageSent(methodInfo: GrpcMethodInfo, classifier: Option[String]): F[Unit]
 
-  def recordMessageReceived(method: MethodType, status: Status, classifier: Option[String]): F[Unit]
+  def recordMessageReceived(
+      methodInfo: GrpcMethodInfo,
+      status: Status,
+      classifier: Option[String]): F[Unit]
 
-  def recordHeadersTime(method: MethodType, elapsed: Long, classifier: Option[String]): F[Unit]
+  def recordHeadersTime(
+      methodInfo: GrpcMethodInfo,
+      elapsed: Long,
+      classifier: Option[String]): F[Unit]
 
   def recordTotalTime(
-      method: MethodType,
+      methodInfo: GrpcMethodInfo,
       status: Status,
       elapsed: Long,
       classifier: Option[String]): F[Unit]
