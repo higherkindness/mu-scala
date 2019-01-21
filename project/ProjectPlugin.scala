@@ -303,8 +303,10 @@ object ProjectPlugin extends AutoPlugin {
       Tut / scalacOptions -= "-Ywarn-unused-import",
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
-      addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
       addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
+      addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
+      // This is needed to prevent the eviction regarding the version of kind-projector injected by org-policies:
+      libraryDependencies ~= (_.filterNot(m => m.name == "kind-projector" && m.revision == "0.9.7")),
       libraryDependencies ++= Seq(
         %%("scalatest") % "test",
         %("slf4j-nop")  % Test
