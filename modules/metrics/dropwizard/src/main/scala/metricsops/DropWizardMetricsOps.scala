@@ -22,7 +22,7 @@ import cats.effect.Sync
 import com.codahale.metrics.MetricRegistry
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
 import higherkindness.mu.rpc.internal.metrics.MetricsOps
-import MetricsOps._
+import io.grpc.MethodDescriptor.MethodType._
 import io.grpc.Status
 
 object DropWizardMetricsOps {
@@ -73,6 +73,50 @@ object DropWizardMetricsOps {
         .update(elapsed, TimeUnit.NANOSECONDS)
     }
 
+  }
+
+  def eventDescription(
+      prefix: String,
+      classifier: Option[String],
+      methodInfo: GrpcMethodInfo,
+      eventName: String,
+      status: Option[Status] = None) =
+    classifier
+      .map(c => s"$prefix.$c")
+      .getOrElse(s"$prefix.default") + "." + methodInfoDescription(methodInfo) + s".$eventName" + status
+      .map(s => s".${statusDescription(s)}")
+      .getOrElse("")
+
+  private def methodInfoDescription(methodInfo: GrpcMethodInfo): String =
+    methodInfo.`type` match {
+      case UNARY => s"${methodInfo.serviceName}.${methodInfo.methodName}.unary"
+      case CLIENT_STREAMING =>
+        s"${methodInfo.serviceName}.${methodInfo.methodName}.client-streaming"
+      case SERVER_STREAMING =>
+        s"${methodInfo.serviceName}.${methodInfo.methodName}.server-streaming"
+      case BIDI_STREAMING => s"${methodInfo.serviceName}.${methodInfo.methodName}.bidi-streaming"
+      case UNKNOWN        => s"${methodInfo.serviceName}.${methodInfo.methodName}.unknown"
+    }
+
+  private def statusDescription(status: Status): String = status match {
+    case Status.ABORTED             => "aborted"
+    case Status.ALREADY_EXISTS      => "already-exists"
+    case Status.CANCELLED           => "cancelled"
+    case Status.DATA_LOSS           => "data-loss"
+    case Status.DEADLINE_EXCEEDED   => "deadline-exceeded"
+    case Status.FAILED_PRECONDITION => "failed-precondition"
+    case Status.INTERNAL            => "internal"
+    case Status.INVALID_ARGUMENT    => "invalid-argument"
+    case Status.NOT_FOUND           => "not-found"
+    case Status.OK                  => "ok"
+    case Status.OUT_OF_RANGE        => "out-of-range"
+    case Status.PERMISSION_DENIED   => "permission-denied"
+    case Status.RESOURCE_EXHAUSTED  => "resource-exhausted"
+    case Status.UNAUTHENTICATED     => "unauthenticated"
+    case Status.UNAVAILABLE         => "unavailable"
+    case Status.UNIMPLEMENTED       => "unimplemented"
+    case Status.UNKNOWN             => "unknown"
+    case _                          => "unknown"
   }
 
 }

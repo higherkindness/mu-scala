@@ -16,11 +16,11 @@
 
 package metricsops
 
-import cats.effect.{IO, Sync}
+import cats.effect.IO
+import cats.implicits._
 import com.codahale.metrics.MetricRegistry
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
-import higherkindness.mu.rpc.internal.metrics.MetricsOps
-import higherkindness.mu.rpc.internal.metrics.MetricsOps._
+import DropWizardMetricsOps._
 import io.grpc.MethodDescriptor.MethodType
 import io.grpc.Status
 import org.scalacheck.Gen.alphaLowerChar
@@ -84,7 +84,7 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
     case MethodType.UNKNOWN          => "unknown"
   }
 
-  def checkMetrics[F[_]: Sync](
+  def checkMetrics(
       methodInfo: GrpcMethodInfo,
       numberOfCalls: Int,
       expectedCount: Int,
@@ -92,11 +92,15 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
       eventName: String,
       getGauges: MetricRegistry => List[String],
       getGaugeCount: (MetricRegistry, String) => Long,
-      f: (MetricsOps[F]) => Unit,
+      f: => IO[Unit],
       status: Option[Status] = None): Boolean = {
-    (1 to numberOfCalls).toList.foreach { _ =>
-      f(DropWizardMetricsOps[F](registry, prefix))
-    }
+
+    (1 to numberOfCalls).toList
+      .map { _ =>
+        f
+      }
+      .sequence
+      .unsafeRunSync()
 
     val counters    = getGauges(registry)
     val counterName = eventDescription(prefix, classifier, methodInfo, eventName, status)
@@ -108,8 +112,9 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
     forAll(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int) =>
         val registry = new MetricRegistry()
+        val metrics  = DropWizardMetricsOps[IO](registry, prefix)
 
-        checkMetrics[IO](
+        checkMetrics(
           methodInfo,
           numberOfCalls,
           numberOfCalls,
@@ -118,8 +123,8 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
           { _.getCounters().asScala.keys.toList }, { (registry, name) =>
             registry.counter(name).getCount
           },
-          { _.increaseActiveCalls(methodInfo, classifier).unsafeRunSync() }
-        ) && checkMetrics[IO](
+          { metrics.increaseActiveCalls(methodInfo, classifier) }
+        ) && checkMetrics(
           methodInfo,
           numberOfCalls,
           0,
@@ -128,7 +133,7 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
           { _.getCounters().asScala.keys.toList }, { (registry, name) =>
             registry.counter(name).getCount
           },
-          { _.decreaseActiveCalls(methodInfo, classifier).unsafeRunSync() }
+          { metrics.decreaseActiveCalls(methodInfo, classifier) }
         )
     }
 
@@ -136,8 +141,9 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
     forAll(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int) =>
         val registry = new MetricRegistry()
+        val metrics  = DropWizardMetricsOps[IO](registry, prefix)
 
-        checkMetrics[IO](
+        checkMetrics(
           methodInfo,
           numberOfCalls,
           numberOfCalls,
@@ -146,7 +152,7 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
           { _.getCounters().asScala.keys.toList }, { (registry, name) =>
             registry.counter(name).getCount
           },
-          { _.recordMessageSent(methodInfo, classifier).unsafeRunSync() }
+          { metrics.recordMessageSent(methodInfo, classifier) }
         )
     }
 
@@ -154,8 +160,9 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
     forAll(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int) =>
         val registry = new MetricRegistry()
+        val metrics  = DropWizardMetricsOps[IO](registry, prefix)
 
-        checkMetrics[IO](
+        checkMetrics(
           methodInfo,
           numberOfCalls,
           numberOfCalls,
@@ -164,7 +171,7 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
           { _.getCounters().asScala.keys.toList }, { (registry, name) =>
             registry.counter(name).getCount
           },
-          { _.recordMessageReceived(methodInfo, classifier).unsafeRunSync() }
+          { metrics.recordMessageReceived(methodInfo, classifier) }
         )
     }
 
@@ -172,8 +179,9 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
     forAll(methodInfoGen, Gen.chooseNum[Int](1, 10), Gen.chooseNum(100, 1000)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int, elapsed: Int) =>
         val registry = new MetricRegistry()
+        val metrics  = DropWizardMetricsOps[IO](registry, prefix)
 
-        checkMetrics[IO](
+        checkMetrics(
           methodInfo,
           numberOfCalls,
           numberOfCalls,
@@ -181,7 +189,7 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
           "headers-time", { _.getTimers().asScala.keys.toList }, { (registry, name) =>
             registry.timer(name).getCount
           },
-          { _.recordHeadersTime(methodInfo, elapsed.toLong, classifier).unsafeRunSync() }
+          { metrics.recordHeadersTime(methodInfo, elapsed.toLong, classifier) }
         )
     }
 
@@ -189,8 +197,9 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
     forAll(methodInfoGen, Gen.chooseNum[Int](1, 10), Gen.chooseNum(100, 1000), statusGen) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int, elapsed: Int, status: Status) =>
         val registry = new MetricRegistry()
+        val metrics  = DropWizardMetricsOps[IO](registry, prefix)
 
-        checkMetrics[IO](
+        checkMetrics(
           methodInfo,
           numberOfCalls,
           numberOfCalls,
@@ -198,7 +207,7 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
           "total-time", { _.getTimers().asScala.keys.toList }, { (registry, name) =>
             registry.timer(name).getCount
           },
-          { _.recordTotalTime(methodInfo, status, elapsed.toLong, classifier).unsafeRunSync() },
+          { metrics.recordTotalTime(methodInfo, status, elapsed.toLong, classifier) },
           Some(status)
         )
     }
