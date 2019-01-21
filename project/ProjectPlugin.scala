@@ -32,8 +32,9 @@ object ProjectPlugin extends AutoPlugin {
       val frees: String              = "0.8.2"
       val fs2: String                = "1.0.2"
       val fs2Grpc: String            = "0.4.0-M3"
-      val jodaTime: String           = "2.10.1"
       val grpc: String               = "1.18.0"
+      val jodaTime: String           = "2.10.1"
+      val kindProjector: String      = "0.9.9"
       val log4s: String              = "1.6.1"
       val logback: String            = "1.2.3"
       val monix: String              = "3.0.0-RC2"
@@ -302,6 +303,7 @@ object ProjectPlugin extends AutoPlugin {
       Tut / scalacOptions -= "-Ywarn-unused-import",
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
+      addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
       addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
       libraryDependencies ++= Seq(
         %%("scalatest") % "test",
