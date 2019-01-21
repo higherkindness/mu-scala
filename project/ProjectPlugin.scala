@@ -8,6 +8,7 @@ import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
 import sbtorgpolicies.model._
 import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
+import sbtorgpolicies.runnable.syntax._
 import sbtrelease.ReleasePlugin.autoImport._
 import scoverage.ScoverageKeys._
 
@@ -351,7 +352,11 @@ object ProjectPlugin extends AutoPlugin {
         ),
         ScalafmtFileType,
         TravisFileType(crossScalaVersions.value, orgScriptCICommandKey, orgAfterCISuccessCommandKey)
-      )
+      ),
+      orgAfterCISuccessTaskListSetting := List(
+        orgPublishReleaseTask.asRunnableItem(allModules = true, aggregated = false, crossScalaVersions = true),
+        orgUpdateDocFiles.asRunnableItem
+      ) ++ guard(!version.value.endsWith("-SNAPSHOT"))(defaultPublishMicrosite)
     )
   // format: ON
 }
