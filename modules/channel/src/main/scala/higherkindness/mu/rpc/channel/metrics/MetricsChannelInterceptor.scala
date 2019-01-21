@@ -85,7 +85,7 @@ class MetricsChannelCallListener[F[_], Res](
   override def onHeaders(headers: Metadata): Unit =
     E.toIO {
       for {
-        now <- C.monotonic(MILLISECONDS)
+        now <- C.monotonic(NANOSECONDS)
         _   <- metricsOps.recordHeadersTime(methodInfo, now - startTime, classifier)
         onH <- E.delay(delegate.onHeaders(headers))
       } yield onH
@@ -100,7 +100,7 @@ class MetricsChannelCallListener[F[_], Res](
   override def onClose(status: Status, metadata: Metadata): Unit =
     E.toIO {
       for {
-        now <- C.monotonic(MILLISECONDS)
+        now <- C.monotonic(NANOSECONDS)
         _   <- metricsOps.recordTotalTime(methodInfo, status, now - startTime, classifier)
         _   <- metricsOps.decreaseActiveCalls(methodInfo, classifier)
         onC <- E.delay(delegate.onClose(status, metadata))
@@ -114,6 +114,6 @@ object MetricsChannelCallListener {
       methodInfo: GrpcMethodInfo,
       metricsOps: MetricsOps[F],
       classifier: Option[String])(implicit C: Clock[F]): F[MetricsChannelCallListener[F, Res]] =
-    C.monotonic(MILLISECONDS)
+    C.monotonic(NANOSECONDS)
       .map(new MetricsChannelCallListener[F, Res](delegate, methodInfo, metricsOps, _, classifier))
 }
