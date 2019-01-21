@@ -8,6 +8,7 @@ import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
 import sbtorgpolicies.model._
 import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
+import sbtorgpolicies.runnable.syntax._
 import sbtrelease.ReleasePlugin.autoImport._
 import scoverage.ScoverageKeys._
 
@@ -31,8 +32,9 @@ object ProjectPlugin extends AutoPlugin {
       val frees: String              = "0.8.2"
       val fs2: String                = "1.0.2"
       val fs2Grpc: String            = "0.4.0-M3"
-      val jodaTime: String           = "2.10.1"
       val grpc: String               = "1.18.0"
+      val jodaTime: String           = "2.10.1"
+      val kindProjector: String      = "0.9.9"
       val log4s: String              = "1.6.1"
       val logback: String            = "1.2.3"
       val monix: String              = "3.0.0-RC2"
@@ -302,6 +304,9 @@ object ProjectPlugin extends AutoPlugin {
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
       addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
+      addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
+      // This is needed to prevent the eviction regarding the version of kind-projector injected by org-policies:
+      libraryDependencies ~= (_.filterNot(m => m.name == "kind-projector" && m.revision == "0.9.7")),
       libraryDependencies ++= Seq(
         %%("scalatest") % "test",
         %("slf4j-nop")  % Test
@@ -351,7 +356,11 @@ object ProjectPlugin extends AutoPlugin {
         ),
         ScalafmtFileType,
         TravisFileType(crossScalaVersions.value, orgScriptCICommandKey, orgAfterCISuccessCommandKey)
-      )
+      ),
+      orgAfterCISuccessTaskListSetting := List(
+        orgPublishReleaseTask.asRunnableItem(allModules = true, aggregated = false, crossScalaVersions = true),
+        orgUpdateDocFiles.asRunnableItem
+      ) ++ guard(!version.value.endsWith("-SNAPSHOT"))(defaultPublishMicrosite)
     )
   // format: ON
 }
