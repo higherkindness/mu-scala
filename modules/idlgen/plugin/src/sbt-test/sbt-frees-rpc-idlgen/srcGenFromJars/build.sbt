@@ -16,7 +16,7 @@ lazy val domain = project
     srcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
     sourceGenerators in Compile += (Compile / srcGen).taskValue,
     libraryDependencies ++= Seq(
-      "io.higherkindness"    %% "mu-rpc-client-core" % sys.props("version"),
+      "io.higherkindness"    %% "mu-rpc-channel" % sys.props("version"),
       "com.chuusai" %% "shapeless" % "2.3.2"
     )
   ))
