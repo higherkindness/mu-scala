@@ -28,7 +28,7 @@ case class MetricsOpsRegister(
     recordMessageSentReg: Ref[IO, List[(GrpcMethodInfo, Option[String])]],
     recordMessageReceivedReg: Ref[IO, List[(GrpcMethodInfo, Option[String])]],
     recordHeadersTimeReg: Ref[IO, List[(GrpcMethodInfo, Long, Option[String])]],
-    recordTotalTimeReg: Ref[IO, List[(GrpcMethodInfo, Status, Long, Option[String])]],
+    recordTotalTimeReg: Ref[IO, List[(GrpcMethodInfo, Status, Long, Option[String])]]
 ) extends MetricsOps[IO] {
 
   def increaseActiveCalls(methodInfo: GrpcMethodInfo, classifier: Option[String]): IO[Unit] =

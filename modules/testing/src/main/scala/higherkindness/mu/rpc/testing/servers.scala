@@ -53,13 +53,18 @@ object servers {
   def withServerChannelList[F[_]: Sync](
       services: F[List[ServerServiceDefinition]],
       clientInterceptor: Option[ClientInterceptor] = None): Resource[F, ServerChannel] =
-    Resource.liftF(services).flatMap(list => ServerChannel(list, clientInterceptor))
+    Resource.liftF(services).flatMap(ServerChannel.fromList(_, clientInterceptor))
 
   final case class ServerChannel(server: Server, channel: ManagedChannel)
 
   object ServerChannel {
 
     def apply[F[_]: Sync](
+        serverServiceDefinition: ServerServiceDefinition,
+        clientInterceptor: Option[ClientInterceptor] = None): Resource[F, ServerChannel] =
+      ServerChannel.fromList[F](List(serverServiceDefinition), clientInterceptor)
+
+    def fromList[F[_]: Sync](
         serverServiceDefinitions: List[ServerServiceDefinition],
         clientInterceptor: Option[ClientInterceptor] = None): Resource[F, ServerChannel] = {
       val serviceRegistry =
