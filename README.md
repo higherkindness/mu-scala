@@ -1,7 +1,7 @@
 
 [comment]: # (Start Badges)
 
-[![Build Status](https://travis-ci.org/higherkindness/mu.svg?branch=master)](https://travis-ci.org/higherkindness/mu) [![codecov.io](http://codecov.io/gh/higherkindness/mu/branch/master/graph/badge.svg)](http://codecov.io/gh/higherkindness/mu) [![Maven Central](https://img.shields.io/badge/maven%20central-0.16.0-green.svg)](https://oss.sonatype.org/#nexus-search;gav~io.higherkindness~mu*) [![Latest version](https://img.shields.io/badge/mu-0.16.0-green.svg)](https://index.scala-lang.org/higherkindness/mu) [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/higherkindness/mu/master/LICENSE) [![Join the chat at https://gitter.im/47deg/mu](https://badges.gitter.im/47deg/mu.svg)](https://gitter.im/47deg/mu?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![GitHub Issues](https://img.shields.io/github/issues/higherkindness/mu.svg)](https://github.com/higherkindness/mu/issues)
+[![Build Status](https://travis-ci.org/higherkindness/mu.svg?branch=master)](https://travis-ci.org/higherkindness/mu) [![codecov.io](http://codecov.io/gh/higherkindness/mu/branch/master/graph/badge.svg)](http://codecov.io/gh/higherkindness/mu) [![Maven Central](https://img.shields.io/badge/maven%20central-0.17.0-green.svg)](https://oss.sonatype.org/#nexus-search;gav~io.higherkindness~mu*) [![Latest version](https://img.shields.io/badge/mu-0.17.0-green.svg)](https://index.scala-lang.org/higherkindness/mu) [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/higherkindness/mu/master/LICENSE) [![Join the chat at https://gitter.im/47deg/mu](https://badges.gitter.im/47deg/mu.svg)](https://gitter.im/47deg/mu?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![GitHub Issues](https://img.shields.io/github/issues/higherkindness/mu.svg)](https://github.com/higherkindness/mu/issues)
 
 [comment]: # (End Badges)
 
@@ -56,32 +56,32 @@ You can install any of these dependencies in your build as follows:
 
 ```scala
 // required for the RPC Server:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-server"            % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-server"            % "0.17.0"
 
 // required for a protocol definition:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-channel"       % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-channel"       % "0.17.0"
 
 // required for the use of the derived RPC Client/s, using either Netty or OkHttp as transport layer:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-netty"      % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-netty"      % "0.17.0"
 // or:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-okhttp"     % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-okhttp"     % "0.17.0"
 
 // optional - for both server and channel configuration.
-libraryDependencies += "io.higherkindness" %% "mu-config"                % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-config"                % "0.17.0"
 
 // optional - for both server and channel metrics reporting, using Prometheus.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus-server" % "0.16.0"
-libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus-client" % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus-server" % "0.17.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus-client" % "0.17.0"
 
 // optional - for both server and channel metrics reporting, using Dropwizard.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-dropwizard-server" % "0.16.0"
-libraryDependencies += "io.higherkindness" %% "mu-rpc-dropwizard-client" % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-dropwizard-server" % "0.17.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-dropwizard-client" % "0.17.0"
 
 // optional - for the communication between server and channel by using SSL/TLS.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-netty-ssl" % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-netty-ssl" % "0.17.0"
 
 // optional - for using the jodatime marshallers.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-marshallers-jodatime" % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-marshallers-jodatime" % "0.17.0"
 ```
 
 [comment]: # (End Replace)
@@ -105,6 +105,6 @@ See the [examples](/modules/examples) module.
 
 mu is designed and developed by 47 Degrees
 
-Copyright (C) 2017-2018 47 Degrees. <http://47deg.com>
+Copyright (C) 2017-2019 47 Degrees. <http://47deg.com>
 
 [comment]: # (End Copyright)

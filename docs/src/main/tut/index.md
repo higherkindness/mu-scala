@@ -71,37 +71,37 @@ You can install any of these dependencies in your build as follows:
 
 ```scala
 // required for the RPC server:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-server"            % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-server"            % "0.17.0"
 
 // required for a protocol definition:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-client-core"       % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-client-core"       % "0.17.0"
 
 // required for a protocol definition with streaming operations:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-client-monix"      % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-client-monix"      % "0.17.0"
 // or:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-client-fs2"        % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-client-fs2"        % "0.17.0"
 
 // required for the use of the derived RPC client/s, using either Netty or OkHttp as transport layer:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-client-netty"      % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-client-netty"      % "0.17.0"
 // or:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-client-okhttp"     % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-client-okhttp"     % "0.17.0"
 
 // optional - for both server and client configuration.
-libraryDependencies += "io.higherkindness" %% "mu-config"                % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-config"                % "0.17.0"
 
 // optional - for both server and client metrics reporting, using Prometheus.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus-server" % "0.16.0"
-libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus-client" % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus-server" % "0.17.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus-client" % "0.17.0"
 
 // optional - for both server and client metrics reporting, using Dropwizard.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-dropwizard-server" % "0.16.0"
-libraryDependencies += "io.higherkindness" %% "mu-rpc-dropwizard-client" % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-dropwizard-server" % "0.17.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-dropwizard-client" % "0.17.0"
 
 // optional - for the communication between server and client by using SSL/TLS.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-netty-ssl" % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-netty-ssl" % "0.17.0"
 
 // optional - for using the jodatime marshallers.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-marshallers-jodatime" % "0.16.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-marshallers-jodatime" % "0.17.0"
 ```
 
 [comment]: # (End Replace)

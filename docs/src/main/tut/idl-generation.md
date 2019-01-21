@@ -17,7 +17,7 @@ Add the following line to _project/plugins.sbt_:
 [comment]: # (Start Replace)
 
 ```scala
-addSbtPlugin("io.higherkindness" % "sbt-mu-idlgen" % "0.16.0")
+addSbtPlugin("io.higherkindness" % "sbt-mu-idlgen" % "0.17.0")
 ```
 
 [comment]: # (End Replace)
