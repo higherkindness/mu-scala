@@ -54,7 +54,7 @@ lazy val testing = project
 lazy val channel = project
   .in(file("modules/channel"))
   .dependsOn(common % "compile->compile;test->test")
-  .dependsOn(`internal-core`)
+  .dependsOn(`internal-core` % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-channel")
   .settings(clientCoreSettings)

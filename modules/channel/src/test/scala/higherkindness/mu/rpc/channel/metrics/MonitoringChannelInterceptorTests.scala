@@ -17,16 +17,16 @@
 package higherkindness.mu.rpc
 package channel.metrics
 
-import cats.effect.concurrent.Ref
 import cats.effect.{IO, Resource}
 import cats.syntax.apply._
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
-import higherkindness.mu.rpc.internal.metrics.MetricsOps
+import higherkindness.mu.rpc.internal.metrics.{MetricsOps, MetricsOpsRegister}
 import higherkindness.mu.rpc.protocol._
 import higherkindness.mu.rpc.testing.servers._
 import io.grpc.MethodDescriptor.MethodType
 import io.grpc.Status
+import org.scalatest.Assertion
 
 class MonitoringChannelInterceptorTests extends RpcBaseTestSuite {
 
@@ -36,41 +36,75 @@ class MonitoringChannelInterceptorTests extends RpcBaseTestSuite {
 
   "MonitoringChannelInterceptor" should {
 
-    "work for unary RPC metrics" in {
-
-      def makeCalls(metricsOps: MetricsOps[IO]): IO[Response] =
-        withServerChannel[IO](
-          service = ProtoRPCService.bindService[IO],
-          clientInterceptor = Some(MetricsChannelInterceptor(metricsOps, myClassifier)))
-          .flatMap(createClient)
-          .use(_.unary(Request()))
-
-      val (incArgs, sentArgs, recArgs, headersArgs, totalArgs, decArgs) = (for {
+    "generate the right metrics with proto" in {
+      (for {
         metricsOps <- MetricsOpsRegister.build
-        _          <- makeCalls(metricsOps)
-        arg1       <- metricsOps.getIncreaseActiveCallsList
-        arg2       <- metricsOps.getRecordMessageSentList
-        arg3       <- metricsOps.getRecordMessageReceivedList
-        arg4       <- metricsOps.getRecordHeadersTimeList
-        arg5       <- metricsOps.getRecordTotalTimeList
-        arg6       <- metricsOps.getDecreaseActiveCallsList
-      } yield (arg1, arg2, arg3, arg4, arg5, arg6)).unsafeRunSync()
+        _          <- makeProtoCalls(metricsOps)(_.serviceOp1(Request()))(protoRPCServiceImpl)
+        assertion  <- checkCalls(metricsOps, List(serviceOp1Info))
+      } yield assertion).unsafeRunSync()
+    }
 
-      incArgs shouldBe List((grpcMethodInfo, myClassifier))
-      sentArgs shouldBe List((grpcMethodInfo, myClassifier))
-      recArgs shouldBe List((grpcMethodInfo, myClassifier))
-      decArgs shouldBe List((grpcMethodInfo, myClassifier))
-      headersArgs.map(_._1) shouldBe List(grpcMethodInfo)
-      headersArgs.map(_._2).forall(_ > 0) shouldBe true
-      headersArgs.map(_._3) shouldBe List(myClassifier)
-      totalArgs.map(_._1) shouldBe List(grpcMethodInfo)
-      totalArgs.map(_._2) shouldBe List(Status.OK)
-      totalArgs.map(_._3).forall(_ > 0) shouldBe true
-      totalArgs.map(_._4) shouldBe List(myClassifier)
+    "generate the right metrics when calling multiple methods with proto" in {
+      (for {
+        metricsOps <- MetricsOpsRegister.build
+        _ <- makeProtoCalls(metricsOps) { client =>
+          client.serviceOp1(Request()) *> client.serviceOp2(Request())
+        }(protoRPCServiceImpl)
+        assertion <- checkCalls(metricsOps, List(serviceOp1Info, serviceOp2Info))
+      } yield assertion).unsafeRunSync()
+    }
+
+    "generate the right metrics with proto when the server returns an error" in {
+      (for {
+        metricsOps <- MetricsOpsRegister.build
+        _          <- makeProtoCalls(metricsOps)(_.serviceOp1(Request()))(protoRPCServiceErrorImpl)
+        assertion  <- checkCalls(metricsOps, List(serviceOp1Info), serverError = true)
+      } yield assertion).unsafeRunSync()
     }
 
   }
 
+  private[this] def makeProtoCalls[A](metricsOps: MetricsOps[IO])(f: ProtoRPCService[IO] => IO[A])(
+      implicit H: ProtoRPCService[IO]): IO[Either[Throwable, A]] =
+    withServerChannel[IO](
+      service = ProtoRPCService.bindService[IO],
+      clientInterceptor = Some(MetricsChannelInterceptor(metricsOps, myClassifier)))
+      .flatMap(createClient)
+      .use(f(_).attempt)
+
+  private[this] def checkCalls(
+      metricsOps: MetricsOpsRegister,
+      methodCalls: List[GrpcMethodInfo],
+      serverError: Boolean = false): IO[Assertion] = {
+    for {
+      incArgs     <- metricsOps.increaseActiveCallsReg.get
+      sentArgs    <- metricsOps.recordMessageSentReg.get
+      recArgs     <- metricsOps.recordMessageReceivedReg.get
+      headersArgs <- metricsOps.recordHeadersTimeReg.get
+      totalArgs   <- metricsOps.recordTotalTimeReg.get
+      decArgs     <- metricsOps.decreaseActiveCallsReg.get
+    } yield {
+
+      val argList: List[(GrpcMethodInfo, Option[String])] = methodCalls.map((_, myClassifier))
+
+      incArgs should contain theSameElementsAs argList
+      sentArgs should contain theSameElementsAs argList
+      if (!serverError) recArgs should contain theSameElementsAs argList
+      decArgs should contain theSameElementsAs argList
+      if (!serverError) {
+        headersArgs.map(_._1) should contain theSameElementsAs methodCalls
+        headersArgs.map(_._2 > 0) shouldBe List.fill(methodCalls.size)(true)
+        headersArgs.map(_._3) should contain theSameElementsAs argList.map(_._2)
+      }
+      totalArgs.map(_._1) should contain theSameElementsAs methodCalls
+      if (serverError)
+        totalArgs.map(_._2.getCode) shouldBe List.fill(methodCalls.size)(Status.INTERNAL.getCode)
+      else
+        totalArgs.map(_._2) shouldBe List.fill(methodCalls.size)(Status.OK)
+      totalArgs.map(_._3 > 0) shouldBe List.fill(methodCalls.size)(true)
+      totalArgs.map(_._4) should contain theSameElementsAs argList.map(_._2)
+    }
+  }
 }
 
 object services {
@@ -84,68 +118,27 @@ object services {
   final case class Request()
   final case class Response()
 
+  val error: Throwable = new RuntimeException("BOOM!")
+
   @service(Protobuf) trait ProtoRPCService[F[_]] {
-    def unary(r: Request): F[Response]
+    def serviceOp1(r: Request): F[Response]
+    def serviceOp2(r: Request): F[Response]
   }
 
-  val grpcMethodInfo: GrpcMethodInfo =
-    GrpcMethodInfo("ProtoRPCService", "ProtoRPCService/unary", "unary", MethodType.UNARY)
+  val serviceOp1Info: GrpcMethodInfo =
+    GrpcMethodInfo("ProtoRPCService", "ProtoRPCService/serviceOp1", "serviceOp1", MethodType.UNARY)
 
-  implicit val protoRPCServiceImpl: ProtoRPCService[IO] = new ProtoRPCService[IO] {
-    override def unary(r: Request): IO[Response] = IO(Response())
+  val serviceOp2Info: GrpcMethodInfo =
+    GrpcMethodInfo("ProtoRPCService", "ProtoRPCService/serviceOp2", "serviceOp2", MethodType.UNARY)
+
+  val protoRPCServiceImpl: ProtoRPCService[IO] = new ProtoRPCService[IO] {
+    def serviceOp1(r: Request): IO[Response] = IO(Response())
+    def serviceOp2(r: Request): IO[Response] = IO(Response())
   }
 
-  type Params1 = List[(GrpcMethodInfo, Option[String])]
-  type Params2 = List[(GrpcMethodInfo, Long, Option[String])]
-  type Params3 = List[(GrpcMethodInfo, Status, Long, Option[String])]
-
-  case class MetricsOpsRegister(
-      paramsRef1: Ref[IO, Params1],
-      paramsRef2: Ref[IO, Params1],
-      paramsRef3: Ref[IO, Params1],
-      paramsRef4: Ref[IO, Params1],
-      paramsRef5: Ref[IO, Params2],
-      paramsRef6: Ref[IO, Params3],
-  ) extends MetricsOps[IO] {
-
-    def increaseActiveCalls(methodInfo: GrpcMethodInfo, classifier: Option[String]): IO[Unit] =
-      paramsRef1.update(_ :+ ((methodInfo, classifier)))
-    def decreaseActiveCalls(methodInfo: GrpcMethodInfo, classifier: Option[String]): IO[Unit] =
-      paramsRef2.update(_ :+ ((methodInfo, classifier)))
-    def recordMessageSent(methodInfo: GrpcMethodInfo, classifier: Option[String]): IO[Unit] =
-      paramsRef3.update(_ :+ ((methodInfo, classifier)))
-    def recordMessageReceived(methodInfo: GrpcMethodInfo, classifier: Option[String]): IO[Unit] =
-      paramsRef4.update(_ :+ ((methodInfo, classifier)))
-    def recordHeadersTime(
-        methodInfo: GrpcMethodInfo,
-        elapsed: Long,
-        classifier: Option[String]): IO[Unit] =
-      paramsRef5.update(_ :+ ((methodInfo, elapsed, classifier)))
-    def recordTotalTime(
-        methodInfo: GrpcMethodInfo,
-        status: Status,
-        elapsed: Long,
-        classifier: Option[String]): IO[Unit] =
-      paramsRef6.update(_ :+ ((methodInfo, status, elapsed, classifier)))
-
-    def getIncreaseActiveCallsList: IO[Params1]   = paramsRef1.get
-    def getDecreaseActiveCallsList: IO[Params1]   = paramsRef2.get
-    def getRecordMessageSentList: IO[Params1]     = paramsRef3.get
-    def getRecordMessageReceivedList: IO[Params1] = paramsRef4.get
-    def getRecordHeadersTimeList: IO[Params2]     = paramsRef5.get
-    def getRecordTotalTimeList: IO[Params3]       = paramsRef6.get
-
-  }
-
-  object MetricsOpsRegister {
-    def build: IO[MetricsOpsRegister] =
-      (
-        Ref.of[IO, Params1](Nil),
-        Ref.of[IO, Params1](Nil),
-        Ref.of[IO, Params1](Nil),
-        Ref.of[IO, Params1](Nil),
-        Ref.of[IO, Params2](Nil),
-        Ref.of[IO, Params3](Nil)).mapN(MetricsOpsRegister.apply)
+  val protoRPCServiceErrorImpl: ProtoRPCService[IO] = new ProtoRPCService[IO] {
+    def serviceOp1(r: Request): IO[Response] = IO.raiseError(error)
+    def serviceOp2(r: Request): IO[Response] = IO.raiseError(error)
   }
 
   def createClient(sc: ServerChannel): Resource[IO, ProtoRPCService[IO]] =
