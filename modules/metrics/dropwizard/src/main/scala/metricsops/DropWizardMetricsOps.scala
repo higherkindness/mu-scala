@@ -14,6 +14,32 @@
  * limitations under the License.
  */
 
+/*
+ * [[MetricsOps]] algebra able to record Dropwizard metrics.
+ *
+ * The list of registered metrics contains:
+ *
+ * {prefix}.{classifier}.{serviceName}.{methodName}.{methodType}.active-calls - Counter
+ * {prefix}.{classifier}.{serviceName}.{methodName}.{methodType}.messages-sent - Counter
+ * {prefix}.{classifier}.{serviceName}.{methodName}.{methodType}.messages-received - Counter
+ * {prefix}.{classifier}.{serviceName}.{methodName}.{methodType}.headers-time - Timer
+ * {prefix}.{classifier}.{serviceName}.{methodName}.{methodType}.total-time.{status} - Timer
+ *
+ * {methodType} can be one of the following: "unary", "client-streaming", "server-streaming", "bidi-streaming", "unknown"
+ * {status} can be one of the following:
+ *    - "ok"
+ *    - "cancelled"
+ *    - "deadline-exceeded"
+ *    - "internal"
+ *    - "resource-exhausted"
+ *    - "unauthenticated"
+ *    - "unavailable"
+ *    - "unimplemented"
+ *    - "unknown"
+ *    - "unreachable-error"
+ *
+ */
+
 package metricsops
 
 import java.util.concurrent.TimeUnit
@@ -22,10 +48,15 @@ import cats.effect.Sync
 import com.codahale.metrics.MetricRegistry
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
 import higherkindness.mu.rpc.internal.metrics.MetricsOps
+import higherkindness.mu.rpc.internal.metrics.MetricsOps._
 import io.grpc.MethodDescriptor.MethodType._
 import io.grpc.Status
 
 object DropWizardMetricsOps {
+
+  sealed trait GaugeType
+  case object Timer   extends GaugeType
+  case object Counter extends GaugeType
 
   def apply[F[_]](registry: MetricRegistry, prefix: String = "higherkinderness.mu")(
       implicit F: Sync[F]) = new MetricsOps[F] {
@@ -33,25 +64,31 @@ object DropWizardMetricsOps {
     override def increaseActiveCalls(
         methodInfo: GrpcMethodInfo,
         classifier: Option[String]): F[Unit] = F.delay {
-      registry.counter(eventDescription(prefix, classifier, methodInfo, "active-calls")).inc()
+      registry.counter(s"${prefixDefinition(prefix, classifier)}.active.calls").inc()
     }
 
     override def decreaseActiveCalls(
         methodInfo: GrpcMethodInfo,
         classifier: Option[String]): F[Unit] = F.delay {
-      registry.counter(eventDescription(prefix, classifier, methodInfo, "active-calls")).dec()
+      registry.counter(s"${prefixDefinition(prefix, classifier)}.active.calls").dec()
     }
 
     override def recordMessageSent(
         methodInfo: GrpcMethodInfo,
         classifier: Option[String]): F[Unit] = F.delay {
-      registry.counter(eventDescription(prefix, classifier, methodInfo, "message-sent")).inc()
+      registry
+        .counter(
+          s"${prefixDefinition(prefix, classifier)}.${methodInfo.serviceName}.${methodInfo.methodName}.messages-sent")
+        .inc()
     }
 
     override def recordMessageReceived(
         methodInfo: GrpcMethodInfo,
         classifier: Option[String]): F[Unit] = F.delay {
-      registry.counter(eventDescription(prefix, classifier, methodInfo, "message-received")).inc()
+      registry
+        .counter(
+          s"${prefixDefinition(prefix, classifier)}.${methodInfo.serviceName}.${methodInfo.methodName}.messages-received")
+        .inc()
     }
 
     override def recordHeadersTime(
@@ -59,7 +96,7 @@ object DropWizardMetricsOps {
         elapsed: Long,
         classifier: Option[String]): F[Unit] = F.delay {
       registry
-        .timer(eventDescription(prefix, classifier, methodInfo, "headers-time"))
+        .timer(s"${prefixDefinition(prefix, classifier)}.calls.header")
         .update(elapsed, TimeUnit.NANOSECONDS)
     }
 
@@ -69,54 +106,47 @@ object DropWizardMetricsOps {
         elapsed: Long,
         classifier: Option[String]): F[Unit] = F.delay {
       registry
-        .timer(eventDescription(prefix, classifier, methodInfo, "total-time", Some(status)))
+        .timer(s"${prefixDefinition(prefix, classifier)}.calls.total")
+        .update(elapsed, TimeUnit.NANOSECONDS)
+
+      registry
+        .timer(
+          s"${prefixDefinition(prefix, classifier)}.${methodTypeDescription(methodInfo)}.calls")
+        .update(elapsed, TimeUnit.NANOSECONDS)
+
+      registry
+        .timer(
+          s"${prefixDefinition(prefix, classifier)}.${statusDescription(grpcStatusFromRawStatus(status))}.calls")
         .update(elapsed, TimeUnit.NANOSECONDS)
     }
 
   }
 
-  def eventDescription(
-      prefix: String,
-      classifier: Option[String],
-      methodInfo: GrpcMethodInfo,
-      eventName: String,
-      status: Option[Status] = None) =
+  private def prefixDefinition(prefix: String, classifier: Option[String]) =
     classifier
       .map(c => s"$prefix.$c")
-      .getOrElse(s"$prefix.default") + "." + methodInfoDescription(methodInfo) + s".$eventName" + status
-      .map(s => s".${statusDescription(s)}")
-      .getOrElse("")
+      .getOrElse(s"$prefix.default")
 
-  private def methodInfoDescription(methodInfo: GrpcMethodInfo): String =
+  def methodTypeDescription(methodInfo: GrpcMethodInfo): String =
     methodInfo.`type` match {
-      case UNARY => s"${methodInfo.serviceName}.${methodInfo.methodName}.unary"
-      case CLIENT_STREAMING =>
-        s"${methodInfo.serviceName}.${methodInfo.methodName}.client-streaming"
-      case SERVER_STREAMING =>
-        s"${methodInfo.serviceName}.${methodInfo.methodName}.server-streaming"
-      case BIDI_STREAMING => s"${methodInfo.serviceName}.${methodInfo.methodName}.bidi-streaming"
-      case UNKNOWN        => s"${methodInfo.serviceName}.${methodInfo.methodName}.unknown"
+      case UNARY            => "unary"
+      case CLIENT_STREAMING => "client-streaming"
+      case SERVER_STREAMING => "server-streaming"
+      case BIDI_STREAMING   => "bidi-streaming"
+      case UNKNOWN          => "unknown"
     }
 
-  private def statusDescription(status: Status): String = status match {
-    case Status.ABORTED             => "aborted"
-    case Status.ALREADY_EXISTS      => "already-exists"
-    case Status.CANCELLED           => "cancelled"
-    case Status.DATA_LOSS           => "data-loss"
-    case Status.DEADLINE_EXCEEDED   => "deadline-exceeded"
-    case Status.FAILED_PRECONDITION => "failed-precondition"
-    case Status.INTERNAL            => "internal"
-    case Status.INVALID_ARGUMENT    => "invalid-argument"
-    case Status.NOT_FOUND           => "not-found"
-    case Status.OK                  => "ok"
-    case Status.OUT_OF_RANGE        => "out-of-range"
-    case Status.PERMISSION_DENIED   => "permission-denied"
-    case Status.RESOURCE_EXHAUSTED  => "resource-exhausted"
-    case Status.UNAUTHENTICATED     => "unauthenticated"
-    case Status.UNAVAILABLE         => "unavailable"
-    case Status.UNIMPLEMENTED       => "unimplemented"
-    case Status.UNKNOWN             => "unknown"
-    case _                          => "unknown"
+  def statusDescription(status: GrpcStatus): String = status match {
+    case OK                => "ok"
+    case Cancelled         => "cancelled"
+    case DeadlineExceeded  => "deadline-exceeded"
+    case Internal          => "internal"
+    case ResourceExhausted => "resource-exhausted"
+    case Unauthenticated   => "unauthenticated"
+    case Unavailable       => "unavailable"
+    case Unimplemented     => "unimplemented"
+    case Unknown           => "unknown"
+    case _                 => "unreachable-error"
   }
 
 }
