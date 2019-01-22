@@ -4,7 +4,7 @@
 
 <h2 id="server">Server</h2>
 
-<p>Predictably, generating the server code is just implementing a service <a href="http://frees.io/docs/core/handlers/">Handler</a>.</p>
+<p>Predictably, generating the server code is just creating an implementation for your service algebra.</p>
 
 <p>First, here’s our <code class="highlighter-rouge">Greeter</code> RPC protocol definition:</p>
 
@@ -128,11 +128,13 @@
   <span class="k">import</span> <span class="nn">gserver.implicits._</span>
 
   <span class="k">def</span> <span class="n">main</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="o">{</span>
-    <span class="k">val</span> <span class="n">grpcConfigs</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">GrpcConfig</span><span class="o">]</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span>
-      <span class="nc">AddService</span><span class="o">(</span><span class="nc">Greeter</span><span class="o">.</span><span class="n">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">])</span>
-    <span class="o">)</span>
 
-    <span class="k">val</span> <span class="n">runServer</span> <span class="k">=</span> <span class="nc">GrpcServer</span><span class="o">.</span><span class="n">default</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="mi">8080</span><span class="o">,</span> <span class="n">grpcConfigs</span><span class="o">).</span><span class="n">flatMap</span><span class="o">(</span><span class="nc">GrpcServer</span><span class="o">.</span><span class="n">server</span><span class="o">[</span><span class="kt">IO</span><span class="o">])</span>
+    <span class="k">val</span> <span class="n">runServer</span> <span class="k">=</span> <span class="k">for</span> <span class="o">{</span>
+      <span class="n">grpcConfig</span> <span class="k">&lt;-</span> <span class="nc">Greeter</span><span class="o">.</span><span class="n">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
+      <span class="n">server</span>     <span class="k">&lt;-</span> <span class="nc">GrpcServer</span><span class="o">.</span><span class="n">default</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="mi">8080</span><span class="o">,</span> <span class="nc">List</span><span class="o">(</span><span class="nc">AddService</span><span class="o">(</span><span class="n">grpcConfig</span><span class="o">)))</span>
+      <span class="n">runServer</span>  <span class="k">&lt;-</span> <span class="nc">GrpcServer</span><span class="o">.</span><span class="n">server</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="n">server</span><span class="o">)</span>
+    <span class="o">}</span> <span class="k">yield</span> <span class="n">runServer</span>
+
     <span class="n">runServer</span><span class="o">.</span><span class="n">unsafeRunSync</span><span class="o">()</span>
   <span class="o">}</span>
 
@@ -149,6 +151,7 @@
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.Resource</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.testing.servers.withServerChannel</span>
+<span class="k">import</span> <span class="nn">io.grpc.</span><span class="o">{</span><span class="nc">ManagedChannel</span><span class="o">,</span> <span class="nc">ServerServiceDefinition</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">org.scalatest.prop.Checkers</span>
 <span class="k">import</span> <span class="nn">org.scalatest._</span>
 <span class="k">import</span> <span class="nn">org.scalacheck.Gen</span>
@@ -158,20 +161,26 @@
 <span class="k">class</span> <span class="nc">ServiceSpec</span> <span class="k">extends</span> <span class="nc">FunSuite</span> <span class="k">with</span> <span class="nc">Matchers</span> <span class="k">with</span> <span class="nc">Checkers</span> <span class="k">with</span> <span class="nc">OneInstancePerTest</span> <span class="o">{</span>
 
   <span class="k">import</span> <span class="nn">gserver.implicits._</span>
-
-  <span class="k">def</span> <span class="n">withClient</span><span class="o">[</span><span class="kt">Client</span>, <span class="kt">A</span><span class="o">](</span><span class="n">resource</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">Client</span><span class="o">])(</span><span class="n">f</span><span class="k">:</span> <span class="kt">Client</span> <span class="o">=&gt;</span> <span class="n">A</span><span class="o">)</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=</span>
-    <span class="n">resource</span><span class="o">.</span><span class="n">use</span><span class="o">(</span><span class="n">client</span> <span class="k">=&gt;</span> <span class="nc">IO</span><span class="o">(</span><span class="n">f</span><span class="o">(</span><span class="n">client</span><span class="o">))).</span><span class="n">unsafeRunSync</span><span class="o">()</span>
+    
+  <span class="k">def</span> <span class="n">withClient</span><span class="o">[</span><span class="kt">Client</span>, <span class="kt">A</span><span class="o">](</span>
+      <span class="n">serviceDef</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">ServerServiceDefinition</span><span class="o">],</span>
+      <span class="n">resourceBuilder</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">ManagedChannel</span><span class="o">]</span> <span class="k">=&gt;</span> <span class="nc">Resource</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">Client</span><span class="o">])(</span>
+      <span class="n">f</span><span class="k">:</span> <span class="kt">Client</span> <span class="o">=&gt;</span> <span class="n">A</span><span class="o">)</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=</span>
+    <span class="n">withServerChannel</span><span class="o">(</span><span class="n">serviceDef</span><span class="o">)</span>
+      <span class="o">.</span><span class="n">flatMap</span><span class="o">(</span><span class="n">sc</span> <span class="k">=&gt;</span> <span class="n">resourceBuilder</span><span class="o">(</span><span class="nc">IO</span><span class="o">(</span><span class="n">sc</span><span class="o">.</span><span class="n">channel</span><span class="o">)))</span>
+      <span class="o">.</span><span class="n">use</span><span class="o">(</span><span class="n">client</span> <span class="k">=&gt;</span> <span class="nc">IO</span><span class="o">(</span><span class="n">f</span><span class="o">(</span><span class="n">client</span><span class="o">)))</span>
+      <span class="o">.</span><span class="n">unsafeRunSync</span><span class="o">()</span>
 
   <span class="k">def</span> <span class="n">sayHelloTest</span><span class="o">(</span><span class="n">requestGen</span><span class="k">:</span> <span class="kt">Gen</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">],</span> <span class="n">expected</span><span class="k">:</span> <span class="kt">HelloResponse</span><span class="o">)</span><span class="k">:</span> <span class="kt">Assertion</span> <span class="o">=</span>
-    <span class="n">withServerChannel</span><span class="o">(</span><span class="nc">Greeter</span><span class="o">.</span><span class="n">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">])</span> <span class="o">{</span> <span class="n">sc</span> <span class="k">=&gt;</span>
-      <span class="n">withClient</span><span class="o">(</span><span class="nc">Greeter</span><span class="o">.</span><span class="n">clientFromChannel</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="nc">IO</span><span class="o">(</span><span class="n">sc</span><span class="o">.</span><span class="n">channel</span><span class="o">)))</span> <span class="o">{</span> <span class="n">client</span> <span class="k">=&gt;</span>
+    <span class="n">withClient</span><span class="o">(</span>
+      <span class="nc">Greeter</span><span class="o">.</span><span class="n">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">],</span> 
+      <span class="nc">Greeter</span><span class="o">.</span><span class="n">clientFromChannel</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="k">_</span><span class="o">))</span> <span class="o">{</span> <span class="n">client</span> <span class="k">=&gt;</span>
         <span class="n">check</span> <span class="o">{</span>
           <span class="n">forAll</span><span class="o">(</span><span class="n">requestGen</span><span class="o">)</span> <span class="o">{</span> <span class="n">request</span> <span class="k">=&gt;</span>
             <span class="n">client</span><span class="o">.</span><span class="n">sayHello</span><span class="o">(</span><span class="n">request</span><span class="o">).</span><span class="n">unsafeRunSync</span><span class="o">()</span> <span class="o">==</span> <span class="n">expected</span>
           <span class="o">}</span>
         <span class="o">}</span>
       <span class="o">}</span>
-    <span class="o">}</span>
 
   <span class="k">val</span> <span class="n">requestGen</span><span class="k">:</span> <span class="kt">Gen</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Gen</span><span class="o">.</span><span class="n">alphaStr</span> <span class="n">map</span> <span class="nc">HelloRequest</span>
 
@@ -225,7 +234,7 @@
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.config._</span>
-<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.client.config._</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.config.channel._</span>
 <span class="k">import</span> <span class="nn">service._</span>
 
 <span class="k">object</span> <span class="nc">gclient</span> <span class="o">{</span>

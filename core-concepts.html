@@ -57,9 +57,9 @@ message HelloReply {
 
 <h3 id="mu-rpc">mu-rpc</h3>
 
-<p>In the previous section, we’ve seen an overview of what <a href="https://grpc.io/">gRPC</a> offers for defining protocols and generating code (compiling protocol buffers). Now, we’ll show how <a href="https://github.com/higherkindness/mu">mu</a> offers the same thing, but in the <strong>Freestyle</strong> fashion, following FP principles.</p>
+<p>In the previous section, we’ve seen an overview of what <a href="https://grpc.io/">gRPC</a> offers for defining protocols and generating code (compiling protocol buffers). Now, we’ll show how <a href="https://github.com/higherkindness/mu">mu</a> offers the same thing, but following FP principles.</p>
 
-<p>First things first, the main difference with respect to <a href="https://grpc.io/">gRPC</a> is that <a href="https://github.com/higherkindness/mu">mu</a> doesn’t need <code class="highlighter-rouge">.proto</code> files, but can still use protobuf thanks to the <a href="https://github.com/btlines/pbdirect">PBDirect</a> library, which allows it to read and write Scala objects directly to protobuf with no <code class="highlighter-rouge">.proto</code> file definitions. In summary:</p>
+<p>First things first, the main difference with respect to <a href="https://grpc.io/">gRPC</a> is that <a href="https://github.com/higherkindness/mu">mu</a> doesn’t need <code class="highlighter-rouge">.proto</code> files, but can still use protobuf thanks to the <a href="https://github.com/47deg/pbdirect">PBDirect</a> library, which allows it to read and write Scala objects directly to protobuf with no <code class="highlighter-rouge">.proto</code> file definitions. In summary:</p>
 
 <ul>
   <li>Your protocols, both messages and services, will reside with your business-logic in your Scala files using <a href="https://github.com/scalamacros/paradise">scalamacros</a> annotations to set them up. We’ll see more details on this shortly.</li>
@@ -120,7 +120,7 @@ Before starting, this is the Scala import we need:</p>
 <span class="o">}</span>
 </code></pre></div></div>
 
-<p>Naturally, the <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> services are grouped in a <code class="highlighter-rouge">@tagless algebra</code>. Therefore, we are following one of the primary principles of Freestyle; you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.</p>
+<p>Naturally, the <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> services are grouped in a <em>Tagless Final</em> algebra. Therefore, you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.</p>
 
 <p>In the above example, we can see that <code class="highlighter-rouge">sayHello</code> returns an <code class="highlighter-rouge">F[HelloReply]</code>. However, very often the services might:</p>
 
@@ -219,7 +219,7 @@ Before starting, this is the Scala import we need:</p>
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.config._</span>
-<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.client.config._</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.config.channel._</span>
 <span class="k">import</span> <span class="nn">io.grpc.CallOptions</span>
 <span class="k">import</span> <span class="nn">service._</span>
 
@@ -281,9 +281,9 @@ Before starting, this is the Scala import we need:</p>
 
 <p><a href="https://github.com/higherkindness/mu">mu</a> allows you to use custom decoders and encoders. It creates implicit <code class="highlighter-rouge">Marshaller</code> instances for your messages using existing serializers/deserializers for the serialization type you’re using.</p>
 
-<p>If you’re using <code class="highlighter-rouge">Protobuf</code>, <a href="https://github.com/higherkindness/mu">mu</a> uses instances of <a href="https://github.com/btlines/pbdirect">PBDirect</a> for creating the <code class="highlighter-rouge">Marshaller</code> instances. For <code class="highlighter-rouge">Avro</code>, it uses instances of <a href="https://github.com/sksamuel/avro4s">Avro4s</a>.</p>
+<p>If you’re using <code class="highlighter-rouge">Protobuf</code>, <a href="https://github.com/higherkindness/mu">mu</a> uses instances of <a href="https://github.com/47deg/pbdirect">PBDirect</a> for creating the <code class="highlighter-rouge">Marshaller</code> instances. For <code class="highlighter-rouge">Avro</code>, it uses instances of <a href="https://github.com/sksamuel/avro4s">Avro4s</a>.</p>
 
-<p>Let’s see a couple of samples, one per each type of serialization. Suppose you want to serialize <code class="highlighter-rouge">java.time.LocalDate</code> as part of your messages in <code class="highlighter-rouge">String</code> format. With <code class="highlighter-rouge">Probobuf</code>, as we’ve mentioned, you need to provide the instances of <a href="https://github.com/btlines/pbdirect">PBDirect</a> for that type. Specifically, you need to provide a <code class="highlighter-rouge">PBWriter</code> and a <code class="highlighter-rouge">PBReader</code>.</p>
+<p>Let’s see a couple of samples, one per each type of serialization. Suppose you want to serialize <code class="highlighter-rouge">java.time.LocalDate</code> as part of your messages in <code class="highlighter-rouge">String</code> format. With <code class="highlighter-rouge">Probobuf</code>, as we’ve mentioned, you need to provide the instances of <a href="https://github.com/47deg/pbdirect">PBDirect</a> for that type. Specifically, you need to provide a <code class="highlighter-rouge">PBWriter</code> and a <code class="highlighter-rouge">PBReader</code>.</p>
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">object</span> <span class="nc">protocol</span> <span class="o">{</span>
 
@@ -356,7 +356,7 @@ Before starting, this is the Scala import we need:</p>
 <span class="o">}</span>
 </code></pre></div></div>
 
-<p><a href="https://github.com/higherkindness/mu">mu</a> provides serializers for <code class="highlighter-rouge">BigDecimal</code> and <code class="highlighter-rouge">BigDecimal</code> with tagged ‘precision’ and ‘scale’ (like <code class="highlighter-rouge">BigDecimal @@ (Nat._8, Nat._2)</code>). It also provides serializers for <code class="highlighter-rouge">java.time.LocalDate</code> and <code class="highlighter-rouge">java.time.LocalDateTime</code> but only for <a href="https://github.com/btlines/pbdirect">PBDirect</a> since <a href="https://github.com/sksamuel/avro4s">Avro4s</a> provides their owns.</p>
+<p><a href="https://github.com/higherkindness/mu">mu</a> provides serializers for <code class="highlighter-rouge">BigDecimal</code> and <code class="highlighter-rouge">BigDecimal</code> with tagged ‘precision’ and ‘scale’ (like <code class="highlighter-rouge">BigDecimal @@ (Nat._8, Nat._2)</code>). It also provides serializers for <code class="highlighter-rouge">java.time.LocalDate</code> and <code class="highlighter-rouge">java.time.LocalDateTime</code> but only for <a href="https://github.com/47deg/pbdirect">PBDirect</a> since <a href="https://github.com/sksamuel/avro4s">Avro4s</a> provides their owns.</p>
 
 <p>The only thing you need to do is add the following import to your service:</p>
 

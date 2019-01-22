@@ -68,15 +68,15 @@
 
   <span class="c1">// Adding to the GrpConfig list the SslContext:
 </span>
-  <span class="k">val</span> <span class="n">grpcConfigs</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">GrpcConfig</span><span class="o">]</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span>
-    <span class="nc">SetSslContext</span><span class="o">(</span><span class="n">serverSslContext</span><span class="o">),</span>
-    <span class="nc">AddService</span><span class="o">(</span><span class="nc">Greeter</span><span class="o">.</span><span class="n">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">])</span>
-  <span class="o">)</span>
+  <span class="k">val</span> <span class="n">grpcConfigs</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">GrpcConfig</span><span class="o">]]</span> <span class="k">=</span>
+     <span class="nc">Greeter</span><span class="o">.</span><span class="n">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
+       <span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="nc">AddService</span><span class="o">)</span>
+       <span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">c</span> <span class="k">=&gt;</span> <span class="nc">List</span><span class="o">(</span><span class="nc">SetSslContext</span><span class="o">(</span><span class="n">serverSslContext</span><span class="o">),</span> <span class="n">c</span><span class="o">))</span>
 
   <span class="c1">// Important. We have to create the server with Netty. OkHttp is not supported for the Ssl
 </span>  <span class="c1">// encryption in mu-rpc at this moment.
 </span>
-  <span class="k">val</span> <span class="n">server</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">GrpcServer</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">GrpcServer</span><span class="o">.</span><span class="n">netty</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="mi">8080</span><span class="o">,</span> <span class="n">grpcConfigs</span><span class="o">)</span>
+  <span class="k">val</span> <span class="n">server</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">GrpcServer</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span> <span class="n">grpcConfigs</span><span class="o">.</span><span class="n">flatMap</span><span class="o">(</span><span class="nc">GrpcServer</span><span class="o">.</span><span class="n">netty</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="mi">8080</span><span class="o">,</span> <span class="k">_</span><span class="o">))</span>
 
 <span class="o">}</span>
 
@@ -87,8 +87,8 @@
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.syntax.either._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.ChannelForAddress</span>
-<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.client.OverrideAuthority</span>
-<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.client.netty.</span><span class="o">{</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.channel.OverrideAuthority</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.channel.netty.</span><span class="o">{</span>
   <span class="nc">NettyChannelInterpreter</span><span class="o">,</span>
   <span class="nc">NettyNegotiationType</span><span class="o">,</span>
   <span class="nc">NettySslContext</span><span class="o">,</span>

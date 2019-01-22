@@ -8,7 +8,7 @@
 
 <p>Add the following line to <em>project/plugins.sbt</em>:</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">addSbtPlugin</span><span class="o">(</span><span class="s">"io.higherkindness"</span> <span class="o">%</span> <span class="s">"sbt-mu-idlgen"</span> <span class="o">%</span> <span class="s">"0.16.0"</span><span class="o">)</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">addSbtPlugin</span><span class="o">(</span><span class="s">"io.higherkindness"</span> <span class="o">%</span> <span class="s">"sbt-mu-idlgen"</span> <span class="o">%</span> <span class="s">"0.17.0"</span><span class="o">)</span>
 </code></pre></div></div>
 
 <p>Note that the plugin is only available for Scala 2.12.</p>
@@ -238,7 +238,6 @@ The plugin’s implementation basically wraps the <a href="https://github.com/ju
 <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//...
 .settings(
   Seq(
-      resolvers += Resolver.bintrayRepo("beyondthelines", "maven"),
       publishMavenStyle := true,
       idlType := "avro",
       srcGenSerializationType := "AvroWithSchema",

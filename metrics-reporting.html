@@ -25,11 +25,13 @@
   <span class="k">implicit</span> <span class="k">val</span> <span class="n">greeterServiceHandler</span><span class="k">:</span> <span class="kt">ServiceHandler</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ServiceHandler</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
 
   <span class="c1">// The Greeter service is the service defined in the Core concepts section
-</span>  <span class="k">val</span> <span class="n">grpcConfigs</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">GrpcConfig</span><span class="o">]</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span>
-    <span class="nc">AddService</span><span class="o">(</span><span class="nc">Greeter</span><span class="o">.</span><span class="n">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">].</span><span class="n">interceptWith</span><span class="o">(</span><span class="n">monitorInterceptor</span><span class="o">))</span>
-  <span class="o">)</span>
+</span>  <span class="k">val</span> <span class="n">grpcConfigs</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">GrpcConfig</span><span class="o">]]</span> <span class="k">=</span> 
+    <span class="nc">Greeter</span><span class="o">.</span><span class="n">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
+      <span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">interceptWith</span><span class="o">(</span><span class="n">monitorInterceptor</span><span class="o">))</span>
+      <span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="nc">AddService</span><span class="o">)</span>
+      <span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="nc">List</span><span class="o">(</span><span class="k">_</span><span class="o">))</span>
 
-  <span class="k">val</span> <span class="n">server</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">GrpcServer</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span> <span class="nc">GrpcServer</span><span class="o">.</span><span class="n">default</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="mi">8080</span><span class="o">,</span> <span class="n">grpcConfigs</span><span class="o">)</span>
+  <span class="k">val</span> <span class="n">server</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">GrpcServer</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span> <span class="n">grpcConfigs</span><span class="o">.</span><span class="n">flatMap</span><span class="o">(</span><span class="nc">GrpcServer</span><span class="o">.</span><span class="n">default</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="mi">8080</span><span class="o">,</span> <span class="k">_</span><span class="o">))</span>
 
 <span class="o">}</span>
 </code></pre></div></div>
@@ -41,8 +43,8 @@
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.config._</span>
-<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.client._</span>
-<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.client.config._</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.channel._</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.config.channel._</span>
 <span class="k">import</span> <span class="nn">service._</span>
 
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.prometheus.shared.Configuration</span>
