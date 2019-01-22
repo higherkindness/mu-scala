@@ -19,24 +19,32 @@
  *
  * The list of registered metrics contains:
  *
- * {prefix}.{classifier}.{serviceName}.{methodName}.{methodType}.active-calls - Counter
- * {prefix}.{classifier}.{serviceName}.{methodName}.{methodType}.messages-sent - Counter
- * {prefix}.{classifier}.{serviceName}.{methodName}.{methodType}.messages-received - Counter
- * {prefix}.{classifier}.{serviceName}.{methodName}.{methodType}.headers-time - Timer
- * {prefix}.{classifier}.{serviceName}.{methodName}.{methodType}.total-time.{status} - Timer
+ * {prefix}.{classifier}.active.calls - Counter
+ * {prefix}.{classifier}.{serviceName}.{methodName}.{methodType}.messages.sent - Counter
+ * {prefix}.{classifier}.{serviceName}.{methodName}.{methodType}.messages.received - Counter
+ * {prefix}.{classifier}.calls.header - Timer
+ * {prefix}.{classifier}.calls.total - Timer
+ * {prefix}.{classifier}.{methodType} - Timer
+ * {prefix}.{classifier}.{status} - Timer
  *
- * {methodType} can be one of the following: "unary", "client-streaming", "server-streaming", "bidi-streaming", "unknown"
+ * {methodType} can be one of the following:
+ *    - "unary-methods"
+ *    - "client-streaming-methods"
+ *    - "server-streaming-methods"
+ *    - "bidi-streaming-methods"
+ *    - "unknown-methods"
+ *
  * {status} can be one of the following:
- *    - "ok"
- *    - "cancelled"
- *    - "deadline-exceeded"
- *    - "internal"
- *    - "resource-exhausted"
- *    - "unauthenticated"
- *    - "unavailable"
- *    - "unimplemented"
- *    - "unknown"
- *    - "unreachable-error"
+ *    - "ok-statuses"
+ *    - "cancelled-statuses"
+ *    - "deadline-exceeded-statuses"
+ *    - "internal-statuses"
+ *    - "resource-exhausted-statuses"
+ *    - "unauthenticated-statuses"
+ *    - "unavailable-statuses"
+ *    - "unimplemented-statuses"
+ *    - "unknown-statuses"
+ *    - "unreachable-error-statuses"
  *
  */
 
@@ -78,7 +86,7 @@ object DropWizardMetricsOps {
         classifier: Option[String]): F[Unit] = F.delay {
       registry
         .counter(
-          s"${prefixDefinition(prefix, classifier)}.${methodInfo.serviceName}.${methodInfo.methodName}.messages-sent")
+          s"${prefixDefinition(prefix, classifier)}.${methodInfo.serviceName}.${methodInfo.methodName}.messages.sent")
         .inc()
     }
 
@@ -87,7 +95,7 @@ object DropWizardMetricsOps {
         classifier: Option[String]): F[Unit] = F.delay {
       registry
         .counter(
-          s"${prefixDefinition(prefix, classifier)}.${methodInfo.serviceName}.${methodInfo.methodName}.messages-received")
+          s"${prefixDefinition(prefix, classifier)}.${methodInfo.serviceName}.${methodInfo.methodName}.messages.received")
         .inc()
     }
 
@@ -110,13 +118,12 @@ object DropWizardMetricsOps {
         .update(elapsed, TimeUnit.NANOSECONDS)
 
       registry
-        .timer(
-          s"${prefixDefinition(prefix, classifier)}.${methodTypeDescription(methodInfo)}.calls")
+        .timer(s"${prefixDefinition(prefix, classifier)}.${methodTypeDescription(methodInfo)}")
         .update(elapsed, TimeUnit.NANOSECONDS)
 
       registry
         .timer(
-          s"${prefixDefinition(prefix, classifier)}.${statusDescription(grpcStatusFromRawStatus(status))}.calls")
+          s"${prefixDefinition(prefix, classifier)}.${statusDescription(grpcStatusFromRawStatus(status))}")
         .update(elapsed, TimeUnit.NANOSECONDS)
     }
 
@@ -129,24 +136,24 @@ object DropWizardMetricsOps {
 
   def methodTypeDescription(methodInfo: GrpcMethodInfo): String =
     methodInfo.`type` match {
-      case UNARY            => "unary"
-      case CLIENT_STREAMING => "client-streaming"
-      case SERVER_STREAMING => "server-streaming"
-      case BIDI_STREAMING   => "bidi-streaming"
-      case UNKNOWN          => "unknown"
+      case UNARY            => "unary-methods"
+      case CLIENT_STREAMING => "client-streaming-methods"
+      case SERVER_STREAMING => "server-streaming-methods"
+      case BIDI_STREAMING   => "bidi-streaming-methods"
+      case UNKNOWN          => "unknown-methods"
     }
 
   def statusDescription(status: GrpcStatus): String = status match {
-    case OK                => "ok"
-    case Cancelled         => "cancelled"
-    case DeadlineExceeded  => "deadline-exceeded"
-    case Internal          => "internal"
-    case ResourceExhausted => "resource-exhausted"
-    case Unauthenticated   => "unauthenticated"
-    case Unavailable       => "unavailable"
-    case Unimplemented     => "unimplemented"
-    case Unknown           => "unknown"
-    case _                 => "unreachable-error"
+    case OK                => "ok-statuses"
+    case Cancelled         => "cancelled-statuses"
+    case DeadlineExceeded  => "deadline-exceeded-statuses"
+    case Internal          => "internal-statuses"
+    case ResourceExhausted => "resource-exhausted-statuses"
+    case Unauthenticated   => "unauthenticated-statuses"
+    case Unavailable       => "unavailable-statuses"
+    case Unimplemented     => "unimplemented-statuses"
+    case Unknown           => "unknown-statuses"
+    case _                 => "unreachable-error-statuses"
   }
 
 }

@@ -26,7 +26,7 @@ import io.grpc.MethodDescriptor.MethodType
 import io.grpc.Status
 import org.scalacheck.Gen.alphaLowerChar
 import org.scalacheck.{Gen, Properties}
-import org.scalacheck.Prop.forAll
+import org.scalacheck.Prop._
 
 import scala.collection.JavaConverters._
 
@@ -77,14 +77,6 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
     Status.UNKNOWN
   )
 
-  def methodTypeName(methodType: MethodType): String = methodType match {
-    case MethodType.UNARY            => "unary"
-    case MethodType.CLIENT_STREAMING => "client-streaming"
-    case MethodType.SERVER_STREAMING => "server-streaming"
-    case MethodType.BIDI_STREAMING   => "bidi-streaming"
-    case MethodType.UNKNOWN          => "unknown"
-  }
-
   def performAndCheckMetrics(
       methodInfo: GrpcMethodInfo,
       numberOfCalls: Int,
@@ -92,73 +84,67 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
       registry: MetricRegistry,
       gaugeName: String,
       gaugeType: GaugeType,
-      f: () => IO[Unit],
-      status: Option[Status] = None): Boolean = {
-
+      op: IO[Unit],
+      status: Option[Status] = None): IO[Boolean] =
     (1 to numberOfCalls).toList
-      .map { _ =>
-        f()
-      }
-      .sequence
-      .unsafeRunSync()
-
-    checkMetrics(expectedCount, registry, gaugeName, gaugeType)
-  }
+      .map(_ => op)
+      .sequence_
+      .map(_ => checkMetrics(expectedCount, registry, gaugeName, gaugeType))
 
   def checkMetrics(
       expectedCount: Int,
       registry: MetricRegistry,
       gaugeName: String,
       gaugeType: GaugeType
-  ): Boolean =
-    gaugeType match {
-      case Timer =>
-        registry.getTimers().asScala.contains(gaugeName) && registry
-          .timer(gaugeName)
-          .getCount == expectedCount
-      case Counter =>
-        registry
-          .getCounters()
-          .asScala
-          .contains(gaugeName) && registry
-          .counter(gaugeName)
-          .getCount == expectedCount
-      case _ => false
-    }
+  ): Boolean = {
+    val (gaugeMap, gaugeCount) =
+      gaugeType match {
+        case Timer =>
+          (registry.getTimers().asScala.toMap, registry.timer(gaugeName).getCount)
+        case Counter =>
+          (registry.getCounters().asScala.toMap, registry.counter(gaugeName).getCount)
+        case _ =>
+          (Map.empty[String, GaugeType], 0)
+      }
+    gaugeMap.contains(gaugeName) && gaugeCount == expectedCount
+  }
 
   property("creates and updates counter when registering an active call") =
-    forAll(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
+    forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int) =>
         val registry        = new MetricRegistry()
         val metrics         = DropWizardMetricsOps[IO](registry, prefix)
         val activeCallsName = s"$prefix.$classifier.active.calls"
 
-        performAndCheckMetrics(
-          methodInfo,
-          numberOfCalls,
-          numberOfCalls,
-          registry,
-          activeCallsName,
-          Counter,
-          () => metrics.increaseActiveCalls(methodInfo, Some(classifier))
-        ) && performAndCheckMetrics(
-          methodInfo,
-          numberOfCalls,
-          0,
-          registry,
-          activeCallsName,
-          Counter,
-          () => metrics.decreaseActiveCalls(methodInfo, Some(classifier))
-        )
+        (for {
+          op1 <- performAndCheckMetrics(
+            methodInfo,
+            numberOfCalls,
+            numberOfCalls,
+            registry,
+            activeCallsName,
+            Counter,
+            metrics.increaseActiveCalls(methodInfo, Some(classifier))
+          )
+          op2 <- performAndCheckMetrics(
+            methodInfo,
+            numberOfCalls,
+            expectedCount = 0,
+            registry,
+            activeCallsName,
+            Counter,
+            metrics.decreaseActiveCalls(methodInfo, Some(classifier))
+          )
+        } yield op1 && op2).unsafeRunSync()
     }
 
   property("creates and updates counter when registering a sent message") =
-    forAll(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
+    forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int) =>
         val registry = new MetricRegistry()
         val metrics  = DropWizardMetricsOps[IO](registry, prefix)
         val messagesSentName =
-          s"$prefix.$classifier.${methodInfo.serviceName}.${methodInfo.methodName}.messages-sent"
+          s"$prefix.$classifier.${methodInfo.serviceName}.${methodInfo.methodName}.messages.sent"
 
         performAndCheckMetrics(
           methodInfo,
@@ -167,17 +153,17 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
           registry,
           messagesSentName,
           Counter,
-          () => metrics.recordMessageSent(methodInfo, Some(classifier))
-        )
+          metrics.recordMessageSent(methodInfo, Some(classifier))
+        ).unsafeRunSync()
     }
 
   property("creates and updates counter when registering a received message") =
-    forAll(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
+    forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int) =>
         val registry = new MetricRegistry()
         val metrics  = DropWizardMetricsOps[IO](registry, prefix)
         val messagesReceivedName =
-          s"$prefix.$classifier.${methodInfo.serviceName}.${methodInfo.methodName}.messages-received"
+          s"$prefix.$classifier.${methodInfo.serviceName}.${methodInfo.methodName}.messages.received"
 
         performAndCheckMetrics(
           methodInfo,
@@ -186,12 +172,12 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
           registry,
           messagesReceivedName,
           Counter,
-          () => metrics.recordMessageReceived(methodInfo, Some(classifier))
-        )
+          metrics.recordMessageReceived(methodInfo, Some(classifier))
+        ).unsafeRunSync()
     }
 
   property("creates and updates timer for headers time") =
-    forAll(methodInfoGen, Gen.chooseNum[Int](1, 10), Gen.chooseNum(100, 1000)) {
+    forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10), Gen.chooseNum(100, 1000)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int, elapsed: Int) =>
         val registry    = new MetricRegistry()
         val metrics     = DropWizardMetricsOps[IO](registry, prefix)
@@ -204,35 +190,34 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
           registry,
           headersName,
           Timer,
-          () => metrics.recordHeadersTime(methodInfo, elapsed.toLong, Some(classifier))
-        )
+          metrics.recordHeadersTime(methodInfo, elapsed.toLong, Some(classifier))
+        ).unsafeRunSync()
     }
 
   property("creates and updates timer for total time") =
-    forAll(methodInfoGen, Gen.chooseNum[Int](1, 10), statusGen) {
+    forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10), statusGen) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int, status: Status) =>
         val registry = new MetricRegistry()
         val metrics  = DropWizardMetricsOps[IO](registry, prefix)
 
-        performAndCheckMetrics(
-          methodInfo,
-          numberOfCalls,
-          numberOfCalls,
-          registry,
-          s"$prefix.$classifier.calls.total",
-          Timer,
-          () => metrics.recordTotalTime(methodInfo, status, 1L, Some(classifier))
-        ) && checkMetrics(
-          numberOfCalls,
-          registry,
-          s"$prefix.$classifier.${methodTypeDescription(methodInfo)}.calls",
-          Timer
-        ) && checkMetrics(
-          numberOfCalls,
-          registry,
-          s"$prefix.$classifier.${statusDescription(MetricsOps.grpcStatusFromRawStatus(status))}.calls",
-          Timer
-        )
+        (1 to numberOfCalls).toList
+          .map(_ => metrics.recordTotalTime(methodInfo, status, 1L, Some(classifier)))
+          .sequence_
+          .map { _ =>
+            checkMetrics(numberOfCalls, registry, s"$prefix.$classifier.calls.total", Timer) &&
+            checkMetrics(
+              numberOfCalls,
+              registry,
+              s"$prefix.$classifier.${methodTypeDescription(methodInfo)}",
+              Timer) &&
+            checkMetrics(
+              numberOfCalls,
+              registry,
+              s"$prefix.$classifier.${statusDescription(MetricsOps.grpcStatusFromRawStatus(status))}",
+              Timer
+            )
+          }
+          .unsafeRunSync()
     }
 
 }
