@@ -41,11 +41,11 @@ We've found that the compiler plugin needs to be added to your build.sbt file *a
 *Artifact Name* | *Scope* | *Mandatory* | *Description*
 --- | --- | --- | ---
 `mu-rpc-server` | Server | Yes | Needed to attach RPC Services and spin-up an RPC Server.
-`mu-rpc-client-core` | Client | Yes | Mandatory to define protocols and auto-derived clients.
-`mu-rpc-client-monix` | Client | Yes | Mandatory to define streaming operations with Monix Observables.
-`mu-rpc-client-fs2` | Client | Yes | Mandatory to define streaming operations with fs2 Streams.
-`mu-rpc-client-netty` | Client | Yes* | Mandatory on the client side if we are using `Netty` on the server side.
-`mu-rpc-client-okhttp` | Client | Yes* | Mandatory on the client side if we are using `OkHttp` on the server side.
+`mu-rpc-channel` | Client | Yes | Mandatory to define protocols and auto-derived clients.
+`mu-rpc-monix` | Client | Yes | Mandatory to define streaming operations with Monix Observables.
+`mu-rpc-fs2` | Client | Yes | Mandatory to define streaming operations with fs2 Streams.
+`mu-rpc-netty` | Client | Yes* | Mandatory on the client side if we are using `Netty` on the server side.
+`mu-rpc-okhttp` | Client | Yes* | Mandatory on the client side if we are using `OkHttp` on the server side.
 `mu-config` | Server/Client | No | Provides configuration helpers using [mu-config] to load the application configuration values.
 `mu-rpc-marshallers-jodatime` | Server/Client | No | Provides marshallers for serializing and deserializing the `LocalDate` and `LocalDateTime` joda instances.
 `mu-rpc-prometheus-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, on the _Server_ side.
@@ -59,7 +59,6 @@ We've found that the compiler plugin needs to be added to your build.sbt file *a
 `mu-rpc-internal` | Server/Client | Provided* | Macros.
 `mu-rpc-internal-monix` | Server/Client | Provided* | Macros.
 `mu-rpc-internal-fs2` | Server/Client | Provided* | Macros.
-`mu-rpc-async` | Server/Client | Provided* | Async instances useful for interacting with the RPC services on both sides, server and the client.
 `mu-rpc-netty-ssl` | Server/Client | No | Adds the `io.netty:netty-tcnative-boringssl-static:jar` dependency, aligned with the Netty version (if that's the case) used in the `mu-rpc` build. See [this section](https://github.com/grpc/grpc-java/blob/master/SECURITY.md#netty) for more information. By adding this you wouldn't need to figure the right version, `mu-rpc` gives you the right one.
 
 * `Yes*`: on the client-side, you must choose either `Netty` or `OkHttp` as the transport layer.
