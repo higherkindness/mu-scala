@@ -49,31 +49,31 @@
       <td>Needed to attach RPC Services and spin-up an RPC Server.</td>
     </tr>
     <tr>
-      <td><code class="highlighter-rouge">mu-rpc-client-core</code></td>
+      <td><code class="highlighter-rouge">mu-rpc-channel</code></td>
       <td>Client</td>
       <td>Yes</td>
       <td>Mandatory to define protocols and auto-derived clients.</td>
     </tr>
     <tr>
-      <td><code class="highlighter-rouge">mu-rpc-client-monix</code></td>
+      <td><code class="highlighter-rouge">mu-rpc-monix</code></td>
       <td>Client</td>
       <td>Yes</td>
       <td>Mandatory to define streaming operations with Monix Observables.</td>
     </tr>
     <tr>
-      <td><code class="highlighter-rouge">mu-rpc-client-fs2</code></td>
+      <td><code class="highlighter-rouge">mu-rpc-fs2</code></td>
       <td>Client</td>
       <td>Yes</td>
       <td>Mandatory to define streaming operations with fs2 Streams.</td>
     </tr>
     <tr>
-      <td><code class="highlighter-rouge">mu-rpc-client-netty</code></td>
+      <td><code class="highlighter-rouge">mu-rpc-netty</code></td>
       <td>Client</td>
       <td>Yes*</td>
       <td>Mandatory on the client side if we are using <code class="highlighter-rouge">Netty</code> on the server side.</td>
     </tr>
     <tr>
-      <td><code class="highlighter-rouge">mu-rpc-client-okhttp</code></td>
+      <td><code class="highlighter-rouge">mu-rpc-okhttp</code></td>
       <td>Client</td>
       <td>Yes*</td>
       <td>Mandatory on the client side if we are using <code class="highlighter-rouge">OkHttp</code> on the server side.</td>
@@ -155,12 +155,6 @@
       <td>Server/Client</td>
       <td>Provided*</td>
       <td>Macros.</td>
-    </tr>
-    <tr>
-      <td><code class="highlighter-rouge">mu-rpc-async</code></td>
-      <td>Server/Client</td>
-      <td>Provided*</td>
-      <td>Async instances useful for interacting with the RPC services on both sides, server and the client.</td>
     </tr>
     <tr>
       <td><code class="highlighter-rouge">mu-rpc-netty-ssl</code></td>
