@@ -43,7 +43,7 @@ trait MetricsOps[F[_]] {
 
 object MetricsOps {
 
-  sealed trait GrpcStatus
+  sealed trait GrpcStatus extends Product with Serialization
   case object OK                extends GrpcStatus
   case object Cancelled         extends GrpcStatus
   case object DeadlineExceeded  extends GrpcStatus
