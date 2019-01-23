@@ -60,7 +60,7 @@ We've found that the compiler plugin needs to be added to your build.sbt file *a
 `mu-rpc-internal-monix` | Server/Client | Provided* | Macros.
 `mu-rpc-internal-fs2` | Server/Client | Provided* | Macros.
 `mu-rpc-netty-ssl` | Server/Client | No | Adds the `io.netty:netty-tcnative-boringssl-static:jar` dependency, aligned with the Netty version (if that's the case) used in the `mu-rpc` build. See [this section](https://github.com/grpc/grpc-java/blob/master/SECURITY.md#netty) for more information. By adding this you wouldn't need to figure the right version, `mu-rpc` gives you the right one.
-`mu-rpc-client-cache` | Server/Client | No | Provides an algebra for caching RPC clients.
+`mu-rpc-client-cache` | Client | No | Provides an algebra for caching RPC clients.
 
 * `Yes*`: on the client-side, you must choose either `Netty` or `OkHttp` as the transport layer.
 * `Provided*`: you don't need to add it to your build, it'll be transitively provided when using other dependencies.
