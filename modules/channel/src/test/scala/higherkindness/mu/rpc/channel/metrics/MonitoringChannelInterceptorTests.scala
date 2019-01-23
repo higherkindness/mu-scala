@@ -17,10 +17,11 @@
 package higherkindness.mu.rpc
 package channel.metrics
 
-import cats.effect.{IO, Resource}
+import cats.effect.{Clock, IO, Resource}
 import cats.syntax.apply._
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
+import higherkindness.mu.rpc.internal.metrics.util.FakeClock
 import higherkindness.mu.rpc.internal.metrics.{MetricsOps, MetricsOpsRegister}
 import higherkindness.mu.rpc.protocol._
 import higherkindness.mu.rpc.testing.servers._
@@ -65,12 +66,14 @@ class MonitoringChannelInterceptorTests extends RpcBaseTestSuite {
   }
 
   private[this] def makeProtoCalls[A](metricsOps: MetricsOps[IO])(f: ProtoRPCService[IO] => IO[A])(
-      implicit H: ProtoRPCService[IO]): IO[Either[Throwable, A]] =
+      implicit H: ProtoRPCService[IO]): IO[Either[Throwable, A]] = {
+    implicit val clock: Clock[IO] = FakeClock[IO]
     withServerChannel[IO](
       service = ProtoRPCService.bindService[IO],
       clientInterceptor = Some(MetricsChannelInterceptor(metricsOps, myClassifier)))
       .flatMap(createClient)
       .use(f(_).attempt)
+  }
 
   private[this] def checkCalls(
       metricsOps: MetricsOpsRegister,
@@ -87,21 +90,29 @@ class MonitoringChannelInterceptorTests extends RpcBaseTestSuite {
 
       val argList: List[(GrpcMethodInfo, Option[String])] = methodCalls.map((_, myClassifier))
 
+      // Increase Active Calls
       incArgs should contain theSameElementsAs argList
+      // Messages Sent
       sentArgs should contain theSameElementsAs argList
+      // Messages Received
       if (!serverError) recArgs should contain theSameElementsAs argList
+      // Decrease Active Calls
       decArgs should contain theSameElementsAs argList
+      // Headers Time
       if (!serverError) {
         headersArgs.map(_._1) should contain theSameElementsAs methodCalls
-        headersArgs.map(_._2 > 0) shouldBe List.fill(methodCalls.size)(true)
+        headersArgs.map(_._2) shouldBe List.fill(methodCalls.size)(50)
         headersArgs.map(_._3) should contain theSameElementsAs argList.map(_._2)
       }
+      // Total Time
       totalArgs.map(_._1) should contain theSameElementsAs methodCalls
-      if (serverError)
+      if (serverError) {
         totalArgs.map(_._2.getCode) shouldBe List.fill(methodCalls.size)(Status.INTERNAL.getCode)
-      else
+        totalArgs.map(_._3) shouldBe List.fill(methodCalls.size)(50)
+      } else {
         totalArgs.map(_._2) shouldBe List.fill(methodCalls.size)(Status.OK)
-      totalArgs.map(_._3 > 0) shouldBe List.fill(methodCalls.size)(true)
+        totalArgs.map(_._3) shouldBe List.fill(methodCalls.size)(100)
+      }
       totalArgs.map(_._4) should contain theSameElementsAs argList.map(_._2)
     }
   }

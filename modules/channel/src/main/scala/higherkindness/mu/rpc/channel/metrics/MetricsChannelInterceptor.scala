@@ -17,7 +17,7 @@
 package higherkindness.mu.rpc
 package channel.metrics
 
-import cats.effect.{Clock, Effect, Timer}
+import cats.effect.{Clock, Effect}
 import cats.implicits._
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
 import higherkindness.mu.rpc.internal.metrics.MetricsOps
@@ -25,12 +25,10 @@ import io.grpc._
 
 import scala.concurrent.duration._
 
-case class MetricsChannelInterceptor[F[_]: Effect: Timer](
+case class MetricsChannelInterceptor[F[_]: Effect: Clock](
     metricsOps: MetricsOps[F],
     classifier: Option[String])
     extends ClientInterceptor {
-
-  implicit val clock: Clock[F] = Timer[F].clock
 
   override def interceptCall[Req, Res](
       methodDescriptor: MethodDescriptor[Req, Res],
@@ -47,11 +45,11 @@ case class MetricsChannelInterceptor[F[_]: Effect: Timer](
   }
 }
 
-case class MetricsClientCall[F[_], Req, Res](
+case class MetricsClientCall[F[_]: Clock, Req, Res](
     clientCall: ClientCall[Req, Res],
     methodInfo: GrpcMethodInfo,
     metricsOps: MetricsOps[F],
-    classifier: Option[String])(implicit E: Effect[F], C: Clock[F])
+    classifier: Option[String])(implicit E: Effect[F])
     extends ForwardingClientCall.SimpleForwardingClientCall[Req, Res](clientCall) {
 
   override def start(responseListener: ClientCall.Listener[Res], headers: Metadata): Unit =
