@@ -47,6 +47,7 @@ object ProjectPlugin extends AutoPlugin {
       val reactiveStreams: String    = "1.0.2"
       val scala: String              = "2.12.8"
       val scalacheckToolbox: String  = "0.2.5"
+      val dropwizard: String         = "4.0.5"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
@@ -155,7 +156,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val dropwizardMetricsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "io.dropwizard.metrics" % "metrics-core" % "4.0.5"
+        "io.dropwizard.metrics" % "metrics-core" % V.dropwizard
       )
     )
 
