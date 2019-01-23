@@ -166,6 +166,13 @@ lazy val `dropwizard-client` = project
   .settings(moduleName := "mu-rpc-dropwizard-client")
   .settings(dropwizardSettings)
 
+lazy val `dropwizard` = project
+  .in(file("modules/metrics/dropwizard"))
+  .dependsOn(`internal-core`)
+  .dependsOn(testing % "test->test")
+  .settings(moduleName := "mu-rpc-dropwizard")
+  .settings(dropwizardMetricsSettings)
+
 ////////////////
 //// IDLGEN ////
 ////////////////
@@ -378,6 +385,7 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `prometheus-server`,
   `dropwizard-server`,
   `dropwizard-client`,
+  `dropwizard`,
   testing,
   ssl,
   `idlgen-core`,
