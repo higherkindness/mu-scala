@@ -56,6 +56,6 @@ jobs:
               git pull origin master;
               sbt ";project idlgen-sbt;release";
               sbt release;
-              sbt depUpdateDependencyIssues;
+              sbt docs/publishMicrosite;
             fi
           fi

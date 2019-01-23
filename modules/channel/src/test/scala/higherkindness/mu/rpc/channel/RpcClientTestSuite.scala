@@ -63,6 +63,7 @@ trait RpcClientTestSuite extends RpcBaseTestSuite {
       NameResolverFactory(
         FakeNameResolverFactory(new URI("defaultscheme", "", "/[valid]", null).getScheme)),
       LoadBalancerFactory(RoundRobinLoadBalancerFactory.getInstance()),
+      DefaultLoadBalancingPolicy("round_robin"),
       SetDecompressorRegistry(DecompressorRegistry.getDefaultInstance),
       SetCompressorRegistry(CompressorRegistry.getDefaultInstance),
       SetIdleTimeout(1, TimeUnit.MINUTES),

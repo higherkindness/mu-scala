@@ -32,7 +32,11 @@ final case class OverrideAuthority(authority: String)             extends Manage
 final case class UsePlaintext()                                   extends ManagedChannelConfig
 final case class NameResolverFactory(resolverFactory: NameResolver.Factory)
     extends ManagedChannelConfig
+@deprecated(
+  "This method disables service-config-based policy selection, and may cause problems. See DefaultLoadBalancingPolicy",
+  "0.18.0")
 final case class LoadBalancerFactory(lbFactory: LoadBalancer.Factory) extends ManagedChannelConfig
+final case class DefaultLoadBalancingPolicy(policy: String)           extends ManagedChannelConfig
 final case class SetDecompressorRegistry(registry: DecompressorRegistry)
     extends ManagedChannelConfig
 final case class SetCompressorRegistry(registry: CompressorRegistry) extends ManagedChannelConfig
