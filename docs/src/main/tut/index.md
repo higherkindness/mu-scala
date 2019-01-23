@@ -60,6 +60,7 @@ We've found that the compiler plugin needs to be added to your build.sbt file *a
 `mu-rpc-internal-monix` | Server/Client | Provided* | Macros.
 `mu-rpc-internal-fs2` | Server/Client | Provided* | Macros.
 `mu-rpc-netty-ssl` | Server/Client | No | Adds the `io.netty:netty-tcnative-boringssl-static:jar` dependency, aligned with the Netty version (if that's the case) used in the `mu-rpc` build. See [this section](https://github.com/grpc/grpc-java/blob/master/SECURITY.md#netty) for more information. By adding this you wouldn't need to figure the right version, `mu-rpc` gives you the right one.
+`mu-rpc-client-cache` | Server/Client | No | Provides an algebra for caching RPC clients.
 
 * `Yes*`: on the client-side, you must choose either `Netty` or `OkHttp` as the transport layer.
 * `Provided*`: you don't need to add it to your build, it'll be transitively provided when using other dependencies.
@@ -70,23 +71,23 @@ You can install any of these dependencies in your build as follows:
 
 ```scala
 // required for the RPC server:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-server"            % "0.17.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-server" % "0.17.0"
 
 // required for a protocol definition:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-client-core"       % "0.17.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-channel" % "0.17.0"
 
 // required for a protocol definition with streaming operations:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-client-monix"      % "0.17.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-monix" % "0.17.0"
 // or:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-client-fs2"        % "0.17.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-fs2" % "0.17.0"
 
 // required for the use of the derived RPC client/s, using either Netty or OkHttp as transport layer:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-client-netty"      % "0.17.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-netty" % "0.17.0"
 // or:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-client-okhttp"     % "0.17.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-okhttp" % "0.17.0"
 
 // optional - for both server and client configuration.
-libraryDependencies += "io.higherkindness" %% "mu-config"                % "0.17.0"
+libraryDependencies += "io.higherkindness" %% "mu-config" % "0.17.0"
 
 // optional - for both server and client metrics reporting, using Prometheus.
 libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus-server" % "0.17.0"
@@ -101,6 +102,9 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-netty-ssl" % "0.17.0"
 
 // optional - for using the jodatime marshallers.
 libraryDependencies += "io.higherkindness" %% "mu-rpc-marshallers-jodatime" % "0.17.0"
+
+// optional - for using the client cache.
+libraryDependencies += "io.higherkindness" %% "mu-rpc-client-cache" % "0.17.0"
 ```
 
 [comment]: # (End Replace)
