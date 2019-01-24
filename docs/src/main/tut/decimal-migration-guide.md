@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Migration guide for decimal types
-permalink: /docs/rpc/decimal-migration-guide
+permalink: /decimal-migration-guide
 ---
 
 # Migration guide for decimal types (available from 0.15.1)
@@ -11,6 +11,10 @@ permalink: /docs/rpc/decimal-migration-guide
 This guide is only for projects that are using a version prior to `0.15.1` **and** have decimals in some of their protocols **and** want to serialize those decimals following the avro specs.
 
 If you're starting a new project, you can use safely tagged `BigDecimal`s. Check the [Custom codecs section in Core concepts](core-concepts#custom-codecs) and [Plugin Settings section in IDL Generation](idl-generation#plugin-settings) for more information.
+
+## Disclaimer
+
+**IMPORTANT**: If you are using a version prior to `0.15.1` **and** do not want to serialize the decimals following the avro specs **and** you are using the plugin for generating the protocols, you need to set the `idlGenBigDecimal` setting key to `ScalaBigDecimalGen`.
 
 ## Background
 
@@ -58,11 +62,11 @@ protocol StockInfoService {
 
 **Scala**
 ```scala
-package mu.rpc.protocols
+package higherkindness.mu.rpc.protocols
 
-import mu.rpc.internal.encoders.avro.bigdecimal._
-import mu.rpc.internal.encoders.avro.javatime._
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.internal.encoders.avro.bigdecimal._
+import higherkindness.mu.rpc.internal.encoders.avro.javatime._
+import higherkindness.mu.rpc.protocol._
 
 @message case class StockInfoRequest(stockId: String)
 
@@ -80,11 +84,11 @@ With the *Scala* definition, you can serialize the `BigDecimal`s according to th
 Starting with `0.15.1` you can generate the following service in *Scala* (manually or through the `idlgen` plugin with the setting `idlGenBigDecimal := ScalaBigDecimalTaggedGen`)
 
 ```scala
-package mu.rpc.protocols
+package higherkindness.mu.rpc.protocols
 
-import mu.rpc.internal.encoders.avro.bigDecimalTagged._
-import mu.rpc.internal.encoders.avro.javatime._
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._
+import higherkindness.mu.rpc.internal.encoders.avro.javatime._
+import higherkindness.mu.rpc.protocol._
 import shapeless.{@@, Nat}
 
 @message case class StockInfoRequest(stockId: String)
@@ -171,4 +175,4 @@ protocol StockInfoModel {
 Provides the serializers for the custom type.
 
 For your convenience, there is a repository that shows an example about how to do this process:
-* [frees-io/freestyle-rpc-protocol-decimal-update](https://github.com/frees-io/freestyle-rpc-protocol-decimal-update)
+* [higherkindness/mu-protocol-decimal-update](https://github.com/higherkindness/mu-protocol-decimal-update)

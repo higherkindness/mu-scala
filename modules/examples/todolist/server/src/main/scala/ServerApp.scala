@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,28 @@
 package examples.todolist.server
 
 import cats.effect.IO
+import cats.instances.list._
+import cats.syntax.traverse._
 import examples.todolist.protocol.Protocols._
 import examples.todolist.server.implicits._
-import mu.rpc.server.config.BuildServerFromConfig
-import mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
+import higherkindness.mu.rpc.config.server.BuildServerFromConfig
+import higherkindness.mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
 
 object ServerApp {
 
   def main(args: Array[String]): Unit = {
-    val grpcConfigs: List[GrpcConfig] =
+
+    val grpcConfigs: IO[List[GrpcConfig]] =
       List(
-        AddService(PingPongService.bindService[IO]),
-        AddService(TagRpcService.bindService[IO]),
-        AddService(TodoListRpcService.bindService[IO]),
-        AddService(TodoItemRpcService.bindService[IO])
-      )
+        PingPongService.bindService[IO],
+        TagRpcService.bindService[IO],
+        TodoListRpcService.bindService[IO],
+        TodoItemRpcService.bindService[IO]
+      ).sequence.map(_.map(AddService))
 
     val runServer = for {
-      server <- BuildServerFromConfig[IO]("rpc.server.port", grpcConfigs)
+      config <- grpcConfigs
+      server <- BuildServerFromConfig[IO]("rpc.server.port", config)
       _      <- GrpcServer.server[IO](server)
     } yield ()
 

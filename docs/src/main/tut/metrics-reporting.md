@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Metrics Reporting
-permalink: /docs/rpc/metrics-reporting
+permalink: /metrics-reporting
 ---
 
 # Metrics Reporting
@@ -25,7 +25,7 @@ trait CommonRuntime {
 ```
 
 ```tut:invisible
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 
 object service {
 
@@ -57,15 +57,15 @@ class ServiceHandler[F[_]: Applicative] extends Greeter[F] {
 
 ```tut:silent
 import cats.effect.IO
-import mu.rpc.server._
-import mu.rpc.prometheus.shared.Configuration
-import mu.rpc.prometheus.server.MonitoringServerInterceptor
+import higherkindness.mu.rpc.server._
+import higherkindness.mu.rpc.prometheus.shared.Configuration
+import higherkindness.mu.rpc.prometheus.server.MonitoringServerInterceptor
 import io.prometheus.client.CollectorRegistry
 import service._
 
 object InterceptingServerCalls extends CommonRuntime {
 
-  import mu.rpc.interceptors.implicits._
+  import higherkindness.mu.rpc.interceptors.implicits._
 
   lazy val cr: CollectorRegistry = new CollectorRegistry()
   lazy val monitorInterceptor = MonitoringServerInterceptor(
@@ -75,11 +75,13 @@ object InterceptingServerCalls extends CommonRuntime {
   implicit val greeterServiceHandler: ServiceHandler[IO] = new ServiceHandler[IO]
 
   // The Greeter service is the service defined in the Core concepts section
-  val grpcConfigs: List[GrpcConfig] = List(
-    AddService(Greeter.bindService[IO].interceptWith(monitorInterceptor))
-  )
+  val grpcConfigs: IO[List[GrpcConfig]] = 
+    Greeter.bindService[IO]
+      .map(_.interceptWith(monitorInterceptor))
+      .map(AddService)
+      .map(List(_))
 
-  val server: IO[GrpcServer[IO]] = GrpcServer.default[IO](8080, grpcConfigs)
+  val server: IO[GrpcServer[IO]] = grpcConfigs.flatMap(GrpcServer.default[IO](8080, _))
 
 }
 ```
@@ -89,22 +91,22 @@ object InterceptingServerCalls extends CommonRuntime {
 In this case, in order to intercept the client calls we need additional configuration settings (by using `AddInterceptor`):
 
 ```tut:silent
-import cats.effect.IO
-import mu.rpc._
-import mu.rpc.config._
-import mu.rpc.client._
-import mu.rpc.client.config._
+import cats.effect.{IO, Resource}
+import higherkindness.mu.rpc._
+import higherkindness.mu.rpc.config._
+import higherkindness.mu.rpc.channel._
+import higherkindness.mu.rpc.config.channel._
 import service._
 
-import mu.rpc.prometheus.shared.Configuration
-import mu.rpc.prometheus.client.MonitoringClientInterceptor
+import higherkindness.mu.rpc.prometheus.shared.Configuration
+import higherkindness.mu.rpc.prometheus.client.MonitoringClientInterceptor
 
 object InterceptingClientCalls extends CommonRuntime {
 
   val channelFor: ChannelFor =
     ConfigForAddress[IO]("rpc.host", "rpc.port").unsafeRunSync
 
-  implicit val serviceClient: Greeter.Client[IO] =
+  implicit val serviceClient: Resource[IO, Greeter[IO]] =
     Greeter.client[IO](
       channelFor = channelFor,
       channelConfigList = List(
@@ -141,8 +143,7 @@ configuration.collectorRegistry.register(new DropwizardExports(metrics))
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
-[@tagless algebra]: http://frees.io/docs/core/algebras/
-[PBDirect]: https://github.com/btlines/pbdirect
+[PBDirect]: https://github.com/47deg/pbdirect
 [scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect

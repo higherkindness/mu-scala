@@ -1,27 +1,30 @@
 options:
+  - title: Quickstart
+    url:
+
   - title: Core concepts
-    url: docs/rpc/core-concepts
+    url: core-concepts
 
   - title: Streaming
-    url: docs/rpc/streaming
+    url: streaming
 
   - title: Annotations
-    url: docs/rpc/annotations
+    url: annotations
 
   - title: IDL Generation
-    url: docs/rpc/idl-generation
+    url: idl-generation
 
   - title: Patterns
-    url: docs/rpc/patterns
+    url: patterns
 
   - title: SSL/TLS
-    url: docs/rpc/ssl-tls
+    url: ssl-tls
 
   - title: Metrics Reporting
-    url: docs/rpc/metrics-reporting
+    url: metrics-reporting
 
   - title: Migration guide for decimal types
-    url: docs/rpc/decimal-migration-guide
+    url: decimal-migration-guide
 
   - title: References
-    url: docs/rpc/references
+    url: references

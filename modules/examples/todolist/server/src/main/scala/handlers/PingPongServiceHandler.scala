@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package handlers
 import cats.Applicative
 import cats.syntax.applicative._
 import examples.todolist.protocol.Protocols.{PingPongService, Pong}
-import mu.rpc.protocol.Empty
+import higherkindness.mu.rpc.protocol.Empty
 
 class PingPongServiceHandler[F[_]](implicit M: Applicative[F]) extends PingPongService[F] {
 

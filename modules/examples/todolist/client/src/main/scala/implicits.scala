@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package examples.todolist.client
 
-import cats.effect.{ContextShift, IO, Timer}
+import cats.effect.{ContextShift, IO, Resource, Timer}
 import examples.todolist.client.handlers._
 import examples.todolist.protocol.Protocols._
-import freestyle.tagless.loggingJVM.log4s.implicits._
 import examples.todolist.runtime.CommonRuntime
-import mu.rpc.ChannelFor
-import mu.rpc.client.config.ConfigForAddress
+import freestyle.tagless.loggingJVM.log4s.implicits._
+import higherkindness.mu.rpc.ChannelFor
+import higherkindness.mu.rpc.config.channel.ConfigForAddress
 
 trait ClientImplicits extends CommonRuntime {
 
@@ -32,29 +32,29 @@ trait ClientImplicits extends CommonRuntime {
   val channelFor: ChannelFor =
     ConfigForAddress[IO]("rpc.client.host", "rpc.client.port").unsafeRunSync()
 
-  implicit val pingPongServiceClient: PingPongService.Client[IO] =
+  val pingPongServiceClient: Resource[IO, PingPongService[IO]] =
     PingPongService.client[IO](channelFor)
 
   implicit val pingPongClientHandler: PingPongClientHandler[IO] =
-    new PingPongClientHandler[IO]
+    new PingPongClientHandler[IO](pingPongServiceClient)
 
-  implicit val tagRpcServiceClient: TagRpcService.Client[IO] =
+  val tagRpcServiceClient: Resource[IO, TagRpcService[IO]] =
     TagRpcService.client[IO](channelFor)
 
   implicit val tagClientHandler: TagClientHandler[IO] =
-    new TagClientHandler[IO]
+    new TagClientHandler[IO](tagRpcServiceClient)
 
-  implicit val todoListRpcServiceClient: TodoListRpcService.Client[IO] =
+  val todoListRpcServiceClient: Resource[IO, TodoListRpcService[IO]] =
     TodoListRpcService.client[IO](channelFor)
 
   implicit val todoListClientHandler: TodoListClientHandler[IO] =
-    new TodoListClientHandler[IO]
+    new TodoListClientHandler[IO](todoListRpcServiceClient)
 
-  implicit val todoItemRpcServiceClient: TodoItemRpcService.Client[IO] =
+  val todoItemRpcServiceClient: Resource[IO, TodoItemRpcService[IO]] =
     TodoItemRpcService.client[IO](channelFor)
 
   implicit val todoItemClientHandler: TodoItemClientHandler[IO] =
-    new TodoItemClientHandler[IO]
+    new TodoItemClientHandler[IO](todoItemRpcServiceClient)
 
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package example.routeguide.client.runtime
 
 import cats.effect.IO
-import mu.rpc.ChannelFor
-import mu.rpc.client.config.ConfigForAddress
+import higherkindness.mu.rpc.ChannelFor
+import higherkindness.mu.rpc.config.channel.ConfigForAddress
 
 trait ClientConf {
 

@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Patterns
-permalink: /docs/rpc/patterns
+permalink: /patterns
 ---
 
 # Patterns
@@ -10,12 +10,12 @@ So far so good, we haven't seen too much code or implemented any business logic.
 
 ## Server
 
-Predictably, generating the server code is just implementing a service [Handler](http://frees.io/docs/core/handlers/).
+Predictably, generating the server code is just creating an implementation for your service algebra.
 
 First, here's our `Greeter` RPC protocol definition:
 
 ```tut:invisible
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 
 object service {
 
@@ -64,7 +64,7 @@ Next, our dummy `Greeter` server implementation:
 ```tut:silent
 import cats.effect.Async
 import cats.syntax.applicative._
-import mu.rpc.internal.task._
+import higherkindness.mu.rpc.internal.task._
 import monix.reactive.Observable
 import service._
 
@@ -149,7 +149,7 @@ In summary, the result would be as follows:
 
 ```tut:silent
 import cats.effect.IO
-import mu.rpc.server._
+import higherkindness.mu.rpc.server._
 import service._
 
 object gserver {
@@ -171,18 +171,20 @@ What else is needed? We just need to define a `main` method:
 
 ```tut:silent
 import cats.effect.IO
-import mu.rpc.server.GrpcServer
+import higherkindness.mu.rpc.server.GrpcServer
 
 object RPCServer {
 
   import gserver.implicits._
 
   def main(args: Array[String]): Unit = {
-    val grpcConfigs: List[GrpcConfig] = List(
-      AddService(Greeter.bindService[IO])
-    )
 
-    val runServer = GrpcServer.default[IO](8080, grpcConfigs).flatMap(GrpcServer.server[IO])
+    val runServer = for {
+      grpcConfig <- Greeter.bindService[IO]
+      server     <- GrpcServer.default[IO](8080, List(AddService(grpcConfig)))
+      runServer  <- GrpcServer.server[IO](server)
+    } yield runServer
+
     runServer.unsafeRunSync()
   }
 
@@ -198,7 +200,9 @@ Fortunately, once all the runtime requirements are in place (**`import gserver.i
 Thanks to `withServerChannel` from the package `mu.rpc.testing.servers`, you will be able to run in-memory instances of the server, which is very convenient for testing purposes. Below, a very simple property-based test for proving `Greeter.sayHello`:
 
 ```tut:silent
-import mu.rpc.testing.servers.withServerChannel
+import cats.effect.Resource
+import higherkindness.mu.rpc.testing.servers.withServerChannel
+import io.grpc.{ManagedChannel, ServerServiceDefinition}
 import org.scalatest.prop.Checkers
 import org.scalatest._
 import org.scalacheck.Gen
@@ -208,16 +212,26 @@ import service._
 class ServiceSpec extends FunSuite with Matchers with Checkers with OneInstancePerTest {
 
   import gserver.implicits._
+    
+  def withClient[Client, A](
+      serviceDef: IO[ServerServiceDefinition],
+      resourceBuilder: IO[ManagedChannel] => Resource[IO, Client])(
+      f: Client => A): A =
+    withServerChannel(serviceDef)
+      .flatMap(sc => resourceBuilder(IO(sc.channel)))
+      .use(client => IO(f(client)))
+      .unsafeRunSync()
 
   def sayHelloTest(requestGen: Gen[HelloRequest], expected: HelloResponse): Assertion =
-    withServerChannel(Greeter.bindService[IO]) { sc =>
-      val client = Greeter.clientFromChannel[IO](sc.channel)
-      check {
-        forAll(requestGen) { request =>
-          client.sayHello(request).unsafeRunSync() == expected
+    withClient(
+      Greeter.bindService[IO], 
+      Greeter.clientFromChannel[IO](_)) { client =>
+        check {
+          forAll(requestGen) { request =>
+            client.sayHello(request).unsafeRunSync() == expected
+          }
         }
       }
-    }
 
   val requestGen: Gen[HelloRequest] = Gen.alphaStr map HelloRequest
 
@@ -267,10 +281,10 @@ As we will see shortly in our example, we are going relay on the default behavio
 So, taking into account all of that, how would our code look?
 
 ```tut:silent
-import cats.effect.IO
-import mu.rpc._
-import mu.rpc.config._
-import mu.rpc.client.config._
+import cats.effect.{IO, Resource}
+import higherkindness.mu.rpc._
+import higherkindness.mu.rpc.config._
+import higherkindness.mu.rpc.config.channel._
 import service._
 
 object gclient {
@@ -280,7 +294,7 @@ object gclient {
     val channelFor: ChannelFor =
       ConfigForAddress[IO]("rpc.host", "rpc.port").unsafeRunSync
 
-    implicit val serviceClient: Greeter.Client[IO] =
+    implicit val serviceClient: Resource[IO, Greeter[IO]] =
       Greeter.client[IO](channelFor)
   }
 
@@ -306,7 +320,7 @@ object RPCDemoApp {
 
   def main(args: Array[String]): Unit = {
 
-    val hello = serviceClient.sayHello(HelloRequest("foo")).flatMap { result =>
+    val hello = serviceClient.use(_.sayHello(HelloRequest("foo"))).flatMap { result =>
       IO(println(s"Result = $result"))
     }
 
@@ -323,8 +337,7 @@ object RPCDemoApp {
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
-[@tagless algebra]: http://frees.io/docs/core/algebras/
-[PBDirect]: https://github.com/btlines/pbdirect
+[PBDirect]: https://github.com/47deg/pbdirect
 [scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect

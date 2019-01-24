@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Core concepts
-permalink: /docs/rpc/core-concepts
+permalink: /core-concepts
 ---
 
 # Core concepts
@@ -61,7 +61,7 @@ You can find more information about Protocol Buffers in the [Protocol Buffers' d
 
 ### mu-rpc
 
-In the previous section, we’ve seen an overview of what [gRPC] offers for defining protocols and generating code (compiling protocol buffers). Now, we'll show how [mu] offers the same thing, but in the **Freestyle** fashion, following FP principles.
+In the previous section, we’ve seen an overview of what [gRPC] offers for defining protocols and generating code (compiling protocol buffers). Now, we'll show how [mu] offers the same thing, but following FP principles.
 
 First things first, the main difference with respect to [gRPC] is that [mu] doesn’t need `.proto` files, but can still use protobuf thanks to the [PBDirect] library, which allows it to read and write Scala objects directly to protobuf with no `.proto` file definitions. In summary:
 
@@ -72,7 +72,7 @@ Let’s start looking at how to define the `Person` message that we saw previous
 Before starting, this is the Scala import we need:
 
 ```tut:silent
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 ```
 
 `Person` would be defined as follows:
@@ -125,7 +125,7 @@ object protocol {
 }
 ```
 
-Naturally, the [RPC] services are grouped in a `@tagless algebra`. Therefore, we are following one of the primary principles of Freestyle; you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.
+Naturally, the [RPC] services are grouped in a *Tagless Final* algebra. Therefore, you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.
 
 In the above example, we can see that `sayHello` returns an `F[HelloReply]`. However, very often the services might:
 
@@ -232,10 +232,10 @@ trait CommonRuntime {
 ```
 
 ```tut:silent
-import cats.effect.IO
-import mu.rpc._
-import mu.rpc.config._
-import mu.rpc.client.config._
+import cats.effect.{IO, Resource}
+import higherkindness.mu.rpc._
+import higherkindness.mu.rpc.config._
+import higherkindness.mu.rpc.config.channel._
 import io.grpc.CallOptions
 import service._
 
@@ -244,7 +244,7 @@ trait ChannelImplicits extends CommonRuntime {
   val channelFor: ChannelFor =
     ConfigForAddress[IO]("rpc.host", "rpc.port").unsafeRunSync
 
-  implicit val serviceClient: Greeter.Client[IO] =
+  implicit val serviceClient: Resource[IO, Greeter[IO]] =
     Greeter.client[IO](channelFor, options = CallOptions.DEFAULT.withCompression("gzip"))
 }
 
@@ -378,30 +378,30 @@ object protocol {
 The only thing you need to do is add the following import to your service:
 
 * `BigDecimal` in `Protobuf`
-  * `import mu.rpc.internal.encoders.pbd.bigDecimal._`
+  * `import higherkindness.mu.rpc.internal.encoders.pbd.bigDecimal._`
 * `java.time.LocalDate` and `java.time.LocalDateTime` in `Protobuf`
-  * `import mu.rpc.internal.encoders.pbd.javatime._`
+  * `import higherkindness.mu.rpc.internal.encoders.pbd.javatime._`
 * `BigDecimal` in `Avro` (**note**: this encoder is not avro spec compliant)
-  * `import mu.rpc.internal.encoders.avro.bigdecimal._`
+  * `import higherkindness.mu.rpc.internal.encoders.avro.bigdecimal._`
 * Tagged `BigDecimal` in `Avro`
-  * `import mu.rpc.internal.encoders.avro.bigDecimalTagged._`
+  * `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._`
 
-Mu also provides instances for `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime`, but you need the `mu-rpc-marshallers-jodatime` extra dependency. See the [main section](/mu/) for the SBT instructions.
+Mu also provides instances for `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime`, but you need the `mu-rpc-marshallers-jodatime` extra dependency. See the [main section](/mu/scala/) for the SBT instructions.
 
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Protobuf`
-  * `import mu.rpc.marshallers.jodaTimeEncoders.pbd._`
+  * `import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.pbd._`
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
-  * `import mu.rpc.marshallers.jodaTimeEncoders.avro._`
+  * `import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.avro._`
   
 **Note**: If you want to send one of these instances directly as a request or response through Avro, you need to provide an instance of `Marshaller`. [mu] provides the marshallers for `BigDecimal`, `java.time.LocalDate`, `java.time.LocalDateTime`, `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in a separate package:
 * `BigDecimal` in `Avro`
-  * `import mu.rpc.internal.encoders.avro.bigdecimal.marshallers._`
+  * `import higherkindness.mu.rpc.internal.encoders.avro.bigdecimal.marshallers._`
 * Tagged `BigDecimal` in `Avro` (**note**: this encoder is not avro spec compliant)
-  * `import mu.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._`
+  * `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._`
 * `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
-  * `import mu.rpc.internal.encoders.avro.javatime.marshallers._`
+  * `import higherkindness.mu.rpc.internal.encoders.avro.javatime.marshallers._`
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
-  * `import mu.rpc.marshallers.jodaTimeEncoders.avro.marshallers._`
+  * `import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.avro.marshallers._`
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
@@ -410,8 +410,7 @@ Mu also provides instances for `org.joda.time.LocalDate` and `org.joda.time.Loca
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
-[@tagless algebra]: http://frees.io/docs/core/algebras/
-[PBDirect]: https://github.com/btlines/pbdirect
+[PBDirect]: https://github.com/47deg/pbdirect
 [scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect

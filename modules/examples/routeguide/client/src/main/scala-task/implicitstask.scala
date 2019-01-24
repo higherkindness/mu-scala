@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package example.routeguide.client.task
 
+import cats.effect.Resource
 import example.routeguide.client.handlers.RouteGuideClientHandler
 import example.routeguide.protocol.Protocols._
 import example.routeguide.runtime._
@@ -24,7 +25,7 @@ import monix.eval.Task
 
 trait ClientTaskImplicits extends RouteGuide with ClientConf {
 
-  implicit val routeGuideServiceClient: RouteGuideService.Client[Task] =
+  implicit val routeGuideServiceClient: Resource[Task, RouteGuideService[Task]] =
     RouteGuideService.client[Task](channelFor)
 
   implicit val routeGuideClientHandler: RouteGuideClientHandler[Task] =

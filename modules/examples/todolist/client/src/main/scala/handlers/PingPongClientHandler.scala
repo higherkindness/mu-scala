@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,21 @@
 package examples.todolist.client
 package handlers
 
-import cats.Functor
 import cats.syntax.functor._
+import cats.effect.{Resource, Sync}
 import examples.todolist.client.clients.PingPongClient
 import examples.todolist.protocol.Protocols.PingPongService
-import mu.rpc.protocol.Empty
+import higherkindness.mu.rpc.protocol.Empty
 import org.log4s._
 
-class PingPongClientHandler[F[_]](implicit M: Functor[F], client: PingPongService.Client[F])
+class PingPongClientHandler[F[_]: Sync](client: Resource[F, PingPongService[F]])
     extends PingPongClient[F] {
 
   val logger: Logger = getLogger
 
   override def ping(): F[Unit] =
     client
-      .ping(Empty)
+      .use(_.ping(Empty))
       .map(p => logger.info(s"Pong received with timestamp: ${p.time}"))
 
 }

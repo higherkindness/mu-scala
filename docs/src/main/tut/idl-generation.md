@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: IDL Generation
-permalink: /docs/rpc/idl-generation
+permalink: /idl-generation
 ---
 
 # IDL Generation
@@ -17,7 +17,7 @@ Add the following line to _project/plugins.sbt_:
 [comment]: # (Start Replace)
 
 ```scala
-addSbtPlugin("io.higherkindness" % "sbt-mu-idlgen" % "0.16.0")
+addSbtPlugin("io.higherkindness" % "sbt-mu-idlgen" % "0.17.0")
 ```
 
 [comment]: # (End Replace)
@@ -29,7 +29,7 @@ Note that the plugin is only available for Scala 2.12.
 Let's take our previous service and add an Avro-specific request and some useful annotations described in the [Annotations section](annotations):
 
 ```tut:silent
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 
 @option("java_multiple_files", true)
 @option("java_outer_classname", "Quickstart")
@@ -76,7 +76,7 @@ Using this example, the resulting Protobuf IDL would be generated in `/src/main/
 ```
 // This file has been automatically generated for use by
 // the idlGen plugin, from mu-rpc service definitions.
-// Read more at: https://higherkindness.github.io/mu/
+// Read more at: https://higherkindness.github.io/mu/scala/
 
 syntax = "proto3";
 
@@ -195,7 +195,7 @@ In the case of the `.avpr` file we generated above, the file `GreeterService.sca
 ```
 package quickstart
 
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 
 @message case class HelloRequest(greeting: String)
 
@@ -227,7 +227,7 @@ Just like `idlGen`, `srcGen` and `srcGenFromJars` has some configurable settings
   * All the source folders specified in the `srcGenSourceDirs` setting.
 * **`srcGenTargetDir`**: the Scala target base directory, where the `srcGen` task will write the Scala files in subdirectories/packages based on the namespaces of the IDL files. By default: `Compile / sourceManaged`, typically `target/scala-2.12/src_managed/main/`.
 * **`genOptions`**: additional options to add to the generated `@service` annotations, after the IDL type. Currently only supports `"Gzip"`.
-* **`idlGenBigDecimal`**: specifies how the `decimal` types will be generated. `ScalaBigDecimalGen` produces `scala.math.BigDecimal` and `ScalaBigDecimalTaggedGen` produces `scala.math.BigDecimal` but tagged with the 'precision' and 'scale'. i.e. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`.
+* **`idlGenBigDecimal`**: specifies how the `decimal` types will be generated. `ScalaBigDecimalGen` produces `scala.math.BigDecimal` and `ScalaBigDecimalTaggedGen` produces `scala.math.BigDecimal` but tagged with the 'precision' and 'scale'. i.e. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`. By default `ScalaBigDecimalTaggedGen`.
 * **`idlGenMarshallerImports`**: additional imports to add on top to the generated service files. This property can be used for importing extra codecs for your services. By default:
   * `List(BigDecimalAvroMarshallers)` if `srcGenSerializationType` is `Avro` or `AvroWithSchema` and `idlGenBigDecimal` is `ScalaBigDecimalGen`
   * `List(BigDecimalTaggedAvroMarshallers)` if `srcGenSerializationType` is `Avro` or `AvroWithSchema` and `idlGenBigDecimal` is `ScalaBigDecimalTaggedGen`
@@ -247,7 +247,6 @@ The following example shows how to set up a dependency with another artifact or 
 //...
 .settings(
   Seq(
-      resolvers += Resolver.bintrayRepo("beyondthelines", "maven"),
       publishMavenStyle := true,
       idlType := "avro",
       srcGenSerializationType := "AvroWithSchema",
@@ -270,8 +269,7 @@ The following example shows how to set up a dependency with another artifact or 
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
-[@tagless algebra]: http://frees.io/docs/core/algebras/
-[PBDirect]: https://github.com/btlines/pbdirect
+[PBDirect]: https://github.com/47deg/pbdirect
 [scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect

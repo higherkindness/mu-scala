@@ -6,12 +6,10 @@ import sbt._
 import sbtorgpolicies.OrgPoliciesPlugin
 import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
 import sbtorgpolicies.model._
-import sbtorgpolicies.runnable.SetSetting
-import sbtorgpolicies.runnable.syntax._
 import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
+import sbtorgpolicies.runnable.syntax._
 import sbtrelease.ReleasePlugin.autoImport._
-import scoverage.ScoverageKeys
 import scoverage.ScoverageKeys._
 
 import scala.language.reflectiveCalls
@@ -27,28 +25,30 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String             = "2.0.2"
-      val avrohugger: String         = "1.0.0-RC14"
+      val avrohugger: String         = "1.0.0-RC15"
       val betterMonadicFor: String   = "0.2.4"
-      val catsEffect: String         = "1.1.0-M1"
-      val circe: String              = "0.10.1"
+      val catsEffect: String         = "1.1.0"
+      val circe: String              = "0.11.1"
       val frees: String              = "0.8.2"
-      val fs2: String                = "1.0.0"
-      val fs2Grpc: String            = "0.4.0-M2"
+      val fs2: String                = "1.0.2"
+      val fs2Grpc: String            = "0.4.0-M3"
+      val grpc: String               = "1.18.0"
       val jodaTime: String           = "2.10.1"
-      val grpc: String               = "1.16.1"
       val http4s                     = "0.19.0"
+      val kindProjector: String      = "0.9.9"
       val log4s: String              = "1.6.1"
       val logback: String            = "1.2.3"
       val monix: String              = "3.0.0-RC2"
       val monocle: String            = "1.5.1-cats"
-      val nettySSL: String           = "2.0.17.Final"
+      val nettySSL: String           = "2.0.20.Final"
       val paradise: String           = "2.1.1"
-      val pbdirect: String           = "0.1.0"
-      val prometheus: String         = "0.5.0"
-      val pureconfig: String         = "0.10.0"
-      val scala: String              = "2.12.7"
-      val scalacheck: String         = "1.14.0"
+      val pbdirect: String           = "0.2.0"
+      val prometheus: String         = "0.6.0"
+      val pureconfig: String         = "0.10.1"
+      val reactiveStreams: String    = "1.0.2"
+      val scala: String              = "2.12.8"
       val scalacheckToolbox: String  = "0.2.5"
+      val dropwizard: String         = "4.0.5"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
@@ -63,15 +63,26 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect),
         %("grpc-stub", V.grpc),
-        %%("monix", V.monix),
-        %%("monocle-core", V.monocle),
-        %%("fs2-reactive-streams", V.fs2),
-        %%("fs2-core", V.fs2),
-        %%("pbdirect", V.pbdirect),
+        "com.47deg" %% "pbdirect" % V.pbdirect,
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
-        "org.lyranthe.fs2-grpc"  %% "java-runtime" % V.fs2Grpc,
         "org.scala-lang"         % "scala-compiler" % scalaVersion.value,
+        %%("scalamockScalatest") % Test
+      )
+    )
+
+    lazy val internalMonixSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("monix", V.monix),
+        "org.reactivestreams" % "reactive-streams" % V.reactiveStreams,
+        %%("scalamockScalatest") % Test
+      )
+    )
+
+    lazy val internalFs2Settings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("fs2-core", V.fs2),
+        "org.lyranthe.fs2-grpc"  %% "java-runtime" % V.fs2Grpc,
         %%("scalamockScalatest") % Test
       )
     )
@@ -156,9 +167,16 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+    lazy val dropwizardMetricsSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        "io.dropwizard.metrics" % "metrics-core" % V.dropwizard
+      )
+    )
+
     lazy val testingSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %("grpc-testing", V.grpc),
+        %%("cats-effect", V.catsEffect),
         %%("scalacheck") % Test
       )
     )
@@ -171,6 +189,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val idlGenSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
+        %%("monocle-core", V.monocle),
         "com.julianpeeters" %% "avrohugger-core" % V.avrohugger,
         %%("circe-generic", V.circe)
       )
@@ -237,18 +256,27 @@ object ProjectPlugin extends AutoPlugin {
       micrositeName := "Mu",
       micrositeBaseUrl := "/mu",
       micrositeDescription := "A purely functional library for building RPC endpoint-based services",
-      micrositeDocumentationUrl := "docs/rpc/core-concepts.html",
       micrositeGithubOwner := "higherkindness",
       micrositeGithubRepo := "mu",
       micrositeGitterChannelUrl := "47deg/mu",
       micrositeOrganizationHomepage := "http://www.47deg.com",
       includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
-      micrositePushSiteWith := GitHub4s
+      micrositePushSiteWith := GitHub4s,
+      micrositePalette := Map(
+        "brand-primary"   -> "#de3423",
+        "brand-secondary" -> "#852319",
+        "brand-tertiary"  -> "#381C19",
+        "gray-dark"       -> "#333333",
+        "gray"            -> "#666666",
+        "gray-light"      -> "#EDEDED",
+        "gray-lighter"    -> "#F4F5F9",
+        "white-color"     -> "#E6E7EC"
+      )
     )
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("scalatest")
+        %%("scalatest") % "tut"
       ),
       scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
     )
@@ -262,6 +290,16 @@ object ProjectPlugin extends AutoPlugin {
   }
 
   import autoImport._
+
+  case class FixedCodecovBadge(info: BadgeInformation) extends Badge(info) {
+
+    override def badgeIcon: Option[BadgeIcon] =
+      BadgeIcon(
+        title = "codecov.io",
+        icon = s"http://codecov.io/gh/${info.owner}/${info.repo}/branch/master/graph/badge.svg",
+        url = s"http://codecov.io/gh/${info.owner}/${info.repo}"
+      ).some
+  }
 
   override def projectSettings: Seq[Def.Setting[_]] =
     sharedReleaseProcess ++ warnUnusedImport ++ Seq(
@@ -286,6 +324,9 @@ object ProjectPlugin extends AutoPlugin {
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
       addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
+      addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
+      // This is needed to prevent the eviction regarding the version of kind-projector injected by org-policies:
+      libraryDependencies ~= (_.filterNot(m => m.name == "kind-projector" && m.revision == "0.9.7")),
       libraryDependencies ++= Seq(
         %%("scalatest") % "test",
         %("slf4j-nop")  % Test
@@ -296,7 +337,8 @@ object ProjectPlugin extends AutoPlugin {
       orgMaintainersSetting := List(Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
       orgBadgeListSetting := List(
         TravisBadge.apply,
-        CodecovBadge.apply, { info => MavenCentralBadge.apply(info.copy(libName = "mu")) },
+        FixedCodecovBadge.apply,
+        { info => MavenCentralBadge.apply(info.copy(libName = "mu")) },
         ScalaLangBadge.apply,
         LicenseBadge.apply,
         // Gitter badge (owner field) can be configured with default value if we migrate it to the higherkindness organization
@@ -335,16 +377,10 @@ object ProjectPlugin extends AutoPlugin {
         ScalafmtFileType,
         TravisFileType(crossScalaVersions.value, orgScriptCICommandKey, orgAfterCISuccessCommandKey)
       ),
-      orgScriptTaskListSetting := List(
-        (clean in Global).asRunnableItemFull,
-        SetSetting(coverageEnabled in Global, true).asRunnableItem,
-        (compile in Compile).asRunnableItemFull,
-        (test in Test).asRunnableItemFull,
-        (ScoverageKeys.coverageReport in Test).asRunnableItemFull,
-        (ScoverageKeys.coverageAggregate in Test).asRunnableItemFull,
-        SetSetting(coverageEnabled in Global, false).asRunnableItem,
-        "docs/tut".asRunnableItem,
-      )
+      orgAfterCISuccessTaskListSetting := List(
+        orgPublishReleaseTask.asRunnableItem(allModules = true, aggregated = false, crossScalaVersions = true),
+        orgUpdateDocFiles.asRunnableItem
+      ) ++ guard(!version.value.endsWith("-SNAPSHOT"))(defaultPublishMicrosite)
     )
   // format: ON
 }

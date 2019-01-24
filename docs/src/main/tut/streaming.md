@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Streaming
-permalink: /docs/rpc/streaming
+permalink: /streaming
 ---
 
 # Streaming
@@ -15,7 +15,7 @@ In the previous section, we saw that [mu] allows you to define unary services. A
 Let's keep going. We'll be completing our protocol's example with the three streaming options:
 
 ```tut:silent
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 
 object service {
 
@@ -99,7 +99,7 @@ Thanks to this new data type, [mu] supports `fs2.Stream[F, ?]` for all the types
 Let's compare our previous protocols using `fs2.Stream` instead of `Observable`.
 
 ```tut:silent
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 
 object service {
 
@@ -152,8 +152,7 @@ As you can see, the Fs2 service is very similar to the Observable service.
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
-[@tagless algebra]: http://frees.io/docs/core/algebras/
-[PBDirect]: https://github.com/btlines/pbdirect
+[PBDirect]: https://github.com/47deg/pbdirect
 [scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect

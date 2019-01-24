@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,17 @@
 package examples.todolist
 package protocol
 
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 
 trait TagProtocol {
 
-  final case class TagRequest(name: String)
+  case class TagRequest(name: String)
 
-  final case class TagMessage(name: String, id: Int)
+  case class TagMessage(name: String, id: Int)
 
-  final case class TagList(list: List[TagMessage])
+  case class TagList(list: List[TagMessage])
 
-  final case class TagResponse(tag: Option[TagMessage])
+  case class TagResponse(tag: Option[TagMessage])
 
   @service(Avro)
   trait TagRpcService[F[_]] {

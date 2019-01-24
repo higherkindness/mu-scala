@@ -1,17 +1,17 @@
 ---
 layout: docs
 title: References
-permalink: /docs/rpc/references
+permalink: /references
 ---
 
 # References
 
-* [Freestyle](http://frees.io/)
+* [Higherkindness](http://higherkindness.io/)
 * [RPC](https://en.wikipedia.org/wiki/Remote_procedure_call)
 * [gRPC](https://grpc.io/)
 * [Protocol Buffers Docs](https://developers.google.com/protocol-buffers/docs/overview)
 * [scalamacros](https://github.com/scalamacros/paradise)
-* [PBDirect](https://github.com/btlines/pbdirect)
+* [PBDirect](https://github.com/47deg/pbdirect)
 * [ScalaPB](https://scalapb.github.io/)
 * [Monix](https://monix.io)
 * [gRPC Java API](https://grpc.io/grpc-java/javadoc/)
@@ -36,8 +36,7 @@ If you want to dive deeper into [mu], we have a complete example at the [example
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
-[@tagless algebra]: http://frees.io/docs/core/algebras/
-[PBDirect]: https://github.com/btlines/pbdirect
+[PBDirect]: https://github.com/47deg/pbdirect
 [scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect

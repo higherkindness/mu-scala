@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: SSL/TLS
-permalink: /docs/rpc/ssl-tls
+permalink: /ssl-tls
 ---
 
 # SSL/TLS Encryption
@@ -10,7 +10,7 @@ permalink: /docs/rpc/ssl-tls
 
 [mu] allows you to encrypt the connection between the server and the client through SSL/TLS. The main goal of using SSL is to protect your sensitive information and to keep your data secure between servers and clients.
 
-As we mentioned in the [Main](/mu/) section, we can choose to configure our client with `OkHttp` or `Netty` but if we want to encrypt our service, it's mandatory to use `Netty`. Currently, [mu] only supports encryption over *Netty*.
+As we mentioned in the [Main](/mu/scala/) section, we can choose to configure our client with `OkHttp` or `Netty` but if we want to encrypt our service, it's mandatory to use `Netty`. Currently, [mu] only supports encryption over *Netty*.
 
 ## Requirements 
 
@@ -45,7 +45,7 @@ trait CommonRuntime {
 ```
 
 ```tut:invisible
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 
 object service {
 
@@ -79,9 +79,9 @@ class ServiceHandler[F[_]: Applicative] extends Greeter[F] {
 import java.io.File
 import java.security.cert.X509Certificate
 
-import cats.effect.IO
-import mu.rpc.server.netty.SetSslContext
-import mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
+import cats.effect.{IO, Resource}
+import higherkindness.mu.rpc.server.netty.SetSslContext
+import higherkindness.mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
 import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.GrpcSslContexts
 import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}
@@ -111,15 +111,15 @@ trait Runtime extends CommonRuntime {
 
   // Adding to the GrpConfig list the SslContext:
 
-  val grpcConfigs: List[GrpcConfig] = List(
-    SetSslContext(serverSslContext),
-    AddService(Greeter.bindService[IO])
-  )
+  val grpcConfigs: IO[List[GrpcConfig]] =
+     Greeter.bindService[IO]
+       .map(AddService)
+       .map(c => List(SetSslContext(serverSslContext), c))
 
   // Important. We have to create the server with Netty. OkHttp is not supported for the Ssl
   // encryption in mu-rpc at this moment.
 
-  val server: IO[GrpcServer[IO]] = GrpcServer.netty[IO](8080, grpcConfigs)
+  val server: IO[GrpcServer[IO]] = grpcConfigs.flatMap(GrpcServer.netty[IO](8080, _))
 
 }
 
@@ -129,9 +129,10 @@ object implicits extends Runtime
 Lastly, as we did before with the server side, let's see what happens on the client side.
 
 ```tut:silent
-import mu.rpc.ChannelForAddress
-import mu.rpc.client.OverrideAuthority
-import mu.rpc.client.netty.{
+import cats.syntax.either._
+import higherkindness.mu.rpc.ChannelForAddress
+import higherkindness.mu.rpc.channel.OverrideAuthority
+import higherkindness.mu.rpc.channel.netty.{
   NettyChannelInterpreter,
   NettyNegotiationType,
   NettySslContext,
@@ -167,16 +168,16 @@ object MainApp extends CommonRuntime {
 
   val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
     ChannelForAddress("localhost", 8080),
+    List(OverrideAuthority(TestUtils.TEST_SERVER_HOST)),
     List(
-      OverrideAuthority(TestUtils.TEST_SERVER_HOST),
       NettyUsePlaintext(),
       NettyNegotiationType(NegotiationType.TLS),
       NettySslContext(clientSslContext)
     )
   )
 
-  val muRPCServiceClient: Greeter.Client[IO] =
-    Greeter.clientFromChannel[IO](channelInterpreter.build)
+  val muRPCServiceClient: Resource[IO, Greeter[IO]] =
+    Greeter.clientFromChannel[IO](IO(channelInterpreter.build))
 
 }
 ```
@@ -188,8 +189,7 @@ object MainApp extends CommonRuntime {
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
-[@tagless algebra]: http://frees.io/docs/core/algebras/
-[PBDirect]: https://github.com/btlines/pbdirect
+[PBDirect]: https://github.com/47deg/pbdirect
 [scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect

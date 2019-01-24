@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package example.routeguide.client.io
 
-import cats.effect.IO
+import cats.effect.{IO, Resource}
 import example.routeguide.client.handlers.RouteGuideClientHandler
 import example.routeguide.protocol.Protocols._
 import example.routeguide.runtime._
@@ -24,7 +24,7 @@ import example.routeguide.client.runtime._
 
 trait ClientIOImplicits extends RouteGuide with ClientConf {
 
-  implicit val routeGuideServiceClient: RouteGuideService.Client[IO] =
+  implicit val routeGuideServiceClient: Resource[IO, RouteGuideService[IO]] =
     RouteGuideService.client[IO](channelFor)
 
   implicit val routeGuideClientHandler: RouteGuideClientHandler[IO] =

@@ -1,5 +1,38 @@
 # Changelog
 
+## 01/21/2019 - Version 0.17.0
+
+Release changes:
+
+* Code Coverage and Codecov support ([#478](https://github.com/higherkindness/mu/pull/478))
+* Bumps avrohugger ([#483](https://github.com/higherkindness/mu/pull/483))
+* Defaults to ScalaBigDecimalTaggedGen in the idl-plugin ([#485](https://github.com/higherkindness/mu/pull/485))
+* Downgrades sbt-org-policies and fixes codecov badge ([#486](https://github.com/higherkindness/mu/pull/486))
+* Bump up gRPC version ([#487](https://github.com/higherkindness/mu/pull/487))
+* Referential Transparency for RPC client ([#484](https://github.com/higherkindness/mu/pull/484))
+* Removes some warnings ([#488](https://github.com/higherkindness/mu/pull/488))
+* Makes the client extends the service ([#493](https://github.com/higherkindness/mu/pull/493))
+* Improve managed channel interpreter ([#494](https://github.com/higherkindness/mu/pull/494))
+* Package renaming ([#495](https://github.com/higherkindness/mu/pull/495))
+* Ignores Metals files ([#497](https://github.com/higherkindness/mu/pull/497))
+* New Mu Microsite ([#498](https://github.com/higherkindness/mu/pull/498))
+* Fixes mu microsite base url ([#499](https://github.com/higherkindness/mu/pull/499))
+* Removes outdated references to freestyle ([#503](https://github.com/higherkindness/mu/pull/503))
+* Split streaming modules ([#505](https://github.com/higherkindness/mu/pull/505))
+* Fixes the avro decimal compat protocol namespace ([#506](https://github.com/higherkindness/mu/pull/506))
+* Updates license headers ([#507](https://github.com/higherkindness/mu/pull/507))
+* Updates pbdirect ([#508](https://github.com/higherkindness/mu/pull/508))
+* `bindService` as an Effect ([#509](https://github.com/higherkindness/mu/pull/509))
+* Bumps fs2-grpc ([#510](https://github.com/higherkindness/mu/pull/510))
+* Build Reorganization ([#518](https://github.com/higherkindness/mu/pull/518))
+* Update gRPC and Others ([#520](https://github.com/higherkindness/mu/pull/520))
+* Defines the MetricsOps algebra ([#519](https://github.com/higherkindness/mu/pull/519))
+* Passes the method info to the MetricsOps defs ([#521](https://github.com/higherkindness/mu/pull/521))
+* Release "0.17.0" ([#501](https://github.com/higherkindness/mu/pull/501))
+* Fixes scripted tests ([#523](https://github.com/higherkindness/mu/pull/523))
+* Disables dependencies plugin ([#534](https://github.com/higherkindness/mu/pull/534))
+
+
 ## 10/20/2018 - Version 0.16.0
 
 Release changes:
