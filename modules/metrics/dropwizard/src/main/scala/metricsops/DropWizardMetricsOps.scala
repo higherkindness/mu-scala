@@ -20,8 +20,8 @@
  * The list of registered metrics contains:
  *
  * {prefix}.{classifier}.active.calls - Counter
- * {prefix}.{classifier}.{serviceName}.{methodName}.{methodType}.messages.sent - Counter
- * {prefix}.{classifier}.{serviceName}.{methodName}.{methodType}.messages.received - Counter
+ * {prefix}.{classifier}.{serviceName}.{methodName}.messages.sent - Counter
+ * {prefix}.{classifier}.{serviceName}.{methodName}.messages.received - Counter
  * {prefix}.{classifier}.calls.header - Timer
  * {prefix}.{classifier}.calls.total - Timer
  * {prefix}.{classifier}.{methodType} - Timer
