@@ -15,11 +15,12 @@
  */
 
 package higherkindness.mu.rpc
-package channel.metrics
+package server.metrics
 
 import cats.effect.{Clock, IO, Resource}
 import cats.syntax.apply._
 import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.interceptors.implicits._
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
 import higherkindness.mu.rpc.internal.metrics.util.FakeClock
 import higherkindness.mu.rpc.internal.metrics.{MetricsOps, MetricsOpsRegister}
@@ -29,13 +30,13 @@ import io.grpc.MethodDescriptor.MethodType
 import io.grpc.Status
 import org.scalatest.Assertion
 
-class MonitoringChannelInterceptorTests extends RpcBaseTestSuite {
+class MetricsServerInterceptorTests extends RpcBaseTestSuite {
 
   import services._
 
   val myClassifier: Option[String] = Some("MyClassifier")
 
-  "MonitoringChannelInterceptor" should {
+  "MetricsServerInterceptor" should {
 
     "generate the right metrics with proto" in {
       (for {
@@ -73,9 +74,10 @@ class MonitoringChannelInterceptorTests extends RpcBaseTestSuite {
       implicit H: ProtoRPCService[IO]): IO[Either[Throwable, A]] = {
     implicit val _: Clock[IO] = clock
     withServerChannel[IO](
-      service = ProtoRPCService.bindService[IO],
-      clientInterceptor = Some(MetricsChannelInterceptor(metricsOps, myClassifier)))
-      .flatMap(createClient)
+      service = ProtoRPCService
+        .bindService[IO]
+        .map(_.interceptWith(MetricsServerInterceptor(metricsOps, myClassifier)))
+    ).flatMap(createClient)
       .use(f(_).attempt)
   }
 
@@ -84,39 +86,31 @@ class MonitoringChannelInterceptorTests extends RpcBaseTestSuite {
       methodCalls: List[GrpcMethodInfo],
       serverError: Boolean = false): IO[Assertion] = {
     for {
-      incArgs     <- metricsOps.increaseActiveCallsReg.get
-      sentArgs    <- metricsOps.recordMessageSentReg.get
-      recArgs     <- metricsOps.recordMessageReceivedReg.get
-      headersArgs <- metricsOps.recordHeadersTimeReg.get
-      totalArgs   <- metricsOps.recordTotalTimeReg.get
-      decArgs     <- metricsOps.decreaseActiveCallsReg.get
+      decArgs   <- metricsOps.decreaseActiveCallsReg.get
+      incArgs   <- metricsOps.increaseActiveCallsReg.get
+      recArgs   <- metricsOps.recordMessageReceivedReg.get
+      sentArgs  <- metricsOps.recordMessageSentReg.get
+      totalArgs <- metricsOps.recordTotalTimeReg.get
     } yield {
 
       val argList: List[(GrpcMethodInfo, Option[String])] = methodCalls.map((_, myClassifier))
 
-      // Increase Active Calls
-      incArgs should contain theSameElementsAs argList
-      // Messages Sent
-      sentArgs should contain theSameElementsAs argList
-      // Messages Received
-      if (!serverError) recArgs should contain theSameElementsAs argList
       // Decrease Active Calls
       decArgs should contain theSameElementsAs argList
-      // Headers Time
-      if (!serverError) {
-        headersArgs.map(_._1) should contain theSameElementsAs methodCalls
-        headersArgs.map(_._2) shouldBe List.fill(methodCalls.size)(50)
-        headersArgs.map(_._3) should contain theSameElementsAs argList.map(_._2)
-      }
+      // Increase Active Calls
+      incArgs should contain theSameElementsAs argList
+      // Messages Received
+      recArgs should contain theSameElementsAs argList
+      // Messages Sent
+      if (serverError) sentArgs shouldBe empty
+      else sentArgs should contain theSameElementsAs argList
       // Total Time
       totalArgs.map(_._1) should contain theSameElementsAs methodCalls
-      if (serverError) {
+      if (serverError)
         totalArgs.map(_._2.getCode) shouldBe List.fill(methodCalls.size)(Status.INTERNAL.getCode)
-        totalArgs.map(_._3) shouldBe List.fill(methodCalls.size)(50)
-      } else {
+      else
         totalArgs.map(_._2) shouldBe List.fill(methodCalls.size)(Status.OK)
-        totalArgs.map(_._3) shouldBe List.fill(methodCalls.size)(100)
-      }
+      totalArgs.map(_._3) shouldBe List.fill(methodCalls.size)(50)
       totalArgs.map(_._4) should contain theSameElementsAs argList.map(_._2)
     }
   }
