@@ -99,6 +99,15 @@ lazy val `client-cache` = project
   .settings(moduleName := "mu-rpc-client-cache")
   .settings(clientCacheSettings)
 
+//////////////////////
+//// INTERCEPTORS ////
+//////////////////////
+
+lazy val interceptors = project
+  .in(file("modules/interceptors"))
+  .settings(moduleName := "mu-rpc-interceptors")
+  .settings(interceptorsSettings)
+
 ////////////////
 //// SERVER ////
 ////////////////
@@ -111,17 +120,9 @@ lazy val server = project
   .dependsOn(monix % "test->test")
   .dependsOn(fs2 % "test->test")
   .dependsOn(testing % "test->test")
+  .dependsOn(interceptors % "compile->compile;test->test")
   .settings(moduleName := "mu-rpc-server")
   .settings(serverSettings)
-
-//////////////////////
-//// INTERCEPTORS ////
-//////////////////////
-
-lazy val interceptors = project
-  .in(file("modules/interceptors"))
-  .settings(moduleName := "mu-rpc-interceptors")
-  .settings(interceptorsSettings)
 
 ////////////////////
 //// PROMETHEUS ////
