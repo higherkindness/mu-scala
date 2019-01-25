@@ -38,15 +38,18 @@ case class MetricsServerInterceptor[F[_]: Clock](
 
     val methodInfo: GrpcMethodInfo = GrpcMethodInfo(call.getMethodDescriptor)
 
-    val metricsCall: MetricsServerCall[F, Req, Res] =
-      E.toIO(MetricsServerCall.build[F, Req, Res](call, methodInfo, metricsOps, classifier))
-        .unsafeRunSync
-
-    MetricsServerCallListener[F, Req](
-      next.startCall(metricsCall, requestHeaders),
-      methodInfo,
-      metricsOps,
-      classifier)
+    E.toIO(
+        MetricsServerCall
+          .build[F, Req, Res](call, methodInfo, metricsOps, classifier)
+          .map(
+            metricsCall =>
+              MetricsServerCallListener[F, Req](
+                next.startCall(metricsCall, requestHeaders),
+                methodInfo,
+                metricsOps,
+                classifier))
+      )
+      .unsafeRunSync
   }
 }
 

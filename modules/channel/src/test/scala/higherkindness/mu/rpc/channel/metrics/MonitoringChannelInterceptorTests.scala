@@ -40,8 +40,8 @@ class MonitoringChannelInterceptorTests extends RpcBaseTestSuite {
     "generate the right metrics with proto" in {
       (for {
         metricsOps <- MetricsOpsRegister.build
-        fakeClock  <- FakeClock.build[IO]
-        _          <- makeProtoCalls(metricsOps, fakeClock)(_.serviceOp1(Request()))(protoRPCServiceImpl)
+        clock      <- FakeClock.build[IO]
+        _          <- makeProtoCalls(metricsOps, clock)(_.serviceOp1(Request()))(protoRPCServiceImpl)
         assertion  <- checkCalls(metricsOps, List(serviceOp1Info))
       } yield assertion).unsafeRunSync()
     }
@@ -49,8 +49,8 @@ class MonitoringChannelInterceptorTests extends RpcBaseTestSuite {
     "generate the right metrics when calling multiple methods with proto" in {
       (for {
         metricsOps <- MetricsOpsRegister.build
-        fakeClock  <- FakeClock.build[IO]
-        _ <- makeProtoCalls(metricsOps, fakeClock) { client =>
+        clock      <- FakeClock.build[IO]
+        _ <- makeProtoCalls(metricsOps, clock) { client =>
           client.serviceOp1(Request()) *> client.serviceOp2(Request())
         }(protoRPCServiceImpl)
         assertion <- checkCalls(metricsOps, List(serviceOp1Info, serviceOp2Info))
@@ -60,19 +60,18 @@ class MonitoringChannelInterceptorTests extends RpcBaseTestSuite {
     "generate the right metrics with proto when the server returns an error" in {
       (for {
         metricsOps <- MetricsOpsRegister.build
-        fakeClock  <- FakeClock.build[IO]
-        _ <- makeProtoCalls(metricsOps, fakeClock)(_.serviceOp1(Request()))(
-          protoRPCServiceErrorImpl)
-        assertion <- checkCalls(metricsOps, List(serviceOp1Info), serverError = true)
+        clock      <- FakeClock.build[IO]
+        _          <- makeProtoCalls(metricsOps, clock)(_.serviceOp1(Request()))(protoRPCServiceErrorImpl)
+        assertion  <- checkCalls(metricsOps, List(serviceOp1Info), serverError = true)
       } yield assertion).unsafeRunSync()
     }
 
   }
 
-  private[this] def makeProtoCalls[A](metricsOps: MetricsOps[IO], fakeClock: FakeClock[IO])(
+  private[this] def makeProtoCalls[A](metricsOps: MetricsOps[IO], clock: FakeClock[IO])(
       f: ProtoRPCService[IO] => IO[A])(
       implicit H: ProtoRPCService[IO]): IO[Either[Throwable, A]] = {
-    implicit val clock: Clock[IO] = fakeClock
+    implicit val _: Clock[IO] = clock
     withServerChannel[IO](
       service = ProtoRPCService.bindService[IO],
       clientInterceptor = Some(MetricsChannelInterceptor(metricsOps, myClassifier)))
