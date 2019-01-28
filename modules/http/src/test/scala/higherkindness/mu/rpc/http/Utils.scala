@@ -19,7 +19,7 @@ package higherkindness.mu.rpc.http
 import cats.ApplicativeError
 import cats.effect._
 import cats.implicits._
-//import fs2.interop.reactivestreams._
+import fs2.interop.reactivestreams._
 import fs2.{RaiseThrowable, Stream}
 import io.grpc.Status.Code._
 import jawn.ParseException
@@ -86,13 +86,13 @@ object Utils {
     def asJsonEither(implicit encoder: Encoder[A]): Stream[F, Json] = stream.attempt.map(_.asJson)
 
     def toObservable(implicit F: ConcurrentEffect[F], ec: ExecutionContext): Observable[A] =
-      Observable.fromReactivePublisher(???) //TODO stream.toUnicastPublisher)
+      Observable.fromReactivePublisher(stream.toUnicastPublisher)
   }
 
   private[http] implicit class MonixStreamOps[A](val stream: Observable[A]) extends AnyVal {
 
     def toFs2Stream[F[_]](implicit F: ConcurrentEffect[F], sc: Scheduler): Stream[F, A] =
-      ??? //TODO stream.toReactivePublisher.toStream[F]()
+      stream.toReactivePublisher.toStream[F]()
   }
 
   private[http] implicit class FResponseOps[F[_]: Sync](response: F[Response[F]])

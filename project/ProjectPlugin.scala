@@ -131,6 +131,7 @@ object ProjectPlugin extends AutoPlugin {
         %%("http4s-blaze-server", V.http4s),
         %%("http4s-circe", V.http4s),
         %%("circe-generic"),
+        "co.fs2" %% "fs2-reactive-streams" % V.reactiveStreams,
         %%("http4s-blaze-client", V.http4s) % Test,
         %%("scalacheck") % Test,
         %%("monix", V.monix) % Test,

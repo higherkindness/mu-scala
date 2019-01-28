@@ -455,16 +455,19 @@ object serviceImpl {
           new $HttpClient[$F](uri)
       }"""
 
-      val http = if(httpRequests.isEmpty) Nil else List(
-        q"import _root_.higherkindness.mu.rpc.http.Utils._",
-        q"import _root_.org.http4s._",
-        q"import _root_.org.http4s.circe._",
-        q"import _root_.io.circe._",
-        q"import _root_.io.circe.generic.auto._",
-        q"import _root_.io.circe.syntax._",
-        httpClientClass,
-        httpClient
-      )
+      val http =
+        if (httpRequests.isEmpty) Nil
+        else
+          List(
+            q"import _root_.higherkindness.mu.rpc.http.Utils._",
+            q"import _root_.org.http4s._",
+            q"import _root_.org.http4s.circe._",
+            q"import _root_.io.circe._",
+            q"import _root_.io.circe.generic.auto._",
+            q"import _root_.io.circe.syntax._",
+            httpClientClass,
+            httpClient
+          )
     }
 
     val classAndMaybeCompanion = annottees.map(_.tree)
