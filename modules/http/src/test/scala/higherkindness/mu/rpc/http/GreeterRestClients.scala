@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package mu.rpc.http
+package higherkindness.mu.rpc.http
 
 import cats.effect._
 import fs2.Stream
 import io.circe.generic.auto._
 import io.circe.syntax._
-import mu.rpc.http.Utils._
+import higherkindness.mu.rpc.http.Utils._
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.client._
@@ -68,7 +68,7 @@ class MonixGreeterRestClient[F[_]: ConcurrentEffect](uri: Uri)(
     implicit sc: monix.execution.Scheduler) {
 
   import monix.reactive.Observable
-  import mu.rpc.http.Utils._
+  import higherkindness.mu.rpc.http.Utils._
 
   private implicit val responseDecoder: EntityDecoder[F, HelloResponse] = jsonOf[F, HelloResponse]
 

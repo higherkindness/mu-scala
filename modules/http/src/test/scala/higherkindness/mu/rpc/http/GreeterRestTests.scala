@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package mu.rpc.http
+package higherkindness.mu.rpc.http
 
 import cats.effect.{IO, _}
 import fs2.Stream
+import higherkindness.mu.rpc.common.RpcBaseTestSuite
+import higherkindness.mu.rpc.http.Utils._
+import higherkindness.mu.rpc.protocol.Empty
 import io.circe.Json
 import io.circe.generic.auto._
 import io.circe.syntax._
 import monix.reactive.Observable
-import mu.rpc.common.RpcBaseTestSuite
-import mu.rpc.http.Utils._
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.client.UnexpectedStatus
@@ -33,6 +34,7 @@ import org.http4s.server._
 import org.http4s.server.blaze._
 import org.scalatest._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+
 import scala.concurrent.duration._
 
 class GreeterRestTests
@@ -262,7 +264,24 @@ class GreeterRestTests
           .getOrElse(sys.error("Stuck!")) shouldBe strings.map(HelloResponse)
       }
     }
+  }
 
+  "Auto-derived REST Client" should {
+
+    "serve a GET request" in {
+      val client: UnaryGreeter.HttpClient[IO] = UnaryGreeter.httpClient[IO](serviceUri)
+      val response: IO[HelloResponse]         = BlazeClientBuilder[IO](ec).resource.use(client.getHello(_))
+      response.unsafeRunSync() shouldBe HelloResponse("hey")
+    }
+
+    "serve a unary POST request" in {
+      val client: UnaryGreeter.HttpClient[IO] = UnaryGreeter.httpClient[IO](serviceUri)
+      val response: IO[HelloResponse] =
+        BlazeClientBuilder[IO](ec).resource.use(client.sayHello(HelloRequest("hey"))(_))
+      response.unsafeRunSync() shouldBe HelloResponse("hey")
+    }
+
+    //TODO: more tests
   }
 
 }

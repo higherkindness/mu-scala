@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc.http
+package higherkindness.mu.rpc.http
 
 import cats.{Applicative, MonadError}
 import cats.effect._
@@ -23,7 +23,7 @@ class UnaryGreeterHandler[F[_]: Applicative](implicit F: MonadError[F, Throwable
     extends UnaryGreeter[F] {
 
   import cats.syntax.applicative._
-  import mu.rpc.protocol.Empty
+  import higherkindness.mu.rpc.protocol.Empty
   import io.grpc.Status._
 
   def getHello(request: Empty.type): F[HelloResponse] = HelloResponse("hey").pure

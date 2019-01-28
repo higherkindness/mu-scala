@@ -125,14 +125,16 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val rpcHttpServerSettings: Seq[Def.Setting[_]] = Seq(
+    lazy val httpSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("http4s-dsl", V.http4s),
         %%("http4s-blaze-server", V.http4s),
         %%("http4s-circe", V.http4s),
         %%("circe-generic"),
         %%("http4s-blaze-client", V.http4s) % Test,
-        %%("scalacheck", V.scalacheck) % Test,
+        %%("scalacheck") % Test,
+        %%("monix", V.monix) % Test,
+        %%("scalamockScalatest") % Test,
         "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
       )
     )

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package mu.rpc.http
+package higherkindness.mu.rpc.http
 
-import mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol._
 
 @message final case class HelloRequest(hello: String)
 
@@ -27,9 +27,9 @@ import mu.rpc.protocol._
 
 @service(Avro) trait UnaryGreeter[F[_]] {
 
-  def getHello(request: Empty.type): F[HelloResponse]
+  @http(GET, "getHello") def getHello(request: Empty.type): F[HelloResponse]
 
-  def sayHello(request: HelloRequest): F[HelloResponse]
+  @http(POST, "sayHello") def sayHello(request: HelloRequest): F[HelloResponse]
 }
 
 import fs2.Stream

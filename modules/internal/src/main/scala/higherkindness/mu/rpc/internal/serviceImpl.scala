@@ -259,6 +259,13 @@ object serviceImpl {
           .getOrElse(if (params.isDefinedAt(pos)) params(pos).toString
           else default.getOrElse(sys.error(s"Missing annotation parameter $name")))
 
+      private def findAnnotation(mods: Modifiers, name: String): Option[Tree] =
+        mods.annotations find {
+          case Apply(Select(New(Ident(TypeName(`name`))), _), _)     => true
+          case Apply(Select(New(Select(_, TypeName(`name`))), _), _) => true
+          case _                                                     => false
+        }
+
       //todo: validate that the request and responses are case classes, if possible
       case class RpcRequest(
           methodName: TermName,
@@ -379,6 +386,85 @@ object serviceImpl {
           q"($methodDescriptorName, $handler)"
         }
       }
+
+      //----------
+      // HTTP/REST
+      //----------
+      //TODO: derive server as well
+      //TODO: move HTTP-related code to its own module (on last attempt this did not work)
+
+      def requestExecution(responseType: Tree, methodResponseType: Tree): Tree =
+        methodResponseType match {
+          case tq"Observable[..$tpts]" =>
+            q"Observable.fromReactivePublisher(client.streaming(request)(_.body.chunks.parseJsonStream.map(_.as[$responseType]).rethrow).toUnicastPublisher)"
+          case tq"Stream[$carrier, ..$tpts]" =>
+            q"client.streaming(request)(_.body.chunks.parseJsonStream.map(_.as[$responseType]).rethrow)"
+          case tq"$carrier[..$tpts]" =>
+            q"client.expect[$responseType](request)"
+        }
+
+      val toHttpRequest: ((TermName, String, TermName, Tree, Tree, Tree)) => DefDef = {
+        case (method, path, name, requestType, responseType, methodResponseType) =>
+          if (requestType.toString.endsWith("Empty.type")) q"""
+            def $name(implicit
+              client: _root_.org.http4s.client.Client[F]
+            ): $methodResponseType = {
+              implicit val responseDecoder: EntityDecoder[F, $responseType] = jsonOf[F, $responseType]
+              val request = Request[F](Method.$method, uri / ${path.replace("\"", "")})
+              ${requestExecution(responseType, methodResponseType)}
+            }"""
+          else q"""
+            def $name(req: $requestType)(implicit
+              client: _root_.org.http4s.client.Client[F]
+            ): $methodResponseType = {
+              implicit val responseDecoder: EntityDecoder[F, $responseType] = jsonOf[F, $responseType]
+              val request = Request[F](Method.$method, uri / ${path.replace("\"", "")}).withEntity(req.asJson)
+              ${requestExecution(responseType, methodResponseType)}
+            }"""
+      }
+
+      val httpRequests = (for {
+        d      <- rpcDefs.collect { case x if findAnnotation(x.mods, "http").isDefined => x }
+        args   <- findAnnotation(d.mods, "http").collect({ case Apply(_, args) => args }).toList
+        params <- d.vparamss
+        _ = require(params.length == 1, s"RPC call ${d.name} has more than one request parameter")
+        p <- params.headOption.toList
+      } yield {
+        val method = TermName(args(0).toString) // TODO: fix direct index access
+        val uri    = args(1).toString // TODO: fix direct index access
+
+        val responseType: Tree = d.tpt match {
+          case tq"Observable[..$tpts]"       => tpts.head
+          case tq"Stream[$carrier, ..$tpts]" => tpts.head
+          case tq"$carrier[..$tpts]"         => tpts.head
+          case _                             => ???
+        }
+
+        (method, uri, d.name, p.tpt, responseType, d.tpt)
+      }).map(toHttpRequest)
+
+      val HttpClient                = TypeName("HttpClient")
+      val httpClientClass: ClassDef = q"""
+        class $HttpClient[$F_](uri: Uri)(implicit F: _root_.cats.effect.Effect[$F], ec: scala.concurrent.ExecutionContext) {
+          ..$httpRequests
+      }"""
+
+      val httpClient: DefDef = q"""
+        def httpClient[$F_](uri: Uri)
+          (implicit F: _root_.cats.effect.Effect[$F], ec: scala.concurrent.ExecutionContext): $HttpClient[$F] = {
+          new $HttpClient[$F](uri)
+      }"""
+
+      val http = if(httpRequests.isEmpty) Nil else List(
+        q"import _root_.higherkindness.mu.rpc.http.Utils._",
+        q"import _root_.org.http4s._",
+        q"import _root_.org.http4s.circe._",
+        q"import _root_.io.circe._",
+        q"import _root_.io.circe.generic.auto._",
+        q"import _root_.io.circe.syntax._",
+        httpClientClass,
+        httpClient
+      )
     }
 
     val classAndMaybeCompanion = annottees.map(_.tree)
@@ -419,8 +505,8 @@ object serviceImpl {
               service.client,
               service.clientFromChannel,
               service.unsafeClient,
-              service.unsafeClientFromChannel
-            )
+              service.unsafeClientFromChannel,
+            ) ++ service.http
           )
         )
         List(serviceDef, enrichedCompanion)

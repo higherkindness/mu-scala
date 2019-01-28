@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package mu.rpc.http
+package higherkindness.mu.rpc.http
 
 import cats.ApplicativeError
 import cats.effect._
 import cats.implicits._
-import fs2.interop.reactivestreams._
+//import fs2.interop.reactivestreams._
 import fs2.{RaiseThrowable, Stream}
 import io.grpc.Status.Code._
 import jawn.ParseException
@@ -86,13 +86,13 @@ object Utils {
     def asJsonEither(implicit encoder: Encoder[A]): Stream[F, Json] = stream.attempt.map(_.asJson)
 
     def toObservable(implicit F: ConcurrentEffect[F], ec: ExecutionContext): Observable[A] =
-      Observable.fromReactivePublisher(stream.toUnicastPublisher)
+      Observable.fromReactivePublisher(???) //TODO stream.toUnicastPublisher)
   }
 
   private[http] implicit class MonixStreamOps[A](val stream: Observable[A]) extends AnyVal {
 
     def toFs2Stream[F[_]](implicit F: ConcurrentEffect[F], sc: Scheduler): Stream[F, A] =
-      stream.toReactivePublisher.toStream[F]()
+      ??? //TODO stream.toReactivePublisher.toStream[F]()
   }
 
   private[http] implicit class FResponseOps[F[_]: Sync](response: F[Response[F]])

@@ -177,15 +177,13 @@ lazy val `dropwizard-client` = project
 //// HTTP/REST ////
 ///////////////////
 
-lazy val `http-server` = project
-  .in(file("modules/http/server"))
+lazy val `http` = project
+  .in(file("modules/http"))
   .dependsOn(common % "compile->compile;test->test")
-  .dependsOn(internal)
-  .dependsOn(client % "test->test")
-  .dependsOn(server % "test->test")
-  .settings(moduleName := "frees-rpc-http-server")
-  .settings(rpcHttpServerSettings)
-  .disablePlugins(ScriptedPlugin)
+  .dependsOn(channel % "compile->compile;test->test")
+  .dependsOn(server % "compile->compile;test->test")
+  .settings(moduleName := "mu-rpc-http")
+  .settings(httpSettings)
 
 ////////////////
 //// IDLGEN ////
@@ -403,7 +401,7 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   testing,
   ssl,
   `idlgen-core`,
-  `http-server`,
+  `http`,
   `marshallers-jodatime`,
   `example-routeguide-protocol`,
   `example-routeguide-common`,

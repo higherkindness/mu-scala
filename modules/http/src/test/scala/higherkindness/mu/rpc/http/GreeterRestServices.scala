@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package mu.rpc.http
+package higherkindness.mu.rpc.http
 
 import cats.MonadError
 import cats.effect._
@@ -22,7 +22,7 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import io.circe.generic.auto._
 import io.circe.syntax._
-import mu.rpc.http.Utils._
+import higherkindness.mu.rpc.http.Utils._
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
@@ -31,7 +31,7 @@ class UnaryGreeterRestService[F[_]: Sync](handler: UnaryGreeter[F])(
     implicit F: MonadError[F, Throwable])
     extends Http4sDsl[F] {
 
-  import mu.rpc.protocol.Empty
+  import higherkindness.mu.rpc.protocol.Empty
 
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
 
