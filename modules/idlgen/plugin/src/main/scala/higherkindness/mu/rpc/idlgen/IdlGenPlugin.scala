@@ -125,7 +125,7 @@ object IdlGenPlugin extends AutoPlugin {
         (idlGenBigDecimal.value match {
           case ScalaBigDecimalGen       => BigDecimalAvroMarshallers
           case ScalaBigDecimalTaggedGen => BigDecimalTaggedAvroMarshallers
-        }) :: Nil
+        }) :: JavaTimeDateAvroMarshallers :: List.empty[MarshallersImport]
       else if (srcGenSerializationType.value == "Protobuf")
         List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)
       else Nil

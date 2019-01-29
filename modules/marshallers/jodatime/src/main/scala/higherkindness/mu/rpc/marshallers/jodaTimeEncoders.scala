@@ -21,12 +21,11 @@ import java.io.{ByteArrayInputStream, InputStream}
 
 import com.google.common.io.ByteStreams
 import com.google.protobuf.{CodedInputStream, CodedOutputStream}
-import com.sksamuel.avro4s.Decoder.{IntDecoder, LongDecoder}
-import com.sksamuel.avro4s.Encoder.{IntEncoder, LongEncoder}
 import higherkindness.mu.rpc.internal.util.EncoderUtil
 import higherkindness.mu.rpc.jodatime.util.JodaTimeUtil
 import io.grpc.MethodDescriptor.Marshaller
-import org.apache.avro.{Schema, SchemaBuilder}
+import org.apache.avro.Schema
+import org.apache.avro.Schema.Field
 import org.joda.time.{LocalDate, LocalDateTime}
 
 object jodaTimeEncoders {
@@ -65,25 +64,33 @@ object jodaTimeEncoders {
 
     import com.sksamuel.avro4s._
 
-    implicit object JodaLocalDateToSchema extends SchemaFor[LocalDate] {
-      override val schema: Schema = SchemaBuilder.builder().intType()
+    implicit object JodaLocalDateToSchema extends ToSchema[LocalDate] {
+      override val schema: Schema = Schema.create(Schema.Type.INT)
     }
 
-    implicit val jodaLocalDateFromValue: Decoder[LocalDate] =
-      IntDecoder.map(JodaTimeUtil.intToJodaLocalDate)
-
-    implicit val jodalocalDateToValue: Encoder[LocalDate] =
-      IntEncoder.comap[LocalDate](JodaTimeUtil.jodaLocalDateToInt)
-
-    implicit object JodaLocalDateTimeToSchema extends SchemaFor[LocalDateTime] {
-      override val schema: Schema = SchemaBuilder.builder().longType()
+    implicit object JodaLocalDateFromValue extends FromValue[LocalDate] {
+      override def apply(value: Any, field: Field): LocalDate =
+        JodaTimeUtil.intToJodaLocalDate(value.asInstanceOf[Int])
     }
 
-    implicit val jodaLocalDateTimeFromValue: Decoder[LocalDateTime] =
-      LongDecoder.map(JodaTimeUtil.longToJodaLocalDateTime)
+    implicit object JodalocalDateToValue extends ToValue[LocalDate] {
+      override def apply(value: LocalDate): Int =
+        JodaTimeUtil.jodaLocalDateToInt(value)
+    }
 
-    implicit val jodaLocalDateTimeToValue: Encoder[LocalDateTime] =
-      LongEncoder.comap[LocalDateTime](JodaTimeUtil.jodaLocalDatetimeToLong)
+    implicit object JodaLocalDateTimeToSchema extends ToSchema[LocalDateTime] {
+      override val schema: Schema = Schema.create(Schema.Type.LONG)
+    }
+
+    implicit object JodaLocalDateTimeFromValue extends FromValue[LocalDateTime] {
+      def apply(value: Any, field: Field): LocalDateTime =
+        JodaTimeUtil.longToJodaLocalDateTime(value.asInstanceOf[Long])
+    }
+
+    implicit object JodaLocalDateTimeToValue extends ToValue[LocalDateTime] {
+      override def apply(value: LocalDateTime): Long =
+        JodaTimeUtil.jodaLocalDatetimeToLong(value)
+    }
 
     object marshallers {
 

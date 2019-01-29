@@ -22,10 +22,11 @@ import java.nio.ByteBuffer
 import java.time.{Instant, LocalDate, LocalDateTime}
 
 import com.google.common.io.ByteStreams
-import higherkindness.mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil}
+import higherkindness.mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTimeUtil}
 import higherkindness.mu.rpc.protocol.Empty
 import io.grpc.MethodDescriptor.Marshaller
-import org.apache.avro.{Conversions, LogicalTypes, Schema, SchemaBuilder}
+import org.apache.avro.{Conversions, LogicalTypes, Schema}
+import org.apache.avro.Schema.Field
 import shapeless.Nat
 import shapeless.ops.nat.ToInt
 import shapeless.tag.@@
@@ -45,23 +46,21 @@ object avro extends AvroMarshallers {
 
   import com.sksamuel.avro4s._
 
-  implicit def avroMarshallers[A: SchemaFor: Decoder: Encoder]: Marshaller[A] =
+  implicit def avroMarshallers[A: SchemaFor: FromRecord: ToRecord]: Marshaller[A] =
     new Marshaller[A] {
 
       override def parse(stream: InputStream): A = {
-        val input: AvroInputStream[A] =
-          AvroInputStream.binary[A].from(stream).build(SchemaFor[A].schema)
-        val result = input.iterator.next()
-        input.close()
-        result
+        val bytes: Array[Byte] =
+          Iterator.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray
+        val in: ByteArrayInputStream        = new ByteArrayInputStream(bytes)
+        val input: AvroBinaryInputStream[A] = AvroInputStream.binary[A](in)
+        input.iterator.toList.head
       }
 
       override def stream(value: A): InputStream = {
-        val baos: ByteArrayOutputStream = new ByteArrayOutputStream()
-        val output: AvroOutputStream[A] =
-          AvroOutputStream.binary[A].to(baos).build(SchemaFor[A].schema)
+        val baos: ByteArrayOutputStream       = new ByteArrayOutputStream()
+        val output: AvroBinaryOutputStream[A] = AvroOutputStream.binary[A](baos)
         output.write(value)
-        output.flush()
         output.close()
 
         new ByteArrayInputStream(baos.toByteArray)
@@ -77,17 +76,17 @@ object avro extends AvroMarshallers {
   )
   object bigdecimal {
 
-    implicit object bigDecimalToSchema extends SchemaFor[BigDecimal] {
-      override val schema: Schema = SchemaBuilder.builder.bytesType()
+    implicit object bigDecimalToSchema extends ToSchema[BigDecimal] {
+      override val schema: Schema = Schema.create(Schema.Type.BYTES)
     }
 
-    implicit object bigDecimalFromValue extends Decoder[BigDecimal] {
-      override def decode(value: Any, schema: Schema): BigDecimal =
+    implicit object bigDecimalFromValue extends FromValue[BigDecimal] {
+      def apply(value: Any, field: Field): BigDecimal =
         BigDecimalUtil.byteToBigDecimal(value.asInstanceOf[ByteBuffer].array())
     }
 
-    implicit object bigDecimalToValue extends Encoder[BigDecimal] {
-      override def encode(value: BigDecimal, schema: Schema): AnyRef =
+    implicit object bigDecimalToValue extends ToValue[BigDecimal] {
+      override def apply(value: BigDecimal): ByteBuffer =
         ByteBuffer.wrap(BigDecimalUtil.bigDecimalToByte(value))
     }
 
@@ -112,14 +111,14 @@ object avro extends AvroMarshallers {
         implicit toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         RM: RoundingMode.RoundingMode) =
-      ScalePrecisionRoundingMode(Nat.toInt[B], Nat.toInt[A], RM)
+      ScaleAndPrecisionAndRoundingMode(Nat.toInt[B], Nat.toInt[A], RM)
 
     private[this] def avro4sPrecisionAndScale[A <: Nat, B <: Nat, C <: Nat](
         implicit toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
         RM: RoundingMode.RoundingMode) =
-      ScalePrecisionRoundingMode(Nat.toInt[C], Nat.toInt[A] * 10 + Nat.toInt[B], RM)
+      ScaleAndPrecisionAndRoundingMode(Nat.toInt[C], Nat.toInt[A] * 10 + Nat.toInt[B], RM)
 
     private[this] def avro4sPrecisionAndScale[A <: Nat, B <: Nat, C <: Nat, D <: Nat](
         implicit toIntNA: ToInt[A],
@@ -127,12 +126,12 @@ object avro extends AvroMarshallers {
         toIntNC: ToInt[C],
         toIntND: ToInt[D],
         RM: RoundingMode.RoundingMode) =
-      ScalePrecisionRoundingMode(
+      ScaleAndPrecisionAndRoundingMode(
         Nat.toInt[C] * 10 + Nat.toInt[D],
         Nat.toInt[A] * 10 + Nat.toInt[B],
         RM)
 
-    private[this] case class BDSerializer(sp: ScalePrecisionRoundingMode) {
+    private[this] case class BDSerializer(sp: ScaleAndPrecisionAndRoundingMode) {
 
       val decimalConversion                 = new Conversions.DecimalConversion
       val decimalType: LogicalTypes.Decimal = LogicalTypes.decimal(sp.precision, sp.scale)
@@ -147,27 +146,30 @@ object avro extends AvroMarshallers {
     }
 
     private[this] def bigDecimalToSchema[A, B](
-        sp: ScalePrecisionRoundingMode): SchemaFor[BigDecimal @@ (A, B)] = {
-      new SchemaFor[BigDecimal @@ (A, B)] {
-        val schema: Schema =
-          LogicalTypes.decimal(sp.precision, sp.scale).addToSchema(SchemaBuilder.builder.bytesType)
+        sp: ScaleAndPrecisionAndRoundingMode): ToSchema[BigDecimal @@ (A, B)] = {
+      new ToSchema[BigDecimal @@ (A, B)] {
+        protected val schema = {
+          val schema = Schema.create(Schema.Type.BYTES)
+          LogicalTypes.decimal(sp.precision, sp.scale).addToSchema(schema)
+          schema
+        }
       }
     }
 
     private[this] def bigDecimalFromValue[A, B](
-        sp: ScalePrecisionRoundingMode): Decoder[BigDecimal @@ (A, B)] = {
-      new Decoder[BigDecimal @@ (A, B)] {
+        sp: ScaleAndPrecisionAndRoundingMode): FromValue[BigDecimal @@ (A, B)] = {
+      new FromValue[BigDecimal @@ (A, B)] {
         val inner = BDSerializer(sp)
-        override def decode(value: Any, schema: Schema): @@[BigDecimal, (A, B)] =
+        override def apply(value: Any, field: Field): BigDecimal @@ (A, B) =
           toDecimalTag[(A, B)](inner.fromByteBuffer(value.asInstanceOf[ByteBuffer]))
       }
     }
 
     private[this] def bigDecimalToValue[A, B](
-        sp: ScalePrecisionRoundingMode): Encoder[BigDecimal @@ (A, B)] = {
-      new Encoder[BigDecimal @@ (A, B)] {
+        sp: ScaleAndPrecisionAndRoundingMode): ToValue[BigDecimal @@ (A, B)] = {
+      new ToValue[BigDecimal @@ (A, B)] {
         val inner = BDSerializer(sp)
-        override def encode(value: @@[BigDecimal, (A, B)], schema: Schema): AnyRef =
+        override def apply(value: BigDecimal @@ (A, B)): ByteBuffer =
           inner.toByteBuffer(value)
       }
     }
@@ -175,14 +177,14 @@ object avro extends AvroMarshallers {
     implicit def bigDecimalToSchemaSimple[A <: Nat, B <: Nat](
         implicit toIntNA: ToInt[A],
         toIntNB: ToInt[B],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): SchemaFor[BigDecimal @@ (A, B)] =
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): ToSchema[BigDecimal @@ (A, B)] =
       bigDecimalToSchema[A, B](avro4sPrecisionAndScale[A, B])
 
     implicit def bigDecimalToSchemaBigPrecision[A <: Nat, B <: Nat, C <: Nat](
         implicit toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): SchemaFor[
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): ToSchema[
       BigDecimal @@ ((A, B), C)] =
       bigDecimalToSchema[(A, B), C](avro4sPrecisionAndScale[A, B, C])
 
@@ -191,21 +193,21 @@ object avro extends AvroMarshallers {
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
         toIntND: ToInt[D],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): SchemaFor[
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): ToSchema[
       BigDecimal @@ ((A, B), (C, D))] =
       bigDecimalToSchema[(A, B), (C, D)](avro4sPrecisionAndScale[A, B, C, D])
 
     implicit def bigDecimalFromValueSimple[A <: Nat, B <: Nat](
         implicit toIntNA: ToInt[A],
         toIntNB: ToInt[B],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): Decoder[BigDecimal @@ (A, B)] =
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): FromValue[BigDecimal @@ (A, B)] =
       bigDecimalFromValue[A, B](avro4sPrecisionAndScale[A, B])
 
     implicit def bigDecimalFromValueBigPrecision[A <: Nat, B <: Nat, C <: Nat](
         implicit toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): Decoder[
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): FromValue[
       BigDecimal @@ ((A, B), C)] =
       bigDecimalFromValue[(A, B), C](avro4sPrecisionAndScale[A, B, C])
 
@@ -214,21 +216,21 @@ object avro extends AvroMarshallers {
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
         toIntND: ToInt[D],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): Decoder[
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): FromValue[
       BigDecimal @@ ((A, B), (C, D))] =
       bigDecimalFromValue[(A, B), (C, D)](avro4sPrecisionAndScale[A, B, C, D])
 
     implicit def bigDecimalToValueSimple[A <: Nat, B <: Nat](
         implicit toIntNA: ToInt[A],
         toIntNB: ToInt[B],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): Encoder[BigDecimal @@ (A, B)] =
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): ToValue[BigDecimal @@ (A, B)] =
       bigDecimalToValue[A, B](avro4sPrecisionAndScale[A, B])
 
     implicit def bigDecimalToValueBigPrecision[A <: Nat, B <: Nat, C <: Nat](
         implicit toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): Encoder[
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): ToValue[
       BigDecimal @@ ((A, B), C)] =
       bigDecimalToValue[(A, B), C](avro4sPrecisionAndScale[A, B, C])
 
@@ -237,7 +239,7 @@ object avro extends AvroMarshallers {
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
         toIntND: ToInt[D],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): Encoder[
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): ToValue[
       BigDecimal @@ ((A, B), (C, D))] =
       bigDecimalToValue[(A, B), (C, D)](avro4sPrecisionAndScale[A, B, C, D])
 
@@ -296,51 +298,77 @@ object avro extends AvroMarshallers {
 
   object javatime {
 
+    implicit object localDateToSchema extends ToSchema[LocalDate] {
+      override val schema: Schema = Schema.create(Schema.Type.INT)
+    }
+
+    implicit object localDateFromValue extends FromValue[LocalDate] {
+      def apply(value: Any, field: Field): LocalDate =
+        JavaTimeUtil.intToLocalDate(value.asInstanceOf[Int])
+    }
+
+    implicit object localDateToValue extends ToValue[LocalDate] {
+      override def apply(value: LocalDate): Int =
+        JavaTimeUtil.localDateToInt(value)
+    }
+
+    implicit object localDateTimeToSchema extends ToSchema[LocalDateTime] {
+      override val schema: Schema = Schema.create(Schema.Type.LONG)
+    }
+
+    implicit object localDateTimeFromValue extends FromValue[LocalDateTime] {
+      def apply(value: Any, field: Field): LocalDateTime =
+        JavaTimeUtil.longToLocalDateTime(value.asInstanceOf[Long])
+    }
+
+    implicit object localDateTimeToValue extends ToValue[LocalDateTime] {
+      override def apply(value: LocalDateTime): Long =
+        JavaTimeUtil.localDateTimeToLong(value)
+    }
+
+    implicit object instantToSchema extends ToSchema[Instant] {
+      override val schema: Schema = Schema.create(Schema.Type.LONG)
+    }
+
+    implicit object instantFromValue extends FromValue[Instant] {
+      def apply(value: Any, field: Field): Instant =
+        JavaTimeUtil.longToInstant(value.asInstanceOf[Long])
+    }
+
+    implicit object instantToValue extends ToValue[Instant] {
+      override def apply(value: Instant): Long =
+        JavaTimeUtil.instantToLong(value)
+    }
+
     object marshallers {
 
-      implicit def localDateMarshaller(
-          implicit E: Encoder[LocalDate],
-          D: Decoder[LocalDate]): Marshaller[LocalDate] = new Marshaller[LocalDate] {
-
-        val schema: Schema = SchemaBuilder.builder().intType()
-
+      implicit val localDateMarshaller: Marshaller[LocalDate] = new Marshaller[LocalDate] {
         override def stream(value: LocalDate): InputStream =
-          new ByteArrayInputStream(
-            EncoderUtil.intToByteArray(E.encode(value, schema).asInstanceOf[Int]))
+          new ByteArrayInputStream(EncoderUtil.intToByteArray(JavaTimeUtil.localDateToInt(value)))
 
         override def parse(stream: InputStream): LocalDate =
-          D.decode(EncoderUtil.byteArrayToInt(ByteStreams.toByteArray(stream)), schema)
+          JavaTimeUtil.intToLocalDate(EncoderUtil.byteArrayToInt(ByteStreams.toByteArray(stream)))
 
       }
 
-      implicit def localDateTimeMarshaller(
-          implicit E: Encoder[LocalDateTime],
-          D: Decoder[LocalDateTime]): Marshaller[LocalDateTime] =
+      implicit val localDateTimeMarshaller: Marshaller[LocalDateTime] =
         new Marshaller[LocalDateTime] {
-
-          val schema: Schema = SchemaBuilder.builder().longType()
-
           override def stream(value: LocalDateTime): InputStream =
             new ByteArrayInputStream(
-              EncoderUtil.longToByteArray(E.encode(value, schema).asInstanceOf[Long]))
+              EncoderUtil.longToByteArray(JavaTimeUtil.localDateTimeToLong(value)))
 
           override def parse(stream: InputStream): LocalDateTime =
-            D.decode(EncoderUtil.byteArrayToLong(ByteStreams.toByteArray(stream)), schema)
+            JavaTimeUtil.longToLocalDateTime(
+              EncoderUtil.byteArrayToLong(ByteStreams.toByteArray(stream)))
         }
 
-      implicit def instantMarshaller(
-          implicit E: Encoder[Instant],
-          D: Decoder[Instant]): Marshaller[Instant] =
+      implicit val instantMarshaller: Marshaller[Instant] =
         new Marshaller[Instant] {
-
-          val schema: Schema = SchemaBuilder.builder().longType()
-
           override def stream(value: Instant): InputStream =
-            new ByteArrayInputStream(
-              EncoderUtil.longToByteArray(E.encode(value, schema).asInstanceOf[Long]))
+            new ByteArrayInputStream(EncoderUtil.longToByteArray(JavaTimeUtil.instantToLong(value)))
 
           override def parse(stream: InputStream): Instant =
-            D.decode(EncoderUtil.byteArrayToLong(ByteStreams.toByteArray(stream)), schema)
+            JavaTimeUtil.longToInstant(EncoderUtil.byteArrayToLong(ByteStreams.toByteArray(stream)))
         }
     }
 
@@ -350,28 +378,26 @@ object avro extends AvroMarshallers {
 object avrowithschema extends AvroMarshallers {
 
   import com.sksamuel.avro4s._
+  import org.apache.avro.file.DataFileStream
+  import org.apache.avro.generic.{GenericDatumReader, GenericRecord}
 
-  implicit def avroWithSchemaMarshallers[A <: Product: Encoder: Decoder: SchemaFor]: Marshaller[A] =
-    new Marshaller[A] {
+  implicit def avroWithSchemaMarshallers[A: ToRecord](
+      implicit schemaFor: SchemaFor[A],
+      fromRecord: FromRecord[A]): Marshaller[A] = new Marshaller[A] {
 
-      override def parse(stream: InputStream): A = {
-        val input: AvroInputStream[A] =
-          AvroInputStream.data[A].from(stream).build(SchemaFor[A].schema)
-        val result = input.iterator.next()
-        input.close()
-        result
-      }
-
-      override def stream(value: A): InputStream = {
-        val baos: ByteArrayOutputStream = new ByteArrayOutputStream()
-        val output: AvroOutputStream[A] =
-          AvroOutputStream.data[A].to(baos).build(SchemaFor[A].schema)
-        output.write(value)
-        output.flush()
-        output.close()
-
-        new ByteArrayInputStream(baos.toByteArray)
-      }
-
+    override def parse(stream: InputStream): A = {
+      val dfs = new DataFileStream(stream, new GenericDatumReader[GenericRecord](schemaFor()))
+      fromRecord(dfs.next())
     }
+
+    override def stream(value: A): InputStream = {
+      val baos: ByteArrayOutputStream     = new ByteArrayOutputStream()
+      val output: AvroDataOutputStream[A] = AvroOutputStream.data[A](baos)
+      output.write(value)
+      output.close()
+
+      new ByteArrayInputStream(baos.toByteArray)
+    }
+
+  }
 }

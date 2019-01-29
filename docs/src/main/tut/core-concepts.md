@@ -399,6 +399,8 @@ Mu also provides instances for `org.joda.time.LocalDate` and `org.joda.time.Loca
 * Tagged `BigDecimal` in `Avro` (**note**: this encoder is not avro spec compliant)
   * `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._`
 * `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
+  * `import mu.rpc.internal.encoders.avro.javatime._`
+* `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
   * `import higherkindness.mu.rpc.internal.encoders.avro.javatime.marshallers._`
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
   * `import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.avro.marshallers._`
