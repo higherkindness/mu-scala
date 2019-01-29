@@ -25,6 +25,7 @@ import com.fortysevendeg.scalacheck.datetime.instances.jdk8._
 import com.fortysevendeg.scalacheck.datetime.GenDateTime._
 import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.seconds
 import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.internal.encoders.avro.javatime._
 import higherkindness.mu.rpc.internal.encoders.avro.javatime.marshallers._
 import higherkindness.mu.rpc.internal.encoders.pbd.javatime._
 import higherkindness.mu.rpc.protocol.Utils._

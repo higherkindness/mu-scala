@@ -20,26 +20,27 @@ import java.io.{ByteArrayInputStream, InputStream}
 import java.nio.ByteBuffer
 
 import com.google.common.io.ByteStreams
-import com.sksamuel.avro4s.{Decoder, Encoder, SchemaFor}
+import com.sksamuel.avro4s.{FromValue, ToSchema, ToValue}
 import higherkindness.mu.rpc.internal.util.BigDecimalUtil
 import io.grpc.MethodDescriptor.Marshaller
-import org.apache.avro.{Schema, SchemaBuilder}
+import org.apache.avro.Schema
+import org.apache.avro.Schema.Field
 
 object avro {
 
   import AvroDecimalCompatUtils._
 
-  implicit object bigDecimalToSchema extends SchemaFor[AvroDecimalCompat] {
-    override val schema: Schema = SchemaBuilder.builder().bytesType()
+  implicit object bigDecimalToSchema extends ToSchema[AvroDecimalCompat] {
+    override val schema: Schema = Schema.create(Schema.Type.BYTES)
   }
 
-  implicit object bigDecimalFromValue extends Decoder[AvroDecimalCompat] {
-    override def decode(value: Any, schema: Schema): AvroDecimalCompat =
+  implicit object bigDecimalFromValue extends FromValue[AvroDecimalCompat] {
+    def apply(value: Any, field: Field): AvroDecimalCompat =
       AvroDecimalCompat(BigDecimalUtil.byteToBigDecimal(value.asInstanceOf[ByteBuffer].array()))
   }
 
-  implicit object bigDecimalToValue extends Encoder[AvroDecimalCompat] {
-    override def encode(value: AvroDecimalCompat, schema: Schema): AnyRef =
+  implicit object bigDecimalToValue extends ToValue[AvroDecimalCompat] {
+    override def apply(value: AvroDecimalCompat): ByteBuffer =
       ByteBuffer.wrap(BigDecimalUtil.bigDecimalToByte(value.toBigDecimal))
   }
 
