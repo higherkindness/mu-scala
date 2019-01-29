@@ -333,7 +333,7 @@ object protocol {
 }
 ```
 
-For `Avro` the process is quite similar, but in this case we need to provide three instances of [Avro4s]. `SchemaFor`, `Encoder`, and `Decoder`.
+For `Avro` the process is quite similar, but in this case we need to provide three instances of [Avro4s]. `ToSchema`, `FromValue`, and `ToValue`.
 
 ```tut:silent
 object protocol {
@@ -343,20 +343,21 @@ object protocol {
 
   import com.sksamuel.avro4s._
   import org.apache.avro.Schema
-  import org.apache.avro.SchemaBuilder
+  import org.apache.avro.Schema.Field
 
-  implicit object LocalDateToSchema extends SchemaFor[LocalDate] {
-    override val schema: Schema = SchemaBuilder.builder().stringType()
+  implicit object LocalDateToSchema extends ToSchema[LocalDate] {
+    override val schema: Schema =
+      Schema.create(Schema.Type.STRING)
   }
 
-  implicit object LocalDateToValue extends Encoder[LocalDate] {
-    override def encode(value: LocalDate, schema: Schema): AnyRef =
+  implicit object LocalDateToValue extends ToValue[LocalDate] {
+    override def apply(value: LocalDate): String =
       value.format(DateTimeFormatter.ISO_LOCAL_DATE)
   }
 
-  implicit object LocalDateFromValue extends Decoder[LocalDate] {
-    override def decode(value: Any, schema: Schema): LocalDate =
-      LocalDate.parse(value.toString, DateTimeFormatter.ISO_LOCAL_DATE)
+  implicit object LocalDateFromValue extends FromValue[LocalDate] {
+    override def apply(value: Any, field: Field): LocalDate =
+      LocalDate.parse(value.toString(), DateTimeFormatter.ISO_LOCAL_DATE)
   }
 
   @message
@@ -373,9 +374,7 @@ object protocol {
 }
 ```
 
-[mu] provides serializers for `BigDecimal` and `BigDecimal` with tagged 'precision' and 'scale' (like `BigDecimal @@ (Nat._8, Nat._2)`). It also provides serializers for `java.time.LocalDate` and `java.time.LocalDateTime` but only for [PBDirect] since [Avro4s] provides their owns. 
-
-The only thing you need to do is add the following import to your service:
+[mu] provides serializers for `BigDecimal`, `BigDecimal` with tagged 'precision' and 'scale' (like `BigDecimal @@ (Nat._8, Nat._2)`), `java.time.LocalDate` and `java.time.LocalDateTime`. The only thing you need to do is add the following import to your service:
 
 * `BigDecimal` in `Protobuf`
   * `import higherkindness.mu.rpc.internal.encoders.pbd.bigDecimal._`
@@ -385,6 +384,8 @@ The only thing you need to do is add the following import to your service:
   * `import higherkindness.mu.rpc.internal.encoders.avro.bigdecimal._`
 * Tagged `BigDecimal` in `Avro`
   * `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._`
+* `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
+  * `import higherkindness.mu.rpc.internal.encoders.avro.javatime._`
 
 Mu also provides instances for `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime`, but you need the `mu-rpc-marshallers-jodatime` extra dependency. See the [main section](/mu/scala/) for the SBT instructions.
 
@@ -398,8 +399,6 @@ Mu also provides instances for `org.joda.time.LocalDate` and `org.joda.time.Loca
   * `import higherkindness.mu.rpc.internal.encoders.avro.bigdecimal.marshallers._`
 * Tagged `BigDecimal` in `Avro` (**note**: this encoder is not avro spec compliant)
   * `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._`
-* `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
-  * `import mu.rpc.internal.encoders.avro.javatime._`
 * `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
   * `import higherkindness.mu.rpc.internal.encoders.avro.javatime.marshallers._`
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
