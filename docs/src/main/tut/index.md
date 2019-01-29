@@ -18,7 +18,7 @@ The current version for [mu] is `0.16.0` using the following common libraries an
 
 [comment]: # (End Replace)
 
- * [avro4s] 1.8.3
+ * [avro4s] 1.8.4
  * [cats-effect] 1.1.0-M1
  * [fs2] 1.0.0
  * [Monix] 3.0.0-RC2
