@@ -58,6 +58,7 @@ jobs:
               git clean -f;
               git checkout master;
               git pull origin master;
+              sbt ";project idlgen-sbt;release";
               sbt release;
               sbt docs/publishMicrosite;
             fi

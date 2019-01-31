@@ -350,6 +350,7 @@ lazy val `marshallers-jodatime` = project
 lazy val `legacy-avro-decimal-compat-protocol` = project
   .in(file("modules/legacy-avro-decimal/procotol"))
   .settings(moduleName := "legacy-avro-decimal-compat-protocol")
+  .settings(crossScalaVersions := Seq(scalac.`2.12`))
   .settings(legacyAvroDecimalProtocolSettings)
   .disablePlugins(scoverage.ScoverageSbtPlugin)
 
