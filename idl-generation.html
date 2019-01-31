@@ -8,7 +8,7 @@
 
 <p>Add the following line to <em>project/plugins.sbt</em>:</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">addSbtPlugin</span><span class="o">(</span><span class="s">"io.higherkindness"</span> <span class="o">%</span> <span class="s">"sbt-mu-idlgen"</span> <span class="o">%</span> <span class="s">"0.17.0"</span><span class="o">)</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">addSbtPlugin</span><span class="o">(</span><span class="s">"io.higherkindness"</span> <span class="o">%</span> <span class="s">"sbt-mu-idlgen"</span> <span class="o">%</span> <span class="s">"0.17.1"</span><span class="o">)</span>
 </code></pre></div></div>
 
 <p>Note that the plugin is only available for Scala 2.12.</p>
@@ -216,8 +216,8 @@ The plugin’s implementation basically wraps the <a href="https://github.com/ju
   <li><strong><code class="highlighter-rouge">idlGenBigDecimal</code></strong>: specifies how the <code class="highlighter-rouge">decimal</code> types will be generated. <code class="highlighter-rouge">ScalaBigDecimalGen</code> produces <code class="highlighter-rouge">scala.math.BigDecimal</code> and <code class="highlighter-rouge">ScalaBigDecimalTaggedGen</code> produces <code class="highlighter-rouge">scala.math.BigDecimal</code> but tagged with the ‘precision’ and ‘scale’. i.e. <code class="highlighter-rouge">scala.math.BigDecimal @@ (Nat._8, Nat._2)</code>. By default <code class="highlighter-rouge">ScalaBigDecimalTaggedGen</code>.</li>
   <li><strong><code class="highlighter-rouge">idlGenMarshallerImports</code></strong>: additional imports to add on top to the generated service files. This property can be used for importing extra codecs for your services. By default:
     <ul>
-      <li><code class="highlighter-rouge">List(BigDecimalAvroMarshallers)</code> if <code class="highlighter-rouge">srcGenSerializationType</code> is <code class="highlighter-rouge">Avro</code> or <code class="highlighter-rouge">AvroWithSchema</code> and <code class="highlighter-rouge">idlGenBigDecimal</code> is <code class="highlighter-rouge">ScalaBigDecimalGen</code></li>
-      <li><code class="highlighter-rouge">List(BigDecimalTaggedAvroMarshallers)</code> if <code class="highlighter-rouge">srcGenSerializationType</code> is <code class="highlighter-rouge">Avro</code> or <code class="highlighter-rouge">AvroWithSchema</code> and <code class="highlighter-rouge">idlGenBigDecimal</code> is <code class="highlighter-rouge">ScalaBigDecimalTaggedGen</code></li>
+      <li><code class="highlighter-rouge">List(BigDecimalAvroMarshallers, JavaTimeDateAvroMarshallers)</code> if <code class="highlighter-rouge">srcGenSerializationType</code> is <code class="highlighter-rouge">Avro</code> or <code class="highlighter-rouge">AvroWithSchema</code> and <code class="highlighter-rouge">idlGenBigDecimal</code> is <code class="highlighter-rouge">ScalaBigDecimalGen</code></li>
+      <li><code class="highlighter-rouge">List(BigDecimalTaggedAvroMarshallers, JavaTimeDateAvroMarshallers)</code> if <code class="highlighter-rouge">srcGenSerializationType</code> is <code class="highlighter-rouge">Avro</code> or <code class="highlighter-rouge">AvroWithSchema</code> and <code class="highlighter-rouge">idlGenBigDecimal</code> is <code class="highlighter-rouge">ScalaBigDecimalTaggedGen</code></li>
       <li><code class="highlighter-rouge">List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)</code> if <code class="highlighter-rouge">srcGenSerializationType</code> is <code class="highlighter-rouge">Protobuf</code>.</li>
     </ul>
   </li>
@@ -225,7 +225,7 @@ The plugin’s implementation basically wraps the <a href="https://github.com/ju
 
 <p>The <code class="highlighter-rouge">JodaDateTimeAvroMarshallers</code> and <code class="highlighter-rouge">JodaDateTimeProtobufMarshallers</code> are also available, but they need the dependency <code class="highlighter-rouge">mu-rpc-marshallers-jodatime</code>. You can also specify custom imports with the following:</p>
 <ul>
-  <li><code class="highlighter-rouge">idlGenMarshallerImports := List(mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))</code></li>
+  <li><code class="highlighter-rouge">idlGenMarshallerImports := List(higherkindness.mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))</code></li>
   <li>See the <a href="core-concepts#custom-codecs">Custom codecs section in core concepts</a> for more information.</li>
 </ul>
 

@@ -317,7 +317,7 @@ Before starting, this is the Scala import we need:</p>
 <span class="o">}</span>
 </code></pre></div></div>
 
-<p>For <code class="highlighter-rouge">Avro</code> the process is quite similar, but in this case we need to provide three instances of <a href="https://github.com/sksamuel/avro4s">Avro4s</a>. <code class="highlighter-rouge">SchemaFor</code>, <code class="highlighter-rouge">Encoder</code>, and <code class="highlighter-rouge">Decoder</code>.</p>
+<p>For <code class="highlighter-rouge">Avro</code> the process is quite similar, but in this case we need to provide three instances of <a href="https://github.com/sksamuel/avro4s">Avro4s</a>. <code class="highlighter-rouge">ToSchema</code>, <code class="highlighter-rouge">FromValue</code>, and <code class="highlighter-rouge">ToValue</code>.</p>
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">object</span> <span class="nc">protocol</span> <span class="o">{</span>
 
@@ -326,20 +326,21 @@ Before starting, this is the Scala import we need:</p>
 
   <span class="k">import</span> <span class="nn">com.sksamuel.avro4s._</span>
   <span class="k">import</span> <span class="nn">org.apache.avro.Schema</span>
-  <span class="k">import</span> <span class="nn">org.apache.avro.SchemaBuilder</span>
+  <span class="k">import</span> <span class="nn">org.apache.avro.Schema.Field</span>
 
-  <span class="k">implicit</span> <span class="k">object</span> <span class="nc">LocalDateToSchema</span> <span class="k">extends</span> <span class="nc">SchemaFor</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="o">{</span>
-    <span class="k">override</span> <span class="k">val</span> <span class="n">schema</span><span class="k">:</span> <span class="kt">Schema</span> <span class="o">=</span> <span class="nc">SchemaBuilder</span><span class="o">.</span><span class="n">builder</span><span class="o">().</span><span class="n">stringType</span><span class="o">()</span>
+  <span class="k">implicit</span> <span class="k">object</span> <span class="nc">LocalDateToSchema</span> <span class="k">extends</span> <span class="nc">ToSchema</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="o">{</span>
+    <span class="k">override</span> <span class="k">val</span> <span class="n">schema</span><span class="k">:</span> <span class="kt">Schema</span> <span class="o">=</span>
+      <span class="nc">Schema</span><span class="o">.</span><span class="n">create</span><span class="o">(</span><span class="nc">Schema</span><span class="o">.</span><span class="nc">Type</span><span class="o">.</span><span class="nc">STRING</span><span class="o">)</span>
   <span class="o">}</span>
 
-  <span class="k">implicit</span> <span class="k">object</span> <span class="nc">LocalDateToValue</span> <span class="k">extends</span> <span class="nc">Encoder</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="o">{</span>
-    <span class="k">override</span> <span class="k">def</span> <span class="n">encode</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">LocalDate</span><span class="o">,</span> <span class="n">schema</span><span class="k">:</span> <span class="kt">Schema</span><span class="o">)</span><span class="k">:</span> <span class="kt">AnyRef</span> <span class="o">=</span>
+  <span class="k">implicit</span> <span class="k">object</span> <span class="nc">LocalDateToValue</span> <span class="k">extends</span> <span class="nc">ToValue</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="o">{</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">LocalDate</span><span class="o">)</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=</span>
       <span class="n">value</span><span class="o">.</span><span class="n">format</span><span class="o">(</span><span class="nc">DateTimeFormatter</span><span class="o">.</span><span class="nc">ISO_LOCAL_DATE</span><span class="o">)</span>
   <span class="o">}</span>
 
-  <span class="k">implicit</span> <span class="k">object</span> <span class="nc">LocalDateFromValue</span> <span class="k">extends</span> <span class="nc">Decoder</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="o">{</span>
-    <span class="k">override</span> <span class="k">def</span> <span class="n">decode</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">Any</span><span class="o">,</span> <span class="n">schema</span><span class="k">:</span> <span class="kt">Schema</span><span class="o">)</span><span class="k">:</span> <span class="kt">LocalDate</span> <span class="o">=</span>
-      <span class="nc">LocalDate</span><span class="o">.</span><span class="n">parse</span><span class="o">(</span><span class="n">value</span><span class="o">.</span><span class="n">toString</span><span class="o">,</span> <span class="nc">DateTimeFormatter</span><span class="o">.</span><span class="nc">ISO_LOCAL_DATE</span><span class="o">)</span>
+  <span class="k">implicit</span> <span class="k">object</span> <span class="nc">LocalDateFromValue</span> <span class="k">extends</span> <span class="nc">FromValue</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="o">{</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">Any</span><span class="o">,</span> <span class="n">field</span><span class="k">:</span> <span class="kt">Field</span><span class="o">)</span><span class="k">:</span> <span class="kt">LocalDate</span> <span class="o">=</span>
+      <span class="nc">LocalDate</span><span class="o">.</span><span class="n">parse</span><span class="o">(</span><span class="n">value</span><span class="o">.</span><span class="n">toString</span><span class="o">(),</span> <span class="nc">DateTimeFormatter</span><span class="o">.</span><span class="nc">ISO_LOCAL_DATE</span><span class="o">)</span>
   <span class="o">}</span>
 
   <span class="nd">@message</span>
@@ -356,9 +357,7 @@ Before starting, this is the Scala import we need:</p>
 <span class="o">}</span>
 </code></pre></div></div>
 
-<p><a href="https://github.com/higherkindness/mu">mu</a> provides serializers for <code class="highlighter-rouge">BigDecimal</code> and <code class="highlighter-rouge">BigDecimal</code> with tagged ‘precision’ and ‘scale’ (like <code class="highlighter-rouge">BigDecimal @@ (Nat._8, Nat._2)</code>). It also provides serializers for <code class="highlighter-rouge">java.time.LocalDate</code> and <code class="highlighter-rouge">java.time.LocalDateTime</code> but only for <a href="https://github.com/47deg/pbdirect">PBDirect</a> since <a href="https://github.com/sksamuel/avro4s">Avro4s</a> provides their owns.</p>
-
-<p>The only thing you need to do is add the following import to your service:</p>
+<p><a href="https://github.com/higherkindness/mu">mu</a> provides serializers for <code class="highlighter-rouge">BigDecimal</code>, <code class="highlighter-rouge">BigDecimal</code> with tagged ‘precision’ and ‘scale’ (like <code class="highlighter-rouge">BigDecimal @@ (Nat._8, Nat._2)</code>), <code class="highlighter-rouge">java.time.LocalDate</code> and <code class="highlighter-rouge">java.time.LocalDateTime</code>. The only thing you need to do is add the following import to your service:</p>
 
 <ul>
   <li><code class="highlighter-rouge">BigDecimal</code> in <code class="highlighter-rouge">Protobuf</code>
@@ -379,6 +378,11 @@ Before starting, this is the Scala import we need:</p>
   <li>Tagged <code class="highlighter-rouge">BigDecimal</code> in <code class="highlighter-rouge">Avro</code>
     <ul>
       <li><code class="highlighter-rouge">import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._</code></li>
+    </ul>
+  </li>
+  <li><code class="highlighter-rouge">java.time.LocalDate</code> and <code class="highlighter-rouge">java.time.LocalDateTime</code> in <code class="highlighter-rouge">Avro</code>
+    <ul>
+      <li><code class="highlighter-rouge">import higherkindness.mu.rpc.internal.encoders.avro.javatime._</code></li>
     </ul>
   </li>
 </ul>
