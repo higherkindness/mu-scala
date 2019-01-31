@@ -62,5 +62,4 @@ jobs:
               sbt release;
               sbt docs/publishMicrosite;
             fi
-            if [ $TRAVIS_SCALA_VERSION = "2.12.8" ]; then sbt ";project legacy-avro-decimal-compat-protocol;release"; fi
           fi
