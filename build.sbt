@@ -402,7 +402,6 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `example-todolist-client`,
   `benchmarks-vprev`,
   `benchmarks-vnext`,
-  `legacy-avro-decimal-compat-protocol`,
   `legacy-avro-decimal-compat-model`,
   `legacy-avro-decimal-compat-encoders`
 )
