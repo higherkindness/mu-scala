@@ -96,6 +96,7 @@ lazy val ssl = project
 
 lazy val `client-cache` = project
   .in(file("modules/client-cache"))
+  .dependsOn(common % "test->test")
   .settings(moduleName := "mu-rpc-client-cache")
   .settings(clientCacheSettings)
 
