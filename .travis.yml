@@ -68,7 +68,7 @@ jobs:
       if: branch = master AND type != pull_request
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
-            echo "Skipping microsite publication, snapshot version"
+            echo "Skipping microsite publication, snapshot version";
           else
             sbt docs/publishMicrosite;
           fi
