@@ -36,6 +36,7 @@ stages:
 - test
 - plugin
 - deploy
+- microsite
 jobs:
   include:
     - stage: plugin
@@ -46,20 +47,28 @@ jobs:
         - sbt ++$TRAVIS_SCALA_VERSION publishLocal idlgen-sbt/publishLocal idlgen-sbt/scripted
     - stage: deploy
       scala: 2.12.8
+      if: branch = master AND type != pull_request
       script:
         - bash <(curl -s https://codecov.io/bash) -t 5b75b318-ab71-4fbc-9203-bfa7765cdbdc
-        - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
-            if grep -q "SNAPSHOT" version.sbt; then
-              sbt +publish;
-              sbt idlgen-sbt/publish;
-            else
-              sbt orgUpdateDocFiles;
-              git reset --hard HEAD;
-              git clean -f;
-              git checkout master;
-              git pull origin master;
-              sbt ";project idlgen-sbt;release";
-              sbt release;
-              sbt docs/publishMicrosite;
-            fi
+        - if grep -q "SNAPSHOT" version.sbt; then
+            sbt +publish;
+            sbt idlgen-sbt/publish;
+          else
+            sbt orgUpdateDocFiles;
+            git reset --hard HEAD;
+            git clean -f;
+            git checkout master;
+            git pull origin master;
+            sbt ";project idlgen-sbt;release";
+            sbt ";project legacy-avro-decimal-compat-protocol;release";
+            sbt release;
+          fi
+    - stage: microsite
+      scala: 2.12.8
+      if: branch = master AND type != pull_request
+      script:
+        - if grep -q "SNAPSHOT" version.sbt; then
+            echo "Skipping microsite publication, snapshot version"
+          else
+            sbt docs/publishMicrosite;
           fi
