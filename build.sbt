@@ -100,15 +100,6 @@ lazy val `client-cache` = project
   .settings(moduleName := "mu-rpc-client-cache")
   .settings(clientCacheSettings)
 
-//////////////////////
-//// INTERCEPTORS ////
-//////////////////////
-
-lazy val interceptors = project
-  .in(file("modules/interceptors"))
-  .settings(moduleName := "mu-rpc-interceptors")
-  .settings(interceptorsSettings)
-
 ////////////////
 //// SERVER ////
 ////////////////
@@ -121,52 +112,12 @@ lazy val server = project
   .dependsOn(monix % "test->test")
   .dependsOn(fs2 % "test->test")
   .dependsOn(testing % "test->test")
-  .dependsOn(interceptors % "compile->compile;test->test")
   .settings(moduleName := "mu-rpc-server")
   .settings(serverSettings)
 
 ////////////////////
-//// PROMETHEUS ////
-////////////////////
-
-lazy val `prometheus-shared` = project
-  .in(file("modules/prometheus/shared"))
-  .dependsOn(interceptors % "compile->compile;test->test")
-  .settings(moduleName := "mu-rpc-prometheus-shared")
-  .settings(prometheusSettings)
-
-lazy val `prometheus-server` = project
-  .in(file("modules/prometheus/server"))
-  .dependsOn(`prometheus-shared` % "compile->compile;test->test")
-  .dependsOn(server % "compile->compile;test->test")
-  .settings(moduleName := "mu-rpc-prometheus-server")
-
-lazy val `prometheus-client` = project
-  .in(file("modules/prometheus/client"))
-  .dependsOn(`prometheus-shared` % "compile->compile;test->test")
-  .dependsOn(channel % "compile->compile;test->test")
-  .dependsOn(server % "test->test")
-  .settings(moduleName := "mu-rpc-prometheus-client")
-  .settings(prometheusClientSettings)
-
-////////////////////
 //// DROPWIZARD ////
 ////////////////////
-
-lazy val `dropwizard-server` = project
-  .in(file("modules/dropwizard/server"))
-  .dependsOn(`prometheus-server` % "compile->compile;test->test")
-  .dependsOn(server % "compile->compile;test->test")
-  .settings(moduleName := "mu-rpc-dropwizard-server")
-  .settings(dropwizardSettings)
-
-lazy val `dropwizard-client` = project
-  .in(file("modules/dropwizard/client"))
-  .dependsOn(`prometheus-client` % "compile->compile;test->test")
-  .dependsOn(channel % "compile->compile;test->test")
-  .dependsOn(server % "test->test")
-  .settings(moduleName := "mu-rpc-dropwizard-client")
-  .settings(dropwizardSettings)
 
 lazy val `dropwizard` = project
   .in(file("modules/metrics/dropwizard"))
@@ -174,6 +125,17 @@ lazy val `dropwizard` = project
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-dropwizard")
   .settings(dropwizardMetricsSettings)
+
+////////////////////
+//// PROMETHEUS ////
+////////////////////
+
+lazy val `prometheus` = project
+  .in(file("modules/metrics/prometheus"))
+  .dependsOn(`internal-core`)
+  .dependsOn(testing % "test->test")
+  .settings(moduleName := "mu-rpc-prometheus")
+  .settings(prometheusMetricsSettings)
 
 ////////////////
 //// IDLGEN ////
@@ -382,13 +344,8 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `okhttp`,
   server,
   config,
-  interceptors,
-  `prometheus-shared`,
-  `prometheus-client`,
-  `prometheus-server`,
-  `dropwizard-server`,
-  `dropwizard-client`,
   `dropwizard`,
+  `prometheus`,
   testing,
   ssl,
   `idlgen-core`,
