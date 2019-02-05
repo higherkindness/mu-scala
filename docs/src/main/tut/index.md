@@ -14,7 +14,7 @@ permalink: /
 
 [comment]: # (Start Replace)
 
-The current version for [mu] is `0.16.0` using the following common libraries and versions. 
+The current version for [mu] is "0.17.2" using the following common libraries and versions.
 
 [comment]: # (End Replace)
 
