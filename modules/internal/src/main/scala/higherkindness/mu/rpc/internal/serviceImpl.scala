@@ -473,7 +473,7 @@ object serviceImpl {
     val classAndMaybeCompanion = annottees.map(_.tree)
     val result: List[Tree] = classAndMaybeCompanion.head match {
       case serviceDef: ClassDef
-          if serviceDef.mods.hasFlag(TRAIT) || serviceDef.mods.hasFlag(ABSTRACT) =>
+          if serviceDef.mods.hasFlag(TRAIT) || serviceDef.mods.hasFlag(ABSTRACT) => {
         val service = new RpcService(serviceDef)
         val companion: ModuleDef = classAndMaybeCompanion.lastOption match {
           case Some(obj: ModuleDef) => obj
@@ -508,11 +508,13 @@ object serviceImpl {
               service.client,
               service.clientFromChannel,
               service.unsafeClient,
-              service.unsafeClientFromChannel,
+              service.unsafeClientFromChannel
             ) ++ service.http
           )
         )
+
         List(serviceDef, enrichedCompanion)
+      }
       case _ => sys.error("@service-annotated definition must be a trait or abstract class")
     }
     c.Expr(Block(result, Literal(Constant(()))))
