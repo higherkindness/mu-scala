@@ -305,22 +305,16 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
 
     }
 
-    "work when combining multiple calls" in {
+    "work when combining multiple unary calls" in {
 
-      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/168 is fixed")
-
-      def unary[F[_]](implicit APP: MyRPCClient[F]): F[C] =
+      def unary1[F[_]](implicit APP: MyRPCClient[F]): F[C] =
         APP.u(a1.x, a1.y)
 
-      def clientStreaming[F[_]](implicit APP: MyRPCClient[F]): F[D] =
-        APP.cs(cList, i)
+      def unary2[F[_]](implicit APP: MyRPCClient[F]): F[C] =
+        APP.uws(a1.x, a1.y)
 
       def check(implicit CR: CollectorRegistry): ConcurrentMonad[Assertion] = suspendM {
         findRecordedMetricOrThrow(clientMetricRpcStarted(namespace)).samples.size() shouldBe 2
-        checkWithRetry(
-          () =>
-            findRecordedMetricOrThrow(clientMetricRpcCompleted(namespace)).samples
-              .size() shouldBe 2)()
       }
 
       val clientRuntime: InterceptorsRuntime = defaultClientRuntime
@@ -328,11 +322,35 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
 
       (for {
         _         <- serverStart[ConcurrentMonad]
-        _         <- unary[ConcurrentMonad]
-        _         <- clientStreaming[ConcurrentMonad]
+        _         <- unary1[ConcurrentMonad]
+        _         <- unary2[ConcurrentMonad]
         assertion <- check
         _         <- serverStop[ConcurrentMonad]
       } yield assertion).unsafeRunSync()
+
+    }
+
+    "work when combining multiple calls, both unary and streaming" in {
+
+      def unary[F[_]](implicit APP: MyRPCClient[F]): F[C] = APP.u(a1.x, a1.y)
+
+      def streaming[F[_]](implicit APP: MyRPCClient[F]): F[D] = APP.cs(cList, i)
+
+      def check(implicit CR: CollectorRegistry): ConcurrentMonad[Assertion] = suspendM {
+        findRecordedMetricOrThrow(clientMetricRpcCompleted(namespace)).samples.size() shouldBe 2
+      }
+
+      val clientRuntime: InterceptorsRuntime = defaultClientRuntime
+      import clientRuntime._
+
+      (for {
+        _ <- serverStart[ConcurrentMonad]
+        _ <- unary[ConcurrentMonad]
+        _ <- streaming[ConcurrentMonad]
+        _ <- serverStop[ConcurrentMonad]
+      } yield ()).unsafeRunSync
+
+      check.unsafeRunSync
 
     }
 
