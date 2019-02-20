@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
-package interceptors
+package higherkindness.mu.rpc.server.interceptors
 
 import io.grpc.{ServerInterceptor, ServerInterceptors, ServerServiceDefinition}
 

@@ -21,10 +21,10 @@ import cats.effect.{Clock, IO, Resource}
 import cats.syntax.apply._
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.common.util.FakeClock
-import higherkindness.mu.rpc.interceptors.implicits._
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
 import higherkindness.mu.rpc.internal.metrics.{MetricsOps, MetricsOpsRegister}
 import higherkindness.mu.rpc.protocol._
+import higherkindness.mu.rpc.server.interceptors.implicits._
 import higherkindness.mu.rpc.testing.servers._
 import io.grpc.MethodDescriptor.MethodType
 import io.grpc.Status

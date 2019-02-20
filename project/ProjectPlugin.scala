@@ -154,6 +154,12 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+    lazy val prometheusMetricsSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %("prometheus", V.prometheus)
+      )
+    )
+
     lazy val dropwizardMetricsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.dropwizard.metrics" % "metrics-core" % V.dropwizard

@@ -27,7 +27,7 @@ import scala.concurrent.duration._
 
 case class MetricsChannelInterceptor[F[_]: Effect: Clock](
     metricsOps: MetricsOps[F],
-    classifier: Option[String])
+    classifier: Option[String] = None)
     extends ClientInterceptor {
 
   override def interceptCall[Req, Res](

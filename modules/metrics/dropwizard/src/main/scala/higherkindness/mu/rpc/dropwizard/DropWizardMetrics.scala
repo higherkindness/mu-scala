@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+package higherkindness.mu.rpc.dropwizard
+
+import java.util.concurrent.TimeUnit
+
+import cats.effect.Sync
+import com.codahale.metrics.MetricRegistry
+import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
+import higherkindness.mu.rpc.internal.metrics.MetricsOps
+import higherkindness.mu.rpc.internal.metrics.MetricsOps._
+import io.grpc.MethodDescriptor.MethodType._
+import io.grpc.Status
+
 /*
  * [[MetricsOps]] algebra able to record Dropwizard metrics.
  *
@@ -27,7 +39,7 @@
  * {prefix}.{classifier}.{methodType} - Timer
  * {prefix}.{classifier}.{status} - Timer
  *
- * {methodType} can be one of the following:
+ * {methodType} can be one of the following:
  *    - "unary-methods"
  *    - "client-streaming-methods"
  *    - "server-streaming-methods"
@@ -47,27 +59,14 @@
  *    - "unreachable-error-statuses"
  *
  */
-
-package metricsops
-
-import java.util.concurrent.TimeUnit
-
-import cats.effect.Sync
-import com.codahale.metrics.MetricRegistry
-import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
-import higherkindness.mu.rpc.internal.metrics.MetricsOps
-import higherkindness.mu.rpc.internal.metrics.MetricsOps._
-import io.grpc.MethodDescriptor.MethodType._
-import io.grpc.Status
-
-object DropWizardMetricsOps {
+object DropWizardMetrics {
 
   sealed trait GaugeType
   case object Timer   extends GaugeType
   case object Counter extends GaugeType
 
   def apply[F[_]](registry: MetricRegistry, prefix: String = "higherkinderness.mu")(
-      implicit F: Sync[F]) = new MetricsOps[F] {
+      implicit F: Sync[F]): MetricsOps[F] = new MetricsOps[F] {
 
     override def increaseActiveCalls(
         methodInfo: GrpcMethodInfo,
