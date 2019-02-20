@@ -327,12 +327,13 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
       import clientRuntime._
 
       (for {
-        _         <- serverStart[ConcurrentMonad]
-        _         <- unary[ConcurrentMonad]
-        _         <- clientStreaming[ConcurrentMonad]
-        assertion <- check
-        _         <- serverStop[ConcurrentMonad]
-      } yield assertion).unsafeRunSync()
+        _ <- serverStart[ConcurrentMonad]
+        _ <- unary[ConcurrentMonad]
+        _ <- clientStreaming[ConcurrentMonad]
+        _ <- serverStop[ConcurrentMonad]
+      } yield ()).unsafeRunSync()
+
+      check.unsafeRunSync()
 
     }
 

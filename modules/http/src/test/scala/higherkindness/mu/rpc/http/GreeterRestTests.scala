@@ -269,13 +269,15 @@ class GreeterRestTests
   "Auto-derived REST Client" should {
 
     "serve a GET request" in {
-      val client: UnaryGreeter.HttpClient[IO] = UnaryGreeter.httpClient[IO](serviceUri)
-      val response: IO[HelloResponse]         = BlazeClientBuilder[IO](ec).resource.use(client.getHello(_))
+      val client: UnaryGreeter.HttpClient[IO] =
+        UnaryGreeter.httpClient[IO](serviceUri / UnaryServicePrefix)
+      val response: IO[HelloResponse] = BlazeClientBuilder[IO](ec).resource.use(client.getHello(_))
       response.unsafeRunSync() shouldBe HelloResponse("hey")
     }
 
     "serve a unary POST request" in {
-      val client: UnaryGreeter.HttpClient[IO] = UnaryGreeter.httpClient[IO](serviceUri)
+      val client: UnaryGreeter.HttpClient[IO] =
+        UnaryGreeter.httpClient[IO](serviceUri / UnaryServicePrefix)
       val response: IO[HelloResponse] =
         BlazeClientBuilder[IO](ec).resource.use(client.sayHello(HelloRequest("hey"))(_))
       response.unsafeRunSync() shouldBe HelloResponse("hey")
