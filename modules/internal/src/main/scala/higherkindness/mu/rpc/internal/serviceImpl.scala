@@ -512,6 +512,10 @@ object serviceImpl {
             ) ++ service.http
           )
         )
+        if (service.httpRequests.nonEmpty) {
+          println("#######################")
+          println(enrichedCompanion.toString)
+        }
         List(serviceDef, enrichedCompanion)
       }
       case _ => sys.error("@service-annotated definition must be a trait or abstract class")

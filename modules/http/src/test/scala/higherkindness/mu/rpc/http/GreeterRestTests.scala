@@ -283,7 +283,31 @@ class GreeterRestTests
       response.unsafeRunSync() shouldBe HelloResponse("hey")
     }
 
-    //TODO: more tests
+    "handle a raised gRPC exception in a unary POST request" in {
+
+      val client: UnaryGreeter.HttpClient[IO] =
+        UnaryGreeter.httpClient[IO](serviceUri / UnaryServicePrefix)
+
+      val response: IO[HelloResponse] =
+        BlazeClientBuilder[IO](ec).resource.use(client.sayHello(HelloRequest("SRE"))(_))
+
+      the[UnexpectedStatus] thrownBy response.unsafeRunSync() shouldBe UnexpectedStatus(
+        Status.BadRequest)
+    }
+
+    "handle a raised non-gRPC exception in a unary POST request" in {
+
+      val client: UnaryGreeter.HttpClient[IO] =
+        UnaryGreeter.httpClient[IO](serviceUri / UnaryServicePrefix)
+
+      val response: IO[HelloResponse] =
+        BlazeClientBuilder[IO](ec).resource.use(client.sayHello(HelloRequest("RTE"))(_))
+
+      the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
+        Status.InternalServerError,
+        Some("RTE"))
+    }
+
   }
 
 }
