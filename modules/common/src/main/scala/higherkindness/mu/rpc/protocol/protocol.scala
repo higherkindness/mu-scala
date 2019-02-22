@@ -33,11 +33,11 @@ sealed abstract class CompressionType extends Product with Serializable
 case object Identity                  extends CompressionType
 case object Gzip                      extends CompressionType
 
-class message                               extends StaticAnnotation
-class option(name: String, value: Any)      extends StaticAnnotation
-class outputPackage(value: String)          extends StaticAnnotation
-class outputName(value: String)             extends StaticAnnotation
-class http(method: HttpMethod, uri: String) extends StaticAnnotation
+class message                          extends StaticAnnotation
+class option(name: String, value: Any) extends StaticAnnotation
+class outputPackage(value: String)     extends StaticAnnotation
+class outputName(value: String)        extends StaticAnnotation
+class http                             extends StaticAnnotation
 
 sealed trait HttpMethod extends Product with Serializable
 case object OPTIONS     extends HttpMethod

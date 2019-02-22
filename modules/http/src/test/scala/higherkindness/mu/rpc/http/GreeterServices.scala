@@ -27,15 +27,15 @@ import higherkindness.mu.rpc.protocol._
 
 @service(Avro) trait UnaryGreeter[F[_]] {
 
-  @http(GET, "getHello") def getHello(request: Empty.type): F[HelloResponse]
+  @http def getHello(request: Empty.type): F[HelloResponse]
 
-  @http(POST, "sayHello") def sayHello(request: HelloRequest): F[HelloResponse]
+  @http def sayHello(request: HelloRequest): F[HelloResponse]
 }
 
 import fs2.Stream
 @service(Avro) trait Fs2Greeter[F[_]] {
 
-  def sayHellos(requests: Stream[F, HelloRequest]): F[HelloResponse]
+  @http def sayHellos(requests: Stream[F, HelloRequest]): F[HelloResponse]
 
   def sayHelloAll(request: HelloRequest): Stream[F, HelloResponse]
 

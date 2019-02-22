@@ -18,6 +18,8 @@ package higherkindness.mu.rpc
 package internal
 
 import higherkindness.mu.rpc.protocol._
+
+import scala.reflect.api.Trees
 import scala.reflect.macros.blackbox
 
 // $COVERAGE-OFF$
@@ -430,8 +432,15 @@ object serviceImpl {
         _ = require(params.length == 1, s"RPC call ${d.name} has more than one request parameter")
         p <- params.headOption.toList
       } yield {
-        val method = TermName(args(0).toString) // TODO: fix direct index access
-        val uri    = args(1).toString // TODO: fix direct index access
+
+        val method: c.universe.TermName = p.tpt match {
+          case tq"Empty.type" => TermName("GET")
+          case _              => TermName("POST")
+        }
+        val uri = d.name.toString
+
+//        val method: c.universe.TermName = TermName(args(0).toString) // TODO: fix direct index access
+//        val uri                         = args(1).toString // TODO: fix direct index access
 
         val responseType: Tree = d.tpt match {
           case tq"Observable[..$tpts]"       => tpts.head
