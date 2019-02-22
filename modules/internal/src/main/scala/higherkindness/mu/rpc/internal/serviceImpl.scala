@@ -395,6 +395,8 @@ object serviceImpl {
       //TODO: derive server as well
       //TODO: move HTTP-related code to its own module (on last attempt this did not work)
 
+      def isEmpty(request: Tree): Boolean = request.toString.endsWith("Empty.type")
+
       def requestExecution(responseType: Tree, methodResponseType: Tree): Tree =
         methodResponseType match {
           case tq"Observable[..$tpts]" =>
@@ -404,6 +406,14 @@ object serviceImpl {
           case tq"$carrier[..$tpts]" =>
             q"client.expect[$responseType](request)"
         }
+
+
+      def requestTypology(method: TermName, path: String): Tree =
+        "" match {
+          case _ =>
+            q"val request = Request[F](Method.$method, uri / ${path.replace("\"", "")}).withEntity(req.map(_.asJson))"
+        }
+
 
       val toHttpRequest: ((TermName, String, TermName, Tree, Tree, Tree)) => DefDef = {
         case (method, path, name, requestType, responseType, methodResponseType) =>
@@ -420,7 +430,7 @@ object serviceImpl {
               client: _root_.org.http4s.client.Client[F]
             ): $methodResponseType = {
               implicit val responseDecoder: EntityDecoder[F, $responseType] = jsonOf[F, $responseType]
-              val request = Request[F](Method.$method, uri / ${path.replace("\"", "")}).withEntity(req.asJson)
+              val request = Request[F](Method.$method, uri / ${path.replace("\"", "")}).withEntity(req.map(_.asJson))
               ${requestExecution(responseType, methodResponseType)}
             }"""
       }
@@ -433,10 +443,7 @@ object serviceImpl {
         p <- params.headOption.toList
       } yield {
 
-        val method: c.universe.TermName = p.tpt match {
-          case tq"Empty.type" => TermName("GET")
-          case _              => TermName("POST")
-        }
+        val method: c.universe.TermName = if(isEmpty(p.tpt)) TermName("GET") else TermName("POST")
         val uri = d.name.toString
 
 //        val method: c.universe.TermName = TermName(args(0).toString) // TODO: fix direct index access
