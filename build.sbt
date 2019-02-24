@@ -148,6 +148,13 @@ lazy val `prometheus-client` = project
   .settings(moduleName := "mu-rpc-prometheus-client")
   .settings(prometheusClientSettings)
 
+lazy val `prometheus` = project
+  .in(file("modules/metrics/prometheus"))
+  .dependsOn(`internal-core`)
+  .dependsOn(testing % "test->test")
+  .settings(moduleName := "mu-rpc-prometheus")
+  .settings(prometheusSettings)
+
 ////////////////////
 //// DROPWIZARD ////
 ////////////////////
