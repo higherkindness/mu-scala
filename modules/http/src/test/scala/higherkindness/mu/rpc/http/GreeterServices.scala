@@ -37,9 +37,9 @@ import fs2.Stream
 
   @http def sayHellos(requests: Stream[F, HelloRequest]): F[HelloResponse]
 
-  def sayHelloAll(request: HelloRequest): Stream[F, HelloResponse]
+  @http def sayHelloAll(request: HelloRequest): Stream[F, HelloResponse]
 
-  def sayHellosAll(requests: Stream[F, HelloRequest]): Stream[F, HelloResponse]
+  @http def sayHellosAll(requests: Stream[F, HelloRequest]): Stream[F, HelloResponse]
 }
 
 import monix.reactive.Observable
@@ -47,7 +47,7 @@ import monix.reactive.Observable
 
   @http def sayHellos(requests: Observable[HelloRequest]): F[HelloResponse]
 
-  def sayHelloAll(request: HelloRequest): Observable[HelloResponse]
+  @http def sayHelloAll(request: HelloRequest): Observable[HelloResponse]
 
-  def sayHellosAll(requests: Observable[HelloRequest]): Observable[HelloResponse]
+  @http def sayHellosAll(requests: Observable[HelloRequest]): Observable[HelloResponse]
 }

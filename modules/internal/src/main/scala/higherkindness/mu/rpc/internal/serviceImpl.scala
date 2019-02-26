@@ -68,6 +68,10 @@ object serviceImpl {
         case _                                        => true
       }
 
+      val isMonixObservable: Boolean = List(request, response).collect {
+        case m: MonixObservable => m
+      }.nonEmpty
+
       require(
         validStreamingComb,
         s"RPC service $name has different streaming implementations for request and response")
@@ -469,14 +473,15 @@ object serviceImpl {
 
       }
 
-      val httpRequests = (for {
+      val operations: List[HttpOperation] = for {
         d      <- rpcDefs.collect { case x if findAnnotation(x.mods, "http").isDefined => x }
         args   <- findAnnotation(d.mods, "http").collect({ case Apply(_, args) => args }).toList
         params <- d.vparamss
         _ = require(params.length == 1, s"RPC call ${d.name} has more than one request parameter")
         p <- params.headOption.toList
-      } yield
-        HttpOperation(Operation(d.name, TypeTypology(p.tpt), TypeTypology(d.tpt)))).map(_.toTree)
+      } yield HttpOperation(Operation(d.name, TypeTypology(p.tpt), TypeTypology(d.tpt)))
+
+      val httpRequests = operations.map(_.toTree)
 
       val HttpClient                = TypeName("HttpClient")
       val httpClientClass: ClassDef = q"""
@@ -490,19 +495,24 @@ object serviceImpl {
           new $HttpClient[$F](uri)
       }"""
 
+      val httpImports: List[Tree] = List(
+        q"import _root_.higherkindness.mu.rpc.http.Utils._",
+        q"import _root_.org.http4s._",
+        q"import _root_.org.http4s.circe._",
+        q"import _root_.io.circe._",
+        q"import _root_.io.circe.generic.auto._",
+        q"import _root_.io.circe.syntax._"
+      )
+
+      val scheduler: List[Tree] = operations
+        .find(_.operation.isMonixObservable)
+        .map(_ => q"import _root_.monix.execution.Scheduler.Implicits.global")
+        .toList
+
       val http =
         if (httpRequests.isEmpty) Nil
         else
-          List(
-            q"import _root_.higherkindness.mu.rpc.http.Utils._",
-            q"import _root_.org.http4s._",
-            q"import _root_.org.http4s.circe._",
-            q"import _root_.io.circe._",
-            q"import _root_.io.circe.generic.auto._",
-            q"import _root_.io.circe.syntax._",
-            httpClientClass,
-            httpClient
-          )
+          httpImports ++ scheduler ++ List(httpClientClass, httpClient)
     }
 
     val classAndMaybeCompanion = annottees.map(_.tree)
@@ -547,10 +557,7 @@ object serviceImpl {
             ) ++ service.http
           )
         )
-        if (service.httpRequests.nonEmpty) {
-          println("#######################")
-          println(enrichedCompanion.toString)
-        }
+
         List(serviceDef, enrichedCompanion)
       }
       case _ => sys.error("@service-annotated definition must be a trait or abstract class")
