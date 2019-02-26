@@ -177,7 +177,7 @@ lazy val `dropwizard-client` = project
 
 lazy val `dropwizard` = project
   .in(file("modules/metrics/dropwizard"))
-  .dependsOn(`internal-core`)
+  .dependsOn(`internal-core` % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-dropwizard")
   .settings(dropwizardMetricsSettings)
