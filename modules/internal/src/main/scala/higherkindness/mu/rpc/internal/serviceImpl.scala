@@ -28,6 +28,58 @@ object serviceImpl {
     import c.universe._
     import Flag._
 
+    abstract class TypeTypology(tpe: Tree, inner: Option[Tree], isStreaming: Boolean) {
+      def getTpe: Tree           = tpe
+      def getInner: Option[Tree] = inner
+      def streaming: Boolean     = isStreaming
+      def safeInner: Tree        = inner.getOrElse(tpe)
+    }
+    object TypeTypology {
+      def apply(t: Tree): TypeTypology = t match {
+        case tq"Observable[..$tpts]"       => MonixObservableTpe(t, tpts.headOption)
+        case tq"Stream[$carrier, ..$tpts]" => Fs2StreamTpe(t, tpts.headOption)
+        case tq"Empty.type"                => EmptyTpe(t)
+        case tq"$carrier[..$tpts]"         => UnaryTpe(t, tpts.headOption)
+      }
+    }
+    case class EmptyTpe(tpe: Tree)                          extends TypeTypology(tpe, None, false)
+    case class UnaryTpe(tpe: Tree, inner: Option[Tree])     extends TypeTypology(tpe, inner, false)
+    case class Fs2StreamTpe(tpe: Tree, inner: Option[Tree]) extends TypeTypology(tpe, inner, true)
+    case class MonixObservableTpe(tpe: Tree, inner: Option[Tree])
+        extends TypeTypology(tpe, inner, true)
+
+    case class Operation(name: TermName, request: TypeTypology, response: TypeTypology) {
+
+      val isStreaming: Boolean = request.streaming || response.streaming
+
+      val streamingType: Option[StreamingType] = (request.streaming, response.streaming) match {
+        case (true, true)  => Some(BidirectionalStreaming)
+        case (true, false) => Some(RequestStreaming)
+        case (false, true) => Some(ResponseStreaming)
+        case _             => None
+      }
+
+      val validStreamingComb: Boolean = (request, response) match {
+        case (Fs2StreamTpe(_, _), MonixObservableTpe(_, _)) => false
+        case (MonixObservableTpe(_, _), Fs2StreamTpe(_, _)) => false
+        case _                                              => true
+      }
+
+      val isMonixObservable: Boolean = List(request, response).collect {
+        case m: MonixObservableTpe => m
+      }.nonEmpty
+
+      require(
+        validStreamingComb,
+        s"RPC service $name has different streaming implementations for request and response")
+
+      val prevalentStreamingTarget: TypeTypology = streamingType match {
+        case Some(ResponseStreaming) => response
+        case _                       => request
+      }
+
+    }
+
     trait SupressWarts[T] {
       def supressWarts(warts: String*)(t: T): T
     }
@@ -117,7 +169,10 @@ object serviceImpl {
         params <- d.vparamss
         _ = require(params.length == 1, s"RPC call ${d.name} has more than one request parameter")
         p <- params.headOption.toList
-      } yield RpcRequest(d.name, p.tpt, d.tpt, compressionType(serviceDef.mods.annotations))
+      } yield
+        RpcRequest(
+          Operation(d.name, TypeTypology(p.tpt), TypeTypology(d.tpt)),
+          compressionType(serviceDef.mods.annotations))
 
       val imports: List[Tree] = defs.collect {
         case imp: Import => imp
@@ -268,14 +323,14 @@ object serviceImpl {
 
       //todo: validate that the request and responses are case classes, if possible
       case class RpcRequest(
-          methodName: TermName,
-          requestType: Tree,
-          responseType: Tree,
+          operation: Operation,
           compressionOption: Tree
       ) {
 
-        private val requestStreamingImpl: Option[StreamingImpl]  = streamingImplFor(requestType)
-        private val responseStreamingImpl: Option[StreamingImpl] = streamingImplFor(responseType)
+        private val requestStreamingImpl: Option[StreamingImpl] = streamingImplFor(
+          operation.request.getTpe)
+        private val responseStreamingImpl: Option[StreamingImpl] = streamingImplFor(
+          operation.response.getTpe)
         private val streamingImpls: Set[StreamingImpl] =
           Set(requestStreamingImpl, responseStreamingImpl).flatten
         require(
@@ -312,13 +367,13 @@ object serviceImpl {
           q"_root_.io.grpc.MethodDescriptor.MethodType.${TermName(suffix)}"
         }
 
-        private val methodDescriptorName = TermName(methodName + "MethodDescriptor")
+        private val methodDescriptorName = TermName(operation.name + "MethodDescriptor")
 
-        private val reqType = requestType match {
+        private val reqType = operation.request.getTpe match {
           case tq"$s[..$tpts]" if requestStreamingImpl.isDefined => tpts.last
           case other                                             => other
         }
-        private val respType = responseType match {
+        private val respType = operation.response.getTpe match {
           case tq"$x[..$tpts]" => tpts.last
         }
 
@@ -334,7 +389,7 @@ object serviceImpl {
               .setType($streamingMethodType)
               .setFullMethodName(
                 _root_.io.grpc.MethodDescriptor.generateFullMethodName(${lit(serviceName)}, ${lit(
-          methodName)}))
+          operation.name)}))
               .build()
           }
         """.supressWarts("Null", "ExplicitImplicitTypes")
@@ -345,43 +400,44 @@ object serviceImpl {
         val clientDef: Tree = streamingType match {
           case Some(RequestStreaming) =>
             q"""
-            def $methodName(input: $requestType): $responseType = ${clientCallMethodFor(
+            def ${operation.name}(input: ${operation.request.getTpe}): ${operation.response.getTpe} = ${clientCallMethodFor(
               "clientStreaming")}"""
           case Some(ResponseStreaming) =>
             q"""
-            def $methodName(input: $requestType): $responseType = ${clientCallMethodFor(
+            def ${operation.name}(input: ${operation.request.getTpe}): ${operation.response.getTpe} = ${clientCallMethodFor(
               "serverStreaming")}"""
           case Some(BidirectionalStreaming) =>
             q"""
-            def $methodName(input: $requestType): $responseType = ${clientCallMethodFor(
+            def ${operation.name}(input: ${operation.request.getTpe}): ${operation.response.getTpe} = ${clientCallMethodFor(
               "bidiStreaming")}"""
           case None =>
             q"""
-            def $methodName(input: $requestType): $responseType = ${clientCallMethodFor("unary")}"""
+            def ${operation.name}(input: ${operation.request.getTpe}): ${operation.response.getTpe} = ${clientCallMethodFor(
+              "unary")}"""
         }
 
         private def serverCallMethodFor(serverMethodName: String) =
-          q"_root_.higherkindness.mu.rpc.internal.server.monixCalls.${TermName(serverMethodName)}(algebra.$methodName, $compressionOption)"
+          q"_root_.higherkindness.mu.rpc.internal.server.monixCalls.${TermName(serverMethodName)}(algebra.${operation.name}, $compressionOption)"
 
         val descriptorAndHandler: Tree = {
           val handler = (streamingType, streamingImpl) match {
             case (Some(RequestStreaming), Some(Fs2Stream)) =>
-              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.clientStreamingMethod(algebra.$methodName, $compressionOption)"
+              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.clientStreamingMethod(algebra.${operation.name}, $compressionOption)"
             case (Some(RequestStreaming), Some(MonixObservable)) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(${serverCallMethodFor("clientStreamingMethod")})"
             case (Some(ResponseStreaming), Some(Fs2Stream)) =>
-              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.serverStreamingMethod(algebra.$methodName, $compressionOption)"
+              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.serverStreamingMethod(algebra.${operation.name}, $compressionOption)"
             case (Some(ResponseStreaming), Some(MonixObservable)) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(${serverCallMethodFor("serverStreamingMethod")})"
             case (Some(BidirectionalStreaming), Some(Fs2Stream)) =>
-              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.bidiStreamingMethod(algebra.$methodName, $compressionOption)"
+              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.bidiStreamingMethod(algebra.${operation.name}, $compressionOption)"
             case (Some(BidirectionalStreaming), Some(MonixObservable)) =>
               q"_root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(${serverCallMethodFor("bidiStreamingMethod")})"
             case (None, None) =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.higherkindness.mu.rpc.internal.server.unaryCalls.unaryMethod(algebra.$methodName, $compressionOption))"
+              q"_root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.higherkindness.mu.rpc.internal.server.unaryCalls.unaryMethod(algebra.${operation.name}, $compressionOption))"
             case _ =>
               sys.error(
-                s"Unable to define a handler for the streaming type $streamingType and $streamingImpl for the method $methodName in the service $serviceName")
+                s"Unable to define a handler for the streaming type $streamingType and $streamingImpl for the method ${operation.name} in the service $serviceName")
           }
           q"($methodDescriptorName, $handler)"
         }
@@ -392,58 +448,6 @@ object serviceImpl {
       //----------
       //TODO: derive server as well
       //TODO: move HTTP-related code to its own module (on last attempt this did not work)
-
-      abstract class TypeTypology(tpe: Tree, inner: Option[Tree], isStreaming: Boolean) {
-        def getTpe: Tree           = tpe
-        def getInner: Option[Tree] = inner
-        def streaming: Boolean     = isStreaming
-        def safeInner: Tree        = inner.getOrElse(tpe)
-      }
-      object TypeTypology {
-        def apply(t: Tree): TypeTypology = t match {
-          case tq"Observable[..$tpts]"       => MonixObservableTpe(t, tpts.headOption)
-          case tq"Stream[$carrier, ..$tpts]" => Fs2StreamTpe(t, tpts.headOption)
-          case tq"Empty.type"                => EmptyTpe(t)
-          case tq"$carrier[..$tpts]"         => UnaryTpe(t, tpts.headOption)
-        }
-      }
-      case class EmptyTpe(tpe: Tree)                          extends TypeTypology(tpe, None, false)
-      case class UnaryTpe(tpe: Tree, inner: Option[Tree])     extends TypeTypology(tpe, inner, false)
-      case class Fs2StreamTpe(tpe: Tree, inner: Option[Tree]) extends TypeTypology(tpe, inner, true)
-      case class MonixObservableTpe(tpe: Tree, inner: Option[Tree])
-          extends TypeTypology(tpe, inner, true)
-
-      case class Operation(name: TermName, request: TypeTypology, response: TypeTypology) {
-
-        val isStreaming: Boolean = request.streaming || response.streaming
-
-        val streamingType: Option[StreamingType] = (request.streaming, response.streaming) match {
-          case (true, true)  => Some(BidirectionalStreaming)
-          case (true, false) => Some(RequestStreaming)
-          case (false, true) => Some(ResponseStreaming)
-          case _             => None
-        }
-
-        val validStreamingComb: Boolean = (request, response) match {
-          case (Fs2StreamTpe(_, _), MonixObservableTpe(_, _)) => false
-          case (MonixObservableTpe(_, _), Fs2StreamTpe(_, _)) => false
-          case _                                              => true
-        }
-
-        val isMonixObservable: Boolean = List(request, response).collect {
-          case m: MonixObservableTpe => m
-        }.nonEmpty
-
-        require(
-          validStreamingComb,
-          s"RPC service $name has different streaming implementations for request and response")
-
-        val prevalentStreamingTarget: TypeTypology = streamingType match {
-          case Some(ResponseStreaming) => response
-          case _                       => request
-        }
-
-      }
 
       case class HttpOperation(operation: Operation) {
 
@@ -576,7 +580,7 @@ object serviceImpl {
               service.client,
               service.clientFromChannel,
               service.unsafeClient,
-              service.unsafeClientFromChannel,
+              service.unsafeClientFromChannel
             ) ++ service.http
           )
         )
