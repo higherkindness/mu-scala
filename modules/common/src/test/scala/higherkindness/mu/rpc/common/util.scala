@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.internal.metrics
+package higherkindness.mu.rpc.common
+
 import java.util.concurrent.TimeUnit
 
 import cats.effect.concurrent.Ref
@@ -24,22 +25,26 @@ import cats.syntax.functor._
 
 object util {
 
-  case class FakeClock[F[_]: Sync](count: Ref[F, Long]) extends Clock[F] {
+  case class FakeClock[F[_]: Sync](step: Long, timeUnit: TimeUnit)(count: Ref[F, Long])
+      extends Clock[F] {
     override def realTime(unit: TimeUnit): F[Long] =
       for {
-        _     <- count.update(_ + 50)
+        _     <- count.update(_ + step)
         value <- count.get
-      } yield unit.convert(value, TimeUnit.NANOSECONDS)
+      } yield unit.convert(value, timeUnit)
 
     override def monotonic(unit: TimeUnit): F[Long] =
       for {
-        _     <- count.update(_ + 50)
+        _     <- count.update(_ + step)
         value <- count.get
-      } yield unit.convert(value, TimeUnit.NANOSECONDS)
+      } yield unit.convert(value, timeUnit)
   }
 
   object FakeClock {
-    def build[F[_]: Sync]: F[FakeClock[F]] = Ref.of[F, Long](0).map(FakeClock(_))
+    def build[F[_]: Sync](
+        step: Long = 50,
+        timeUnit: TimeUnit = TimeUnit.NANOSECONDS): F[FakeClock[F]] =
+      Ref.of[F, Long](0).map(FakeClock(step, timeUnit))
   }
 
 }

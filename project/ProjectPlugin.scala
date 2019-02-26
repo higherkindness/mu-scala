@@ -27,11 +27,11 @@ object ProjectPlugin extends AutoPlugin {
       val avro4s: String             = "1.8.4"
       val avrohugger: String         = "1.0.0-RC15"
       val betterMonadicFor: String   = "0.2.4"
-      val catsEffect: String         = "1.1.0"
+      val catsEffect: String         = "1.2.0"
       val circe: String              = "0.11.1"
       val frees: String              = "0.8.2"
-      val fs2: String                = "1.0.2"
-      val fs2Grpc: String            = "0.4.0-M3"
+      val fs2: String                = "1.0.3"
+      val fs2Grpc: String            = "0.4.0-M6"
       val grpc: String               = "1.18.0"
       val jodaTime: String           = "2.10.1"
       val kindProjector: String      = "0.9.9"
@@ -154,6 +154,12 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+    lazy val prometheusMetricsSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %("prometheus", V.prometheus)
+      )
+    )
+
     lazy val dropwizardMetricsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.dropwizard.metrics" % "metrics-core" % V.dropwizard
@@ -249,6 +255,7 @@ object ProjectPlugin extends AutoPlugin {
       micrositeOrganizationHomepage := "http://www.47deg.com",
       includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
       micrositePushSiteWith := GitHub4s,
+      micrositeGithubToken := sys.env.get(orgGithubTokenSetting.value),
       micrositePalette := Map(
         "brand-primary"   -> "#de3423",
         "brand-secondary" -> "#852319",

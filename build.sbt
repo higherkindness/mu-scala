@@ -96,6 +96,7 @@ lazy val ssl = project
 
 lazy val `client-cache` = project
   .in(file("modules/client-cache"))
+  .dependsOn(common % "test->test")
   .settings(moduleName := "mu-rpc-client-cache")
   .settings(clientCacheSettings)
 
@@ -153,7 +154,7 @@ lazy val `prometheus` = project
   .dependsOn(`internal-core`)
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-prometheus")
-  .settings(prometheusSettings)
+  .settings(prometheusMetricsSettings)
 
 ////////////////////
 //// DROPWIZARD ////
@@ -357,6 +358,7 @@ lazy val `marshallers-jodatime` = project
 lazy val `legacy-avro-decimal-compat-protocol` = project
   .in(file("modules/legacy-avro-decimal/procotol"))
   .settings(moduleName := "legacy-avro-decimal-compat-protocol")
+  .settings(crossScalaVersions := Seq(scalac.`2.12`))
   .settings(legacyAvroDecimalProtocolSettings)
   .disablePlugins(scoverage.ScoverageSbtPlugin)
 
@@ -394,6 +396,7 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `dropwizard-server`,
   `dropwizard-client`,
   `dropwizard`,
+  `prometheus`,
   testing,
   ssl,
   `idlgen-core`,
@@ -409,7 +412,6 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `example-todolist-client`,
   `benchmarks-vprev`,
   `benchmarks-vnext`,
-  `legacy-avro-decimal-compat-protocol`,
   `legacy-avro-decimal-compat-model`,
   `legacy-avro-decimal-compat-encoders`
 )

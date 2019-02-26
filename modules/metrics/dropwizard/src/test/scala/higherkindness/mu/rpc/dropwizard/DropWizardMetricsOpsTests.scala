@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package metricsops
+package higherkindness.mu.rpc.dropwizard
 
 import cats.effect.IO
 import cats.implicits._
 import com.codahale.metrics.MetricRegistry
+import higherkindness.mu.rpc.dropwizard.DropWizardMetrics._
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
-import DropWizardMetricsOps._
 import higherkindness.mu.rpc.internal.metrics.MetricsOps
 import io.grpc.MethodDescriptor.MethodType
 import io.grpc.Status
@@ -30,7 +30,7 @@ import org.scalacheck.Prop._
 
 import scala.collection.JavaConverters._
 
-object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
+object DropWizardMetricsTests extends Properties("DropWizardMetrics") {
 
   val prefix     = "testPrefix"
   val classifier = "classifier"
@@ -113,7 +113,7 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int) =>
         val registry        = new MetricRegistry()
-        val metrics         = DropWizardMetricsOps[IO](registry, prefix)
+        val metrics         = DropWizardMetrics[IO](registry, prefix)
         val activeCallsName = s"$prefix.$classifier.active.calls"
 
         (for {
@@ -142,7 +142,7 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int) =>
         val registry = new MetricRegistry()
-        val metrics  = DropWizardMetricsOps[IO](registry, prefix)
+        val metrics  = DropWizardMetrics[IO](registry, prefix)
         val messagesSentName =
           s"$prefix.$classifier.${methodInfo.serviceName}.${methodInfo.methodName}.messages.sent"
 
@@ -161,7 +161,7 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int) =>
         val registry = new MetricRegistry()
-        val metrics  = DropWizardMetricsOps[IO](registry, prefix)
+        val metrics  = DropWizardMetrics[IO](registry, prefix)
         val messagesReceivedName =
           s"$prefix.$classifier.${methodInfo.serviceName}.${methodInfo.methodName}.messages.received"
 
@@ -180,7 +180,7 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10), Gen.chooseNum(100, 1000)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int, elapsed: Int) =>
         val registry    = new MetricRegistry()
-        val metrics     = DropWizardMetricsOps[IO](registry, prefix)
+        val metrics     = DropWizardMetrics[IO](registry, prefix)
         val headersName = s"$prefix.$classifier.calls.header"
 
         performAndCheckMetrics(
@@ -198,7 +198,7 @@ object DropWizardMetricsOpsTests extends Properties("DropWizardMetrics") {
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10), statusGen) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int, status: Status) =>
         val registry = new MetricRegistry()
-        val metrics  = DropWizardMetricsOps[IO](registry, prefix)
+        val metrics  = DropWizardMetrics[IO](registry, prefix)
 
         (1 to numberOfCalls).toList
           .map(_ => metrics.recordTotalTime(methodInfo, status, 1L, Some(classifier)))

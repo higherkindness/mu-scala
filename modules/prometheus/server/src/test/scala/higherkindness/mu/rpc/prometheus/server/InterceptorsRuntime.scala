@@ -34,7 +34,7 @@ case class InterceptorsRuntime(
   import handlers.server._
   import handlers.client._
   import higherkindness.mu.rpc.server._
-  import higherkindness.mu.rpc.interceptors.implicits._
+  import higherkindness.mu.rpc.server.interceptors.implicits._
   import cats.instances.list._
   import cats.syntax.traverse._
 
