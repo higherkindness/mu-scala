@@ -18,71 +18,133 @@ package higherkindness.mu.rpc.prometheus
 
 import cats.effect.Sync
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
-import io.prometheus.client.{CollectorRegistry, Counter, Gauge, Summary}
+import io.prometheus.client._
 import higherkindness.mu.rpc.internal.metrics.MetricsOps
+import higherkindness.mu.rpc.internal.metrics.MetricsOps._
 import io.grpc.Status
 
 case class PrometheusMetrics(
-                              activeCalls: Gauge,
-                              messagesSent: Counter,
-                              messagesReceived: Counter,
-                              headersTime: Summary,
-                              totalTime: Summary
-                            )
+    activeCalls: Gauge,
+    messagesSent: Counter,
+    messagesReceived: Counter,
+    headersTime: Summary,
+    totalTime: Summary,
+    methodTime: Summary,
+    statusTime: Summary
+)
 
 object PrometheusMetrics {
 
-  def apply[F[_]](cr: CollectorRegistry, prefix: String = "higherkinderness.mu")(implicit F: Sync[F]) = F.delay {
+  def apply[F[_]](
+      cr: CollectorRegistry,
+      prefix: String = "higherkinderness.mu",
+      classifier: Option[String])(implicit F: Sync[F]) = F.delay {
+    val metrics = generateMetrics(prefix, classifier, cr)
+
     new MetricsOps[F] {
-      override def increaseActiveCalls(methodInfo: GrpcMethodInfo, classifier: Option[String]): F[Unit] = ???
+      override def increaseActiveCalls(
+          methodInfo: GrpcMethodInfo,
+          classifier: Option[String]): F[Unit] = F.delay {
+        metrics.activeCalls.labels(label(classifier)).inc()
+      }
 
-      override def decreaseActiveCalls(methodInfo: GrpcMethodInfo, classifier: Option[String]): F[Unit] = ???
+      override def decreaseActiveCalls(
+          methodInfo: GrpcMethodInfo,
+          classifier: Option[String]): F[Unit] = F.delay {
+        metrics.activeCalls.labels(label(classifier)).dec()
+      }
 
-      override def recordMessageSent(methodInfo: GrpcMethodInfo, classifier: Option[String]): F[Unit] = ???
+      override def recordMessageSent(
+          methodInfo: GrpcMethodInfo,
+          classifier: Option[String]): F[Unit] = F.delay {
+        metrics.messagesSent
+          .labels(label(classifier), methodInfo.serviceName, methodInfo.methodName)
+          .inc()
+      }
 
-      override def recordMessageReceived(methodInfo: GrpcMethodInfo, classifier: Option[String]): F[Unit] = ???
+      override def recordMessageReceived(
+          methodInfo: GrpcMethodInfo,
+          classifier: Option[String]): F[Unit] = F.delay {
+        metrics.messagesReceived
+          .labels(label(classifier), methodInfo.serviceName, methodInfo.methodName)
+          .inc()
+      }
 
-      override def recordHeadersTime(methodInfo: GrpcMethodInfo, elapsed: Long, classifier: Option[String]): F[Unit] = ???
+      override def recordHeadersTime(
+          methodInfo: GrpcMethodInfo,
+          elapsed: Long,
+          classifier: Option[String]): F[Unit] = F.delay {
+        metrics.headersTime
+          .labels(label(classifier))
+          .observe(SimpleTimer.elapsedSecondsFromNanos(0, elapsed))
+      }
 
-      override def recordTotalTime(methodInfo: GrpcMethodInfo, status: Status, elapsed: Long, classifier: Option[String]): F[Unit] = ???
+      override def recordTotalTime(
+          methodInfo: GrpcMethodInfo,
+          status: Status,
+          elapsed: Long,
+          classifier: Option[String]): F[Unit] = F.delay {
+        metrics.totalTime
+          .labels(label(classifier))
+          .observe(SimpleTimer.elapsedSecondsFromNanos(0, elapsed))
+        metrics.methodTime
+          .labels(label(classifier), methodInfo.methodName)
+          .observe(SimpleTimer.elapsedSecondsFromNanos(0, elapsed))
+        metrics.methodTime
+          .labels(label(classifier), statusDescription(grpcStatusFromRawStatus(status)))
+          .observe(SimpleTimer.elapsedSecondsFromNanos(0, elapsed))
+      }
     }
   }
 
-  def metrics(prefix: String, classifier: Option[String], registry: CollectorRegistry) = PrometheusMetrics(
+  private[this] def generateMetrics(
+      prefix: String,
+      classifier: Option[String],
+      registry: CollectorRegistry): PrometheusMetrics = PrometheusMetrics(
     activeCalls = Gauge
       .build()
       .name(s"${prefix}_${classifier}_active_calls")
       .help("Current active calls.")
-      .labelNames("active_calls")
+      .labelNames("classifier")
       .register(registry),
-    messagesSent =
-      Counter
-        .build()
-        .name(s"${prefix}_${classifier}_messages_sent")
-        .help("Number of messages sent.")
-        .labelNames("messages_sent")
-        .register(registry),
-    messagesReceived =
-      Counter
-        .build()
-        .name(s"${prefix}_${classifier}_messages_received")
-        .help("Number of messages received.")
-        .labelNames("messages_received")
-        .register(registry),
-    headersTime =
-      Summary
-        .build()
-        .name(s"${prefix}_${classifier}_calls_header")
-        .help("Accumulative time for header calls")
-        .labelNames("time", "header")
-        .register(registry),
-    totalTime =
-      Summary
-        .build()
-        .name(s"${prefix}_${classifier}_calls_total")
-        .help("Total time for all calls")
-        .labelNames("time", "total")
-        .register(registry)
+    messagesSent = Counter
+      .build()
+      .name(s"${prefix}_${classifier}_messages_sent")
+      .help("Number of messages sent by service and method.")
+      .labelNames("classifier", "service", "method")
+      .register(registry),
+    messagesReceived = Counter
+      .build()
+      .name(s"${prefix}_${classifier}_messages_received")
+      .help("Number of messages received by service and method.")
+      .labelNames("classifier", "service", "method")
+      .register(registry),
+    headersTime = Summary
+      .build()
+      .name(s"${prefix}_${classifier}_calls_header")
+      .help("Accumulative time for header calls")
+      .labelNames("classifier")
+      .register(registry),
+    totalTime = Summary
+      .build()
+      .name(s"${prefix}_${classifier}_calls_total")
+      .help("Total time for all calls")
+      .labelNames("classifier")
+      .register(registry),
+    methodTime = Summary
+      .build()
+      .name(s"${prefix}_${classifier}_by_method")
+      .help("Time for calls based on GRPC method")
+      .labelNames("classifier", "method")
+      .register(registry),
+    statusTime = Summary
+      .build()
+      .name(s"${prefix}_${classifier}_by_status")
+      .help("Time for calls based on GRPC status")
+      .labelNames("classifier", "status")
+      .register(registry)
   )
+
+  private[this] def label(classifier: Option[String]): String = classifier.getOrElse("")
 
 }

@@ -76,4 +76,17 @@ object MetricsOps {
     case _                          => UnreachableError
   }
 
+  def statusDescription(status: GrpcStatus): String = status match {
+    case OK                => "ok-statuses"
+    case Cancelled         => "cancelled-statuses"
+    case DeadlineExceeded  => "deadline-exceeded-statuses"
+    case Internal          => "internal-statuses"
+    case ResourceExhausted => "resource-exhausted-statuses"
+    case Unauthenticated   => "unauthenticated-statuses"
+    case Unavailable       => "unavailable-statuses"
+    case Unimplemented     => "unimplemented-statuses"
+    case Unknown           => "unknown-statuses"
+    case _                 => "unreachable-error-statuses"
+  }
+
 }
