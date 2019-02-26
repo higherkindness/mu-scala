@@ -268,8 +268,9 @@ class GreeterRestTests
 
   "Auto-derived REST Client" should {
 
-    val unaryClient: UnaryGreeter.HttpClient[IO] =
-      UnaryGreeter.httpClient[IO](serviceUri / UnaryServicePrefix)
+    val unaryClient = UnaryGreeter.httpClient[IO](serviceUri / UnaryServicePrefix)
+    val fs2Client   = Fs2Greeter.httpClient[IO](serviceUri / Fs2ServicePrefix)
+    val monixClient = MonixGreeter.httpClient[IO](serviceUri / MonixServicePrefix)
 
     "serve a GET request" in {
       val response: IO[HelloResponse] =
@@ -287,53 +288,50 @@ class GreeterRestTests
       val response: IO[HelloResponse] =
         BlazeClientBuilder[IO](ec).resource.use(unaryClient.sayHello(HelloRequest("SRE"))(_))
 
-      the[UnexpectedStatus] thrownBy response.unsafeRunSync() shouldBe UnexpectedStatus(
-        Status.BadRequest)
+      the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
+        Status.BadRequest,
+        Some("INVALID_ARGUMENT: SRE"))
     }
 
     "handle a raised non-gRPC exception in a unary POST request" in {
       val response: IO[HelloResponse] =
         BlazeClientBuilder[IO](ec).resource.use(unaryClient.sayHello(HelloRequest("RTE"))(_))
 
-      the[UnexpectedStatus] thrownBy response.unsafeRunSync() shouldBe UnexpectedStatus(
-        Status.InternalServerError)
+      the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
+        Status.InternalServerError,
+        Some("RTE"))
     }
 
     "handle a thrown exception in a unary POST request" in {
       val response: IO[HelloResponse] =
         BlazeClientBuilder[IO](ec).resource.use(unaryClient.sayHello(HelloRequest("TR"))(_))
 
-      the[UnexpectedStatus] thrownBy response.unsafeRunSync() shouldBe UnexpectedStatus(
+      the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
         Status.InternalServerError)
     }
 
-//    "serve a POST request with fs2 streaming request" in {
-//
-//      val fs2Client = Fs2Greeter.httpClient[IO](serviceUri / UnaryServicePrefix)
-//
-//      val requests = Stream(HelloRequest("hey"), HelloRequest("there"))
-////      val response =
-////        BlazeClientBuilder[IO](ec).resource.use(fs2ServiceClient.sayHellos(requests)(_))
-////      response.unsafeRunSync() shouldBe HelloResponse("hey, there")
-//
-//      val response: IO[HelloResponse] =
-//        BlazeClientBuilder[IO](ec).resource.use(fs2Client.sayHellos(requests)(_))
-//      response.unsafeRunSync() shouldBe HelloResponse("hey, there")
-//    }
-//
-//    "serve a POST request with empty fs2 streaming request" in {
-//      val requests = Stream.empty
-//      val response =
-//        BlazeClientBuilder[IO](ec).resource.use(fs2ServiceClient.sayHellos(requests)(_))
-//      response.unsafeRunSync() shouldBe HelloResponse("")
-//    }
-//
-//    "serve a POST request with Observable streaming request" in {
-//      val requests = Observable(HelloRequest("hey"), HelloRequest("there"))
-//      val response =
-//        BlazeClientBuilder[IO](ec).resource.use(monixServiceClient.sayHellos(requests)(_))
-//      response.unsafeRunSync() shouldBe HelloResponse("hey, there")
-//    }
+    "serve a POST request with fs2 streaming request" in {
+
+      val requests = Stream(HelloRequest("hey"), HelloRequest("there"))
+
+      val response: IO[HelloResponse] =
+        BlazeClientBuilder[IO](ec).resource.use(fs2Client.sayHellos(requests)(_))
+      response.unsafeRunSync() shouldBe HelloResponse("hey, there")
+    }
+
+    "serve a POST request with empty fs2 streaming request" in {
+      val requests = Stream.empty
+      val response =
+        BlazeClientBuilder[IO](ec).resource.use(fs2Client.sayHellos(requests)(_))
+      response.unsafeRunSync() shouldBe HelloResponse("")
+    }
+
+    "serve a POST request with Observable streaming request" in {
+      val requests = Observable(HelloRequest("hey"), HelloRequest("there"))
+      val response =
+        BlazeClientBuilder[IO](ec).resource.use(monixClient.sayHellos(requests)(_))
+      response.unsafeRunSync() shouldBe HelloResponse("hey, there")
+    }
 //
 //    "serve a POST request with empty Observable streaming request" in {
 //      val requests = Observable.empty

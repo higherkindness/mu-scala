@@ -45,7 +45,7 @@ import fs2.Stream
 import monix.reactive.Observable
 @service(Avro) trait MonixGreeter[F[_]] {
 
-  def sayHellos(requests: Observable[HelloRequest]): F[HelloResponse]
+  @http def sayHellos(requests: Observable[HelloRequest]): F[HelloResponse]
 
   def sayHelloAll(request: HelloRequest): Observable[HelloResponse]
 
