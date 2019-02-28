@@ -460,7 +460,7 @@ object serviceImpl {
         val responseEncoder =
           q"""implicit val responseDecoder: EntityDecoder[F, ${response.safeInner}] = jsonOf[F, ${response.safeInner}]"""
 
-        def toTree: Tree = request match {
+        def toRequestTree: Tree = request match {
           case _: EmptyTpe =>
             q"""def $name(implicit client: _root_.org.http4s.client.Client[F]): ${response.getTpe} = {
 		                  $responseEncoder
@@ -475,6 +475,8 @@ object serviceImpl {
 		                 }"""
         }
 
+        def toRouteTree = cq"""_ => Ok("Hi")"""
+
       }
 
       val operations: List[HttpOperation] = for {
@@ -485,7 +487,7 @@ object serviceImpl {
         p <- params.headOption.toList
       } yield HttpOperation(Operation(d.name, TypeTypology(p.tpt), TypeTypology(d.tpt)))
 
-      val httpRequests = operations.map(_.toTree)
+      val httpRequests = operations.map(_.toRequestTree)
 
       val HttpClient                = TypeName("HttpClient")
       val httpClientClass: ClassDef = q"""
@@ -501,6 +503,7 @@ object serviceImpl {
 
       val httpImports: List[Tree] = List(
         q"import _root_.higherkindness.mu.rpc.http.Utils._",
+        q"import _root_.cats.syntax.functor._",
         q"import _root_.org.http4s._",
         q"import _root_.org.http4s.circe._",
         q"import _root_.io.circe._",
@@ -513,10 +516,67 @@ object serviceImpl {
         .map(_ => q"import _root_.monix.execution.Scheduler.Implicits.global")
         .toList
 
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+
+      println("&&&&&&&&&&&&&&&&&&")
+      println(serviceDef.name.toTermName)
+
+//      val httpRoutesCases = operations.map(_.toRouteTree)
+      val httpRoutesCases =
+        operations.map(op =>
+          cq"""GET -> Root / ${op.operation.name} => Ok(handler.getHello(_root_.higherkindness.mu.rpc.protocol.Empty).map(_.asJson))    """)
+      val routesPF = q"{ case ..$httpRoutesCases }"
+
+      val HttpRestService = TypeName(serviceDef.name.toString + "RestService")
+
+      val httpRestServiceClass = q"""
+        class $HttpRestService[$F_](implicit handler: ${serviceDef.name}[F], F: _root_.cats.effect.Sync[$F]) extends _root_.org.http4s.dsl.Http4sDsl[F] {
+         def service: HttpRoutes[F] = HttpRoutes.of[F]{$routesPF}
+      }"""
+
+      val httpService = q"""
+        def route[$F_](implicit handler: ${serviceDef.name}[F], F: _root_.cats.effect.Sync[$F]): HttpRoutes[F] = {
+          new $HttpRestService[$F].service
+      }"""
+
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+      //
+
       val http =
         if (httpRequests.isEmpty) Nil
         else
-          httpImports ++ scheduler ++ List(httpClientClass, httpClient)
+          httpImports ++ scheduler ++ List(
+            httpClientClass,
+            httpClient,
+            httpRestServiceClass,
+            httpService)
     }
 
     val classAndMaybeCompanion = annottees.map(_.tree)
@@ -561,6 +621,12 @@ object serviceImpl {
             ) ++ service.http
           )
         )
+
+        if (service.httpRequests.nonEmpty) {
+          println("#######################")
+          println(enrichedCompanion.toString)
+        }
+
         List(serviceDef, enrichedCompanion)
       case _ => sys.error("@service-annotated definition must be a trait or abstract class")
     }

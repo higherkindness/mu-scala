@@ -27,9 +27,7 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
-class UnaryGreeterRestService[F[_]: Sync](handler: UnaryGreeter[F])(
-    implicit F: MonadError[F, Throwable])
-    extends Http4sDsl[F] {
+class UnaryGreeterRestService[F[_]: Sync](implicit handler: UnaryGreeter[F]) extends Http4sDsl[F] {
 
   import higherkindness.mu.rpc.protocol.Empty
 
@@ -47,7 +45,7 @@ class UnaryGreeterRestService[F[_]: Sync](handler: UnaryGreeter[F])(
   }
 }
 
-class Fs2GreeterRestService[F[_]: Sync](handler: Fs2Greeter[F]) extends Http4sDsl[F] {
+class Fs2GreeterRestService[F[_]: Sync](implicit handler: Fs2Greeter[F]) extends Http4sDsl[F] {
 
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
 
@@ -69,8 +67,9 @@ class Fs2GreeterRestService[F[_]: Sync](handler: Fs2Greeter[F]) extends Http4sDs
   }
 }
 
-class MonixGreeterRestService[F[_]: ConcurrentEffect](handler: MonixGreeter[F])(
-    implicit sc: monix.execution.Scheduler)
+class MonixGreeterRestService[F[_]: ConcurrentEffect](
+    implicit handler: MonixGreeter[F],
+    sc: monix.execution.Scheduler)
     extends Http4sDsl[F] {
 
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
