@@ -27,10 +27,10 @@ case class PrometheusMetrics(
     activeCalls: Gauge,
     messagesSent: Counter,
     messagesReceived: Counter,
-    headersTime: Summary,
-    totalTime: Summary,
-    methodTime: Summary,
-    statusTime: Summary
+    headersTime: Histogram,
+    totalTime: Histogram,
+    methodTime: Histogram,
+    statusTime: Histogram
 )
 
 object PrometheusMetrics {
@@ -88,7 +88,7 @@ object PrometheusMetrics {
           .labels(label(classifier))
           .observe(SimpleTimer.elapsedSecondsFromNanos(0, elapsed))
         metrics.methodTime
-          .labels(label(classifier), methodInfo.methodName)
+          .labels(label(classifier), methodTypeDescription(methodInfo))
           .observe(SimpleTimer.elapsedSecondsFromNanos(0, elapsed))
         metrics.methodTime
           .labels(label(classifier), statusDescription(grpcStatusFromRawStatus(status)))
@@ -103,43 +103,43 @@ object PrometheusMetrics {
       registry: CollectorRegistry): PrometheusMetrics = PrometheusMetrics(
     activeCalls = Gauge
       .build()
-      .name(s"${prefix}_${classifier}_active_calls")
+      .name(s"${prefix}_active_calls")
       .help("Current active calls.")
       .labelNames("classifier")
       .register(registry),
     messagesSent = Counter
       .build()
-      .name(s"${prefix}_${classifier}_messages_sent")
+      .name(s"${prefix}_messages_sent")
       .help("Number of messages sent by service and method.")
       .labelNames("classifier", "service", "method")
       .register(registry),
     messagesReceived = Counter
       .build()
-      .name(s"${prefix}_${classifier}_messages_received")
+      .name(s"${prefix}_messages_received")
       .help("Number of messages received by service and method.")
       .labelNames("classifier", "service", "method")
       .register(registry),
-    headersTime = Summary
+    headersTime = Histogram
       .build()
-      .name(s"${prefix}_${classifier}_calls_header")
+      .name(s"${prefix}_calls_header")
       .help("Accumulative time for header calls")
       .labelNames("classifier")
       .register(registry),
-    totalTime = Summary
+    totalTime = Histogram
       .build()
-      .name(s"${prefix}_${classifier}_calls_total")
+      .name(s"${prefix}_calls_total")
       .help("Total time for all calls")
       .labelNames("classifier")
       .register(registry),
-    methodTime = Summary
+    methodTime = Histogram
       .build()
-      .name(s"${prefix}_${classifier}_by_method")
+      .name(s"${prefix}_calls_by_method")
       .help("Time for calls based on GRPC method")
       .labelNames("classifier", "method")
       .register(registry),
-    statusTime = Summary
+    statusTime = Histogram
       .build()
-      .name(s"${prefix}_${classifier}_by_status")
+      .name(s"${prefix}_${label(classifier)}_calls_by_status")
       .help("Time for calls based on GRPC status")
       .labelNames("classifier", "status")
       .register(registry)

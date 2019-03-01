@@ -133,13 +133,4 @@ object DropWizardMetrics {
       .map(c => s"$prefix.$c")
       .getOrElse(s"$prefix.default")
 
-  def methodTypeDescription(methodInfo: GrpcMethodInfo): String =
-    methodInfo.`type` match {
-      case UNARY            => "unary-methods"
-      case CLIENT_STREAMING => "client-streaming-methods"
-      case SERVER_STREAMING => "server-streaming-methods"
-      case BIDI_STREAMING   => "bidi-streaming-methods"
-      case UNKNOWN          => "unknown-methods"
-    }
-
 }

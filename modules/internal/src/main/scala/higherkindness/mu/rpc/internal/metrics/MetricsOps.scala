@@ -16,6 +16,7 @@
 
 package higherkindness.mu.rpc.internal.metrics
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
+import io.grpc.MethodDescriptor.MethodType._
 import io.grpc.Status
 
 trait MetricsOps[F[_]] {
@@ -88,5 +89,14 @@ object MetricsOps {
     case Unknown           => "unknown-statuses"
     case _                 => "unreachable-error-statuses"
   }
+
+  def methodTypeDescription(methodInfo: GrpcMethodInfo): String =
+    methodInfo.`type` match {
+      case UNARY            => "unary-methods"
+      case CLIENT_STREAMING => "client-streaming-methods"
+      case SERVER_STREAMING => "server-streaming-methods"
+      case BIDI_STREAMING   => "bidi-streaming-methods"
+      case UNKNOWN          => "unknown-methods"
+    }
 
 }
