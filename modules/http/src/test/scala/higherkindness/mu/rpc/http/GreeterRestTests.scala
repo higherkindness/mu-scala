@@ -63,9 +63,9 @@
 //
 //  val serviceUri: Uri = Uri.unsafeFromString(s"http://$Hostname:$Port")
 //
-//  val UnaryServicePrefix = "unary"
-//  val Fs2ServicePrefix   = "fs2"
-//  val MonixServicePrefix = "monix"
+//  val UnaryServicePrefix = "UnaryGreeter"
+//  val Fs2ServicePrefix   = "Fs2Greeter"
+//  val MonixServicePrefix = "MonixGreeter"
 //
 //  implicit val ec                   = monix.execution.Scheduler.Implicits.global
 //  implicit val cs: ContextShift[IO] = IO.contextShift(ec)
@@ -285,9 +285,9 @@
 //
 //  "Auto-derived REST Client" should {
 //
-//    val unaryClient = UnaryGreeter.httpClient[IO](serviceUri / UnaryServicePrefix)
-//    val fs2Client   = Fs2Greeter.httpClient[IO](serviceUri / Fs2ServicePrefix)
-//    val monixClient = MonixGreeter.httpClient[IO](serviceUri / MonixServicePrefix)
+//    val unaryClient = UnaryGreeter.httpClient[IO](serviceUri)
+//    val fs2Client   = Fs2Greeter.httpClient[IO](serviceUri)
+//    val monixClient = MonixGreeter.httpClient[IO](serviceUri)
 //
 //    "serve a GET request" in {
 //      val response: IO[HelloResponse] =
