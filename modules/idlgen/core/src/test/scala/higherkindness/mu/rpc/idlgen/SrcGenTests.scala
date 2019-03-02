@@ -19,7 +19,7 @@ package higherkindness.mu.rpc.idlgen
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
 import higherkindness.mu.rpc.idlgen.AvroScalaGeneratorArbitrary._
 import higherkindness.mu.rpc.idlgen.avro._
-import org.scalatest.prop.Checkers
+import org.scalatestplus.scalacheck.Checkers
 import org.scalacheck.Prop.forAll
 
 class SrcGenTests extends RpcBaseTestSuite with Checkers {

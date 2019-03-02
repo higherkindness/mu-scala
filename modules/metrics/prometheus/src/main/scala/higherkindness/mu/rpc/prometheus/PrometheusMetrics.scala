@@ -21,6 +21,7 @@ import higherkindness.mu.rpc.internal.metrics.MetricsOps
 
 object PrometheusMetrics {
 
-  def apply[F[_]](cr: CollectorRegistry, prefix: String = "higherkinderness.mu"): F[MetricsOps[F]] = ???
+  def apply[F[_]](cr: CollectorRegistry, prefix: String = "higherkinderness.mu"): F[MetricsOps[F]] =
+    ???
 
 }

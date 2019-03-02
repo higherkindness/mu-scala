@@ -434,7 +434,3 @@ lazy val docs = project
   .settings(micrositeSettings: _*)
   .settings(noPublishSettings: _*)
   .enablePlugins(MicrositesPlugin)
-
-onLoad in Global := { s =>
-  "dependencyUpdates" :: s
-}

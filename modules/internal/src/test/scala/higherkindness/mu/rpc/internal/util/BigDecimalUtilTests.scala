@@ -22,7 +22,7 @@ import org.scalacheck.Gen.Choose
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest._
 import org.scalacheck.Prop._
-import org.scalatest.prop.Checkers
+import org.scalatestplus.scalacheck.Checkers
 
 class BigDecimalUtilTests extends WordSpec with Matchers with Checkers {
 

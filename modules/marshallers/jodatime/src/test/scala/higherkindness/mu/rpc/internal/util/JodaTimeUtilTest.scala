@@ -24,7 +24,7 @@ import com.fortysevendeg.scalacheck.datetime.GenDateTime.genDateTimeWithinRange
 import higherkindness.mu.rpc.jodatime.util.JodaTimeUtil
 import org.scalatest._
 import org.scalacheck.Prop._
-import org.scalatest.prop.Checkers
+import org.scalatestplus.scalacheck.Checkers
 
 class JodaTimeUtilTest extends WordSpec with Matchers with Checkers {
 

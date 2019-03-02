@@ -27,7 +27,7 @@ import higherkindness.mu.rpc.internal.encoders.pbd.bigDecimal._
 import higherkindness.mu.rpc.protocol.Utils._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Prop._
-import org.scalatest.prop.Checkers
+import org.scalatestplus.scalacheck.Checkers
 import shapeless.{tag, Nat}
 import shapeless.tag.@@
 
