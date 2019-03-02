@@ -272,9 +272,7 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        %%("scalatest", V.scalatest) % "tut"
-      ),
+      libraryDependencies += %%("scalatest", V.scalatest),
       scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
     )
 
