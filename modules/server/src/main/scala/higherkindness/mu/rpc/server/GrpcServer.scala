@@ -18,9 +18,7 @@ package higherkindness.mu.rpc
 package server
 
 import cats.~>
-import cats.effect.{Effect, IO, Sync}
-import cats.instances.either._
-import cats.syntax.apply._
+import cats.effect.{Effect, Sync}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import io.grpc.{Server, ServerBuilder, ServerServiceDefinition}
@@ -79,20 +77,8 @@ trait GrpcServer[F[_]] { self =>
 
 object GrpcServer {
 
-  // Deferred can maybe be used here once cats-effect version is upgraded
-  // def server[F[_]](S: GrpcServer[F])(implicit B: Bracket[F, Throwable]): F[Unit] =
-  //   B.bracket(S.start)(_ => S.awaitTermination)(_ => S.shutdown)
-  def server[F[_]](S: GrpcServer[F])(implicit F: Effect[F]): F[Unit] = {
-
-    def shutdownEventually(endProcess: Either[Throwable, Unit] => Unit): Unit = {
-      Runtime.getRuntime.addShutdownHook(new Thread() {
-        override def run(): Unit =
-          F.runAsync(S.shutdown *> S.awaitTermination)(cb => IO(endProcess(cb.void))).unsafeRunSync
-      })
-    }
-
-    S.start() *> F.async[Unit](cb => shutdownEventually(cb))
-  }
+  def server[F[_]](S: GrpcServer[F])(implicit F: Effect[F]): F[Unit] =
+    F.bracket(S.start())(_ => S.awaitTermination())(_ => S.shutdown())
 
   def default[F[_]](port: Int, configList: List[GrpcConfig])(
       implicit F: Sync[F]): F[GrpcServer[F]] =
