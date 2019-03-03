@@ -485,13 +485,11 @@ object serviceImpl {
 
         val routeTypology: Tree = (request, response) match {
           case (_: Fs2StreamTpe, _: UnaryTpe) =>
-            q"""println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@entra por Fs2StreamTpe-UnaryTpe")
-                val requests = msg.asStream[${operation.request.safeInner}]
+            q"""val requests = msg.asStream[${operation.request.safeInner}]
               Ok(handler.${operation.name}(requests).map(_.asJson))"""
 
           case (_: UnaryTpe, _: Fs2StreamTpe) =>
-            q"""println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@entra por UnaryTpe-Fs2StreamTpe")
-                for {
+            q"""for {
               request   <- msg.as[${operation.request.safeInner}]
               responses <- Ok(handler.${operation.name}(request).asJsonEither)
             } yield responses"""
@@ -514,6 +512,9 @@ object serviceImpl {
             q"""val requests = msg.asStream[${operation.request.safeInner}]
               Ok(handler.${operation.name}(requests.toObservable).toFs2Stream.asJsonEither)"""
 
+          case (_: EmptyTpe, _) =>
+            q"""Ok(handler.${operation.name}(_root_.higherkindness.mu.rpc.protocol.Empty).map(_.asJson))"""
+
           case _ =>
             q"""for {
               request  <- msg.as[${operation.request.safeInner}]
@@ -521,12 +522,12 @@ object serviceImpl {
             } yield response"""
         }
 
-        def toRouteTree: Tree = request match {
-          case _: EmptyTpe =>
-            cq"""GET -> Root / ${operation.name} => Ok(handler.${operation.name}(_root_.higherkindness.mu.rpc.protocol.Empty).map(_.asJson))"""
+        val getPattern  = pq"GET -> Root / ${operation.name.toString}"
+        val postPattern = pq"msg @ POST -> Root / ${operation.name.toString}"
 
-          case _ =>
-            cq"""msg @ POST -> Root / ${operation.name} => $routeTypology"""
+        def toRouteTree: Tree = request match {
+          case _: EmptyTpe => cq"$getPattern => $routeTypology"
+          case _           => cq"$postPattern => $routeTypology"
         }
 
       }
@@ -541,13 +542,13 @@ object serviceImpl {
 
       val httpRequests = operations.map(_.toRequestTree)
 
-      val HttpClient                = TypeName("HttpClient")
-      val httpClientClass: ClassDef = q"""
+      val HttpClient      = TypeName("HttpClient")
+      val httpClientClass = q"""
         class $HttpClient[$F_](uri: Uri)(implicit F: _root_.cats.effect.ConcurrentEffect[$F], ec: scala.concurrent.ExecutionContext) {
           ..$httpRequests
       }"""
 
-      val httpClient: DefDef = q"""
+      val httpClient = q"""
         def httpClient[$F_](uri: Uri)
           (implicit F: _root_.cats.effect.ConcurrentEffect[$F], ec: scala.concurrent.ExecutionContext): $HttpClient[$F] = {
           new $HttpClient[$F](uri / ${serviceDef.name.toString})
