@@ -17,6 +17,7 @@
 package higherkindness.mu.rpc.prometheus
 
 import cats.effect.Sync
+import cats.syntax.functor._
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
 import io.prometheus.client._
 import higherkindness.mu.rpc.internal.metrics.MetricsOps
@@ -35,12 +36,13 @@ case class PrometheusMetrics(
 
 object PrometheusMetrics {
 
-  def apply[F[_]](
+  def build[F[_]: Sync](
       cr: CollectorRegistry,
       prefix: String = "higherkinderness.mu",
-      classifier: Option[String])(implicit F: Sync[F]) = F.delay {
-    val metrics = generateMetrics(prefix, classifier, cr)
+      classifier: Option[String]): F[MetricsOps[F]] =
+    buildMetrics[F](prefix, classifier, cr).map(PrometheusMetrics[F])
 
+  def apply[F[_]: Sync](metrics: PrometheusMetrics)(implicit F: Sync[F]): MetricsOps[F] =
     new MetricsOps[F] {
       override def increaseActiveCalls(
           methodInfo: GrpcMethodInfo,
@@ -90,60 +92,61 @@ object PrometheusMetrics {
         metrics.methodTime
           .labels(label(classifier), methodTypeDescription(methodInfo))
           .observe(SimpleTimer.elapsedSecondsFromNanos(0, elapsed))
-        metrics.methodTime
+        metrics.statusTime
           .labels(label(classifier), statusDescription(grpcStatusFromRawStatus(status)))
           .observe(SimpleTimer.elapsedSecondsFromNanos(0, elapsed))
       }
     }
-  }
 
-  private[this] def generateMetrics(
+  private[this] def buildMetrics[F[_]: Sync](
       prefix: String,
       classifier: Option[String],
-      registry: CollectorRegistry): PrometheusMetrics = PrometheusMetrics(
-    activeCalls = Gauge
-      .build()
-      .name(s"${prefix}_active_calls")
-      .help("Current active calls.")
-      .labelNames("classifier")
-      .register(registry),
-    messagesSent = Counter
-      .build()
-      .name(s"${prefix}_messages_sent")
-      .help("Number of messages sent by service and method.")
-      .labelNames("classifier", "service", "method")
-      .register(registry),
-    messagesReceived = Counter
-      .build()
-      .name(s"${prefix}_messages_received")
-      .help("Number of messages received by service and method.")
-      .labelNames("classifier", "service", "method")
-      .register(registry),
-    headersTime = Histogram
-      .build()
-      .name(s"${prefix}_calls_header")
-      .help("Accumulative time for header calls")
-      .labelNames("classifier")
-      .register(registry),
-    totalTime = Histogram
-      .build()
-      .name(s"${prefix}_calls_total")
-      .help("Total time for all calls")
-      .labelNames("classifier")
-      .register(registry),
-    methodTime = Histogram
-      .build()
-      .name(s"${prefix}_calls_by_method")
-      .help("Time for calls based on GRPC method")
-      .labelNames("classifier", "method")
-      .register(registry),
-    statusTime = Histogram
-      .build()
-      .name(s"${prefix}_${label(classifier)}_calls_by_status")
-      .help("Time for calls based on GRPC status")
-      .labelNames("classifier", "status")
-      .register(registry)
-  )
+      registry: CollectorRegistry): F[PrometheusMetrics] = Sync[F].delay {
+    PrometheusMetrics(
+      activeCalls = Gauge
+        .build()
+        .name(s"${prefix}_active_calls")
+        .help("Current active calls.")
+        .labelNames("classifier")
+        .register(registry),
+      messagesSent = Counter
+        .build()
+        .name(s"${prefix}_messages_sent")
+        .help("Number of messages sent by service and method.")
+        .labelNames("classifier", "service", "method")
+        .register(registry),
+      messagesReceived = Counter
+        .build()
+        .name(s"${prefix}_messages_received")
+        .help("Number of messages received by service and method.")
+        .labelNames("classifier", "service", "method")
+        .register(registry),
+      headersTime = Histogram
+        .build()
+        .name(s"${prefix}_calls_header")
+        .help("Accumulative time for header calls")
+        .labelNames("classifier")
+        .register(registry),
+      totalTime = Histogram
+        .build()
+        .name(s"${prefix}_calls_total")
+        .help("Total time for all calls")
+        .labelNames("classifier")
+        .register(registry),
+      methodTime = Histogram
+        .build()
+        .name(s"${prefix}_calls_by_method")
+        .help("Time for calls based on GRPC method")
+        .labelNames("classifier", "method")
+        .register(registry),
+      statusTime = Histogram
+        .build()
+        .name(s"${prefix}_calls_by_status")
+        .help("Time for calls based on GRPC status")
+        .labelNames("classifier", "status")
+        .register(registry)
+    )
+  }
 
   private[this] def label(classifier: Option[String]): String = classifier.getOrElse("")
 
