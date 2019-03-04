@@ -428,12 +428,6 @@ object serviceImpl {
         }
       }
 
-      //----------
-      // HTTP/REST
-      //----------
-      //TODO: derive server as well
-      //TODO: move HTTP-related code to its own module (on last attempt this did not work)
-
       case class HttpOperation(operation: Operation) {
 
         import operation._
@@ -570,25 +564,6 @@ object serviceImpl {
         .map(_ => q"import _root_.monix.execution.Scheduler.Implicits.global")
         .toList
 
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-
-      println("&&&&&&&&&&&&&&&&&&")
-      println(serviceDef.name.toTermName)
-
       val httpRoutesCases: Seq[Tree] = operations.map(_.toRouteTree)
 
       val routesPF: Tree = q"{ case ..$httpRoutesCases }"
@@ -624,22 +599,6 @@ object serviceImpl {
         def route[$F_](implicit handler: ${serviceDef.name}[F], F: _root_.cats.effect.ConcurrentEffect[$F], sc: scala.concurrent.ExecutionContext): _root_.higherkindness.mu.http.RouteMap[F] = {
           _root_.higherkindness.mu.http.RouteMap[F](${serviceDef.name.toString}, new $HttpRestService[$F].service)
       }""")
-
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      //
 
       val http =
         if (httpRequests.isEmpty) Nil
@@ -693,11 +652,6 @@ object serviceImpl {
             ) ++ service.http
           )
         )
-
-        if (service.httpRequests.nonEmpty) {
-          println("#######################")
-          println(enrichedCompanion.toString)
-        }
 
         List(serviceDef, enrichedCompanion)
       case _ => sys.error("@service-annotated definition must be a trait or abstract class")

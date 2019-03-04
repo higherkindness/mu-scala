@@ -16,7 +16,6 @@
 
 package higherkindness.mu.rpc.http
 
-import cats.MonadError
 import cats.effect._
 import cats.syntax.flatMap._
 import cats.syntax.functor._

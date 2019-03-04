@@ -53,19 +53,19 @@ class GreeterDerivedRestTests
   implicit val fs2HandlerIO         = new Fs2GreeterHandler[IO]
   implicit val monixHandlerIO       = new MonixGreeterHandler[IO]
 
-//  val unaryRoute: RouteMap[IO] = UnaryGreeter.route[IO]
-  val fs2Route: RouteMap[IO] = Fs2Greeter.route[IO]
-//  val monixRoute: RouteMap[IO] = MonixGreeter.route[IO]
+  val unaryRoute: RouteMap[IO] = UnaryGreeter.route[IO]
+  val fs2Route: RouteMap[IO]   = Fs2Greeter.route[IO]
+  val monixRoute: RouteMap[IO] = MonixGreeter.route[IO]
 
-//  val server: BlazeServerBuilder[IO] = HttpServer.bind(port, host, unaryRoute, fs2Route, monixRoute)
+  val server: BlazeServerBuilder[IO] = HttpServer.bind(port, host, unaryRoute, fs2Route, monixRoute)
 
 //  val server1: BlazeServerBuilder[IO] = BlazeServerBuilder[IO]
 //    .bindHttp(port, host)
 //    .withHttpApp(Router("/Fs2Greeter" -> new Fs2GreeterRestService[IO].service).orNotFound)
-
-  val server: BlazeServerBuilder[IO] = BlazeServerBuilder[IO]
-    .bindHttp(port, host)
-    .withHttpApp(Router(s"/${fs2Route.prefix}" -> fs2Route.route).orNotFound)
+//
+//  val server: BlazeServerBuilder[IO] = BlazeServerBuilder[IO]
+//    .bindHttp(port, host)
+//    .withHttpApp(Router(s"/${fs2Route.prefix}" -> fs2Route.route).orNotFound)
 
   var serverTask: Fiber[IO, Nothing] = _ // sorry
   before(serverTask = server.resource.use(_ => IO.never).start.unsafeRunSync())
@@ -73,77 +73,77 @@ class GreeterDerivedRestTests
 
   "REST Service" should {
 
-//    val unaryClient = UnaryGreeter.httpClient[IO](serviceUri)
-    val fs2Client = Fs2Greeter.httpClient[IO](serviceUri)
-//    val monixClient = MonixGreeter.httpClient[IO](serviceUri)
+    val unaryClient = UnaryGreeter.httpClient[IO](serviceUri)
+    val fs2Client   = Fs2Greeter.httpClient[IO](serviceUri)
+    val monixClient = MonixGreeter.httpClient[IO](serviceUri)
 
-//    "serve a GET request" in {
-//      val response: IO[HelloResponse] =
-//        BlazeClientBuilder[IO](ec).resource.use(unaryClient.getHello(_))
-//      response.unsafeRunSync() shouldBe HelloResponse("hey")
-//    }
-//
-//    "serve a unary POST request" in {
-//      val response: IO[HelloResponse] =
-//        BlazeClientBuilder[IO](ec).resource.use(unaryClient.sayHello(HelloRequest("hey"))(_))
-//      response.unsafeRunSync() shouldBe HelloResponse("hey")
-//    }
-//
-//    "handle a raised gRPC exception in a unary POST request" in {
-//      val response: IO[HelloResponse] =
-//        BlazeClientBuilder[IO](ec).resource.use(unaryClient.sayHello(HelloRequest("SRE"))(_))
-//
-//      the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
-//        Status.BadRequest,
-//        Some("INVALID_ARGUMENT: SRE"))
-//    }
-//
-//    "handle a raised non-gRPC exception in a unary POST request" in {
-//      val response: IO[HelloResponse] =
-//        BlazeClientBuilder[IO](ec).resource.use(unaryClient.sayHello(HelloRequest("RTE"))(_))
-//
-//      the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
-//        Status.InternalServerError,
-//        Some("RTE"))
-//    }
-//
-//    "handle a thrown exception in a unary POST request" in {
-//      val response: IO[HelloResponse] =
-//        BlazeClientBuilder[IO](ec).resource.use(unaryClient.sayHello(HelloRequest("TR"))(_))
-//
-//      the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
-//        Status.InternalServerError)
-//    }
-//
-//    "serve a POST request with fs2 streaming request" in {
-//
-//      val requests = Stream(HelloRequest("hey"), HelloRequest("there"))
-//
-//      val response: IO[HelloResponse] =
-//        BlazeClientBuilder[IO](ec).resource.use(fs2Client.sayHellos(requests)(_))
-//      response.unsafeRunSync() shouldBe HelloResponse("hey, there")
-//    }
-//
-//    "serve a POST request with empty fs2 streaming request" in {
-//      val requests = Stream.empty
-//      val response =
-//        BlazeClientBuilder[IO](ec).resource.use(fs2Client.sayHellos(requests)(_))
-//      response.unsafeRunSync() shouldBe HelloResponse("")
-//    }
-//
-//    "serve a POST request with Observable streaming request" in {
-//      val requests = Observable(HelloRequest("hey"), HelloRequest("there"))
-//      val response =
-//        BlazeClientBuilder[IO](ec).resource.use(monixClient.sayHellos(requests)(_))
-//      response.unsafeRunSync() shouldBe HelloResponse("hey, there")
-//    }
-//
-//    "serve a POST request with empty Observable streaming request" in {
-//      val requests = Observable.empty
-//      val response =
-//        BlazeClientBuilder[IO](ec).resource.use(monixClient.sayHellos(requests)(_))
-//      response.unsafeRunSync() shouldBe HelloResponse("")
-//    }
+    "serve a GET request" in {
+      val response: IO[HelloResponse] =
+        BlazeClientBuilder[IO](ec).resource.use(unaryClient.getHello(_))
+      response.unsafeRunSync() shouldBe HelloResponse("hey")
+    }
+
+    "serve a unary POST request" in {
+      val response: IO[HelloResponse] =
+        BlazeClientBuilder[IO](ec).resource.use(unaryClient.sayHello(HelloRequest("hey"))(_))
+      response.unsafeRunSync() shouldBe HelloResponse("hey")
+    }
+
+    "handle a raised gRPC exception in a unary POST request" in {
+      val response: IO[HelloResponse] =
+        BlazeClientBuilder[IO](ec).resource.use(unaryClient.sayHello(HelloRequest("SRE"))(_))
+
+      the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
+        Status.BadRequest,
+        Some("INVALID_ARGUMENT: SRE"))
+    }
+
+    "handle a raised non-gRPC exception in a unary POST request" in {
+      val response: IO[HelloResponse] =
+        BlazeClientBuilder[IO](ec).resource.use(unaryClient.sayHello(HelloRequest("RTE"))(_))
+
+      the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
+        Status.InternalServerError,
+        Some("RTE"))
+    }
+
+    "handle a thrown exception in a unary POST request" in {
+      val response: IO[HelloResponse] =
+        BlazeClientBuilder[IO](ec).resource.use(unaryClient.sayHello(HelloRequest("TR"))(_))
+
+      the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
+        Status.InternalServerError)
+    }
+
+    "serve a POST request with fs2 streaming request" in {
+
+      val requests = Stream(HelloRequest("hey"), HelloRequest("there"))
+
+      val response: IO[HelloResponse] =
+        BlazeClientBuilder[IO](ec).resource.use(fs2Client.sayHellos(requests)(_))
+      response.unsafeRunSync() shouldBe HelloResponse("hey, there")
+    }
+
+    "serve a POST request with empty fs2 streaming request" in {
+      val requests = Stream.empty
+      val response =
+        BlazeClientBuilder[IO](ec).resource.use(fs2Client.sayHellos(requests)(_))
+      response.unsafeRunSync() shouldBe HelloResponse("")
+    }
+
+    "serve a POST request with Observable streaming request" in {
+      val requests = Observable(HelloRequest("hey"), HelloRequest("there"))
+      val response =
+        BlazeClientBuilder[IO](ec).resource.use(monixClient.sayHellos(requests)(_))
+      response.unsafeRunSync() shouldBe HelloResponse("hey, there")
+    }
+
+    "serve a POST request with empty Observable streaming request" in {
+      val requests = Observable.empty
+      val response =
+        BlazeClientBuilder[IO](ec).resource.use(monixClient.sayHellos(requests)(_))
+      response.unsafeRunSync() shouldBe HelloResponse("")
+    }
 
     "serve a POST request with fs2 streaming response" in {
       val request = HelloRequest("hey")
@@ -152,76 +152,76 @@ class GreeterDerivedRestTests
       responses.compile.toList
         .unsafeRunSync() shouldBe List(HelloResponse("hey"), HelloResponse("hey"))
     }
-//
-//    "serve a POST request with Observable streaming response" in {
-//      val request = HelloRequest("hey")
-//      val responses = BlazeClientBuilder[IO](ec).stream
-//        .flatMap(monixClient.sayHelloAll(request)(_).toFs2Stream[IO])
-//      responses.compile.toList
-//        .unsafeRunTimed(10.seconds)
-//        .getOrElse(sys.error("Stuck!")) shouldBe List(HelloResponse("hey"), HelloResponse("hey"))
-//    }
-//
-//    "handle errors with fs2 streaming response" in {
-//      val request = HelloRequest("")
-//      val responses =
-//        BlazeClientBuilder[IO](ec).stream.flatMap(fs2Client.sayHelloAll(request)(_))
-//      the[IllegalArgumentException] thrownBy responses.compile.toList
-//        .unsafeRunSync() should have message "empty greeting"
-//    }
-//
-//    "handle errors with Observable streaming response" in {
-//      val request = HelloRequest("")
-//      val responses = BlazeClientBuilder[IO](ec).stream
-//        .flatMap(monixClient.sayHelloAll(request)(_).toFs2Stream[IO])
-//      the[IllegalArgumentException] thrownBy responses.compile.toList
-//        .unsafeRunTimed(10.seconds)
-//        .getOrElse(sys.error("Stuck!")) should have message "empty greeting"
-//    }
-//
-//    "serve a POST request with bidirectional fs2 streaming" in {
-//      val requests = Stream(HelloRequest("hey"), HelloRequest("there"))
-//      val responses =
-//        BlazeClientBuilder[IO](ec).stream.flatMap(fs2Client.sayHellosAll(requests)(_))
-//      responses.compile.toList
-//        .unsafeRunSync() shouldBe List(HelloResponse("hey"), HelloResponse("there"))
-//    }
-//
-//    "serve an empty POST request with bidirectional fs2 streaming" in {
-//      val requests = Stream.empty
-//      val responses =
-//        BlazeClientBuilder[IO](ec).stream.flatMap(fs2Client.sayHellosAll(requests)(_))
-//      responses.compile.toList.unsafeRunSync() shouldBe Nil
-//    }
-//
-//    "serve a POST request with bidirectional Observable streaming" in {
-//      val requests = Observable(HelloRequest("hey"), HelloRequest("there"))
-//      val responses = BlazeClientBuilder[IO](ec).stream
-//        .flatMap(monixClient.sayHellosAll(requests)(_).toFs2Stream[IO])
-//      responses.compile.toList
-//        .unsafeRunTimed(10.seconds)
-//        .getOrElse(sys.error("Stuck!")) shouldBe List(HelloResponse("hey"), HelloResponse("there"))
-//    }
-//
-//    "serve an empty POST request with bidirectional Observable streaming" in {
-//      val requests = Observable.empty
-//      val responses = BlazeClientBuilder[IO](ec).stream
-//        .flatMap(monixClient.sayHellosAll(requests)(_).toFs2Stream[IO])
-//      responses.compile.toList
-//        .unsafeRunTimed(10.seconds)
-//        .getOrElse(sys.error("Stuck!")) shouldBe Nil
-//    }
-//
-//    "serve ScalaCheck-generated POST requests with bidirectional Observable streaming" in {
-//      forAll { strings: List[String] =>
-//        val requests = Observable.fromIterable(strings.map(HelloRequest))
-//        val responses = BlazeClientBuilder[IO](ec).stream
-//          .flatMap(monixClient.sayHellosAll(requests)(_).toFs2Stream[IO])
-//        responses.compile.toList
-//          .unsafeRunTimed(10.seconds)
-//          .getOrElse(sys.error("Stuck!")) shouldBe strings.map(HelloResponse)
-//      }
-//    }
+
+    "serve a POST request with Observable streaming response" in {
+      val request = HelloRequest("hey")
+      val responses = BlazeClientBuilder[IO](ec).stream
+        .flatMap(monixClient.sayHelloAll(request)(_).toFs2Stream[IO])
+      responses.compile.toList
+        .unsafeRunTimed(10.seconds)
+        .getOrElse(sys.error("Stuck!")) shouldBe List(HelloResponse("hey"), HelloResponse("hey"))
+    }
+
+    "handle errors with fs2 streaming response" in {
+      val request = HelloRequest("")
+      val responses =
+        BlazeClientBuilder[IO](ec).stream.flatMap(fs2Client.sayHelloAll(request)(_))
+      the[IllegalArgumentException] thrownBy responses.compile.toList
+        .unsafeRunSync() should have message "empty greeting"
+    }
+
+    "handle errors with Observable streaming response" in {
+      val request = HelloRequest("")
+      val responses = BlazeClientBuilder[IO](ec).stream
+        .flatMap(monixClient.sayHelloAll(request)(_).toFs2Stream[IO])
+      the[IllegalArgumentException] thrownBy responses.compile.toList
+        .unsafeRunTimed(10.seconds)
+        .getOrElse(sys.error("Stuck!")) should have message "empty greeting"
+    }
+
+    "serve a POST request with bidirectional fs2 streaming" in {
+      val requests = Stream(HelloRequest("hey"), HelloRequest("there"))
+      val responses =
+        BlazeClientBuilder[IO](ec).stream.flatMap(fs2Client.sayHellosAll(requests)(_))
+      responses.compile.toList
+        .unsafeRunSync() shouldBe List(HelloResponse("hey"), HelloResponse("there"))
+    }
+
+    "serve an empty POST request with bidirectional fs2 streaming" in {
+      val requests = Stream.empty
+      val responses =
+        BlazeClientBuilder[IO](ec).stream.flatMap(fs2Client.sayHellosAll(requests)(_))
+      responses.compile.toList.unsafeRunSync() shouldBe Nil
+    }
+
+    "serve a POST request with bidirectional Observable streaming" in {
+      val requests = Observable(HelloRequest("hey"), HelloRequest("there"))
+      val responses = BlazeClientBuilder[IO](ec).stream
+        .flatMap(monixClient.sayHellosAll(requests)(_).toFs2Stream[IO])
+      responses.compile.toList
+        .unsafeRunTimed(10.seconds)
+        .getOrElse(sys.error("Stuck!")) shouldBe List(HelloResponse("hey"), HelloResponse("there"))
+    }
+
+    "serve an empty POST request with bidirectional Observable streaming" in {
+      val requests = Observable.empty
+      val responses = BlazeClientBuilder[IO](ec).stream
+        .flatMap(monixClient.sayHellosAll(requests)(_).toFs2Stream[IO])
+      responses.compile.toList
+        .unsafeRunTimed(10.seconds)
+        .getOrElse(sys.error("Stuck!")) shouldBe Nil
+    }
+
+    "serve ScalaCheck-generated POST requests with bidirectional Observable streaming" in {
+      forAll { strings: List[String] =>
+        val requests = Observable.fromIterable(strings.map(HelloRequest))
+        val responses = BlazeClientBuilder[IO](ec).stream
+          .flatMap(monixClient.sayHellosAll(requests)(_).toFs2Stream[IO])
+        responses.compile.toList
+          .unsafeRunTimed(10.seconds)
+          .getOrElse(sys.error("Stuck!")) shouldBe strings.map(HelloResponse)
+      }
+    }
 
   }
 
