@@ -22,32 +22,6 @@ import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.dsl.io._
 
-sealed trait HttpMethod extends Product with Serializable
-case object OPTIONS     extends HttpMethod
-case object GET         extends HttpMethod
-case object HEAD        extends HttpMethod
-case object POST        extends HttpMethod
-case object PUT         extends HttpMethod
-case object DELETE      extends HttpMethod
-case object TRACE       extends HttpMethod
-case object CONNECT     extends HttpMethod
-case object PATCH       extends HttpMethod
-
-object HttpMethod {
-  def fromString(str: String): Option[HttpMethod] = str match {
-    case "OPTIONS" => Some(OPTIONS)
-    case "GET"     => Some(GET)
-    case "HEAD"    => Some(HEAD)
-    case "POST"    => Some(POST)
-    case "PUT"     => Some(PUT)
-    case "DELETE"  => Some(DELETE)
-    case "TRACE"   => Some(TRACE)
-    case "CONNECT" => Some(CONNECT)
-    case "PATCH"   => Some(PATCH)
-    case _         => None
-  }
-}
-
 case class RouteMap[F[_]](prefix: String, route: HttpRoutes[F])
 
 object HttpServer {
