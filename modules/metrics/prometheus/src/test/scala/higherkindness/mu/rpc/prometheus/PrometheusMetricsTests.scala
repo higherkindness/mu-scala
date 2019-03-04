@@ -23,11 +23,14 @@ import higherkindness.mu.rpc.internal.metrics.MetricsOps
 import higherkindness.mu.rpc.internal.metrics.MetricsOps._
 import higherkindness.mu.rpc.internal.metrics.MetricsOpsGenerators.{methodInfoGen, statusGen}
 import io.grpc.Status
-import io.prometheus.client.CollectorRegistry
+import io.prometheus.client.Collector.MetricFamilySamples
+import io.prometheus.client.{Collector, CollectorRegistry}
 import org.scalacheck.Prop.forAllNoShrink
 import org.scalacheck.{Gen, Properties}
 
-class PrometheusMetricsTests extends Properties("DropWizardMetrics") {
+import scala.collection.JavaConverters._
+
+class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
 
   val prefix     = "testPrefix"
   val classifier = "classifier"
@@ -35,26 +38,53 @@ class PrometheusMetricsTests extends Properties("DropWizardMetrics") {
   def performAndCheckMetrics(
       methodInfo: GrpcMethodInfo,
       numberOfCalls: Int,
-      expectedValue: Double,
       registry: CollectorRegistry,
-      gaugeName: String,
+      metricName: String,
       labelNames: List[String],
       labelValues: List[String],
       op: IO[Unit],
-      status: Option[Status] = None): IO[Boolean] =
+      status: Option[Status] = None)(
+      checkSamples: List[MetricFamilySamples.Sample] => Boolean): IO[Boolean] =
     (1 to numberOfCalls).toList
       .map(_ => op)
       .sequence_
-      .map(_ => checkMetrics(expectedValue, registry, gaugeName, labelNames, labelValues))
+      .map(_ => checkMetrics(registry, metricName, labelNames, labelValues)(checkSamples))
+
+  def findRecordedMetric(
+      metricName: String,
+      registry: CollectorRegistry): Option[Collector.MetricFamilySamples] =
+    registry.metricFamilySamples.asScala.find(_.name == metricName)
+
+  def findRecordedMetricOrThrow(
+      metricName: String,
+      registry: CollectorRegistry): Collector.MetricFamilySamples =
+    findRecordedMetric(metricName, registry).getOrElse(
+      throw new IllegalArgumentException(s"Could not find metric with name: $metricName"))
 
   def checkMetrics(
-      expectedValue: Double,
       registry: CollectorRegistry,
       metricName: String,
       labelNames: List[String],
       labelValues: List[String]
-  ): Boolean =
-    registry.getSampleValue(metricName, labelNames.toArray, labelValues.toArray) == expectedValue
+  )(checkSamples: List[MetricFamilySamples.Sample] => Boolean): Boolean =
+    checkSamples(findRecordedMetricOrThrow(metricName, registry).samples.asScala.toList)
+
+  def checkSingleSamples(metricName: String, value: Double)(
+      samples: List[MetricFamilySamples.Sample]): Boolean =
+    samples.find(_.name == metricName).exists(_.value == value)
+
+  // Prometheus can return the value with a difference of 0.0000000001
+  def compareWithMinError(v1: Double, v2: Double): Boolean =
+    Math.abs(v1 - v2) < Math.pow(10, -10)
+
+  def checkSeriesSamples(metricName: String, numberOfCalls: Int, elapsed: Int)(
+      samples: List[MetricFamilySamples.Sample]): Boolean = {
+    samples.find(_.name == metricName + "_count").exists(_.value == numberOfCalls.toDouble) &&
+    samples
+      .find(_.name == metricName + "_sum")
+      .map(_.value * Collector.NANOSECONDS_PER_SECOND)
+      .exists(compareWithMinError(_, (numberOfCalls * elapsed).toDouble))
+  }
 
   property("creates and updates counter when registering an active call") =
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
@@ -63,49 +93,26 @@ class PrometheusMetricsTests extends Properties("DropWizardMetrics") {
         val metricName = s"${prefix}_active_calls"
 
         (for {
-          metrics <- PrometheusMetrics[IO](registry, prefix, Some(classifier))
+          metrics <- PrometheusMetrics.build[IO](registry, prefix, Some(classifier))
           op1 <- performAndCheckMetrics(
             methodInfo,
             numberOfCalls,
-            numberOfCalls.toDouble,
             registry,
             metricName,
             List("classifier"),
             List(classifier),
             metrics.increaseActiveCalls(methodInfo, Some(classifier))
-          )
+          )(checkSingleSamples(metricName, numberOfCalls.toDouble))
           op2 <- performAndCheckMetrics(
             methodInfo,
             numberOfCalls,
-            expectedValue = 0L,
             registry,
             metricName,
             List("classifier"),
             List(classifier),
             metrics.decreaseActiveCalls(methodInfo, Some(classifier))
-          )
+          )(checkSingleSamples(metricName, 0l))
         } yield op1 && op2).unsafeRunSync()
-    }
-
-  property("creates and updates counter when registering a sent message") =
-    forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
-      (methodInfo: GrpcMethodInfo, numberOfCalls: Int) =>
-        val registry   = new CollectorRegistry()
-        val metricName = s"${prefix}_messages_sent"
-
-        (for {
-          metrics <- PrometheusMetrics[IO](registry, prefix, Some(classifier))
-          op1 <- performAndCheckMetrics(
-            methodInfo,
-            numberOfCalls,
-            numberOfCalls.toDouble,
-            registry,
-            metricName,
-            List("classifier", "service", "method"),
-            List(classifier, methodInfo.serviceName, methodInfo.methodName),
-            metrics.recordMessageSent(methodInfo, Some(classifier))
-          )
-        } yield op1).unsafeRunSync()
     }
 
   property("creates and updates counter when registering a received message") =
@@ -115,17 +122,16 @@ class PrometheusMetricsTests extends Properties("DropWizardMetrics") {
         val metricName = s"${prefix}_messages_received"
 
         (for {
-          metrics <- PrometheusMetrics[IO](registry, prefix, Some(classifier))
+          metrics <- PrometheusMetrics.build[IO](registry, prefix, Some(classifier))
           op1 <- performAndCheckMetrics(
             methodInfo,
             numberOfCalls,
-            numberOfCalls.toDouble,
             registry,
             metricName,
             List("classifier", "service", "method"),
             List(classifier, methodInfo.serviceName, methodInfo.methodName),
             metrics.recordMessageReceived(methodInfo, Some(classifier))
-          )
+          )(checkSingleSamples(metricName, numberOfCalls.toDouble))
         } yield op1).unsafeRunSync()
     }
 
@@ -136,53 +142,47 @@ class PrometheusMetricsTests extends Properties("DropWizardMetrics") {
         val metricName = s"${prefix}_calls_header"
 
         (for {
-          metrics <- PrometheusMetrics[IO](registry, prefix, Some(classifier))
+          metrics <- PrometheusMetrics.build[IO](registry, prefix, Some(classifier))
           op1 <- performAndCheckMetrics(
             methodInfo,
             numberOfCalls,
-            (elapsed * numberOfCalls).toDouble,
             registry,
             metricName,
             List("classifier"),
             List(classifier),
             metrics.recordHeadersTime(methodInfo, elapsed.toLong, Some(classifier))
-          )
+          )(checkSeriesSamples(metricName, numberOfCalls, elapsed))
         } yield op1).unsafeRunSync()
     }
 
   property("creates and updates timer for total time") =
-    forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10), statusGen) {
-      (methodInfo: GrpcMethodInfo, numberOfCalls: Int, status: Status) =>
+    forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10), statusGen, Gen.chooseNum(100, 1000)) {
+      (methodInfo: GrpcMethodInfo, numberOfCalls: Int, status: Status, elapsed: Int) =>
         val registry              = new CollectorRegistry()
         val metricNameTotal       = s"${prefix}_calls_total"
         val metricNameTotalMethod = s"${prefix}_calls_by_method"
         val metricNameTotalStatus = s"${prefix}_calls_by_status"
 
         (for {
-          metrics <- PrometheusMetrics[IO](registry, prefix, Some(classifier))
+          metrics <- PrometheusMetrics.build[IO](registry, prefix, Some(classifier))
           op1 <- (1 to numberOfCalls).toList
-            .map(_ => metrics.recordTotalTime(methodInfo, status, 1L, Some(classifier)))
+            .map(_ => metrics.recordTotalTime(methodInfo, status, elapsed.toLong, Some(classifier)))
             .sequence_
             .map { _ =>
+              checkMetrics(registry, metricNameTotal, List("classifier"), List(classifier))(
+                checkSeriesSamples(metricNameTotal, numberOfCalls, elapsed)) &&
               checkMetrics(
-                numberOfCalls.toDouble,
-                registry,
-                metricNameTotal,
-                List("classifier"),
-                List(classifier)) &&
-              checkMetrics(
-                numberOfCalls.toDouble,
                 registry,
                 metricNameTotalMethod,
                 List("classifier", "method"),
-                List(classifier, methodTypeDescription(methodInfo))) &&
+                List(classifier, methodTypeDescription(methodInfo)))(
+                checkSeriesSamples(metricNameTotalMethod, numberOfCalls, elapsed)) &&
               checkMetrics(
-                numberOfCalls.toDouble,
                 registry,
                 metricNameTotalStatus,
                 List("classifier", "status"),
                 List(classifier, statusDescription(MetricsOps.grpcStatusFromRawStatus(status)))
-              )
+              )(checkSeriesSamples(metricNameTotalStatus, numberOfCalls, elapsed))
             }
         } yield op1).unsafeRunSync()
     }
