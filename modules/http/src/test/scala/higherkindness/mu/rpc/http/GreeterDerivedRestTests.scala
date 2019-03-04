@@ -21,17 +21,9 @@ import fs2.Stream
 import higherkindness.mu.http.{HttpServer, RouteMap}
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
 import higherkindness.mu.rpc.http.Utils._
-import higherkindness.mu.rpc.protocol.Empty
-import io.circe.Json
-import io.circe.generic.auto._
-import io.circe.syntax._
 import monix.reactive.Observable
 import org.http4s._
-import org.http4s.circe._
-import org.http4s.client.UnexpectedStatus
 import org.http4s.client.blaze.BlazeClientBuilder
-import org.http4s.dsl.io._
-import org.http4s.server._
 import org.http4s.server.blaze._
 import org.scalatest._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
@@ -59,15 +51,7 @@ class GreeterDerivedRestTests
 
   val server: BlazeServerBuilder[IO] = HttpServer.bind(port, host, unaryRoute, fs2Route, monixRoute)
 
-//  val server1: BlazeServerBuilder[IO] = BlazeServerBuilder[IO]
-//    .bindHttp(port, host)
-//    .withHttpApp(Router("/Fs2Greeter" -> new Fs2GreeterRestService[IO].service).orNotFound)
-//
-//  val server: BlazeServerBuilder[IO] = BlazeServerBuilder[IO]
-//    .bindHttp(port, host)
-//    .withHttpApp(Router(s"/${fs2Route.prefix}" -> fs2Route.route).orNotFound)
-
-  var serverTask: Fiber[IO, Nothing] = _ // sorry
+  var serverTask: Fiber[IO, Nothing] = _
   before(serverTask = server.resource.use(_ => IO.never).start.unsafeRunSync())
   after(serverTask.cancel)
 
