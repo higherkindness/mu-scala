@@ -21,7 +21,7 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import io.circe.generic.auto._
 import io.circe.syntax._
-import higherkindness.mu.rpc.http.Utils._
+import higherkindness.mu.http.Utils._
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl

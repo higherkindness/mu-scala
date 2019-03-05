@@ -18,9 +18,9 @@ package higherkindness.mu.rpc.http
 
 import cats.effect.{IO, _}
 import fs2.Stream
-import higherkindness.mu.http.{HttpServer, RouteMap}
+import higherkindness.mu.http.{HttpServer, ResponseError, RouteMap}
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
-import higherkindness.mu.rpc.http.Utils._
+import higherkindness.mu.http.Utils._
 import monix.reactive.Observable
 import org.http4s._
 import org.http4s.client.blaze.BlazeClientBuilder
@@ -41,9 +41,11 @@ class GreeterDerivedRestTests
 
   implicit val ec                   = monix.execution.Scheduler.Implicits.global
   implicit val cs: ContextShift[IO] = IO.contextShift(ec)
-  implicit val unaryHandlerIO       = new UnaryGreeterHandler[IO]
-  implicit val fs2HandlerIO         = new Fs2GreeterHandler[IO]
-  implicit val monixHandlerIO       = new MonixGreeterHandler[IO]
+  implicit val timer: Timer[IO]     = IO.timer(ec)
+
+  implicit val unaryHandlerIO = new UnaryGreeterHandler[IO]
+  implicit val fs2HandlerIO   = new Fs2GreeterHandler[IO]
+  implicit val monixHandlerIO = new MonixGreeterHandler[IO]
 
   val unaryRoute: RouteMap[IO] = UnaryGreeter.route[IO]
   val fs2Route: RouteMap[IO]   = Fs2Greeter.route[IO]

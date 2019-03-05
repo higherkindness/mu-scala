@@ -20,11 +20,10 @@ import cats.effect._
 import fs2.Stream
 import io.circe.generic.auto._
 import io.circe.syntax._
-import higherkindness.mu.rpc.http.Utils._
+import higherkindness.mu.http.Utils._
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.client._
-import org.http4s.dsl.io._
 
 class UnaryGreeterRestClient[F[_]: Sync](uri: Uri) {
 
@@ -68,7 +67,7 @@ class MonixGreeterRestClient[F[_]: ConcurrentEffect](uri: Uri)(
     implicit sc: monix.execution.Scheduler) {
 
   import monix.reactive.Observable
-  import higherkindness.mu.rpc.http.Utils._
+  import higherkindness.mu.http.Utils._
 
   private implicit val responseDecoder: EntityDecoder[F, HelloResponse] = jsonOf[F, HelloResponse]
 

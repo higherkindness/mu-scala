@@ -549,7 +549,7 @@ object serviceImpl {
       }"""
 
       val httpImports: List[Tree] = List(
-        q"import _root_.higherkindness.mu.rpc.http.Utils._",
+        q"import _root_.higherkindness.mu.http.Utils._",
         q"import _root_.cats.syntax.flatMap._",
         q"import _root_.cats.syntax.functor._",
         q"import _root_.org.http4s._",

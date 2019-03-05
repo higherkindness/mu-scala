@@ -16,17 +16,17 @@
 
 package higherkindness.mu.http
 
-import cats.effect.ConcurrentEffect
+import cats.effect.{ConcurrentEffect, Timer}
 import org.http4s.HttpRoutes
-import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
-import org.http4s.dsl.io._
+import org.http4s.implicits._
+import org.http4s.server.Router
 
 case class RouteMap[F[_]](prefix: String, route: HttpRoutes[F])
 
 object HttpServer {
 
-  def bind[F[_]: ConcurrentEffect](
+  def bind[F[_]: ConcurrentEffect: Timer](
       port: Int,
       host: String,
       routes: RouteMap[F]*): BlazeServerBuilder[F] =

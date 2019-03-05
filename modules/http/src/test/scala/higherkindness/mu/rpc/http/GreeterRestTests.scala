@@ -18,8 +18,9 @@ package higherkindness.mu.rpc.http
 
 import cats.effect.{IO, _}
 import fs2.Stream
+import higherkindness.mu.http.ResponseError
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
-import higherkindness.mu.rpc.http.Utils._
+import higherkindness.mu.http.Utils._
 import io.circe.Json
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -28,11 +29,11 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.client.UnexpectedStatus
 import org.http4s.client.blaze.BlazeClientBuilder
-import org.http4s.dsl.io._
-import org.http4s.server._
 import org.http4s.server.blaze._
 import org.scalatest._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.http4s.implicits._
+import org.http4s.server.Router
 
 import scala.concurrent.duration._
 
@@ -52,6 +53,7 @@ class GreeterRestTests
 
   implicit val ec                   = monix.execution.Scheduler.Implicits.global
   implicit val cs: ContextShift[IO] = IO.contextShift(ec)
+  implicit val timer: Timer[IO]     = IO.timer(ec)
 
   implicit val unaryHandlerIO = new UnaryGreeterHandler[IO]
   implicit val fs2HandlerIO   = new Fs2GreeterHandler[IO]
