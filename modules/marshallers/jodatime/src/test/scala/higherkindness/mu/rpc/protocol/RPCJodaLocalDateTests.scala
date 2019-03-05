@@ -29,7 +29,7 @@ import io.grpc.{ManagedChannel, ServerServiceDefinition}
 import org.scalacheck.Arbitrary
 import org.scalatest._
 import org.scalacheck.Prop._
-import org.scalatest.prop.Checkers
+import org.scalatestplus.scalacheck.Checkers
 
 class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with Checkers {
 

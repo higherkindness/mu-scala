@@ -18,13 +18,7 @@ package higherkindness.mu.rpc.channel.cache
 
 import cats.effect.concurrent.Ref
 import cats.effect._
-import cats.instances.list._
-import cats.instances.tuple._
-import cats.syntax.apply._
-import cats.syntax.bifunctor._
-import cats.syntax.flatMap._
-import cats.syntax.foldable._
-import cats.syntax.functor._
+import cats.implicits._
 import fs2.Stream
 import org.log4s.{getLogger, Logger}
 
@@ -42,6 +36,17 @@ object ClientCache {
   private val logger: Logger = getLogger
 
   type HostPort = (String, Int)
+
+  def fromResource[Client[_[_]], F[_]](
+      getHostAndPort: F[HostPort],
+      createClient: HostPort => Resource[F, Client[F]],
+      tryToRemoveUnusedEvery: FiniteDuration,
+      removeUnusedAfter: FiniteDuration
+  )(
+      implicit CE: ConcurrentEffect[F],
+      ec: ExecutionContext,
+      timer: Timer[F]): Stream[F, ClientCache[Client, F]] =
+    impl(getHostAndPort, createClient(_).allocated, tryToRemoveUnusedEvery, removeUnusedAfter)
 
   def impl[Client[_[_]], F[_]](
       getHostAndPort: F[HostPort],

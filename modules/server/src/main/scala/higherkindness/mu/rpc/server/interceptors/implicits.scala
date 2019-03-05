@@ -14,27 +14,22 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.internal.metrics
-import java.util.concurrent.TimeUnit
+package higherkindness.mu.rpc.server.interceptors
 
-import cats.effect.{Clock, Sync}
+import io.grpc.{ServerInterceptor, ServerInterceptors, ServerServiceDefinition}
 
-object util {
+trait InterceptorSyntax {
 
-  object FakeClock {
-    def apply[F[_]: Sync]: Clock[F] = new Clock[F] {
-      private var count = 0L
-
-      override def realTime(unit: TimeUnit): F[Long] = Sync[F].delay {
-        count += 50
-        unit.convert(count, TimeUnit.NANOSECONDS)
-      }
-
-      override def monotonic(unit: TimeUnit): F[Long] = Sync[F].delay {
-        count += 50
-        unit.convert(count, TimeUnit.NANOSECONDS)
-      }
-    }
-  }
+  implicit final def serviceDefinitionSyntax(s: ServerServiceDefinition): InterceptorOps =
+    new InterceptorOps(s)
 
 }
+
+final class InterceptorOps(val s: ServerServiceDefinition) extends AnyVal {
+
+  def interceptWith(i: ServerInterceptor): ServerServiceDefinition =
+    ServerInterceptors.intercept(s, i)
+
+}
+
+object implicits extends InterceptorSyntax

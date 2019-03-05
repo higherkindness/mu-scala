@@ -2,7 +2,7 @@
 
 Dir.chdir(File.absolute_path(File.join(File.dirname(__FILE__), "..")))
 
-Dir.entries("benchmarks/shared/src/main/scala").each do |f|
+Dir.entries("benchmarks/shared/src/main/scala/higherkindness/mu/rpc/benchmarks").each do |f|
   if f =~ /^([^.]+)\.scala$/
     name = $1
     system("./benchmarks/run-benchmark #{name}") if name !~ /package/

@@ -65,7 +65,7 @@ import service._
 
 object InterceptingServerCalls extends CommonRuntime {
 
-  import higherkindness.mu.rpc.interceptors.implicits._
+  import higherkindness.mu.rpc.server.interceptors.implicits._
 
   lazy val cr: CollectorRegistry = new CollectorRegistry()
   lazy val monitorInterceptor = MonitoringServerInterceptor(

@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
-package interceptors
+package higherkindness.mu.rpc.prometheus
 
-import io.grpc.{ServerInterceptor, ServerInterceptors, ServerServiceDefinition}
+import io.prometheus.client.CollectorRegistry
+import higherkindness.mu.rpc.internal.metrics.MetricsOps
 
-trait InterceptorSyntax {
+object PrometheusMetrics {
 
-  implicit final def serviceDefinitionSyntax(s: ServerServiceDefinition): InterceptorOps =
-    new InterceptorOps(s)
-
-}
-
-final class InterceptorOps(val s: ServerServiceDefinition) extends AnyVal {
-
-  def interceptWith(i: ServerInterceptor): ServerServiceDefinition =
-    ServerInterceptors.intercept(s, i)
+  def apply[F[_]](cr: CollectorRegistry, prefix: String = "higherkinderness.mu"): F[MetricsOps[F]] =
+    ???
 
 }
-
-object implicits extends InterceptorSyntax

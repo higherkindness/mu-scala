@@ -24,7 +24,7 @@ import com.fortysevendeg.scalacheck.datetime.instances.jdk8._
 import com.fortysevendeg.scalacheck.datetime.GenDateTime._
 import org.scalatest._
 import org.scalacheck.Prop._
-import org.scalatest.prop.Checkers
+import org.scalatestplus.scalacheck.Checkers
 
 class JavaTimeUtilTests extends WordSpec with Matchers with Checkers {
 

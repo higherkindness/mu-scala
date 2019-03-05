@@ -73,6 +73,8 @@ object Model {
       extends MarshallersImport("higherkindness.mu.rpc.internal.encoders.avro.bigdecimal._")
   case object BigDecimalTaggedAvroMarshallers
       extends MarshallersImport("higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._")
+  case object JavaTimeDateAvroMarshallers
+      extends MarshallersImport("higherkindness.mu.rpc.internal.encoders.avro.javatime._")
   case object JodaDateTimeAvroMarshallers
       extends MarshallersImport("higherkindness.mu.rpc.marshallers.jodaTimeEncoders.avro._")
   case object BigDecimalProtobufMarshallers

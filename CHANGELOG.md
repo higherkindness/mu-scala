@@ -1,5 +1,40 @@
 # Changelog
 
+## 02/05/2019 - Version 0.17.2
+
+Release changes:
+
+* Removes duplicated doc from README ([#543](https://github.com/higherkindness/mu/pull/543))
+* Channel Interceptor Metrics ([#522](https://github.com/higherkindness/mu/pull/522))
+* Adds a fake clock for testing the time meassure ([#545](https://github.com/higherkindness/mu/pull/545))
+* 514 - Dropwizards implementation ([#546](https://github.com/higherkindness/mu/pull/546))
+* Updates doc index ([#547](https://github.com/higherkindness/mu/pull/547))
+* Fixes typo in the documentation of Dropwizard metrics ([#548](https://github.com/higherkindness/mu/pull/548))
+* Server metrics implementation based on MetricOps ([#550](https://github.com/higherkindness/mu/pull/550))
+* Downgrades avro4s ([#553](https://github.com/higherkindness/mu/pull/553))
+* Release 0.17.1 ([#554](https://github.com/higherkindness/mu/pull/554))
+* Fixes deployment ([#555](https://github.com/higherkindness/mu/pull/555))
+* Restores the sbt plugin release and fixes ci release ([#556](https://github.com/higherkindness/mu/pull/556))
+* Client cache resource and bumps resources ([#558](https://github.com/higherkindness/mu/pull/558))
+* Releases 0.17.2 version ([#559](https://github.com/higherkindness/mu/pull/559))
+
+
+## 01/31/2019 - Version 0.17.1
+
+Release changes:
+
+* Removes duplicated doc from README ([#543](https://github.com/higherkindness/mu/pull/543))
+* Channel Interceptor Metrics ([#522](https://github.com/higherkindness/mu/pull/522))
+* Adds a fake clock for testing the time meassure ([#545](https://github.com/higherkindness/mu/pull/545))
+* 514 - Dropwizards implementation ([#546](https://github.com/higherkindness/mu/pull/546))
+* Updates doc index ([#547](https://github.com/higherkindness/mu/pull/547))
+* Fixes typo in the documentation of Dropwizard metrics ([#548](https://github.com/higherkindness/mu/pull/548))
+* Server metrics implementation based on MetricOps ([#550](https://github.com/higherkindness/mu/pull/550))
+* Downgrades avro4s ([#553](https://github.com/higherkindness/mu/pull/553))
+* Release 0.17.1 ([#554](https://github.com/higherkindness/mu/pull/554))
+* Fixes deployment ([#555](https://github.com/higherkindness/mu/pull/555))
+
+
 ## 01/21/2019 - Version 0.17.0
 
 Release changes:

@@ -275,14 +275,14 @@ object serviceImpl {
       val clientFromChannel: DefDef =
         q"""
         def clientFromChannel[$F_](
-          channel: F[_root_.io.grpc.ManagedChannel],
+          channel: $F[_root_.io.grpc.ManagedChannel],
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit
           F: _root_.cats.effect.ConcurrentEffect[$F],
           EC: _root_.scala.concurrent.ExecutionContext
-        ): _root_.cats.effect.Resource[F, $serviceName[$F]] = _root_.cats.effect.Resource.make(channel)(channel =>
+        ): _root_.cats.effect.Resource[$F, $serviceName[$F]] = _root_.cats.effect.Resource.make(channel)(channel =>
         F.void(F.delay(channel.shutdown()))).flatMap(ch =>
-        _root_.cats.effect.Resource.make[F, $serviceName[$F]](F.delay(new $Client[$F](ch, options)))(_ => F.unit))
+        _root_.cats.effect.Resource.make[$F, $serviceName[$F]](F.delay(new $Client[$F](ch, options)))(_ => F.unit))
         """.supressWarts("DefaultArguments")
 
       val unsafeClient: DefDef =

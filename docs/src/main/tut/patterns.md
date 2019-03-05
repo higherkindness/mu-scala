@@ -203,7 +203,7 @@ Thanks to `withServerChannel` from the package `mu.rpc.testing.servers`, you wil
 import cats.effect.Resource
 import higherkindness.mu.rpc.testing.servers.withServerChannel
 import io.grpc.{ManagedChannel, ServerServiceDefinition}
-import org.scalatest.prop.Checkers
+import org.scalatestplus.scalacheck.Checkers
 import org.scalatest._
 import org.scalacheck.Gen
 import org.scalacheck.Prop.forAll

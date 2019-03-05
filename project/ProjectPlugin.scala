@@ -24,30 +24,33 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String             = "2.0.2"
+      val avro4s: String             = "1.8.4"
       val avrohugger: String         = "1.0.0-RC15"
       val betterMonadicFor: String   = "0.2.4"
-      val catsEffect: String         = "1.1.0"
+      val catsEffect: String         = "1.2.0"
       val circe: String              = "0.11.1"
       val frees: String              = "0.8.2"
-      val fs2: String                = "1.0.2"
-      val fs2Grpc: String            = "0.4.0-M3"
+      val fs2: String                = "1.0.4"
+      val fs2Grpc: String            = "0.4.0-M6"
       val grpc: String               = "1.18.0"
       val jodaTime: String           = "2.10.1"
       val http4s                     = "0.20.0-M6"
       val kindProjector: String      = "0.9.9"
-      val log4s: String              = "1.6.1"
+      val log4s: String              = "1.7.0"
       val logback: String            = "1.2.3"
       val monix: String              = "3.0.0-RC2"
       val monocle: String            = "1.5.1-cats"
       val nettySSL: String           = "2.0.20.Final"
       val paradise: String           = "2.1.1"
-      val pbdirect: String           = "0.2.0"
+      val pbdirect: String           = "0.2.1"
       val prometheus: String         = "0.6.0"
-      val pureconfig: String         = "0.10.1"
+      val pureconfig: String         = "0.10.2"
       val reactiveStreams: String    = "1.0.2"
       val scala: String              = "2.12.8"
       val scalacheckToolbox: String  = "0.2.5"
+      val scalamockScalatest: String = "3.6.0"
+      val scalatest: String          = "3.0.6"
+      val slf4j: String              = "1.7.26"
       val dropwizard: String         = "4.0.5"
     }
 
@@ -74,7 +77,7 @@ object ProjectPlugin extends AutoPlugin {
     lazy val internalMonixSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("monix", V.monix),
-        "org.reactivestreams" % "reactive-streams" % V.reactiveStreams,
+        "org.reactivestreams"    % "reactive-streams" % V.reactiveStreams,
         %%("scalamockScalatest") % Test
       )
     )
@@ -167,6 +170,12 @@ object ProjectPlugin extends AutoPlugin {
     lazy val dropwizardSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.prometheus" % "simpleclient_dropwizard" % V.prometheus
+      )
+    )
+
+    lazy val prometheusMetricsSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %("prometheus", V.prometheus)
       )
     )
 
@@ -265,6 +274,7 @@ object ProjectPlugin extends AutoPlugin {
       micrositeOrganizationHomepage := "http://www.47deg.com",
       includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
       micrositePushSiteWith := GitHub4s,
+      micrositeGithubToken := sys.env.get(orgGithubTokenSetting.value),
       micrositePalette := Map(
         "brand-primary"   -> "#de3423",
         "brand-secondary" -> "#852319",
@@ -278,9 +288,7 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        %%("scalatest") % "tut"
-      ),
+      libraryDependencies += %%("scalatest", V.scalatest),
       scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
     )
 
@@ -326,13 +334,12 @@ object ProjectPlugin extends AutoPlugin {
       Tut / scalacOptions -= "-Ywarn-unused-import",
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
+      resolvers ++= Seq(Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots")),
       addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
       addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
-      // This is needed to prevent the eviction regarding the version of kind-projector injected by org-policies:
-      libraryDependencies ~= (_.filterNot(m => m.name == "kind-projector" && m.revision == "0.9.7")),
       libraryDependencies ++= Seq(
-        %%("scalatest") % "test",
-        %("slf4j-nop")  % Test
+        %%("scalatest", V.scalatest) % "test",
+        %("slf4j-nop", V.slf4j)      % Test
       )
     ) ++ Seq(
       // sbt-org-policies settings:
