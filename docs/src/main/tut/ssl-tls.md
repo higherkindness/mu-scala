@@ -22,7 +22,7 @@ On the server and client side, we will need two files to configure the `SslConte
 
 ## Usage
 
-The first step to secure our [mu] services is to add the library dependencies `mu-rpc-netty-ssl` and `mu-rpc-client-netty` in our build.
+The first step to secure our [mu] services is to add the library dependencies `mu-rpc-netty-ssl` and `mu-rpc-netty` in our build.
 
 For the second step, we have to move both server/client certificates and private keys to the `resources` folder.
 

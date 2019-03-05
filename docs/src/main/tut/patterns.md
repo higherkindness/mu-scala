@@ -255,7 +255,7 @@ run(new ServiceSpec)
 
 [mu] derives a client automatically based on the protocol. This is especially useful because you can distribute it depending on the protocol/service definitions. If you change something in your protocol definition, you will get a new client for free without having to write anything.
 
-You will need to add either `mu-rpc-client-netty` or `mu-rpc-client-okhttp` to your build.
+You will need to add either `mu-rpc-netty` or `mu-rpc-okhttp` to your build.
 
 ### Client Runtime
 
