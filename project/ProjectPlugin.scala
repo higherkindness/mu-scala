@@ -139,7 +139,7 @@ object ProjectPlugin extends AutoPlugin {
         %%("http4s-blaze-client", V.http4s) % Test,
         %%("scalacheck") % Test,
         %%("scalamockScalatest") % Test,
-        "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
+        "ch.qos.logback" % "logback-classic" % V.logback % Test
       )
     )
 

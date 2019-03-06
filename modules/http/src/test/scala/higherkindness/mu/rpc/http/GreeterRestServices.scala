@@ -21,7 +21,9 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import io.circe.generic.auto._
 import io.circe.syntax._
-import higherkindness.mu.http.Utils._
+import higherkindness.mu.http.implicits._
+import fs2.interop.reactivestreams._
+import monix.reactive.Observable
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
@@ -77,16 +79,24 @@ class MonixGreeterRestService[F[_]: ConcurrentEffect](
 
     case msg @ POST -> Root / "sayHellos" =>
       val requests = msg.asStream[HelloRequest]
-      Ok(handler.sayHellos(requests.toObservable).map(_.asJson))
+      Ok(
+        handler
+          .sayHellos(Observable.fromReactivePublisher(requests.toUnicastPublisher))
+          .map(_.asJson))
 
     case msg @ POST -> Root / "sayHelloAll" =>
       for {
         request   <- msg.as[HelloRequest]
-        responses <- Ok(handler.sayHelloAll(request).toFs2Stream.asJsonEither)
+        responses <- Ok(handler.sayHelloAll(request).toReactivePublisher.toStream.asJsonEither)
       } yield responses
 
     case msg @ POST -> Root / "sayHellosAll" =>
       val requests = msg.asStream[HelloRequest]
-      Ok(handler.sayHellosAll(requests.toObservable).toFs2Stream.asJsonEither)
+      Ok(
+        handler
+          .sayHellosAll(Observable.fromReactivePublisher(requests.toUnicastPublisher))
+          .toReactivePublisher
+          .toStream
+          .asJsonEither)
   }
 }

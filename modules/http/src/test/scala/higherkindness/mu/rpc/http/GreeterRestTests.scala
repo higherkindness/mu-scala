@@ -18,9 +18,10 @@ package higherkindness.mu.rpc.http
 
 import cats.effect.{IO, _}
 import fs2.Stream
+import fs2.interop.reactivestreams._
 import higherkindness.mu.http.ResponseError
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
-import higherkindness.mu.http.Utils._
+import higherkindness.mu.http.implicits._
 import io.circe.Json
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -31,15 +32,15 @@ import org.http4s.client.UnexpectedStatus
 import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.server.blaze._
 import org.scalatest._
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.http4s.implicits._
 import org.http4s.server.Router
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 import scala.concurrent.duration._
 
 class GreeterRestTests
     extends RpcBaseTestSuite
-    with GeneratorDrivenPropertyChecks
+    with ScalaCheckDrivenPropertyChecks
     with BeforeAndAfter {
 
   val Hostname = "localhost"
@@ -59,7 +60,6 @@ class GreeterRestTests
   implicit val fs2HandlerIO   = new Fs2GreeterHandler[IO]
   implicit val monixHandlerIO = new MonixGreeterHandler[IO]
 
-  //TODO: add Logger middleware
   val unaryService: HttpRoutes[IO] = new UnaryGreeterRestService[IO].service
   val fs2Service: HttpRoutes[IO]   = new Fs2GreeterRestService[IO].service
   val monixService: HttpRoutes[IO] = new MonixGreeterRestService[IO].service
@@ -198,7 +198,7 @@ class GreeterRestTests
     "serve a POST request with Observable streaming response" in {
       val request = HelloRequest("hey")
       val responses = BlazeClientBuilder[IO](ec).stream
-        .flatMap(monixServiceClient.sayHelloAll(request)(_).toFs2Stream[IO])
+        .flatMap(monixServiceClient.sayHelloAll(request)(_).toReactivePublisher.toStream[IO])
       responses.compile.toList
         .unsafeRunTimed(10.seconds)
         .getOrElse(sys.error("Stuck!")) shouldBe List(HelloResponse("hey"), HelloResponse("hey"))
@@ -215,7 +215,7 @@ class GreeterRestTests
     "handle errors with Observable streaming response" in {
       val request = HelloRequest("")
       val responses = BlazeClientBuilder[IO](ec).stream
-        .flatMap(monixServiceClient.sayHelloAll(request)(_).toFs2Stream[IO])
+        .flatMap(monixServiceClient.sayHelloAll(request)(_).toReactivePublisher.toStream[IO])
       the[IllegalArgumentException] thrownBy responses.compile.toList
         .unsafeRunTimed(10.seconds)
         .getOrElse(sys.error("Stuck!")) should have message "empty greeting"
@@ -239,7 +239,7 @@ class GreeterRestTests
     "serve a POST request with bidirectional Observable streaming" in {
       val requests = Observable(HelloRequest("hey"), HelloRequest("there"))
       val responses = BlazeClientBuilder[IO](ec).stream
-        .flatMap(monixServiceClient.sayHellosAll(requests)(_).toFs2Stream[IO])
+        .flatMap(monixServiceClient.sayHellosAll(requests)(_).toReactivePublisher.toStream[IO])
       responses.compile.toList
         .unsafeRunTimed(10.seconds)
         .getOrElse(sys.error("Stuck!")) shouldBe List(HelloResponse("hey"), HelloResponse("there"))
@@ -248,7 +248,7 @@ class GreeterRestTests
     "serve an empty POST request with bidirectional Observable streaming" in {
       val requests = Observable.empty
       val responses = BlazeClientBuilder[IO](ec).stream
-        .flatMap(monixServiceClient.sayHellosAll(requests)(_).toFs2Stream[IO])
+        .flatMap(monixServiceClient.sayHellosAll(requests)(_).toReactivePublisher.toStream[IO])
       responses.compile.toList
         .unsafeRunTimed(10.seconds)
         .getOrElse(sys.error("Stuck!")) shouldBe Nil
@@ -258,7 +258,7 @@ class GreeterRestTests
       forAll { strings: List[String] =>
         val requests = Observable.fromIterable(strings.map(HelloRequest))
         val responses = BlazeClientBuilder[IO](ec).stream
-          .flatMap(monixServiceClient.sayHellosAll(requests)(_).toFs2Stream[IO])
+          .flatMap(monixServiceClient.sayHellosAll(requests)(_).toReactivePublisher.toStream[IO])
         responses.compile.toList
           .unsafeRunTimed(10.seconds)
           .getOrElse(sys.error("Stuck!")) shouldBe strings.map(HelloResponse)

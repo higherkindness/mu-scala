@@ -18,9 +18,10 @@ package higherkindness.mu.rpc.http
 
 import cats.effect._
 import fs2.Stream
+import fs2.interop.reactivestreams._
 import io.circe.generic.auto._
 import io.circe.syntax._
-import higherkindness.mu.http.Utils._
+import higherkindness.mu.http.implicits._
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.client._
@@ -67,28 +68,33 @@ class MonixGreeterRestClient[F[_]: ConcurrentEffect](uri: Uri)(
     implicit sc: monix.execution.Scheduler) {
 
   import monix.reactive.Observable
-  import higherkindness.mu.http.Utils._
+  import higherkindness.mu.http.implicits._
 
   private implicit val responseDecoder: EntityDecoder[F, HelloResponse] = jsonOf[F, HelloResponse]
 
   def sayHellos(arg: Observable[HelloRequest])(implicit client: Client[F]): F[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellos")
-    client.expectOr[HelloResponse](request.withEntity(arg.toFs2Stream.map(_.asJson)))(
-      handleResponseError)
+    client.expectOr[HelloResponse](
+      request.withEntity(arg.toReactivePublisher.toStream.map(_.asJson)))(handleResponseError)
   }
 
   def sayHelloAll(arg: HelloRequest)(implicit client: Client[F]): Observable[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHelloAll")
-    client.stream(request.withEntity(arg.asJson)).flatMap(_.asStream[HelloResponse]).toObservable
+    Observable.fromReactivePublisher(
+      client
+        .stream(request.withEntity(arg.asJson))
+        .flatMap(_.asStream[HelloResponse])
+        .toUnicastPublisher)
   }
 
   def sayHellosAll(arg: Observable[HelloRequest])(
       implicit client: Client[F]): Observable[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellosAll")
-    client
-      .stream(request.withEntity(arg.toFs2Stream.map(_.asJson)))
-      .flatMap(_.asStream[HelloResponse])
-      .toObservable
+    Observable.fromReactivePublisher(
+      client
+        .stream(request.withEntity(arg.toReactivePublisher.toStream.map(_.asJson)))
+        .flatMap(_.asStream[HelloResponse])
+        .toUnicastPublisher)
   }
 
 }

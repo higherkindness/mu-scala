@@ -18,21 +18,21 @@ package higherkindness.mu.rpc.http
 
 import cats.effect.{IO, _}
 import fs2.Stream
+import fs2.interop.reactivestreams._
 import higherkindness.mu.http.{HttpServer, ResponseError, RouteMap}
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
-import higherkindness.mu.http.Utils._
 import monix.reactive.Observable
 import org.http4s._
 import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.server.blaze._
 import org.scalatest._
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 import scala.concurrent.duration._
 
 class GreeterDerivedRestTests
     extends RpcBaseTestSuite
-    with GeneratorDrivenPropertyChecks
+    with ScalaCheckDrivenPropertyChecks
     with BeforeAndAfter {
 
   val host            = "localhost"
@@ -142,7 +142,7 @@ class GreeterDerivedRestTests
     "serve a POST request with Observable streaming response" in {
       val request = HelloRequest("hey")
       val responses = BlazeClientBuilder[IO](ec).stream
-        .flatMap(monixClient.sayHelloAll(request)(_).toFs2Stream[IO])
+        .flatMap(monixClient.sayHelloAll(request)(_).toReactivePublisher.toStream[IO])
       responses.compile.toList
         .unsafeRunTimed(10.seconds)
         .getOrElse(sys.error("Stuck!")) shouldBe List(HelloResponse("hey"), HelloResponse("hey"))
@@ -159,7 +159,7 @@ class GreeterDerivedRestTests
     "handle errors with Observable streaming response" in {
       val request = HelloRequest("")
       val responses = BlazeClientBuilder[IO](ec).stream
-        .flatMap(monixClient.sayHelloAll(request)(_).toFs2Stream[IO])
+        .flatMap(monixClient.sayHelloAll(request)(_).toReactivePublisher.toStream[IO])
       the[IllegalArgumentException] thrownBy responses.compile.toList
         .unsafeRunTimed(10.seconds)
         .getOrElse(sys.error("Stuck!")) should have message "empty greeting"
@@ -183,7 +183,7 @@ class GreeterDerivedRestTests
     "serve a POST request with bidirectional Observable streaming" in {
       val requests = Observable(HelloRequest("hey"), HelloRequest("there"))
       val responses = BlazeClientBuilder[IO](ec).stream
-        .flatMap(monixClient.sayHellosAll(requests)(_).toFs2Stream[IO])
+        .flatMap(monixClient.sayHellosAll(requests)(_).toReactivePublisher.toStream[IO])
       responses.compile.toList
         .unsafeRunTimed(10.seconds)
         .getOrElse(sys.error("Stuck!")) shouldBe List(HelloResponse("hey"), HelloResponse("there"))
@@ -192,7 +192,7 @@ class GreeterDerivedRestTests
     "serve an empty POST request with bidirectional Observable streaming" in {
       val requests = Observable.empty
       val responses = BlazeClientBuilder[IO](ec).stream
-        .flatMap(monixClient.sayHellosAll(requests)(_).toFs2Stream[IO])
+        .flatMap(monixClient.sayHellosAll(requests)(_).toReactivePublisher.toStream[IO])
       responses.compile.toList
         .unsafeRunTimed(10.seconds)
         .getOrElse(sys.error("Stuck!")) shouldBe Nil
@@ -202,7 +202,7 @@ class GreeterDerivedRestTests
       forAll { strings: List[String] =>
         val requests = Observable.fromIterable(strings.map(HelloRequest))
         val responses = BlazeClientBuilder[IO](ec).stream
-          .flatMap(monixClient.sayHellosAll(requests)(_).toFs2Stream[IO])
+          .flatMap(monixClient.sayHellosAll(requests)(_).toReactivePublisher.toStream[IO])
         responses.compile.toList
           .unsafeRunTimed(10.seconds)
           .getOrElse(sys.error("Stuck!")) shouldBe strings.map(HelloResponse)

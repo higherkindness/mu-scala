@@ -441,7 +441,7 @@ object serviceImpl {
 
         val executionClient: Tree = response match {
           case MonixObservableTpe(_, _) =>
-            q"client.stream(request).flatMap(_.asStream[${response.safeInner}]).toObservable"
+            q"Observable.fromReactivePublisher(client.stream(request).flatMap(_.asStream[${response.safeInner}]).toUnicastPublisher)"
           case Fs2StreamTpe(_, _) =>
             q"client.stream(request).flatMap(_.asStream[${response.safeInner}])"
           case _ =>
@@ -454,7 +454,7 @@ object serviceImpl {
           case _: Fs2StreamTpe =>
             q"val request = Request[F](Method.$method, uri / ${uri.replace("\"", "")}).withEntity(req.map(_.asJson))"
           case _: MonixObservableTpe =>
-            q"val request = Request[F](Method.$method, uri / ${uri.replace("\"", "")}).withEntity(req.toFs2Stream.map(_.asJson))"
+            q"val request = Request[F](Method.$method, uri / ${uri.replace("\"", "")}).withEntity(req.toReactivePublisher.toStream.map(_.asJson))"
           case _ =>
             q"val request = Request[F](Method.$method, uri / ${uri.replace("\"", "")})"
         }
@@ -494,17 +494,17 @@ object serviceImpl {
 
           case (_: MonixObservableTpe, _: UnaryTpe) =>
             q"""val requests = msg.asStream[${operation.request.safeInner}]
-              Ok(handler.${operation.name}(requests.toObservable).map(_.asJson))"""
+              Ok(handler.${operation.name}(Observable.fromReactivePublisher(requests.toUnicastPublisher)).map(_.asJson))"""
 
           case (_: UnaryTpe, _: MonixObservableTpe) =>
             q"""for {
                 request   <- msg.as[${operation.request.safeInner}]
-                responses <- Ok(handler.${operation.name}(request).toFs2Stream.asJsonEither)
+                responses <- Ok(handler.${operation.name}(request).toReactivePublisher.toStream.asJsonEither)
               } yield responses"""
 
           case (_: MonixObservableTpe, _: MonixObservableTpe) =>
             q"""val requests = msg.asStream[${operation.request.safeInner}]
-              Ok(handler.${operation.name}(requests.toObservable).toFs2Stream.asJsonEither)"""
+              Ok(handler.${operation.name}(Observable.fromReactivePublisher(requests.toUnicastPublisher)).toReactivePublisher.toStream.asJsonEither)"""
 
           case (_: EmptyTpe, _) =>
             q"""Ok(handler.${operation.name}(_root_.higherkindness.mu.rpc.protocol.Empty).map(_.asJson))"""
@@ -549,7 +549,8 @@ object serviceImpl {
       }"""
 
       val httpImports: List[Tree] = List(
-        q"import _root_.higherkindness.mu.http.Utils._",
+        q"import _root_.higherkindness.mu.http.implicits._",
+        q"import _root_.fs2.interop.reactivestreams._",
         q"import _root_.cats.syntax.flatMap._",
         q"import _root_.cats.syntax.functor._",
         q"import _root_.org.http4s._",

@@ -19,7 +19,6 @@ package higherkindness.mu.http
 import cats.ApplicativeError
 import cats.effect._
 import cats.implicits._
-import fs2.interop.reactivestreams._
 import fs2.{RaiseThrowable, Stream}
 import io.grpc.Status.Code._
 import org.typelevel.jawn.ParseException
@@ -29,16 +28,14 @@ import io.circe.jawn.CirceSupportParser.facade
 import io.circe.syntax._
 import io.grpc.{Status => _, _}
 import jawnfs2._
-import monix.execution._
-import monix.reactive.Observable
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
-import scala.concurrent.ExecutionContext
+import org.http4s.Status.Ok
 import scala.util.control.NoStackTrace
 
-object Utils {
+object implicits {
 
-  implicit class MessageOps[F[_]](val message: Message[F]) extends AnyVal {
+  implicit class MessageOps[F[_]](private val message: Message[F]) extends AnyVal {
 
     def jsonBodyAsStream[A](
         implicit decoder: Decoder[A],
@@ -46,7 +43,7 @@ object Utils {
       message.body.chunks.parseJsonStream.map(_.as[A]).rethrow
   }
 
-  implicit class RequestOps[F[_]](val request: Request[F]) {
+  implicit class RequestOps[F[_]](private val request: Request[F]) {
 
     def asStream[A](implicit decoder: Decoder[A], F: ApplicativeError[F, Throwable]): Stream[F, A] =
       request
@@ -57,7 +54,7 @@ object Utils {
         }
   }
 
-  implicit class ResponseOps[F[_]](val response: Response[F]) {
+  implicit class ResponseOps[F[_]](private val response: Response[F]) {
 
     implicit private val throwableDecoder: Decoder[Throwable] =
       Decoder.decodeTuple2[String, String].map {
@@ -73,29 +70,21 @@ object Utils {
         implicit decoder: Decoder[A],
         F: ApplicativeError[F, Throwable],
         R: RaiseThrowable[F]): Stream[F, A] =
-      if (response.status.code != 200) Stream.raiseError(ResponseError(response.status))
+      if (response.status.code != Ok.code) Stream.raiseError(ResponseError(response.status))
       else response.jsonBodyAsStream[Either[Throwable, A]].rethrow
   }
 
-  implicit class Fs2StreamOps[F[_], A](stream: Stream[F, A]) {
+  implicit class Fs2StreamOps[F[_], A](private val stream: Stream[F, A]) {
 
-    implicit private val throwableEncoder: Encoder[Throwable] = new Encoder[Throwable] {
+    implicit val throwableEncoder: Encoder[Throwable] = new Encoder[Throwable] {
       def apply(ex: Throwable): Json = (ex.getClass.getName, ex.getMessage).asJson
     }
 
     def asJsonEither(implicit encoder: Encoder[A]): Stream[F, Json] = stream.attempt.map(_.asJson)
-
-    def toObservable(implicit F: ConcurrentEffect[F], ec: ExecutionContext): Observable[A] =
-      Observable.fromReactivePublisher(stream.toUnicastPublisher)
   }
 
-  implicit class MonixStreamOps[A](val stream: Observable[A]) extends AnyVal {
-
-    def toFs2Stream[F[_]](implicit F: ConcurrentEffect[F], sc: Scheduler): Stream[F, A] =
-      stream.toReactivePublisher.toStream[F]()
-  }
-
-  implicit class FResponseOps[F[_]: Sync](response: F[Response[F]]) extends Http4sDsl[F] {
+  implicit class FResponseOps[F[_]: Sync](private val response: F[Response[F]])
+      extends Http4sDsl[F] {
 
     def adaptErrors: F[Response[F]] = response.handleErrorWith {
       case se: StatusException         => errorFromStatus(se.getStatus, se.getMessage)
@@ -106,7 +95,7 @@ object Utils {
     private def errorFromStatus(status: io.grpc.Status, message: String): F[Response[F]] =
       status.getCode match {
         case INVALID_ARGUMENT  => BadRequest(message)
-        case UNAUTHENTICATED   => BadRequest(message)
+        case UNAUTHENTICATED   => Forbidden(message)
         case PERMISSION_DENIED => Forbidden(message)
         case NOT_FOUND         => NotFound(message)
         case UNAVAILABLE       => ServiceUnavailable(message)

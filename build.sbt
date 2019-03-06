@@ -189,7 +189,6 @@ lazy val `dropwizard-client` = project
 lazy val `http` = project
   .in(file("modules/http"))
   .dependsOn(common % "compile->compile;test->test")
-  .dependsOn(channel % "compile->compile;test->test")
   .dependsOn(server % "compile->compile;test->test")
   .settings(moduleName := "mu-rpc-http")
   .settings(httpSettings)
