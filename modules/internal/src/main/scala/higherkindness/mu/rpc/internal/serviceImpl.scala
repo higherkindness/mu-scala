@@ -544,17 +544,28 @@ object serviceImpl {
         p <- params.headOption.toList
       } yield HttpOperation(Operation(d.name, TypeTypology(p.tpt), TypeTypology(d.tpt)))
 
+      val streamConstraints: List[Tree] = operations
+        .find(_.operation.isMonixObservable)
+        .fold(List(q"F: _root_.cats.effect.Sync[$F]"))(
+          _ =>
+            List(
+              q"F: _root_.cats.effect.ConcurrentEffect[$F]",
+              q"sc: _root_.monix.execution.Scheduler"
+          ))
+
       val httpRequests = operations.map(_.toRequestTree)
+
+      val schedulerConstraint = q"ec: _root_.monix.execution.Scheduler"
 
       val HttpClient      = TypeName("HttpClient")
       val httpClientClass = q"""
-        class $HttpClient[$F_](uri: _root_.org.http4s.Uri)(implicit F: _root_.cats.effect.ConcurrentEffect[$F], ec: scala.concurrent.ExecutionContext) {
+        class $HttpClient[$F_](uri: _root_.org.http4s.Uri)(implicit ..$streamConstraints) {
           ..$httpRequests
       }"""
 
       val httpClient = q"""
         def httpClient[$F_](uri: _root_.org.http4s.Uri)
-          (implicit F: _root_.cats.effect.ConcurrentEffect[$F], ec: scala.concurrent.ExecutionContext): $HttpClient[$F] = {
+          (implicit ..$streamConstraints): $HttpClient[$F] = {
           new $HttpClient[$F](uri / ${serviceDef.name.toString})
       }"""
 
@@ -589,15 +600,6 @@ object serviceImpl {
 
       val HttpRestService: TypeName = TypeName(serviceDef.name.toString + "RestService")
 
-      val streamConstraints: List[Tree] = operations
-        .find(_.operation.isMonixObservable)
-        .fold(List(q"F: _root_.cats.effect.Sync[$F]"))(
-          _ =>
-            List(
-              q"F: _root_.cats.effect.ConcurrentEffect[$F]",
-              q"sc: scala.concurrent.ExecutionContext"
-          ))
-
       val arguments: List[Tree] = List(q"handler: ${serviceDef.name}[F]") ++
         requestTypes.map(n => q"${TermName("decoder" + n)}: io.circe.Decoder[${TypeName(n)}]") ++
         responseTypes.map(n => q"${TermName("encoder" + n)}: io.circe.Encoder[${TypeName(n)}]") ++
@@ -617,11 +619,7 @@ object serviceImpl {
       val http =
         if (httpRequests.isEmpty) Nil
         else
-          httpImports ++ scheduler ++ List(
-            httpClientClass,
-            httpClient,
-            httpRestServiceClass,
-            httpService)
+          httpImports ++ List(httpClientClass, httpClient, httpRestServiceClass, httpService)
     }
 
     val classAndMaybeCompanion = annottees.map(_.tree)
