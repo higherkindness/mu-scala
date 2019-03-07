@@ -441,36 +441,44 @@ object serviceImpl {
 
         val executionClient: Tree = response match {
           case MonixObservableTpe(_, _) =>
-            q"Observable.fromReactivePublisher(client.stream(request).flatMap(_.asStream[${response.safeInner}]).toUnicastPublisher)"
+            q"_root_.monix.reactive.Observable.fromReactivePublisher(client.stream(request).flatMap(_.asStream[${response.safeInner}]).toUnicastPublisher)"
           case Fs2StreamTpe(_, _) =>
             q"client.stream(request).flatMap(_.asStream[${response.safeInner}])"
           case _ =>
-            q"client.expectOr[${response.safeInner}](request)(handleResponseError)"
+            q"""client.expectOr[${response.safeInner}](request)(handleResponseError)(jsonOf[F, ${response.safeInner}])"""
         }
 
         val requestTypology: Tree = request match {
           case _: UnaryTpe =>
-            q"val request = Request[F](Method.$method, uri / ${uri.replace("\"", "")}).withEntity(req.asJson)"
+            q"val request = _root_.org.http4s.Request[F](_root_.org.http4s.Method.$method, uri / ${uri
+              .replace("\"", "")}).withEntity(req.asJson)"
           case _: Fs2StreamTpe =>
-            q"val request = Request[F](Method.$method, uri / ${uri.replace("\"", "")}).withEntity(req.map(_.asJson))"
+            q"val request = _root_.org.http4s.Request[F](_root_.org.http4s.Method.$method, uri / ${uri
+              .replace("\"", "")}).withEntity(req.map(_.asJson))"
           case _: MonixObservableTpe =>
-            q"val request = Request[F](Method.$method, uri / ${uri.replace("\"", "")}).withEntity(req.toReactivePublisher.toStream.map(_.asJson))"
+            q"val request = _root_.org.http4s.Request[F](_root_.org.http4s.Method.$method, uri / ${uri
+              .replace("\"", "")}).withEntity(req.toReactivePublisher.toStream.map(_.asJson))"
           case _ =>
-            q"val request = Request[F](Method.$method, uri / ${uri.replace("\"", "")})"
+            q"val request = _root_.org.http4s.Request[F](_root_.org.http4s.Method.$method, uri / ${uri
+              .replace("\"", "")})"
         }
 
         val responseEncoder =
-          q"""implicit val responseDecoder: EntityDecoder[F, ${response.safeInner}] = jsonOf[F, ${response.safeInner}]"""
+          q"""implicit val responseEntityDecoder: _root_.org.http4s.EntityDecoder[F, ${response.safeInner}] = jsonOf[F, ${response.safeInner}]"""
 
         def toRequestTree: Tree = request match {
           case _: EmptyTpe =>
-            q"""def $name(implicit client: _root_.org.http4s.client.Client[F]): ${response.getTpe} = {
+            q"""def $name(client: _root_.org.http4s.client.Client[F])(
+               implicit responseDecoder: io.circe.Decoder[${response.safeInner}]): ${response.getTpe} = {
 		                  $responseEncoder
 		                  $requestTypology
 		                  $executionClient
 		                 }"""
           case _ =>
-            q"""def $name(req: ${request.getTpe})(implicit client: _root_.org.http4s.client.Client[F]): ${response.getTpe} = {
+            q"""def $name(req: ${request.getTpe})(client: _root_.org.http4s.client.Client[F])(
+               implicit requestEncoder: io.circe.Encoder[${request.safeInner}],
+               responseDecoder: io.circe.Decoder[${response.safeInner}]
+            ): ${response.getTpe} = {
 		                  $responseEncoder
 		                  $requestTypology
 		                  $executionClient
@@ -480,44 +488,46 @@ object serviceImpl {
         val routeTypology: Tree = (request, response) match {
           case (_: Fs2StreamTpe, _: UnaryTpe) =>
             q"""val requests = msg.asStream[${operation.request.safeInner}]
-              Ok(handler.${operation.name}(requests).map(_.asJson))"""
+              _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(requests).map(_.asJson))"""
 
           case (_: UnaryTpe, _: Fs2StreamTpe) =>
             q"""for {
               request   <- msg.as[${operation.request.safeInner}]
-              responses <- Ok(handler.${operation.name}(request).asJsonEither)
+              responses <- _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(request).asJsonEither)
             } yield responses"""
 
           case (_: Fs2StreamTpe, _: Fs2StreamTpe) =>
             q"""val requests = msg.asStream[${operation.request.safeInner}]
-             Ok(handler.${operation.name}(requests).asJsonEither)"""
+             _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(requests).asJsonEither)"""
 
           case (_: MonixObservableTpe, _: UnaryTpe) =>
             q"""val requests = msg.asStream[${operation.request.safeInner}]
-              Ok(handler.${operation.name}(Observable.fromReactivePublisher(requests.toUnicastPublisher)).map(_.asJson))"""
+              _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(_root_.monix.reactive.Observable.fromReactivePublisher(requests.toUnicastPublisher)).map(_.asJson))"""
 
           case (_: UnaryTpe, _: MonixObservableTpe) =>
             q"""for {
                 request   <- msg.as[${operation.request.safeInner}]
-                responses <- Ok(handler.${operation.name}(request).toReactivePublisher.toStream.asJsonEither)
+                responses <- _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(request).toReactivePublisher.toStream.asJsonEither)
               } yield responses"""
 
           case (_: MonixObservableTpe, _: MonixObservableTpe) =>
             q"""val requests = msg.asStream[${operation.request.safeInner}]
-              Ok(handler.${operation.name}(Observable.fromReactivePublisher(requests.toUnicastPublisher)).toReactivePublisher.toStream.asJsonEither)"""
+              _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(_root_.monix.reactive.Observable.fromReactivePublisher(requests.toUnicastPublisher)).toReactivePublisher.toStream.asJsonEither)"""
 
           case (_: EmptyTpe, _) =>
-            q"""Ok(handler.${operation.name}(_root_.higherkindness.mu.rpc.protocol.Empty).map(_.asJson))"""
+            q"""_root_.org.http4s.Status.Ok.apply(handler.${operation.name}(_root_.higherkindness.mu.rpc.protocol.Empty).map(_.asJson))"""
 
           case _ =>
             q"""for {
               request  <- msg.as[${operation.request.safeInner}]
-              response <- Ok(handler.${operation.name}(request).map(_.asJson)).adaptErrors
+              response <- _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(request).map(_.asJson)).adaptErrors
             } yield response"""
         }
 
-        val getPattern  = pq"GET -> Root / ${operation.name.toString}"
-        val postPattern = pq"msg @ POST -> Root / ${operation.name.toString}"
+        val getPattern =
+          pq"_root_.org.http4s.Method.GET -> Root / ${operation.name.toString}"
+        val postPattern =
+          pq"msg @ _root_.org.http4s.Method.POST -> Root / ${operation.name.toString}"
 
         def toRouteTree: Tree = request match {
           case _: EmptyTpe => cq"$getPattern => $routeTypology"
@@ -538,12 +548,12 @@ object serviceImpl {
 
       val HttpClient      = TypeName("HttpClient")
       val httpClientClass = q"""
-        class $HttpClient[$F_](uri: Uri)(implicit F: _root_.cats.effect.ConcurrentEffect[$F], ec: scala.concurrent.ExecutionContext) {
+        class $HttpClient[$F_](uri: _root_.org.http4s.Uri)(implicit F: _root_.cats.effect.ConcurrentEffect[$F], ec: scala.concurrent.ExecutionContext) {
           ..$httpRequests
       }"""
 
       val httpClient = q"""
-        def httpClient[$F_](uri: Uri)
+        def httpClient[$F_](uri: _root_.org.http4s.Uri)
           (implicit F: _root_.cats.effect.ConcurrentEffect[$F], ec: scala.concurrent.ExecutionContext): $HttpClient[$F] = {
           new $HttpClient[$F](uri / ${serviceDef.name.toString})
       }"""
@@ -553,10 +563,7 @@ object serviceImpl {
         q"import _root_.fs2.interop.reactivestreams._",
         q"import _root_.cats.syntax.flatMap._",
         q"import _root_.cats.syntax.functor._",
-        q"import _root_.org.http4s._",
         q"import _root_.org.http4s.circe._",
-        q"import _root_.io.circe._",
-        q"import _root_.io.circe.generic.auto._",
         q"import _root_.io.circe.syntax._"
       )
 
@@ -572,34 +579,40 @@ object serviceImpl {
       val requestTypes: Set[String] =
         operations.filterNot(_.operation.request.isEmpty).map(_.operation.request.flatName).toSet
 
+      val responseTypes: Set[String] =
+        operations.filterNot(_.operation.response.isEmpty).map(_.operation.response.flatName).toSet
+
       val requestDecoders =
         requestTypes.map(n =>
-          q"""implicit private val ${TermName("decoder" + n)}:EntityDecoder[F, ${TypeName(n)}] =
-             jsonOf[F, ${TypeName(n)}]""")
+          q"""implicit private val ${TermName("entityDecoder" + n)}:_root_.org.http4s.EntityDecoder[F, ${TypeName(
+            n)}] = jsonOf[F, ${TypeName(n)}]""")
 
       val HttpRestService: TypeName = TypeName(serviceDef.name.toString + "RestService")
 
-      val httpRestServiceClass: Tree = operations
+      val streamConstraints: List[Tree] = operations
         .find(_.operation.isMonixObservable)
-        .fold(q"""
-        class $HttpRestService[$F_](implicit handler: ${serviceDef.name}[F], F: _root_.cats.effect.Sync[$F]) extends _root_.org.http4s.dsl.Http4sDsl[F] {
-         ..$requestDecoders
-         def service: HttpRoutes[F] = HttpRoutes.of[F]{$routesPF}
-      }""")(_ => q"""
-        class $HttpRestService[$F_](implicit handler: ${serviceDef.name}[F], F: _root_.cats.effect.ConcurrentEffect[$F], sc: scala.concurrent.ExecutionContext) extends _root_.org.http4s.dsl.Http4sDsl[F] {
-         ..$requestDecoders
-         def service: HttpRoutes[F] = HttpRoutes.of[F]{$routesPF}
-      }""")
+        .fold(List(q"F: _root_.cats.effect.Sync[$F]"))(
+          _ =>
+            List(
+              q"F: _root_.cats.effect.ConcurrentEffect[$F]",
+              q"sc: scala.concurrent.ExecutionContext"
+          ))
 
-      val httpService = operations
-        .find(_.operation.isMonixObservable)
-        .fold(q"""
-        def route[$F_](implicit handler: ${serviceDef.name}[F], F: _root_.cats.effect.Sync[$F]): _root_.higherkindness.mu.http.RouteMap[F] = {
+      val arguments: List[Tree] = List(q"handler: ${serviceDef.name}[F]") ++
+        requestTypes.map(n => q"${TermName("decoder" + n)}: io.circe.Decoder[${TypeName(n)}]") ++
+        responseTypes.map(n => q"${TermName("encoder" + n)}: io.circe.Encoder[${TypeName(n)}]") ++
+        streamConstraints
+
+      val httpRestServiceClass: Tree = q"""
+        class $HttpRestService[$F_](implicit ..$arguments) extends _root_.org.http4s.dsl.Http4sDsl[F] {
+         ..$requestDecoders
+         def service = _root_.org.http4s.HttpRoutes.of[F]{$routesPF}
+      }"""
+
+      val httpService = q"""
+        def route[$F_](implicit ..$arguments): _root_.higherkindness.mu.http.RouteMap[F] = {
           _root_.higherkindness.mu.http.RouteMap[F](${serviceDef.name.toString}, new $HttpRestService[$F].service)
-      }""")(_ => q"""
-        def route[$F_](implicit handler: ${serviceDef.name}[F], F: _root_.cats.effect.ConcurrentEffect[$F], sc: scala.concurrent.ExecutionContext): _root_.higherkindness.mu.http.RouteMap[F] = {
-          _root_.higherkindness.mu.http.RouteMap[F](${serviceDef.name.toString}, new $HttpRestService[$F].service)
-      }""")
+      }"""
 
       val http =
         if (httpRequests.isEmpty) Nil

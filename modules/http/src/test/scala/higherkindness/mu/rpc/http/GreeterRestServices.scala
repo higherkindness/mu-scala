@@ -19,7 +19,6 @@ package higherkindness.mu.rpc.http
 import cats.effect._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import io.circe.generic.auto._
 import io.circe.syntax._
 import higherkindness.mu.http.implicits._
 import fs2.interop.reactivestreams._
@@ -28,7 +27,11 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
-class UnaryGreeterRestService[F[_]: Sync](implicit handler: UnaryGreeter[F]) extends Http4sDsl[F] {
+class UnaryGreeterRestService[F[_]: Sync](
+    implicit handler: UnaryGreeter[F],
+    decoderHelloRequest: io.circe.Decoder[HelloRequest],
+    encoderHelloResponse: io.circe.Encoder[HelloResponse])
+    extends Http4sDsl[F] {
 
   import higherkindness.mu.rpc.protocol.Empty
 
@@ -46,7 +49,11 @@ class UnaryGreeterRestService[F[_]: Sync](implicit handler: UnaryGreeter[F]) ext
   }
 }
 
-class Fs2GreeterRestService[F[_]: Sync](implicit handler: Fs2Greeter[F]) extends Http4sDsl[F] {
+class Fs2GreeterRestService[F[_]: Sync](
+    implicit handler: Fs2Greeter[F],
+    decoderHelloRequest: io.circe.Decoder[HelloRequest],
+    encoderHelloResponse: io.circe.Encoder[HelloResponse])
+    extends Http4sDsl[F] {
 
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
 
@@ -70,7 +77,9 @@ class Fs2GreeterRestService[F[_]: Sync](implicit handler: Fs2Greeter[F]) extends
 
 class MonixGreeterRestService[F[_]: ConcurrentEffect](
     implicit handler: MonixGreeter[F],
-    sc: monix.execution.Scheduler)
+    sc: monix.execution.Scheduler,
+    decoderHelloRequest: io.circe.Decoder[HelloRequest],
+    encoderHelloResponse: io.circe.Encoder[HelloResponse])
     extends Http4sDsl[F] {
 
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]

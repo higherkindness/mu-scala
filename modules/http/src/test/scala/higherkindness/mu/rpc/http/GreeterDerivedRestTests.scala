@@ -22,6 +22,7 @@ import fs2.interop.reactivestreams._
 import higherkindness.mu.http.{HttpServer, ResponseError, RouteMap}
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
 import monix.reactive.Observable
+import io.circe.generic.auto._
 import org.http4s._
 import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.server.blaze._

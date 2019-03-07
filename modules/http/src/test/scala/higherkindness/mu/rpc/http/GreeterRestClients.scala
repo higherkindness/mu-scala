@@ -19,7 +19,6 @@ package higherkindness.mu.rpc.http
 import cats.effect._
 import fs2.Stream
 import fs2.interop.reactivestreams._
-import io.circe.generic.auto._
 import io.circe.syntax._
 import higherkindness.mu.http.implicits._
 import org.http4s._
@@ -28,36 +27,42 @@ import org.http4s.client._
 
 class UnaryGreeterRestClient[F[_]: Sync](uri: Uri) {
 
-  private implicit val responseDecoder: EntityDecoder[F, HelloResponse] = jsonOf[F, HelloResponse]
-
-  def getHello()(implicit client: Client[F]): F[HelloResponse] = {
+  def getHello()(client: Client[F])(
+      implicit decoderHelloResponse: io.circe.Decoder[HelloResponse]): F[HelloResponse] = {
     val request = Request[F](Method.GET, uri / "getHello")
-    client.expectOr[HelloResponse](request)(handleResponseError)
+    client.expectOr[HelloResponse](request)(handleResponseError)(jsonOf[F, HelloResponse])
   }
 
-  def sayHello(arg: HelloRequest)(implicit client: Client[F]): F[HelloResponse] = {
+  def sayHello(arg: HelloRequest)(client: Client[F])(
+      implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
+      decoderHelloResponse: io.circe.Decoder[HelloResponse]): F[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHello")
-    client.expectOr[HelloResponse](request.withEntity(arg.asJson))(handleResponseError)
+    client.expectOr[HelloResponse](request.withEntity(arg.asJson))(handleResponseError)(
+      jsonOf[F, HelloResponse])
   }
 
 }
 
 class Fs2GreeterRestClient[F[_]: Sync](uri: Uri) {
 
-  private implicit val responseDecoder: EntityDecoder[F, HelloResponse] = jsonOf[F, HelloResponse]
-
-  def sayHellos(arg: Stream[F, HelloRequest])(implicit client: Client[F]): F[HelloResponse] = {
+  def sayHellos(arg: Stream[F, HelloRequest])(client: Client[F])(
+      implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
+      decoderHelloResponse: io.circe.Decoder[HelloResponse]): F[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellos")
-    client.expectOr[HelloResponse](request.withEntity(arg.map(_.asJson)))(handleResponseError)
+    client.expectOr[HelloResponse](request.withEntity(arg.map(_.asJson)))(handleResponseError)(
+      jsonOf[F, HelloResponse])
   }
 
-  def sayHelloAll(arg: HelloRequest)(implicit client: Client[F]): Stream[F, HelloResponse] = {
+  def sayHelloAll(arg: HelloRequest)(client: Client[F])(
+      implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
+      decoderHelloResponse: io.circe.Decoder[HelloResponse]): Stream[F, HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHelloAll")
     client.stream(request.withEntity(arg.asJson)).flatMap(_.asStream[HelloResponse])
   }
 
-  def sayHellosAll(arg: Stream[F, HelloRequest])(
-      implicit client: Client[F]): Stream[F, HelloResponse] = {
+  def sayHellosAll(arg: Stream[F, HelloRequest])(client: Client[F])(
+      implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
+      decoderHelloResponse: io.circe.Decoder[HelloResponse]): Stream[F, HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellosAll")
     client.stream(request.withEntity(arg.map(_.asJson))).flatMap(_.asStream[HelloResponse])
   }
@@ -65,20 +70,25 @@ class Fs2GreeterRestClient[F[_]: Sync](uri: Uri) {
 }
 
 class MonixGreeterRestClient[F[_]: ConcurrentEffect](uri: Uri)(
-    implicit sc: monix.execution.Scheduler) {
+    implicit sc: monix.execution.Scheduler,
+    encoderHelloRequest: io.circe.Encoder[HelloRequest],
+    decoderHelloResponse: io.circe.Decoder[HelloResponse]) {
 
   import monix.reactive.Observable
   import higherkindness.mu.http.implicits._
 
-  private implicit val responseDecoder: EntityDecoder[F, HelloResponse] = jsonOf[F, HelloResponse]
-
-  def sayHellos(arg: Observable[HelloRequest])(implicit client: Client[F]): F[HelloResponse] = {
+  def sayHellos(arg: Observable[HelloRequest])(client: Client[F])(
+      implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
+      decoderHelloResponse: io.circe.Decoder[HelloResponse]): F[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellos")
     client.expectOr[HelloResponse](
-      request.withEntity(arg.toReactivePublisher.toStream.map(_.asJson)))(handleResponseError)
+      request.withEntity(arg.toReactivePublisher.toStream.map(_.asJson)))(handleResponseError)(
+      jsonOf[F, HelloResponse])
   }
 
-  def sayHelloAll(arg: HelloRequest)(implicit client: Client[F]): Observable[HelloResponse] = {
+  def sayHelloAll(arg: HelloRequest)(client: Client[F])(
+      implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
+      decoderHelloResponse: io.circe.Decoder[HelloResponse]): Observable[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHelloAll")
     Observable.fromReactivePublisher(
       client
@@ -87,8 +97,9 @@ class MonixGreeterRestClient[F[_]: ConcurrentEffect](uri: Uri)(
         .toUnicastPublisher)
   }
 
-  def sayHellosAll(arg: Observable[HelloRequest])(
-      implicit client: Client[F]): Observable[HelloResponse] = {
+  def sayHellosAll(arg: Observable[HelloRequest])(client: Client[F])(
+      implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
+      decoderHelloResponse: io.circe.Decoder[HelloResponse]): Observable[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellosAll")
     Observable.fromReactivePublisher(
       client
