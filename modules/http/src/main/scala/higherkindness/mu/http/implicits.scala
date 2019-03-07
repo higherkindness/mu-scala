@@ -23,7 +23,6 @@ import fs2.{RaiseThrowable, Stream}
 import io.grpc.Status.Code._
 import org.typelevel.jawn.ParseException
 import io.circe._
-import io.circe.generic.auto._
 import io.circe.jawn.CirceSupportParser.facade
 import io.circe.syntax._
 import io.grpc.{Status => _, _}
@@ -56,6 +55,14 @@ object implicits {
 
   implicit class ResponseOps[F[_]](private val response: Response[F]) {
 
+    implicit def EitherDecoder[A, B](
+        implicit a: Decoder[A],
+        b: Decoder[B]): Decoder[Either[A, B]] = {
+      val l: Decoder[Either[A, B]] = a.map(Left.apply)
+      val r: Decoder[Either[A, B]] = b.map(Right.apply)
+      l or r
+    }
+
     implicit private val throwableDecoder: Decoder[Throwable] =
       Decoder.decodeTuple2[String, String].map {
         case (cls, msg) =>
@@ -75,6 +82,14 @@ object implicits {
   }
 
   implicit class Fs2StreamOps[F[_], A](private val stream: Stream[F, A]) {
+
+    implicit def EitherEncoder[A, B](implicit ea: Encoder[A], eb: Encoder[B]): Encoder[Either[A, B]] =
+      new Encoder[Either[A, B]] {
+        final def apply(a: Either[A, B]): Json = a match {
+          case Left(a)  => a.asJson
+          case Right(b) => b.asJson
+        }
+      }
 
     implicit val throwableEncoder: Encoder[Throwable] = new Encoder[Throwable] {
       def apply(ex: Throwable): Json = (ex.getClass.getName, ex.getMessage).asJson
