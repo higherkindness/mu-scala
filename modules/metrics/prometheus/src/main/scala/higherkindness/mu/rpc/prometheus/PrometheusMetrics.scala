@@ -24,6 +24,40 @@ import higherkindness.mu.rpc.internal.metrics.MetricsOps
 import higherkindness.mu.rpc.internal.metrics.MetricsOps._
 import io.grpc.Status
 
+/*
+ * [[MetricsOps]] algebra able to record Prometheus metrics.
+ *
+ * The list of registered metrics contains:
+ *
+ * {prefix}_active_calls{labels=classifier} - Counter
+ * {prefix}_messages_sent{labels=classifier,service,method} - Counter
+ * {prefix}_messages_received{labels=classifier,service,method} - Counter
+ * {prefix}_calls_header{labels=classifier} - Histogram
+ * {prefix}_calls_total{labels=classifier} - Histogram
+ * {prefix}_calls_by_method{labels=classifier,method} - Histogram
+ * {prefix}_calls_by_method{labels=classifier,status} - Histogram
+ *
+ * `methodType` can be one of the following:
+ *    - "unary-methods"
+ *    - "client-streaming-methods"
+ *    - "server-streaming-methods"
+ *    - "bidi-streaming-methods"
+ *    - "unknown-methods"
+ *
+ * `status` can be one of the following:
+ *    - "ok-statuses"
+ *    - "cancelled-statuses"
+ *    - "deadline-exceeded-statuses"
+ *    - "internal-statuses"
+ *    - "resource-exhausted-statuses"
+ *    - "unauthenticated-statuses"
+ *    - "unavailable-statuses"
+ *    - "unimplemented-statuses"
+ *    - "unknown-statuses"
+ *    - "unreachable-error-statuses"
+ *
+ */
+
 case class PrometheusMetrics(
     activeCalls: Gauge,
     messagesSent: Counter,
