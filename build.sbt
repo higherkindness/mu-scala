@@ -208,22 +208,17 @@ lazy val `idlgen-sbt` = project
 //// BENCHMARKS ////
 ////////////////////
 
-lazy val lastReleasedV = "0.15.1"
+lazy val lastReleasedV = "0.17.2"
 
 lazy val `benchmarks-vprev` = project
   .in(file("benchmarks/vprev"))
-  // TODO: temporarily disabled until the project is migrated
-//  .settings(
-//    libraryDependencies ++= Seq(
-//      "io.higherkindness" %% "mu-rpc-channel" % lastReleasedV,
-//      "io.higherkindness" %% "mu-rpc-server"      % lastReleasedV,
-//      "io.higherkindness" %% "mu-rpc-testing"     % lastReleasedV
-//    )
-//  )
-  // TODO: remove dependsOn and uncomment the lines above
-  .dependsOn(channel)
-  .dependsOn(server)
-  .dependsOn(testing)
+  .settings(
+    libraryDependencies ++= Seq(
+      "io.higherkindness" %% "mu-rpc-channel" % lastReleasedV,
+      "io.higherkindness" %% "mu-rpc-server"  % lastReleasedV,
+      "io.higherkindness" %% "mu-rpc-testing" % lastReleasedV
+    )
+  )
   .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vprev")
   .settings(crossSettings)

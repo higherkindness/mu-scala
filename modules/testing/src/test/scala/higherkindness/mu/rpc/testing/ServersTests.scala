@@ -19,7 +19,7 @@ package testing
 
 import io.grpc.{ServerCall, ServerCallHandler, ServerServiceDefinition}
 import org.scalatest._
-import org.scalatest.prop.Checkers
+import org.scalatestplus.scalacheck.Checkers
 import org.scalacheck.Prop._
 
 import scala.collection.JavaConverters._

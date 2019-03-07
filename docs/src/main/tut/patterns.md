@@ -203,7 +203,7 @@ Thanks to `withServerChannel` from the package `mu.rpc.testing.servers`, you wil
 import cats.effect.Resource
 import higherkindness.mu.rpc.testing.servers.withServerChannel
 import io.grpc.{ManagedChannel, ServerServiceDefinition}
-import org.scalatest.prop.Checkers
+import org.scalatestplus.scalacheck.Checkers
 import org.scalatest._
 import org.scalacheck.Gen
 import org.scalacheck.Prop.forAll
@@ -255,7 +255,7 @@ run(new ServiceSpec)
 
 [mu] derives a client automatically based on the protocol. This is especially useful because you can distribute it depending on the protocol/service definitions. If you change something in your protocol definition, you will get a new client for free without having to write anything.
 
-You will need to add either `mu-rpc-client-netty` or `mu-rpc-client-okhttp` to your build.
+You will need to add either `mu-rpc-netty` or `mu-rpc-okhttp` to your build.
 
 ### Client Runtime
 

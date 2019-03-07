@@ -19,7 +19,7 @@ package testing
 
 import org.scalacheck.Gen
 import org.scalatest._
-import org.scalatest.prop.Checkers
+import org.scalatestplus.scalacheck.Checkers
 import org.scalacheck.Prop._
 
 class MethodsTests extends WordSpec with Matchers with Checkers {
