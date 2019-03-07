@@ -550,7 +550,7 @@ object serviceImpl {
           _ =>
             List(
               q"F: _root_.cats.effect.ConcurrentEffect[$F]",
-              q"ec: scala.concurrent.ExecutionContext"
+              q"ec: _root_.scala.concurrent.ExecutionContext"
           ))
 
       val executionContextStreaming: List[Tree] = operations
