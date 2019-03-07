@@ -469,15 +469,15 @@ object serviceImpl {
         def toRequestTree: Tree = request match {
           case _: EmptyTpe =>
             q"""def $name(client: _root_.org.http4s.client.Client[F])(
-               implicit responseDecoder: io.circe.Decoder[${response.safeInner}]): ${response.getTpe} = {
+               implicit responseDecoder: _root_.io.circe.Decoder[${response.safeInner}]): ${response.getTpe} = {
 		                  $responseEncoder
 		                  $requestTypology
 		                  $executionClient
 		                 }"""
           case _ =>
             q"""def $name(req: ${request.getTpe})(client: _root_.org.http4s.client.Client[F])(
-               implicit requestEncoder: io.circe.Encoder[${request.safeInner}],
-               responseDecoder: io.circe.Decoder[${response.safeInner}]
+               implicit requestEncoder: _root_.io.circe.Encoder[${request.safeInner}],
+               responseDecoder: _root_.io.circe.Decoder[${response.safeInner}]
             ): ${response.getTpe} = {
 		                  $responseEncoder
 		                  $requestTypology
@@ -525,9 +525,9 @@ object serviceImpl {
         }
 
         val getPattern =
-          pq"_root_.org.http4s.Method.GET -> Root / ${operation.name.toString}"
+          pq"_root_.org.http4s.Method.GET -> _root_.org.http4s.dsl.impl.Root / ${operation.name.toString}"
         val postPattern =
-          pq"msg @ _root_.org.http4s.Method.POST -> Root / ${operation.name.toString}"
+          pq"msg @ _root_.org.http4s.Method.POST -> _root_.org.http4s.dsl.impl.Root / ${operation.name.toString}"
 
         def toRouteTree: Tree = request match {
           case _: EmptyTpe => cq"$getPattern => $routeTypology"
@@ -550,16 +550,20 @@ object serviceImpl {
           _ =>
             List(
               q"F: _root_.cats.effect.ConcurrentEffect[$F]",
-              q"sc: _root_.monix.execution.Scheduler"
+              q"ec: scala.concurrent.ExecutionContext"
           ))
 
-      val httpRequests = operations.map(_.toRequestTree)
+      val executionContextStreaming: List[Tree] = operations
+        .find(_.operation.isMonixObservable)
+        .fold(List.empty[Tree])(_ =>
+          List(q"implicit val sc: _root_.monix.execution.Scheduler = _root_.monix.execution.Scheduler(ec)"))
 
-      val schedulerConstraint = q"ec: _root_.monix.execution.Scheduler"
+      val httpRequests = operations.map(_.toRequestTree)
 
       val HttpClient      = TypeName("HttpClient")
       val httpClientClass = q"""
         class $HttpClient[$F_](uri: _root_.org.http4s.Uri)(implicit ..$streamConstraints) {
+          ..$executionContextStreaming
           ..$httpRequests
       }"""
 
@@ -577,11 +581,6 @@ object serviceImpl {
         q"import _root_.org.http4s.circe._",
         q"import _root_.io.circe.syntax._"
       )
-
-      val scheduler: List[Tree] = operations
-        .find(_.operation.isMonixObservable)
-        .map(_ => q"import _root_.monix.execution.Scheduler.Implicits.global")
-        .toList
 
       val httpRoutesCases: Seq[Tree] = operations.map(_.toRouteTree)
 
@@ -601,13 +600,16 @@ object serviceImpl {
       val HttpRestService: TypeName = TypeName(serviceDef.name.toString + "RestService")
 
       val arguments: List[Tree] = List(q"handler: ${serviceDef.name}[F]") ++
-        requestTypes.map(n => q"${TermName("decoder" + n)}: io.circe.Decoder[${TypeName(n)}]") ++
-        responseTypes.map(n => q"${TermName("encoder" + n)}: io.circe.Encoder[${TypeName(n)}]") ++
+        requestTypes.map(n =>
+          q"${TermName("decoder" + n)}: _root_.io.circe.Decoder[${TypeName(n)}]") ++
+        responseTypes.map(n =>
+          q"${TermName("encoder" + n)}: _root_.io.circe.Encoder[${TypeName(n)}]") ++
         streamConstraints
 
       val httpRestServiceClass: Tree = q"""
         class $HttpRestService[$F_](implicit ..$arguments) extends _root_.org.http4s.dsl.Http4sDsl[F] {
          ..$requestDecoders
+         ..$executionContextStreaming
          def service = _root_.org.http4s.HttpRoutes.of[F]{$routesPF}
       }"""
 

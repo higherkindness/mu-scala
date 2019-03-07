@@ -77,12 +77,13 @@ class Fs2GreeterRestService[F[_]: Sync](
 
 class MonixGreeterRestService[F[_]: ConcurrentEffect](
     implicit handler: MonixGreeter[F],
-    sc: monix.execution.Scheduler,
+    ec: scala.concurrent.ExecutionContext,
     decoderHelloRequest: io.circe.Decoder[HelloRequest],
     encoderHelloResponse: io.circe.Encoder[HelloResponse])
     extends Http4sDsl[F] {
 
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
+  implicit val scheduler: monix.execution.Scheduler                   = monix.execution.Scheduler(ec)
 
   def service: HttpRoutes[F] = HttpRoutes.of[F] {
 

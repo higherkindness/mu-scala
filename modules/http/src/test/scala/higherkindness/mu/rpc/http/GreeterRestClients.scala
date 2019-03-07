@@ -70,12 +70,12 @@ class Fs2GreeterRestClient[F[_]: Sync](uri: Uri) {
 }
 
 class MonixGreeterRestClient[F[_]: ConcurrentEffect](uri: Uri)(
-    implicit sc: monix.execution.Scheduler,
-    encoderHelloRequest: io.circe.Encoder[HelloRequest],
-    decoderHelloResponse: io.circe.Decoder[HelloResponse]) {
+    implicit ec: scala.concurrent.ExecutionContext) {
 
   import monix.reactive.Observable
   import higherkindness.mu.http.implicits._
+
+  implicit val sc: monix.execution.Scheduler = monix.execution.Scheduler(ec)
 
   def sayHellos(arg: Observable[HelloRequest])(client: Client[F])(
       implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
