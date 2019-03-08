@@ -137,7 +137,6 @@ object ProjectPlugin extends AutoPlugin {
         %%("monix", V.monix),
         %%("http4s-blaze-client", V.http4s) % Test,
         %%("circe-generic") % Test,
-        %%("scalacheck") % Test,
         "ch.qos.logback" % "logback-classic" % V.logback % Test
       )
     )

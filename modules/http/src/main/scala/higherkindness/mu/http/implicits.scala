@@ -19,6 +19,7 @@ package higherkindness.mu.http
 import cats.ApplicativeError
 import cats.effect._
 import cats.implicits._
+import cats.syntax.either._
 import fs2.{RaiseThrowable, Stream}
 import io.grpc.Status.Code._
 import org.typelevel.jawn.ParseException
@@ -33,6 +34,29 @@ import org.http4s.Status.Ok
 import scala.util.control.NoStackTrace
 
 object implicits {
+
+  implicit val unexpectedErrorEncoder: Encoder[UnexpectedError] = new Encoder[UnexpectedError] {
+    final def apply(a: UnexpectedError): Json = Json.obj(
+      ("className", Json.fromString(a.className)),
+      ("msg", a.msg.fold(Json.Null)(s => Json.fromString(s)))
+    )
+  }
+
+  implicit val unexpectedErrorDecoder: Decoder[UnexpectedError] = new Decoder[UnexpectedError] {
+    final def apply(c: HCursor): Decoder.Result[UnexpectedError] =
+      for {
+        className <- c.downField("className").as[String]
+        msg       <- c.downField("msg").as[Option[String]]
+      } yield UnexpectedError(className, msg)
+  }
+
+  implicit def EitherDecoder[A, B](implicit a: Decoder[A], b: Decoder[B]): Decoder[Either[A, B]] =
+    a.map(Left.apply) or b.map(Right.apply)
+
+  implicit def EitherEncoder[A, B](implicit ea: Encoder[A], eb: Encoder[B]): Encoder[Either[A, B]] =
+    new Encoder[Either[A, B]] {
+      final def apply(a: Either[A, B]): Json = a.fold(_.asJson, _.asJson)
+    }
 
   implicit class MessageOps[F[_]](private val message: Message[F]) extends AnyVal {
 
@@ -55,47 +79,18 @@ object implicits {
 
   implicit class ResponseOps[F[_]](private val response: Response[F]) {
 
-    implicit def EitherDecoder[A, B](
-        implicit a: Decoder[A],
-        b: Decoder[B]): Decoder[Either[A, B]] = {
-      val l: Decoder[Either[A, B]] = a.map(Left.apply)
-      val r: Decoder[Either[A, B]] = b.map(Right.apply)
-      l or r
-    }
-
-    implicit private val throwableDecoder: Decoder[Throwable] =
-      Decoder.decodeTuple2[String, String].map {
-        case (cls, msg) =>
-          Class
-            .forName(cls)
-            .getConstructor(classOf[String])
-            .newInstance(msg)
-            .asInstanceOf[Throwable]
-      }
-
     def asStream[A](
         implicit decoder: Decoder[A],
         F: ApplicativeError[F, Throwable],
         R: RaiseThrowable[F]): Stream[F, A] =
       if (response.status.code != Ok.code) Stream.raiseError(ResponseError(response.status))
-      else response.jsonBodyAsStream[Either[Throwable, A]].rethrow
+      else response.jsonBodyAsStream[Either[UnexpectedError, A]].rethrow
   }
 
   implicit class Fs2StreamOps[F[_], A](private val stream: Stream[F, A]) {
 
-    implicit def EitherEncoder[A, B](implicit ea: Encoder[A], eb: Encoder[B]): Encoder[Either[A, B]] =
-      new Encoder[Either[A, B]] {
-        final def apply(a: Either[A, B]): Json = a match {
-          case Left(a)  => a.asJson
-          case Right(b) => b.asJson
-        }
-      }
-
-    implicit val throwableEncoder: Encoder[Throwable] = new Encoder[Throwable] {
-      def apply(ex: Throwable): Json = (ex.getClass.getName, ex.getMessage).asJson
-    }
-
-    def asJsonEither(implicit encoder: Encoder[A]): Stream[F, Json] = stream.attempt.map(_.asJson)
+    def asJsonEither(implicit encoder: Encoder[A]): Stream[F, Json] =
+      stream.attempt.map(_.bimap(_.toUnexpected, identity).asJson)
   }
 
   implicit class FResponseOps[F[_]: Sync](private val response: F[Response[F]])
@@ -121,7 +116,17 @@ object implicits {
   def handleResponseError[F[_]: Sync](errorResponse: Response[F]): F[Throwable] =
     errorResponse.bodyAsText.compile.foldMonoid.map(body =>
       ResponseError(errorResponse.status, Some(body).filter(_.nonEmpty)))
+
+  implicit class ThrowableOps(self: Throwable) {
+    def toUnexpected: UnexpectedError =
+      UnexpectedError(self.getClass.getName, Option(self.getMessage))
+  }
+
 }
+
+final case class UnexpectedError(className: String, msg: Option[String])
+    extends RuntimeException(className + msg.fold("")(": " + _))
+    with NoStackTrace
 
 final case class ResponseError(status: Status, msg: Option[String] = None)
     extends RuntimeException(status + msg.fold("")(": " + _))

@@ -19,7 +19,7 @@ package higherkindness.mu.rpc.http
 import cats.effect.{IO, _}
 import fs2.Stream
 import fs2.interop.reactivestreams._
-import higherkindness.mu.http.ResponseError
+import higherkindness.mu.http.{ResponseError, UnexpectedError}
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
 import higherkindness.mu.http.implicits._
 import io.circe.Json
@@ -34,14 +34,10 @@ import org.http4s.server.blaze._
 import org.scalatest._
 import org.http4s.implicits._
 import org.http4s.server.Router
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 import scala.concurrent.duration._
 
-class GreeterRestTests
-    extends RpcBaseTestSuite
-    with ScalaCheckDrivenPropertyChecks
-    with BeforeAndAfter {
+class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
 
   val Hostname = "localhost"
   val Port     = 8080
@@ -72,7 +68,7 @@ class GreeterRestTests
         s"/$Fs2ServicePrefix"   -> fs2Service,
         s"/$MonixServicePrefix" -> monixService).orNotFound)
 
-  var serverTask: Fiber[IO, Nothing] = _ // sorry
+  var serverTask: Fiber[IO, Nothing] = _
   before(serverTask = server.resource.use(_ => IO.never).start.unsafeRunSync())
   after(serverTask.cancel)
 
@@ -208,17 +204,17 @@ class GreeterRestTests
       val request = HelloRequest("")
       val responses =
         BlazeClientBuilder[IO](ec).stream.flatMap(fs2ServiceClient.sayHelloAll(request)(_))
-      the[IllegalArgumentException] thrownBy responses.compile.toList
-        .unsafeRunSync() should have message "empty greeting"
+      the[UnexpectedError] thrownBy responses.compile.toList
+        .unsafeRunSync() should have message "java.lang.IllegalArgumentException: empty greeting"
     }
 
     "handle errors with Observable streaming response" in {
       val request = HelloRequest("")
       val responses = BlazeClientBuilder[IO](ec).stream
         .flatMap(monixServiceClient.sayHelloAll(request)(_).toReactivePublisher.toStream[IO])
-      the[IllegalArgumentException] thrownBy responses.compile.toList
+      the[UnexpectedError] thrownBy responses.compile.toList
         .unsafeRunTimed(10.seconds)
-        .getOrElse(sys.error("Stuck!")) should have message "empty greeting"
+        .getOrElse(sys.error("Stuck!")) should have message "java.lang.IllegalArgumentException: empty greeting"
     }
 
     "serve a POST request with bidirectional fs2 streaming" in {
@@ -254,15 +250,5 @@ class GreeterRestTests
         .getOrElse(sys.error("Stuck!")) shouldBe Nil
     }
 
-    "serve ScalaCheck-generated POST requests with bidirectional Observable streaming" in {
-      forAll { strings: List[String] =>
-        val requests = Observable.fromIterable(strings.map(HelloRequest))
-        val responses = BlazeClientBuilder[IO](ec).stream
-          .flatMap(monixServiceClient.sayHellosAll(requests)(_).toReactivePublisher.toStream[IO])
-        responses.compile.toList
-          .unsafeRunTimed(10.seconds)
-          .getOrElse(sys.error("Stuck!")) shouldBe strings.map(HelloResponse)
-      }
-    }
   }
 }
