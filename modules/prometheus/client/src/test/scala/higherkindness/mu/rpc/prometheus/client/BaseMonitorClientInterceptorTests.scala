@@ -307,8 +307,6 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
 
     "work when combining multiple calls" in {
 
-      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/168 is fixed")
-
       def unary[F[_]](implicit APP: MyRPCClient[F]): F[C] =
         APP.u(a1.x, a1.y)
 
@@ -327,12 +325,13 @@ abstract class BaseMonitorClientInterceptorTests extends RpcBaseTestSuite {
       import clientRuntime._
 
       (for {
-        _         <- serverStart[ConcurrentMonad]
-        _         <- unary[ConcurrentMonad]
-        _         <- clientStreaming[ConcurrentMonad]
-        assertion <- check
-        _         <- serverStop[ConcurrentMonad]
-      } yield assertion).unsafeRunSync()
+        _ <- serverStart[ConcurrentMonad]
+        _ <- unary[ConcurrentMonad]
+        _ <- clientStreaming[ConcurrentMonad]
+        _ <- serverStop[ConcurrentMonad]
+      } yield ()).unsafeRunSync()
+
+      check.unsafeRunSync()
 
     }
 

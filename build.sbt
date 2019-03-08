@@ -160,6 +160,13 @@ lazy val `prometheus` = project
 //// DROPWIZARD ////
 ////////////////////
 
+lazy val `dropwizard` = project
+  .in(file("modules/metrics/dropwizard"))
+  .dependsOn(`internal-core`)
+  .dependsOn(testing % "test->test")
+  .settings(moduleName := "mu-rpc-dropwizard")
+  .settings(dropwizardMetricsSettings)
+
 lazy val `dropwizard-server` = project
   .in(file("modules/dropwizard/server"))
   .dependsOn(`prometheus-server` % "compile->compile;test->test")
@@ -175,12 +182,16 @@ lazy val `dropwizard-client` = project
   .settings(moduleName := "mu-rpc-dropwizard-client")
   .settings(dropwizardSettings)
 
-lazy val `dropwizard` = project
-  .in(file("modules/metrics/dropwizard"))
-  .dependsOn(`internal-core`)
-  .dependsOn(testing % "test->test")
-  .settings(moduleName := "mu-rpc-dropwizard")
-  .settings(dropwizardMetricsSettings)
+///////////////////
+//// HTTP/REST ////
+///////////////////
+
+lazy val `http` = project
+  .in(file("modules/http"))
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(server % "compile->compile;test->test")
+  .settings(moduleName := "mu-rpc-http")
+  .settings(httpSettings)
 
 ////////////////
 //// IDLGEN ////
@@ -395,6 +406,7 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   testing,
   ssl,
   `idlgen-core`,
+  `http`,
   `marshallers-jodatime`,
   `example-routeguide-protocol`,
   `example-routeguide-common`,

@@ -37,6 +37,7 @@ class message                          extends StaticAnnotation
 class option(name: String, value: Any) extends StaticAnnotation
 class outputPackage(value: String)     extends StaticAnnotation
 class outputName(value: String)        extends StaticAnnotation
+class http                             extends StaticAnnotation
 
 @message
 object Empty

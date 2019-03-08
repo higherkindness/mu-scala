@@ -34,6 +34,7 @@ object ProjectPlugin extends AutoPlugin {
       val fs2Grpc: String            = "0.4.0-M6"
       val grpc: String               = "1.18.0"
       val jodaTime: String           = "2.10.1"
+      val http4s                     = "0.20.0-M6"
       val kindProjector: String      = "0.9.9"
       val log4s: String              = "1.7.0"
       val logback: String            = "1.2.3"
@@ -124,6 +125,19 @@ object ProjectPlugin extends AutoPlugin {
         %("grpc-netty", V.grpc),
         %%("scalamockScalatest") % Test,
         "io.netty"               % "netty-tcnative-boringssl-static" % V.nettySSL % Test
+      )
+    )
+
+    lazy val httpSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("http4s-dsl", V.http4s),
+        %%("http4s-blaze-server", V.http4s),
+        %%("http4s-circe", V.http4s),
+        "co.fs2" %% "fs2-reactive-streams" % V.reactiveStreams,
+        %%("monix", V.monix),
+        %%("http4s-blaze-client", V.http4s) % Test,
+        %%("circe-generic") % Test,
+        "ch.qos.logback" % "logback-classic" % V.logback % Test
       )
     )
 
