@@ -22,13 +22,16 @@ import higherkindness.mu.rpc.idlgen.Model.{
   ScalaBigDecimalTaggedGen
 }
 import higherkindness.mu.rpc.idlgen.avro.AvroSrcGenerator
+import higherkindness.mu.rpc.idlgen.proto.ProtoSrcGenerator
 
 object SrcGenApplication {
   def apply(
       marshallersImports: List[MarshallersImport] = Nil,
       bigDecimalTypeGen: BigDecimalTypeGen = ScalaBigDecimalTaggedGen): GeneratorApplication[
-    AvroSrcGenerator] =
-    new GeneratorApplication(AvroSrcGenerator(marshallersImports, bigDecimalTypeGen)) {
+    SrcGenerator] =
+    new GeneratorApplication(
+      ProtoSrcGenerator,
+      AvroSrcGenerator(marshallersImports, bigDecimalTypeGen)) {
       def main(args: Array[String]): Unit = {
         generateFrom(args)
         (): Unit
