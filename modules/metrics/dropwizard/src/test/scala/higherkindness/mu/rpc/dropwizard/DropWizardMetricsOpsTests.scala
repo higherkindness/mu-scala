@@ -22,9 +22,9 @@ import com.codahale.metrics.MetricRegistry
 import higherkindness.mu.rpc.dropwizard.DropWizardMetrics._
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
 import higherkindness.mu.rpc.internal.metrics.MetricsOps
-import io.grpc.MethodDescriptor.MethodType
+import higherkindness.mu.rpc.internal.metrics.MetricsOps._
+import higherkindness.mu.rpc.internal.metrics.MetricsOpsGenerators._
 import io.grpc.Status
-import org.scalacheck.Gen.alphaLowerChar
 import org.scalacheck.{Gen, Properties}
 import org.scalacheck.Prop._
 
@@ -34,48 +34,6 @@ object DropWizardMetricsTests extends Properties("DropWizardMetrics") {
 
   val prefix     = "testPrefix"
   val classifier = "classifier"
-
-  def nonEmptyStrGen: Gen[String] = Gen.nonEmptyListOf(alphaLowerChar).map(_.mkString)
-
-  def methodInfoGen: Gen[GrpcMethodInfo] =
-    for {
-      serviceName    <- nonEmptyStrGen
-      fullMethodName <- nonEmptyStrGen
-      methodName     <- nonEmptyStrGen
-      methodType <- Gen.oneOf(
-        Seq(
-          MethodType.BIDI_STREAMING,
-          MethodType.CLIENT_STREAMING,
-          MethodType.SERVER_STREAMING,
-          MethodType.UNARY,
-          MethodType.UNKNOWN))
-    } yield
-      GrpcMethodInfo(
-        serviceName,
-        fullMethodName,
-        methodName,
-        methodType
-      )
-
-  def statusGen: Gen[Status] = Gen.oneOf(
-    Status.ABORTED,
-    Status.ALREADY_EXISTS,
-    Status.CANCELLED,
-    Status.DATA_LOSS,
-    Status.DEADLINE_EXCEEDED,
-    Status.FAILED_PRECONDITION,
-    Status.INTERNAL,
-    Status.INVALID_ARGUMENT,
-    Status.NOT_FOUND,
-    Status.OK,
-    Status.OUT_OF_RANGE,
-    Status.PERMISSION_DENIED,
-    Status.RESOURCE_EXHAUSTED,
-    Status.UNAUTHENTICATED,
-    Status.UNAVAILABLE,
-    Status.UNIMPLEMENTED,
-    Status.UNKNOWN
-  )
 
   def performAndCheckMetrics(
       methodInfo: GrpcMethodInfo,

@@ -151,7 +151,7 @@ lazy val `prometheus-client` = project
 
 lazy val `prometheus` = project
   .in(file("modules/metrics/prometheus"))
-  .dependsOn(`internal-core`)
+  .dependsOn(`internal-core` % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-prometheus")
   .settings(prometheusMetricsSettings)
@@ -159,13 +159,6 @@ lazy val `prometheus` = project
 ////////////////////
 //// DROPWIZARD ////
 ////////////////////
-
-lazy val `dropwizard` = project
-  .in(file("modules/metrics/dropwizard"))
-  .dependsOn(`internal-core`)
-  .dependsOn(testing % "test->test")
-  .settings(moduleName := "mu-rpc-dropwizard")
-  .settings(dropwizardMetricsSettings)
 
 lazy val `dropwizard-server` = project
   .in(file("modules/dropwizard/server"))
@@ -181,6 +174,13 @@ lazy val `dropwizard-client` = project
   .dependsOn(server % "test->test")
   .settings(moduleName := "mu-rpc-dropwizard-client")
   .settings(dropwizardSettings)
+
+lazy val `dropwizard` = project
+  .in(file("modules/metrics/dropwizard"))
+  .dependsOn(`internal-core` % "compile->compile;test->test")
+  .dependsOn(testing % "test->test")
+  .settings(moduleName := "mu-rpc-dropwizard")
+  .settings(dropwizardMetricsSettings)
 
 ///////////////////
 //// HTTP/REST ////
