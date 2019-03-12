@@ -76,7 +76,7 @@ object InterceptingServerCalls extends CommonRuntime {
   implicit val greeterServiceHandler: ServiceHandler[IO] = new ServiceHandler[IO]
   
   val server: IO[GrpcServer[IO]] = for {
-    metricsOps <- PrometheusMetrics[IO](cr, "server")
+    metricsOps <- PrometheusMetrics.build[IO](cr, "server")
     service    <- Greeter.bindService[IO]
     grpcConfig = AddService(service.interceptWith(MetricsServerInterceptor(metricsOps)))
     server     <- GrpcServer.default[IO](8080, List(grpcConfig))
@@ -106,7 +106,7 @@ object InterceptingClientCalls extends CommonRuntime {
   implicit val serviceClient: Resource[IO, Greeter[IO]] = 
     for {
       channelFor    <- Resource.liftF(ConfigForAddress[IO]("rpc.host", "rpc.port"))
-      metricsOps    <- Resource.liftF(PrometheusMetrics[IO](cr, "client"))
+      metricsOps    <- Resource.liftF(PrometheusMetrics.build[IO](cr, "client"))
       serviceClient <- Greeter.client[IO](
         channelFor = channelFor, 
         channelConfigList = List(UsePlaintext(), AddInterceptor(MetricsChannelInterceptor(metricsOps))))
