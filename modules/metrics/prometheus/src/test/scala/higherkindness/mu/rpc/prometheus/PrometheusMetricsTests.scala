@@ -158,10 +158,8 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
   property("creates and updates timer for total time") =
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10), statusGen, Gen.chooseNum(100, 1000)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int, status: Status, elapsed: Int) =>
-        val registry              = new CollectorRegistry()
-        val metricNameTotal       = s"${prefix}_calls_total"
-        val metricNameTotalMethod = s"${prefix}_calls_by_method"
-        val metricNameTotalStatus = s"${prefix}_calls_by_status"
+        val registry   = new CollectorRegistry()
+        val metricName = s"${prefix}_calls_total"
 
         (for {
           metrics <- PrometheusMetrics.build[IO](registry, prefix, Some(classifier))
@@ -169,20 +167,15 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
             .map(_ => metrics.recordTotalTime(methodInfo, status, elapsed.toLong, Some(classifier)))
             .sequence_
             .map { _ =>
-              checkMetrics(registry, metricNameTotal, List("classifier"), List(classifier))(
-                checkSeriesSamples(metricNameTotal, numberOfCalls, elapsed)) &&
               checkMetrics(
                 registry,
-                metricNameTotalMethod,
-                List("classifier", "method"),
-                List(classifier, methodTypeDescription(methodInfo)))(
-                checkSeriesSamples(metricNameTotalMethod, numberOfCalls, elapsed)) &&
-              checkMetrics(
-                registry,
-                metricNameTotalStatus,
-                List("classifier", "status"),
-                List(classifier, statusDescription(MetricsOps.grpcStatusFromRawStatus(status)))
-              )(checkSeriesSamples(metricNameTotalStatus, numberOfCalls, elapsed))
+                metricName,
+                List("classifier", "method", "status"),
+                List(
+                  classifier,
+                  methodTypeDescription(methodInfo),
+                  statusDescription(MetricsOps.grpcStatusFromRawStatus(status)))
+              )(checkSeriesSamples(metricName, numberOfCalls, elapsed))
             }
         } yield op1).unsafeRunSync()
     }

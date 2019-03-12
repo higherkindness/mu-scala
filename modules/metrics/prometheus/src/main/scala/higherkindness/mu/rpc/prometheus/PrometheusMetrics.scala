@@ -33,11 +33,9 @@ import io.grpc.Status
  * {prefix}_messages_sent{labels=classifier,service,method} - Counter
  * {prefix}_messages_received{labels=classifier,service,method} - Counter
  * {prefix}_calls_header{labels=classifier} - Histogram
- * {prefix}_calls_total{labels=classifier} - Histogram
- * {prefix}_calls_by_method{labels=classifier,method} - Histogram
- * {prefix}_calls_by_method{labels=classifier,status} - Histogram
+ * {prefix}_calls_total{labels=classifier,method,status} - Histogram
  *
- * `methodType` can be one of the following:
+ * `method` can be one of the following:
  *    - "unary-methods"
  *    - "client-streaming-methods"
  *    - "server-streaming-methods"
@@ -63,9 +61,7 @@ case class PrometheusMetrics(
     messagesSent: Counter,
     messagesReceived: Counter,
     headersTime: Histogram,
-    totalTime: Histogram,
-    methodTime: Histogram,
-    statusTime: Histogram
+    totalTime: Histogram
 )
 
 object PrometheusMetrics {
@@ -121,13 +117,10 @@ object PrometheusMetrics {
           elapsed: Long,
           classifier: Option[String]): F[Unit] = F.delay {
         metrics.totalTime
-          .labels(label(classifier))
-          .observe(SimpleTimer.elapsedSecondsFromNanos(0, elapsed))
-        metrics.methodTime
-          .labels(label(classifier), methodTypeDescription(methodInfo))
-          .observe(SimpleTimer.elapsedSecondsFromNanos(0, elapsed))
-        metrics.statusTime
-          .labels(label(classifier), statusDescription(grpcStatusFromRawStatus(status)))
+          .labels(
+            label(classifier),
+            methodTypeDescription(methodInfo),
+            statusDescription(grpcStatusFromRawStatus(status)))
           .observe(SimpleTimer.elapsedSecondsFromNanos(0, elapsed))
       }
     }
@@ -165,19 +158,7 @@ object PrometheusMetrics {
         .build()
         .name(s"${prefix}_calls_total")
         .help("Total time for all calls")
-        .labelNames("classifier")
-        .register(registry),
-      methodTime = Histogram
-        .build()
-        .name(s"${prefix}_calls_by_method")
-        .help("Time for calls based on GRPC method")
-        .labelNames("classifier", "method")
-        .register(registry),
-      statusTime = Histogram
-        .build()
-        .name(s"${prefix}_calls_by_status")
-        .help("Time for calls based on GRPC status")
-        .labelNames("classifier", "status")
+        .labelNames("classifier", "method", "status")
         .register(registry)
     )
   }
