@@ -160,13 +160,6 @@ lazy val `prometheus` = project
 //// DROPWIZARD ////
 ////////////////////
 
-lazy val `dropwizard` = project
-  .in(file("modules/metrics/dropwizard"))
-  .dependsOn(`internal-core`)
-  .dependsOn(testing % "test->test")
-  .settings(moduleName := "mu-rpc-dropwizard")
-  .settings(dropwizardMetricsSettings)
-
 lazy val `dropwizard-server` = project
   .in(file("modules/dropwizard/server"))
   .dependsOn(`prometheus-server` % "compile->compile;test->test")
