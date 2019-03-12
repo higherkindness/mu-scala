@@ -32,7 +32,7 @@ import higherkindness.mu.rpc.protocol.Utils._
 import org.scalacheck.Arbitrary
 import org.scalatest._
 import org.scalacheck.Prop._
-import org.scalatest.prop.Checkers
+import org.scalatestplus.scalacheck.Checkers
 
 class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Checkers {
 

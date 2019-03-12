@@ -116,26 +116,37 @@ lazy val server = project
   .settings(serverSettings)
 
 ////////////////////
-//// DROPWIZARD ////
-////////////////////
-
-lazy val `dropwizard` = project
-  .in(file("modules/metrics/dropwizard"))
-  .dependsOn(`internal-core`)
-  .dependsOn(testing % "test->test")
-  .settings(moduleName := "mu-rpc-dropwizard")
-  .settings(dropwizardMetricsSettings)
-
-////////////////////
 //// PROMETHEUS ////
 ////////////////////
 
 lazy val `prometheus` = project
   .in(file("modules/metrics/prometheus"))
-  .dependsOn(`internal-core`)
+  .dependsOn(`internal-core` % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-prometheus")
   .settings(prometheusMetricsSettings)
+
+////////////////////
+//// DROPWIZARD ////
+////////////////////
+
+lazy val `dropwizard` = project
+  .in(file("modules/metrics/dropwizard"))
+  .dependsOn(`internal-core` % "compile->compile;test->test")
+  .dependsOn(testing % "test->test")
+  .settings(moduleName := "mu-rpc-dropwizard")
+  .settings(dropwizardMetricsSettings)
+
+///////////////////
+//// HTTP/REST ////
+///////////////////
+
+lazy val `http` = project
+  .in(file("modules/http"))
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(server % "compile->compile;test->test")
+  .settings(moduleName := "mu-rpc-http")
+  .settings(httpSettings)
 
 ////////////////
 //// IDLGEN ////
@@ -163,22 +174,17 @@ lazy val `idlgen-sbt` = project
 //// BENCHMARKS ////
 ////////////////////
 
-lazy val lastReleasedV = "0.15.1"
+lazy val lastReleasedV = "0.17.2"
 
 lazy val `benchmarks-vprev` = project
   .in(file("benchmarks/vprev"))
-  // TODO: temporarily disabled until the project is migrated
-//  .settings(
-//    libraryDependencies ++= Seq(
-//      "io.higherkindness" %% "mu-rpc-channel" % lastReleasedV,
-//      "io.higherkindness" %% "mu-rpc-server"      % lastReleasedV,
-//      "io.higherkindness" %% "mu-rpc-testing"     % lastReleasedV
-//    )
-//  )
-  // TODO: remove dependsOn and uncomment the lines above
-  .dependsOn(channel)
-  .dependsOn(server)
-  .dependsOn(testing)
+  .settings(
+    libraryDependencies ++= Seq(
+      "io.higherkindness" %% "mu-rpc-channel" % lastReleasedV,
+      "io.higherkindness" %% "mu-rpc-server"  % lastReleasedV,
+      "io.higherkindness" %% "mu-rpc-testing" % lastReleasedV
+    )
+  )
   .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vprev")
   .settings(crossSettings)
@@ -349,6 +355,7 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   testing,
   ssl,
   `idlgen-core`,
+  `http`,
   `marshallers-jodatime`,
   `example-routeguide-protocol`,
   `example-routeguide-common`,
@@ -361,7 +368,6 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `example-todolist-client`,
   `benchmarks-vprev`,
   `benchmarks-vnext`,
-  `legacy-avro-decimal-compat-protocol`,
   `legacy-avro-decimal-compat-model`,
   `legacy-avro-decimal-compat-encoders`
 )

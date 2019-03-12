@@ -14,13 +14,24 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.prometheus
+package higherkindness.mu.http
 
-import io.prometheus.client.CollectorRegistry
-import higherkindness.mu.rpc.internal.metrics.MetricsOps
+import cats.effect.{ConcurrentEffect, Timer}
+import org.http4s.HttpRoutes
+import org.http4s.server.blaze.BlazeServerBuilder
+import org.http4s.implicits._
+import org.http4s.server.Router
 
-object PrometheusMetrics {
+case class RouteMap[F[_]](prefix: String, route: HttpRoutes[F])
 
-  def apply[F[_]](cr: CollectorRegistry, prefix: String = ""): F[MetricsOps[F]] = ???
+object HttpServer {
+
+  def bind[F[_]: ConcurrentEffect: Timer](
+      port: Int,
+      host: String,
+      routes: RouteMap[F]*): BlazeServerBuilder[F] =
+    BlazeServerBuilder[F]
+      .bindHttp(port, host)
+      .withHttpApp(Router(routes.map(r => (s"/${r.prefix}", r.route)): _*).orNotFound)
 
 }

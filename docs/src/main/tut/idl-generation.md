@@ -17,7 +17,7 @@ Add the following line to _project/plugins.sbt_:
 [comment]: # (Start Replace)
 
 ```scala
-addSbtPlugin("io.higherkindness" % "sbt-mu-idlgen" % "0.17.1")
+addSbtPlugin("io.higherkindness" % "sbt-mu-idlgen" % "0.17.2")
 ```
 
 [comment]: # (End Replace)
@@ -216,7 +216,7 @@ sourceGenerators in Compile += (Compile / srcGen).taskValue
 
 ### Plugin Settings
 
-Just like `idlGen`, `srcGen` and `srcGenFromJars` has some configurable settings:
+Just like `idlGen`, `srcGen` has some configurable settings:
 
 * **`idlType`**: the type of IDL to generate from, currently only `avro`.
 * **`srcGenSerializationType`**: the serialization type when generating Scala sources from the IDL definitions. `Protobuf`, `Avro` or `AvroWithSchema` are the current supported serialization types. By default, the serialization type is `Avro`.

@@ -133,26 +133,4 @@ object DropWizardMetrics {
       .map(c => s"$prefix.$c")
       .getOrElse(s"$prefix.default")
 
-  def methodTypeDescription(methodInfo: GrpcMethodInfo): String =
-    methodInfo.`type` match {
-      case UNARY            => "unary-methods"
-      case CLIENT_STREAMING => "client-streaming-methods"
-      case SERVER_STREAMING => "server-streaming-methods"
-      case BIDI_STREAMING   => "bidi-streaming-methods"
-      case UNKNOWN          => "unknown-methods"
-    }
-
-  def statusDescription(status: GrpcStatus): String = status match {
-    case OK                => "ok-statuses"
-    case Cancelled         => "cancelled-statuses"
-    case DeadlineExceeded  => "deadline-exceeded-statuses"
-    case Internal          => "internal-statuses"
-    case ResourceExhausted => "resource-exhausted-statuses"
-    case Unauthenticated   => "unauthenticated-statuses"
-    case Unavailable       => "unavailable-statuses"
-    case Unimplemented     => "unimplemented-statuses"
-    case Unknown           => "unknown-statuses"
-    case _                 => "unreachable-error-statuses"
-  }
-
 }

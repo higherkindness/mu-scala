@@ -79,9 +79,6 @@ trait GrpcServer[F[_]] { self =>
 
 object GrpcServer {
 
-  // Deferred can maybe be used here once cats-effect version is upgraded
-  // def server[F[_]](S: GrpcServer[F])(implicit B: Bracket[F, Throwable]): F[Unit] =
-  //   B.bracket(S.start)(_ => S.awaitTermination)(_ => S.shutdown)
   def server[F[_]](S: GrpcServer[F])(implicit F: Effect[F]): F[Unit] = {
 
     def shutdownEventually(endProcess: Either[Throwable, Unit] => Unit): Unit = {
