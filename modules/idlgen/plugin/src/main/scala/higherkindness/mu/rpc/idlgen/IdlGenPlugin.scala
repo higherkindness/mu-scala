@@ -35,10 +35,6 @@ object IdlGenPlugin extends AutoPlugin {
     lazy val srcGen: TaskKey[Seq[File]] =
       taskKey[Seq[File]]("Generates mu Scala files from IDL definitions")
 
-    @deprecated("This setting has been deprecated in favor of srcGen", "0.13.3")
-    val srcGenFromJars =
-      taskKey[Seq[File]]("Unzip IDL definitions from the given jar files")
-
     lazy val idlType: SettingKey[String] =
       settingKey[String]("The IDL type to work with, such as avro or proto")
 
@@ -60,18 +56,8 @@ object IdlGenPlugin extends AutoPlugin {
         "The IDL target directory, where the `idlGen` task will write the generated files " +
           "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on mu service definitions.")
 
-    @deprecated("This setting has been deprecated in favor of srcGenSourceDirs", "0.13.3")
-    lazy val srcGenSourceDir: SettingKey[File] =
-      settingKey[File]("The IDL directory, where your IDL definitions are placed.")
-
     lazy val srcGenSourceDirs: SettingKey[Seq[File]] =
       settingKey[Seq[File]]("The IDL directories, where your IDL definitions are placed.")
-
-    @deprecated("This setting has been deprecated in favor of srcGenJarNames", "0.13.5")
-    lazy val srcJarNames: SettingKey[Seq[String]] =
-      settingKey[Seq[String]](
-        "The names of those jars containing IDL definitions that will be used at " +
-          "compilation time to generate the Scala Sources. By default, this sequence is empty.")
 
     lazy val srcGenJarNames: SettingKey[Seq[String]] =
       settingKey[Seq[String]](
@@ -112,10 +98,8 @@ object IdlGenPlugin extends AutoPlugin {
     srcGenSerializationType := "Avro",
     idlGenSourceDir := (Compile / sourceDirectory).value,
     idlGenTargetDir := (Compile / resourceManaged).value,
-    srcGenSourceDir := (Compile / resourceDirectory).value,
-    srcJarNames := Seq.empty,
-    srcGenJarNames := srcJarNames.value,
-    srcGenSourceDirs := Seq(srcGenSourceDir.value),
+    srcGenJarNames := Seq.empty,
+    srcGenSourceDirs := Seq((Compile / resourceDirectory).value),
     srcGenIDLTargetDir := (Compile / resourceManaged).value / idlType.value,
     srcGenTargetDir := (Compile / sourceManaged).value,
     genOptions := Seq.empty,
@@ -175,8 +159,7 @@ object IdlGenPlugin extends AutoPlugin {
             )(srcGenIDLTargetDir.value.allPaths.get.toSet).toSeq
           }
         )
-        .value,
-      srcGenFromJars := srcGen.value
+        .value
     )
   }
 
