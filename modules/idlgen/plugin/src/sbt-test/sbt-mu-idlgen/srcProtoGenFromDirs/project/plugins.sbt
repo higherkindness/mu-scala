@@ -1,1 +1,1 @@
-addSbtPlugin("io.higherkindness" %% "sbt-mu-idlgen" % "0.17.3-SNAPSHOT")
+addSbtPlugin("io.higherkindness" %% "sbt-mu-idlgen" % sys.props("version"))
