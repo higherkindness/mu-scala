@@ -32,14 +32,7 @@ case class GrpcMethodInfo(
     serviceName: String,
     fullMethodName: String,
     methodName: String,
-    `type`: MethodType) {
-
-  def isClientStreaming: Boolean =
-    (`type` eq MethodType.CLIENT_STREAMING) || (`type` eq MethodType.BIDI_STREAMING)
-
-  def isServerStreaming: Boolean =
-    (`type` eq MethodType.SERVER_STREAMING) || (`type` eq MethodType.BIDI_STREAMING)
-}
+    `type`: MethodType)
 
 object GrpcMethodInfo {
 
