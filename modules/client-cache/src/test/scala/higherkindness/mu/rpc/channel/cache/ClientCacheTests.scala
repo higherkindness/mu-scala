@@ -32,19 +32,26 @@ class ClientCacheTests extends WordSpec with Matchers {
   val EC: scala.concurrent.ExecutionContext =
     scala.concurrent.ExecutionContext.Implicits.global
 
-  def buildTimer: IO[Timer[IO]] = FakeClock.build[IO](50, TimeUnit.MILLISECONDS).map { fakeClock =>
-    new Timer[IO] {
+  private[this] val clockStep: Int = 50
 
-      private[this] val innerTimer = IO.timer(EC)
+  def buildTimer: IO[Timer[IO]] = FakeClock.build[IO](clockStep.toLong, TimeUnit.MILLISECONDS).map {
+    fakeClock =>
+      new Timer[IO] {
 
-      override def clock: Clock[IO]                          = fakeClock
-      override def sleep(duration: FiniteDuration): IO[Unit] = innerTimer.sleep(duration)
-    }
+        private[this] val innerTimer = IO.timer(EC)
+
+        override def clock: Clock[IO]                          = fakeClock
+        override def sleep(duration: FiniteDuration): IO[Unit] = innerTimer.sleep(duration)
+      }
   }
 
   implicit val cs: ContextShift[IO] = IO.contextShift(EC)
 
-  def compiledStream(ref1: Ref[IO, Int], ref2: Ref[IO, Int], numClients: Int): IO[Unit] =
+  def compiledStream(
+      ref1: Ref[IO, Int],
+      ref2: Ref[IO, Int],
+      numClients: Int,
+      cleanUp: Int): IO[Unit] =
     (for {
       hostAndPort <- Stream.eval(
         Ref.of[IO, List[(String, Int)]]((1 to numClients).toList.map(i => ("localhost", i))))
@@ -55,40 +62,33 @@ class ClientCacheTests extends WordSpec with Matchers {
           ref1
             .update(_ + 1)
             .map(_ => (new MyClient[IO], ref2.update(_ + 1).void)),
-        40.millis,
-        40.millis
+        cleanUp.millis,
+        cleanUp.millis
       )(ConcurrentEffect[IO], EC, timer)
       _ <- Stream.eval((1 to numClients).toList.traverse_(_ => clientCache.getClient))
     } yield ()).compile.drain
 
+  def test(numClients: Int, cleanUp: Int): (Int, Int) =
+    (for {
+      ref1         <- Ref.of[IO, Int](0)
+      ref2         <- Ref.of[IO, Int](0)
+      _            <- compiledStream(ref1, ref2, numClients, cleanUp)
+      numCreations <- ref1.get
+      numCloses    <- ref2.get
+    } yield (numCreations, numCloses)).unsafeRunSync()
+
   "ClientCache.impl" should {
 
-    "create the client and close after one use" in {
+    "create the client and close after one use when the clean up time is lower than the elapsed time" in {
+      test(1, clockStep - 10) shouldBe ((1, 1))
+    }
 
-      val (numCreations, numCloses) = (for {
-        ref1         <- Ref.of[IO, Int](0)
-        ref2         <- Ref.of[IO, Int](0)
-        _            <- compiledStream(ref1, ref2, numClients = 1)
-        numCreations <- ref1.get
-        numCloses    <- ref2.get
-      } yield (numCreations, numCloses)).unsafeRunSync()
-
-      numCreations shouldBe 1
-      numCloses shouldBe 1
+    "create the client and close after one use when the clean up time is greater than the elapsed time" in {
+      test(1, clockStep + 10) shouldBe ((1, 1))
     }
 
     "use the provided clients and close them" in {
-
-      val (numCreations, numCloses) = (for {
-        ref1         <- Ref.of[IO, Int](0)
-        ref2         <- Ref.of[IO, Int](0)
-        _            <- compiledStream(ref1, ref2, numClients = 2)
-        numCreations <- ref1.get
-        numCloses    <- ref2.get
-      } yield (numCreations, numCloses)).unsafeRunSync()
-
-      numCreations shouldBe 2
-      numCloses shouldBe 2
+      test(2, clockStep) shouldBe ((2, 2))
     }
 
   }

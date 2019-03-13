@@ -55,24 +55,22 @@ import io.grpc.Status
  *    - "unreachable-error-statuses"
  *
  */
-
-case class PrometheusMetrics(
-    activeCalls: Gauge,
-    messagesSent: Counter,
-    messagesReceived: Counter,
-    headersTime: Histogram,
-    totalTime: Histogram
-)
-
 object PrometheusMetrics {
+
+  private[this] case class Metrics(
+      activeCalls: Gauge,
+      messagesSent: Counter,
+      messagesReceived: Counter,
+      headersTime: Histogram,
+      totalTime: Histogram
+  )
 
   def build[F[_]: Sync](
       cr: CollectorRegistry,
-      prefix: String = "higherkinderness.mu",
-      classifier: Option[String]): F[MetricsOps[F]] =
-    buildMetrics[F](prefix, classifier, cr).map(PrometheusMetrics[F])
+      prefix: String = "higherkinderness.mu"): F[MetricsOps[F]] =
+    buildMetrics[F](prefix, cr).map(PrometheusMetrics[F])
 
-  def apply[F[_]: Sync](metrics: PrometheusMetrics)(implicit F: Sync[F]): MetricsOps[F] =
+  def apply[F[_]: Sync](metrics: Metrics)(implicit F: Sync[F]): MetricsOps[F] =
     new MetricsOps[F] {
       override def increaseActiveCalls(
           methodInfo: GrpcMethodInfo,
@@ -127,9 +125,8 @@ object PrometheusMetrics {
 
   private[this] def buildMetrics[F[_]: Sync](
       prefix: String,
-      classifier: Option[String],
-      registry: CollectorRegistry): F[PrometheusMetrics] = Sync[F].delay {
-    PrometheusMetrics(
+      registry: CollectorRegistry): F[Metrics] = Sync[F].delay {
+    Metrics(
       activeCalls = Gauge
         .build()
         .name(s"${prefix}_active_calls")

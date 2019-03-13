@@ -93,7 +93,7 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
         val metricName = s"${prefix}_active_calls"
 
         (for {
-          metrics <- PrometheusMetrics.build[IO](registry, prefix, Some(classifier))
+          metrics <- PrometheusMetrics.build[IO](registry, prefix)
           op1 <- performAndCheckMetrics(
             methodInfo,
             numberOfCalls,
@@ -122,7 +122,7 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
         val metricName = s"${prefix}_messages_received"
 
         (for {
-          metrics <- PrometheusMetrics.build[IO](registry, prefix, Some(classifier))
+          metrics <- PrometheusMetrics.build[IO](registry, prefix)
           op1 <- performAndCheckMetrics(
             methodInfo,
             numberOfCalls,
@@ -142,7 +142,7 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
         val metricName = s"${prefix}_calls_header"
 
         (for {
-          metrics <- PrometheusMetrics.build[IO](registry, prefix, Some(classifier))
+          metrics <- PrometheusMetrics.build[IO](registry, prefix)
           op1 <- performAndCheckMetrics(
             methodInfo,
             numberOfCalls,
@@ -162,7 +162,7 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
         val metricName = s"${prefix}_calls_total"
 
         (for {
-          metrics <- PrometheusMetrics.build[IO](registry, prefix, Some(classifier))
+          metrics <- PrometheusMetrics.build[IO](registry, prefix)
           op1 <- (1 to numberOfCalls).toList
             .map(_ => metrics.recordTotalTime(methodInfo, status, elapsed.toLong, Some(classifier)))
             .sequence_
