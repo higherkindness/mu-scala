@@ -18,7 +18,8 @@ package higherkindness.mu.rpc.idlgen.proto
 
 import java.io.File
 
-import cats.effect.IO
+import cats.effect.{IO, Sync}
+import cats.syntax.functor._
 import higherkindness.mu.rpc.idlgen._
 import higherkindness.skeuomorph.mu.MuF
 import higherkindness.skeuomorph.protobuf.ParseProto.{parseProto, ProtoSource}
@@ -27,72 +28,55 @@ import org.log4s._
 import qq.droste.data.Mu
 import qq.droste.data.Mu._
 
+import scala.util.matching.Regex
+
 object ProtoSrcGenerator extends SrcGenerator {
 
   private[this] val logger = getLogger
 
   val idlType: String = proto.IdlType
 
-  def inputFiles(files: Set[File]): Seq[File] = {
-    val protoFiles = files.filter(_.getName.endsWith(ProtoExtension))
-    protoFiles.toSeq
-  }
+  def inputFiles(files: Set[File]): Seq[File] =
+    files.filter(_.getName.endsWith(ProtoExtension)).toSeq
 
   def generateFrom(
       inputFile: File,
       serializationType: String,
-      options: String*): Option[(String, Seq[String])] = Option(getCode(inputFile))
+      options: String*): Option[(String, Seq[String])] =
+    Option(getCode[IO](inputFile).unsafeRunSync)
 
-  private def getCode(file: File): (String, Seq[String]) = {
+  val withImports: String => String = self =>
+    (self.split("\n", 2).toList match {
+      case h :: t => imports(h) :: t
+      case a      => a
+    }).mkString("\n")
 
-    val source = ProtoSource(file.getName, file.getParent)
+  val copRegExp: Regex = """((Cop\[)(((\w+)(\s)?(\:\:)(\s)?)+)(TNil)(\]))""".r
 
-    val protobufProtocol: Protocol[Mu[ProtobufF]] =
-      parseProto[IO, Mu[ProtobufF]].parse(source).unsafeRunSync()
+  val cleanCop: String => String =
+    _.replace("Cop[", "").replace("::", ":+:").replace("TNil]", "CNil")
 
-    val parseProtocol: Protocol[Mu[ProtobufF]] => higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] = {
-      p: Protocol[Mu[ProtobufF]] =>
-        higherkindness.skeuomorph.mu.Protocol.fromProtobufProto(p)
-    }
+  val withCoproducts: String => String = self =>
+    copRegExp.replaceAllIn(self, m => cleanCop(m.matched))
 
-    val printProtocol: higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] => String = {
-      p: higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] =>
-        higherkindness.skeuomorph.mu.print.proto.print(p)
-    }
+  val parseProtocol: Protocol[Mu[ProtobufF]] => higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] =
+    p => higherkindness.skeuomorph.mu.Protocol.fromProtobufProto(p)
 
-    val result: String = (parseProtocol andThen printProtocol)(protobufProtocol)
+  val printProtocol: higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] => String = p =>
+    higherkindness.skeuomorph.mu.print.proto.print(p)
 
-    println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-    println(result.withImports.withCoproducts)
-
-    getPath(protobufProtocol) -> Seq(result.withImports.withCoproducts)
-  }
+  private def getCode[F[_]: Sync](file: File): F[(String, Seq[String])] =
+    parseProto[F, Mu[ProtobufF]]
+      .parse(ProtoSource(file.getName, file.getParent))
+      .map(
+        protocol =>
+          getPath(protocol) -> Seq(
+            (parseProtocol andThen printProtocol andThen withImports andThen withCoproducts)(
+              protocol)))
 
   private def getPath(p: Protocol[Mu[ProtobufF]]): String =
-    s"${p.pkg.toPath}/${p.name}$ScalaFileExtension"
+    s"${p.pkg.replace('.', '/')}/${p.name}$ScalaFileExtension"
 
-  implicit class StringOps(self: String) {
-
-    def withImports: String =
-      (self.split("\n", 2).toList match {
-        case h :: t =>
-          List(
-            h,
-            "\n",
-            "import higherkindness.mu.rpc.protocol._",
-            "import fs2.Stream",
-            "import shapeless.{:+:, CNil}") ++ t
-        case a => a
-      }).mkString("\n")
-
-    def withCoproducts: String =
-      """((Cop\[)(((\w+)(\s)?(\:\:)(\s)?)+)(TNil)(\]))""".r.replaceAllIn(self, _.matched.cleanCop)
-
-    def cleanCop: String =
-      self.replace("Cop[", "").replace("::", ":+:").replace("TNil]", "CNil")
-
-    def toPath: String = self.replace('.', '/')
-
-  }
-
+  def imports(pkg: String): String =
+    s"$pkg\nimport higherkindness.mu.rpc.protocol._\nimport fs2.Stream\nimport shapeless.{:+:, CNil}"
 }
