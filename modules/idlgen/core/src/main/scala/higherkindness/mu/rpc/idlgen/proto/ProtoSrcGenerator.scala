@@ -60,12 +60,39 @@ object ProtoSrcGenerator extends SrcGenerator {
         higherkindness.skeuomorph.mu.print.proto.print(p)
     }
 
-    val result = (parseProtocol andThen printProtocol)(protobufProtocol)
+    val result: String = (parseProtocol andThen printProtocol)(protobufProtocol)
 
-    val outputPath =
-      s"${protobufProtocol.pkg.replace('.', '/')}/${protobufProtocol.name}$ScalaFileExtension"
+    println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    println(result.withImports.withCoproducts)
 
-    outputPath -> Seq(result)
+    getPath(protobufProtocol) -> Seq(result.withImports.withCoproducts)
+  }
+
+  private def getPath(p: Protocol[Mu[ProtobufF]]): String =
+    s"${p.pkg.toPath}/${p.name}$ScalaFileExtension"
+
+  implicit class StringOps(self: String) {
+
+    def withImports: String =
+      (self.split("\n", 2).toList match {
+        case h :: t =>
+          List(
+            h,
+            "\n",
+            "import higherkindness.mu.rpc.protocol._",
+            "import fs2.Stream",
+            "import shapeless.{:+:, CNil}") ++ t
+        case a => a
+      }).mkString("\n")
+
+    def withCoproducts: String =
+      """((Cop\[)(((\w+)(\s)?(\:\:)(\s)?)+)(TNil)(\]))""".r.replaceAllIn(self, _.matched.cleanCop)
+
+    def cleanCop: String =
+      self.replace("Cop[", "").replace("::", ":+:").replace("TNil]", "CNil")
+
+    def toPath: String = self.replace('.', '/')
+
   }
 
 }
