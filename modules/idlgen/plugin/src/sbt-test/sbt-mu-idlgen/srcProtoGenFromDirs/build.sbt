@@ -8,5 +8,12 @@ lazy val root = project
     idlType := "proto",
     srcGenSourceDirs := Seq((Compile / resourceDirectory).value),
     srcGenTargetDir := (Compile / sourceManaged).value / "compiled_proto",
-    sourceGenerators in Compile += (Compile / srcGen).taskValue
+    sourceGenerators in Compile += (Compile / srcGen).taskValue,
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch),
+    libraryDependencies ++= Seq(
+        "io.higherkindness"    %% "mu-rpc-channel" % sys.props("version"),
+        "io.higherkindness"    %% "mu-rpc-fs2" % sys.props("version"),
+        "com.chuusai" %% "shapeless" % "2.3.2",
+        "co.fs2" %% "fs2-core" % "1.0.4"
+    )
   ))
