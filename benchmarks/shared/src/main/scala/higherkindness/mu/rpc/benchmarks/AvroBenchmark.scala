@@ -36,7 +36,8 @@ class AvroBenchmark extends Runtime {
   implicit val handler: AvroHandler[IO] = new AvroHandler[IO]
 
   def clientIO: Resource[IO, PersonServiceAvro[IO]] =
-    Resource.liftF(PersonServiceAvro.bindService[IO])
+    Resource
+      .liftF(PersonServiceAvro.bindService[IO])
       .flatMap(ServerChannel[IO](_))
       .flatMap(sc => PersonServiceAvro.clientFromChannel[IO](IO(sc.channel)))
 

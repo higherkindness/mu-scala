@@ -168,6 +168,19 @@ lazy val `idlgen-sbt` = project
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
   .settings(buildInfoPackage := "mu.rpc.idlgen")
+  // See https://github.com/sbt/sbt/issues/3248
+  .settings(publishLocal := publishLocal
+    .dependsOn(
+      common / publishLocal,
+      `internal-core` / publishLocal,
+      channel / publishLocal,
+      server / publishLocal,
+      `internal-fs2` / publishLocal,
+      fs2 / publishLocal,
+      `marshallers-jodatime` / publishLocal,
+      `idlgen-core` / publishLocal
+    )
+    .value)
   .enablePlugins(SbtPlugin)
 
 ////////////////////

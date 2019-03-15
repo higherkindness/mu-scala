@@ -50,6 +50,7 @@ object ProjectPlugin extends AutoPlugin {
       val scalacheckToolbox: String  = "0.2.5"
       val scalamockScalatest: String = "3.6.0"
       val scalatest: String          = "3.0.6"
+      val skeuomorph: String         = "0.0.5"
       val slf4j: String              = "1.7.26"
       val dropwizard: String         = "4.0.5"
     }
@@ -136,8 +137,8 @@ object ProjectPlugin extends AutoPlugin {
         "co.fs2" %% "fs2-reactive-streams" % V.reactiveStreams,
         %%("monix", V.monix),
         %%("http4s-blaze-client", V.http4s) % Test,
-        %%("circe-generic") % Test,
-        "ch.qos.logback" % "logback-classic" % V.logback % Test
+        %%("circe-generic")                 % Test,
+        "ch.qos.logback"                    % "logback-classic" % V.logback % Test
       )
     )
 
@@ -176,6 +177,7 @@ object ProjectPlugin extends AutoPlugin {
     lazy val idlGenSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("monocle-core", V.monocle),
+        "io.higherkindness" %% "skeuomorph"      % V.skeuomorph,
         "com.julianpeeters" %% "avrohugger-core" % V.avrohugger,
         %%("circe-generic", V.circe)
       )
