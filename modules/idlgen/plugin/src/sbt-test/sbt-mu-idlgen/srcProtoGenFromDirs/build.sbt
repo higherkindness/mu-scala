@@ -13,7 +13,6 @@ lazy val root = project
     libraryDependencies ++= Seq(
         "io.higherkindness"    %% "mu-rpc-channel" % sys.props("version"),
         "io.higherkindness"    %% "mu-rpc-fs2" % sys.props("version"),
-        "com.chuusai" %% "shapeless" % "2.3.2",
-        "co.fs2" %% "fs2-core" % "1.0.4"
+        "com.chuusai" %% "shapeless" % "2.3.2"
     )
   ))
