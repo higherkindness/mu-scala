@@ -43,7 +43,7 @@ object ProtoSrcGenerator extends SrcGenerator {
       inputFile: File,
       serializationType: String,
       options: String*): Option[(String, Seq[String])] =
-    Option(getCode[IO](inputFile).unsafeRunSync)
+    getCode[IO](inputFile).map(Some(_)).unsafeRunSync
 
   def withImports(self: String): String =
     (self.split("\n", 2).toList match {
@@ -60,10 +60,10 @@ object ProtoSrcGenerator extends SrcGenerator {
     copRegExp.replaceAllIn(self, m => cleanCop(m.matched))
 
   val parseProtocol: Protocol[Mu[ProtobufF]] => higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] =
-    p => higherkindness.skeuomorph.mu.Protocol.fromProtobufProto(p)
+    higherkindness.skeuomorph.mu.Protocol.fromProtobufProto
 
-  val printProtocol: higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] => String = p =>
-    higherkindness.skeuomorph.mu.print.proto.print(p)
+  val printProtocol: higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] => String =
+    higherkindness.skeuomorph.mu.print.proto.print
 
   private def getCode[F[_]: Sync](file: File): F[(String, Seq[String])] =
     parseProto[F, Mu[ProtobufF]]
