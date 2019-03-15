@@ -45,7 +45,7 @@ object ProtoSrcGenerator extends SrcGenerator {
       options: String*): Option[(String, Seq[String])] =
     Option(getCode[IO](inputFile).unsafeRunSync)
 
-  val withImports: String => String = self =>
+  def withImports(self: String): String =
     (self.split("\n", 2).toList match {
       case h :: t => imports(h) :: t
       case a      => a

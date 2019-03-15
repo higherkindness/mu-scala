@@ -137,8 +137,8 @@ object ProjectPlugin extends AutoPlugin {
         "co.fs2" %% "fs2-reactive-streams" % V.reactiveStreams,
         %%("monix", V.monix),
         %%("http4s-blaze-client", V.http4s) % Test,
-        %%("circe-generic") % Test,
-        "ch.qos.logback" % "logback-classic" % V.logback % Test
+        %%("circe-generic")                 % Test,
+        "ch.qos.logback"                    % "logback-classic" % V.logback % Test
       )
     )
 
@@ -201,7 +201,7 @@ object ProjectPlugin extends AutoPlugin {
     lazy val idlGenSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("monocle-core", V.monocle),
-        "io.higherkindness" %% "skeuomorph" % V.skeuomorph,
+        "io.higherkindness" %% "skeuomorph"      % V.skeuomorph,
         "com.julianpeeters" %% "avrohugger-core" % V.avrohugger,
         %%("circe-generic", V.circe)
       )

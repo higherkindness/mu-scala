@@ -36,7 +36,8 @@ class AvroWithSchemaBenchmark extends Runtime {
   implicit val handler: AvroWithSchemaHandler[IO] = new AvroWithSchemaHandler[IO]
 
   def clientIO: Resource[IO, PersonServiceAvroWithSchema[IO]] =
-    Resource.liftF(PersonServiceAvroWithSchema.bindService[IO])
+    Resource
+      .liftF(PersonServiceAvroWithSchema.bindService[IO])
       .flatMap(ServerChannel[IO](_))
       .flatMap(sc => PersonServiceAvroWithSchema.clientFromChannel[IO](IO(sc.channel)))
 
@@ -44,10 +45,12 @@ class AvroWithSchemaBenchmark extends Runtime {
   def shutdown(): Unit = {}
 
   @Benchmark
-  def listPersons: PersonList = clientIO.use(_.listPersons(Empty)).unsafeRunTimed(defaultTimeOut).get
+  def listPersons: PersonList =
+    clientIO.use(_.listPersons(Empty)).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
-  def getPerson: Person = clientIO.use(_.getPerson(PersonId("1"))).unsafeRunTimed(defaultTimeOut).get
+  def getPerson: Person =
+    clientIO.use(_.getPerson(PersonId("1"))).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
   def getPersonLinks: PersonLinkList =

@@ -36,7 +36,8 @@ class ProtoBenchmark extends Runtime {
   implicit val handler: ProtoHandler[IO] = new ProtoHandler[IO]
 
   def clientIO: Resource[IO, PersonServicePB[IO]] =
-    Resource.liftF(PersonServicePB.bindService[IO])
+    Resource
+      .liftF(PersonServicePB.bindService[IO])
       .flatMap(ServerChannel[IO](_))
       .flatMap(sc => PersonServicePB.clientFromChannel[IO](IO(sc.channel)))
 
@@ -44,10 +45,12 @@ class ProtoBenchmark extends Runtime {
   def shutdown(): Unit = {}
 
   @Benchmark
-  def listPersons: PersonList = clientIO.use(_.listPersons(Empty)).unsafeRunTimed(defaultTimeOut).get
+  def listPersons: PersonList =
+    clientIO.use(_.listPersons(Empty)).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
-  def getPerson: Person = clientIO.use(_.getPerson(PersonId("1"))).unsafeRunTimed(defaultTimeOut).get
+  def getPerson: Person =
+    clientIO.use(_.getPerson(PersonId("1"))).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
   def getPersonLinks: PersonLinkList =
