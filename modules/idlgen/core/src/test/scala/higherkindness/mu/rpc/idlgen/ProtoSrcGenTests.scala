@@ -41,14 +41,13 @@ class ProtoSrcGenTests extends RpcBaseTestSuite {
   val expectation =
     """package com.proto
       |
-      |
       |import higherkindness.mu.rpc.protocol._
       |import fs2.Stream
       |import shapeless.{:+:, CNil}
+      |import com.proto.author.Author
       |
       |object book {
       |
-      |@message final case class Author(name: String, nick: String)
       |@message final case class Book(isbn: Long, title: String, author: List[Author], binding_type: BindingType)
       |@message final case class GetBookRequest(isbn: Long)
       |@message final case class GetBookViaAuthor(author: Author)
