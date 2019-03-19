@@ -17,6 +17,7 @@
 package higherkindness.mu.rpc.http
 
 import higherkindness.mu.rpc.protocol._
+import higherkindness.mu.http._
 
 @message final case class HelloRequest(hello: String)
 
