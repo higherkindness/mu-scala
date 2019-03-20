@@ -614,8 +614,8 @@ object serviceImpl {
       }"""
 
       val httpService = q"""
-        def route[$F_](implicit ..$arguments): _root_.higherkindness.mu.http.RouteMap[F] = {
-          _root_.higherkindness.mu.http.RouteMap[F](${serviceDef.name.toString}, new $HttpRestService[$F].service)
+        def route[$F_](implicit ..$arguments): _root_.higherkindness.mu.http.protocol.RouteMap[F] = {
+          _root_.higherkindness.mu.http.protocol.RouteMap[F](${serviceDef.name.toString}, new $HttpRestService[$F].service)
       }"""
 
       val http =
