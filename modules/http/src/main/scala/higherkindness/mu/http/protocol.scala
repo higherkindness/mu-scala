@@ -21,6 +21,13 @@ import org.http4s.HttpRoutes
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.implicits._
 import org.http4s.server.Router
+import scala.annotation.StaticAnnotation
+
+object protocol {
+
+  class http extends StaticAnnotation
+
+}
 
 case class RouteMap[F[_]](prefix: String, route: HttpRoutes[F])
 
