@@ -19,7 +19,8 @@ package higherkindness.mu.rpc.http
 import cats.effect.{IO, _}
 import fs2.Stream
 import fs2.interop.reactivestreams._
-import higherkindness.mu.http.{HttpServer, ResponseError, RouteMap, UnexpectedError}
+import higherkindness.mu.http.{ResponseError, UnexpectedError}
+import higherkindness.mu.http.protocol.{HttpServer, RouteMap}
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
 import monix.reactive.Observable
 import io.circe.generic.auto._
