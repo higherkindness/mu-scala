@@ -225,14 +225,24 @@ object serviceImpl {
       }
 
       val methodDescriptors: List[Tree] = rpcRequests.map(_.methodDescriptor)
+
       private val serverCallDescriptorsAndHandlers: List[Tree] =
         rpcRequests.map(_.descriptorAndHandler)
+
+      val ceImplicit: Tree = q"CE: _root_.cats.effect.ConcurrentEffect[$F]"
+      val ecImplicit: Tree = q"EC: _root_.scala.concurrent.ExecutionContext"
+
+      val bindImplicits: List[Tree] = rpcRequests
+        .find(_.operation.isMonixObservable)
+        .fold(ceImplicit :: q"algebra: $serviceName[$F]" :: Nil)(_ =>
+          ceImplicit :: ecImplicit :: q"algebra: $serviceName[$F]" :: Nil)
+
+      val classImplicits: List[Tree] = rpcRequests
+        .find(_.operation.isMonixObservable)
+        .fold(List(ceImplicit))(_ => ceImplicit :: ecImplicit :: Nil)
+
       val bindService: DefDef = q"""
-        def bindService[$F_](implicit
-          F: _root_.cats.effect.ConcurrentEffect[$F],
-          algebra: $serviceName[$F],
-          EC: _root_.scala.concurrent.ExecutionContext
-        ): $F[_root_.io.grpc.ServerServiceDefinition] =
+        def bindService[$F_](implicit ..$bindImplicits): $F[_root_.io.grpc.ServerServiceDefinition] =
           _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](${lit(
         serviceName)}, ..$serverCallDescriptorsAndHandlers)
         """
@@ -244,10 +254,7 @@ object serviceImpl {
         class $Client[$F_](
           channel: _root_.io.grpc.Channel,
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-        )(implicit
-          F: _root_.cats.effect.ConcurrentEffect[$F],
-          EC: _root_.scala.concurrent.ExecutionContext
-        ) extends _root_.io.grpc.stub.AbstractStub[$Client[$F]](channel, options) with $serviceName[$F] {
+        )(implicit ..$classImplicits) extends _root_.io.grpc.stub.AbstractStub[$Client[$F]](channel, options) with $serviceName[$F] {
           override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $Client[$F] =
               new $Client[$F](channel, options)
 
@@ -262,14 +269,11 @@ object serviceImpl {
           channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] = List(
             _root_.higherkindness.mu.rpc.channel.UsePlaintext()),
             options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-          )(implicit
-          F: _root_.cats.effect.ConcurrentEffect[$F],
-          EC: _root_.scala.concurrent.ExecutionContext
-        ): _root_.cats.effect.Resource[F, $serviceName[$F]] =
+          )(implicit ..$classImplicits): _root_.cats.effect.Resource[F, $serviceName[$F]] =
           _root_.cats.effect.Resource.make {
             new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
-          }(channel => F.void(F.delay(channel.shutdown()))).flatMap(ch =>
-          _root_.cats.effect.Resource.make[F, $serviceName[$F]](F.delay(new $Client[$F](ch, options)))(_ => F.unit))
+          }(channel => CE.void(CE.delay(channel.shutdown()))).flatMap(ch =>
+          _root_.cats.effect.Resource.make[F, $serviceName[$F]](CE.delay(new $Client[$F](ch, options)))(_ => CE.unit))
         """.supressWarts("DefaultArguments")
 
       val clientFromChannel: DefDef =
@@ -277,12 +281,9 @@ object serviceImpl {
         def clientFromChannel[$F_](
           channel: $F[_root_.io.grpc.ManagedChannel],
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-        )(implicit
-          F: _root_.cats.effect.ConcurrentEffect[$F],
-          EC: _root_.scala.concurrent.ExecutionContext
-        ): _root_.cats.effect.Resource[$F, $serviceName[$F]] = _root_.cats.effect.Resource.make(channel)(channel =>
-        F.void(F.delay(channel.shutdown()))).flatMap(ch =>
-        _root_.cats.effect.Resource.make[$F, $serviceName[$F]](F.delay(new $Client[$F](ch, options)))(_ => F.unit))
+        )(implicit ..$classImplicits): _root_.cats.effect.Resource[$F, $serviceName[$F]] = _root_.cats.effect.Resource.make(channel)(channel =>
+        CE.void(CE.delay(channel.shutdown()))).flatMap(ch =>
+        _root_.cats.effect.Resource.make[$F, $serviceName[$F]](CE.delay(new $Client[$F](ch, options)))(_ => CE.unit))
         """.supressWarts("DefaultArguments")
 
       val unsafeClient: DefDef =
@@ -292,10 +293,7 @@ object serviceImpl {
           channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] = List(
             _root_.higherkindness.mu.rpc.channel.UsePlaintext()),
             options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-          )(implicit
-          F: _root_.cats.effect.ConcurrentEffect[$F],
-          EC: _root_.scala.concurrent.ExecutionContext
-        ): $serviceName[$F] = {
+          )(implicit ..$classImplicits): $serviceName[$F] = {
           val managedChannelInterpreter =
             new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).unsafeBuild
           new $Client[$F](managedChannelInterpreter, options)
@@ -306,10 +304,7 @@ object serviceImpl {
         def unsafeClientFromChannel[$F_](
           channel: _root_.io.grpc.Channel,
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-        )(implicit
-          F: _root_.cats.effect.ConcurrentEffect[$F],
-          EC: _root_.scala.concurrent.ExecutionContext
-        ): $serviceName[$F] = new $Client[$F](channel, options)
+        )(implicit ..$classImplicits): $serviceName[$F] = new $Client[$F](channel, options)
         """.supressWarts("DefaultArguments")
 
       private def lit(x: Any): Literal = Literal(Constant(x.toString))
