@@ -18,7 +18,7 @@ package higherkindness.mu.rpc
 package internal
 package client
 
-import cats.effect.{Async, Effect}
+import cats.effect.Async
 import io.grpc.stub.{ClientCalls, StreamObserver}
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
 import monix.reactive.Observable
@@ -31,15 +31,6 @@ import scala.concurrent.ExecutionContext
 object monixCalls {
 
   import higherkindness.mu.rpc.internal.converters._
-
-  def unary[F[_]: Effect, Req, Res](
-      request: Req,
-      descriptor: MethodDescriptor[Req, Res],
-      channel: Channel,
-      options: CallOptions)(implicit EC: ExecutionContext): F[Res] =
-    listenableFuture2Async[F, Res](
-      ClientCalls
-        .futureUnaryCall(channel.newCall(descriptor, options), request))
 
   def serverStreaming[Req, Res](
       request: Req,

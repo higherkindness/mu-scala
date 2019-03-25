@@ -230,16 +230,18 @@ object serviceImpl {
         rpcRequests.map(_.descriptorAndHandler)
 
       val ceImplicit: Tree = q"CE: _root_.cats.effect.ConcurrentEffect[$F]"
+      val csImplicit: Tree = q"CS: _root_.cats.effect.ContextShift[$F]"
       val ecImplicit: Tree = q"EC: _root_.scala.concurrent.ExecutionContext"
 
-      val bindImplicits: List[Tree] = rpcRequests
+      val bindImplicits: List[Tree] = ceImplicit :: q"algebra: $serviceName[$F]" :: rpcRequests
         .find(_.operation.isMonixObservable)
-        .fold(ceImplicit :: q"algebra: $serviceName[$F]" :: Nil)(_ =>
-          ceImplicit :: ecImplicit :: q"algebra: $serviceName[$F]" :: Nil)
+        .map(_ => ecImplicit)
+        .toList
 
-      val classImplicits: List[Tree] = rpcRequests
+      val classImplicits: List[Tree] = ceImplicit :: csImplicit :: rpcRequests
         .find(_.operation.isMonixObservable)
-        .fold(List(ceImplicit))(_ => ceImplicit :: ecImplicit :: Nil)
+        .map(_ => ecImplicit)
+        .toList
 
       val bindService: DefDef = q"""
         def bindService[$F_](implicit ..$bindImplicits): $F[_root_.io.grpc.ServerServiceDefinition] =

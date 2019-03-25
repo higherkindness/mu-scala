@@ -18,13 +18,13 @@ package higherkindness.mu.rpc
 package internal
 package client
 
-import cats.effect.Effect
+import cats.effect.{ContextShift, Effect}
 import io.grpc.stub.ClientCalls
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
 
 object unaryCalls {
 
-  def unary[F[_]: Effect, Req, Res](
+  def unary[F[_]: Effect: ContextShift, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,

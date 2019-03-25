@@ -16,32 +16,41 @@
 
 package higherkindness.mu.rpc.internal
 
+import cats.effect.Sync
 import io.grpc.{Status, StatusException, StatusRuntimeException}
 import io.grpc.stub.{ServerCallStreamObserver, StreamObserver}
 
 package object server {
 
-  private[internal] def addCompression[A](
+  private[internal] def addCompression[F[_]: Sync, A](
       observer: StreamObserver[A],
-      algorithm: Option[String]): Unit =
+      algorithm: Option[String]): F[Unit] =
     (observer, algorithm) match {
-      case (o: ServerCallStreamObserver[_], Some(alg)) => o.setCompression(alg)
-      case _                                           =>
+      case (o: ServerCallStreamObserver[_], Some(alg)) => Sync[F].delay(o.setCompression(alg))
+      case _                                           => Sync[F].unit
     }
 
-  private[internal] def completeObserver[A](
-      observer: StreamObserver[A]): Either[Throwable, A] => Unit = {
+  private[internal] def completeObserver[F[_]: Sync, A](
+      observer: StreamObserver[A]): Either[Throwable, A] => F[Unit] = {
     case Right(value) =>
-      observer.onNext(value)
-      observer.onCompleted()
+      Sync[F].delay {
+        observer.onNext(value)
+        observer.onCompleted()
+      }
     case Left(s: StatusException) =>
-      observer.onError(s)
+      Sync[F].delay {
+        observer.onError(s)
+      }
     case Left(s: StatusRuntimeException) =>
-      observer.onError(s)
+      Sync[F].delay {
+        observer.onError(s)
+      }
     case Left(e) =>
-      observer.onError(
-        Status.INTERNAL.withDescription(e.getMessage).withCause(e).asException()
-      )
+      Sync[F].delay {
+        observer.onError(
+          Status.INTERNAL.withDescription(e.getMessage).withCause(e).asException()
+        )
+      }
   }
 
 }
