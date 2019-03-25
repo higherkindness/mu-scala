@@ -23,7 +23,7 @@ import scala.concurrent.ExecutionContext
 
 class ServerConfigTests extends RpcServerTestSuite {
 
-  implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
+  val ec: ExecutionContext = ExecutionContext.Implicits.global
 
   "ServerConfig" should {
 

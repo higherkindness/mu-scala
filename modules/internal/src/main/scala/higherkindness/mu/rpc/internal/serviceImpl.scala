@@ -229,18 +229,18 @@ object serviceImpl {
       private val serverCallDescriptorsAndHandlers: List[Tree] =
         rpcRequests.map(_.descriptorAndHandler)
 
-      val ceImplicit: Tree = q"CE: _root_.cats.effect.ConcurrentEffect[$F]"
-      val csImplicit: Tree = q"CS: _root_.cats.effect.ContextShift[$F]"
-      val ecImplicit: Tree = q"EC: _root_.scala.concurrent.ExecutionContext"
+      val ceImplicit: Tree        = q"CE: _root_.cats.effect.ConcurrentEffect[$F]"
+      val csImplicit: Tree        = q"CS: _root_.cats.effect.ContextShift[$F]"
+      val schedulerImplicit: Tree = q"S: _root_.monix.execution.Scheduler"
 
       val bindImplicits: List[Tree] = ceImplicit :: q"algebra: $serviceName[$F]" :: rpcRequests
         .find(_.operation.isMonixObservable)
-        .map(_ => ecImplicit)
+        .map(_ => schedulerImplicit)
         .toList
 
       val classImplicits: List[Tree] = ceImplicit :: csImplicit :: rpcRequests
         .find(_.operation.isMonixObservable)
-        .map(_ => ecImplicit)
+        .map(_ => schedulerImplicit)
         .toList
 
       val bindService: DefDef = q"""
@@ -547,20 +547,14 @@ object serviceImpl {
           _ =>
             List(
               q"F: _root_.cats.effect.ConcurrentEffect[$F]",
-              q"ec: _root_.scala.concurrent.ExecutionContext"
+              q"S: _root_.monix.execution.Scheduler"
           ))
-
-      val executionContextStreaming: List[Tree] = operations
-        .find(_.operation.isMonixObservable)
-        .fold(List.empty[Tree])(_ =>
-          List(q"implicit val sc: _root_.monix.execution.Scheduler = _root_.monix.execution.Scheduler(ec)"))
 
       val httpRequests = operations.map(_.toRequestTree)
 
       val HttpClient      = TypeName("HttpClient")
       val httpClientClass = q"""
         class $HttpClient[$F_](uri: _root_.org.http4s.Uri)(implicit ..$streamConstraints) {
-          ..$executionContextStreaming
           ..$httpRequests
       }"""
 
@@ -606,7 +600,6 @@ object serviceImpl {
       val httpRestServiceClass: Tree = q"""
         class $HttpRestService[$F_](implicit ..$arguments) extends _root_.org.http4s.dsl.Http4sDsl[F] {
          ..$requestDecoders
-         ..$executionContextStreaming
          def service = _root_.org.http4s.HttpRoutes.of[F]{$routesPF}
       }"""
 

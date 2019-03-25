@@ -20,7 +20,7 @@ import cats.effect.{ContextShift, IO, Timer}
 
 object TestsImplicits {
 
-  implicit val EC: scala.concurrent.ExecutionContext =
+  val EC: scala.concurrent.ExecutionContext =
     scala.concurrent.ExecutionContext.Implicits.global
 
   implicit val timer: Timer[IO]     = IO.timer(EC)

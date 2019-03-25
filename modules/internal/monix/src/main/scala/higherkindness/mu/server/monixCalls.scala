@@ -24,7 +24,7 @@ import io.grpc.stub.StreamObserver
 import monix.execution.{Ack, Scheduler}
 import monix.reactive.observers.Subscriber
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import monix.reactive.{Observable, Observer, Pipe}
 
 object monixCalls {
@@ -33,8 +33,7 @@ object monixCalls {
 
   def clientStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Observable[Req] => F[Res],
-      maybeCompression: Option[String])(
-      implicit EC: ExecutionContext): ClientStreamingMethod[Req, Res] =
+      maybeCompression: Option[String])(implicit S: Scheduler): ClientStreamingMethod[Req, Res] =
     new ClientStreamingMethod[Req, Res] {
 
       override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
@@ -48,8 +47,7 @@ object monixCalls {
 
   def serverStreamingMethod[F[_]: Effect, Req, Res](
       f: Req => Observable[Res],
-      maybeCompression: Option[String])(
-      implicit EC: ExecutionContext): ServerStreamingMethod[Req, Res] =
+      maybeCompression: Option[String])(implicit S: Scheduler): ServerStreamingMethod[Req, Res] =
     new ServerStreamingMethod[Req, Res] {
 
       override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
@@ -61,8 +59,7 @@ object monixCalls {
 
   def bidiStreamingMethod[F[_]: Effect, Req, Res](
       f: Observable[Req] => Observable[Res],
-      maybeCompression: Option[String])(
-      implicit EC: ExecutionContext): BidiStreamingMethod[Req, Res] =
+      maybeCompression: Option[String])(implicit S: Scheduler): BidiStreamingMethod[Req, Res] =
     new BidiStreamingMethod[Req, Res] {
 
       override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
@@ -90,7 +87,7 @@ object monixCalls {
   private[this] def transformStreamObserver[Req, Res](
       transformer: Observable[Req] => Observable[Res],
       responseObserver: StreamObserver[Res]
-  )(implicit EC: ExecutionContext): StreamObserver[Req] =
+  )(implicit S: Scheduler): StreamObserver[Req] =
     transform(transformer, responseObserver.toSubscriber).toStreamObserver
 
 }

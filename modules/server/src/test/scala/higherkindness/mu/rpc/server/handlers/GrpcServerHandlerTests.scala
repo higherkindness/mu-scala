@@ -26,7 +26,7 @@ import scala.concurrent.duration.TimeUnit
 
 class GrpcServerHandlerTests extends RpcServerTestSuite {
 
-  implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
+  val executionContext: ExecutionContext = ExecutionContext.Implicits.global
 
   import implicits._
 

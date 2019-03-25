@@ -27,7 +27,7 @@ import monix.reactive.Observable.Operator
 import monix.reactive.observers.Subscriber
 import org.reactivestreams.{Subscriber => RSubscriber}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 trait MonixAdapters {
 
@@ -56,16 +56,16 @@ trait MonixAdapters {
       }
     }
 
-  def streamObserver2MonixSubscriber(implicit EC: ExecutionContext): StreamObserver ~> Subscriber =
+  def streamObserver2MonixSubscriber(implicit S: Scheduler): StreamObserver ~> Subscriber =
     new (StreamObserver ~> Subscriber) {
 
       override def apply[A](fa: StreamObserver[A]): Subscriber[A] = new Subscriber[A] {
 
-        override implicit val scheduler: Scheduler = Scheduler(EC)
+        override implicit val scheduler: Scheduler = S
         override def onError(ex: Throwable): Unit  = fa.onError(ex)
         override def onComplete(): Unit            = fa.onCompleted()
         override def onNext(elem: A): Future[Ack] =
-          catsStdInstancesForFuture(EC).handleError[Ack] {
+          catsStdInstancesForFuture(S).handleError[Ack] {
             fa.onNext(elem)
             Continue
           } { t: Throwable =>
@@ -91,16 +91,13 @@ object converters extends MonixAdapters {
 
   private[internal] implicit class StreamObserverOps[A](private val observer: StreamObserver[A])
       extends AnyVal {
-    def toSubscriber(implicit EC: ExecutionContext): Subscriber[A] =
+    def toSubscriber(implicit S: Scheduler): Subscriber[A] =
       streamObserver2MonixSubscriber.apply(observer)
   }
 
   private[internal] def StreamObserver2MonixOperator[Req, Res](
       op: StreamObserver[Res] => StreamObserver[Req]): Operator[Req, Res] =
-    (outputSubscriber: Subscriber[Res]) => {
-      implicit val EC: ExecutionContext = outputSubscriber.scheduler
-
-      op(outputSubscriber.toStreamObserver).toSubscriber
-    }
+    (outputSubscriber: Subscriber[Res]) =>
+      op(outputSubscriber.toStreamObserver).toSubscriber(outputSubscriber.scheduler)
 
 }

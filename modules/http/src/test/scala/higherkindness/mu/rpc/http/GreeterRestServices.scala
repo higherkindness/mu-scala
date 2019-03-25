@@ -22,6 +22,7 @@ import cats.syntax.functor._
 import io.circe.syntax._
 import higherkindness.mu.http.implicits._
 import fs2.interop.reactivestreams._
+import monix.execution.Scheduler
 import monix.reactive.Observable
 import org.http4s._
 import org.http4s.circe._
@@ -77,13 +78,12 @@ class Fs2GreeterRestService[F[_]: Sync](
 
 class MonixGreeterRestService[F[_]: ConcurrentEffect](
     implicit handler: MonixGreeter[F],
-    ec: scala.concurrent.ExecutionContext,
+    s: Scheduler,
     decoderHelloRequest: io.circe.Decoder[HelloRequest],
     encoderHelloResponse: io.circe.Encoder[HelloResponse])
     extends Http4sDsl[F] {
 
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
-  implicit val scheduler: monix.execution.Scheduler                   = monix.execution.Scheduler(ec)
 
   def service: HttpRoutes[F] = HttpRoutes.of[F] {
 

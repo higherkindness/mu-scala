@@ -21,6 +21,7 @@ import fs2.Stream
 import fs2.interop.reactivestreams._
 import io.circe.syntax._
 import higherkindness.mu.http.implicits._
+import monix.execution.Scheduler
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.client._
@@ -69,13 +70,10 @@ class Fs2GreeterRestClient[F[_]: Sync](uri: Uri) {
 
 }
 
-class MonixGreeterRestClient[F[_]: ConcurrentEffect](uri: Uri)(
-    implicit ec: scala.concurrent.ExecutionContext) {
+class MonixGreeterRestClient[F[_]: ConcurrentEffect](uri: Uri)(implicit s: Scheduler) {
 
   import monix.reactive.Observable
   import higherkindness.mu.http.implicits._
-
-  implicit val sc: monix.execution.Scheduler = monix.execution.Scheduler(ec)
 
   def sayHellos(arg: Observable[HelloRequest])(client: Client[F])(
       implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
