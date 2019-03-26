@@ -118,7 +118,7 @@ class MetricsServerInterceptorTests extends RpcBaseTestSuite {
 
 object services {
 
-  implicit val EC: scala.concurrent.ExecutionContext =
+  val EC: scala.concurrent.ExecutionContext =
     scala.concurrent.ExecutionContext.Implicits.global
 
   implicit val timer: cats.effect.Timer[cats.effect.IO]     = cats.effect.IO.timer(EC)

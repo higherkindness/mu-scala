@@ -18,16 +18,15 @@ package higherkindness.mu.rpc.internal
 
 import java.util.concurrent.{Executor => JavaExecutor}
 
-import cats.effect.Async
+import cats.effect.{ContextShift, Effect}
+import cats.syntax.apply._
 import com.google.common.util.concurrent.{FutureCallback, Futures, ListenableFuture}
-
-import scala.concurrent.ExecutionContext
 
 package object client {
 
   private[internal] def listenableFuture2Async[F[_], A](
-      fa: => ListenableFuture[A])(implicit F: Async[F], EC: ExecutionContext): F[A] =
-    F.async { cb =>
+      fa: => ListenableFuture[A])(implicit E: Effect[F], CS: ContextShift[F]): F[A] =
+    E.async { cb =>
       Futures.addCallback(
         fa,
         new FutureCallback[A] {
@@ -36,7 +35,8 @@ package object client {
           override def onFailure(t: Throwable): Unit = cb(Left(t))
         },
         new JavaExecutor {
-          override def execute(command: Runnable): Unit = EC.execute(command)
+          override def execute(command: Runnable): Unit =
+            E.toIO(CS.shift *> E.delay(command.run())).unsafeRunSync
         }
       )
     }

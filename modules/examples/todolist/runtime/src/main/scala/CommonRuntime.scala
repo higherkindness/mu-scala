@@ -20,6 +20,6 @@ import scala.concurrent.ExecutionContext
 
 trait CommonRuntime {
 
-  implicit val EC: ExecutionContext = ExecutionContext.Implicits.global
+  val EC: ExecutionContext = ExecutionContext.Implicits.global
 
 }

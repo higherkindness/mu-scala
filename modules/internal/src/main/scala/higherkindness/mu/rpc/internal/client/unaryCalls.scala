@@ -18,19 +18,17 @@ package higherkindness.mu.rpc
 package internal
 package client
 
-import cats.effect.Async
+import cats.effect.{ContextShift, Effect}
 import io.grpc.stub.ClientCalls
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
 
-import scala.concurrent.ExecutionContext
-
 object unaryCalls {
 
-  def unary[F[_]: Async, Req, Res](
+  def unary[F[_]: Effect: ContextShift, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit EC: ExecutionContext): F[Res] =
+      options: CallOptions): F[Res] =
     listenableFuture2Async[F, Res](
       ClientCalls
         .futureUnaryCall(channel.newCall(descriptor, options), request))

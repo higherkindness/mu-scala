@@ -64,13 +64,13 @@ Next, our dummy `Greeter` server implementation:
 ```tut:silent
 import cats.effect.Async
 import cats.syntax.applicative._
-import higherkindness.mu.rpc.internal.task._
+import monix.execution.Scheduler
 import monix.reactive.Observable
 import service._
 
 import scala.concurrent.ExecutionContext
 
-class ServiceHandler[F[_]: Async](implicit EC: ExecutionContext) extends Greeter[F] {
+class ServiceHandler[F[_]: Async](implicit S: Scheduler) extends Greeter[F] {
 
   private[this] val dummyObservableResponse: Observable[HelloResponse] =
     Observable.fromIterable(1 to 5 map (i => HelloResponse(s"Reply $i")))
@@ -106,6 +106,8 @@ class ServiceHandler[F[_]: Async](implicit EC: ExecutionContext) extends Greeter
 }
 ```
 
+As you can see, we need a `monix.execution.Scheduler` implicit. This is needed in order to resolve the `cats.effect` instances for `Monix`.
+
 That's it! We have exposed a potential implementation on the server side.
 
 ### Server Runtime
@@ -120,11 +122,15 @@ We'll be using `IO` from `cats-effect`, but you can use any type that has a `Con
 
 For executing `IO` we need a `ContextShift[IO]` used for running `IO` instances and a `Timer[IO]` that is used for scheduling, let's go ahead and create them.
 
+*Note:* You'd need an implicit `monix.execution.Scheduler` in the case you're using Monix observables.
+
 ```tut:silent
 trait CommonRuntime {
 
-  implicit val EC: scala.concurrent.ExecutionContext =
+  val EC: scala.concurrent.ExecutionContext =
     scala.concurrent.ExecutionContext.Implicits.global
+
+  implicit val S: monix.execution.Scheduler = monix.execution.Scheduler.Implicits.global
 
   implicit val timer: cats.effect.Timer[cats.effect.IO]     = cats.effect.IO.timer(EC)
   implicit val cs: cats.effect.ContextShift[cats.effect.IO] = cats.effect.IO.contextShift(EC)
@@ -150,6 +156,7 @@ In summary, the result would be as follows:
 ```tut:silent
 import cats.effect.IO
 import higherkindness.mu.rpc.server._
+import monix.execution.Scheduler
 import service._
 
 object gserver {

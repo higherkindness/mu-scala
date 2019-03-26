@@ -35,7 +35,7 @@ We won't cover the details regarding creation of `RPCService`, `ServerRPCService
 ```tut:invisible
 trait CommonRuntime {
 
-  implicit val EC: scala.concurrent.ExecutionContext =
+  val EC: scala.concurrent.ExecutionContext =
     scala.concurrent.ExecutionContext.Implicits.global
 
   implicit val timer: cats.effect.Timer[cats.effect.IO]     = cats.effect.IO.timer(EC)

@@ -22,7 +22,6 @@ import cats.implicits._
 import fs2.Stream
 import org.log4s.{getLogger, Logger}
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.{Duration, DurationLong, FiniteDuration, MILLISECONDS}
 
 trait ClientCache[Client[_[_]], F[_]] {
@@ -44,7 +43,7 @@ object ClientCache {
       removeUnusedAfter: FiniteDuration
   )(
       implicit CE: ConcurrentEffect[F],
-      ec: ExecutionContext,
+      cs: ContextShift[F],
       timer: Timer[F]): Stream[F, ClientCache[Client, F]] =
     impl(getHostAndPort, createClient(_).allocated, tryToRemoveUnusedEvery, removeUnusedAfter)
 
@@ -55,7 +54,7 @@ object ClientCache {
       removeUnusedAfter: FiniteDuration
   )(
       implicit CE: ConcurrentEffect[F],
-      ec: ExecutionContext,
+      cs: ContextShift[F],
       timer: Timer[F]): Stream[F, ClientCache[Client, F]] = {
 
     type UnixMillis = Duration
@@ -88,8 +87,7 @@ object ClientCache {
                   .as(clientMeta.client))
         (_, lastClean) <- ref.get
         _ <- if (lastClean < (now - tryToRemoveUnusedEvery))
-          Concurrent[F].start(
-            Async.shift(ec) *> cleanup(ref, _.lastAccessed < (now - removeUnusedAfter)))
+          Concurrent[F].start(cs.shift *> cleanup(ref, _.lastAccessed < (now - removeUnusedAfter)))
         else CE.unit
       } yield client
     }
