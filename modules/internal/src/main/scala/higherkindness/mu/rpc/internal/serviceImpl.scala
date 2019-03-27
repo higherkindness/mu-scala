@@ -428,11 +428,28 @@ object serviceImpl {
         }
       }
 
-      case class HttpOperation(operation: Operation) {
+      case class HttpOperation(
+          operation: Operation,
+          httpMethod: String,
+          prefix: String,
+          operationName: String) {
 
         import operation._
 
         val uri = name.toString
+
+//        val method: TermName = httpMethod match {
+//          case "OPTIONS" => TermName("OPTIONS")
+//          case "GET"     => TermName("GET")
+//          case "HEAD"    => TermName("HEAD")
+//          case "POST"    => TermName("POST")
+//          case "PUT"     => TermName("PUT")
+//          case "DELETE"  => TermName("DELETE")
+//          case "TRACE"   => TermName("TRACE")
+//          case "CONNECT" => TermName("CONNECT")
+//          case "PATCH"   => TermName("PATCH")
+//          case _         => TermName("POST")
+//        }
 
         val method: TermName = request match {
           case _: EmptyTpe => TermName("GET")
@@ -440,8 +457,6 @@ object serviceImpl {
         }
 
         val executionClient: Tree = response match {
-          case MonixObservableTpe(_, _) =>
-            q"_root_.monix.reactive.Observable.fromReactivePublisher(client.stream(request).flatMap(_.asStream[${response.safeInner}]).toUnicastPublisher)"
           case Fs2StreamTpe(_, _) =>
             q"client.stream(request).flatMap(_.asStream[${response.safeInner}])"
           case _ =>
@@ -455,9 +470,6 @@ object serviceImpl {
           case _: Fs2StreamTpe =>
             q"val request = _root_.org.http4s.Request[F](_root_.org.http4s.Method.$method, uri / ${uri
               .replace("\"", "")}).withEntity(req.map(_.asJson))"
-          case _: MonixObservableTpe =>
-            q"val request = _root_.org.http4s.Request[F](_root_.org.http4s.Method.$method, uri / ${uri
-              .replace("\"", "")}).withEntity(req.toReactivePublisher.toStream.map(_.asJson))"
           case _ =>
             q"val request = _root_.org.http4s.Request[F](_root_.org.http4s.Method.$method, uri / ${uri
               .replace("\"", "")})"
@@ -500,20 +512,6 @@ object serviceImpl {
             q"""val requests = msg.asStream[${operation.request.safeInner}]
              _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(requests).asJsonEither)"""
 
-          case (_: MonixObservableTpe, _: UnaryTpe) =>
-            q"""val requests = msg.asStream[${operation.request.safeInner}]
-              _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(_root_.monix.reactive.Observable.fromReactivePublisher(requests.toUnicastPublisher)).map(_.asJson))"""
-
-          case (_: UnaryTpe, _: MonixObservableTpe) =>
-            q"""for {
-                request   <- msg.as[${operation.request.safeInner}]
-                responses <- _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(request).toReactivePublisher.toStream.asJsonEither)
-              } yield responses"""
-
-          case (_: MonixObservableTpe, _: MonixObservableTpe) =>
-            q"""val requests = msg.asStream[${operation.request.safeInner}]
-              _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(_root_.monix.reactive.Observable.fromReactivePublisher(requests.toUnicastPublisher)).toReactivePublisher.toStream.asJsonEither)"""
-
           case (_: EmptyTpe, _) =>
             q"""_root_.org.http4s.Status.Ok.apply(handler.${operation.name}(_root_.higherkindness.mu.rpc.protocol.Empty).map(_.asJson))"""
 
@@ -542,28 +540,19 @@ object serviceImpl {
         params <- d.vparamss
         _ = require(params.length == 1, s"RPC call ${d.name} has more than one request parameter")
         p <- params.headOption.toList
-      } yield HttpOperation(Operation(d.name, TypeTypology(p.tpt), TypeTypology(d.tpt)))
+        op = Operation(d.name, TypeTypology(p.tpt), TypeTypology(d.tpt))
+        _ = if (op.isMonixObservable)
+          sys.error(
+            "Monix.Observable is not compatible with streaming services. Please consider using Fs2.Stream instead.")
+      } yield HttpOperation(op, "", "", "")
 
-      val streamConstraints: List[Tree] = operations
-        .find(_.operation.isMonixObservable)
-        .fold(List(q"F: _root_.cats.effect.Sync[$F]"))(
-          _ =>
-            List(
-              q"F: _root_.cats.effect.ConcurrentEffect[$F]",
-              q"ec: _root_.scala.concurrent.ExecutionContext"
-          ))
-
-      val executionContextStreaming: List[Tree] = operations
-        .find(_.operation.isMonixObservable)
-        .fold(List.empty[Tree])(_ =>
-          List(q"implicit val sc: _root_.monix.execution.Scheduler = _root_.monix.execution.Scheduler(ec)"))
+      val streamConstraints: List[Tree] = List(q"F: _root_.cats.effect.Sync[$F]")
 
       val httpRequests = operations.map(_.toRequestTree)
 
       val HttpClient      = TypeName("HttpClient")
       val httpClientClass = q"""
         class $HttpClient[$F_](uri: _root_.org.http4s.Uri)(implicit ..$streamConstraints) {
-          ..$executionContextStreaming
           ..$httpRequests
       }"""
 
@@ -575,7 +564,6 @@ object serviceImpl {
 
       val httpImports: List[Tree] = List(
         q"import _root_.higherkindness.mu.http.implicits._",
-        q"import _root_.fs2.interop.reactivestreams._",
         q"import _root_.cats.syntax.flatMap._",
         q"import _root_.cats.syntax.functor._",
         q"import _root_.org.http4s.circe._",
@@ -609,7 +597,6 @@ object serviceImpl {
       val httpRestServiceClass: Tree = q"""
         class $HttpRestService[$F_](implicit ..$arguments) extends _root_.org.http4s.dsl.Http4sDsl[F] {
          ..$requestDecoders
-         ..$executionContextStreaming
          def service = _root_.org.http4s.HttpRoutes.of[F]{$routesPF}
       }"""
 

@@ -28,28 +28,17 @@ import higherkindness.mu.http.protocol._
 
 @service(Avro) trait UnaryGreeter[F[_]] {
 
-  @http def getHello(request: Empty.type): F[HelloResponse]
+  @http("", "", "") def getHello(request: Empty.type): F[HelloResponse]
 
-  @http def sayHello(request: HelloRequest): F[HelloResponse]
+  @http("", "", "") def sayHello(request: HelloRequest): F[HelloResponse]
 }
 
 import fs2.Stream
 @service(Avro) trait Fs2Greeter[F[_]] {
 
-  @http def sayHellos(requests: Stream[F, HelloRequest]): F[HelloResponse]
+  @http("", "", "") def sayHellos(requests: Stream[F, HelloRequest]): F[HelloResponse]
 
-  @http def sayHelloAll(request: HelloRequest): Stream[F, HelloResponse]
+  @http("", "", "") def sayHelloAll(request: HelloRequest): Stream[F, HelloResponse]
 
-  @http def sayHellosAll(requests: Stream[F, HelloRequest]): Stream[F, HelloResponse]
-}
-
-import monix.reactive.Observable
-@service(Avro) trait MonixGreeter[F[_]] {
-
-  @http def sayHellos(requests: Observable[HelloRequest]): F[HelloResponse]
-
-  @http def sayHelloAll(request: HelloRequest): Observable[HelloResponse]
-
-  @http def sayHellosAll(requests: Observable[HelloRequest]): Observable[HelloResponse]
-
+  @http("", "", "") def sayHellosAll(requests: Stream[F, HelloRequest]): Stream[F, HelloResponse]
 }

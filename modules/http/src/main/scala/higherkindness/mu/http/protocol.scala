@@ -24,7 +24,7 @@ import org.http4s.implicits._
 import org.http4s.server.Router
 import scala.annotation.StaticAnnotation
 
-class http extends StaticAnnotation
+class http(method: String, prefix: String, operation: String) extends StaticAnnotation
 
 case class RouteMap[F[_]](prefix: String, route: HttpRoutes[F])
 

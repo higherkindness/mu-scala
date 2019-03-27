@@ -18,18 +18,14 @@ package higherkindness.mu.rpc.http
 
 import cats.effect.{IO, _}
 import fs2.Stream
-import fs2.interop.reactivestreams._
 import higherkindness.mu.http.{ResponseError, UnexpectedError}
 import higherkindness.mu.http.protocol.{HttpServer, RouteMap}
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
-import monix.reactive.Observable
 import io.circe.generic.auto._
 import org.http4s._
 import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.server.blaze._
 import org.scalatest._
-
-import scala.concurrent.duration._
 
 class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
 
@@ -43,13 +39,11 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
 
   implicit val unaryHandlerIO = new UnaryGreeterHandler[IO]
   implicit val fs2HandlerIO   = new Fs2GreeterHandler[IO]
-  implicit val monixHandlerIO = new MonixGreeterHandler[IO]
 
   val unaryRoute: RouteMap[IO] = UnaryGreeter.route[IO]
   val fs2Route: RouteMap[IO]   = Fs2Greeter.route[IO]
-  val monixRoute: RouteMap[IO] = MonixGreeter.route[IO]
 
-  val server: BlazeServerBuilder[IO] = HttpServer.bind(port, host, unaryRoute, fs2Route, monixRoute)
+  val server: BlazeServerBuilder[IO] = HttpServer.bind(port, host, unaryRoute, fs2Route)
 
   var serverTask: Fiber[IO, Nothing] = _
   before(serverTask = server.resource.use(_ => IO.never).start.unsafeRunSync())
@@ -59,7 +53,6 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
 
     val unaryClient = UnaryGreeter.httpClient[IO](serviceUri)
     val fs2Client   = Fs2Greeter.httpClient[IO](serviceUri)
-    val monixClient = MonixGreeter.httpClient[IO](serviceUri)
 
     "serve a GET request" in {
       val response: IO[HelloResponse] =
@@ -115,20 +108,6 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
       response.unsafeRunSync() shouldBe HelloResponse("")
     }
 
-    "serve a POST request with Observable streaming request" in {
-      val requests = Observable(HelloRequest("hey"), HelloRequest("there"))
-      val response =
-        BlazeClientBuilder[IO](ec).resource.use(monixClient.sayHellos(requests)(_))
-      response.unsafeRunSync() shouldBe HelloResponse("hey, there")
-    }
-
-    "serve a POST request with empty Observable streaming request" in {
-      val requests = Observable.empty
-      val response =
-        BlazeClientBuilder[IO](ec).resource.use(monixClient.sayHellos(requests)(_))
-      response.unsafeRunSync() shouldBe HelloResponse("")
-    }
-
     "serve a POST request with fs2 streaming response" in {
       val request = HelloRequest("hey")
       val responses =
@@ -137,30 +116,12 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
         .unsafeRunSync() shouldBe List(HelloResponse("hey"), HelloResponse("hey"))
     }
 
-    "serve a POST request with Observable streaming response" in {
-      val request = HelloRequest("hey")
-      val responses = BlazeClientBuilder[IO](ec).stream
-        .flatMap(monixClient.sayHelloAll(request)(_).toReactivePublisher.toStream[IO])
-      responses.compile.toList
-        .unsafeRunTimed(10.seconds)
-        .getOrElse(sys.error("Stuck!")) shouldBe List(HelloResponse("hey"), HelloResponse("hey"))
-    }
-
     "handle errors with fs2 streaming response" in {
       val request = HelloRequest("")
       val responses =
         BlazeClientBuilder[IO](ec).stream.flatMap(fs2Client.sayHelloAll(request)(_))
       the[UnexpectedError] thrownBy responses.compile.toList
         .unsafeRunSync() should have message "java.lang.IllegalArgumentException: empty greeting"
-    }
-
-    "handle errors with Observable streaming response" in {
-      val request = HelloRequest("")
-      val responses = BlazeClientBuilder[IO](ec).stream
-        .flatMap(monixClient.sayHelloAll(request)(_).toReactivePublisher.toStream[IO])
-      the[UnexpectedError] thrownBy responses.compile.toList
-        .unsafeRunTimed(10.seconds)
-        .getOrElse(sys.error("Stuck!")) should have message "java.lang.IllegalArgumentException: empty greeting"
     }
 
     "serve a POST request with bidirectional fs2 streaming" in {
@@ -176,24 +137,6 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
       val responses =
         BlazeClientBuilder[IO](ec).stream.flatMap(fs2Client.sayHellosAll(requests)(_))
       responses.compile.toList.unsafeRunSync() shouldBe Nil
-    }
-
-    "serve a POST request with bidirectional Observable streaming" in {
-      val requests = Observable(HelloRequest("hey"), HelloRequest("there"))
-      val responses = BlazeClientBuilder[IO](ec).stream
-        .flatMap(monixClient.sayHellosAll(requests)(_).toReactivePublisher.toStream[IO])
-      responses.compile.toList
-        .unsafeRunTimed(10.seconds)
-        .getOrElse(sys.error("Stuck!")) shouldBe List(HelloResponse("hey"), HelloResponse("there"))
-    }
-
-    "serve an empty POST request with bidirectional Observable streaming" in {
-      val requests = Observable.empty
-      val responses = BlazeClientBuilder[IO](ec).stream
-        .flatMap(monixClient.sayHellosAll(requests)(_).toReactivePublisher.toStream[IO])
-      responses.compile.toList
-        .unsafeRunTimed(10.seconds)
-        .getOrElse(sys.error("Stuck!")) shouldBe Nil
     }
 
   }
