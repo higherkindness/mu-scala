@@ -18,13 +18,14 @@ package higherkindness.mu.http
 package protocol
 
 import cats.effect.{ConcurrentEffect, Timer}
-import org.http4s.HttpRoutes
+import org.http4s.{HttpRoutes, Method}
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.implicits._
 import org.http4s.server.Router
+
 import scala.annotation.StaticAnnotation
 
-class http(method: String, prefix: String, operation: String) extends StaticAnnotation
+class http(method: Method, prefix: String, operation: String) extends StaticAnnotation
 
 case class RouteMap[F[_]](prefix: String, route: HttpRoutes[F])
 

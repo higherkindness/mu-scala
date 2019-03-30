@@ -122,6 +122,10 @@ object implicits {
       UnexpectedError(self.getClass.getName, Option(self.getMessage))
   }
 
+  implicit class HeadersOps[T](a: T) {
+    def asHeader: Header = Header("response", a.toString)
+  }
+
 }
 
 final case class UnexpectedError(className: String, msg: Option[String])

@@ -17,6 +17,7 @@
 package higherkindness.mu.rpc.http
 
 import cats.effect._
+import cats.syntax.functor._
 import fs2.Stream
 import io.circe.syntax._
 import higherkindness.mu.http.implicits._
@@ -30,6 +31,52 @@ class UnaryGreeterRestClient[F[_]: Sync](uri: Uri) {
       implicit decoderHelloResponse: io.circe.Decoder[HelloResponse]): F[HelloResponse] = {
     val request = Request[F](Method.GET, uri / "getHello")
     client.expectOr[HelloResponse](request)(handleResponseError)(jsonOf[F, HelloResponse])
+  }
+
+  def optionsHello()(client: Client[F])(
+      implicit decoderHelloResponse: io.circe.Decoder[HelloResponse]): F[HelloResponse] = {
+    val request = Request[F](Method.OPTIONS, uri / "optionsHello")
+    client.expectOr[HelloResponse](request)(handleResponseError)(jsonOf[F, HelloResponse])
+  }
+
+  def headHello()(client: Client[F])(
+      implicit decoderHelloResponse: io.circe.Decoder[HelloResponse]): F[Response[F]] = {
+    val request = Request[F](Method.HEAD, uri / "headHello")
+    client.run(request).allocated.map(_._1)
+  }
+
+  def traceHello()(client: Client[F])(
+      implicit decoderHelloResponse: io.circe.Decoder[HelloResponse]): F[Response[F]] = {
+    val request = Request[F](Method.TRACE, uri / "traceHello")
+    client.run(request).allocated.map(_._1)
+  }
+
+  def connectHello()(client: Client[F])(
+      implicit decoderHelloResponse: io.circe.Decoder[HelloResponse]): F[HelloResponse] = {
+    val request = Request[F](Method.CONNECT, uri / "connectHello")
+    client.expectOr[HelloResponse](request)(handleResponseError)(jsonOf[F, HelloResponse])
+  }
+
+  def putHello(arg: HelloRequest)(client: Client[F])(
+      implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
+      decoderHelloResponse: io.circe.Decoder[HelloResponse]): F[Response[F]] = {
+    val request = Request[F](Method.PUT, uri / "putHello")
+    client.run(request.withEntity(arg.asJson)).allocated.map(_._1)
+  }
+
+  def patchHello(arg: HelloRequest)(client: Client[F])(
+      implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
+      decoderHelloResponse: io.circe.Decoder[HelloResponse]): F[Response[F]] = {
+    val request = Request[F](Method.PATCH, uri / "patchHello")
+    client.run(request.withEntity(arg.asJson)).allocated.map(_._1)
+  }
+
+  def deleteHello(arg: HelloRequest)(client: Client[F])(
+      implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
+      decoderHelloResponse: io.circe.Decoder[HelloResponse]): F[HelloResponse] = {
+    val request = Request[F](Method.DELETE, uri / "deleteHello")
+    client.expectOr[HelloResponse](request.withEntity(arg.asJson))(handleResponseError)(
+      jsonOf[F, HelloResponse])
   }
 
   def sayHello(arg: HelloRequest)(client: Client[F])(

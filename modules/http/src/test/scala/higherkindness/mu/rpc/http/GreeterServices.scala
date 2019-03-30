@@ -18,27 +18,41 @@ package higherkindness.mu.rpc.http
 
 import higherkindness.mu.rpc.protocol._
 import higherkindness.mu.http.protocol._
+import org.http4s.Method._
 
 @message final case class HelloRequest(hello: String)
 
 @message final case class HelloResponse(hello: String)
 
-// We don't actually need to split the various streaming types into their own services,
-// but this allows for more specific dependencies and type constraints (Sync, Async, Effect...) in their implementations.
+@message final case class EmptyResponse()
 
 @service(Avro) trait UnaryGreeter[F[_]] {
 
-  @http("", "", "") def getHello(request: Empty.type): F[HelloResponse]
+  @http(GET, "", "") def getHello(request: Empty.type): F[HelloResponse]
 
-  @http("", "", "") def sayHello(request: HelloRequest): F[HelloResponse]
+  @http(OPTIONS, "", "") def optionsHello(request: Empty.type): F[HelloResponse]
+
+  @http(HEAD, "", "") def headHello(request: Empty.type): F[EmptyResponse]
+
+  @http(TRACE, "", "") def traceHello(request: Empty.type): F[EmptyResponse]
+
+  @http(CONNECT, "", "") def connectHello(request: Empty.type): F[HelloResponse]
+
+  @http(PUT, "", "") def putHello(request: HelloRequest): F[EmptyResponse]
+
+  @http(PATCH, "", "") def patchHello(request: HelloRequest): F[EmptyResponse]
+
+  @http(DELETE, "", "") def deleteHello(request: HelloRequest): F[HelloResponse]
+
+  @http(POST, "", "") def sayHello(request: HelloRequest): F[HelloResponse]
 }
 
 import fs2.Stream
 @service(Avro) trait Fs2Greeter[F[_]] {
 
-  @http("", "", "") def sayHellos(requests: Stream[F, HelloRequest]): F[HelloResponse]
+  @http(POST, "", "") def sayHellos(requests: Stream[F, HelloRequest]): F[HelloResponse]
 
-  @http("", "", "") def sayHelloAll(request: HelloRequest): Stream[F, HelloResponse]
+  @http(POST, "", "") def sayHelloAll(request: HelloRequest): Stream[F, HelloResponse]
 
-  @http("", "", "") def sayHellosAll(requests: Stream[F, HelloRequest]): Stream[F, HelloResponse]
+  @http(POST, "", "") def sayHellosAll(requests: Stream[F, HelloRequest]): Stream[F, HelloResponse]
 }

@@ -438,23 +438,31 @@ object serviceImpl {
 
         val uri = name.toString
 
-//        val method: TermName = httpMethod match {
-//          case "OPTIONS" => TermName("OPTIONS")
-//          case "GET"     => TermName("GET")
-//          case "HEAD"    => TermName("HEAD")
-//          case "POST"    => TermName("POST")
-//          case "PUT"     => TermName("PUT")
-//          case "DELETE"  => TermName("DELETE")
-//          case "TRACE"   => TermName("TRACE")
-//          case "CONNECT" => TermName("CONNECT")
-//          case "PATCH"   => TermName("PATCH")
-//          case _         => TermName("POST")
-//        }
+        val isPost: Boolean = httpMethod == "POST"
 
-        val method: TermName = request match {
-          case _: EmptyTpe => TermName("GET")
-          case _           => TermName("POST")
+        require(
+          !isStreaming || (isStreaming && isPost),
+          s"${name}: Only POST method is available for streaming")
+
+        val method: TermName = httpMethod match {
+          case "OPTIONS" => TermName("OPTIONS")
+          case "GET"     => TermName("GET")
+          case "HEAD"    => TermName("HEAD")
+          case "POST"    => TermName("POST")
+          case "PUT"     => TermName("PUT")
+          case "DELETE"  => TermName("DELETE")
+          case "TRACE"   => TermName("TRACE")
+          case "CONNECT" => TermName("CONNECT")
+          case "PATCH"   => TermName("PATCH")
+          case _         => TermName("POST")
         }
+
+        println("*******************************")
+        println("*******************************")
+        println("*******************************")
+        println("*******************************")
+        println(httpMethod)
+        println(method)
 
         val executionClient: Tree = response match {
           case Fs2StreamTpe(_, _) =>
@@ -522,14 +530,23 @@ object serviceImpl {
             } yield response"""
         }
 
-        val getPattern =
-          pq"_root_.org.http4s.Method.GET -> _root_.org.http4s.dsl.impl.Root / ${operation.name.toString}"
-        val postPattern =
-          pq"msg @ _root_.org.http4s.Method.POST -> _root_.org.http4s.dsl.impl.Root / ${operation.name.toString}"
+        val withOutInputPattern =
+          pq"_root_.org.http4s.Method.$method -> _root_.org.http4s.dsl.impl.Root / ${operation.name.toString}"
 
-        def toRouteTree: Tree = request match {
-          case _: EmptyTpe => cq"$getPattern => $routeTypology"
-          case _           => cq"$postPattern => $routeTypology"
+        val withInputPattern =
+          pq"msg @ _root_.org.http4s.Method.$method -> _root_.org.http4s.dsl.impl.Root / ${operation.name.toString}"
+
+        def toRouteTree: Tree = httpMethod match {
+          case "GET"     => cq"$withOutInputPattern => $routeTypology"
+          case "OPTIONS" => cq"$withOutInputPattern => $routeTypology"
+          case "HEAD"    => cq"$withOutInputPattern => $routeTypology"
+          case "TRACE"   => cq"$withOutInputPattern => $routeTypology"
+          case "CONNECT" => cq"$withOutInputPattern => $routeTypology"
+          case "PUT"     => cq"$withInputPattern => $routeTypology"
+          case "PATCH"   => cq"$withInputPattern => $routeTypology"
+          case "DELETE"  => cq"$withInputPattern => $routeTypology"
+          case "POST"    => cq"$withInputPattern => $routeTypology"
+          case _         => cq"$withInputPattern => $routeTypology"
         }
 
       }
@@ -544,7 +561,10 @@ object serviceImpl {
         _ = if (op.isMonixObservable)
           sys.error(
             "Monix.Observable is not compatible with streaming services. Please consider using Fs2.Stream instead.")
-      } yield HttpOperation(op, "", "", "")
+      } yield HttpOperation(op, getHttpMacroParam(args, 0, "POST"), "", "")
+
+      private def getHttpMacroParam(params: List[Tree], pos: Int, d: String): String =
+        if (params.isDefinedAt(pos)) params(pos).toString else d
 
       val streamConstraints: List[Tree] = List(q"F: _root_.cats.effect.Sync[$F]")
 
@@ -653,6 +673,12 @@ object serviceImpl {
             ) ++ service.http
           )
         )
+
+//        if (service.httpRequests.nonEmpty) {
+//          println(service)
+//          println("#######################")
+//          println(enrichedCompanion.toString)
+//        }
 
         List(serviceDef, enrichedCompanion)
       case _ => sys.error("@service-annotated definition must be a trait or abstract class")

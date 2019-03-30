@@ -21,10 +21,12 @@ import fs2.Stream
 import higherkindness.mu.http.{ResponseError, UnexpectedError}
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
 import higherkindness.mu.http.implicits._
-import io.circe.Json
+import higherkindness.mu.rpc.protocol.Empty
+import io.circe.Decoder.Result
+import io.circe.{Decoder, HCursor, Json}
 import io.circe.generic.auto._
 import io.circe.syntax._
-import org.http4s._
+import org.http4s.{Status, _}
 import org.http4s.circe._
 import org.http4s.client.UnexpectedStatus
 import org.http4s.client.blaze.BlazeClientBuilder
@@ -32,6 +34,8 @@ import org.http4s.server.blaze._
 import org.scalatest._
 import org.http4s.implicits._
 import org.http4s.server.Router
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
 
@@ -43,9 +47,8 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
   val UnaryServicePrefix = "UnaryGreeter"
   val Fs2ServicePrefix   = "Fs2Greeter"
 
-  implicit val ec                   = monix.execution.Scheduler.Implicits.global
-  implicit val cs: ContextShift[IO] = IO.contextShift(ec)
-  implicit val timer: Timer[IO]     = IO.timer(ec)
+  implicit val cs: ContextShift[IO] = IO.contextShift(global)
+  implicit val timer: Timer[IO]     = IO.timer(global)
 
   implicit val unaryHandlerIO = new UnaryGreeterHandler[IO]
   implicit val fs2HandlerIO   = new Fs2GreeterHandler[IO]
@@ -61,21 +64,87 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
 
   var serverTask: Fiber[IO, Nothing] = _
   before(serverTask = server.resource.use(_ => IO.never).start.unsafeRunSync())
-  after(serverTask.cancel)
+  after(serverTask.cancel.unsafeRunSync)
 
   "REST Server" should {
 
     "serve a GET request" in {
       val request  = Request[IO](Method.GET, serviceUri / UnaryServicePrefix / "getHello")
-      val response = BlazeClientBuilder[IO](ec).resource.use(_.expect[Json](request))
+      val response = BlazeClientBuilder[IO](global).resource.use(_.expect[Json](request))
       response.unsafeRunSync() shouldBe HelloResponse("hey").asJson
+    }
+
+    "serve a OPTIONS request" in {
+      val request = Request[IO](Method.OPTIONS, serviceUri / UnaryServicePrefix / "optionsHello")
+      val response =
+        BlazeClientBuilder[IO](global).resource.use(_.expect[Json](request))
+      response.unsafeRunSync() shouldBe HelloResponse("Options: Hey").asJson
+    }
+
+    "serve a HEAD request" in {
+      val request = Request[IO](Method.HEAD, serviceUri / UnaryServicePrefix / "headHello")
+
+      val response: IO[Status] = (for {
+        client <- BlazeClientBuilder[IO](global).resource
+        resp   <- client.run(request)
+      } yield resp.status).allocated.map(_._1)
+
+      response.unsafeRunSync() shouldBe Status.NoContent
+    }
+
+    "serve a TRACE request" in {
+      val request = Request[IO](Method.TRACE, serviceUri / UnaryServicePrefix / "traceHello")
+
+      val response: IO[Status] = (for {
+        client <- BlazeClientBuilder[IO](global).resource
+        resp   <- client.run(request)
+      } yield resp.status).allocated.map(_._1)
+
+      response.unsafeRunSync() shouldBe Status.NoContent
+    }
+
+    "serve a CONNECT request" in {
+      val request = Request[IO](Method.CONNECT, serviceUri / UnaryServicePrefix / "connectHello")
+      val response =
+        BlazeClientBuilder[IO](global).resource.use(_.expect[Json](request))
+      response.unsafeRunSync() shouldBe HelloResponse("Connect: Hey").asJson
+    }
+
+    "serve a PUT request" in {
+      val request = Request[IO](Method.PUT, serviceUri / UnaryServicePrefix / "putHello")
+
+      val response: IO[Status] = (for {
+        client <- BlazeClientBuilder[IO](global).resource
+        resp   <- client.run(request.withEntity(HelloRequest("hey").asJson))
+      } yield resp.status).allocated.map(_._1)
+
+      response.unsafeRunSync() shouldBe Status.Accepted
+    }
+
+    "serve a PATCH request" in {
+      val request = Request[IO](Method.PATCH, serviceUri / UnaryServicePrefix / "patchHello")
+
+      val response: IO[Status] = (for {
+        client <- BlazeClientBuilder[IO](global).resource
+        resp   <- client.run(request.withEntity(HelloRequest("hey").asJson))
+      } yield resp.status).allocated.map(_._1)
+
+      response.unsafeRunSync() shouldBe Status.Accepted
+    }
+
+    "serve a DELETE request" in {
+      val request     = Request[IO](Method.DELETE, serviceUri / UnaryServicePrefix / "deleteHello")
+      val requestBody = HelloRequest("hey").asJson
+      val response =
+        BlazeClientBuilder[IO](global).resource.use(_.expect[Json](request.withEntity(requestBody)))
+      response.unsafeRunSync() shouldBe HelloResponse("Delete: Hey").asJson
     }
 
     "serve a POST request" in {
       val request     = Request[IO](Method.POST, serviceUri / UnaryServicePrefix / "sayHello")
       val requestBody = HelloRequest("hey").asJson
       val response =
-        BlazeClientBuilder[IO](ec).resource.use(_.expect[Json](request.withEntity(requestBody)))
+        BlazeClientBuilder[IO](global).resource.use(_.expect[Json](request.withEntity(requestBody)))
       response.unsafeRunSync() shouldBe HelloResponse("hey").asJson
     }
 
@@ -83,7 +152,7 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
       val request     = Request[IO](Method.POST, serviceUri / UnaryServicePrefix / "sayHello")
       val requestBody = "{"
       val response =
-        BlazeClientBuilder[IO](ec).resource.use(_.expect[Json](request.withEntity(requestBody)))
+        BlazeClientBuilder[IO](global).resource.use(_.expect[Json](request.withEntity(requestBody)))
       the[UnexpectedStatus] thrownBy response.unsafeRunSync() shouldBe UnexpectedStatus(
         Status.BadRequest)
     }
@@ -92,7 +161,7 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
       val request     = Request[IO](Method.POST, serviceUri / Fs2ServicePrefix / "sayHellos")
       val requestBody = "{"
       val response =
-        BlazeClientBuilder[IO](ec).resource.use(_.expect[Json](request.withEntity(requestBody)))
+        BlazeClientBuilder[IO](global).resource.use(_.expect[Json](request.withEntity(requestBody)))
       the[UnexpectedStatus] thrownBy response.unsafeRunSync() shouldBe UnexpectedStatus(
         Status.BadRequest)
     }
@@ -107,21 +176,69 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
   "REST Service" should {
 
     "serve a GET request" in {
-      val response = BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.getHello()(_))
+      val response = BlazeClientBuilder[IO](global).resource.use(unaryServiceClient.getHello()(_))
       response.unsafeRunSync() shouldBe HelloResponse("hey")
+    }
+
+    "serve a OPTIONS request" in {
+      val response =
+        BlazeClientBuilder[IO](global).resource.use(unaryServiceClient.optionsHello()(_))
+      response.unsafeRunSync() shouldBe HelloResponse("Options: Hey")
+    }
+
+    "serve a HEAD request" in {
+      val status: IO[Status] =
+        BlazeClientBuilder[IO](global).resource.use(unaryServiceClient.headHello()(_)).map(_.status)
+      status.unsafeRunSync() shouldBe Status.NoContent
+    }
+
+    "serve a TRACE request" in {
+      val status: IO[Status] =
+        BlazeClientBuilder[IO](global).resource
+          .use(unaryServiceClient.traceHello()(_))
+          .map(_.status)
+      status.unsafeRunSync() shouldBe Status.NoContent
+    }
+
+    "serve a CONNECT request" in {
+      val response =
+        BlazeClientBuilder[IO](global).resource.use(unaryServiceClient.connectHello()(_))
+      response.unsafeRunSync() shouldBe HelloResponse("Connect: Hey")
+    }
+
+    "serve a PUT request" in {
+      val status: IO[Status] =
+        BlazeClientBuilder[IO](global).resource
+          .use(unaryServiceClient.putHello(HelloRequest("hey"))(_))
+          .map(_.status)
+      status.unsafeRunSync() shouldBe Status.Accepted
+    }
+
+    "serve a PATCH request" in {
+      val status: IO[Status] =
+        BlazeClientBuilder[IO](global).resource
+          .use(unaryServiceClient.patchHello(HelloRequest("hey"))(_))
+          .map(_.status)
+      status.unsafeRunSync() shouldBe Status.Accepted
+    }
+
+    "serve a unary DELETE request" in {
+      val response = BlazeClientBuilder[IO](global).resource
+        .use(unaryServiceClient.deleteHello(HelloRequest("hey"))(_))
+      response.unsafeRunSync() shouldBe HelloResponse("Delete: Hey")
     }
 
     "serve a unary POST request" in {
       val request = HelloRequest("hey")
       val response =
-        BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.sayHello(request)(_))
+        BlazeClientBuilder[IO](global).resource.use(unaryServiceClient.sayHello(request)(_))
       response.unsafeRunSync() shouldBe HelloResponse("hey")
     }
 
     "handle a raised gRPC exception in a unary POST request" in {
       val request = HelloRequest("SRE")
       val response =
-        BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.sayHello(request)(_))
+        BlazeClientBuilder[IO](global).resource.use(unaryServiceClient.sayHello(request)(_))
       the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
         Status.BadRequest,
         Some("INVALID_ARGUMENT: SRE"))
@@ -130,7 +247,7 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
     "handle a raised non-gRPC exception in a unary POST request" in {
       val request = HelloRequest("RTE")
       val response =
-        BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.sayHello(request)(_))
+        BlazeClientBuilder[IO](global).resource.use(unaryServiceClient.sayHello(request)(_))
       the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
         Status.InternalServerError,
         Some("RTE"))
@@ -139,7 +256,7 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
     "handle a thrown exception in a unary POST request" in {
       val request = HelloRequest("TR")
       val response =
-        BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.sayHello(request)(_))
+        BlazeClientBuilder[IO](global).resource.use(unaryServiceClient.sayHello(request)(_))
       the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
         Status.InternalServerError)
     }
@@ -147,21 +264,21 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
     "serve a POST request with fs2 streaming request" in {
       val requests = Stream(HelloRequest("hey"), HelloRequest("there"))
       val response =
-        BlazeClientBuilder[IO](ec).resource.use(fs2ServiceClient.sayHellos(requests)(_))
+        BlazeClientBuilder[IO](global).resource.use(fs2ServiceClient.sayHellos(requests)(_))
       response.unsafeRunSync() shouldBe HelloResponse("hey, there")
     }
 
     "serve a POST request with empty fs2 streaming request" in {
       val requests = Stream.empty
       val response =
-        BlazeClientBuilder[IO](ec).resource.use(fs2ServiceClient.sayHellos(requests)(_))
+        BlazeClientBuilder[IO](global).resource.use(fs2ServiceClient.sayHellos(requests)(_))
       response.unsafeRunSync() shouldBe HelloResponse("")
     }
 
     "serve a POST request with fs2 streaming response" in {
       val request = HelloRequest("hey")
       val responses =
-        BlazeClientBuilder[IO](ec).stream.flatMap(fs2ServiceClient.sayHelloAll(request)(_))
+        BlazeClientBuilder[IO](global).stream.flatMap(fs2ServiceClient.sayHelloAll(request)(_))
       responses.compile.toList
         .unsafeRunSync() shouldBe List(HelloResponse("hey"), HelloResponse("hey"))
     }
@@ -169,7 +286,7 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
     "handle errors with fs2 streaming response" in {
       val request = HelloRequest("")
       val responses =
-        BlazeClientBuilder[IO](ec).stream.flatMap(fs2ServiceClient.sayHelloAll(request)(_))
+        BlazeClientBuilder[IO](global).stream.flatMap(fs2ServiceClient.sayHelloAll(request)(_))
       the[UnexpectedError] thrownBy responses.compile.toList
         .unsafeRunSync() should have message "java.lang.IllegalArgumentException: empty greeting"
     }
@@ -177,7 +294,7 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
     "serve a POST request with bidirectional fs2 streaming" in {
       val requests = Stream(HelloRequest("hey"), HelloRequest("there"))
       val responses =
-        BlazeClientBuilder[IO](ec).stream.flatMap(fs2ServiceClient.sayHellosAll(requests)(_))
+        BlazeClientBuilder[IO](global).stream.flatMap(fs2ServiceClient.sayHellosAll(requests)(_))
       responses.compile.toList
         .unsafeRunSync() shouldBe List(HelloResponse("hey"), HelloResponse("there"))
     }
@@ -185,7 +302,7 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
     "serve an empty POST request with bidirectional fs2 streaming" in {
       val requests = Stream.empty
       val responses =
-        BlazeClientBuilder[IO](ec).stream.flatMap(fs2ServiceClient.sayHellosAll(requests)(_))
+        BlazeClientBuilder[IO](global).stream.flatMap(fs2ServiceClient.sayHellosAll(requests)(_))
       responses.compile.toList.unsafeRunSync() shouldBe Nil
     }
 

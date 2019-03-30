@@ -21,6 +21,7 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import io.circe.syntax._
 import higherkindness.mu.http.implicits._
+import higherkindness.mu.rpc.protocol.Empty
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
@@ -28,10 +29,9 @@ import org.http4s.dsl.Http4sDsl
 class UnaryGreeterRestService[F[_]: Sync](
     implicit handler: UnaryGreeter[F],
     decoderHelloRequest: io.circe.Decoder[HelloRequest],
-    encoderHelloResponse: io.circe.Encoder[HelloResponse])
+    encoderHelloResponse: io.circe.Encoder[HelloResponse],
+    encoderEmptyResponse: io.circe.Encoder[EmptyResponse])
     extends Http4sDsl[F] {
-
-  import higherkindness.mu.rpc.protocol.Empty
 
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
 
@@ -39,11 +39,43 @@ class UnaryGreeterRestService[F[_]: Sync](
 
     case GET -> Root / "getHello" => Ok(handler.getHello(Empty).map(_.asJson))
 
+    case OPTIONS -> Root / "optionsHello" => Ok(handler.optionsHello(Empty).map(_.asJson))
+
+    case HEAD -> Root / "headHello" =>
+      handler.headHello(Empty).flatMap(r => NoContent(r.asHeader))
+
+    case TRACE -> Root / "traceHello" =>
+      handler.traceHello(Empty).flatMap(r => NoContent(r.asHeader))
+
+    case CONNECT -> Root / "connectHello" =>
+      handler.connectHello(Empty).flatMap(a => Ok(a.asJson))
+
+    case msg @ PUT -> Root / "putHello" =>
+      for {
+        request  <- msg.as[HelloRequest]
+        put      <- handler.putHello(request)
+        response <- Accepted(put.asHeader)
+      } yield response
+
+    case msg @ PATCH -> Root / "patchHello" =>
+      for {
+        request  <- msg.as[HelloRequest]
+        patch    <- handler.patchHello(request)
+        response <- Accepted(patch.asHeader)
+      } yield response
+
+    case msg @ DELETE -> Root / "deleteHello" =>
+      for {
+        request  <- msg.as[HelloRequest]
+        response <- Ok(handler.deleteHello(request).map(_.asJson)).adaptErrors
+      } yield response
+
     case msg @ POST -> Root / "sayHello" =>
       for {
         request  <- msg.as[HelloRequest]
         response <- Ok(handler.sayHello(request).map(_.asJson)).adaptErrors
       } yield response
+
   }
 }
 

@@ -21,7 +21,11 @@ import fs2.Stream
 import higherkindness.mu.http.{ResponseError, UnexpectedError}
 import higherkindness.mu.http.protocol.{HttpServer, RouteMap}
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
+import higherkindness.mu.http.implicits._
+import io.circe.Json
 import io.circe.generic.auto._
+import io.circe.syntax._
+import org.http4s.circe._
 import org.http4s._
 import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.server.blaze._
@@ -33,7 +37,7 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
   val port            = 8080
   val serviceUri: Uri = Uri.unsafeFromString(s"http://$host:$port")
 
-  implicit val ec                   = monix.execution.Scheduler.Implicits.global
+  implicit val ec                   = scala.concurrent.ExecutionContext.Implicits.global
   implicit val cs: ContextShift[IO] = IO.contextShift(ec)
   implicit val timer: Timer[IO]     = IO.timer(ec)
 
@@ -47,7 +51,7 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
 
   var serverTask: Fiber[IO, Nothing] = _
   before(serverTask = server.resource.use(_ => IO.never).start.unsafeRunSync())
-  after(serverTask.cancel)
+  after(serverTask.cancel.unsafeRunSync())
 
   "REST Service" should {
 
@@ -58,6 +62,17 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
       val response: IO[HelloResponse] =
         BlazeClientBuilder[IO](ec).resource.use(unaryClient.getHello(_))
       response.unsafeRunSync() shouldBe HelloResponse("hey")
+    }
+
+    "serve a OPTIONS request" in {
+//      val response =
+//        BlazeClientBuilder[IO](ec).resource.use(unaryClient.optionsHello()(_))
+//      response.unsafeRunSync() shouldBe HelloResponse("Options: Hey")
+
+      val request = Request[IO](Method.OPTIONS, serviceUri / "optionsHello")
+      val response =
+        BlazeClientBuilder[IO](ec).resource.use(_.expect[Json](request))
+      response.unsafeRunSync() shouldBe HelloResponse("Options: Hey").asJson
     }
 
     "serve a unary POST request" in {
