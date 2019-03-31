@@ -27,15 +27,15 @@ options:
     url: decimal-migration-guide
 
   - title: Schema Evolution
-    url: docs/rpc/schema-evolution
+    url: schema-evolution
 
     nested_options:
 
       - title: Avro
-        url: docs/rpc/schema-evolution/avro
+        url: schema-evolution/avro
 
       - title: Protocol Buffers
-        url: docs/rpc/schema-evolution/proto
+        url: schema-evolution/proto
 
   - title: References
     url: references

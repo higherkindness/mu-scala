@@ -6,179 +6,287 @@ permalink: /schema-evolution/avro
 
 # Avro - Schema Evolution
 
-From now on, consider that we are using `AvroWithSchema` as serialization mechanism.
+From now on, consider that we are using `AvroWithSchema` as the serialization mechanism in your [mu] program.
 
 According to the [Avro Specs](http://avro.apache.org/docs/current/spec.html#Schema+Resolution):
 
 > A reader of Avro data, whether from an RPC or a file, can always parse that data because its schema is provided. But that schema may not be exactly the schema that was expected. For example, if the data was written with a different version of the software than it is read, then records may have had fields added or removed.
 
-In terms of Scala, this section specifies how such schema differences should be resolved preserving compatibility. We'll try to summarise a bit all the possible cases, but you could go deeper by using this [repo](https://github.com/higherkindness/mu-protocol-decimal-update) where you can play with all of the possibilities.
+For Scala, this section specifies how such schema differences should be resolved to preserve compatibility. We'll try to summarise a bit all the possible cases in both ends: request and response. However, you could go deeper by using this [repo](https://github.com/higherkindness/mu-protocol-decimal-update) where you can play with all of the possibilities.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 ## Cases
 
-- [A: Add new non-optional field in the request](#a-add-new-non-optional-field-in-the-request)
-- [B: Add new optional field in the request](#b-add-new-optional-field-in-the-request)
-- [C: Add item to a coproduct in the request](#c-add-item-to-a-coproduct-in-the-request)
-- [D: Remove item to a coproduct in the request](#d-remove-item-to-a-coproduct-in-the-request)
-- [E: Replace item in a coproduct in the request](#e-replace-item-in-a-coproduct-in-the-request)
-- [F: Change type of an existing field in the request](#f-change-type-of-an-existing-field-in-the-request)
-- [G: Rename field in the request](#g-rename-field-in-the-request)
-- [H: Remove field in the request](#h-remove-field-in-the-request)
-- [I: Add new non-optional field in the response](#i-add-new-non-optional-field-in-the-response)
-- [J: Add new optional field in the response](#j-add-new-optional-field-in-the-response)
-- [K: Add item to a coproduct in the response](#k-add-item-to-a-coproduct-in-the-response)
-- [L: Remove item to a coproduct in the response](#l-remove-item-to-a-coproduct-in-the-response)
-- [M: Replace item in a coproduct in the response](#m-replace-item-in-a-coproduct-in-the-response)
-- [N: Change type of an existing field in the response](#n-change-type-of-an-existing-field-in-the-response)
-- [O: Rename field in the response](#o-rename-field-in-the-response)
-- [P: Remove field in the response](#p-remove-field-in-the-response)
+- [Modifying the Request (Client side)](#modifying-the-request-client-side)
+  - [A: Adding a new non-optional field](#a-adding-a-new-non-optional-field)
+  - [B: Adding a new optional field](#b-adding-a-new-optional-field)
+  - [C: Adding new item to a coproduct](#c-adding-new-item-to-a-coproduct)
+  - [D: Removing item from a coproduct](#d-removing-item-from-a-coproduct)
+  - [E: Replacing item in a coproduct](#e-replacing-item-in-a-coproduct)
+  - [F: Changing the type of an existing field](#f-changing-the-type-of-an-existing-field)
+  - [G: Renaming a field](#g-renaming-a-field)
+  - [H: Removing a field](#h-removing-a-field)
+- [Modifying the Response (Server side)](#modifying-the-response-server-side)
+  - [I: Adding a new non-optional field](#i-adding-a-new-non-optional-field)
+  - [J: Adding a new optional field](#j-adding-a-new-optional-field)
+  - [K: Adding a new item to a coproduct](#k-adding-a-new-item-to-a-coproduct)
+  - [L: Removing item from a coproduct](#l-removing-item-from-a-coproduct)
+  - [M: Replacing item from a coproduct](#m-replacing-item-from-a-coproduct)
+  - [N: Changing the type of an existing field](#n-changing-the-type-of-an-existing-field)
+  - [O: Renaming a field](#o-renaming-a-field)
+  - [P: Removing a field](#p-removing-a-field)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-### A: Add new non-optional field in the request
+### Modifying the Request (Client side)
 
-Request: Provide default value to the new field.
+#### A: Adding a new non-optional field
+
+You need to specify a default value for the new field.
+
+* Before:
 
 ```scala
 case class Request(a: String, b: Int)
+```
+
+* After:
+
+```scala
 case class NewRequest(a: String, b: Int, c: Boolean = true)
 ```
 
-### B: Add new optional field in the request
+#### B: Adding a new optional field
 
-Request: This is just another case of the previous scenario. The solutions could be to provide a default value, that presumably could be None/null.
+This is a particular case of the previous scenario, hence, the solution could be providing a default value, that presumably, in Scala would be `None`.
 
-### C: Add item to a coproduct in the request
+#### C: Adding new item to a coproduct
 
-Request: No action required
+In this case, we are safe and no actions are required.
+
+* Before:
 
 ```scala
 case class Request(a: Int :+: String :+: CNil)
+```
+
+* After:
+
+```scala
 case class NewRequest(a: Int :+: String :+: Boolean :+: CNil)
 ```
 
-### D: Remove item to a coproduct in the request
+#### D: Removing item from a coproduct
 
-Request: The only way to deal with this situation is considering this as a change of type, see next case.
+In this case, we'd be breaking the compatibility. The only way to deal with this situation is considering this as a change of type, see the next case for details.
+
+* Before:
 
 ```scala
 case class Request(a: Int :+: String :+: CNil)
+```
+
+* After:
+
+```scala
 case class NewRequest(b: String :+: CNil = Coproduct[String :+: CNil](""))
 ```
 
-### E: Replace item in a coproduct in the request
+#### E: Replacing item in a coproduct
 
-Request: If the type is just replaced, it will work while the passed value is one of the types in common between the previous coproduct and the new one.
+As we saw previously, again we are breaking the compatibility. If the type is replaced, it will work while the provided value is one of the types in common between the previous `coproduct` and the new one.
+
+* Before:
 
 ```scala
 case class Request(a: Int :+: String :+: CNil)
+```
+
+* After:
+
+```scala
 case class NewRequest(a: Int :+: Boolean :+: CNil)
 ```
 
 It will work if the request is:
+
 ```scala
 Request(a = Coproduct[Int :+: String :+: CNil](10))
 ```
 
-and it will fail if the request is:
+And it will fail if the request is:
+
 ```scala
 Request(a = Coproduct[Int :+: String :+: CNil]("Hi"))
 ```
 
-### F: Change type of an existing field in the request
+#### F: Changing the type of an existing field
 
-Request: It's is impossible to deal with a type swapping if we maintain the same name of the field. So the solution is considering this replacement as a combination of removing the old field/type, and adding a new field with the new type with a default value.
+In this case, it's not possible to deal with a type swap, if we are maintaining the same name of the field. So the solution would be to consider this replacement as a combination of removing the old field/type, and adding a new field with the new type with a default value.
+
+* Before:
 
 ```scala
 case class Request(a: String, b: Int)
+```
+
+* After:
+
+```scala
 case class NewRequest(a: String, c: Boolean = true)
 ```
 
-### G: Rename field in the request
+#### G: Renaming a field
 
-Request: Renaming a field is a particular case of creating a field with the new name and default value, and remove the old one, that will be ignored if old clients pass it.
+Renaming a field is a particular case of creating a field with the new name and its default value, and then, removing the old one. The old name will be ignored if they are provided by old clients.
+
+* Before:
 
 ```scala
 case class Request(a: String, b: Int)
+```
+
+* After:
+
+```scala
 case class NewRequest(a: String, c: Int = 0)
 ```
 
-### H: Remove field in the request
+#### H: Removing a field
 
-Request: No action required. But note that the value will be ignored when old clients include it in the request.
+No action required. However, keep in mind that the value will be ignored when old clients include it in the request.
+
+* Before:
 
 ```scala
 case class Request(a: String, b: Int)
+```
+
+* After:
+
+```scala
 case class NewRequest(a: String)
 ```
 
-### I: Add new non-optional field in the response
+### Modifying the Response (Server side)
 
-Response: No action required. Old clients will ignore the value of the new field.
+#### I: Adding a new non-optional field
+
+In this case, the old clients will ignore the value of the new field, so everything will be safe in terms of backward compatibility.
+
+* Before:
 
 ```scala
 case class Response(a: String, b: Int)
+```
+
+* After:
+
+```scala
 case class NewResponse(a: String, b: Int, c: Boolean)
 ```
 
-### J: Add new optional field in the response
+#### J: Adding a new optional field
 
-Response: This is a just a particular case of the previous scenario.
+This would be just a particular case of the previous scenario, where the default value would be `None`, in the case of `Scala`.
 
-### K: Add item to a coproduct in the response
+#### K: Adding a new item to a coproduct
 
-Response: Obviously, it fails when the value is the new item. So the solution is providing a default value to the old coproduct and creating a new field with the new coproduct.
+In this scenario, the old clients will fail when the result is including the new item. Hence, the solution would be to provide a default value to the old coproduct and creating a new field with the new coproduct.
+
+* Before:
 
 ```scala
 case class Response(a: Int :+: String :+: CNil)
+```
+
+* After:
+
+```scala
 case class NewResponse(
       a: Int :+: String :+: CNil = Coproduct[Int :+: String :+: CNil](0),
       b: Int :+: String :+: Boolean :+: CNil)
 ```
 
-### L: Remove item to a coproduct in the response
+#### L: Removing item from a coproduct
 
-Response: No action required.
+No action will be required in this case.
+
+* Before:
 
 ```scala
 case class Response(a: Int :+: String :+: CNil)
+```
+
+* After:
+
+```scala
 case class NewResponse(a: Int :+: CNil)
 ```
 
-### M: Replace item in a coproduct in the response
+#### M: Replacing item from a coproduct
 
-Response: As long as the value of the coproduct belongs to the previous version, the old client should be able to accept the response as valid.
+As long as the value of the coproduct belongs to the previous version, the old client should be able to accept the response as valid. Thus, we would need to follow the same approach as above when _Adding a new item to a coproduct_.
+
+* Before:
 
 ```scala
 case class Response(a: Int :+: String :+: CNil)
+```
+
+* After:
+
+```scala
 case class NewResponse(a: Int :+: Boolean :+: CNil)
 ```
 
-### N: Change type of an existing field in the response
+#### N: Changing the type of an existing field
 
-Response: It requires to provide a default value to the previous type, and to create a new field with the new type.
+It will require providing a default value for the previous type, and then, we would need to create a new field with the new type.
+
+* Before:
 
 ```scala
 case class Response(a: String, b: Int)
+```
+
+* After:
+
+```scala
 case class NewResponse(a: String, b: Int = 123, c: Boolean)
 ```
 
-### O: Rename field in the response
+#### O: Renaming a field
 
-Response: It requires to remain the previous name/type with a default value and to add a new field with the same type.
+It will require to keep the previous name and type with a default value, and then, adding a new field with the same type.
+
+* Before:
 
 ```scala
 case class Response(a: String, b: Int)
+```
+
+* After:
+
+```scala
 case class NewResponse(a: String, b: Int = 123, c: Int)
 ```
 
-### P: Remove field in the response
+#### P: Removing a field
 
-Response: This evolution should never happen. Only under the special case that the old response has a default value for the field we want to drop, then this operation is feasible, just removing the field in the new version of the response.
+This evolution should never happen since we would lose backward compatibility. Nonetheless, it would work only under the special case that the old response has a default value for the field that we want to delete, where this operation would be feasible by removing the field in the new version of the server response.
+
+* Before:
 
 ```scala
 case class Response(a: String, b: Int = 123)
+```
+
+* After:
+
+```scala
 case class NewResponse(a: String)
 ```
+
+[mu]: https://github.com/higherkindness/mu

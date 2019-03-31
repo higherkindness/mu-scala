@@ -1,9 +1,9 @@
 ---
 layout: docs
 title: Schema Evolution - Protobuf
-permalink: /docs/rpc/schema-evolution/proto
+permalink: /schema-evolution/proto
 ---
 
 # Protocol Buffers - Schema Evolution
 
-TO-DO
+_TO-DO_
