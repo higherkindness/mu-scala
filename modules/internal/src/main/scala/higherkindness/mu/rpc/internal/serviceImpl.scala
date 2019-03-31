@@ -454,13 +454,19 @@ object serviceImpl {
           case "TRACE"   => TermName("TRACE")
           case "CONNECT" => TermName("CONNECT")
           case "PATCH"   => TermName("PATCH")
-          case _         => TermName("POST")
+          case _         => sys.error(s"Invalid request method $httpMethod")
         }
 
-        val executionClient: Tree = response match {
-          case Fs2StreamTpe(_, _) =>
+        val headerReturners = List("HEAD", "TRACE", "PUT", "PATCH")
+
+        val ifReturningHeader = if (headerReturners.contains(httpMethod)) true else false
+
+        val executionClient: Tree = (response, ifReturningHeader) match {
+          case (Fs2StreamTpe(_, _), _) =>
             q"client.stream(request).flatMap(_.asStream[${response.safeInner}])"
-          case _ =>
+          case (_, true) =>
+            q"""client.run(request).allocated.map(_._1)"""
+          case (_, false) =>
             q"""client.expectOr[${response.safeInner}](request)(handleResponseError)(jsonOf[F, ${response.safeInner}])"""
         }
 
@@ -479,15 +485,29 @@ object serviceImpl {
         val responseEncoder =
           q"""implicit val responseEntityDecoder: _root_.org.http4s.EntityDecoder[F, ${response.safeInner}] = jsonOf[F, ${response.safeInner}]"""
 
-        def toRequestTree: Tree = request match {
-          case _: EmptyTpe =>
+        def toRequestTree: Tree = (request, ifReturningHeader) match {
+          case (_: EmptyTpe, true) =>
+            q"""def $name(client: _root_.org.http4s.client.Client[F]): F[_root_.org.http4s.Response[F]] = {
+		                  $requestTypology
+		                  $executionClient
+		                 }"""
+
+          case (_, true) =>
+            q"""def $name(req: ${request.getTpe})(client: _root_.org.http4s.client.Client[F])(
+                implicit requestEncoder: _root_.io.circe.Encoder[${request.safeInner}]): F[_root_.org.http4s.Response[F]] = {
+		                  $requestTypology
+		                  $executionClient
+		                 }"""
+
+          case (_: EmptyTpe, false) =>
             q"""def $name(client: _root_.org.http4s.client.Client[F])(
                implicit responseDecoder: _root_.io.circe.Decoder[${response.safeInner}]): ${response.getTpe} = {
 		                  $responseEncoder
 		                  $requestTypology
 		                  $executionClient
 		                 }"""
-          case _ =>
+
+          case (_, false) =>
             q"""def $name(req: ${request.getTpe})(client: _root_.org.http4s.client.Client[F])(
                implicit requestEncoder: _root_.io.circe.Encoder[${request.safeInner}],
                responseDecoder: _root_.io.circe.Decoder[${response.safeInner}]
@@ -498,29 +518,53 @@ object serviceImpl {
 		                 }"""
         }
 
-        val routeTypology: Tree = (request, response) match {
-          case (_: Fs2StreamTpe, _: UnaryTpe) =>
-            q"""val requests = msg.asStream[${operation.request.safeInner}]
+        val emptyRequestOk =
+          q"""_root_.org.http4s.Status.Ok.apply(handler.${operation.name}(_root_.higherkindness.mu.rpc.protocol.Empty).map(_.asJson))"""
+
+        val emptyRequestNoContent =
+          q"""handler.${operation.name}(_root_.higherkindness.mu.rpc.protocol.Empty).flatMap(r => _root_.org.http4s.Status.NoContent.apply(r.asHeader))"""
+
+        val someRequestOk =
+          q"""for {
+              request  <- msg.as[${operation.request.safeInner}]
+              response <- _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(request).map(_.asJson)).adaptErrors
+            } yield response"""
+
+        val someRequestAccepted =
+          q"""for {
+              request  <- msg.as[${operation.request.safeInner}]
+              service <- handler.${operation.name}(request)
+              response <- _root_.org.http4s.Status.Accepted.apply(service.asHeader)
+            } yield response"""
+
+        val clientStreamOk =
+          q"""val requests = msg.asStream[${operation.request.safeInner}]
               _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(requests).map(_.asJson))"""
 
-          case (_: UnaryTpe, _: Fs2StreamTpe) =>
-            q"""for {
+        val serverStreamOk =
+          q"""for {
               request   <- msg.as[${operation.request.safeInner}]
               responses <- _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(request).asJsonEither)
             } yield responses"""
 
-          case (_: Fs2StreamTpe, _: Fs2StreamTpe) =>
-            q"""val requests = msg.asStream[${operation.request.safeInner}]
+        val bidirectionalStreamOk =
+          q"""val requests = msg.asStream[${operation.request.safeInner}]
              _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(requests).asJsonEither)"""
 
-          case (_: EmptyTpe, _) =>
-            q"""_root_.org.http4s.Status.Ok.apply(handler.${operation.name}(_root_.higherkindness.mu.rpc.protocol.Empty).map(_.asJson))"""
-
-          case _ =>
-            q"""for {
-              request  <- msg.as[${operation.request.safeInner}]
-              response <- _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(request).map(_.asJson)).adaptErrors
-            } yield response"""
+        val routeTypology: Tree = (request, response, httpMethod) match {
+          case (_: Fs2StreamTpe, _: UnaryTpe, "POST")     => clientStreamOk
+          case (_: UnaryTpe, _: Fs2StreamTpe, "POST")     => serverStreamOk
+          case (_: Fs2StreamTpe, _: Fs2StreamTpe, "POST") => bidirectionalStreamOk
+          case (_: EmptyTpe, _, "GET")                    => emptyRequestOk
+          case (_: EmptyTpe, _, "OPTIONS")                => emptyRequestOk
+          case (_: EmptyTpe, _, "HEAD")                   => emptyRequestNoContent
+          case (_: EmptyTpe, _, "TRACE")                  => emptyRequestNoContent
+          case (_: EmptyTpe, _, "CONNECT")                => emptyRequestOk
+          case (_, _: UnaryTpe, "PUT")                    => someRequestAccepted
+          case (_, _: UnaryTpe, "PATCH")                  => someRequestAccepted
+          case (_, _: UnaryTpe, "DELETE")                 => someRequestOk
+          case (_, _: UnaryTpe, "POST")                   => someRequestOk
+          case _                                          => sys.error(s"Method $httpMethod incompatible with request or response type")
         }
 
         val withOutInputPattern =
@@ -529,7 +573,7 @@ object serviceImpl {
         val withInputPattern =
           pq"msg @ _root_.org.http4s.Method.$method -> _root_.org.http4s.dsl.impl.Root / ${operation.name.toString}"
 
-        def toRouteTree: Tree = httpMethod match {
+        val toRouteTree: Tree = httpMethod match {
           case "GET"     => cq"$withOutInputPattern => $routeTypology"
           case "OPTIONS" => cq"$withOutInputPattern => $routeTypology"
           case "HEAD"    => cq"$withOutInputPattern => $routeTypology"

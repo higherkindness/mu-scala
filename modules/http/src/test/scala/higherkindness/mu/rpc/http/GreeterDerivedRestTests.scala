@@ -27,6 +27,7 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s.circe._
 import org.http4s._
+import org.http4s.Status
 import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.server.blaze._
 import org.scalatest._
@@ -70,11 +71,43 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
       response.unsafeRunSync() shouldBe HelloResponse("Options: Hey")
     }
 
-//    "serve a HEAD request" in {
-//      val response =
-//        BlazeClientBuilder[IO](ec).resource.use(unaryClient.headHello(_))
-//      response.unsafeRunSync() shouldBe HelloResponse("Head: Hey")
-//    }
+    "serve a HEAD request" in {
+      val response: IO[Status] =
+        BlazeClientBuilder[IO](ec).resource.use(unaryClient.headHello(_)).map(_.status)
+      response.unsafeRunSync() shouldBe Status.NoContent
+    }
+
+    "serve a TRACE request" in {
+      val response: IO[Status] =
+        BlazeClientBuilder[IO](ec).resource.use(unaryClient.traceHello(_)).map(_.status)
+      response.unsafeRunSync() shouldBe Status.NoContent
+    }
+
+    "serve a CONNECT request" in {
+      val response: IO[HelloResponse] =
+        BlazeClientBuilder[IO](ec).resource.use(unaryClient.connectHello(_))
+      response.unsafeRunSync() shouldBe HelloResponse("Connect: Hey")
+    }
+
+    "serve a PUT request" in {
+      val status: IO[Status] = BlazeClientBuilder[IO](ec).resource
+        .use(unaryClient.putHello(HelloRequest("hey"))(_))
+        .map(_.status)
+      status.unsafeRunSync() shouldBe Status.Accepted
+    }
+
+    "serve a PATCH request" in {
+      val status: IO[Status] = BlazeClientBuilder[IO](ec).resource
+        .use(unaryClient.patchHello(HelloRequest("hey"))(_))
+        .map(_.status)
+      status.unsafeRunSync() shouldBe Status.Accepted
+    }
+
+    "serve a unary DELETE request" in {
+      val response: IO[HelloResponse] =
+        BlazeClientBuilder[IO](ec).resource.use(unaryClient.deleteHello(HelloRequest("hey"))(_))
+      response.unsafeRunSync() shouldBe HelloResponse("Delete: Hey")
+    }
 
     "serve a unary POST request" in {
       val response: IO[HelloResponse] =

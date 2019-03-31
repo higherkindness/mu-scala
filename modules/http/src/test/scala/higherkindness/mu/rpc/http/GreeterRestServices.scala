@@ -37,7 +37,8 @@ class UnaryGreeterRestService[F[_]: Sync](
 
   def service: HttpRoutes[F] = HttpRoutes.of[F] {
 
-    case GET -> Root / "getHello" => Ok(handler.getHello(Empty).map(_.asJson))
+    case GET -> Root / "getHello" =>
+      Ok(handler.getHello(Empty).map(_.asJson))
 
     case OPTIONS -> Root / "optionsHello" => Ok(handler.optionsHello(Empty).map(_.asJson))
 

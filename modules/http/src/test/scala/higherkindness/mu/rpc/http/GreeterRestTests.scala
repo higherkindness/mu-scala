@@ -176,33 +176,31 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
   "REST Service" should {
 
     "serve a GET request" in {
-      val response = BlazeClientBuilder[IO](global).resource.use(unaryServiceClient.getHello()(_))
+      val response = BlazeClientBuilder[IO](global).resource.use(unaryServiceClient.getHello(_))
       response.unsafeRunSync() shouldBe HelloResponse("hey")
     }
 
     "serve a OPTIONS request" in {
       val response =
-        BlazeClientBuilder[IO](global).resource.use(unaryServiceClient.optionsHello()(_))
+        BlazeClientBuilder[IO](global).resource.use(unaryServiceClient.optionsHello(_))
       response.unsafeRunSync() shouldBe HelloResponse("Options: Hey")
     }
 
     "serve a HEAD request" in {
       val status: IO[Status] =
-        BlazeClientBuilder[IO](global).resource.use(unaryServiceClient.headHello()(_)).map(_.status)
+        BlazeClientBuilder[IO](global).resource.use(unaryServiceClient.headHello).map(_.status)
       status.unsafeRunSync() shouldBe Status.NoContent
     }
 
     "serve a TRACE request" in {
       val status: IO[Status] =
-        BlazeClientBuilder[IO](global).resource
-          .use(unaryServiceClient.traceHello()(_))
-          .map(_.status)
+        BlazeClientBuilder[IO](global).resource.use(unaryServiceClient.traceHello).map(_.status)
       status.unsafeRunSync() shouldBe Status.NoContent
     }
 
     "serve a CONNECT request" in {
       val response =
-        BlazeClientBuilder[IO](global).resource.use(unaryServiceClient.connectHello()(_))
+        BlazeClientBuilder[IO](global).resource.use(unaryServiceClient.connectHello(_))
       response.unsafeRunSync() shouldBe HelloResponse("Connect: Hey")
     }
 
