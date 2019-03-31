@@ -457,13 +457,6 @@ object serviceImpl {
           case _         => TermName("POST")
         }
 
-        println("*******************************")
-        println("*******************************")
-        println("*******************************")
-        println("*******************************")
-        println(httpMethod)
-        println(method)
-
         val executionClient: Tree = response match {
           case Fs2StreamTpe(_, _) =>
             q"client.stream(request).flatMap(_.asStream[${response.safeInner}])"
@@ -674,11 +667,11 @@ object serviceImpl {
           )
         )
 
-//        if (service.httpRequests.nonEmpty) {
-//          println(service)
-//          println("#######################")
-//          println(enrichedCompanion.toString)
-//        }
+        if (service.httpRequests.nonEmpty) {
+          println(service)
+          println("#######################")
+          println(enrichedCompanion.toString)
+        }
 
         List(serviceDef, enrichedCompanion)
       case _ => sys.error("@service-annotated definition must be a trait or abstract class")

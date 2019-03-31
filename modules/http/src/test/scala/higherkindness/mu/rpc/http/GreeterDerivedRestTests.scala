@@ -65,15 +65,16 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
     }
 
     "serve a OPTIONS request" in {
-//      val response =
-//        BlazeClientBuilder[IO](ec).resource.use(unaryClient.optionsHello()(_))
-//      response.unsafeRunSync() shouldBe HelloResponse("Options: Hey")
-
-      val request = Request[IO](Method.OPTIONS, serviceUri / "optionsHello")
       val response =
-        BlazeClientBuilder[IO](ec).resource.use(_.expect[Json](request))
-      response.unsafeRunSync() shouldBe HelloResponse("Options: Hey").asJson
+        BlazeClientBuilder[IO](ec).resource.use(unaryClient.optionsHello(_))
+      response.unsafeRunSync() shouldBe HelloResponse("Options: Hey")
     }
+
+//    "serve a HEAD request" in {
+//      val response =
+//        BlazeClientBuilder[IO](ec).resource.use(unaryClient.headHello(_))
+//      response.unsafeRunSync() shouldBe HelloResponse("Head: Hey")
+//    }
 
     "serve a unary POST request" in {
       val response: IO[HelloResponse] =
