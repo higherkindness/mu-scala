@@ -221,7 +221,7 @@ For executing `IO` we need a `ContextShift[IO]` used for running `IO` instances 
 
 *Note:* You'd need an implicit `monix.execution.Scheduler` in the case you're using Monix observables.
 
-```tut:invisible
+```tut:silent
 trait CommonRuntime {
 
   val EC: scala.concurrent.ExecutionContext =
