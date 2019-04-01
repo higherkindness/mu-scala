@@ -56,25 +56,3 @@ class Fs2GreeterHandler[F[_]: Sync] extends Fs2Greeter[F] {
   def sayHellosAll(requests: Stream[F, HelloRequest]): Stream[F, HelloResponse] =
     requests.map(request => HelloResponse(request.hello))
 }
-
-class MonixGreeterHandler[F[_]: Async](implicit sc: monix.execution.Scheduler)
-    extends MonixGreeter[F] {
-
-  import monix.reactive.Observable
-
-  def sayHellos(requests: Observable[HelloRequest]): F[HelloResponse] =
-    requests
-      .foldLeftL(HelloResponse("")) {
-        case (response, request) =>
-          HelloResponse(
-            if (response.hello.isEmpty) request.hello else s"${response.hello}, ${request.hello}")
-      }
-      .to[F]
-
-  def sayHelloAll(request: HelloRequest): Observable[HelloResponse] =
-    if (request.hello.isEmpty) Observable.raiseError(new IllegalArgumentException("empty greeting"))
-    else Observable(HelloResponse(request.hello), HelloResponse(request.hello))
-
-  def sayHellosAll(requests: Observable[HelloRequest]): Observable[HelloResponse] =
-    requests.map(request => HelloResponse(request.hello))
-}
