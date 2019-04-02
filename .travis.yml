@@ -49,7 +49,6 @@ jobs:
       scala: 2.12.8
       if: branch = master AND type != pull_request
       script:
-        - bash <(curl -s https://codecov.io/bash) -t 5b75b318-ab71-4fbc-9203-bfa7765cdbdc
         - if grep -q "SNAPSHOT" version.sbt; then
             sbt +publish;
             sbt idlgen-sbt/publish;
