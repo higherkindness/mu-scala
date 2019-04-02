@@ -18,14 +18,12 @@ package higherkindness.mu.rpc.http
 
 import cats.effect.{IO, _}
 import fs2.Stream
-import fs2.interop.reactivestreams._
 import higherkindness.mu.http.{ResponseError, UnexpectedError}
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
 import higherkindness.mu.http.implicits._
 import io.circe.Json
 import io.circe.generic.auto._
 import io.circe.syntax._
-import monix.reactive.Observable
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.client.UnexpectedStatus
@@ -34,8 +32,6 @@ import org.http4s.server.blaze._
 import org.scalatest._
 import org.http4s.implicits._
 import org.http4s.server.Router
-
-import scala.concurrent.duration._
 
 class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
 
@@ -48,25 +44,21 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
   val Fs2ServicePrefix   = "Fs2Greeter"
   val MonixServicePrefix = "MonixGreeter"
 
-  implicit val ec                   = monix.execution.Scheduler.Implicits.global
+  implicit val ec                   = scala.concurrent.ExecutionContext.Implicits.global
   implicit val cs: ContextShift[IO] = IO.contextShift(ec)
   implicit val timer: Timer[IO]     = IO.timer(ec)
 
   implicit val unaryHandlerIO = new UnaryGreeterHandler[IO]
   implicit val fs2HandlerIO   = new Fs2GreeterHandler[IO]
-  implicit val monixHandlerIO = new MonixGreeterHandler[IO]
 
   val unaryService: HttpRoutes[IO] = new UnaryGreeterRestService[IO].service
   val fs2Service: HttpRoutes[IO]   = new Fs2GreeterRestService[IO].service
-  val monixService: HttpRoutes[IO] = new MonixGreeterRestService[IO].service
 
   val server: BlazeServerBuilder[IO] = BlazeServerBuilder[IO]
     .bindHttp(Port, Hostname)
-    .withHttpApp(
-      Router(
-        s"/$UnaryServicePrefix" -> unaryService,
-        s"/$Fs2ServicePrefix"   -> fs2Service,
-        s"/$MonixServicePrefix" -> monixService).orNotFound)
+    .withHttpApp(Router(
+      s"/$UnaryServicePrefix" -> unaryService,
+      s"/$Fs2ServicePrefix"   -> fs2Service).orNotFound)
 
   var serverTask: Fiber[IO, Nothing] = _
   before(serverTask = server.resource.use(_ => IO.never).start.unsafeRunSync())
@@ -112,8 +104,6 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
     new UnaryGreeterRestClient[IO](serviceUri / UnaryServicePrefix)
   val fs2ServiceClient: Fs2GreeterRestClient[IO] =
     new Fs2GreeterRestClient[IO](serviceUri / Fs2ServicePrefix)
-  val monixServiceClient: MonixGreeterRestClient[IO] =
-    new MonixGreeterRestClient[IO](serviceUri / MonixServicePrefix)
 
   "REST Service" should {
 
@@ -169,20 +159,6 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
       response.unsafeRunSync() shouldBe HelloResponse("")
     }
 
-    "serve a POST request with Observable streaming request" in {
-      val requests = Observable(HelloRequest("hey"), HelloRequest("there"))
-      val response =
-        BlazeClientBuilder[IO](ec).resource.use(monixServiceClient.sayHellos(requests)(_))
-      response.unsafeRunSync() shouldBe HelloResponse("hey, there")
-    }
-
-    "serve a POST request with empty Observable streaming request" in {
-      val requests = Observable.empty
-      val response =
-        BlazeClientBuilder[IO](ec).resource.use(monixServiceClient.sayHellos(requests)(_))
-      response.unsafeRunSync() shouldBe HelloResponse("")
-    }
-
     "serve a POST request with fs2 streaming response" in {
       val request = HelloRequest("hey")
       val responses =
@@ -191,30 +167,12 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
         .unsafeRunSync() shouldBe List(HelloResponse("hey"), HelloResponse("hey"))
     }
 
-    "serve a POST request with Observable streaming response" in {
-      val request = HelloRequest("hey")
-      val responses = BlazeClientBuilder[IO](ec).stream
-        .flatMap(monixServiceClient.sayHelloAll(request)(_).toReactivePublisher.toStream[IO])
-      responses.compile.toList
-        .unsafeRunTimed(10.seconds)
-        .getOrElse(sys.error("Stuck!")) shouldBe List(HelloResponse("hey"), HelloResponse("hey"))
-    }
-
     "handle errors with fs2 streaming response" in {
       val request = HelloRequest("")
       val responses =
         BlazeClientBuilder[IO](ec).stream.flatMap(fs2ServiceClient.sayHelloAll(request)(_))
       the[UnexpectedError] thrownBy responses.compile.toList
         .unsafeRunSync() should have message "java.lang.IllegalArgumentException: empty greeting"
-    }
-
-    "handle errors with Observable streaming response" in {
-      val request = HelloRequest("")
-      val responses = BlazeClientBuilder[IO](ec).stream
-        .flatMap(monixServiceClient.sayHelloAll(request)(_).toReactivePublisher.toStream[IO])
-      the[UnexpectedError] thrownBy responses.compile.toList
-        .unsafeRunTimed(10.seconds)
-        .getOrElse(sys.error("Stuck!")) should have message "java.lang.IllegalArgumentException: empty greeting"
     }
 
     "serve a POST request with bidirectional fs2 streaming" in {
@@ -230,24 +188,6 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
       val responses =
         BlazeClientBuilder[IO](ec).stream.flatMap(fs2ServiceClient.sayHellosAll(requests)(_))
       responses.compile.toList.unsafeRunSync() shouldBe Nil
-    }
-
-    "serve a POST request with bidirectional Observable streaming" in {
-      val requests = Observable(HelloRequest("hey"), HelloRequest("there"))
-      val responses = BlazeClientBuilder[IO](ec).stream
-        .flatMap(monixServiceClient.sayHellosAll(requests)(_).toReactivePublisher.toStream[IO])
-      responses.compile.toList
-        .unsafeRunTimed(10.seconds)
-        .getOrElse(sys.error("Stuck!")) shouldBe List(HelloResponse("hey"), HelloResponse("there"))
-    }
-
-    "serve an empty POST request with bidirectional Observable streaming" in {
-      val requests = Observable.empty
-      val responses = BlazeClientBuilder[IO](ec).stream
-        .flatMap(monixServiceClient.sayHellosAll(requests)(_).toReactivePublisher.toStream[IO])
-      responses.compile.toList
-        .unsafeRunTimed(10.seconds)
-        .getOrElse(sys.error("Stuck!")) shouldBe Nil
     }
 
   }

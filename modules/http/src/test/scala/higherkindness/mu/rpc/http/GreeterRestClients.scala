@@ -18,10 +18,8 @@ package higherkindness.mu.rpc.http
 
 import cats.effect._
 import fs2.Stream
-import fs2.interop.reactivestreams._
 import io.circe.syntax._
 import higherkindness.mu.http.implicits._
-import monix.execution.Scheduler
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.client._
@@ -66,44 +64,6 @@ class Fs2GreeterRestClient[F[_]: Sync](uri: Uri) {
       decoderHelloResponse: io.circe.Decoder[HelloResponse]): Stream[F, HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellosAll")
     client.stream(request.withEntity(arg.map(_.asJson))).flatMap(_.asStream[HelloResponse])
-  }
-
-}
-
-class MonixGreeterRestClient[F[_]: ConcurrentEffect](uri: Uri)(implicit s: Scheduler) {
-
-  import monix.reactive.Observable
-  import higherkindness.mu.http.implicits._
-
-  def sayHellos(arg: Observable[HelloRequest])(client: Client[F])(
-      implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
-      decoderHelloResponse: io.circe.Decoder[HelloResponse]): F[HelloResponse] = {
-    val request = Request[F](Method.POST, uri / "sayHellos")
-    client.expectOr[HelloResponse](
-      request.withEntity(arg.toReactivePublisher.toStream.map(_.asJson)))(handleResponseError)(
-      jsonOf[F, HelloResponse])
-  }
-
-  def sayHelloAll(arg: HelloRequest)(client: Client[F])(
-      implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
-      decoderHelloResponse: io.circe.Decoder[HelloResponse]): Observable[HelloResponse] = {
-    val request = Request[F](Method.POST, uri / "sayHelloAll")
-    Observable.fromReactivePublisher(
-      client
-        .stream(request.withEntity(arg.asJson))
-        .flatMap(_.asStream[HelloResponse])
-        .toUnicastPublisher)
-  }
-
-  def sayHellosAll(arg: Observable[HelloRequest])(client: Client[F])(
-      implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
-      decoderHelloResponse: io.circe.Decoder[HelloResponse]): Observable[HelloResponse] = {
-    val request = Request[F](Method.POST, uri / "sayHellosAll")
-    Observable.fromReactivePublisher(
-      client
-        .stream(request.withEntity(arg.toReactivePublisher.toStream.map(_.asJson)))
-        .flatMap(_.asStream[HelloResponse])
-        .toUnicastPublisher)
   }
 
 }

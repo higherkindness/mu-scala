@@ -21,9 +21,6 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import io.circe.syntax._
 import higherkindness.mu.http.implicits._
-import fs2.interop.reactivestreams._
-import monix.execution.Scheduler
-import monix.reactive.Observable
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
@@ -73,40 +70,5 @@ class Fs2GreeterRestService[F[_]: Sync](
     case msg @ POST -> Root / "sayHellosAll" =>
       val requests = msg.asStream[HelloRequest]
       Ok(handler.sayHellosAll(requests).asJsonEither)
-  }
-}
-
-class MonixGreeterRestService[F[_]: ConcurrentEffect](
-    implicit handler: MonixGreeter[F],
-    s: Scheduler,
-    decoderHelloRequest: io.circe.Decoder[HelloRequest],
-    encoderHelloResponse: io.circe.Encoder[HelloResponse])
-    extends Http4sDsl[F] {
-
-  private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
-
-  def service: HttpRoutes[F] = HttpRoutes.of[F] {
-
-    case msg @ POST -> Root / "sayHellos" =>
-      val requests = msg.asStream[HelloRequest]
-      Ok(
-        handler
-          .sayHellos(Observable.fromReactivePublisher(requests.toUnicastPublisher))
-          .map(_.asJson))
-
-    case msg @ POST -> Root / "sayHelloAll" =>
-      for {
-        request   <- msg.as[HelloRequest]
-        responses <- Ok(handler.sayHelloAll(request).toReactivePublisher.toStream.asJsonEither)
-      } yield responses
-
-    case msg @ POST -> Root / "sayHellosAll" =>
-      val requests = msg.asStream[HelloRequest]
-      Ok(
-        handler
-          .sayHellosAll(Observable.fromReactivePublisher(requests.toUnicastPublisher))
-          .toReactivePublisher
-          .toStream
-          .asJsonEither)
   }
 }
