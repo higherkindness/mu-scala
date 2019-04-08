@@ -21,18 +21,18 @@ For Scala, this section specifies how such schema differences should be resolved
 - [Modifying the Request (Client side)](#modifying-the-request-client-side)
   - [A: Adding a new non-optional field](#a-adding-a-new-non-optional-field)
   - [B: Adding a new optional field](#b-adding-a-new-optional-field)
-  - [C: Adding new item to a coproduct](#c-adding-new-item-to-a-coproduct)
-  - [D: Removing item from a coproduct](#d-removing-item-from-a-coproduct)
-  - [E: Replacing item in a coproduct](#e-replacing-item-in-a-coproduct)
+  - [C: Adding new item to a union](#c-adding-new-item-to-a-union)
+  - [D: Removing item from a union](#d-removing-item-from-a-union)
+  - [E: Replacing item in a union](#e-replacing-item-in-a-union)
   - [F: Changing the type of an existing field](#f-changing-the-type-of-an-existing-field)
   - [G: Renaming a field](#g-renaming-a-field)
   - [H: Removing a field](#h-removing-a-field)
 - [Modifying the Response (Server side)](#modifying-the-response-server-side)
   - [I: Adding a new non-optional field](#i-adding-a-new-non-optional-field)
   - [J: Adding a new optional field](#j-adding-a-new-optional-field)
-  - [K: Adding a new item to a coproduct](#k-adding-a-new-item-to-a-coproduct)
-  - [L: Removing item from a coproduct](#l-removing-item-from-a-coproduct)
-  - [M: Replacing item from a coproduct](#m-replacing-item-from-a-coproduct)
+  - [K: Adding a new item to a union](#k-adding-a-new-item-to-a-union)
+  - [L: Removing item from a union](#l-removing-item-from-a-union)
+  - [M: Replacing item from a union](#m-replacing-item-from-a-union)
   - [N: Changing the type of an existing field](#n-changing-the-type-of-an-existing-field)
   - [O: Renaming a field](#o-renaming-a-field)
   - [P: Removing a field](#p-removing-a-field)
@@ -61,7 +61,7 @@ case class NewRequest(a: String, b: Int, c: Boolean = true)
 
 This is a particular case of the previous scenario, hence, the solution could be providing a default value, that presumably, in Scala would be `None`.
 
-#### C: Adding new item to a coproduct
+#### C: Adding new item to a union
 
 In this case, we are safe and no actions are required.
 
@@ -77,7 +77,7 @@ case class Request(a: Int :+: String :+: CNil)
 case class NewRequest(a: Int :+: String :+: Boolean :+: CNil)
 ```
 
-#### D: Removing item from a coproduct
+#### D: Removing item from a union
 
 In this case, we'd be breaking the compatibility. The only way to deal with this situation is considering this as a change of type, see the next case for details.
 
@@ -93,7 +93,7 @@ case class Request(a: Int :+: String :+: CNil)
 case class NewRequest(b: String :+: CNil = Coproduct[String :+: CNil](""))
 ```
 
-#### E: Replacing item in a coproduct
+#### E: Replacing item in a union
 
 As we saw previously, again we are breaking the compatibility. If the type is replaced, it will work while the provided value is one of the types in common between the previous `coproduct` and the new one.
 
@@ -139,7 +139,7 @@ case class NewRequest(a: String, c: Boolean = true)
 
 #### G: Renaming a field
 
-Renaming a field is a particular case of creating a field with the new name and its default value, and then, removing the old one. The old name will be ignored if they are provided by old clients.
+This operation is completely safe, in Avro, the names are not being sent as part of the request, so no matter how they are named.
 
 * Before:
 
@@ -150,7 +150,7 @@ case class Request(a: String, b: Int)
 * After:
 
 ```scala
-case class NewRequest(a: String, c: Int = 0)
+case class NewRequest(a: String, c: Int)
 ```
 
 #### H: Removing a field
@@ -191,7 +191,7 @@ case class NewResponse(a: String, b: Int, c: Boolean)
 
 This would be just a particular case of the previous scenario, where the default value would be `None`, in the case of `Scala`.
 
-#### K: Adding a new item to a coproduct
+#### K: Adding a new item to a union
 
 In this scenario, the old clients will fail when the result is including the new item. Hence, the solution would be to provide a default value to the old coproduct and creating a new field with the new coproduct.
 
@@ -209,7 +209,7 @@ case class NewResponse(
       b: Int :+: String :+: Boolean :+: CNil)
 ```
 
-#### L: Removing item from a coproduct
+#### L: Removing item from a union
 
 No action will be required in this case.
 
@@ -225,7 +225,7 @@ case class Response(a: Int :+: String :+: CNil)
 case class NewResponse(a: Int :+: CNil)
 ```
 
-#### M: Replacing item from a coproduct
+#### M: Replacing item from a union
 
 As long as the value of the coproduct belongs to the previous version, the old client should be able to accept the response as valid. Thus, we would need to follow the same approach as above when _Adding a new item to a coproduct_.
 
@@ -259,7 +259,7 @@ case class NewResponse(a: String, b: Int = 123, c: Boolean)
 
 #### O: Renaming a field
 
-It will require to keep the previous name and type with a default value, and then, adding a new field with the same type.
+It's also safe in Avro, the server responses don't include the parameter names inside and they will be ignored when the data is serialized and sent through the wire.
 
 * Before:
 
@@ -270,7 +270,7 @@ case class Response(a: String, b: Int)
 * After:
 
 ```scala
-case class NewResponse(a: String, b: Int = 123, c: Int)
+case class NewResponse(a: String, c: Int)
 ```
 
 #### P: Removing a field
