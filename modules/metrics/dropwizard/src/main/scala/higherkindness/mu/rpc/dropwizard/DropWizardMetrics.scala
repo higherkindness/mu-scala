@@ -23,7 +23,6 @@ import com.codahale.metrics.MetricRegistry
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
 import higherkindness.mu.rpc.internal.metrics.MetricsOps
 import higherkindness.mu.rpc.internal.metrics.MetricsOps._
-import io.grpc.MethodDescriptor.MethodType._
 import io.grpc.Status
 
 /*
