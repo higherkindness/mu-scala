@@ -124,7 +124,7 @@ On step **2**, the types which included the old decimals need to be changed to a
 
 Luckily, there are a couple of modules created for facilitating this task:
 
-* `"io.higherkindness" % "legacy-avro-decimal-compat-protocol" % "x.x.x"`
+* `"io.higherkindness" %% "legacy-avro-decimal-compat-protocol" % "x.x.x"`
 
 Provides an avdl file (`legacyAvroDecimalCompatProtocol.avdl`) with the custom type (`mu.rpc.protocols.LegacyAvroDecimalCompat`) to replace your old `decimal` values. That way, you could go from this:
                         

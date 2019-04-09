@@ -56,7 +56,6 @@ jobs:
             git checkout master;
             git pull origin master;
             sbt ";project idlgen-sbt;release";
-            sbt ";project legacy-avro-decimal-compat-protocol;release";
             sbt release;
           fi
     - stage: microsite

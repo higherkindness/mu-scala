@@ -266,12 +266,6 @@ object ProjectPlugin extends AutoPlugin {
       scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
     )
 
-    lazy val legacyAvroDecimalProtocolSettings: Seq[Def.Setting[_]] = Seq(
-      publishMavenStyle := true,
-      crossPaths := false,
-      libraryDependencies := Nil
-    )
-
   }
 
   import autoImport._
