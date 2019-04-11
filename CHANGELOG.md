@@ -1,5 +1,12 @@
 # Changelog
 
+## 04/11/2019 - Version 0.18.0
+
+Release changes:
+
+Releasing 0.18.0
+
+
 ## 02/05/2019 - Version 0.17.2
 
 Release changes:
