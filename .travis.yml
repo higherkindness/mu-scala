@@ -58,7 +58,6 @@ jobs:
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
             sbt +publish;
-            sbt idlgen-sbt/publish;
           else
             sbt orgUpdateDocFiles;
             git reset --hard HEAD;
