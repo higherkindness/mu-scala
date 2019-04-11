@@ -10,7 +10,7 @@ This section is about how data flows through the network, and how are they encod
 
 Currently, [mu] brings the ability to encode data in bytes based on Avro and Protocol buffers. In the next sections, we are going to pass through both serialization standards to see how to preserve both forward and backward compatibility in your system:
 
-* [Avro](avro)
-* [Protocol Buffers](proto)
+* [Avro](schema-evolution/avro)
+* [Protocol Buffers](schema-evolution/proto)
 
 [mu]: https://github.com/higherkindness/mu
