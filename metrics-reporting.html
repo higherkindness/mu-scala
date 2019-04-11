@@ -13,7 +13,7 @@
 
 <p>Let’s see how to register server metrics using <code class="highlighter-rouge">Prometheus</code> in the following fragment.</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.prometheus.PrometheusMetrics</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.server._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.server.interceptors.implicits._</span>
@@ -35,14 +35,13 @@
   <span class="o">}</span> <span class="k">yield</span> <span class="n">server</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="monitor-client-calls">Monitor Client Calls</h2>
 
 <p>In this case, in order to intercept the client calls we need additional configuration settings (by using <code class="highlighter-rouge">AddInterceptor</code>):</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">}</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.config._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.channel._</span>
@@ -64,8 +63,7 @@
         <span class="n">channelConfigList</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="nc">UsePlaintext</span><span class="o">(),</span> <span class="nc">AddInterceptor</span><span class="o">(</span><span class="nc">MetricsChannelInterceptor</span><span class="o">(</span><span class="n">metricsOps</span><span class="o">))))</span>
     <span class="o">}</span> <span class="k">yield</span> <span class="n">serviceClient</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>That is how we use <code class="highlighter-rouge">Prometheus</code> to monitor both <a href="https://grpc.io/">gRPC</a> ends.</p>
 
@@ -73,13 +71,12 @@
 
 <p>The usage the same as before, but in this case we need to create a <code class="highlighter-rouge">Dropwizard</code> backed <code class="highlighter-rouge">MetricsOps</code></p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
 <span class="k">import</span> <span class="nn">com.codahale.metrics.MetricRegistry</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.dropwizard.DropWizardMetrics</span>
 
 <span class="k">val</span> <span class="n">metricsOps</span> <span class="k">=</span> <span class="nc">DropWizardMetrics</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="k">new</span> <span class="nc">MetricRegistry</span><span class="o">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 </section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/mu/highlight/highlight.pack.js"></script><script>hljs.configure({languages:['scala','java','bash']});
 hljs.initHighlighting();

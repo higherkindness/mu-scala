@@ -10,7 +10,7 @@
 
 <p>Next, our dummy <code class="highlighter-rouge">Greeter</code> server implementation:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.Async</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.Async</span>
 <span class="k">import</span> <span class="nn">cats.syntax.applicative._</span>
 <span class="k">import</span> <span class="nn">monix.execution.Scheduler</span>
 <span class="k">import</span> <span class="nn">monix.reactive.Observable</span>
@@ -52,8 +52,7 @@
         <span class="k">throw</span> <span class="n">e</span>
       <span class="o">}</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>As you can see, we need a <code class="highlighter-rouge">monix.execution.Scheduler</code> implicit. This is needed in order to resolve the <code class="highlighter-rouge">cats.effect</code> instances for <code class="highlighter-rouge">Monix</code>.</p>
 
@@ -73,7 +72,7 @@
 
 <p><em>Note:</em> You’d need an implicit <code class="highlighter-rouge">monix.execution.Scheduler</code> in the case you’re using Monix observables.</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">trait</span> <span class="nc">CommonRuntime</span> <span class="o">{</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="nc">CommonRuntime</span> <span class="o">{</span>
 
   <span class="k">val</span> <span class="nc">EC</span><span class="k">:</span> <span class="kt">scala.concurrent.ExecutionContext</span> <span class="o">=</span>
     <span class="n">scala</span><span class="o">.</span><span class="n">concurrent</span><span class="o">.</span><span class="nc">ExecutionContext</span><span class="o">.</span><span class="nc">Implicits</span><span class="o">.</span><span class="n">global</span>
@@ -84,8 +83,7 @@
   <span class="k">implicit</span> <span class="k">val</span> <span class="n">cs</span><span class="k">:</span> <span class="kt">cats.effect.ContextShift</span><span class="o">[</span><span class="kt">cats.effect.IO</span><span class="o">]</span> <span class="k">=</span> <span class="n">cats</span><span class="o">.</span><span class="n">effect</span><span class="o">.</span><span class="nc">IO</span><span class="o">.</span><span class="n">contextShift</span><span class="o">(</span><span class="nc">EC</span><span class="o">)</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>As a side note, <code class="highlighter-rouge">CommonRuntime</code> will also be used later on for the client example program.</p>
 
@@ -107,7 +105,7 @@
 
 <p>In summary, the result would be as follows:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.server._</span>
 <span class="k">import</span> <span class="nn">monix.execution.Scheduler</span>
 <span class="k">import</span> <span class="nn">service._</span>
@@ -123,14 +121,13 @@
   <span class="k">object</span> <span class="nc">implicits</span> <span class="k">extends</span> <span class="nc">Implicits</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h3 id="server-bootstrap">Server Bootstrap</h3>
 
 <p>What else is needed? We just need to define a <code class="highlighter-rouge">main</code> method:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.server.GrpcServer</span>
 
 <span class="k">object</span> <span class="nc">RPCServer</span> <span class="o">{</span>
@@ -149,8 +146,7 @@
   <span class="o">}</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>The Server will bootstrap on port <code class="highlighter-rouge">8080</code>.</p>
 
@@ -160,7 +156,7 @@
 
 <p>Thanks to <code class="highlighter-rouge">withServerChannel</code> from the package <code class="highlighter-rouge">mu.rpc.testing.servers</code>, you will be able to run in-memory instances of the server, which is very convenient for testing purposes. Below, a very simple property-based test for proving <code class="highlighter-rouge">Greeter.sayHello</code>:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.Resource</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.Resource</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.testing.servers.withServerChannel</span>
 <span class="k">import</span> <span class="nn">io.grpc.</span><span class="o">{</span><span class="nc">ManagedChannel</span><span class="o">,</span> <span class="nc">ServerServiceDefinition</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">org.scalatestplus.scalacheck.Checkers</span>
@@ -200,18 +196,16 @@
   <span class="o">}</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p><code class="highlighter-rouge">Greeter.bindService</code> is an auto-derived method which creates, behind the scenes, the binding service for <a href="https://grpc.io/">gRPC</a>. It requires <code class="highlighter-rouge">F[_]</code> as the type parameter, the target/concurrent monad, in our example: <code class="highlighter-rouge">cats.effects.IO</code>.</p>
 
 <p>Running the test:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="n">scala</span><span class="o">&gt;</span> <span class="n">run</span><span class="o">(</span><span class="k">new</span> <span class="nc">ServiceSpec</span><span class="o">)</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">scala</span><span class="o">&gt;</span> <span class="n">run</span><span class="o">(</span><span class="k">new</span> <span class="nc">ServiceSpec</span><span class="o">)</span>
 <span class="nc">ServiceSpec</span><span class="k">:</span>
 <span class="kt">-</span> <span class="kt">Get</span> <span class="kt">a</span> <span class="kt">valid</span> <span class="kt">response</span> <span class="kt">when</span> <span class="kt">a</span> <span class="kt">proper</span> <span class="kt">request</span> <span class="kt">is</span> <span class="kt">passed</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="client">Client</h2>
 
@@ -244,7 +238,7 @@
 
 <p>So, taking into account all of that, how would our code look?</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">}</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.config._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.config.channel._</span>
@@ -263,8 +257,7 @@
 
   <span class="k">object</span> <span class="nc">implicits</span> <span class="k">extends</span> <span class="nc">Implicits</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p><strong>Notes</strong>:</p>
 
@@ -277,7 +270,7 @@
 
 <p>Once we have our runtime configuration defined as above, everything gets easier on the client side. This is an example of a client application, following our dummy quickstart:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
 <span class="k">import</span> <span class="nn">service._</span>
 <span class="k">import</span> <span class="nn">gclient.implicits._</span>
 
@@ -293,8 +286,7 @@
   <span class="o">}</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 </section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/mu/highlight/highlight.pack.js"></script><script>hljs.configure({languages:['scala','java','bash']});
 hljs.initHighlighting();

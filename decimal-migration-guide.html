@@ -53,7 +53,7 @@ protocol StockInfoService {
 </code></pre>
 
 <p><strong>Scala</strong></p>
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">package</span> <span class="nn">higherkindness.mu.rpc.protocols</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="nn">higherkindness.mu.rpc.protocols</span>
 
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.internal.encoders.avro.bigdecimal._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.internal.encoders.avro.javatime._</span>
@@ -68,14 +68,13 @@ protocol StockInfoService {
   <span class="k">def</span> <span class="n">getStockInfo</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">mu.rpc.protocols.StockInfoRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">mu.rpc.protocols.StockInfoResponse</span><span class="o">]</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>With the <em>Scala</em> definition, you can serialize the <code class="highlighter-rouge">BigDecimal</code>s according to the avro specs (you can query the <em>scale</em> in the value) but you can’t deserialize it, because the <em>Scala</em> <strong>type</strong> doesn’t give us information about the <em>scale</em>.</p>
 
 <p>Starting with <code class="highlighter-rouge">0.15.1</code> you can generate the following service in <em>Scala</em> (manually or through the <code class="highlighter-rouge">idlgen</code> plugin with the setting <code class="highlighter-rouge">idlGenBigDecimal := ScalaBigDecimalTaggedGen</code>)</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">package</span> <span class="nn">higherkindness.mu.rpc.protocols</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="nn">higherkindness.mu.rpc.protocols</span>
 
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.internal.encoders.avro.javatime._</span>
@@ -91,8 +90,7 @@ protocol StockInfoService {
   <span class="k">def</span> <span class="n">getStockInfo</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">mu.rpc.protocols.StockInfoRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">mu.rpc.protocols.StockInfoResponse</span><span class="o">]</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>As you can see, the type now reflects the precision and the scale of these <code class="highlighter-rouge">BigDecimal</code>s.</p>
 
