@@ -402,7 +402,7 @@ lazy val `seed-client` = project
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
   .aggregate(allSeedClientModules: _*)
-  .dependsOn(allClientModulesDeps: _*)
+  .dependsOn(allSeedClientModulesDeps: _*)
 addCommandAlias("runAvroClient", "seed_client/runMain example.seed.client.app.AvroClientApp")
 addCommandAlias("runProtoClient", "seed_client/runMain example.seed.client.app.ProtoClientApp")
 
