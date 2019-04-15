@@ -8,7 +8,8 @@ permalink: /
 
 ## What is mu-rpc?
 
-[mu] provides the ability to combine [RPC] protocols, services, and clients in your Scala program, thanks to [gRPC]. Although it's fully integrated with [gRPC], there are some important differences when defining the protocols, as we’ll see later on.
+[mu] provides the ability to combine [RPC] protocols, services, and clients in your Scala program, thanks to [gRPC]. 
+Although it's fully integrated with [gRPC], there are some important differences when defining the protocols, as we’ll see later on.
 
 ## Installation
 
@@ -90,12 +91,10 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-okhttp" % "0.18.0"
 libraryDependencies += "io.higherkindness" %% "mu-config" % "0.18.0"
 
 // optional - for both server and client metrics reporting, using Prometheus.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus-server" % "0.18.0"
-libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus-client" % "0.18.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus" % "0.18.0"
 
 // optional - for both server and client metrics reporting, using Dropwizard.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-dropwizard-server" % "0.18.0"
-libraryDependencies += "io.higherkindness" %% "mu-rpc-dropwizard-client" % "0.18.0"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-dropwizard" % "0.18.0"
 
 // optional - for the communication between server and client by using SSL/TLS.
 libraryDependencies += "io.higherkindness" %% "mu-rpc-netty-ssl" % "0.18.0"
