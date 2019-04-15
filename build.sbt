@@ -341,7 +341,7 @@ lazy val `seed-server-app` = project
 ////      Server      ////
 //////////////////////////
 
-lazy val allServerModules: Seq[ProjectReference] = Seq(
+lazy val allSeedServerModules: Seq[ProjectReference] = Seq(
   `seed-server-common`,
   `seed-server-protocol-avro`,
   `seed-server-protocol-proto`,
