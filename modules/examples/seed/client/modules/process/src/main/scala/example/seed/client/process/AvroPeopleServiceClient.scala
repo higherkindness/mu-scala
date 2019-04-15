@@ -53,15 +53,13 @@ object AvroPeopleServiceClient {
 
   def createClient[F[_]: ContextShift: Logger](
       hostname: String,
-      port: Int,
-      sslEnabled: Boolean = true)(
+      port: Int)(
       implicit F: ConcurrentEffect[F]): fs2.Stream[F, AvroPeopleServiceClient[F]] = {
 
     val channel: F[ManagedChannel] =
       F.delay(InetAddress.getByName(hostname).getHostAddress).flatMap { ip =>
         val channelFor    = ChannelForAddress(ip, port)
-        val channelConfig = if (!sslEnabled) List(UsePlaintext()) else Nil
-        new ManagedChannelInterpreter[F](channelFor, channelConfig).build
+        new ManagedChannelInterpreter[F](channelFor, List(UsePlaintext())).build
       }
 
     def clientFromChannel: Resource[F, PeopleService[F]] =

@@ -26,15 +26,15 @@ import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import pureconfig.generic.auto._
 
-abstract class ClientBoot[F[_]: ConcurrentEffect: ContextShift] {
+abstract class ClientBoot[F[_]: ConcurrentEffect: ContextShift: Timer] {
 
   def avroPeopleServiceClient(host: String, port: Int)(
       implicit L: Logger[F]): Stream[F, AvroPeopleServiceClient[F]] =
-    AvroPeopleServiceClient.createClient(host, port, sslEnabled = false)
+    AvroPeopleServiceClient.createClient(host, port)
 
   def protoPeopleServiceClient(host: String, port: Int)(
       implicit L: Logger[F]): Stream[F, ProtoPeopleServiceClient[F]] =
-    ProtoPeopleServiceClient.createClient(host, port, sslEnabled = false)
+    ProtoPeopleServiceClient.createClient(host, port)
 
   def runProgram(args: List[String]): Stream[F, ExitCode] = {
     def setupConfig: F[SeedClientConfig] =

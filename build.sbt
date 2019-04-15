@@ -395,7 +395,7 @@ lazy val allSeedClientModules: Seq[ProjectReference] = Seq(
 )
 
 lazy val allSeedClientModulesDeps: Seq[ClasspathDependency] =
-  allClientModules.map(ClasspathDependency(_, None))
+  allSeedClientModules.map(ClasspathDependency(_, None))
 
 lazy val `seed-client` = project
   .in(file("modules/examples/seed/client"))

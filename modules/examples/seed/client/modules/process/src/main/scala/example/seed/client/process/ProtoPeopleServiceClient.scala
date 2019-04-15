@@ -31,6 +31,7 @@ import io.chrisdavenport.log4cats.Logger
 import io.grpc.{CallOptions, ManagedChannel}
 
 import scala.util.Random
+import scala.concurrent.duration._
 
 trait ProtoPeopleServiceClient[F[_]] {
 
@@ -41,8 +42,10 @@ trait ProtoPeopleServiceClient[F[_]] {
 }
 object ProtoPeopleServiceClient {
 
-  def apply[F[_]](
-      client: PeopleService[F])(implicit F: Effect[F], L: Logger[F]): ProtoPeopleServiceClient[F] =
+  def apply[F[_]](client: PeopleService[F])(
+      implicit F: Effect[F],
+      L: Logger[F],
+      T: Timer[F]): ProtoPeopleServiceClient[F] =
     new ProtoPeopleServiceClient[F] {
 
       val serviceName = "ProtoPeopleClient"
@@ -59,7 +62,7 @@ object ProtoPeopleServiceClient {
         def requestStream: Stream[F, PeopleRequest] =
           Stream.iterateEval(PeopleRequest("")) { _ =>
             val req = PeopleRequest(Random.nextPrintableChar().toString)
-            F.delay(Thread.sleep(2000)) *> L.info(s"$serviceName Stream Request: $req").as(req)
+            T.sleep(2.seconds) *> L.info(s"$serviceName Stream Request: $req").as(req)
           }
 
         for {
@@ -70,17 +73,15 @@ object ProtoPeopleServiceClient {
 
     }
 
-  def createClient[F[_]: ContextShift: Logger](
+  def createClient[F[_]: ContextShift: Logger: Timer](
       hostname: String,
-      port: Int,
-      sslEnabled: Boolean = true)(
+      port: Int)(
       implicit F: ConcurrentEffect[F]): fs2.Stream[F, ProtoPeopleServiceClient[F]] = {
 
     val channel: F[ManagedChannel] =
       F.delay(InetAddress.getByName(hostname).getHostAddress).flatMap { ip =>
         val channelFor    = ChannelForAddress(ip, port)
-        val channelConfig = if (!sslEnabled) List(UsePlaintext()) else Nil
-        new ManagedChannelInterpreter[F](channelFor, channelConfig).build
+        new ManagedChannelInterpreter[F](channelFor, List(UsePlaintext())).build
       }
 
     def clientFromChannel: Resource[F, PeopleService[F]] =
