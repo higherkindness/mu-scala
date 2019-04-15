@@ -388,7 +388,7 @@ lazy val `seed-client-app` = project
 ////      Client      ////
 //////////////////////////
 
-lazy val allClientModules: Seq[ProjectReference] = Seq(
+lazy val allSeedClientModules: Seq[ProjectReference] = Seq(
   `seed-client-common`,
   `seed-client-process`,
   `seed-client-app`
