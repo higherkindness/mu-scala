@@ -356,7 +356,7 @@ lazy val `seed-server` = project
   .in(file("modules/examples/seed/server"))
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
-  .aggregate(allServerModules: _*)
+  .aggregate(allSeedServerModules: _*)
   .dependsOn(allServerModulesDeps: _*)
 addCommandAlias("runAvroServer", "seed_server/runMain example.seed.server.app.AvroServerApp")
 addCommandAlias("runProtoServer", "seed_server/runMain example.seed.server.app.ProtoServerApp")
