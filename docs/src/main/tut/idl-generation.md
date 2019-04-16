@@ -85,7 +85,6 @@ assuming that the scala file is named `service.scala`. The content should be sim
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_outer_class_name = "Quickstart";
 
 package quickstart;
 
@@ -115,7 +114,6 @@ And the resulting `Avro` IDL would be generated in `target/scala-2.12/resource_m
 
 ```json
 {
-  "namespace" : "quickstart",
   "protocol" : "GreeterService",
   "types" : [
     {
@@ -202,11 +200,9 @@ in the build where your `IDL` files are placed, for instance:
 ```
 
 In the case of the `.avpr` file we generated above, 
-the file `GreeterService.scala` would be generated in `target/scala-2.12/src_managed/main/quickstart`:
+the file `GreeterService.scala` would be generated in `target/scala-2.12/src_managed/main`:
 
 ```tut:silent
-package quickstart
-
 import higherkindness.mu.rpc.protocol._
 
 @message case class HelloRequest(greeting: String)
@@ -216,7 +212,7 @@ import higherkindness.mu.rpc.protocol._
 @service(Avro) 
 trait GreeterService[F[_]] {
 
-  def sayHelloAvro(arg: foo.bar.HelloRequest): F[foo.bar.HelloResponse]
+  def sayHelloAvro(arg: HelloRequest): F[HelloResponse]
 
 }
 ```
