@@ -61,6 +61,7 @@ protocol StockInfoService {
 ```
 
 **Scala**
+
 ```scala
 package higherkindness.mu.rpc.protocols
 

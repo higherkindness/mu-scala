@@ -6,9 +6,11 @@ permalink: /idl-generation
 
 # IDL Generation
 
-Before going into implementation details, we mentioned that the [mu] ecosystem gives us the ability to generate `.proto` files from Scala definitions, in order to maintain compatibility with other languages and systems outside of Scala.
+Before going into implementation details, we mentioned that the [mu] ecosystem gives us 
+the ability to generate `.proto` files from Scala definitions, 
+in order to maintain compatibility with other languages and systems outside of Scala.
 
-This relies on `idlGen`, an sbt plugin to generate Protobuf and Avro IDL files from the [mu] service definitions.
+This relies on `idlGen`, an sbt plugin to generate `Protobuf` and `Avro` IDL files from the [mu] service definitions.
 
 ## Plugin Installation
 
@@ -65,15 +67,17 @@ object service {
 }
 ```
 
-At this point, each time you want to update your `.proto` IDL files from the scala definitions, you have to run the following sbt task:
+At this point, each time you want to update your `.proto` IDL files from the scala definitions, 
+you have to run the following sbt task:
 
 ```bash
 sbt "idlGen proto"
 ```
 
-Using this example, the resulting Protobuf IDL would be generated in `/src/main/resources/proto/service.proto`, assuming that the scala file is named `service.scala`. The content should be similar to:
+Using this example, the resulting `Protobuf` IDL would be generated in `/src/main/resources/proto/service.proto`, 
+assuming that the scala file is named `service.scala`. The content should be similar to:
 
-```
+```proto
 // This file has been automatically generated for use by
 // the idlGen plugin, from mu-rpc service definitions.
 // Read more at: https://higherkindness.github.io/mu/scala/
@@ -81,7 +85,6 @@ Using this example, the resulting Protobuf IDL would be generated in `/src/main/
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_outer_class_name = "Quickstart";
 
 package quickstart;
 
@@ -101,17 +104,16 @@ service ProtoGreeter {
 }
 ```
 
-To generate Avro IDL instead, use:
+To generate `Avro` IDL instead, use:
 
 ```bash
 sbt "idlGen avro"
 ```
 
-And the resulting Avro IDL would be generated in `target/scala-2.12/resource_managed/main/avro/service.avpr`:
+And the resulting `Avro` IDL would be generated in `target/scala-2.12/resource_managed/main/avro/service.avpr`:
 
-```
+```json
 {
-  "namespace" : "quickstart",
   "protocol" : "GreeterService",
   "types" : [
     {
@@ -149,7 +151,8 @@ And the resulting Avro IDL would be generated in `target/scala-2.12/resource_man
 }
 ```
 
-Note that due to limitations in the Avro IDL, currently only unary RPC services are converted (client and/or server-streaming services are ignored).
+Note that due to limitations in the `Avro` IDL, currently only unary RPC services 
+are converted (client and/or server-streaming services are ignored).
 
 ### Plugin Settings
 
@@ -163,8 +166,10 @@ The source directory must exist, otherwise, the `idlGen` task will fail. Target 
 
 ## Generating source files from IDL
 
-You can also use this process in reverse and generate [mu] Scala classes from IDL definitions. Currently only Avro is supported, in both `.avpr` (JSON) and `.avdl` (Avro IDL) formats.
-The plugin's implementation basically wraps the [avrohugger] library and adds some mu-specific extensions.
+You can also use this process in reverse and generate [mu] Scala classes from IDL definitions. 
+Currently, `Avro` is supported in both `.avpr` (JSON) and `.avdl` (Avro IDL) formats, along with `Protobuf`.
+The plugin's implementation basically wraps the [avrohugger] library for `Avro` 
+and uses [skeuomorph] for `Protobuf` adding some mu-specific extensions.
 
 To use it, run:
 
@@ -172,16 +177,20 @@ To use it, run:
 sbt "srcGen avro"
 ```
 
-You can even use `IDL` definitions packaged into artifacts within your classpath. In that particular situation, you need to setup `srcGenJarNames`, specifying the artifact names (or sbt module names) that will be unzipped/used to extract the `IDL` files.
+You can even use `IDL` definitions packaged into artifacts within your classpath. 
+In that particular situation, you need to setup `srcGenJarNames`, 
+specifying the artifact names (or sbt module names) that will be unzipped/used to extract the `IDL` files.
 
-`srcGenJarNames ` can be very useful when you want to distribute your `IDL` files without binary code (to prevent binary conflicts in clients). In that case, you might want to include some additional settings in the build where your `IDL` files are placed, for instance:
+`srcGenJarNames ` can be very useful when you want to distribute your `IDL` files 
+without binary code (to prevent binary conflicts in clients). 
+In that case, you might want to include some additional settings 
+in the build where your `IDL` files are placed, for instance:
 
 ```
 //...
 .settings(
   Seq(
     publishMavenStyle := true,
-    mappings in (Compile, packageBin) ~= { _.filter(!_._1.getName.endsWith(".class")) },
     idlType := "avro",
     srcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
     sourceGenerators in Compile += (Compile / srcGen).taskValue
@@ -190,20 +199,20 @@ You can even use `IDL` definitions packaged into artifacts within your classpath
 //...
 ```
 
-In the case of the `.avpr` file we generated above, the file `GreeterService.scala` would be generated in `target/scala-2.12/src_managed/main/quickstart`:
+In the case of the `.avpr` file we generated above, 
+the file `GreeterService.scala` would be generated in `target/scala-2.12/src_managed/main`:
 
-```
-package quickstart
-
+```tut:silent
 import higherkindness.mu.rpc.protocol._
 
 @message case class HelloRequest(greeting: String)
 
 @message case class HelloResponse(reply: String)
 
-@service trait GreeterService[F[_]] {
+@service(Avro) 
+trait GreeterService[F[_]] {
 
-  def sayHelloAvro(arg: foo.bar.HelloRequest): F[foo.bar.HelloResponse]
+  def sayHelloAvro(arg: HelloRequest): F[HelloResponse]
 
 }
 ```
@@ -218,7 +227,7 @@ sourceGenerators in Compile += (Compile / srcGen).taskValue
 
 Just like `idlGen`, `srcGen` has some configurable settings:
 
-* **`idlType`**: the type of IDL to generate from, currently only `avro`.
+* **`idlType`**: the type of IDL to generate from `avro` or `proto`.
 * **`srcGenSerializationType`**: the serialization type when generating Scala sources from the IDL definitions. `Protobuf`, `Avro` or `AvroWithSchema` are the current supported serialization types. By default, the serialization type is `Avro`.
 * **`srcGenJarNames`**: the list of jar names or sbt modules containing the IDL definitions that will be used at compilation time by `srcGen` to generate the Scala sources. By default, this sequence is empty.
 * **`srcGenSourceDirs`**: the list of directories where your IDL files are placed. By default: `Compile / resourceDirectory`, typically `src/main/resources/`.
@@ -239,7 +248,8 @@ The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also
 
 The source directory must exist, otherwise, the `srcGen` task will fail. Target directories will be created upon generation.
 
-*Note*: regarding `srcGenSourceDirs`, all the directories configured as the source will be distributed in the resulting jar artifact preserving the same folder structure as in the source.
+*Note*: regarding `srcGenSourceDirs`, all the directories configured as the source 
+will be distributed in the resulting jar artifact preserving the same folder structure as in the source.
 
 The following example shows how to set up a dependency with another artifact or sbt module containing the IDL definitions (`foo-domain`):
 
@@ -247,14 +257,13 @@ The following example shows how to set up a dependency with another artifact or 
 //...
 .settings(
   Seq(
-      publishMavenStyle := true,
       idlType := "avro",
       srcGenSerializationType := "AvroWithSchema",
       srcGenJarNames := Seq("foo-domain"),
       srcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
       sourceGenerators in Compile += (Compile / srcGen).taskValue,
       libraryDependencies ++= Seq(
-        "io.higherkindness" %% "mu-rpc-client-core" % V.muRPC
+        "io.higherkindness" %% "mu-rpc-channel" % V.muRPC
       )
   )
 )
@@ -275,3 +284,4 @@ The following example shows how to set up a dependency with another artifact or 
 [cats-effect]: https://github.com/typelevel/cats-effect
 [Metrifier]: https://github.com/47deg/metrifier
 [avrohugger]: https://github.com/julianpeeters/avrohugger
+[skeuomorph]: https://github.com/higherkindness/skeuomorph
