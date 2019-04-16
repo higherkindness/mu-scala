@@ -25,7 +25,7 @@ As you might know, [gRPC] uses protocol buffers (a.k.a. *protobuf*) by default:
 
 In the example given in the [gRPC guide], you might have a proto file like this:
 
-```
+```proto
 message Person {
   string name = 1;
   int32 id = 2;
@@ -37,7 +37,7 @@ Then, once you’ve specified your data structures, you can use the protobuf com
 
 Likewise, you can define [gRPC] services in your proto files, with RPC method parameters and return types specified as protocol buffer messages:
 
-```
+```proto
 // The greeter service definition.
 service Greeter {
   // Sends a greeting

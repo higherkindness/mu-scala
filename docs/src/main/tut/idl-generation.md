@@ -77,7 +77,7 @@ sbt "idlGen proto"
 Using this example, the resulting `Protobuf` IDL would be generated in `/src/main/resources/proto/service.proto`, 
 assuming that the scala file is named `service.scala`. The content should be similar to:
 
-```
+```proto
 // This file has been automatically generated for use by
 // the idlGen plugin, from mu-rpc service definitions.
 // Read more at: https://higherkindness.github.io/mu/scala/
@@ -113,7 +113,7 @@ sbt "idlGen avro"
 
 And the resulting `Avro` IDL would be generated in `target/scala-2.12/resource_managed/main/avro/service.avpr`:
 
-```
+```json
 {
   "namespace" : "quickstart",
   "protocol" : "GreeterService",
@@ -204,7 +204,7 @@ in the build where your `IDL` files are placed, for instance:
 In the case of the `.avpr` file we generated above, 
 the file `GreeterService.scala` would be generated in `target/scala-2.12/src_managed/main/quickstart`:
 
-```
+```tut:silent
 package quickstart
 
 import higherkindness.mu.rpc.protocol._
