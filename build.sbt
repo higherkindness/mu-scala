@@ -119,7 +119,7 @@ lazy val server = project
 //// PROMETHEUS ////
 ////////////////////
 
-lazy val `prometheus` = project
+lazy val prometheus = project
   .in(file("modules/metrics/prometheus"))
   .dependsOn(`internal-core` % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
@@ -130,7 +130,7 @@ lazy val `prometheus` = project
 //// DROPWIZARD ////
 ////////////////////
 
-lazy val `dropwizard` = project
+lazy val dropwizard = project
   .in(file("modules/metrics/dropwizard"))
   .dependsOn(`internal-core` % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
@@ -141,7 +141,7 @@ lazy val `dropwizard` = project
 //// HTTP/REST ////
 ///////////////////
 
-lazy val `http` = project
+lazy val http = project
   .in(file("modules/http"))
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(server % "compile->compile;test->test")
@@ -187,7 +187,7 @@ lazy val `idlgen-sbt` = project
 //// BENCHMARKS ////
 ////////////////////
 
-lazy val lastReleasedV = "0.17.2"
+lazy val lastReleasedV = "0.18.0"
 
 lazy val `benchmarks-vprev` = project
   .in(file("benchmarks/vprev"))
@@ -274,6 +274,160 @@ lazy val `example-routeguide-client` = project
     addCommandAlias("runClientTask", "runMain example.routeguide.client.task.ClientAppTask"))
 
 ////////////////////
+/////   SEED   /////
+////////////////////
+
+////////////////////////
+//// Shared Modules ////
+////////////////////////
+
+lazy val `seed-config` = project
+  .in(file("modules/examples/seed/shared/modules/config"))
+  .settings(coverageEnabled := false)
+  .settings(noPublishSettings)
+  .settings(exampleSeedConfigSettings)
+
+////////////////////////
+////     Shared     ////
+////////////////////////
+
+lazy val allSharedModules: ProjectReference = `seed-config`
+
+lazy val allSharedModulesDeps: ClasspathDependency =
+  ClasspathDependency(allSharedModules, None)
+
+lazy val `seed-shared` = project
+  .in(file("modules/examples/seed/shared"))
+  .settings(coverageEnabled := false)
+  .settings(noPublishSettings)
+  .aggregate(allSharedModules)
+  .dependsOn(allSharedModulesDeps)
+
+//////////////////////////
+////  Server Modules  ////
+//////////////////////////
+
+lazy val `seed-server-common` = project
+  .in(file("modules/examples/seed/server/modules/common"))
+  .settings(coverageEnabled := false)
+  .settings(noPublishSettings)
+
+lazy val `seed-server-protocol-avro` = project
+  .in(file("modules/examples/seed/server/modules/protocol_avro"))
+  .settings(coverageEnabled := false)
+  .settings(noPublishSettings)
+  .dependsOn(channel)
+
+lazy val `seed-server-protocol-proto` = project
+  .in(file("modules/examples/seed/server/modules/protocol_proto"))
+  .settings(coverageEnabled := false)
+  .settings(noPublishSettings)
+  .dependsOn(fs2)
+
+lazy val `seed-server-process` = project
+  .in(file("modules/examples/seed/server/modules/process"))
+  .settings(coverageEnabled := false)
+  .settings(noPublishSettings)
+  .settings(exampleSeedLogSettings)
+  .dependsOn(`seed-server-common`, `seed-server-protocol-avro`, `seed-server-protocol-proto`)
+
+lazy val `seed-server-app` = project
+  .in(file("modules/examples/seed/server/modules/app"))
+  .settings(coverageEnabled := false)
+  .settings(noPublishSettings)
+  .dependsOn(server, `seed-server-process`, `seed-config`)
+
+//////////////////////////
+////      Server      ////
+//////////////////////////
+
+lazy val allSeedServerModules: Seq[ProjectReference] = Seq(
+  `seed-server-common`,
+  `seed-server-protocol-avro`,
+  `seed-server-protocol-proto`,
+  `seed-server-process`,
+  `seed-server-app`
+)
+
+lazy val allSeedServerModulesDeps: Seq[ClasspathDependency] =
+  allSeedServerModules.map(ClasspathDependency(_, None))
+
+lazy val `seed-server` = project
+  .in(file("modules/examples/seed/server"))
+  .settings(coverageEnabled := false)
+  .settings(noPublishSettings)
+  .aggregate(allSeedServerModules: _*)
+  .dependsOn(allSeedServerModulesDeps: _*)
+addCommandAlias("runAvroServer", "seed_server/runMain example.seed.server.app.AvroServerApp")
+addCommandAlias("runProtoServer", "seed_server/runMain example.seed.server.app.ProtoServerApp")
+
+//////////////////////////
+////  Client Modules  ////
+//////////////////////////
+
+lazy val `seed-client-common` = project
+  .in(file("modules/examples/seed/client/modules/common"))
+  .settings(coverageEnabled := false)
+  .settings(noPublishSettings)
+
+lazy val `seed-client-process` = project
+  .in(file("modules/examples/seed/client/modules/process"))
+  .settings(coverageEnabled := false)
+  .settings(noPublishSettings)
+  .settings(exampleSeedLogSettings)
+  .dependsOn(netty, fs2, `seed-client-common`, `seed-server-protocol-avro`, `seed-server-protocol-proto`)
+
+lazy val `seed-client-app` = project
+  .in(file("modules/examples/seed/client/modules/app"))
+  .settings(coverageEnabled := false)
+  .settings(noPublishSettings)
+  .settings(exampleSeedClientAppSettings)
+  .dependsOn(`seed-client-process`, `seed-config`)
+
+//////////////////////////
+////      Client      ////
+//////////////////////////
+
+lazy val allSeedClientModules: Seq[ProjectReference] = Seq(
+  `seed-client-common`,
+  `seed-client-process`,
+  `seed-client-app`
+)
+
+lazy val allSeedClientModulesDeps: Seq[ClasspathDependency] =
+  allSeedClientModules.map(ClasspathDependency(_, None))
+
+lazy val `seed-client` = project
+  .in(file("modules/examples/seed/client"))
+  .settings(coverageEnabled := false)
+  .settings(noPublishSettings)
+  .aggregate(allSeedClientModules: _*)
+  .dependsOn(allSeedClientModulesDeps: _*)
+addCommandAlias("runAvroClient", "seed_client/runMain example.seed.client.app.AvroClientApp")
+addCommandAlias("runProtoClient", "seed_client/runMain example.seed.client.app.ProtoClientApp")
+
+/////////////////////////
+////       Root       ////
+/////////////////////////
+
+lazy val allSeedModules: Seq[ProjectReference] = Seq(
+  `seed-shared`,
+  `seed-client`,
+  `seed-server`
+)
+
+lazy val allSeedModulesDeps: Seq[ClasspathDependency] =
+  allSeedModules.map(ClasspathDependency(_, None))
+
+lazy val seed = project
+  .in(file("modules/examples/seed"))
+  .settings(coverageEnabled := false)
+  .settings(noPublishSettings)
+  .settings(moduleName := "mu-rpc-example-seed")
+  .aggregate(allSeedModules: _*)
+  .dependsOn(allSeedModulesDeps: _*)
+
+////////////////////
 ////  TODOLIST  ////
 ////////////////////
 
@@ -357,16 +511,16 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   monix,
   fs2,
   `client-cache`,
-  `netty`,
-  `okhttp`,
+  netty,
+  okhttp,
   server,
   config,
-  `dropwizard`,
-  `prometheus`,
+  dropwizard,
+  prometheus,
   testing,
   ssl,
   `idlgen-core`,
-  `http`,
+  http,
   `marshallers-jodatime`,
   `example-routeguide-protocol`,
   `example-routeguide-common`,
@@ -377,6 +531,7 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `example-todolist-runtime`,
   `example-todolist-server`,
   `example-todolist-client`,
+  seed,
   `benchmarks-vprev`,
   `benchmarks-vnext`,
   `legacy-avro-decimal-compat-model`,
