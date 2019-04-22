@@ -170,11 +170,27 @@ object serviceImpl {
         case d: DefDef => d
       } partition (_.rhs.isEmpty)
 
-      private def compressionType(anns: List[Tree]): Tree =
-        annotationParam(anns, 1, "compressionType", Some("Identity")) match {
+      private val compressionType: Tree =
+        annotationParam(1, "compressionType") {
           case "Identity" => q"None"
           case "Gzip"     => q"""Some("gzip")"""
-        }
+        }.getOrElse(q"None")
+
+      private val OptionString = "Some\\(\"(.+)\"\\)".r
+
+      private val namespace: String =
+        annotationParam(2, "namespace") {
+          case OptionString(s) => s"$s."
+          case "None"          => ""
+        }.getOrElse("")
+
+      private val fullyServiceName = namespace + serviceName.toString
+
+      private val methodNameStyle: MethodNameStyle =
+        annotationParam(3, "methodNameStyle") {
+          case "Capitalize" => Capitalize
+          case "Unchanged"  => Unchanged
+        }.getOrElse(Unchanged)
 
       private val rpcRequests: List[RpcRequest] = for {
         d      <- rpcDefs
@@ -184,36 +200,22 @@ object serviceImpl {
       } yield
         RpcRequest(
           Operation(d.name, TypeTypology(p.tpt), TypeTypology(d.tpt)),
-          compressionType(serviceDef.mods.annotations))
+          compressionType,
+          namespace,
+          methodNameStyle
+        )
 
       val imports: List[Tree] = defs.collect {
         case imp: Import => imp
       }
 
       private val serializationType: SerializationType =
-        c.prefix.tree match {
-          case q"new service($serializationType)" =>
-            serializationType.toString match {
-              case "Protobuf"       => Protobuf
-              case "Avro"           => Avro
-              case "AvroWithSchema" => AvroWithSchema
-              case _ =>
-                sys.error(
-                  "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema]")
-            }
-          case q"new service($serializationType, $_)" =>
-            serializationType.toString match {
-              case "Protobuf"       => Protobuf
-              case "Avro"           => Avro
-              case "AvroWithSchema" => AvroWithSchema
-              case _ =>
-                sys.error(
-                  "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema], and a CompressionType parameter [Identity|Gzip]")
-            }
-          case _ =>
-            sys.error(
-              "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema]")
-        }
+        annotationParam(0, "serializationType") {
+          case "Protobuf"       => Protobuf
+          case "Avro"           => Avro
+          case "AvroWithSchema" => AvroWithSchema
+        }.getOrElse(sys.error(
+          "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema]"))
 
       val encodersImport = serializationType match {
         case Protobuf =>
@@ -246,7 +248,7 @@ object serviceImpl {
       val bindService: DefDef = q"""
         def bindService[$F_](implicit ..$bindImplicits): $F[_root_.io.grpc.ServerServiceDefinition] =
           _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](${lit(
-        serviceName)}, ..$serverCallDescriptorsAndHandlers)
+        fullyServiceName)}, ..$serverCallDescriptorsAndHandlers)
         """
 
       private val clientCallMethods: List[Tree] = rpcRequests.map(_.clientDef)
@@ -311,17 +313,21 @@ object serviceImpl {
 
       private def lit(x: Any): Literal = Literal(Constant(x.toString))
 
-      private def annotationParam(
-          params: List[Tree],
-          pos: Int,
-          name: String,
-          default: Option[String] = None): String =
-        params
-          .collectFirst {
-            case q"$pName = $pValue" if pName.toString == name => pValue.toString
-          }
-          .getOrElse(if (params.isDefinedAt(pos)) params(pos).toString
-          else default.getOrElse(sys.error(s"Missing annotation parameter $name")))
+      private def annotationParam[A](pos: Int, name: String)(
+          pf: PartialFunction[String, A]): Option[A] = {
+        val rawValue: Option[String] = c.prefix.tree match {
+          case q"new service(..$list)" =>
+            list
+              .collectFirst {
+                case q"$pName = $pValue" if pName.toString == name => pValue.toString
+              }
+              .orElse(list.lift(pos).map(_.toString()))
+          case _ => None
+        }
+        rawValue.map { s =>
+          pf.lift(s).getOrElse(sys.error(s"Invalid `$name` annotation value ($s)"))
+        }
+      }
 
       private def findAnnotation(mods: Modifiers, name: String): Option[Tree] =
         mods.annotations find {
@@ -333,7 +339,9 @@ object serviceImpl {
       //todo: validate that the request and responses are case classes, if possible
       case class RpcRequest(
           operation: Operation,
-          compressionOption: Tree
+          compressionOption: Tree,
+          namespace: String,
+          methodNameStyle: MethodNameStyle
       ) {
 
         import operation._
@@ -354,7 +362,12 @@ object serviceImpl {
           q"_root_.io.grpc.MethodDescriptor.MethodType.${TermName(suffix)}"
         }
 
-        private val methodDescriptorName = TermName(name + "MethodDescriptor")
+        private val updatedName = methodNameStyle match {
+          case Unchanged  => name.toString
+          case Capitalize => name.toString.capitalize
+        }
+
+        private val methodDescriptorName = TermName(updatedName + "MethodDescriptor")
 
         private val reqType = request.safeType
 
@@ -371,8 +384,8 @@ object serviceImpl {
                 RespM)
               .setType($streamingMethodType)
               .setFullMethodName(
-                _root_.io.grpc.MethodDescriptor.generateFullMethodName(${lit(serviceName)}, ${lit(
-          name)}))
+                _root_.io.grpc.MethodDescriptor.generateFullMethodName(
+          ${lit(fullyServiceName)}, ${lit(updatedName)}))
               .build()
           }
         """.supressWarts("Null", "ExplicitImplicitTypes")
