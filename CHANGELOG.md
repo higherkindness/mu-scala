@@ -4,13 +4,6 @@
 
 Release changes:
 
-* Release 0.17.1 ([#554](https://github.com/higherkindness/mu/pull/554))
-* Fixes deployment ([#555](https://github.com/higherkindness/mu/pull/555))
-* Restores the sbt plugin release and fixes ci release ([#556](https://github.com/higherkindness/mu/pull/556))
-* Client cache resource and bumps resources ([#558](https://github.com/higherkindness/mu/pull/558))
-* Releases 0.17.2 version ([#559](https://github.com/higherkindness/mu/pull/559))
-* Moves the site publication to a new stage ([#561](https://github.com/higherkindness/mu/pull/561))
-* Update .travis.yml ([#562](https://github.com/higherkindness/mu/pull/562))
 * Fixes some package names and some refactors ([#565](https://github.com/higherkindness/mu/pull/565))
 * Upgrades Build ([#567](https://github.com/higherkindness/mu/pull/567))
 * Enables benchmarks for the previous Mu version ([#570](https://github.com/higherkindness/mu/pull/570))
