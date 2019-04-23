@@ -32,13 +32,14 @@ class RPCNamespaceTests extends RpcBaseTestSuite with BeforeAndAfterAll with Che
 
     case class Response(length: Int)
 
-    @service(Protobuf, Identity, Some("my.namespace")) trait ProtoRPCServiceDef[F[_]] {
+    @service(Protobuf, namespace = Some("my.namespace")) trait ProtoRPCServiceDef[F[_]] {
       def proto1(req: Request): F[Response]
     }
-    @service(Avro, Identity, Some("my.namespace")) trait AvroRPCServiceDef[F[_]] {
+    @service(Avro, namespace = Some("my.namespace")) trait AvroRPCServiceDef[F[_]] {
       def avro(req: Request): F[Response]
     }
-    @service(AvroWithSchema, Identity, Some("my.namespace")) trait AvroWithSchemaRPCServiceDef[F[_]] {
+    @service(AvroWithSchema, namespace = Some("my.namespace")) trait AvroWithSchemaRPCServiceDef[
+        F[_]] {
       def avroWithSchema(req: Request): F[Response]
     }
 

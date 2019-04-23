@@ -17,6 +17,7 @@
 package higherkindness.mu.rpc
 package internal
 
+import cats.syntax.either._
 import higherkindness.mu.rpc.protocol._
 import scala.reflect.macros.blackbox
 
@@ -170,6 +171,15 @@ object serviceImpl {
         case d: DefDef => d
       } partition (_.rhs.isEmpty)
 
+      val annotationParams: List[Either[String, (String, String)]] = c.prefix.tree match {
+        case q"new service(..$seq)" =>
+          seq.toList.map {
+            case q"$pName = $pValue" => Right((pName.toString(), pValue.toString()))
+            case param               => Left(param.toString())
+          }
+        case _ => Nil
+      }
+
       private val compressionType: Tree =
         annotationParam(1, "compressionType") {
           case "Identity" => q"None"
@@ -178,13 +188,13 @@ object serviceImpl {
 
       private val OptionString = "Some\\(\"(.+)\"\\)".r
 
-      private val namespace: String =
+      private val namespacePrefix: String =
         annotationParam(2, "namespace") {
           case OptionString(s) => s"$s."
           case "None"          => ""
         }.getOrElse("")
 
-      private val fullyServiceName = namespace + serviceName.toString
+      private val fullyServiceName = namespacePrefix + serviceName.toString
 
       private val methodNameStyle: MethodNameStyle =
         annotationParam(3, "methodNameStyle") {
@@ -201,7 +211,6 @@ object serviceImpl {
         RpcRequest(
           Operation(d.name, TypeTypology(p.tpt), TypeTypology(d.tpt)),
           compressionType,
-          namespace,
           methodNameStyle
         )
 
@@ -315,16 +324,14 @@ object serviceImpl {
 
       private def annotationParam[A](pos: Int, name: String)(
           pf: PartialFunction[String, A]): Option[A] = {
-        val rawValue: Option[String] = c.prefix.tree match {
-          case q"new service(..$list)" =>
-            list
-              .collectFirst {
-                case q"$pName = $pValue" if pName.toString == name => pValue.toString
-              }
-              .orElse(list.lift(pos).map(_.toString()))
-          case _ => None
-        }
-        rawValue.map { s =>
+
+        def findNamed: Option[Either[String, (String, String)]] =
+          annotationParams.find(_.exists(_._1 == name))
+
+        def findIndexed: Option[Either[String, (String, String)]] =
+          annotationParams.lift(pos).filter(_.isLeft)
+
+        (findNamed orElse findIndexed).map(_.fold(identity, _._2)).map { s =>
           pf.lift(s).getOrElse(sys.error(s"Invalid `$name` annotation value ($s)"))
         }
       }
@@ -340,7 +347,6 @@ object serviceImpl {
       case class RpcRequest(
           operation: Operation,
           compressionOption: Tree,
-          namespace: String,
           methodNameStyle: MethodNameStyle
       ) {
 
