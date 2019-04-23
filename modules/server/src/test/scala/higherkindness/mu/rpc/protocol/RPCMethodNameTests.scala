@@ -32,13 +32,13 @@ class RPCMethodNameTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
     case class Response(length: Int)
 
-    @service(Protobuf, Identity, None, Capitalize) trait ProtoRPCServiceDef[F[_]] {
-      def proto1(req: Request): F[Response]
+    @service(Protobuf, methodNameStyle = Capitalize) trait ProtoRPCServiceDef[F[_]] {
+      def proto(req: Request): F[Response]
     }
-    @service(Avro, Identity, None, Capitalize) trait AvroRPCServiceDef[F[_]] {
+    @service(Avro, methodNameStyle = Capitalize) trait AvroRPCServiceDef[F[_]] {
       def avro(req: Request): F[Response]
     }
-    @service(AvroWithSchema, Identity, None, Capitalize) trait AvroWithSchemaRPCServiceDef[F[_]] {
+    @service(AvroWithSchema, methodNameStyle = Capitalize) trait AvroWithSchemaRPCServiceDef[F[_]] {
       def avroWithSchema(req: Request): F[Response]
     }
 
@@ -47,7 +47,7 @@ class RPCMethodNameTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
         with AvroRPCServiceDef[F]
         with AvroWithSchemaRPCServiceDef[F] {
 
-      def proto1(bd: Request): F[Response]         = Response(bd.s.length).pure
+      def proto(bd: Request): F[Response]          = Response(bd.s.length).pure
       def avro(bd: Request): F[Response]           = Response(bd.s.length).pure
       def avroWithSchema(bd: Request): F[Response] = Response(bd.s.length).pure
     }
@@ -68,7 +68,7 @@ class RPCMethodNameTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
         ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
           forAll { s: String =>
-            client.proto1(Request(s)).map(_.length).unsafeRunSync() == s.length
+            client.proto(Request(s)).map(_.length).unsafeRunSync() == s.length
           }
         }
       }
