@@ -17,6 +17,7 @@
 package higherkindness.mu.rpc
 package internal
 
+import cats.syntax.either._
 import higherkindness.mu.rpc.protocol._
 import scala.reflect.macros.blackbox
 
