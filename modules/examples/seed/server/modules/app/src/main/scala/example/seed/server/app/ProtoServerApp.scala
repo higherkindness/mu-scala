@@ -25,8 +25,6 @@ import example.seed.server.protocol.proto.services._
 import higherkindness.mu.rpc.server.{AddService, GrpcServer}
 import io.chrisdavenport.log4cats.Logger
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 class ProtoServerProgram[F[_]: ConcurrentEffect: Timer] extends ServerBoot[F] {
 
   def serverProgram(config: SeedServerConfig)(implicit L: Logger[F]): F[ExitCode] = {

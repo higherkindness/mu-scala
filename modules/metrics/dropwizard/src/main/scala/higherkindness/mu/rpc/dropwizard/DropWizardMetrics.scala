@@ -54,7 +54,7 @@ import io.grpc.Status
  *    - "unauthenticated"
  *    - "unavailable"
  *    - "unimplemented"
- *    - "unknown"
+ *    - "unknown-status"
  *    - "unreachable-error"
  *
  */

@@ -25,8 +25,6 @@ import example.seed.server.protocol.avro._
 import higherkindness.mu.rpc.server._
 import io.chrisdavenport.log4cats.Logger
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 class AvroServerProgram[F[_]: ConcurrentEffect] extends ServerBoot[F] {
 
   def serverProgram(config: SeedServerConfig)(implicit L: Logger[F]): F[ExitCode] = {

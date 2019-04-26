@@ -86,7 +86,7 @@ object MetricsOps {
     case Unauthenticated   => "unauthenticated"
     case Unavailable       => "unavailable"
     case Unimplemented     => "unimplemented"
-    case Unknown           => "unknown"
+    case Unknown           => "unknown-status"
     case _                 => "unreachable-error"
   }
 
