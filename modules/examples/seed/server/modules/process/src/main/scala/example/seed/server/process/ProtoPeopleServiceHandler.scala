@@ -17,7 +17,6 @@
 package example.seed.server.process
 
 import cats.effect.{Sync, Timer}
-import cats.syntax.apply._
 import cats.syntax.functor._
 import example.seed.server.protocol.proto.people._
 import example.seed.server.protocol.proto.services.PeopleService
