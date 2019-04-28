@@ -2,7 +2,8 @@
 
 <h2 id="what-is-mu-rpc">What is mu-rpc?</h2>
 
-<p><a href="https://github.com/higherkindness/mu">mu</a> provides the ability to combine <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> protocols, services, and clients in your Scala program, thanks to <a href="https://grpc.io/">gRPC</a>. Although it’s fully integrated with <a href="https://grpc.io/">gRPC</a>, there are some important differences when defining the protocols, as we’ll see later on.</p>
+<p><a href="https://github.com/higherkindness/mu">mu</a> provides the ability to combine <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> protocols, services, and clients in your Scala program, thanks to <a href="https://grpc.io/">gRPC</a>. 
+Although it’s fully integrated with <a href="https://grpc.io/">gRPC</a>, there are some important differences when defining the protocols, as we’ll see later on.</p>
 
 <h2 id="installation">Installation</h2>
 
@@ -198,12 +199,10 @@
 </span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-config"</span> <span class="o">%</span> <span class="s">"0.18.0"</span>
 
 <span class="c1">// optional - for both server and client metrics reporting, using Prometheus.
-</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-prometheus-server"</span> <span class="o">%</span> <span class="s">"0.18.0"</span>
-<span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-prometheus-client"</span> <span class="o">%</span> <span class="s">"0.18.0"</span>
+</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-prometheus"</span> <span class="o">%</span> <span class="s">"0.18.0"</span>
 
 <span class="c1">// optional - for both server and client metrics reporting, using Dropwizard.
-</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-dropwizard-server"</span> <span class="o">%</span> <span class="s">"0.18.0"</span>
-<span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-dropwizard-client"</span> <span class="o">%</span> <span class="s">"0.18.0"</span>
+</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-dropwizard"</span> <span class="o">%</span> <span class="s">"0.18.0"</span>
 
 <span class="c1">// optional - for the communication between server and client by using SSL/TLS.
 </span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-netty-ssl"</span> <span class="o">%</span> <span class="s">"0.18.0"</span>

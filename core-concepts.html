@@ -23,32 +23,32 @@
 
 <p>In the example given in the <a href="https://grpc.io/docs/guides/">gRPC guide</a>, you might have a proto file like this:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>message Person {
-  string name = 1;
-  int32 id = 2;
-  bool has_ponycopter = 3;
-}
+<div class="language-proto highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">message</span> <span class="nc">Person</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">name</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">int32</span> <span class="na">id</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="kt">bool</span> <span class="na">has_ponycopter</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <p>Then, once you’ve specified your data structures, you can use the protobuf compiler <code class="highlighter-rouge">protoc</code> to generate data access classes in your preferred language(s) from your proto definition.</p>
 
 <p>Likewise, you can define <a href="https://grpc.io/">gRPC</a> services in your proto files, with RPC method parameters and return types specified as protocol buffer messages:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// The greeter service definition.
-service Greeter {
-  // Sends a greeting
-  rpc SayHello (HelloRequest) returns (HelloReply);
-}
+<div class="language-proto highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// The greeter service definition.
+</span><span class="kd">service</span> <span class="n">Greeter</span> <span class="p">{</span>
+  <span class="c1">// Sends a greeting
+</span>  <span class="k">rpc</span> <span class="n">SayHello</span> <span class="p">(</span><span class="n">HelloRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">HelloReply</span><span class="p">);</span>
+<span class="p">}</span>
 
-// The request message containing the user's name.
-message HelloRequest {
-  string name = 1;
-}
+<span class="c1">// The request message containing the user's name.
+</span><span class="kd">message</span> <span class="nc">HelloRequest</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">name</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
 
-// The response message containing the greetings
-message HelloReply {
-  string message = 1;
-}
+<span class="c1">// The response message containing the greetings
+</span><span class="kd">message</span> <span class="nc">HelloReply</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="kd">message</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
 <p>Correspondingly, <a href="https://grpc.io/">gRPC</a> uses protoc with a special <a href="https://grpc.io/">gRPC</a> plugin to generate code from your proto file for this <code class="highlighter-rouge">Greeter</code> RPC service.</p>
