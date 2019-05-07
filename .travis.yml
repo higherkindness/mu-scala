@@ -50,7 +50,7 @@ jobs:
         - if grep -q "SNAPSHOT" version.sbt; then
             sbt idlgen-sbt/publish;
           else
-            sbt idlgen-sbt/release;
+            sbt ";project idlgen-sbt; release";
           fi
     - stage: deploy
       scala: 2.12.8
