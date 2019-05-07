@@ -67,7 +67,7 @@ object PrometheusMetrics {
 
   def build[F[_]: Sync](
       cr: CollectorRegistry,
-      prefix: String = "higherkinderness.mu"): F[MetricsOps[F]] =
+      prefix: String = "higherkindness_mu"): F[MetricsOps[F]] =
     buildMetrics[F](prefix, cr).map(PrometheusMetrics[F])
 
   def apply[F[_]: Sync](metrics: Metrics)(implicit F: Sync[F]): MetricsOps[F] =
