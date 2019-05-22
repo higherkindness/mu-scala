@@ -17,6 +17,7 @@
 package higherkindness.mu.rpc
 package internal
 
+import cats.syntax.either._
 import higherkindness.mu.rpc.protocol._
 import scala.reflect.macros.blackbox
 
@@ -170,11 +171,36 @@ object serviceImpl {
         case d: DefDef => d
       } partition (_.rhs.isEmpty)
 
-      private def compressionType(anns: List[Tree]): Tree =
-        annotationParam(anns, 1, "compressionType", Some("Identity")) match {
+      val annotationParams: List[Either[String, (String, String)]] = c.prefix.tree match {
+        case q"new service(..$seq)" =>
+          seq.toList.map {
+            case q"$pName = $pValue" => Right((pName.toString(), pValue.toString()))
+            case param               => Left(param.toString())
+          }
+        case _ => Nil
+      }
+
+      private val compressionType: Tree =
+        annotationParam(1, "compressionType") {
           case "Identity" => q"None"
           case "Gzip"     => q"""Some("gzip")"""
-        }
+        }.getOrElse(q"None")
+
+      private val OptionString = "Some\\(\"(.+)\"\\)".r
+
+      private val namespacePrefix: String =
+        annotationParam(2, "namespace") {
+          case OptionString(s) => s"$s."
+          case "None"          => ""
+        }.getOrElse("")
+
+      private val fullyServiceName = namespacePrefix + serviceName.toString
+
+      private val methodNameStyle: MethodNameStyle =
+        annotationParam(3, "methodNameStyle") {
+          case "Capitalize" => Capitalize
+          case "Unchanged"  => Unchanged
+        }.getOrElse(Unchanged)
 
       private val rpcRequests: List[RpcRequest] = for {
         d      <- rpcDefs
@@ -184,36 +210,21 @@ object serviceImpl {
       } yield
         RpcRequest(
           Operation(d.name, TypeTypology(p.tpt), TypeTypology(d.tpt)),
-          compressionType(serviceDef.mods.annotations))
+          compressionType,
+          methodNameStyle
+        )
 
       val imports: List[Tree] = defs.collect {
         case imp: Import => imp
       }
 
       private val serializationType: SerializationType =
-        c.prefix.tree match {
-          case q"new service($serializationType)" =>
-            serializationType.toString match {
-              case "Protobuf"       => Protobuf
-              case "Avro"           => Avro
-              case "AvroWithSchema" => AvroWithSchema
-              case _ =>
-                sys.error(
-                  "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema]")
-            }
-          case q"new service($serializationType, $_)" =>
-            serializationType.toString match {
-              case "Protobuf"       => Protobuf
-              case "Avro"           => Avro
-              case "AvroWithSchema" => AvroWithSchema
-              case _ =>
-                sys.error(
-                  "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema], and a CompressionType parameter [Identity|Gzip]")
-            }
-          case _ =>
-            sys.error(
-              "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema]")
-        }
+        annotationParam(0, "serializationType") {
+          case "Protobuf"       => Protobuf
+          case "Avro"           => Avro
+          case "AvroWithSchema" => AvroWithSchema
+        }.getOrElse(sys.error(
+          "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema]"))
 
       val encodersImport = serializationType match {
         case Protobuf =>
@@ -225,16 +236,28 @@ object serviceImpl {
       }
 
       val methodDescriptors: List[Tree] = rpcRequests.map(_.methodDescriptor)
+
       private val serverCallDescriptorsAndHandlers: List[Tree] =
         rpcRequests.map(_.descriptorAndHandler)
+
+      val ceImplicit: Tree        = q"CE: _root_.cats.effect.ConcurrentEffect[$F]"
+      val csImplicit: Tree        = q"CS: _root_.cats.effect.ContextShift[$F]"
+      val schedulerImplicit: Tree = q"S: _root_.monix.execution.Scheduler"
+
+      val bindImplicits: List[Tree] = ceImplicit :: q"algebra: $serviceName[$F]" :: rpcRequests
+        .find(_.operation.isMonixObservable)
+        .map(_ => schedulerImplicit)
+        .toList
+
+      val classImplicits: List[Tree] = ceImplicit :: csImplicit :: rpcRequests
+        .find(_.operation.isMonixObservable)
+        .map(_ => schedulerImplicit)
+        .toList
+
       val bindService: DefDef = q"""
-        def bindService[$F_](implicit
-          F: _root_.cats.effect.ConcurrentEffect[$F],
-          algebra: $serviceName[$F],
-          EC: _root_.scala.concurrent.ExecutionContext
-        ): $F[_root_.io.grpc.ServerServiceDefinition] =
+        def bindService[$F_](implicit ..$bindImplicits): $F[_root_.io.grpc.ServerServiceDefinition] =
           _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](${lit(
-        serviceName)}, ..$serverCallDescriptorsAndHandlers)
+        fullyServiceName)}, ..$serverCallDescriptorsAndHandlers)
         """
 
       private val clientCallMethods: List[Tree] = rpcRequests.map(_.clientDef)
@@ -244,10 +267,7 @@ object serviceImpl {
         class $Client[$F_](
           channel: _root_.io.grpc.Channel,
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-        )(implicit
-          F: _root_.cats.effect.ConcurrentEffect[$F],
-          EC: _root_.scala.concurrent.ExecutionContext
-        ) extends _root_.io.grpc.stub.AbstractStub[$Client[$F]](channel, options) with $serviceName[$F] {
+        )(implicit ..$classImplicits) extends _root_.io.grpc.stub.AbstractStub[$Client[$F]](channel, options) with $serviceName[$F] {
           override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $Client[$F] =
               new $Client[$F](channel, options)
 
@@ -262,14 +282,11 @@ object serviceImpl {
           channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] = List(
             _root_.higherkindness.mu.rpc.channel.UsePlaintext()),
             options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-          )(implicit
-          F: _root_.cats.effect.ConcurrentEffect[$F],
-          EC: _root_.scala.concurrent.ExecutionContext
-        ): _root_.cats.effect.Resource[F, $serviceName[$F]] =
+          )(implicit ..$classImplicits): _root_.cats.effect.Resource[F, $serviceName[$F]] =
           _root_.cats.effect.Resource.make {
             new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
-          }(channel => F.void(F.delay(channel.shutdown()))).flatMap(ch =>
-          _root_.cats.effect.Resource.make[F, $serviceName[$F]](F.delay(new $Client[$F](ch, options)))(_ => F.unit))
+          }(channel => CE.void(CE.delay(channel.shutdown()))).flatMap(ch =>
+          _root_.cats.effect.Resource.make[F, $serviceName[$F]](CE.delay(new $Client[$F](ch, options)))(_ => CE.unit))
         """.supressWarts("DefaultArguments")
 
       val clientFromChannel: DefDef =
@@ -277,12 +294,9 @@ object serviceImpl {
         def clientFromChannel[$F_](
           channel: $F[_root_.io.grpc.ManagedChannel],
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-        )(implicit
-          F: _root_.cats.effect.ConcurrentEffect[$F],
-          EC: _root_.scala.concurrent.ExecutionContext
-        ): _root_.cats.effect.Resource[$F, $serviceName[$F]] = _root_.cats.effect.Resource.make(channel)(channel =>
-        F.void(F.delay(channel.shutdown()))).flatMap(ch =>
-        _root_.cats.effect.Resource.make[$F, $serviceName[$F]](F.delay(new $Client[$F](ch, options)))(_ => F.unit))
+        )(implicit ..$classImplicits): _root_.cats.effect.Resource[$F, $serviceName[$F]] = _root_.cats.effect.Resource.make(channel)(channel =>
+        CE.void(CE.delay(channel.shutdown()))).flatMap(ch =>
+        _root_.cats.effect.Resource.make[$F, $serviceName[$F]](CE.delay(new $Client[$F](ch, options)))(_ => CE.unit))
         """.supressWarts("DefaultArguments")
 
       val unsafeClient: DefDef =
@@ -292,10 +306,7 @@ object serviceImpl {
           channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] = List(
             _root_.higherkindness.mu.rpc.channel.UsePlaintext()),
             options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-          )(implicit
-          F: _root_.cats.effect.ConcurrentEffect[$F],
-          EC: _root_.scala.concurrent.ExecutionContext
-        ): $serviceName[$F] = {
+          )(implicit ..$classImplicits): $serviceName[$F] = {
           val managedChannelInterpreter =
             new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).unsafeBuild
           new $Client[$F](managedChannelInterpreter, options)
@@ -306,25 +317,24 @@ object serviceImpl {
         def unsafeClientFromChannel[$F_](
           channel: _root_.io.grpc.Channel,
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-        )(implicit
-          F: _root_.cats.effect.ConcurrentEffect[$F],
-          EC: _root_.scala.concurrent.ExecutionContext
-        ): $serviceName[$F] = new $Client[$F](channel, options)
+        )(implicit ..$classImplicits): $serviceName[$F] = new $Client[$F](channel, options)
         """.supressWarts("DefaultArguments")
 
       private def lit(x: Any): Literal = Literal(Constant(x.toString))
 
-      private def annotationParam(
-          params: List[Tree],
-          pos: Int,
-          name: String,
-          default: Option[String] = None): String =
-        params
-          .collectFirst {
-            case q"$pName = $pValue" if pName.toString == name => pValue.toString
-          }
-          .getOrElse(if (params.isDefinedAt(pos)) params(pos).toString
-          else default.getOrElse(sys.error(s"Missing annotation parameter $name")))
+      private def annotationParam[A](pos: Int, name: String)(
+          pf: PartialFunction[String, A]): Option[A] = {
+
+        def findNamed: Option[Either[String, (String, String)]] =
+          annotationParams.find(_.exists(_._1 == name))
+
+        def findIndexed: Option[Either[String, (String, String)]] =
+          annotationParams.lift(pos).filter(_.isLeft)
+
+        (findNamed orElse findIndexed).map(_.fold(identity, _._2)).map { s =>
+          pf.lift(s).getOrElse(sys.error(s"Invalid `$name` annotation value ($s)"))
+        }
+      }
 
       private def findAnnotation(mods: Modifiers, name: String): Option[Tree] =
         mods.annotations find {
@@ -336,7 +346,8 @@ object serviceImpl {
       //todo: validate that the request and responses are case classes, if possible
       case class RpcRequest(
           operation: Operation,
-          compressionOption: Tree
+          compressionOption: Tree,
+          methodNameStyle: MethodNameStyle
       ) {
 
         import operation._
@@ -357,7 +368,12 @@ object serviceImpl {
           q"_root_.io.grpc.MethodDescriptor.MethodType.${TermName(suffix)}"
         }
 
-        private val methodDescriptorName = TermName(name + "MethodDescriptor")
+        private val updatedName = methodNameStyle match {
+          case Unchanged  => name.toString
+          case Capitalize => name.toString.capitalize
+        }
+
+        private val methodDescriptorName = TermName(updatedName + "MethodDescriptor")
 
         private val reqType = request.safeType
 
@@ -374,8 +390,8 @@ object serviceImpl {
                 RespM)
               .setType($streamingMethodType)
               .setFullMethodName(
-                _root_.io.grpc.MethodDescriptor.generateFullMethodName(${lit(serviceName)}, ${lit(
-          name)}))
+                _root_.io.grpc.MethodDescriptor.generateFullMethodName(
+          ${lit(fullyServiceName)}, ${lit(updatedName)}))
               .build()
           }
         """.supressWarts("Null", "ExplicitImplicitTypes")
@@ -440,8 +456,6 @@ object serviceImpl {
         }
 
         val executionClient: Tree = response match {
-          case MonixObservableTpe(_, _) =>
-            q"_root_.monix.reactive.Observable.fromReactivePublisher(client.stream(request).flatMap(_.asStream[${response.safeInner}]).toUnicastPublisher)"
           case Fs2StreamTpe(_, _) =>
             q"client.stream(request).flatMap(_.asStream[${response.safeInner}])"
           case _ =>
@@ -455,9 +469,6 @@ object serviceImpl {
           case _: Fs2StreamTpe =>
             q"val request = _root_.org.http4s.Request[F](_root_.org.http4s.Method.$method, uri / ${uri
               .replace("\"", "")}).withEntity(req.map(_.asJson))"
-          case _: MonixObservableTpe =>
-            q"val request = _root_.org.http4s.Request[F](_root_.org.http4s.Method.$method, uri / ${uri
-              .replace("\"", "")}).withEntity(req.toReactivePublisher.toStream.map(_.asJson))"
           case _ =>
             q"val request = _root_.org.http4s.Request[F](_root_.org.http4s.Method.$method, uri / ${uri
               .replace("\"", "")})"
@@ -500,20 +511,6 @@ object serviceImpl {
             q"""val requests = msg.asStream[${operation.request.safeInner}]
              _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(requests).asJsonEither)"""
 
-          case (_: MonixObservableTpe, _: UnaryTpe) =>
-            q"""val requests = msg.asStream[${operation.request.safeInner}]
-              _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(_root_.monix.reactive.Observable.fromReactivePublisher(requests.toUnicastPublisher)).map(_.asJson))"""
-
-          case (_: UnaryTpe, _: MonixObservableTpe) =>
-            q"""for {
-                request   <- msg.as[${operation.request.safeInner}]
-                responses <- _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(request).toReactivePublisher.toStream.asJsonEither)
-              } yield responses"""
-
-          case (_: MonixObservableTpe, _: MonixObservableTpe) =>
-            q"""val requests = msg.asStream[${operation.request.safeInner}]
-              _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(_root_.monix.reactive.Observable.fromReactivePublisher(requests.toUnicastPublisher)).toReactivePublisher.toStream.asJsonEither)"""
-
           case (_: EmptyTpe, _) =>
             q"""_root_.org.http4s.Status.Ok.apply(handler.${operation.name}(_root_.higherkindness.mu.rpc.protocol.Empty).map(_.asJson))"""
 
@@ -542,28 +539,19 @@ object serviceImpl {
         params <- d.vparamss
         _ = require(params.length == 1, s"RPC call ${d.name} has more than one request parameter")
         p <- params.headOption.toList
-      } yield HttpOperation(Operation(d.name, TypeTypology(p.tpt), TypeTypology(d.tpt)))
+        op = Operation(d.name, TypeTypology(p.tpt), TypeTypology(d.tpt))
+        _ = if (op.isMonixObservable)
+          sys.error(
+            "Monix.Observable is not compatible with streaming services. Please consider using Fs2.Stream instead.")
+      } yield HttpOperation(op)
 
-      val streamConstraints: List[Tree] = operations
-        .find(_.operation.isMonixObservable)
-        .fold(List(q"F: _root_.cats.effect.Sync[$F]"))(
-          _ =>
-            List(
-              q"F: _root_.cats.effect.ConcurrentEffect[$F]",
-              q"ec: _root_.scala.concurrent.ExecutionContext"
-          ))
-
-      val executionContextStreaming: List[Tree] = operations
-        .find(_.operation.isMonixObservable)
-        .fold(List.empty[Tree])(_ =>
-          List(q"implicit val sc: _root_.monix.execution.Scheduler = _root_.monix.execution.Scheduler(ec)"))
+      val streamConstraints: List[Tree] = List(q"F: _root_.cats.effect.Sync[$F]")
 
       val httpRequests = operations.map(_.toRequestTree)
 
       val HttpClient      = TypeName("HttpClient")
       val httpClientClass = q"""
         class $HttpClient[$F_](uri: _root_.org.http4s.Uri)(implicit ..$streamConstraints) {
-          ..$executionContextStreaming
           ..$httpRequests
       }"""
 
@@ -575,7 +563,6 @@ object serviceImpl {
 
       val httpImports: List[Tree] = List(
         q"import _root_.higherkindness.mu.http.implicits._",
-        q"import _root_.fs2.interop.reactivestreams._",
         q"import _root_.cats.syntax.flatMap._",
         q"import _root_.cats.syntax.functor._",
         q"import _root_.org.http4s.circe._",
@@ -609,13 +596,12 @@ object serviceImpl {
       val httpRestServiceClass: Tree = q"""
         class $HttpRestService[$F_](implicit ..$arguments) extends _root_.org.http4s.dsl.Http4sDsl[F] {
          ..$requestDecoders
-         ..$executionContextStreaming
          def service = _root_.org.http4s.HttpRoutes.of[F]{$routesPF}
       }"""
 
       val httpService = q"""
-        def route[$F_](implicit ..$arguments): _root_.higherkindness.mu.http.RouteMap[F] = {
-          _root_.higherkindness.mu.http.RouteMap[F](${serviceDef.name.toString}, new $HttpRestService[$F].service)
+        def route[$F_](implicit ..$arguments): _root_.higherkindness.mu.http.protocol.RouteMap[F] = {
+          _root_.higherkindness.mu.http.protocol.RouteMap[F](${serviceDef.name.toString}, new $HttpRestService[$F].service)
       }"""
 
       val http =

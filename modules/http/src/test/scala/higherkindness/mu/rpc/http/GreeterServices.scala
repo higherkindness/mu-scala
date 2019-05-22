@@ -17,6 +17,7 @@
 package higherkindness.mu.rpc.http
 
 import higherkindness.mu.rpc.protocol._
+import higherkindness.mu.http.protocol._
 
 @message final case class HelloRequest(hello: String)
 
@@ -40,15 +41,4 @@ import fs2.Stream
   @http def sayHelloAll(request: HelloRequest): Stream[F, HelloResponse]
 
   @http def sayHellosAll(requests: Stream[F, HelloRequest]): Stream[F, HelloResponse]
-}
-
-import monix.reactive.Observable
-@service(Avro) trait MonixGreeter[F[_]] {
-
-  @http def sayHellos(requests: Observable[HelloRequest]): F[HelloResponse]
-
-  @http def sayHelloAll(request: HelloRequest): Observable[HelloResponse]
-
-  @http def sayHellosAll(requests: Observable[HelloRequest]): Observable[HelloResponse]
-
 }

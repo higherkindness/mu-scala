@@ -36,6 +36,7 @@ object ProjectPlugin extends AutoPlugin {
       val jodaTime: String           = "2.10.1"
       val http4s                     = "0.20.0-M6"
       val kindProjector: String      = "0.9.9"
+      val log4cats: String           = "0.3.0"
       val log4s: String              = "1.7.0"
       val logback: String            = "1.2.3"
       val monix: String              = "3.0.0-RC2"
@@ -47,9 +48,11 @@ object ProjectPlugin extends AutoPlugin {
       val pureconfig: String         = "0.10.2"
       val reactiveStreams: String    = "1.0.2"
       val scala: String              = "2.12.8"
+      val scopt: String              = "3.7.0"
       val scalacheckToolbox: String  = "0.2.5"
       val scalamockScalatest: String = "3.6.0"
       val scalatest: String          = "3.0.6"
+      val skeuomorph: String         = "0.0.8"
       val slf4j: String              = "1.7.26"
       val dropwizard: String         = "4.0.5"
     }
@@ -133,11 +136,9 @@ object ProjectPlugin extends AutoPlugin {
         %%("http4s-dsl", V.http4s),
         %%("http4s-blaze-server", V.http4s),
         %%("http4s-circe", V.http4s),
-        "co.fs2" %% "fs2-reactive-streams" % V.reactiveStreams,
-        %%("monix", V.monix),
         %%("http4s-blaze-client", V.http4s) % Test,
-        %%("circe-generic") % Test,
-        "ch.qos.logback" % "logback-classic" % V.logback % Test
+        %%("circe-generic")                 % Test,
+        "ch.qos.logback"                    % "logback-classic" % V.logback % Test
       )
     )
 
@@ -176,6 +177,7 @@ object ProjectPlugin extends AutoPlugin {
     lazy val idlGenSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("monocle-core", V.monocle),
+        "io.higherkindness" %% "skeuomorph"      % V.skeuomorph,
         "com.julianpeeters" %% "avrohugger-core" % V.avrohugger,
         %%("circe-generic", V.circe)
       )
@@ -204,6 +206,23 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+    lazy val exampleSeedLogSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %("logback-classic", V.logback),
+        "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
+        "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats
+      ))
+
+    lazy val exampleSeedConfigSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        "org.typelevel"         %% "cats-effect" % V.catsEffect,
+        "com.github.pureconfig" %% "pureconfig"  % V.pureconfig))
+
+    lazy val exampleSeedClientAppSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        "com.github.scopt" %% "scopt" % V.scopt
+      ))
+
     lazy val exampleTodolistCommonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.frees" %% "frees-todolist-lib" % V.frees,
@@ -213,6 +232,7 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
+      sbtPlugin:= true,
       scriptedLaunchOpts := {
         scriptedLaunchOpts.value ++
           Seq(
@@ -264,12 +284,6 @@ object ProjectPlugin extends AutoPlugin {
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies += %%("scalatest", V.scalatest),
       scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
-    )
-
-    lazy val legacyAvroDecimalProtocolSettings: Seq[Def.Setting[_]] = Seq(
-      publishMavenStyle := true,
-      crossPaths := false,
-      libraryDependencies := Nil
     )
 
   }

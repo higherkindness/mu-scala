@@ -27,7 +27,9 @@ package object protocol {
   @compileTimeOnly("enable macro paradise to expand @service macro annotations")
   class service(
       val serializationType: SerializationType,
-      val compressionType: CompressionType = Identity)
+      val compressionType: CompressionType = Identity,
+      val namespace: Option[String] = None,
+      val methodNameStyle: MethodNameStyle = Unchanged)
       extends StaticAnnotation {
     def macroTransform(annottees: Any*): Any = macro serviceImpl.service
   }

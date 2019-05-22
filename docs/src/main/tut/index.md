@@ -8,13 +8,14 @@ permalink: /
 
 ## What is mu-rpc?
 
-[mu] provides the ability to combine [RPC] protocols, services, and clients in your Scala program, thanks to [gRPC]. Although it's fully integrated with [gRPC], there are some important differences when defining the protocols, as we’ll see later on.
+[mu] provides the ability to combine [RPC] protocols, services, and clients in your Scala program, thanks to [gRPC]. 
+Although it's fully integrated with [gRPC], there are some important differences when defining the protocols, as we’ll see later on.
 
 ## Installation
 
 [comment]: # (Start Replace)
 
-The current version for [mu] is "0.17.2" using the following common libraries and versions.
+The current version for [mu] is "0.18.1" using the following common libraries and versions.
 
 [comment]: # (End Replace)
 
@@ -71,40 +72,38 @@ You can install any of these dependencies in your build as follows:
 
 ```scala
 // required for the RPC server:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-server" % "0.17.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-server" % "0.18.1"
 
 // required for a protocol definition:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-channel" % "0.17.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-channel" % "0.18.1"
 
 // required for a protocol definition with streaming operations:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-monix" % "0.17.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-monix" % "0.18.1"
 // or:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-fs2" % "0.17.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-fs2" % "0.18.1"
 
 // required for the use of the derived RPC client/s, using either Netty or OkHttp as transport layer:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-netty" % "0.17.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-netty" % "0.18.1"
 // or:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-okhttp" % "0.17.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-okhttp" % "0.18.1"
 
 // optional - for both server and client configuration.
-libraryDependencies += "io.higherkindness" %% "mu-config" % "0.17.2"
+libraryDependencies += "io.higherkindness" %% "mu-config" % "0.18.1"
 
 // optional - for both server and client metrics reporting, using Prometheus.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus-server" % "0.17.2"
-libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus-client" % "0.17.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus" % "0.18.1"
 
 // optional - for both server and client metrics reporting, using Dropwizard.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-dropwizard-server" % "0.17.2"
-libraryDependencies += "io.higherkindness" %% "mu-rpc-dropwizard-client" % "0.17.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-dropwizard" % "0.18.1"
 
 // optional - for the communication between server and client by using SSL/TLS.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-netty-ssl" % "0.17.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-netty-ssl" % "0.18.1"
 
 // optional - for using the jodatime marshallers.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-marshallers-jodatime" % "0.17.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-marshallers-jodatime" % "0.18.1"
 
 // optional - for using the client cache.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-client-cache" % "0.17.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-client-cache" % "0.18.1"
 ```
 
 [comment]: # (End Replace)

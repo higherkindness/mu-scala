@@ -20,7 +20,8 @@ import java.io.File
 import scala.annotation.tailrec
 import scala.io.Source
 
-/** Adapted from [[avrohugger.filesorter.AvdlFileSorter]].
+/**
+ * Adapted from `avrohugger.filesorter.AvdlFileSorter`.
  * Changes:
  * - Handles imported files not present in the input set
  * - Doesn't require input files to be in canonical form (but returns them as such)

@@ -25,7 +25,7 @@ As you might know, [gRPC] uses protocol buffers (a.k.a. *protobuf*) by default:
 
 In the example given in the [gRPC guide], you might have a proto file like this:
 
-```
+```proto
 message Person {
   string name = 1;
   int32 id = 2;
@@ -37,7 +37,7 @@ Then, once you’ve specified your data structures, you can use the protobuf com
 
 Likewise, you can define [gRPC] services in your proto files, with RPC method parameters and return types specified as protocol buffer messages:
 
-```
+```proto
 // The greeter service definition.
 service Greeter {
   // Sends a greeting
@@ -219,10 +219,12 @@ We'll be using `IO` from `cats-effect`, but you can use any type that has a `Con
 
 For executing `IO` we need a `ContextShift[IO]` used for running `IO` instances and a `Timer[IO]` that is used for scheduling, let's go ahead and create them.
 
-```tut:invisible
+*Note:* You'd need an implicit `monix.execution.Scheduler` in the case you're using Monix observables.
+
+```tut:silent
 trait CommonRuntime {
 
-  implicit val EC: scala.concurrent.ExecutionContext =
+  val EC: scala.concurrent.ExecutionContext =
     scala.concurrent.ExecutionContext.Implicits.global
 
   implicit val timer: cats.effect.Timer[cats.effect.IO]     = cats.effect.IO.timer(EC)
@@ -290,7 +292,7 @@ object service {
 
 Here `sayHello` is our unary RPC.
 
-In the `Streaming` section, we are going to see all the streaming options.
+In the [Streaming section](streaming), we are going to see all the streaming options.
 
 ## Custom codecs
 

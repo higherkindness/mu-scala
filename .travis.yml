@@ -26,15 +26,13 @@ install:
   - gem install sass
   - gem install jekyll -v 3.2.1
 script:
-  - curl -s https://codecov.io/bash > .codecov
-  - sed -i -e 's/TRAVIS_.*_VERSION/^TRAVIS_.*_VERSION=/' .codecov
-  - chmod +x .codecov
   - if [ $TRAVIS_SCALA_VERSION = "2.12.8" ]; then sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut; fi
-  - if [ $TRAVIS_SCALA_VERSION = "2.12.8" ]; then ./.codecov -X gcov; fi
   - if [ $TRAVIS_SCALA_VERSION = "2.11.12" ]; then sbt ++$TRAVIS_SCALA_VERSION clean test; fi
+  - bash <(curl -s https://codecov.io/bash)
 stages:
 - test
 - plugin
+- deployPlugin
 - deploy
 - microsite
 jobs:
@@ -45,22 +43,27 @@ jobs:
         - sbt ++$TRAVIS_SCALA_VERSION idlgen-core/test
         - sbt ++$TRAVIS_SCALA_VERSION idlgen-sbt/test
         - sbt ++$TRAVIS_SCALA_VERSION publishLocal idlgen-sbt/publishLocal idlgen-sbt/scripted
+    - stage: deployPlugin
+      scala: 2.12.8
+      if: branch = master AND type != pull_request AND env(SKIP_SBT_DEPLOY) = false
+      script:
+        - if grep -q "SNAPSHOT" version.sbt; then
+            sbt idlgen-sbt/publish;
+          else
+            sbt ";project idlgen-sbt; release";
+          fi
     - stage: deploy
       scala: 2.12.8
       if: branch = master AND type != pull_request
       script:
-        - bash <(curl -s https://codecov.io/bash) -t 5b75b318-ab71-4fbc-9203-bfa7765cdbdc
         - if grep -q "SNAPSHOT" version.sbt; then
             sbt +publish;
-            sbt idlgen-sbt/publish;
           else
             sbt orgUpdateDocFiles;
             git reset --hard HEAD;
             git clean -f;
             git checkout master;
             git pull origin master;
-            sbt ";project idlgen-sbt;release";
-            sbt ";project legacy-avro-decimal-compat-protocol;release";
             sbt release;
           fi
     - stage: microsite

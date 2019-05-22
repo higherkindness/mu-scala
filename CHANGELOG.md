@@ -1,5 +1,47 @@
 # Changelog
 
+## 05/07/2019 - Version 0.18.1
+
+Release changes:
+
+* Fixes schema-evolution links ([#595](https://github.com/higherkindness/mu/pull/595))
+* Bumps sbt-org-policies and sbt-jmh ([#596](https://github.com/higherkindness/mu/pull/596))
+* Add seed sample ([#598](https://github.com/higherkindness/mu/pull/598))
+* Allows specifying the namespace and the capitalize params ([#601](https://github.com/higherkindness/mu/pull/601))
+* Improves how the params are received in the annotation ([#602](https://github.com/higherkindness/mu/pull/602))
+* Improves rpc metrics naming ([#607](https://github.com/higherkindness/mu/pull/607))
+* Update docs ([#600](https://github.com/higherkindness/mu/pull/600))
+* Fixes metric prefix ([#609](https://github.com/higherkindness/mu/pull/609))
+* Fixes plugin release ([#610](https://github.com/higherkindness/mu/pull/610))
+
+
+## 04/11/2019 - Version 0.18.0
+
+Release changes:
+
+* Fixes some package names and some refactors ([#565](https://github.com/higherkindness/mu/pull/565))
+* Upgrades Build ([#567](https://github.com/higherkindness/mu/pull/567))
+* Enables benchmarks for the previous Mu version ([#570](https://github.com/higherkindness/mu/pull/570))
+* Fixes typo in docs ([#571](https://github.com/higherkindness/mu/pull/571))
+* Sample http4s REST client/server with client macro derivation ([#552](https://github.com/higherkindness/mu/pull/552))
+* Removes deprecated Sbt Settings ([#573](https://github.com/higherkindness/mu/pull/573))
+* RPC Server Start with Brackets ([#566](https://github.com/higherkindness/mu/pull/566))
+* Prometheus MetricsOps implementation ([#572](https://github.com/higherkindness/mu/pull/572))
+* Update docs and reorganizes modules ([#560](https://github.com/higherkindness/mu/pull/560))
+* Adapts latest changes in the code generation by Skeuomorph ([#579](https://github.com/higherkindness/mu/pull/579))
+* Skipping binary dependencies when is not necessary ([#581](https://github.com/higherkindness/mu/pull/581))
+* Remove the ExecutionContext implicit when not necessary ([#584](https://github.com/higherkindness/mu/pull/584))
+* CommonRuntime - Converts tut:invisible by tut:silent ([#585](https://github.com/higherkindness/mu/pull/585))
+* Removes the compatibility of Monix.Observable in the HTTP layer ([#587](https://github.com/higherkindness/mu/pull/587))
+* Minor fixes ([#588](https://github.com/higherkindness/mu/pull/588))
+* [Docs] Schema Evolution ([#481](https://github.com/higherkindness/mu/pull/481))
+* Releases 0.18.0 ([#590](https://github.com/higherkindness/mu/pull/590))
+* Fix decimal protocol ([#591](https://github.com/higherkindness/mu/pull/591))
+* Macro Fix - Uses the F param in macro ([#569](https://github.com/higherkindness/mu/pull/569))
+* Skeuomorph integration and Proto Source Generation Support ([#577](https://github.com/higherkindness/mu/pull/577))
+* Fixes travis snapshot release ([#594](https://github.com/higherkindness/mu/pull/594))
+
+
 ## 02/05/2019 - Version 0.17.2
 
 Release changes:

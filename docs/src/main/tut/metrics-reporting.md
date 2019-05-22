@@ -20,7 +20,7 @@ Let's see how to register server metrics using `Prometheus` in the following fra
 ```tut:invisible
 trait CommonRuntime {
 
-  implicit val EC: scala.concurrent.ExecutionContext =
+  val EC: scala.concurrent.ExecutionContext =
     scala.concurrent.ExecutionContext.Implicits.global
 
   implicit val timer: cats.effect.Timer[cats.effect.IO]     = cats.effect.IO.timer(EC)

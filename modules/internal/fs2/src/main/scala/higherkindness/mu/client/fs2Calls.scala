@@ -24,15 +24,13 @@ import fs2.Stream
 import io.grpc.{CallOptions, Channel, Metadata, MethodDescriptor}
 import org.lyranthe.fs2_grpc.java_runtime.client.Fs2ClientCall
 
-import scala.concurrent.ExecutionContext
-
 object fs2Calls {
 
   def unary[F[_]: ConcurrentEffect, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit EC: ExecutionContext): F[Res] =
+      options: CallOptions): F[Res] =
     Fs2ClientCall[F](channel, descriptor, options)
       .flatMap(_.unaryToUnaryCall(request, new Metadata()))
 
@@ -40,7 +38,7 @@ object fs2Calls {
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit EC: ExecutionContext): Stream[F, Res] =
+      options: CallOptions): Stream[F, Res] =
     Stream
       .eval(Fs2ClientCall[F](channel, descriptor, options))
       .flatMap(_.unaryToStreamingCall(request, new Metadata()))
@@ -49,7 +47,7 @@ object fs2Calls {
       input: Stream[F, Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit EC: ExecutionContext): F[Res] =
+      options: CallOptions): F[Res] =
     Fs2ClientCall[F](channel, descriptor, options)
       .flatMap(_.streamingToUnaryCall(input, new Metadata()))
 
@@ -57,7 +55,7 @@ object fs2Calls {
       input: Stream[F, Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit EC: ExecutionContext): Stream[F, Res] =
+      options: CallOptions): Stream[F, Res] =
     Stream
       .eval(Fs2ClientCall[F](channel, descriptor, options))
       .flatMap(_.streamingToStreamingCall(input, new Metadata()))

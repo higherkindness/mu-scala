@@ -15,7 +15,9 @@
  */
 
 package higherkindness.mu.rpc.internal.server
+
 import cats.effect.{Effect, IO}
+import cats.syntax.apply._
 import io.grpc.stub.ServerCalls.UnaryMethod
 import io.grpc.stub.StreamObserver
 
@@ -26,9 +28,10 @@ object unaryCalls {
       maybeCompression: Option[String]): UnaryMethod[Req, Res] =
     new UnaryMethod[Req, Res] {
       override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
-        addCompression(responseObserver, maybeCompression)
         Effect[F]
-          .runAsync(f(request))(either => IO(completeObserver(responseObserver)(either)))
+          .runAsync(addCompression(responseObserver, maybeCompression) *> f(request)) {
+            completeObserver[IO, Res](responseObserver)
+          }
           .toIO
           .unsafeRunAsync(_ => ())
       }

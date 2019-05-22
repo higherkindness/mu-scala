@@ -64,7 +64,7 @@ class ClientCacheTests extends WordSpec with Matchers {
             .map(_ => (new MyClient[IO], ref2.update(_ + 1).void)),
         cleanUp.millis,
         cleanUp.millis
-      )(ConcurrentEffect[IO], EC, timer)
+      )(ConcurrentEffect[IO], cs, timer)
       _ <- Stream.eval((1 to numClients).toList.traverse_(_ => clientCache.getClient))
     } yield ()).compile.drain
 

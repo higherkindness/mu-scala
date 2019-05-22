@@ -26,5 +26,16 @@ options:
   - title: Migration guide for decimal types
     url: decimal-migration-guide
 
+  - title: Schema Evolution
+    url: schema-evolution
+
+    nested_options:
+
+      - title: Avro
+        url: schema-evolution/avro
+
+      - title: Protocol Buffers
+        url: schema-evolution/proto
+
   - title: References
     url: references

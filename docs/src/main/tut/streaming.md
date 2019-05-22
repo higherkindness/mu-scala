@@ -90,8 +90,6 @@ The example above shows a basic implementation of how to use this data type for 
 
 ### FS2: Functional Streams
 
-_Disclaimer_: this feature is considered experimental, for now.
-
 The second data type available for implementing streaming protocols is `fs2.Stream`, see the [FS2 Docs](https://github.com/functional-streams-for-scala/fs2) for more details. 
 
 Thanks to this new data type, [mu] supports `fs2.Stream[F, ?]` for all the types of streaming mentioned before.

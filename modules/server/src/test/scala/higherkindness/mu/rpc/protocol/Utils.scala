@@ -23,6 +23,7 @@ import cats.syntax.applicative._
 import io.grpc.Status
 import monix.reactive.Observable
 import higherkindness.mu.rpc.common._
+import monix.execution.Scheduler
 
 object Utils extends CommonUtils {
 
@@ -118,7 +119,6 @@ object Utils extends CommonUtils {
 
     object server {
 
-      import higherkindness.mu.rpc.internal.task._
       import database._
       import service._
       import higherkindness.mu.rpc.protocol._
@@ -131,7 +131,7 @@ object Utils extends CommonUtils {
           with CompressedAvroRPCService[F]
           with CompressedAvroWithSchemaRPCService[F] {
 
-        import scala.concurrent.ExecutionContext.Implicits.global
+        import monix.execution.Scheduler.Implicits.global
 
         def notAllowed(b: Boolean): F[C] = c1.pure[F]
 
@@ -255,7 +255,6 @@ object Utils extends CommonUtils {
 
     object client {
 
-      import higherkindness.mu.rpc.internal.task._
       import service._
       import higherkindness.mu.rpc.protocol.Utils.client.MyRPCClient
       import higherkindness.mu.rpc.protocol._
@@ -266,7 +265,7 @@ object Utils extends CommonUtils {
           aws: Resource[F, AvroWithSchemaRPCService[F]])(implicit M: MonadError[F, Throwable])
           extends MyRPCClient[F] {
 
-        import scala.concurrent.ExecutionContext.Implicits.global
+        import monix.execution.Scheduler.Implicits.global
 
         override def notAllowed(b: Boolean): F[C] =
           proto.use(_.notAllowed(b))
@@ -376,7 +375,7 @@ object Utils extends CommonUtils {
           implicit M: MonadError[F, Throwable])
           extends MyRPCClient[F] {
 
-        import scala.concurrent.ExecutionContext.Implicits.global
+        import monix.execution.Scheduler.Implicits.global
 
         override def notAllowed(b: Boolean): F[C] =
           proto.use(_.notAllowedCompressed(b))
@@ -495,6 +494,8 @@ object Utils extends CommonUtils {
     //////////////////////////////////
     // Server Runtime Configuration //
     //////////////////////////////////
+
+    implicit val S: Scheduler = Scheduler.Implicits.global
 
     implicit val muRPCHandler: ServerRPCService[ConcurrentMonad] =
       new ServerRPCService[ConcurrentMonad]

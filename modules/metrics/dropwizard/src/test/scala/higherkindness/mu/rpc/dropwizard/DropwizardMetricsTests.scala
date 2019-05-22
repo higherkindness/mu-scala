@@ -30,7 +30,7 @@ import org.scalacheck.Prop._
 
 import scala.collection.JavaConverters._
 
-object DropWizardMetricsTests extends Properties("DropWizardMetrics") {
+object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
 
   val prefix     = "testPrefix"
   val classifier = "classifier"

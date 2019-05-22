@@ -36,23 +36,23 @@ import io.grpc.Status
  * {prefix}_calls_total{labels=classifier,method,status} - Histogram
  *
  * `method` can be one of the following:
- *    - "unary-methods"
- *    - "client-streaming-methods"
- *    - "server-streaming-methods"
- *    - "bidi-streaming-methods"
- *    - "unknown-methods"
+ *    - "unary"
+ *    - "client-streaming"
+ *    - "server-streaming"
+ *    - "bidi-streaming"
+ *    - "unknown"
  *
  * `status` can be one of the following:
- *    - "ok-statuses"
- *    - "cancelled-statuses"
- *    - "deadline-exceeded-statuses"
- *    - "internal-statuses"
- *    - "resource-exhausted-statuses"
- *    - "unauthenticated-statuses"
- *    - "unavailable-statuses"
- *    - "unimplemented-statuses"
- *    - "unknown-statuses"
- *    - "unreachable-error-statuses"
+ *    - "ok"
+ *    - "cancelled"
+ *    - "deadline-exceeded"
+ *    - "internal"
+ *    - "resource-exhausted"
+ *    - "unauthenticated"
+ *    - "unavailable"
+ *    - "unimplemented"
+ *    - "unknown-status"
+ *    - "unreachable-error"
  *
  */
 object PrometheusMetrics {
@@ -67,7 +67,7 @@ object PrometheusMetrics {
 
   def build[F[_]: Sync](
       cr: CollectorRegistry,
-      prefix: String = "higherkinderness.mu"): F[MetricsOps[F]] =
+      prefix: String = "higherkindness_mu"): F[MetricsOps[F]] =
     buildMetrics[F](prefix, cr).map(PrometheusMetrics[F])
 
   def apply[F[_]: Sync](metrics: Metrics)(implicit F: Sync[F]): MetricsOps[F] =
