@@ -73,14 +73,12 @@ object ProtoPeopleServiceClient {
 
     }
 
-  def createClient[F[_]: ContextShift: Logger: Timer](
-      hostname: String,
-      port: Int)(
+  def createClient[F[_]: ContextShift: Logger: Timer](hostname: String, port: Int)(
       implicit F: ConcurrentEffect[F]): fs2.Stream[F, ProtoPeopleServiceClient[F]] = {
 
     val channel: F[ManagedChannel] =
       F.delay(InetAddress.getByName(hostname).getHostAddress).flatMap { ip =>
-        val channelFor    = ChannelForAddress(ip, port)
+        val channelFor = ChannelForAddress(ip, port)
         new ManagedChannelInterpreter[F](channelFor, List(UsePlaintext())).build
       }
 
