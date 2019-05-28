@@ -51,14 +51,12 @@ object AvroPeopleServiceClient {
 
     }
 
-  def createClient[F[_]: ContextShift: Logger](
-      hostname: String,
-      port: Int)(
+  def createClient[F[_]: ContextShift: Logger](hostname: String, port: Int)(
       implicit F: ConcurrentEffect[F]): fs2.Stream[F, AvroPeopleServiceClient[F]] = {
 
     val channel: F[ManagedChannel] =
       F.delay(InetAddress.getByName(hostname).getHostAddress).flatMap { ip =>
-        val channelFor    = ChannelForAddress(ip, port)
+        val channelFor = ChannelForAddress(ip, port)
         new ManagedChannelInterpreter[F](channelFor, List(UsePlaintext())).build
       }
 

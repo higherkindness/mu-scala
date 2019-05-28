@@ -48,10 +48,10 @@ class ProtoSrcGenTests extends RpcBaseTestSuite {
       |
       |object book {
       |
-      |@message final case class Book(isbn: Long, title: String, author: List[Author], binding_type: BindingType)
+      |@message final case class Book(isbn: Long, title: String, author: List[Option[Author]], binding_type: Option[BindingType])
       |@message final case class GetBookRequest(isbn: Long)
-      |@message final case class GetBookViaAuthor(author: Author)
-      |@message final case class BookStore(name: String, books: Map[Long, String], genres: List[Genre], payment_method: Long :+: Int :+: String :+: Book :+: CNil)
+      |@message final case class GetBookViaAuthor(author: Option[Author])
+      |@message final case class BookStore(name: String, books: Map[Long, String], genres: List[Option[Genre]], payment_method: Cop[Long :: Int :: String :: Option[Book] :: TNil])
       |
       |sealed trait Genre
       |object Genre {
@@ -69,9 +69,9 @@ class ProtoSrcGenTests extends RpcBaseTestSuite {
       |
       |@service(Protobuf) trait BookService[F[_]] {
       |  def GetBook(req: GetBookRequest): F[Book]
-      |  def GetBooksViaAuthor(req: GetBookViaAuthor): Stream[F, Book]
-      |  def GetGreatestBook(req: Stream[F, GetBookRequest]): F[Book]
-      |  def GetBooks(req: Stream[F, GetBookRequest]): Stream[F, Book]
+      |  def GetBooksViaAuthor(req: GetBookViaAuthor): fs2.Stream[F, Book]
+      |  def GetGreatestBook(req: fs2.Stream[F, GetBookRequest]): F[Book]
+      |  def GetBooks(req: fs2.Stream[F, GetBookRequest]): fs2.Stream[F, Book]
       |}
       |
       |}""".stripMargin
