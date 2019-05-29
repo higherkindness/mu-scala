@@ -42,7 +42,6 @@ class ProtoSrcGenTests extends RpcBaseTestSuite {
     """package com.proto
       |
       |import higherkindness.mu.rpc.protocol._
-      |import fs2.Stream
       |import shapeless.{:+:, CNil}
       |import com.proto.author.Author
       |

@@ -51,7 +51,7 @@ object ProtoSrcGenerator extends SrcGenerator {
       case a      => a
     }).mkString("\n")
 
-  val copRegExp: Regex = """((Cop\[)(((\w+)(\s)?(\:\:)(\s)?)+)(TNil)(\]))""".r
+  val copRegExp: Regex = """((Cop\[)(((\w+)((\[)(\w+)(\]))?(\s)?(\:\:)(\s)?)+)(TNil)(\]))""".r
 
   val cleanCop: String => String =
     _.replace("Cop[", "").replace("::", ":+:").replace("TNil]", "CNil")
@@ -78,5 +78,5 @@ object ProtoSrcGenerator extends SrcGenerator {
     s"${p.pkg.replace('.', '/')}/${p.name}$ScalaFileExtension"
 
   def imports(pkg: String): String =
-    s"$pkg\nimport higherkindness.mu.rpc.protocol._\nimport fs2.Stream\nimport shapeless.{:+:, CNil}"
+    s"$pkg\nimport higherkindness.mu.rpc.protocol._\nimport shapeless.{:+:, CNil}"
 }
