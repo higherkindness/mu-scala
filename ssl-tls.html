@@ -33,7 +33,7 @@
 
 <p>We won’t cover the details regarding creation of <code class="highlighter-rouge">RPCService</code>, <code class="highlighter-rouge">ServerRPCService</code> and runtime implicits. You can find more information about these in the <a href="patterns">Patterns</a> section.</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">java.io.File</span>
+<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">java.io.File</span>
 <span class="k">import</span> <span class="nn">java.security.cert.X509Certificate</span>
 
 <span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">}</span>
@@ -81,11 +81,12 @@
 <span class="o">}</span>
 
 <span class="k">object</span> <span class="nc">implicits</span> <span class="k">extends</span> <span class="nc">Runtime</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 <p>Lastly, as we did before with the server side, let’s see what happens on the client side.</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.syntax.either._</span>
+<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.syntax.either._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.ChannelForAddress</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.channel.OverrideAuthority</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.channel.netty.</span><span class="o">{</span>
@@ -134,7 +135,8 @@
     <span class="nc">Greeter</span><span class="o">.</span><span class="n">clientFromChannel</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="nc">IO</span><span class="o">(</span><span class="n">channelInterpreter</span><span class="o">.</span><span class="n">build</span><span class="o">))</span>
 
 <span class="o">}</span>
-</code></pre></div></div>
+</code></pre>
+</div>
 
 </section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/mu/highlight/highlight.pack.js"></script><script>hljs.configure({languages:['scala','java','bash']});
 hljs.initHighlighting();

@@ -1,0 +1,11 @@
+name: Mu
+baseurl: /mu
+description: A purely functional library for building RPC endpoint-based services
+highlighter: rouge
+docs: true
+collections:
+  tut:
+    output: true
+version: 0.18.3
+org: 47 Degrees
+markdown: kramdown
