@@ -1,5 +1,22 @@
 # Changelog
 
+## 05/30/2019 - Version 0.18.3
+
+Release changes:
+
+* Fixes schema-evolution links ([#595](https://github.com/higherkindness/mu/pull/595))
+* Bumps sbt-org-policies and sbt-jmh ([#596](https://github.com/higherkindness/mu/pull/596))
+* Add seed sample ([#598](https://github.com/higherkindness/mu/pull/598))
+* Allows specifying the namespace and the capitalize params ([#601](https://github.com/higherkindness/mu/pull/601))
+* Improves how the params are received in the annotation ([#602](https://github.com/higherkindness/mu/pull/602))
+* Improves rpc metrics naming ([#607](https://github.com/higherkindness/mu/pull/607))
+* Update docs ([#600](https://github.com/higherkindness/mu/pull/600))
+* Fixes metric prefix ([#609](https://github.com/higherkindness/mu/pull/609))
+* Fixes plugin release ([#610](https://github.com/higherkindness/mu/pull/610))
+* Use updated Skeuomorph version for non-primitive protobuf fields ([#614](https://github.com/higherkindness/mu/pull/614))
+* Fix compile errors with the generated source code ([#615](https://github.com/higherkindness/mu/pull/615))
+
+
 ## 05/07/2019 - Version 0.18.1
 
 Release changes:
