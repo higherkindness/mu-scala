@@ -51,7 +51,7 @@ object ProtoSrcGenerator extends SrcGenerator {
       case a      => a
     }).mkString("\n")
 
-  val copRegExp: Regex = """((Cop\[)(((\w+)(\s)?(\:\:)(\s)?)+)(TNil)(\]))""".r
+  val copRegExp: Regex = """((Cop\[)(((\w+)((\[)(\w+)(\]))?(\s)?(\:\:)(\s)?)+)(TNil)(\]))""".r
 
   val cleanCop: String => String =
     _.replace("Cop[", "").replace("::", ":+:").replace("TNil]", "CNil")
