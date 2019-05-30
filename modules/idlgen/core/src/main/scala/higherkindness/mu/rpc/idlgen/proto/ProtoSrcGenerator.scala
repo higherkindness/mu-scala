@@ -78,5 +78,5 @@ object ProtoSrcGenerator extends SrcGenerator {
     s"${p.pkg.replace('.', '/')}/${p.name}$ScalaFileExtension"
 
   def imports(pkg: String): String =
-    s"$pkg\nimport higherkindness.mu.rpc.protocol._\nimport shapeless.{:+:, CNil}"
+    s"$pkg\nimport higherkindness.mu.rpc.protocol._\nimport fs2.Stream\nimport shapeless.{:+:, CNil}"
 }

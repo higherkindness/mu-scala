@@ -42,6 +42,7 @@ class ProtoSrcGenTests extends RpcBaseTestSuite {
     """package com.proto
       |
       |import higherkindness.mu.rpc.protocol._
+      |import fs2.Stream
       |import shapeless.{:+:, CNil}
       |import com.proto.author.Author
       |
@@ -68,9 +69,9 @@ class ProtoSrcGenTests extends RpcBaseTestSuite {
       |
       |@service(Protobuf) trait BookService[F[_]] {
       |  def GetBook(req: GetBookRequest): F[Book]
-      |  def GetBooksViaAuthor(req: GetBookViaAuthor): fs2.Stream[F, Book]
-      |  def GetGreatestBook(req: fs2.Stream[F, GetBookRequest]): F[Book]
-      |  def GetBooks(req: fs2.Stream[F, GetBookRequest]): fs2.Stream[F, Book]
+      |  def GetBooksViaAuthor(req: GetBookViaAuthor): Stream[F, Book]
+      |  def GetGreatestBook(req: Stream[F, GetBookRequest]): F[Book]
+      |  def GetBooks(req: Stream[F, GetBookRequest]): Stream[F, Book]
       |}
       |
       |}""".stripMargin

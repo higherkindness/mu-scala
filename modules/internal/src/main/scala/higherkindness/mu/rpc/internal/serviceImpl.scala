@@ -52,10 +52,10 @@ object serviceImpl {
     }
     object TypeTypology {
       def apply(t: Tree): TypeTypology = t match {
-        case tq"Observable[..$tpts]"           => MonixObservableTpe(t, tpts.headOption)
-        case tq"fs2.Stream[$carrier, ..$tpts]" => Fs2StreamTpe(t, tpts.headOption)
-        case tq"Empty.type"                    => EmptyTpe(t)
-        case tq"$carrier[..$tpts]"             => UnaryTpe(t, tpts.headOption)
+        case tq"Observable[..$tpts]"       => MonixObservableTpe(t, tpts.headOption)
+        case tq"Stream[$carrier, ..$tpts]" => Fs2StreamTpe(t, tpts.headOption)
+        case tq"Empty.type"                => EmptyTpe(t)
+        case tq"$carrier[..$tpts]"         => UnaryTpe(t, tpts.headOption)
       }
     }
     case class EmptyTpe(tpe: Tree)                                extends TypeTypology(tpe, None)

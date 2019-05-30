@@ -52,7 +52,7 @@ object ProjectPlugin extends AutoPlugin {
       val scalacheckToolbox: String  = "0.2.5"
       val scalamockScalatest: String = "3.6.0"
       val scalatest: String          = "3.0.6"
-      val skeuomorph: String         = "0.0.9.1"
+      val skeuomorph: String         = "0.0.10"
       val slf4j: String              = "1.7.26"
       val dropwizard: String         = "4.0.5"
     }
