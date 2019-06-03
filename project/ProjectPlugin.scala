@@ -182,7 +182,7 @@ object ProjectPlugin extends AutoPlugin {
         %%("circe-generic", V.circe)
       )
     )
-
+    
     lazy val exampleRouteguideRuntimeSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("monix", V.monix)
@@ -222,6 +222,12 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         "com.github.scopt" %% "scopt" % V.scopt
       ))
+
+    lazy val kittensSettingsTODO: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        "org.typelevel" %% "kittens" % "1.2.1"
+      )
+    )
 
     lazy val exampleTodolistCommonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(

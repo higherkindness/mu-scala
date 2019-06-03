@@ -17,7 +17,7 @@
 package higherkindness.mu.rpc
 package protocol
 
-import cats.MonadError
+import cats.{MonadError, Monoid}
 import cats.effect.{Async, Resource}
 import cats.syntax.applicative._
 import io.grpc.Status
@@ -28,6 +28,9 @@ import monix.execution.Scheduler
 object Utils extends CommonUtils {
 
   object service {
+
+    implicit def fillMonoid[A]: Monoid[A] = ???
+
     @service(Avro, Gzip) trait CompressedAvroRPCService[F[_]] {
       def unaryCompressed(a: A): F[C]
       def unaryCompressedWithError(e: E): F[C]

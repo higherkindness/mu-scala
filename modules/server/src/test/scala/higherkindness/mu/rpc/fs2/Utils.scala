@@ -20,12 +20,15 @@ package fs2
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.protocol._
 import _root_.fs2._
+import cats.Monoid
 import cats.effect.{Effect, Resource}
 import io.grpc.Status
 
 object Utils extends CommonUtils {
 
   object service {
+
+    implicit def fillMonoid[A]: Monoid[A] = ???
 
     @service(Protobuf) trait ProtoRPCService[F[_]] {
       def serverStreamingWithError(e: E): Stream[F, C]

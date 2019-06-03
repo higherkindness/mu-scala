@@ -12,6 +12,7 @@ lazy val common = project
   .in(file("modules/common"))
   .settings(moduleName := "mu-common")
   .settings(commonSettings)
+  .settings(kittensSettingsTODO)
 
 lazy val `internal-core` = project
   .in(file("modules/internal"))
@@ -202,6 +203,7 @@ lazy val `benchmarks-vprev` = project
   .settings(moduleName := "mu-benchmarks-vprev")
   .settings(crossSettings)
   .settings(noPublishSettings)
+  .settings(kittensSettingsTODO)
   .enablePlugins(JmhPlugin)
 
 lazy val `benchmarks-vnext` = project
@@ -213,6 +215,7 @@ lazy val `benchmarks-vnext` = project
   .settings(moduleName := "mu-benchmarks-vnext")
   .settings(crossSettings)
   .settings(noPublishSettings)
+  .settings(kittensSettingsTODO)
   .enablePlugins(JmhPlugin)
 
 //////////////////
@@ -229,6 +232,7 @@ lazy val `example-routeguide-protocol` = project
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
   .settings(moduleName := "mu-rpc-example-routeguide-protocol")
+  .settings(kittensSettingsTODO)
 
 lazy val `example-routeguide-runtime` = project
   .in(file("modules/examples/routeguide/runtime"))
@@ -478,6 +482,7 @@ lazy val `marshallers-jodatime` = project
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-marshallers-jodatime")
   .settings(marshallersJodatimeSettings)
+
 
 ///////////////////////////
 //// DECIMAL MIGRATION ////

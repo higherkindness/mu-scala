@@ -17,6 +17,9 @@
 package examples.todolist
 package protocol
 
+import cats.implicits._
+import cats.derived._
+import auto.monoid._
 import higherkindness.mu.rpc.protocol._
 
 trait PingPongProtocol {

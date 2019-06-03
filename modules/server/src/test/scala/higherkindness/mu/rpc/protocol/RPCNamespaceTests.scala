@@ -16,7 +16,7 @@
 
 package higherkindness.mu.rpc.protocol
 
-import cats.Applicative
+import cats.{Applicative, Monoid}
 import cats.syntax.applicative._
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.protocol.Utils._
@@ -27,6 +27,9 @@ import org.scalatestplus.scalacheck.Checkers
 class RPCNamespaceTests extends RpcBaseTestSuite with BeforeAndAfterAll with Checkers {
 
   object RPCService {
+
+    implicit val requestMonoid: Monoid[Request]   = ???
+    implicit val responseMonoid: Monoid[Response] = ???
 
     case class Request(s: String)
 

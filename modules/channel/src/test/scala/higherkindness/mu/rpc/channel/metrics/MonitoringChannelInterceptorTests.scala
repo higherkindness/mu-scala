@@ -124,6 +124,10 @@ class MonitoringChannelInterceptorTests extends RpcBaseTestSuite {
 
 object services {
 
+  import cats.implicits._
+  import cats.derived._
+  import auto.monoid._
+
   val EC: scala.concurrent.ExecutionContext =
     scala.concurrent.ExecutionContext.Implicits.global
 

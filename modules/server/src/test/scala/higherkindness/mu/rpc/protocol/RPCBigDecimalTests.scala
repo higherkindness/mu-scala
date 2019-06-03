@@ -17,7 +17,7 @@
 package higherkindness.mu.rpc
 package protocol
 
-import cats.Applicative
+import cats.{Applicative, Monoid}
 import cats.syntax.applicative._
 import org.scalatest._
 import higherkindness.mu.rpc.common._
@@ -50,6 +50,10 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
   }
 
   object RPCService {
+
+    implicit val bigDecimalMonoid: Monoid[BigDecimal] = ???
+    implicit val requestMonoid: Monoid[Request]       = ???
+    implicit val responseMonoid: Monoid[Response]     = ???
 
     case class Request(bigDecimal: BigDecimal, label: String)
 
@@ -110,6 +114,9 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
   object RPCServiceWithImplicitRM {
 
     implicit val RM: RoundingMode.RoundingMode = RoundingMode.HALF_DOWN
+
+    implicit val requestMonoid: Monoid[Request]   = ???
+    implicit val responseMonoid: Monoid[Response] = ???
 
     case class Request(bigDecimal: BigDecimal @@ (Nat._8, Nat._2), label: String)
 

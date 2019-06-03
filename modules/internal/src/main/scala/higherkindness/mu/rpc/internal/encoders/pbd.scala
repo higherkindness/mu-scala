@@ -20,6 +20,7 @@ package internal.encoders
 import java.io.{ByteArrayInputStream, InputStream}
 import java.time.{Instant, LocalDate, LocalDateTime}
 
+import cats.Monoid
 import cats.instances._
 import com.google.protobuf.{CodedInputStream, CodedOutputStream}
 import higherkindness.mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTimeUtil}
@@ -33,11 +34,18 @@ object pbd
 
   import pbdirect._
 
-  implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader]: Marshaller[A] =
+  implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader: Monoid]: Marshaller[A] =
     new Marshaller[A] {
-
+      case class OA(oa: Option[A])
       override def parse(stream: InputStream): A =
-        Iterator.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray.pbTo[A]
+        Iterator
+          .continually(stream.read)
+          .takeWhile(_ != -1)
+          .map(_.toByte)
+          .toArray
+          .pbTo[OA]
+          .oa
+          .getOrElse(Monoid[A].empty)
 
       override def stream(value: A): InputStream = new ByteArrayInputStream(value.toPB)
 

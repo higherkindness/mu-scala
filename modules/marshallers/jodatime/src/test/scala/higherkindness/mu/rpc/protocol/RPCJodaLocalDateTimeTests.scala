@@ -18,7 +18,7 @@ package higherkindness.mu.rpc
 package protocol
 
 import org.joda.time._
-import cats.Applicative
+import cats.{Applicative, Monoid}
 import cats.effect.Resource
 import cats.syntax.applicative._
 import com.fortysevendeg.scalacheck.datetime.instances.joda._
@@ -43,6 +43,8 @@ class RPCJodaLocalDateTimeTests extends RpcBaseTestSuite with BeforeAndAfter wit
       .unsafeRunSync()
 
   object RPCJodaLocalDateTimeService {
+
+    implicit def fillMonoid[A]: Monoid[A] = ???
 
     case class Request(date: LocalDateTime, label: String)
 

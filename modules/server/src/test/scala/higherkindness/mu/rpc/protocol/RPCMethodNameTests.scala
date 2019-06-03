@@ -24,9 +24,14 @@ import org.scalacheck.Prop._
 import org.scalatest._
 import org.scalatestplus.scalacheck.Checkers
 
+import cats.Monoid
+
 class RPCMethodNameTests extends RpcBaseTestSuite with BeforeAndAfterAll with Checkers {
 
   object RPCService {
+
+    implicit val requestMonoid: Monoid[Request]   = ???
+    implicit val responseMonoid: Monoid[Response] = ???
 
     case class Request(s: String)
 

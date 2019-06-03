@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-package example.seed.server.protocol.proto
+package higherkindness.mu.rpc.internal.encoders
 
-import higherkindness.mu.rpc.protocol._
-import fs2.Stream
-import shapeless.{:+:, CNil}
-
-import example.seed.server.protocol.proto.people.PeopleRequest
-import example.seed.server.protocol.proto.people.PeopleResponse
+import java.io.{ByteArrayInputStream, InputStream}
 
 import cats.implicits._
-import cats.derived._
-import auto.monoid._
+import higherkindness.mu.rpc.internal.encoders.pbd._
+import io.grpc.MethodDescriptor.Marshaller
+import org.scalatest._
 
-object services {
+class DefaultDirectPBMarshallerTests extends WordSpec with Matchers {
 
-  @service(Protobuf) trait PeopleService[F[_]] {
-    def getPerson(req: PeopleRequest): F[PeopleResponse]
-    def getPersonStream(req: Stream[F, PeopleRequest]): Stream[F, PeopleResponse]
+  "Default PBDirect marshaller" should {
+
+    val emptyInputStream: InputStream = new ByteArrayInputStream(Array())
+
+    "handle empty streams by filling in the default value" in {
+
+      implicitly[Marshaller[Float]].parse(emptyInputStream) shouldBe 0.0f
+
+    }
+
   }
-
 }

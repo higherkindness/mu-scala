@@ -17,6 +17,10 @@
 package higherkindness.mu.rpc.benchmarks
 package shared
 
+import cats.implicits._
+import cats.derived._
+import auto.monoid._
+
 object models {
 
   type PersonAggregation =

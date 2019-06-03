@@ -34,9 +34,14 @@ import org.scalatest._
 import org.scalacheck.Prop._
 import org.scalatestplus.scalacheck.Checkers
 
+import cats.Monoid
+
 class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Checkers {
 
   object RPCDateService {
+
+    implicit val requestMonoid: Monoid[Request]   = ???
+    implicit val responseMonoid: Monoid[Response] = ???
 
     case class Request(date: LocalDate, dateTime: LocalDateTime, instant: Instant, label: String)
 

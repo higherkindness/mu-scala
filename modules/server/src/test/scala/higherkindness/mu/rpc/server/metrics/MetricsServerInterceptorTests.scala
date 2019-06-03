@@ -17,6 +17,7 @@
 package higherkindness.mu.rpc
 package server.metrics
 
+import cats.Monoid
 import cats.effect.{Clock, IO, Resource}
 import cats.syntax.apply._
 import higherkindness.mu.rpc.common._
@@ -123,6 +124,9 @@ object services {
 
   implicit val timer: cats.effect.Timer[cats.effect.IO]     = cats.effect.IO.timer(EC)
   implicit val cs: cats.effect.ContextShift[cats.effect.IO] = cats.effect.IO.contextShift(EC)
+
+  implicit val requestMonoid: Monoid[Request]   = ???
+  implicit val responseMonoid: Monoid[Response] = ???
 
   final case class Request()
   final case class Response()
