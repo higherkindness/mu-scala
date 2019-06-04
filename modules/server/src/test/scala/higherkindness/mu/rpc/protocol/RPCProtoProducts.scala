@@ -29,6 +29,26 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
   object RPCService {
 
+    implicit val protoDefaultRequestOption: ProtoDefault[RequestOption] =
+      new ProtoDefault[RequestOption] {
+        override def default: RequestOption = RequestOption(None)
+      }
+
+    implicit val protoDefaultRequestList: ProtoDefault[RequestList] =
+      new ProtoDefault[RequestList] {
+        override def default: RequestList = RequestList(Nil)
+      }
+
+    implicit val protoDefaultResponseOption: ProtoDefault[ResponseOption] =
+      new ProtoDefault[ResponseOption] {
+        override def default: ResponseOption = ResponseOption(None, false)
+      }
+
+    implicit val protoDefaultResponseList: ProtoDefault[ResponseList] =
+      new ProtoDefault[ResponseList] {
+        override def default: ResponseList = ResponseList(Nil, false)
+      }
+
     case class MyParam(value: String)
 
     case class RequestOption(param1: Option[MyParam])

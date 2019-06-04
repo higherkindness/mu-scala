@@ -51,6 +51,14 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
   object RPCService {
 
+    implicit val protoDefaultRequest: ProtoDefault[Request] = new ProtoDefault[Request] {
+      override def default: Request = Request(BigDecimal(0), "")
+    }
+
+    implicit val protoDefaultResponse: ProtoDefault[Response] = new ProtoDefault[Response] {
+      override def default: Response = Response(BigDecimal(0), "", false)
+    }
+
     case class Request(bigDecimal: BigDecimal, label: String)
 
     case class Response(bigDecimal: BigDecimal, result: String, check: Boolean)

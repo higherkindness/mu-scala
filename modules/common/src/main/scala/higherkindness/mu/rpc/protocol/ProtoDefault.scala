@@ -14,33 +14,25 @@
  * limitations under the License.
  */
 
-package examples.todolist
-package protocol
+package higherkindness.mu.rpc.protocol
 
-import cats.implicits._
-import cats.derived._
-import auto.monoid._
-import higherkindness.mu.rpc.protocol._
+import cats.Monoid
 
-trait PingPongProtocol {
+trait ProtoDefault[A] {
+  def default: A
+}
 
-  /**
-   * Pong response with current timestamp
-   *
-   * @param time Current timestamp.
-   */
-  case class Pong(time: Long = System.currentTimeMillis() / 1000L)
+object ProtoDefault {
+  def apply[A](implicit P: ProtoDefault[A]): ProtoDefault[A] = P
 
-  @service(Protobuf)
-  trait PingPongService[F[_]] {
+  implicit def protoDefaultFromMonoid[A](implicit M: Monoid[A]): ProtoDefault[A] =
+    new ProtoDefault[A] { def default: A = M.empty }
 
-    /**
-     * A simple ping-pong rpc.
-     *
-     * @param empty
-     * @return Pong response with current timestamp.
-     */
-    def ping(empty: Empty.type): F[Pong]
+  implicit val protoDefaultBoolean: ProtoDefault[Boolean] = new ProtoDefault[Boolean] {
+    def default: Boolean = false
+  }
 
+  implicit val protoDefaultBigDecimal: ProtoDefault[BigDecimal] = new ProtoDefault[BigDecimal] {
+    def default: BigDecimal = BigDecimal(0)
   }
 }

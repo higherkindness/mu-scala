@@ -50,6 +50,19 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
 
     object ProtobufService {
       import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.pbd._
+
+      implicit val protoDefaultLocalDate: ProtoDefault[LocalDate] = new ProtoDefault[LocalDate] {
+        override def default: LocalDate = new LocalDate(1970, 1, 1)
+      }
+
+      implicit val protoDefaultRequest: ProtoDefault[Request] = new ProtoDefault[Request] {
+        override def default: Request = Request(new LocalDate(1970, 1, 1), "")
+      }
+
+      implicit val protoDefaultResponse: ProtoDefault[Response] = new ProtoDefault[Response] {
+        override def default: Response = Response(new LocalDate(1970, 1, 1), "", false)
+      }
+
       @service(Protobuf)
       trait Def[F[_]] {
         def jodaLocalDateProto(date: LocalDate): F[LocalDate]

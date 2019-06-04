@@ -23,6 +23,7 @@ import java.time.{Instant, LocalDate, LocalDateTime}
 import cats.instances._
 import com.google.protobuf.{CodedInputStream, CodedOutputStream}
 import higherkindness.mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTimeUtil}
+import higherkindness.mu.rpc.protocol.ProtoDefault
 import io.grpc.MethodDescriptor.Marshaller
 
 object pbd
@@ -33,11 +34,19 @@ object pbd
 
   import pbdirect._
 
-  implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader]: Marshaller[A] =
+  implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader: ProtoDefault]: Marshaller[A] =
     new Marshaller[A] {
+      case class OA(oa: Option[A])
 
       override def parse(stream: InputStream): A =
-        Iterator.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray.pbTo[A]
+        Iterator
+          .continually(stream.read)
+          .takeWhile(_ != -1)
+          .map(_.toByte)
+          .toArray
+          .pbTo[OA]
+          .oa
+          .getOrElse(ProtoDefault[A].default)
 
       override def stream(value: A): InputStream = new ByteArrayInputStream(value.toPB)
 

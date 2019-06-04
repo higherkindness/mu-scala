@@ -38,6 +38,20 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
   object RPCDateService {
 
+    val ld  = LocalDate.of(1970, 1, 1)
+    val lt  = LocalTime.of(0, 0, 0, 0)
+    val ldt = LocalDateTime.of(ld, lt)
+
+    implicit val protoDefaultRequest: ProtoDefault[Request] = new ProtoDefault[Request] {
+      override def default: Request =
+        Request(ld, ldt, Instant.now(), "")
+    }
+
+    implicit val protoDefaultResponse: ProtoDefault[Response] = new ProtoDefault[Response] {
+      override def default: Response =
+        Response(ld, ldt, Instant.now(), "", false)
+    }
+
     case class Request(date: LocalDate, dateTime: LocalDateTime, instant: Instant, label: String)
 
     case class Response(

@@ -44,6 +44,19 @@ class RPCJodaLocalDateTimeTests extends RpcBaseTestSuite with BeforeAndAfter wit
 
   object RPCJodaLocalDateTimeService {
 
+    implicit val protoDefaultLocalDateTime: ProtoDefault[LocalDateTime] =
+      new ProtoDefault[LocalDateTime] {
+        override def default: LocalDateTime = new LocalDateTime(0L)
+      }
+
+    implicit val protoDefaultRequest: ProtoDefault[Request] = new ProtoDefault[Request] {
+      override def default: Request = Request(new LocalDateTime(0L), "")
+    }
+
+    implicit val protoDefaultResponse: ProtoDefault[Response] = new ProtoDefault[Response] {
+      override def default: Response = Response(new LocalDateTime(0L), "", false)
+    }
+
     case class Request(date: LocalDateTime, label: String)
 
     case class Response(date: LocalDateTime, label: String, check: Boolean)

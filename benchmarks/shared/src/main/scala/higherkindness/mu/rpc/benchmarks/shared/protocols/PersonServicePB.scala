@@ -21,6 +21,10 @@ package protocols
 import higherkindness.mu.rpc.benchmarks.shared.models._
 import higherkindness.mu.rpc.protocol._
 
+import cats.implicits._
+import cats.derived._
+import auto.monoid._
+
 @service(Protobuf)
 trait PersonServicePB[F[_]] {
 

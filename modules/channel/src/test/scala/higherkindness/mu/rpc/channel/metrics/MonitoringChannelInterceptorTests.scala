@@ -130,6 +130,10 @@ object services {
   implicit val timer: cats.effect.Timer[cats.effect.IO]     = cats.effect.IO.timer(EC)
   implicit val cs: cats.effect.ContextShift[cats.effect.IO] = cats.effect.IO.contextShift(EC)
 
+  import cats.implicits._
+  import cats.derived._
+  import auto.monoid._
+
   final case class Request()
   final case class Response()
 

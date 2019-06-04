@@ -28,6 +28,14 @@ class RPCNamespaceTests extends RpcBaseTestSuite with BeforeAndAfterAll with Che
 
   object RPCService {
 
+    implicit val protoDefaultRequest: ProtoDefault[Request] = new ProtoDefault[Request] {
+      override def default: Request = Request("")
+    }
+
+    implicit val protoDefaultResponse: ProtoDefault[Response] = new ProtoDefault[Response] {
+      override def default: Response = Response(0)
+    }
+
     case class Request(s: String)
 
     case class Response(length: Int)
