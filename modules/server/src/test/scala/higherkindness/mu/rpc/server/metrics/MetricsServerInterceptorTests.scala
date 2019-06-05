@@ -124,13 +124,8 @@ object services {
   implicit val timer: cats.effect.Timer[cats.effect.IO]     = cats.effect.IO.timer(EC)
   implicit val cs: cats.effect.ContextShift[cats.effect.IO] = cats.effect.IO.contextShift(EC)
 
-  implicit val protoDefaultRequest: ProtoDefault[Request] = new ProtoDefault[Request] {
-    override def default: Request = Request()
-  }
-
-  implicit val protoDefaultResponse: ProtoDefault[Response] = new ProtoDefault[Response] {
-    override def default: Response = Response()
-  }
+  import cats.derived._
+  import auto.monoid._
 
   final case class Request()
   final case class Response()

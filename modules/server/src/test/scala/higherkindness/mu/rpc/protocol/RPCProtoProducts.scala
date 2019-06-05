@@ -41,12 +41,12 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     implicit val protoDefaultResponseOption: ProtoDefault[ResponseOption] =
       new ProtoDefault[ResponseOption] {
-        override def default: ResponseOption = ResponseOption(None, false)
+        override def default: ResponseOption = ResponseOption(None, param2 = false)
       }
 
     implicit val protoDefaultResponseList: ProtoDefault[ResponseList] =
       new ProtoDefault[ResponseList] {
-        override def default: ResponseList = ResponseList(Nil, false)
+        override def default: ResponseList = ResponseList(Nil, param2 = false)
       }
 
     case class MyParam(value: String)

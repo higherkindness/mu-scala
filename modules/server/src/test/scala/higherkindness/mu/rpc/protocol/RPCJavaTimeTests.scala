@@ -49,7 +49,7 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     implicit val protoDefaultResponse: ProtoDefault[Response] = new ProtoDefault[Response] {
       override def default: Response =
-        Response(ld, ldt, Instant.now(), "", false)
+        Response(ld, ldt, Instant.now(), "", check = false)
     }
 
     case class Request(date: LocalDate, dateTime: LocalDateTime, instant: Instant, label: String)

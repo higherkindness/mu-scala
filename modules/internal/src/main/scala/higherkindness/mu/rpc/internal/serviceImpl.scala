@@ -379,8 +379,6 @@ object serviceImpl {
 
         private val respType = response.safeInner
 
-        //q"""ReqPD: _root_.higherkindness.mu.rpc.protocol.ProtoDefault[$reqType],"""
-
         val methodDescriptorMarshallerImplicits: List[Tree] = List(
           q"ReqM: _root_.io.grpc.MethodDescriptor.Marshaller[$reqType]",
           q"RespM: _root_.io.grpc.MethodDescriptor.Marshaller[$respType]"

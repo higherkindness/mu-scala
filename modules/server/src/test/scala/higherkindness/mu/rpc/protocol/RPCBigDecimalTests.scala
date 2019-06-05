@@ -56,7 +56,7 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
     }
 
     implicit val protoDefaultResponse: ProtoDefault[Response] = new ProtoDefault[Response] {
-      override def default: Response = Response(BigDecimal(0), "", false)
+      override def default: Response = Response(BigDecimal(0), "", check = false)
     }
 
     case class Request(bigDecimal: BigDecimal, label: String)
