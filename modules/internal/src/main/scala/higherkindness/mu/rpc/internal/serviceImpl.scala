@@ -379,11 +379,21 @@ object serviceImpl {
 
         private val respType = response.safeInner
 
+        //q"""ReqPD: _root_.higherkindness.mu.rpc.protocol.ProtoDefault[$reqType],"""
+
+        val methodDescriptorMarshallerImplicits: List[Tree] = List(
+          q"ReqM: _root_.io.grpc.MethodDescriptor.Marshaller[$reqType]",
+          q"RespM: _root_.io.grpc.MethodDescriptor.Marshaller[$respType]"
+        )
+
+        val methodDescriptorProtoDefaultImplicit: List[Tree] = if (serializationType == Protobuf) {
+          List(q"ReqPD: _root_.higherkindness.mu.rpc.protocol.ProtoDefault[$reqType]")
+        } else List()
+
+        val methodDescriptorImplicits = methodDescriptorMarshallerImplicits ++ methodDescriptorProtoDefaultImplicit
+
         val methodDescriptor: DefDef = q"""
-          def $methodDescriptorName(implicit
-            ReqM: _root_.io.grpc.MethodDescriptor.Marshaller[$reqType],
-            RespM: _root_.io.grpc.MethodDescriptor.Marshaller[$respType]
-          ): _root_.io.grpc.MethodDescriptor[$reqType, $respType] = {
+          def $methodDescriptorName(implicit ..$methodDescriptorImplicits): _root_.io.grpc.MethodDescriptor[$reqType, $respType] = {
             _root_.io.grpc.MethodDescriptor
               .newBuilder(
                 ReqM,
