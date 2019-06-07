@@ -50,13 +50,13 @@ class ClientCacheTests extends WordSpec with Matchers {
   def compiledStream[H](
       ref1: Ref[IO, Int],
       ref2: Ref[IO, Int],
-      hosts: List[H],
+      keys: List[H],
       cleanUp: Int): IO[Unit] =
     (for {
-      hostAndPort <- Stream.eval(Ref.of[IO, List[H]](hosts))
-      timer       <- Stream.eval(buildTimer)
+      keyRef <- Stream.eval(Ref.of[IO, List[H]](keys))
+      timer  <- Stream.eval(buildTimer)
       clientCache <- ClientCache.impl[MyClient, IO, H](
-        hostAndPort.modify(list => (list.tail, list.head)),
+        keyRef.modify(list => (list.tail, list.head)),
         _ =>
           ref1
             .update(_ + 1)
@@ -64,59 +64,30 @@ class ClientCacheTests extends WordSpec with Matchers {
         cleanUp.millis,
         cleanUp.millis
       )(ConcurrentEffect[IO], cs, timer)
-      _ <- Stream.eval((1 to hosts.length).toList.traverse_(_ => clientCache.getClient))
+      _ <- Stream.eval((1 to keys.length).toList.traverse_(_ => clientCache.getClient))
     } yield ()).compile.drain
 
-  def test1(numClients: Int, cleanUp: Int): (Int, Int) =
+  def test(numClients: Int, cleanUp: Int): (Int, Int) =
     (for {
       ref1         <- Ref.of[IO, Int](0)
       ref2         <- Ref.of[IO, Int](0)
-      _            <- compiledStream(ref1, ref2, (1 to numClients).toList.map(i => ("localhost", i)), cleanUp)
+      _            <- compiledStream(ref1, ref2, (1 to numClients).toList.map("node-0000" + _), cleanUp)
       numCreations <- ref1.get
       numCloses    <- ref2.get
     } yield (numCreations, numCloses)).unsafeRunSync()
 
-  def test2(numClients: Int, cleanUp: Int): (Int, Int) =
-    (for {
-      ref1 <- Ref.of[IO, Int](0)
-      ref2 <- Ref.of[IO, Int](0)
-      _ <- compiledStream(
-        ref1,
-        ref2,
-        (1 to numClients).toList.map(i => "node-0000" + i.toString),
-        cleanUp)
-      numCreations <- ref1.get
-      numCloses    <- ref2.get
-    } yield (numCreations, numCloses)).unsafeRunSync()
-
-  "ClientCache.impl with Host and Port" should {
+  "ClientCache.impl" should {
 
     "create the client and close after one use when the clean up time is lower than the elapsed time" in {
-      test1(1, clockStep - 10) shouldBe ((1, 1))
+      test(3, clockStep - 10) shouldBe ((3, 3))
     }
 
     "create the client and close after one use when the clean up time is greater than the elapsed time" in {
-      test1(1, clockStep + 10) shouldBe ((1, 1))
+      test(5, clockStep + 10) shouldBe ((5, 5))
     }
 
     "use the provided clients and close them" in {
-      test1(2, clockStep) shouldBe ((2, 2))
-    }
-
-  }
-
-  "ClientCache.impl with Hostname" should {
-
-    "create the client and close after one use when the clean up time is lower than the elapsed time" in {
-      test2(3, clockStep - 10) shouldBe ((3, 3))
-    }
-
-    "create the client and close after one use when the clean up time is greater than the elapsed time" in {
-      test2(5, clockStep + 10) shouldBe ((5, 5))
-    }
-
-    "use the provided clients and close them" in {
-      test2(2, clockStep) shouldBe ((2, 2))
+      test(2, clockStep) shouldBe ((2, 2))
     }
 
   }

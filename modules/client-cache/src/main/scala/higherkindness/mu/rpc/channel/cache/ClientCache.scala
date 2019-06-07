@@ -35,7 +35,7 @@ object ClientCache {
   private val logger: Logger = getLogger
 
   def fromResource[Client[_[_]], F[_], H](
-      getHostAndPort: F[H],
+      getKey: F[H],
       createClient: H => Resource[F, Client[F]],
       tryToRemoveUnusedEvery: FiniteDuration,
       removeUnusedAfter: FiniteDuration
@@ -43,14 +43,10 @@ object ClientCache {
       implicit CE: ConcurrentEffect[F],
       cs: ContextShift[F],
       timer: Timer[F]): Stream[F, ClientCache[Client, F]] =
-    impl(
-      getHostAndPort,
-      (h: H) => createClient(h).allocated,
-      tryToRemoveUnusedEvery,
-      removeUnusedAfter)
+    impl(getKey, (h: H) => createClient(h).allocated, tryToRemoveUnusedEvery, removeUnusedAfter)
 
   def impl[Client[_[_]], F[_], H](
-      getHostAndPort: F[H],
+      getKey: F[H],
       createClient: H => F[(Client[F], F[Unit])],
       tryToRemoveUnusedEvery: FiniteDuration,
       removeUnusedAfter: FiniteDuration
@@ -68,24 +64,24 @@ object ClientCache {
 
     def create(ref: Ref[F, State]): ClientCache[Client, F] = new ClientCache[Client, F] {
       val getClient: F[Client[F]] = for {
-        hostAndPort <- getHostAndPort
-        now         <- nowUnix
-        (map, _)    <- ref.get
+        key      <- getKey
+        now      <- nowUnix
+        (map, _) <- ref.get
         client <- map
-          .get(hostAndPort)
+          .get(key)
           .fold {
-            createClient(hostAndPort).flatMap {
+            createClient(key).flatMap {
               case (client, close) =>
-                CE.delay(logger.info(s"Created new RPC client for $hostAndPort")) *>
+                CE.delay(logger.info(s"Created new RPC client for $key")) *>
                   ref
-                    .update(_.leftMap(_ + (hostAndPort -> ClientMeta(client, close, now))))
+                    .update(_.leftMap(_ + (key -> ClientMeta(client, close, now))))
                     .as(client)
             }
           }(
             clientMeta =>
-              CE.delay(logger.debug(s"Reuse existing RPC client for $hostAndPort")) *>
+              CE.delay(logger.debug(s"Reuse existing RPC client for $key")) *>
                 ref
-                  .update(_.leftMap(_.updated(hostAndPort, clientMeta.copy(lastAccessed = now))))
+                  .update(_.leftMap(_.updated(key, clientMeta.copy(lastAccessed = now))))
                   .as(clientMeta.client))
 
         (_, lastClean) <- ref.get
