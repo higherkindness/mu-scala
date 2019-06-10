@@ -64,31 +64,40 @@ object jodaTimeEncoders {
 
     import com.sksamuel.avro4s._
 
-    implicit object JodaLocalDateToSchema extends ToSchema[LocalDate] {
-      override val schema: Schema = Schema.create(Schema.Type.INT)
+    implicit object JodaLocalDateToSchema extends SchemaFor[LocalDate] {
+      override def schema(namingStrategy: NamingStrategy): Schema = Schema.create(Schema.Type.INT)
     }
 
-    implicit object JodaLocalDateFromValue extends FromValue[LocalDate] {
-      override def apply(value: Any, field: Field): LocalDate =
+    implicit object JodaLocalDateFromValue extends Decoder[LocalDate] {
+      override def decode(value: Any, schema: Schema, namingStrategy: NamingStrategy): LocalDate =
         JodaTimeUtil.intToJodaLocalDate(value.asInstanceOf[Int])
     }
 
-    implicit object JodalocalDateToValue extends ToValue[LocalDate] {
-      override def apply(value: LocalDate): Int =
+    implicit object JodalocalDateToValue extends Encoder[LocalDate] {
+      override def encode(
+          value: LocalDate,
+          schema: Schema,
+          namingStrategy: NamingStrategy): Int =
         JodaTimeUtil.jodaLocalDateToInt(value)
     }
 
-    implicit object JodaLocalDateTimeToSchema extends ToSchema[LocalDateTime] {
-      override val schema: Schema = Schema.create(Schema.Type.LONG)
+    implicit object JodaLocalDateTimeToSchema extends SchemaFor[LocalDateTime] {
+      override def schema(namingStrategy: NamingStrategy): Schema = Schema.create(Schema.Type.LONG)
     }
 
-    implicit object JodaLocalDateTimeFromValue extends FromValue[LocalDateTime] {
-      def apply(value: Any, field: Field): LocalDateTime =
+    implicit object JodaLocalDateTimeFromValue extends Decoder[LocalDateTime] {
+      override def decode(
+          value: Any,
+          schema: Schema,
+          namingStrategy: NamingStrategy): LocalDateTime =
         JodaTimeUtil.longToJodaLocalDateTime(value.asInstanceOf[Long])
     }
 
-    implicit object JodaLocalDateTimeToValue extends ToValue[LocalDateTime] {
-      override def apply(value: LocalDateTime): Long =
+    implicit object JodaLocalDateTimeToValue extends Encoder[LocalDateTime] {
+      override def encode(
+          value: LocalDateTime,
+          schema: Schema,
+          namingStrategy: NamingStrategy): Long =
         JodaTimeUtil.jodaLocalDatetimeToLong(value)
     }
 
