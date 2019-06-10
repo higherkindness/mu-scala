@@ -60,6 +60,7 @@ object ProjectPlugin extends AutoPlugin {
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect),
+        "org.typelevel" %% "kittens" % "1.2.1",
         %%("scalamockScalatest")                         % Test,
         %%("scheckToolboxDatetime", V.scalacheckToolbox) % Test
       )
@@ -193,12 +194,6 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %("joda-time", V.jodaTime),
         %%("scheckToolboxDatetime", V.scalacheckToolbox) % Test
-      )
-    )
-
-    lazy val kittensTODO: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "org.typelevel" %% "kittens" % "1.2.1" // todo this should go in a better place but it's fine for now before PR
       )
     )
 

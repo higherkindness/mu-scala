@@ -12,7 +12,6 @@ lazy val common = project
   .in(file("modules/common"))
   .settings(moduleName := "mu-common")
   .settings(commonSettings)
-  .settings(kittensTODO)
 
 lazy val `internal-core` = project
   .in(file("modules/internal"))
@@ -20,7 +19,6 @@ lazy val `internal-core` = project
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-internal-core")
   .settings(internalSettings)
-  .settings(kittensTODO)
 
 lazy val `internal-monix` = project
   .in(file("modules/internal/monix"))
@@ -197,14 +195,14 @@ lazy val `benchmarks-vprev` = project
     libraryDependencies ++= Seq(
       "io.higherkindness" %% "mu-rpc-channel" % lastReleasedV,
       "io.higherkindness" %% "mu-rpc-server"  % lastReleasedV,
-      "io.higherkindness" %% "mu-rpc-testing" % lastReleasedV
+      "io.higherkindness" %% "mu-rpc-testing" % lastReleasedV,
+      "org.typelevel" %% "kittens" % "1.2.1"
     )
   )
   .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vprev")
   .settings(crossSettings)
   .settings(noPublishSettings)
-  .settings(kittensTODO)
   .enablePlugins(JmhPlugin)
 
 lazy val `benchmarks-vnext` = project
@@ -216,7 +214,6 @@ lazy val `benchmarks-vnext` = project
   .settings(moduleName := "mu-benchmarks-vnext")
   .settings(crossSettings)
   .settings(noPublishSettings)
-  .settings(kittensTODO)
   .enablePlugins(JmhPlugin)
 
 //////////////////
@@ -233,7 +230,6 @@ lazy val `example-routeguide-protocol` = project
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
   .settings(moduleName := "mu-rpc-example-routeguide-protocol")
-  .settings(kittensTODO)
 
 lazy val `example-routeguide-runtime` = project
   .in(file("modules/examples/routeguide/runtime"))
@@ -321,7 +317,6 @@ lazy val `seed-server-protocol-avro` = project
   .in(file("modules/examples/seed/server/modules/protocol_avro"))
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
-  .settings(kittensTODO)
   .dependsOn(channel)
 
 lazy val `seed-server-protocol-proto` = project
