@@ -34,22 +34,20 @@ object ClientCache {
 
   private val logger: Logger = getLogger
 
-  type HostPort = (String, Int)
-
-  def fromResource[Client[_[_]], F[_]](
-      getHostAndPort: F[HostPort],
-      createClient: HostPort => Resource[F, Client[F]],
+  def fromResource[Client[_[_]], F[_], H](
+      getKey: F[H],
+      createClient: H => Resource[F, Client[F]],
       tryToRemoveUnusedEvery: FiniteDuration,
       removeUnusedAfter: FiniteDuration
   )(
       implicit CE: ConcurrentEffect[F],
       cs: ContextShift[F],
       timer: Timer[F]): Stream[F, ClientCache[Client, F]] =
-    impl(getHostAndPort, createClient(_).allocated, tryToRemoveUnusedEvery, removeUnusedAfter)
+    impl(getKey, (h: H) => createClient(h).allocated, tryToRemoveUnusedEvery, removeUnusedAfter)
 
-  def impl[Client[_[_]], F[_]](
-      getHostAndPort: F[HostPort],
-      createClient: HostPort => F[(Client[F], F[Unit])],
+  def impl[Client[_[_]], F[_], H](
+      getKey: F[H],
+      createClient: H => F[(Client[F], F[Unit])],
       tryToRemoveUnusedEvery: FiniteDuration,
       removeUnusedAfter: FiniteDuration
   )(
@@ -59,32 +57,33 @@ object ClientCache {
 
     type UnixMillis = Duration
     final case class ClientMeta(client: Client[F], close: F[Unit], lastAccessed: UnixMillis)
-    type State = (Map[HostPort, ClientMeta], UnixMillis)
+    type State = (Map[H, ClientMeta], UnixMillis)
 
     val nowUnix: F[UnixMillis] =
       timer.clock.realTime(MILLISECONDS).map(_.millis)
 
     def create(ref: Ref[F, State]): ClientCache[Client, F] = new ClientCache[Client, F] {
       val getClient: F[Client[F]] = for {
-        hostAndPort <- getHostAndPort
-        now         <- nowUnix
-        (map, _)    <- ref.get
+        key      <- getKey
+        now      <- nowUnix
+        (map, _) <- ref.get
         client <- map
-          .get(hostAndPort)
+          .get(key)
           .fold {
-            createClient(hostAndPort).flatMap {
+            createClient(key).flatMap {
               case (client, close) =>
-                CE.delay(logger.info(s"Created new RPC client for $hostAndPort")) *>
+                CE.delay(logger.info(s"Created new RPC client for $key")) *>
                   ref
-                    .update(_.leftMap(_ + (hostAndPort -> ClientMeta(client, close, now))))
+                    .update(_.leftMap(_ + (key -> ClientMeta(client, close, now))))
                     .as(client)
             }
           }(
             clientMeta =>
-              CE.delay(logger.debug(s"Reuse existing RPC client for $hostAndPort")) *>
+              CE.delay(logger.debug(s"Reuse existing RPC client for $key")) *>
                 ref
-                  .update(_.leftMap(_.updated(hostAndPort, clientMeta.copy(lastAccessed = now))))
+                  .update(_.leftMap(_.updated(key, clientMeta.copy(lastAccessed = now))))
                   .as(clientMeta.client))
+
         (_, lastClean) <- ref.get
         _ <- if (lastClean < (now - tryToRemoveUnusedEvery))
           Concurrent[F].start(cs.shift *> cleanup(ref, _.lastAccessed < (now - removeUnusedAfter)))
@@ -106,7 +105,7 @@ object ClientCache {
       } yield ()
 
     val refState: F[Ref[F, State]] =
-      nowUnix.tupleLeft(Map.empty[HostPort, ClientMeta]).flatMap(Ref.of[F, State])
+      nowUnix.tupleLeft(Map.empty[H, ClientMeta]).flatMap(Ref.of[F, State])
 
     Stream.bracket(refState)(cleanup(_, _ => true)).map(create)
   }
