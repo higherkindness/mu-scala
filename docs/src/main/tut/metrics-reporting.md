@@ -34,6 +34,15 @@ import higherkindness.mu.rpc.protocol._
 
 object service {
 
+  implicit val helloRequestDefault: ProtoDefault[HelloRequest] = new ProtoDefault[HelloRequest] {
+    val default: HelloRequest = HelloRequest("")
+  }
+  
+  implicit val helloReplyDefault: ProtoDefault[HelloResponse] = new ProtoDefault[HelloResponse] {
+    val default: HelloResponse = HelloResponse("")
+  }
+  
+
   @message
   case class HelloRequest(greeting: String)
 

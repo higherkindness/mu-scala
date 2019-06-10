@@ -21,6 +21,14 @@ object service {
 
   import monix.reactive.Observable
 
+  implicit val helloRequestDefault: ProtoDefault[HelloRequest] = new ProtoDefault[HelloRequest] {
+    val default: HelloRequest = HelloRequest("")
+  }
+  
+  implicit val helloResponseDefault: ProtoDefault[HelloResponse] = new ProtoDefault[HelloResponse] {
+    val default: HelloResponse = HelloResponse("")
+  }
+  
   @message
   case class HelloRequest(greeting: String)
 
@@ -103,6 +111,14 @@ object service {
 
   import fs2.Stream
 
+  implicit val helloRequestDefault: ProtoDefault[HelloRequest] = new ProtoDefault[HelloRequest] {
+    val default: HelloRequest = HelloRequest("")
+  }
+  
+  implicit val helloResponseDefault: ProtoDefault[HelloResponse] = new ProtoDefault[HelloResponse] {
+    val default: HelloResponse = HelloResponse("")
+  }
+  
   @message
   case class HelloRequest(greeting: String)
 

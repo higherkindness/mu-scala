@@ -35,4 +35,8 @@ object ProtoDefault {
   implicit val protoDefaultBigDecimal: ProtoDefault[BigDecimal] = new ProtoDefault[BigDecimal] {
     def default: BigDecimal = BigDecimal(0)
   }
+
+  implicit val protoDefaultMuEmpty: ProtoDefault[Empty.type] = new ProtoDefault[Empty.type] {
+    override def default: Empty.type = Empty
+  }
 }

@@ -91,11 +91,19 @@ case class Person(name: String, id: Int, has_ponycopter: Boolean)
 
 As we can see, this is quite simple - it’s just a Scala case class preceded by the `@message` annotation (though, `@message` is optional and used exclusively by `idlGen`):
 
-By the same token, let’s see now how the `Greeter` service would be translated to the [mu] style (in your `.scala` file):
+By the same token, let’s see now how the `Greeter` service would be translated to the [mu] style (in your `.scala` file). We need to include an instance of the `ProtoDefault` typeclass for the request, so that the server knows how to generate default values. For efficiency, gRPC defaults are not sent over the wire, so the server needs to fill them in. If you have an implicit `cats.Monoid` in scope for your type, the compiler can use that too.
 
 ```tut:silent
 object protocol {
 
+  implicit val helloRequestDefault: ProtoDefault[HelloRequest] = new ProtoDefault[HelloRequest] {
+    val default: HelloRequest = HelloRequest("")
+  }
+  
+  implicit val helloReplyDefault: ProtoDefault[HelloReply] = new ProtoDefault[HelloReply] {
+    val default: HelloReply = HelloReply("")
+  }
+  
   /**
     * The request message containing the user's name.
     * @param name User's name.
@@ -139,6 +147,14 @@ For instance:
 
 ```tut:silent
 object protocol {
+
+  implicit val helloRequestDefault: ProtoDefault[HelloRequest] = new ProtoDefault[HelloRequest] {
+    val default: HelloRequest = HelloRequest("")
+  }
+
+  implicit val helloReplyDefault: ProtoDefault[HelloReply] = new ProtoDefault[HelloReply] {
+    val default: HelloReply = HelloReply("")
+  }
 
   /**
    * The request message containing the user's name.
@@ -265,6 +281,14 @@ Let's complete our protocol's example with an unary service method:
 ```tut:silent
 object service {
 
+  implicit val helloRequestDefault: ProtoDefault[HelloRequest] = new ProtoDefault[HelloRequest] {
+    val default: HelloRequest = HelloRequest("")
+  }
+
+  implicit val helloResponseDefault: ProtoDefault[HelloResponse] = new ProtoDefault[HelloResponse] {
+    val default: HelloResponse = HelloResponse("")
+  }
+
   @message
   case class HelloRequest(greeting: String)
 
@@ -319,6 +343,14 @@ object protocol {
   implicit object LocalDateReader extends PBReader[LocalDate] {
     override def read(input: CodedInputStream): LocalDate =
       LocalDate.parse(input.readString(), DateTimeFormatter.ISO_LOCAL_DATE)
+  }
+
+  implicit val helloRequestDefault: ProtoDefault[HelloRequest] = new ProtoDefault[HelloRequest] {
+    val default: HelloRequest = HelloRequest("", LocalDate.MIN)
+  }
+
+  implicit val helloReplyDefault: ProtoDefault[HelloReply] = new ProtoDefault[HelloReply] {
+    val default: HelloReply = HelloReply("")
   }
 
   @message
