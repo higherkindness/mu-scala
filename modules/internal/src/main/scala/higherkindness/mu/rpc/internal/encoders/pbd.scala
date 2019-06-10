@@ -26,6 +26,8 @@ import higherkindness.mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTim
 import higherkindness.mu.rpc.protocol.ProtoDefault
 import io.grpc.MethodDescriptor.Marshaller
 
+import scala.util.Try
+
 object pbd
     extends OptionInstances
     with OptionInstancesBinCompat0
@@ -36,17 +38,16 @@ object pbd
 
   implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader: ProtoDefault]: Marshaller[A] =
     new Marshaller[A] {
-      case class OA(oa: Option[A])
 
       override def parse(stream: InputStream): A =
-        Iterator
-          .continually(stream.read)
-          .takeWhile(_ != -1)
-          .map(_.toByte)
-          .toArray
-          .pbTo[OA]
-          .oa
-          .getOrElse(ProtoDefault[A].default)
+        Try(
+          Iterator
+            .continually(stream.read)
+            .takeWhile(_ != -1)
+            .map(_.toByte)
+            .toArray
+            .pbTo[A]
+        ).getOrElse(ProtoDefault[A].default)
 
       override def stream(value: A): InputStream = new ByteArrayInputStream(value.toPB)
 
