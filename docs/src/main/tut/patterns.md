@@ -6,7 +6,7 @@ permalink: /patterns
 
 # Patterns
 
-So far so good, we haven't seen too much code or implemented any business logic. In the previous sections we have seen some protocol definitions with Scala annotations and the generation of IDL files from the Scala definitions. Finally, in this section, we are going to see how to complete our quickstart example. We'll take a look at both sides, the server and the client.
+So far so good, we haven't seen too much code or implemented any business logic. In the previous sections we have seen some protocol definitions with Scala annotations and the generation of these definitions from IDL files. Finally, in this section, we are going to see how to complete our quickstart example. We'll take a look at both sides, the server and the client.
 
 ## Server
 
@@ -21,10 +21,8 @@ object service {
 
   import monix.reactive.Observable
 
-  @message
   case class HelloRequest(greeting: String)
 
-  @message
   case class HelloResponse(reply: String)
 
   @service(Protobuf)

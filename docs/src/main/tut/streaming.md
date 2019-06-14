@@ -21,10 +21,8 @@ object service {
 
   import monix.reactive.Observable
 
-  @message
   case class HelloRequest(greeting: String)
 
-  @message
   case class HelloResponse(reply: String)
 
   @service(Protobuf)
@@ -103,10 +101,8 @@ object service {
 
   import fs2.Stream
 
-  @message
   case class HelloRequest(greeting: String)
 
-  @message
   case class HelloResponse(reply: String)
 
   @service(Protobuf)

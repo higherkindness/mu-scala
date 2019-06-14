@@ -11,6 +11,9 @@ options:
   - title: Annotations
     url: annotations
 
+  - title: Generate sources from IDL
+      url: generate-sources-from-idl
+
   - title: IDL Generation
     url: idl-generation
 
