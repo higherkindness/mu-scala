@@ -67,7 +67,7 @@ First things first, the main difference with respect to [gRPC] is that [mu] does
 
 * Your protocols, both messages and services, will reside with your business-logic in your Scala files using [scalamacros] annotations to set them up. We’ll see more details on this shortly.
 * As a optional feature, [mu] can generate the services and messages definitions in Scala code from `.proto` files.  We'll check out this feature further in [this section](generate-sources-from-idl).
-* Also, instead of reading `.proto` files to set up the [RPC] messages and services, [mu] offers the ability to generate them based on the protocols defined in your Scala code. However, this feature is now **deprecated**, in future versions it will disapear.
+* With [mu] you can still generate `.proto` files based on the protocols defined in your Scala code. However, this feature is now **deprecated** and it will disappear in future versions.
 
 Let’s start looking at how to define the `Person` message that we saw previously.
 Before starting, this is the Scala import we need:
