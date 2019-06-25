@@ -74,7 +74,7 @@ you have to run the following sbt task:
 sbt "idlGen proto"
 ```
 
-However, as we said in [the previous section](generate-sources-from-idl.md), the easiest way to use the plugin is integrating the source generation in your compile process by adding this import to your `build.sbt` file:
+However, as we said in [the previous section](generate-sources-from-idl), the easiest way to use the plugin is integrating the source generation in your compile process by adding this import to your `build.sbt` file:
 
 ```scala
  import higherkindness.mu.rpc.idlgen.IdlGenPlugin.autoImport._
