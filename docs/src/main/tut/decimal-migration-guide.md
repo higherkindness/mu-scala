@@ -10,7 +10,7 @@ permalink: /decimal-migration-guide
 
 This guide is only for projects that are using a version prior to `0.15.1` **and** have decimals in some of their protocols **and** want to serialize those decimals following the avro specs.
 
-If you're starting a new project, you can use safely tagged `BigDecimal`s. Check the [Custom codecs section in Core concepts](core-concepts#custom-codecs) and [Plugin Settings section in IDL Generation](idl-generation#plugin-settings) for more information.
+If you're starting a new project, you can use safely tagged `BigDecimal`s. Check the [Custom codecs section in Core concepts](core-concepts#custom-codecs) and [Plugin Settings section in Generate sources from IDL](generate-sources-from-idl#plugin-settings) for more information.
 
 ## Disclaimer
 

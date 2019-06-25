@@ -16,7 +16,7 @@ In the upcoming sections, we'll take a look at how we can implement RPC protocol
 
 ## Messages and Services
 
-### GRPC
+### gRPC
 
 As you might know, [gRPC] uses protocol buffers (a.k.a. *protobuf*) by default:
 
@@ -66,7 +66,8 @@ In the previous section, we’ve seen an overview of what [gRPC] offers for defi
 First things first, the main difference with respect to [gRPC] is that [mu] doesn’t need `.proto` files, but can still use protobuf thanks to the [PBDirect] library, which allows it to read and write Scala objects directly to protobuf with no `.proto` file definitions. In summary:
 
 * Your protocols, both messages and services, will reside with your business-logic in your Scala files using [scalamacros] annotations to set them up. We’ll see more details on this shortly.
-* Instead of reading `.proto` files to set up the [RPC] messages and services, [mu] offers (as an optional feature) the ability to generate them based on the protocols defined in your Scala code. This feature is offered to maintain compatibility with other languages and systems outside of Scala. We'll check out this feature further in [this section](idl-generation).
+* As a optional feature, [mu] can generate the services and messages definitions in Scala code from `.proto` files.  We'll check out this feature further in [this section](generate-sources-from-idl).
+* With [mu] you can still generate `.proto` files based on the protocols defined in your Scala code. However, this feature is now **deprecated** and it will disappear in future versions.
 
 Let’s start looking at how to define the `Person` message that we saw previously.
 Before starting, this is the Scala import we need:
@@ -85,13 +86,10 @@ import higherkindness.mu.rpc.protocol._
  * @param id Person Id.
  * @param has_ponycopter Has Ponycopter check.
  */
-@message
 case class Person(name: String, id: Int, has_ponycopter: Boolean)
 ```
 
-As we can see, this is quite simple - it’s just a Scala case class preceded by the `@message` annotation (though, `@message` is optional and used exclusively by `idlGen`):
-
-By the same token, let’s see now how the `Greeter` service would be translated to the [mu] style (in your `.scala` file):
+As we can see, this is quite simple. By the same token, let’s see now how the `Greeter` service would be translated to the [mu] style (in your `.scala` file):
 
 ```tut:silent
 object protocol {
@@ -100,14 +98,12 @@ object protocol {
     * The request message containing the user's name.
     * @param name User's name.
     */
-  @message
   case class HelloRequest(name: String)
 
   /**
     * The response message,
     * @param message Message containing the greetings.
     */
-  @message
   case class HelloReply(message: String)
 
   @service(Protobuf)
@@ -144,14 +140,12 @@ object protocol {
    * The request message containing the user's name.
    * @param name User's name.
    */
-  @message
   case class HelloRequest(name: String)
 
   /**
    * The response message.
    * @param message Message containing the greetings.
    */
-  @message
   case class HelloReply(message: String)
 
   @service(Protobuf)
@@ -265,10 +259,8 @@ Let's complete our protocol's example with an unary service method:
 ```tut:silent
 object service {
 
-  @message
   case class HelloRequest(greeting: String)
 
-  @message
   case class HelloResponse(reply: String)
 
   @service(Protobuf)
@@ -321,10 +313,8 @@ object protocol {
       LocalDate.parse(input.readString(), DateTimeFormatter.ISO_LOCAL_DATE)
   }
 
-  @message
   case class HelloRequest(name: String, date: LocalDate)
 
-  @message
   case class HelloReply(message: String)
 
   @service(Protobuf)
@@ -362,10 +352,8 @@ object protocol {
       LocalDate.parse(value.toString(), DateTimeFormatter.ISO_LOCAL_DATE)
   }
 
-  @message
   case class HelloRequest(name: String, date: LocalDate)
 
-  @message
   case class HelloReply(message: String)
 
   @service(Avro)
