@@ -18,20 +18,27 @@ package higherkindness.mu.rpc.idlgen
 
 import higherkindness.mu.rpc.idlgen.Model.{
   BigDecimalTypeGen,
+  CompressionTypeGen,
   MarshallersImport,
-  ScalaBigDecimalTaggedGen
+  UseIdiomaticEndpoints
 }
 import higherkindness.mu.rpc.idlgen.avro.AvroSrcGenerator
 import higherkindness.mu.rpc.idlgen.proto.ProtoSrcGenerator
 
 object SrcGenApplication {
   def apply(
-      marshallersImports: List[MarshallersImport] = Nil,
-      bigDecimalTypeGen: BigDecimalTypeGen = ScalaBigDecimalTaggedGen): GeneratorApplication[
-    SrcGenerator] =
+      marshallersImports: List[MarshallersImport],
+      bigDecimalTypeGen: BigDecimalTypeGen,
+      compressionType: CompressionTypeGen,
+      useIdiomaticEndpoints: UseIdiomaticEndpoints
+  ): GeneratorApplication[SrcGenerator] =
     new GeneratorApplication(
       ProtoSrcGenerator,
-      AvroSrcGenerator(marshallersImports, bigDecimalTypeGen)) {
+      AvroSrcGenerator(
+        marshallersImports,
+        bigDecimalTypeGen,
+        compressionType,
+        useIdiomaticEndpoints)) {
       def main(args: Array[String]): Unit = {
         generateFrom(args)
         (): Unit

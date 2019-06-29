@@ -16,8 +16,6 @@
 
 package higherkindness.mu.rpc
 
-import higherkindness.mu.rpc.idlgen.avro._
-import higherkindness.mu.rpc.idlgen.proto.ProtoIdlGenerator
 import higherkindness.mu.rpc.idlgen.util.Toolbox.u._
 import higherkindness.mu.rpc.idlgen.util.AstOptics.ast
 import higherkindness.mu.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
@@ -28,14 +26,6 @@ package object idlgen {
   val EmptyType               = "Empty.type"
 
   val ScalaFileExtension = ".scala"
-
-  val idlGenerators: Map[String, IdlGenerator] = Seq(ProtoIdlGenerator, AvroIdlGenerator)
-    .map(g => g.idlType -> g)
-    .toMap
-
-  val srcGenerators: Map[String, SrcGenerator] = Seq(AvroSrcGenerator())
-    .map(g => g.idlType -> g)
-    .toMap
 
   val serializationTypes: Map[String, SerializationType] =
     Map("Protobuf" -> Protobuf, "Avro" -> Avro, "AvroWithSchema" -> AvroWithSchema)

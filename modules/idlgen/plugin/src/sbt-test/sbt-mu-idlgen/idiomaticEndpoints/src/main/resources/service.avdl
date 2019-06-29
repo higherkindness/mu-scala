@@ -1,0 +1,16 @@
+@namespace("io.higherkindness")
+protocol service {
+
+  record Foo {
+    string bar;
+  }
+
+  record Person {
+    long id;
+    string name;
+    union { null, string } email;
+  }
+
+  io.higherkindness.Person hi(io.higherkindness.Foo request);
+
+}
