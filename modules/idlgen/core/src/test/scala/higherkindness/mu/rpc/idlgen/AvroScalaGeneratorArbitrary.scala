@@ -47,7 +47,7 @@ trait AvroScalaGeneratorArbitrary {
       if (options.isEmpty) {
         serializationType ::
           s"compressionType = ${compressionTypeGen.value}" ::
-          List(s"""namespace = Some("foo.bar")""", "methodNameStyle = Capitalize").filterNot(_ =>
+          List(s"""namespace = Some("foo.bar")""", "methodNameStyle = Capitalize").filter(_ =>
           useIdiomaticEndpoints)
       } else serializationType +: options.toSeq
 
