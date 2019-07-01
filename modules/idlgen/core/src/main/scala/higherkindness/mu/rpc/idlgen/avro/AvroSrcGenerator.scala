@@ -30,8 +30,10 @@ import scala.collection.JavaConverters._
 import scala.util.Right
 
 case class AvroSrcGenerator(
-    marshallersImports: List[MarshallersImport] = Nil,
-    bigDecimalTypeGen: BigDecimalTypeGen = ScalaBigDecimalTaggedGen)
+    marshallersImports: List[MarshallersImport],
+    bigDecimalTypeGen: BigDecimalTypeGen,
+    compressionTypeGen: CompressionTypeGen,
+    useIdiomaticEndpoints: UseIdiomaticEndpoints)
     extends SrcGenerator {
 
   private[this] val logger = getLogger
@@ -134,7 +136,16 @@ case class AvroSrcGenerator(
             Seq.empty
         }
     }
-    val serviceParams = (serializationType +: options) mkString ", "
+
+    val extraParams: List[String] =
+      if (options.isEmpty) {
+        s"compressionType = ${compressionTypeGen.value}" +:
+          (if (useIdiomaticEndpoints) {
+           List(s"""namespace = Some("${protocol.getNamespace}")""", "methodNameStyle = Capitalize")
+         } else Nil)
+      } else options.toList
+
+    val serviceParams: String = (serializationType +: extraParams).mkString(",")
 
     val serviceLines =
       if (requestLines.isEmpty) Seq.empty

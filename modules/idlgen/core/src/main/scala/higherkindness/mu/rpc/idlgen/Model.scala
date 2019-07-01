@@ -19,6 +19,8 @@ package higherkindness.mu.rpc.idlgen
 import higherkindness.mu.rpc.idlgen.util.Toolbox
 import higherkindness.mu.rpc.internal.util.StringUtil._
 import higherkindness.mu.rpc.protocol._
+import shapeless.tag
+import shapeless.tag.@@
 
 object Model {
 
@@ -87,4 +89,17 @@ object Model {
   sealed trait BigDecimalTypeGen       extends Product with Serializable
   case object ScalaBigDecimalGen       extends BigDecimalTypeGen
   case object ScalaBigDecimalTaggedGen extends BigDecimalTypeGen
+
+  sealed abstract class CompressionTypeGen(val value: String) extends Product with Serializable
+  case object GzipGen                                         extends CompressionTypeGen("Gzip")
+  case object NoCompressionGen                                extends CompressionTypeGen("Identity")
+
+  trait UseIdiomaticEndpointsTag
+  type UseIdiomaticEndpoints = Boolean @@ UseIdiomaticEndpointsTag
+  object UseIdiomaticEndpoints {
+    val trueV = UseIdiomaticEndpoints(true)
+
+    def apply(v: Boolean): UseIdiomaticEndpoints =
+      tag[UseIdiomaticEndpointsTag][Boolean](v)
+  }
 }

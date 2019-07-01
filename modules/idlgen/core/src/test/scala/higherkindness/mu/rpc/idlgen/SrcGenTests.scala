@@ -18,6 +18,7 @@ package higherkindness.mu.rpc.idlgen
 
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
 import higherkindness.mu.rpc.idlgen.AvroScalaGeneratorArbitrary._
+import higherkindness.mu.rpc.idlgen.Model.ScalaBigDecimalTaggedGen
 import higherkindness.mu.rpc.idlgen.avro._
 import org.scalatestplus.scalacheck.Checkers
 import org.scalacheck.Prop.forAll
@@ -37,7 +38,11 @@ class SrcGenTests extends RpcBaseTestSuite with Checkers {
 
   private def test(scenario: Scenario): Boolean = {
     val output =
-      AvroSrcGenerator(scenario.marshallersImports)
+      AvroSrcGenerator(
+        scenario.marshallersImports,
+        ScalaBigDecimalTaggedGen,
+        scenario.compressionTypeGen,
+        scenario.useIdiomaticEndpoints)
         .generateFrom(
           resource(scenario.inputResourcePath).mkString,
           scenario.serializationType,

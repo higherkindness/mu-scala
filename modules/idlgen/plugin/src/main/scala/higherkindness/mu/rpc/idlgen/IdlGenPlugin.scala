@@ -73,6 +73,7 @@ object IdlGenPlugin extends AutoPlugin {
         "The Scala target directory, where the `srcGen` task will write the generated files " +
           "in subpackages based on the namespaces declared in the IDL files.")
 
+    @deprecated("Use the specific settings like `idlGenCompressionType` or `idlGenIdiomaticEndpoints`", "0.18.4")
     lazy val genOptions: SettingKey[Seq[String]] =
       settingKey[Seq[String]](
         "Options for the generator, such as additional @service annotation parameters in srcGen.")
@@ -86,6 +87,15 @@ object IdlGenPlugin extends AutoPlugin {
       settingKey[List[MarshallersImport]](
         "List of imports needed for creating the request/response marshallers. " +
           "By default, this include the instances for serializing `BigDecimal`, `java.time.LocalDate`, and `java.time.LocalDateTime`")
+
+    lazy val idlGenCompressionType: SettingKey[CompressionTypeGen] =
+      settingKey[CompressionTypeGen](
+        "Specifies the compression type. `NoCompressionGen` by default.")
+
+    lazy val idlGenIdiomaticEndpoints: SettingKey[Boolean] =
+      settingKey[Boolean](
+        "If `true`, the gRPC endpoints generated in the services generated from idls will contain the " +
+          "namespace as prefix and their method names will be capitalized. `false` by default.")
   }
 
   import higherkindness.mu.rpc.idlgen.IdlGenPlugin.autoImport._
@@ -113,7 +123,9 @@ object IdlGenPlugin extends AutoPlugin {
       else if (srcGenSerializationType.value == "Protobuf")
         List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)
       else Nil
-    }
+    },
+    idlGenCompressionType := NoCompressionGen,
+    idlGenIdiomaticEndpoints := false
   )
 
   lazy val taskSettings: Seq[Def.Setting[_]] = {
@@ -150,7 +162,12 @@ object IdlGenPlugin extends AutoPlugin {
           },
           Def.task {
             idlGenTask(
-              SrcGenApplication(idlGenMarshallerImports.value, idlGenBigDecimal.value),
+              SrcGenApplication(
+                idlGenMarshallerImports.value,
+                idlGenBigDecimal.value,
+                idlGenCompressionType.value,
+                UseIdiomaticEndpoints(idlGenIdiomaticEndpoints.value)
+              ),
               idlType.value,
               srcGenSerializationType.value,
               genOptions.value,
@@ -208,6 +225,7 @@ object IdlGenPlugin extends AutoPlugin {
               overwrite = true,
               preserveLastModified = true,
               preserveExecutable = true)
+            (): Unit
           } else if (classpathEntry.data.exists) {
             IO.unzip(classpathEntry.data, tmpDir, nameFilter)
             IO.copyDirectory(tmpDir, target)

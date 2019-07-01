@@ -74,13 +74,14 @@ Basic settings:
 
 Extra settings:
 
-* **`genOptions`**: additional options to add to the generated `@service` annotations, after the IDL type. Currently only supports `"Gzip"`.
 * **`srcGenJarNames`**: the list of jar names or sbt modules containing the IDL definitions that will be used at compilation time by `srcGen` to generate the Scala sources. By default, this sequence is empty.
 * **`idlGenBigDecimal`**: specifies how the `decimal` types will be generated. `ScalaBigDecimalGen` produces `scala.math.BigDecimal` and `ScalaBigDecimalTaggedGen` produces `scala.math.BigDecimal` but tagged with the 'precision' and 'scale'. i.e. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`. By default `ScalaBigDecimalTaggedGen`.
 * **`idlGenMarshallerImports`**: additional imports to add on top to the generated service files. This property can be used for importing extra codecs for your services. By default:
   * `List(BigDecimalAvroMarshallers, JavaTimeDateAvroMarshallers)` if `srcGenSerializationType` is `Avro` or `AvroWithSchema` and `idlGenBigDecimal` is `ScalaBigDecimalGen`
   * `List(BigDecimalTaggedAvroMarshallers, JavaTimeDateAvroMarshallers)` if `srcGenSerializationType` is `Avro` or `AvroWithSchema` and `idlGenBigDecimal` is `ScalaBigDecimalTaggedGen`
   * `List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)` if `srcGenSerializationType` is `Protobuf`.
+* **`idlGenCompressionType`**: Only for `avro`. Specifies the compression type that will be used by the IDL generated services. Set to `higherkindness.mu.rpc.idlgen.Model.GzipGen` for compressed communications with Gzip. `higherkindness.mu.rpc.idlgen.Model.NoCompressionGen` by default.
+* **`idlGenIdiomaticEndpoints`**: Only for `avro`. Flag indicating if idiomatic gRPC endpoints should be used. If `true`, the service operations will be prefixed by the namespace and the methods will be capitalized. `false` by default.  
 
 The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also available, but they need the dependency `mu-rpc-marshallers-jodatime`. You can also specify custom imports with the following:
   * `idlGenMarshallerImports := List(higherkindness.mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))`
