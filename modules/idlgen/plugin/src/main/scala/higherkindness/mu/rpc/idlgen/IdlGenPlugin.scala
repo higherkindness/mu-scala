@@ -124,7 +124,7 @@ object IdlGenPlugin extends AutoPlugin {
         List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)
       else Nil
     },
-    idlGenCompressionType := GzipGen,
+    idlGenCompressionType := NoCompressionGen,
     idlGenIdiomaticEndpoints := false
   )
 
