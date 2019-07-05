@@ -71,7 +71,7 @@ class ProtoSrcGenTests extends RpcBaseTestSuite {
       |  case object PAPERBACK extends BindingType
       |}
       |
-      |@service(Protobuf) trait BookService[F[_]] {
+      |@service(Protobuf,Identity) trait BookService[F[_]] {
       |  def GetBook(req: GetBookRequest): F[Book]
       |  def GetBooksViaAuthor(req: GetBookViaAuthor): Stream[F, Book]
       |  def GetGreatestBook(req: Stream[F, GetBookRequest]): F[Book]
