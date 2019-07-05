@@ -17,8 +17,10 @@
 package higherkindness.mu.rpc.idlgen
 
 import java.io.File
-import higherkindness.mu.rpc.idlgen.proto.ProtoSrcGenerator
+
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
+import higherkindness.mu.rpc.idlgen.proto.ProtoSrcGenerator
+import higherkindness.mu.rpc.idlgen.Model.{NoCompressionGen, UseIdiomaticEndpoints}
 
 class ProtoSrcGenTests extends RpcBaseTestSuite {
 
@@ -31,8 +33,10 @@ class ProtoSrcGenTests extends RpcBaseTestSuite {
 
       val result: Option[(String, Seq[String])] =
         ProtoSrcGenerator
-          .generateFrom(inputFile = protoFile, serializationType = "", options = "")
-          .map(t => (t._1, t._2.map(_.clean)))
+          .build(NoCompressionGen, UseIdiomaticEndpoints(false))
+          .generateFrom(files = Set(protoFile), serializationType = "", options = "")
+          .map(t => (t._2, t._3.map(_.clean)))
+          .headOption
 
       result shouldBe Some(("com/proto/book.scala", Seq(expectation.clean)))
     }
