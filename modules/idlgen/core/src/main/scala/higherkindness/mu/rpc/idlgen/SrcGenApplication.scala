@@ -33,12 +33,13 @@ object SrcGenApplication {
       useIdiomaticEndpoints: UseIdiomaticEndpoints
   ): GeneratorApplication[SrcGenerator] =
     new GeneratorApplication(
-      ProtoSrcGenerator,
+      ProtoSrcGenerator.build(compressionType, useIdiomaticEndpoints),
       AvroSrcGenerator(
         marshallersImports,
         bigDecimalTypeGen,
         compressionType,
-        useIdiomaticEndpoints)) {
+        useIdiomaticEndpoints)
+    ) {
       def main(args: Array[String]): Unit = {
         generateFrom(args)
         (): Unit
