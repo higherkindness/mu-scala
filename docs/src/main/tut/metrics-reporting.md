@@ -122,20 +122,22 @@ The usage the same as before, but in this case we need to create a `Dropwizard` 
 import cats.effect.IO
 import com.codahale.metrics.MetricRegistry
 import higherkindness.mu.rpc.dropwizard.DropWizardMetrics
+import com.codahale.metrics.MetricRegistry
 
-val metricsOps = DropWizardMetrics[IO](new MetricRegistry)
+val registry: MetricRegistry = new MetricRegistry()
+val metricsOps = DropWizardMetrics[IO](registry)
 ```
 
 To check the metrics from our server or client, `Dropwizard` exposes it through `JMX`. You'll need the following dependency:
 
-```tut:silent 
+```scala
  "io.dropwizard.metrics" % "metrics-jmx" % "4.0.5"
- ```
+```
  And to associate the reporter with the metrics registry on your project,
- ```tut:silent
+```scala
  val jmxReporter = JmxReporter.forRegistry(registry)
  jmxReporter.build().start()
- ```
+```
 ## More
 
 For more details, in [metrics integration with mu] you can check a full example about [mu] metrics.
