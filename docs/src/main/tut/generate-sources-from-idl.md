@@ -19,7 +19,7 @@ Add the following line to _project/plugins.sbt_:
 [comment]: # (Start Replace)
 
 ```scala
-addSbtPlugin("io.higherkindness" % "sbt-mu-idlgen" % "0.18.3")
+addSbtPlugin("io.higherkindness" % "sbt-mu-idlgen" % "0.18.4")
 ```
 
 [comment]: # (End Replace)
@@ -80,8 +80,8 @@ Extra settings:
   * `List(BigDecimalAvroMarshallers, JavaTimeDateAvroMarshallers)` if `srcGenSerializationType` is `Avro` or `AvroWithSchema` and `idlGenBigDecimal` is `ScalaBigDecimalGen`
   * `List(BigDecimalTaggedAvroMarshallers, JavaTimeDateAvroMarshallers)` if `srcGenSerializationType` is `Avro` or `AvroWithSchema` and `idlGenBigDecimal` is `ScalaBigDecimalTaggedGen`
   * `List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)` if `srcGenSerializationType` is `Protobuf`.
-* **`idlGenCompressionType`**: Only for `avro`. Specifies the compression type that will be used by the IDL generated services. Set to `higherkindness.mu.rpc.idlgen.Model.GzipGen` for compressed communications with Gzip. `higherkindness.mu.rpc.idlgen.Model.NoCompressionGen` by default.
-* **`idlGenIdiomaticEndpoints`**: Only for `avro`. Flag indicating if idiomatic gRPC endpoints should be used. If `true`, the service operations will be prefixed by the namespace and the methods will be capitalized. `false` by default.  
+* **`idlGenCompressionType`**: Specifies the compression type that will be used by the IDL generated services. Set to `higherkindness.mu.rpc.idlgen.Model.GzipGen` for compressed communications with Gzip. `higherkindness.mu.rpc.idlgen.Model.NoCompressionGen` by default.
+* **`idlGenIdiomaticEndpoints`**: Flag indicating if idiomatic gRPC endpoints should be used. If `true`, the service operations will be prefixed by the namespace and the methods will be capitalized. `false` by default.  
 
 The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also available, but they need the dependency `mu-rpc-marshallers-jodatime`. You can also specify custom imports with the following:
   * `idlGenMarshallerImports := List(higherkindness.mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))`

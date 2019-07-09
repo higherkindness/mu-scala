@@ -1,5 +1,15 @@
 # Changelog
 
+## 07/08/2019 - Version 0.18.4
+
+Release changes:
+
+* Issue 563: Client cache should receive a ManagedChannel ([#617](https://github.com/higherkindness/mu/pull/617))
+* Mu documentation changed - New section "Generate sources from IDL" ([#621](https://github.com/higherkindness/mu/pull/621))
+* Allows generating idiomatic gRPC urls for avro ([#622](https://github.com/higherkindness/mu/pull/622))
+* Support for idiomatic endpoints in protobuf ([#623](https://github.com/higherkindness/mu/pull/623))
+
+
 ## 05/30/2019 - Version 0.18.3
 
 Release changes:
