@@ -334,6 +334,10 @@ object RPCDemoApp {
 
 }
 ```
+## More
+
+You can check a full explanation about defining messages and services [here](https://www.47deg.com/blog/mu-rpc-defining-messages-and-services/) or some examples [here](https://github.com/higherkindness/mu/tree/master/modules/examples).
+
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/

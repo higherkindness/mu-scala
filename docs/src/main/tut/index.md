@@ -20,8 +20,8 @@ The current version for [mu] is "0.18.3" using the following common libraries an
 [comment]: # (End Replace)
 
  * [avro4s] 1.8.4
- * [cats-effect] 1.1.0-M1
- * [fs2] 1.0.0
+ * [cats-effect] 1.2.0
+ * [fs2] 1.0.4
  * [Monix] 3.0.0-RC2
 
 `mu-rpc` is cross-built for Scala `2.11.x` and `2.12.x`.
@@ -32,6 +32,7 @@ To use the project, add the following to your build.sbt:
 
 We've found that the compiler plugin needs to be added to your build.sbt file *after* your library dependencies due to the manner in which SBT evaluates the build file. 
 
+#### Artifacts
 [mu] is divided into multiple artifacts, grouped by scope:
 
 * `Server`: specifically for the RPC server.
@@ -39,6 +40,15 @@ We've found that the compiler plugin needs to be added to your build.sbt file *a
 * `Server/Client`: used from other artifacts for both Server and Client.
 * `Test`: useful to test `mu-rpc` applications.
 
+###### Common
+*Artifact Name* | *Scope* | *Mandatory* | *Description*
+--- | --- | --- | ---
+`mu-common` | Server/Client | Provided* | Common things that are used throughout the project.
+`mu-rpc-internal-core` | Server/Client | Provided* | Macros.
+`mu-rpc-internal-monix` | Server/Client | Provided* | Macros.
+`mu-rpc-internal-fs2` | Server/Client | Provided* | Macros.
+
+###### Client/Server
 *Artifact Name* | *Scope* | *Mandatory* | *Description*
 --- | --- | --- | ---
 `mu-rpc-server` | Server | Yes | Needed to attach RPC Services and spin-up an RPC Server.
@@ -46,26 +56,30 @@ We've found that the compiler plugin needs to be added to your build.sbt file *a
 `mu-rpc-monix` | Client | Yes | Mandatory to define streaming operations with Monix Observables.
 `mu-rpc-fs2` | Client | Yes | Mandatory to define streaming operations with fs2 Streams.
 `mu-rpc-netty` | Client | Yes* | Mandatory on the client side if we are using `Netty` on the server side.
-`mu-rpc-okhttp` | Client | Yes* | Mandatory on the client side if we are using `OkHttp` on the server side.
-`mu-config` | Server/Client | No | Provides configuration helpers using [mu-config] to load the application configuration values.
-`mu-rpc-marshallers-jodatime` | Server/Client | No | Provides marshallers for serializing and deserializing the `LocalDate` and `LocalDateTime` joda instances.
-`mu-rpc-prometheus-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, on the _Server_ side.
-`mu-rpc-prometheus-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Prometheus, on the _Client_ side.
-`mu-rpc-prometheus-shared` | Server/Client | No | Common code for both the client and the server in the prometheus scope.
-`mu-rpc-dropwizard-server` | Server | No | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics, on the _Server_ side.
-`mu-rpc-dropwizard-client` | Client | No | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics, on the _Client_ side.
-`mu-rpc-interceptors` | Server/Client | No | Commons related to gRPC interceptors.
-`mu-rpc-testing` | Test | No | Utilities to test out `mu-rpc` applications. It provides the `grpc-testing` library as the transitive dependency.
-`mu-common` | Server/Client | Provided* | Common things that are used throughout the project.
-`mu-rpc-internal` | Server/Client | Provided* | Macros.
-`mu-rpc-internal-monix` | Server/Client | Provided* | Macros.
-`mu-rpc-internal-fs2` | Server/Client | Provided* | Macros.
 `mu-rpc-netty-ssl` | Server/Client | No | Adds the `io.netty:netty-tcnative-boringssl-static:jar` dependency, aligned with the Netty version (if that's the case) used in the `mu-rpc` build. See [this section](https://github.com/grpc/grpc-java/blob/master/SECURITY.md#netty) for more information. By adding this you wouldn't need to figure the right version, `mu-rpc` gives you the right one.
-`mu-rpc-client-cache` | Client | No | Provides an algebra for caching RPC clients.
+`mu-rpc-okhttp` | Client | Yes* | Mandatory on the client side if we are using `OkHttp` on the server side.
+
 
 * `Yes*`: on the client-side, you must choose either `Netty` or `OkHttp` as the transport layer.
 * `Provided*`: you don't need to add it to your build, it'll be transitively provided when using other dependencies.
 
+
+###### Metrics
+*Artifact Name* | *Scope* | *Mandatory* | *Description*
+--- | --- | --- | ---
+`mu-rpc-prometheus` | Server/Client | No | Scala interceptors which can be used to monitor gRPC services using Prometheus.
+`mu-rpc-dropwizard` | Server/Client | No | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics.
+
+###### Other
+*Artifact Name* | *Scope* | *Mandatory* | *Description*
+--- | --- | --- | ---
+`mu-config` | Server/Client | No | Provides configuration helpers using [mu-config] to load the application configuration values.
+`mu-rpc-testing` | Test | No | Utilities to test out `mu-rpc` applications. It provides the `grpc-testing` library as the transitive dependency.
+`mu-rpc-client-cache` | Client | No | Provides an algebra for caching RPC clients.
+`mu-rpc-marshallers-jodatime` | Server/Client | No | Provides marshallers for serializing and deserializing the `LocalDate` and `LocalDateTime` joda instances.
+
+
+#### Build
 You can install any of these dependencies in your build as follows:
 
 [comment]: # (Start Replace)

@@ -126,6 +126,22 @@ import higherkindness.mu.rpc.dropwizard.DropWizardMetrics
 val metricsOps = DropWizardMetrics[IO](new MetricRegistry)
 ```
 
+To check the metrics from our server or client, `Dropwizard` exposes it through `JMX`. You'll need the following dependency:
+
+```tut:silent 
+ "io.dropwizard.metrics" % "metrics-jmx" % "4.0.5"
+ ```
+ And to associate the reporter with the metrics registry on your project,
+ ```tut:silent
+ val jmxReporter = JmxReporter.forRegistry(registry)
+ jmxReporter.build().start()
+ ```
+## More
+
+For more details, in [metrics integration with mu] you can check a full example about [mu] metrics.
+
+
+[metrics integration with mu]: https://www.47deg.com/blog/metrics-integration-with-mu/
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
