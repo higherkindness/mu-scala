@@ -19,7 +19,7 @@ package higherkindness.mu.rpc.internal.encoders
 import java.io.{ByteArrayInputStream, InputStream}
 
 import cats.implicits._
-import cats.kernel.Monoid
+import cats.Monoid
 import higherkindness.mu.rpc.internal.encoders.pbd._
 import higherkindness.mu.rpc.protocol.ProtoDefault
 import io.grpc.MethodDescriptor.Marshaller
@@ -75,7 +75,7 @@ class DefaultPBDirectMarshallerTests extends WordSpec with Matchers {
       testDefault[MyTestDefault](MyTestDefault(""))
     }
 
-    "handle defaults for more complex data with Monoid Instnace" in {
+    "handle defaults for more complex data with Monoid Instance" in {
       implicit val monoid: Monoid[NestedThing] = new Monoid[NestedThing] {
         override def empty: NestedThing = NestedThing(ListThing(List(), None), 0)
 
@@ -86,10 +86,11 @@ class DefaultPBDirectMarshallerTests extends WordSpec with Matchers {
       testDefault[NestedThing](NestedThing(ListThing(List(), None), 0))
     }
 
-//    "handle automatically derived typeclasses for more complex data" in {
-//      import cats.derived.auto.monoid._
-//
-//      testDefault[NestedThing](NestedThing(ListThing(List(), None), 0))
-//    }
+    "handle automatically derived typeclasses for more complex data" in {
+      import cats.implicits._ //this is already imported above, but it wont compile without this here.....
+      import cats.derived.auto.monoid._
+
+      testDefault[NestedThing](NestedThing(ListThing(List(), None), 0))
+    }
   }
 }
