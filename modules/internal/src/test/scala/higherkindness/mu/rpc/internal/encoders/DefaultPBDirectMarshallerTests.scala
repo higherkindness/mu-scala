@@ -28,6 +28,10 @@ import org.scalatest._
 class DefaultPBDirectMarshallerTests extends WordSpec with Matchers {
 
   case class MyTestDefault(s: String)
+
+  case class NestedThing(lt: ListThing, i: Int)
+  case class ListThing(l: List[Int], o: Option[String])
+
   private val expectedString = "12345"
 
   private val emptyInputStream: InputStream = new ByteArrayInputStream(Array())
@@ -66,10 +70,26 @@ class DefaultPBDirectMarshallerTests extends WordSpec with Matchers {
     }
 
     "handle empty streams by filling in the default when an automatically derived Monoid typeclass exists" in {
-      import cats.derived._
-      import auto.monoid._
+      import cats.derived.auto.monoid._
 
       testDefault[MyTestDefault](MyTestDefault(""))
     }
+
+    "handle defaults for more complex data with Monoid Instnace" in {
+      implicit val monoid: Monoid[NestedThing] = new Monoid[NestedThing] {
+        override def empty: NestedThing = NestedThing(ListThing(List(), None), 0)
+
+        override def combine(x: NestedThing, y: NestedThing): NestedThing =
+          ??? // explicit as it should never be called
+      }
+
+      testDefault[NestedThing](NestedThing(ListThing(List(), None), 0))
+    }
+
+//    "handle automatically derived typeclasses for more complex data" in {
+//      import cats.derived.auto.monoid._
+//
+//      testDefault[NestedThing](NestedThing(ListThing(List(), None), 0))
+//    }
   }
 }
