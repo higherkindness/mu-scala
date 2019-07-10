@@ -22,20 +22,6 @@ object people {
 
   @message final case class Person(name: String, age: Int)
   @message final case class PeopleRequest(name: String)
-
-  object PeopleRequest {
-    implicit val protoDefaultPeopleRequest: ProtoDefault[PeopleRequest] =
-      new ProtoDefault[PeopleRequest] {
-        def default: PeopleRequest = PeopleRequest("")
-      }
-  }
-
   @message final case class PeopleResponse(person: Person)
 
-  object PeopleResponse {
-    implicit val protoDefaultPeopleResponse: ProtoDefault[PeopleResponse] =
-      new ProtoDefault[PeopleResponse] {
-        def default: PeopleResponse = PeopleResponse(Person("", 0))
-      }
-  }
 }
