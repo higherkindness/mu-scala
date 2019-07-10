@@ -180,6 +180,9 @@ object MainApp extends CommonRuntime {
 }
 ```
 
+## More
+For more details, [here](https://www.47deg.com/blog/mu-rpc-securing-communications-with-mu/) you can check a full explanation and an example about securing communications.
+
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
