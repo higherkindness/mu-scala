@@ -27,10 +27,6 @@ object Utils extends CommonUtils {
 
   object service {
 
-    import cats.implicits._
-    import cats.derived._
-    import auto.monoid._
-
     @service(Protobuf) trait ProtoRPCService[F[_]] {
       def serverStreamingWithError(e: E): Stream[F, C]
       def clientStreaming(oa: Stream[F, A]): F[D]

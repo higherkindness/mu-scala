@@ -19,10 +19,6 @@ package example.routeguide.protocol
 import higherkindness.mu.rpc.protocol._
 import monix.reactive.Observable
 
-import cats.implicits._
-import cats.derived._
-import auto.monoid._
-
 @outputPackage("routeguide")
 @option("java_multiple_files", true)
 @option("java_package", "io.grpc.examples.routeguide")

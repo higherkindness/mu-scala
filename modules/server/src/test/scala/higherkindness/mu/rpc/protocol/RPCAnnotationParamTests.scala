@@ -22,10 +22,6 @@ import org.scalatestplus.scalacheck.Checkers
 
 class RPCAnnotationParamTests extends RpcBaseTestSuite with BeforeAndAfterAll with Checkers {
 
-  import cats.implicits._
-  import cats.derived._
-  import auto.monoid._
-
   case class Request(s: String)
   case class Response(length: Int)
 

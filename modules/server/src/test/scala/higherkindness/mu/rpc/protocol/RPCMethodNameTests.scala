@@ -30,8 +30,6 @@ class RPCMethodNameTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
     import cats.kernel.instances.string._
     import cats.kernel.instances.int._
-    import cats.derived._
-    import auto.monoid._
 
     case class Request(s: String)
 

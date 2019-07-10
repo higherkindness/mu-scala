@@ -29,10 +29,6 @@ object Utils extends CommonUtils {
 
   object service {
 
-    import cats.implicits._
-    import cats.derived._
-    import auto.monoid._
-
     @service(Avro, Gzip) trait CompressedAvroRPCService[F[_]] {
       def unaryCompressed(a: A): F[C]
       def unaryCompressedWithError(e: E): F[C]
