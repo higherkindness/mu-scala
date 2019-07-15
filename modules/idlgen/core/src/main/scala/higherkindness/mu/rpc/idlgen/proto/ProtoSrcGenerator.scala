@@ -39,7 +39,8 @@ object ProtoSrcGenerator {
 
   def build(
       compressionTypeGen: CompressionTypeGen,
-      useIdiomaticEndpoints: UseIdiomaticEndpoints): SrcGenerator = new SrcGenerator {
+      useIdiomaticEndpoints: UseIdiomaticEndpoints,
+      idlTargetDir: File): SrcGenerator = new SrcGenerator {
 
     val idlType: String = proto.IdlType
 
@@ -80,7 +81,7 @@ object ProtoSrcGenerator {
 
     private def getCode[F[_]: Sync](file: File): F[(String, Seq[String])] =
       parseProto[F, Mu[ProtobufF]]
-        .parse(ProtoSource(file.getName, file.getParent))
+        .parse(ProtoSource(file.getName, file.getParent, idlTargetDir.getCanonicalPath))
         .map(
           protocol =>
             getPath(protocol) -> Seq(
