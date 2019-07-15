@@ -28,11 +28,7 @@ import io.grpc.MethodDescriptor.Marshaller
 
 import scala.util.Try
 
-object pbd
-    extends OptionInstances
-    with OptionInstancesBinCompat0
-    with ListInstances
-    with ListInstancesBinCompat0 {
+object pbd {
 
   import pbdirect._
 
