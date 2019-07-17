@@ -17,6 +17,7 @@
 package higherkindness.mu.rpc.protocol
 
 import cats.Monoid
+import alleycats.{Empty => CEmpty}
 
 trait ProtoDefault[A] {
   def default: A
@@ -27,6 +28,9 @@ object ProtoDefault {
 
   implicit def protoDefaultFromMonoid[A](implicit M: Monoid[A]): ProtoDefault[A] =
     new ProtoDefault[A] { def default: A = M.empty }
+
+  implicit def protoDefaultFromEmpty[A](implicit E: CEmpty[A]): ProtoDefault[A] =
+    new ProtoDefault[A] { def default: A = E.empty }
 
   implicit val protoDefaultBoolean: ProtoDefault[Boolean] = new ProtoDefault[Boolean] {
     def default: Boolean = false
