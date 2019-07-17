@@ -115,6 +115,38 @@ lazy val server = project
   .settings(moduleName := "mu-rpc-server")
   .settings(serverSettings)
 
+/////////////////////
+//// HEALTHCHECK ////
+/////////////////////
+
+lazy val `health-check` = project
+  .in(file("modules/health-check"))
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`internal-core` % "compile->compile;test->test")
+  .dependsOn(channel)
+  .dependsOn(server)
+  .dependsOn(monix)
+  .dependsOn(config)
+  .settings(healthCheckSettings)
+  .settings(moduleName := "mu-rpc-health-check")
+
+/////////HealthCheck Server Example
+lazy val `health-server` = project
+  .in(file("modules/examples/health-check/health-server"))
+  .dependsOn(`health-check`)
+  .settings(healthCheckSettings)
+  .settings(moduleName := "mu-rpc-example-health-check-server")
+
+/////////HealthCheck Client Example
+lazy val `health-client` = project
+  .in(file("modules/examples/health-check/health-client"))
+  .dependsOn(`health-check`)
+  .dependsOn(`health-server`)
+  .dependsOn(netty)
+  .settings(healthCheckSettings)
+  .settings(moduleName := "mu-rpc-example-health-check-client")
+
+
 ////////////////////
 //// PROMETHEUS ////
 ////////////////////

@@ -123,6 +123,18 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+
+    lazy val healthCheckSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("log4s", V.log4s),
+        %%("monix", V.monix),
+        %%("circe-core", V.circe),
+        %%("circe-generic", V.circe),
+        %%("circe-parser", V.circe),
+        %%("cats-effect", V.catsEffect)
+      )
+    )
+
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %("grpc-netty", V.grpc),
