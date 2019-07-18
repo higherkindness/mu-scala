@@ -230,6 +230,7 @@ object serviceImpl {
         case Protobuf =>
           List(
             q"import _root_.cats.implicits._",
+            q"import _root_.cats.derived.auto.empty._",
             q"import _root_.cats.derived.auto.monoid._",
             q"import _root_.higherkindness.mu.rpc.internal.encoders.pbd._"
           )

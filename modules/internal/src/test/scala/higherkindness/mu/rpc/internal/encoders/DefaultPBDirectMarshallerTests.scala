@@ -21,7 +21,8 @@ import java.io.{ByteArrayInputStream, InputStream}
 import cats.implicits._
 import cats.Monoid
 import higherkindness.mu.rpc.internal.encoders.pbd._
-import higherkindness.mu.rpc.protocol.ProtoDefault
+import higherkindness.mu.rpc.protocol.{implicits, ProtoDefault}
+import implicits._
 import io.grpc.MethodDescriptor.Marshaller
 import org.scalatest._
 
@@ -91,6 +92,14 @@ class DefaultPBDirectMarshallerTests extends WordSpec with Matchers {
       import cats.derived.auto.monoid._
 
       testDefault[NestedThing](NestedThing(ListThing(List(), None), 0))
+    }
+
+    "Handle automatically derived typeclasses for a derived alleycats Empty" in {
+      import cats.derived.auto.empty._
+
+      case class BIS(b: Boolean, i: Int, s: String)
+
+      testDefault(BIS(false, 0, ""))
     }
   }
 }

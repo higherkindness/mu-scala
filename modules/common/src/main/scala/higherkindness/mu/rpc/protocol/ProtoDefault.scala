@@ -16,7 +16,6 @@
 
 package higherkindness.mu.rpc.protocol
 
-import cats.Monoid
 import alleycats.{Empty => CEmpty}
 
 trait ProtoDefault[A] {
@@ -24,23 +23,25 @@ trait ProtoDefault[A] {
 }
 
 object ProtoDefault {
+
   def apply[A](implicit P: ProtoDefault[A]): ProtoDefault[A] = P
 
-  implicit def protoDefaultFromMonoid[A](implicit M: Monoid[A]): ProtoDefault[A] =
-    new ProtoDefault[A] { def default: A = M.empty }
-
-  implicit def protoDefaultFromEmpty[A](implicit E: CEmpty[A]): ProtoDefault[A] =
-    new ProtoDefault[A] { def default: A = E.empty }
-
-  implicit val protoDefaultBoolean: ProtoDefault[Boolean] = new ProtoDefault[Boolean] {
-    def default: Boolean = false
-  }
-
-  implicit val protoDefaultBigDecimal: ProtoDefault[BigDecimal] = new ProtoDefault[BigDecimal] {
-    def default: BigDecimal = BigDecimal(0)
-  }
+  implicit def protoDefaultFromEmpty[A: CEmpty]: ProtoDefault[A] =
+    new ProtoDefault[A] { def default: A = CEmpty[A].empty }
 
   implicit val protoDefaultMuEmpty: ProtoDefault[Empty.type] = new ProtoDefault[Empty.type] {
     override def default: Empty.type = Empty
+  }
+}
+
+package object implicits extends EmptyImplicits
+
+trait EmptyImplicits {
+  implicit val boolEmpty: CEmpty[Boolean] = new CEmpty[Boolean] {
+    override def empty: Boolean = false
+  }
+
+  implicit val bigDecimalEmpty: CEmpty[BigDecimal] = new CEmpty[BigDecimal] {
+    override def empty: BigDecimal = BigDecimal(0)
   }
 }
