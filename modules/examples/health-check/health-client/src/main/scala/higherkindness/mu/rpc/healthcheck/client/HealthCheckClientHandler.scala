@@ -35,9 +35,11 @@ package higherkindness.mu.rpc.healthcheck.client
 import cats.effect.{Resource, Sync}
 import higherkindness.mu.rpc.healthcheck.ServerStatus
 import higherkindness.mu.rpc.healthcheck.handler.service.{
+  EmptyInput,
   HealthCheck,
   HealthCheckService,
-  HealthStatus
+  HealthStatus,
+  WentNice
 }
 import cats.syntax._
 import cats.implicits._
@@ -48,14 +50,39 @@ class HealthCheckClientHandler[F[_]: Sync](client: Resource[F, HealthCheckServic
 
   def settingAndCheck(name: String, status: ServerStatus) =
     for {
+      _     <- Sync[F].delay(println("Is there some server named " + name.toUpperCase + "?"))
+      known <- client.use(_.check(HealthCheck(name)))
+      _     <- Sync[F].delay(println("Actually the status is " + known.status))
       _ <- Sync[F].delay(
-        println("/////////////////////////Nos metemos en la parte del healthcheck"))
-      wentNice <- client.use(_.setStatus(HealthStatus(HealthCheck(name), status)))
-      _ <- Sync[F].delay(
-        logger.info(
-          "Added status: " + status.toString + "to service: " + name + ". It went ok?" + wentNice))
+        println("Setting " + name.toUpperCase + " service with " + status.status + " status"))
+      wentNiceSet <- client.use(_.setStatus(HealthStatus(HealthCheck(name), status)))
+      _ <- Sync[F].delay(println(
+        "Went it ok? " + wentNiceSet.ok + ". Added status: " + status.status + " to service: " + name.toUpperCase))
       status <- client.use(_.check(HealthCheck(name)))
-      _      <- Sync[F].delay(logger.info("Checked the status of " + name + ". Obtained: " + status))
+      _ <- Sync[F].delay(
+        println("Checked the status of " + name.toUpperCase + ". Obtained: " + status.status))
+      wentNiceClean <- client.use(_.clearStatus(HealthCheck(name)))
+      _ <- Sync[F].delay(
+        println("Cleaned " + name.toUpperCase + " status. Went ok?: " + wentNiceClean.ok))
+      unknown <- client.use(_.check(HealthCheck(name)))
+      _       <- Sync[F].delay(println("Current status of " + name.toUpperCase + ": " + unknown.status))
     } yield ()
 
+  def settingAndFullClean(namesAndStatuses: List[(String, ServerStatus)]) = {
+
+    for {
+      _ <- Sync[F].delay(println("Setting services: " + namesAndStatuses))
+      wentNiceSet <- namesAndStatuses.traverse(l =>
+        client.use(_.setStatus(HealthStatus(HealthCheck(l._1), l._2))))
+      allStatuses1 <- client.use(_.checkAll(EmptyInput()))
+      _            <- Sync[F].delay(println("All statuses are: " + allStatuses1.all.mkString("\n")))
+      _ <- Sync[F].delay(
+        println("Went it ok in all cases? " + !wentNiceSet.contains(WentNice(false))))
+      wentNiceClear <- client.use(_.cleanAll(EmptyInput()))
+      _             <- Sync[F].delay(println("Went the cleaning part nice? " + wentNiceClear.ok))
+      allStatuses2  <- client.use(_.checkAll(EmptyInput()))
+      _             <- Sync[F].delay(println("All statuses are: " + allStatuses2.all.mkString("\n")))
+
+    } yield ()
+  }
 }

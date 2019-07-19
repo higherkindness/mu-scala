@@ -121,12 +121,9 @@ lazy val server = project
 
 lazy val `health-check` = project
   .in(file("modules/health-check"))
-  .dependsOn(common % "compile->compile;test->test")
-  .dependsOn(`internal-core` % "compile->compile;test->test")
   .dependsOn(channel)
   .dependsOn(server)
   .dependsOn(monix)
-  .dependsOn(config)
   .settings(healthCheckSettings)
   .settings(moduleName := "mu-rpc-health-check")
 
@@ -140,8 +137,8 @@ lazy val `health-server` = project
 /////////HealthCheck Client Example
 lazy val `health-client` = project
   .in(file("modules/examples/health-check/health-client"))
-  .dependsOn(`health-check`)
   .dependsOn(`health-server`)
+  .dependsOn(config)
   .dependsOn(netty)
   .settings(healthCheckSettings)
   .settings(moduleName := "mu-rpc-example-health-check-client")

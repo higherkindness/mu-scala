@@ -17,15 +17,17 @@
 package higherkindness.mu.rpc.healthcheck.client
 
 import cats.effect.IO
-import higherkindness.mu.rpc.healthcheck.SERVING
+import higherkindness.mu.rpc.healthcheck.ServerStatus
 
 object ClientProgram {
 
   def clientProgramIO(implicit handler: HealthCheckClientHandler[IO]) = {
     for {
-      _ <- IO.delay(println("///////////////////////Entramos en el handler"))
-      _ <- handler.settingAndCheck("example", SERVING)
-      _ <- IO.delay(println("///////////////////////Salimos del handler"))
+      _ <- IO.delay(println("///////////////////////Starting program"))
+      _ <- handler.settingAndCheck("example", ServerStatus("SERVING"))
+      _ <- handler.settingAndFullClean(
+        List(("example1", ServerStatus("NOT_SERVING")), ("example2", ServerStatus("SERVING"))))
+      _ <- IO.delay(println("///////////////////////Exiting program"))
     } yield ()
   }
 }

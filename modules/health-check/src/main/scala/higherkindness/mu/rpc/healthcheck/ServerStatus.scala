@@ -15,8 +15,16 @@
  */
 
 package higherkindness.mu.rpc.healthcheck
-
+/*
+object ServerStatus extends Enumeration {
+  type ServerStatus = Value
+  val NOTSERVING, SERVING, UNKNOWN = Value
+}
+ */
+/*
 sealed trait ServerStatus
 case object NOTSERVING extends ServerStatus
 case object SERVING    extends ServerStatus
 case object UNKNOWN    extends ServerStatus
+ */
+case class ServerStatus(status: String)

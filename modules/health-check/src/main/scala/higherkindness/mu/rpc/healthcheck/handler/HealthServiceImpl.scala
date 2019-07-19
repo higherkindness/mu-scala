@@ -19,13 +19,15 @@ package higherkindness.mu.rpc.healthcheck.handler
 import cats.effect.Sync
 import cats.effect.concurrent.Ref
 import cats.implicits._
-import higherkindness.mu.rpc.healthcheck.{ServerStatus, UNKNOWN}
-import service.{HealthCheck, HealthCheckService, HealthStatus}
+import higherkindness.mu.rpc.healthcheck.ServerStatus
+import service.{AllStatuses, EmptyInput, HealthCheck, HealthCheckService, HealthStatus, WentNice}
 import monix.reactive.Observable
+import cats.implicits._
 
 object HealthService {
 
   def buildInstance[F[_]: Sync]: F[HealthCheckService[F]] = {
+
     val checkRef: F[Ref[F, Map[String, ServerStatus]]] =
       Ref.of[F, Map[String, ServerStatus]](Map.empty[String, ServerStatus])
     val watchRef: F[Ref[F, Map[String, Observable[ServerStatus]]]] =
@@ -38,18 +40,27 @@ object HealthService {
 
   }
 }
-class HealthServiceImpl[F[_]](
+class HealthServiceImpl[F[_]: Sync](
     checkStatus: Ref[F, Map[String, ServerStatus]],
     watchRef: Ref[F, Map[String, Observable[ServerStatus]]])
     extends HealthCheckService[F] {
 
   override def check(service: HealthCheck): F[ServerStatus] =
-    checkStatus.modify(m => (m, m.getOrElse(service.nameService, UNKNOWN)))
+    checkStatus.modify(m => (m, m.getOrElse(service.nameService, ServerStatus("UNKNOWN"))))
 
-  override def setStatus(newStatus: HealthStatus): F[Boolean] =
-    checkStatus.tryUpdate(_ + (newStatus.service.nameService -> newStatus.status))
+  override def setStatus(newStatus: HealthStatus): F[WentNice] =
+    checkStatus.tryUpdate(_ + (newStatus.service.nameService -> newStatus.status)).map(WentNice)
 
-  // def watch(service: String): Observable[Boolean] = {
-  //   refStatus.set(map => map :+ ("myService", false))
-  // }
+  override def clearStatus(service: HealthCheck): F[WentNice] =
+    checkStatus.tryUpdate(_ - service.nameService).map(WentNice)
+
+  override def checkAll(empty: EmptyInput): F[service.AllStatuses] =
+    checkStatus.get.map(m => m.keys.map(HealthCheck).toList.zip(m.values.toList)).map(AllStatuses)
+
+  override def cleanAll(empty: EmptyInput): F[WentNice] =
+    checkStatus.tryUpdate(_ => Map.empty[String, ServerStatus]).map(WentNice)
+
+  //override def watch(service: String): Observable[ServerStatus] = {
+  //   watchRef.get.map(_.getOrElse(service, Observable(ServerStatus("UNKNOWN"))))
+  //}
 }

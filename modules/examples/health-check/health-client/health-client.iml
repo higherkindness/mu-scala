@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module external.linked.project.id="health-client [file:/Users/mrtmmr/Documents/Develop/mu/]" external.linked.project.path="$MODULE_DIR$/../../../examples/health-check/health-client" external.root.project.path="$MODULE_DIR$/../../../.." external.system.id="SBT" type="JAVA_MODULE" version="4">
+<module external.linked.project.id="health-client [file:/Users/mrtmmr/Documents/Develop/mu/]" external.linked.project.path="$MODULE_DIR$" external.root.project.path="$MODULE_DIR$/../../../.." external.system.id="SBT" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
-    <output url="file://$MODULE_DIR$/../../../examples/health-check/health-client/target/scala-2.12/classes" />
-    <output-test url="file://$MODULE_DIR$/../../../examples/health-check/health-client/target/scala-2.12/test-classes" />
+    <output url="file://$MODULE_DIR$/target/scala-2.12/classes" />
+    <output-test url="file://$MODULE_DIR$/target/scala-2.12/test-classes" />
     <exclude-output />
-    <content url="file://$MODULE_DIR$/../../../examples/health-check/health-client">
-      <sourceFolder url="file://$MODULE_DIR$/../../../examples/health-check/health-client/src/main/scala" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../examples/health-check/health-client/target/scala-2.12/src_managed/main" isTestSource="false" generated="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../examples/health-check/health-client/target/scala-2.12/src_managed/test" isTestSource="true" generated="true" />
-      <sourceFolder url="file://$MODULE_DIR$/../../../examples/health-check/health-client/src/main/resources" type="java-resource" />
-      <excludeFolder url="file://$MODULE_DIR$/../../../examples/health-check/health-client/target" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src/main/scala" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/target/scala-2.12/src_managed/main" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/target/scala-2.12/src_managed/test" isTestSource="true" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="sbt: org.typelevel:jawn-parser_2.12:0.14.1:jar" level="project" />
     <orderEntry type="module" module-name="health-server" exported="" />
-    <orderEntry type="module" module-name="health-check" exported="" />
     <orderEntry type="module" module-name="netty" exported="" />
     <orderEntry type="library" name="sbt: com.47deg:pbdirect_2.12:0.2.1:jar" level="project" />
     <orderEntry type="library" name="sbt: com.chuusai:shapeless_2.12:2.3.3:jar" level="project" />
@@ -89,5 +88,6 @@
     <orderEntry type="library" name="sbt: com.github.pureconfig:pureconfig-macros_2.12:0.10.2:jar" level="project" />
     <orderEntry type="library" name="sbt: com.github.pureconfig:pureconfig_2.12:0.10.2:jar" level="project" />
     <orderEntry type="library" name="sbt: com.typesafe:config:1.3.3:jar" level="project" />
+    <orderEntry type="module" module-name="config" exported="" />
   </component>
 </module>

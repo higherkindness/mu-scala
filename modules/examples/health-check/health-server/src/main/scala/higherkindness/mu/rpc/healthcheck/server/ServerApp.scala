@@ -35,7 +35,6 @@ object ServerApp {
       List(
         HealthCheckService.bindService[IO]
       ).sequence.map(_.map(AddService))
-    //List(AddService(HealthCheckService.bindService[IO]))
 
     val runServer = for {
       health <- healthCheck
