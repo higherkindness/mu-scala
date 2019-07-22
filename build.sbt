@@ -123,7 +123,9 @@ lazy val `health-check` = project
   .in(file("modules/health-check"))
   .dependsOn(channel)
   .dependsOn(server)
+  .dependsOn(`internal-monix`)
   .dependsOn(monix)
+  .dependsOn(fs2)
   .settings(healthCheckSettings)
   .settings(moduleName := "mu-rpc-health-check")
 

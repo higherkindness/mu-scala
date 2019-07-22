@@ -18,17 +18,16 @@ package higherkindness.mu.rpc.healthcheck.handler
 
 import higherkindness.mu.rpc.healthcheck.ServerStatus
 import higherkindness.mu.rpc.protocol.{service, Protobuf}
-import monix.reactive.Observable
+import fs2._
 
 object service {
 
   case class HealthCheck(nameService: String)
-  case class HealthStatus(service: HealthCheck, status: ServerStatus)
+  case class HealthStatus(hc: HealthCheck, status: ServerStatus)
   case class WentNice(ok: Boolean)
 
   case class AllStatuses(all: List[(HealthCheck, ServerStatus)])
   case class EmptyInput() //TODO doesnt work with empty type nor case object
-
   @service(Protobuf)
   trait HealthCheckService[F[_]] {
 
@@ -39,6 +38,6 @@ object service {
     def checkAll(empty: EmptyInput): F[AllStatuses]
     def cleanAll(empty: EmptyInput): F[WentNice]
 
-    //def watch(service: HealthCheck): Observable[ServerStatus]
+    def watch(service: HealthCheck): Stream[F, HealthStatus]
   }
 }

@@ -14,73 +14,76 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="health-check" exported="" />
-    <orderEntry type="library" name="sbt: com.47deg:pbdirect_2.12:0.2.1:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.chuusai:shapeless_2.12:2.3.3:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.google.code.findbugs:jsr305:3.0.2:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.google.code.gson:gson:2.7:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.google.errorprone:error_prone_annotations:2.2.0:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.google.guava:guava:25.1-android:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.google.j2objc:j2objc-annotations:1.1:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.google.protobuf:protobuf-java:3.6.1:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.sksamuel.avro4s:avro4s-core_2.12:1.8.4:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.sksamuel.avro4s:avro4s-macros_2.12:1.8.4:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.thoughtworks.paranamer:paranamer:2.7:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.grpc:grpc-context:1.18.0:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.grpc:grpc-core:1.18.0:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.grpc:grpc-netty:1.18.0:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.grpc:grpc-stub:1.18.0:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.monix:monix-catnap_2.12:3.0.0-RC2:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.monix:monix-eval_2.12:3.0.0-RC2:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.monix:monix-execution_2.12:3.0.0-RC2:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.monix:monix-java_2.12:3.0.0-RC2:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.monix:monix-reactive_2.12:3.0.0-RC2:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.monix:monix-tail_2.12:3.0.0-RC2:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.monix:monix_2.12:3.0.0-RC2:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.netty:netty-buffer:4.1.32.Final:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.netty:netty-codec:4.1.32.Final:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.netty:netty-codec-http:4.1.32.Final:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.netty:netty-codec-http2:4.1.32.Final:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.netty:netty-codec-socks:4.1.32.Final:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.netty:netty-common:4.1.32.Final:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.netty:netty-handler:4.1.32.Final:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.netty:netty-handler-proxy:4.1.32.Final:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.netty:netty-resolver:4.1.32.Final:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.netty:netty-transport:4.1.32.Final:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.opencensus:opencensus-api:0.18.0:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.opencensus:opencensus-contrib-grpc-metrics:0.18.0:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.apache.avro:avro:1.8.2:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.apache.commons:commons-compress:1.8.1:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.checkerframework:checker-compat-qual:2.5.2:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.codehaus.jackson:jackson-core-asl:1.9.13:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.codehaus.jackson:jackson-mapper-asl:1.9.13:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.codehaus.mojo:animal-sniffer-annotations:1.17:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.jctools:jctools-core:2.1.1:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.log4s:log4s_2.12:1.7.0:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.reactivestreams:reactive-streams:1.0.2:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.scala-lang:scala-compiler:2.12.8:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.scala-lang:scala-library:2.12.8:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.scala-lang:scala-reflect:2.12.8:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.scala-lang.modules:scala-collection-compat_2.12:0.1.1:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.scala-lang.modules:scala-xml_2.12:1.0.6:jar" level="project" />
-    <orderEntry type="library" scope="TEST" name="sbt: org.scala-lang.modules:scala-xml_2.12:1.1.0:jar" level="project" />
-    <orderEntry type="library" scope="TEST" name="sbt: org.scalactic:scalactic_2.12:3.0.6:jar" level="project" />
-    <orderEntry type="library" scope="TEST" name="sbt: org.scalatest:scalatest_2.12:3.0.6:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.slf4j:slf4j-api:1.7.25:jar" level="project" />
-    <orderEntry type="library" scope="TEST" name="sbt: org.slf4j:slf4j-api:1.7.26:jar" level="project" />
-    <orderEntry type="library" scope="TEST" name="sbt: org.slf4j:slf4j-nop:1.7.26:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.tukaani:xz:1.5:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.typelevel:cats-core_2.12:1.6.0:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.typelevel:cats-effect_2.12:1.2.0:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.typelevel:cats-kernel_2.12:1.6.0:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.typelevel:cats-macros_2.12:1.6.0:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.typelevel:machinist_2.12:0.6.6:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.typelevel:macro-compat_2.12:1.1.1:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.xerial.snappy:snappy-java:1.1.1.3:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.circe:circe-core_2.12:0.11.1:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.circe:circe-generic_2.12:0.11.1:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.circe:circe-jawn_2.12:0.11.1:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.circe:circe-numbers_2.12:0.11.1:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.circe:circe-parser_2.12:0.11.1:jar" level="project" />
     <orderEntry type="library" name="sbt: org.typelevel:jawn-parser_2.12:0.14.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.circe:circe-parser_2.12:0.11.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.circe:circe-numbers_2.12:0.11.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.circe:circe-jawn_2.12:0.11.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.circe:circe-generic_2.12:0.11.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.circe:circe-core_2.12:0.11.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.xerial.snappy:snappy-java:1.1.1.3:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.typelevel:macro-compat_2.12:1.1.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.typelevel:machinist_2.12:0.6.6:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.typelevel:cats-macros_2.12:1.6.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.typelevel:cats-kernel_2.12:1.6.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.typelevel:cats-effect_2.12:1.2.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.typelevel:cats-core_2.12:1.6.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.tukaani:xz:1.5:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="sbt: org.slf4j:slf4j-nop:1.7.26:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="sbt: org.slf4j:slf4j-api:1.7.26:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.slf4j:slf4j-api:1.7.25:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="sbt: org.scalatest:scalatest_2.12:3.0.6:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="sbt: org.scalactic:scalactic_2.12:3.0.6:jar" level="project" />
+    <orderEntry type="library" scope="TEST" name="sbt: org.scala-lang.modules:scala-xml_2.12:1.1.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scala-lang.modules:scala-xml_2.12:1.0.6:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scala-lang:scala-reflect:2.12.8:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scala-lang:scala-library:2.12.8:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scala-lang:scala-compiler:2.12.8:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.reactivestreams:reactive-streams:1.0.2:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.log4s:log4s_2.12:1.7.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.jctools:jctools-core:2.1.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.codehaus.mojo:animal-sniffer-annotations:1.17:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.codehaus.jackson:jackson-mapper-asl:1.9.13:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.codehaus.jackson:jackson-core-asl:1.9.13:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.checkerframework:checker-compat-qual:2.5.2:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.apache.commons:commons-compress:1.8.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.apache.avro:avro:1.8.2:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.opencensus:opencensus-contrib-grpc-metrics:0.18.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.opencensus:opencensus-api:0.18.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-transport:4.1.32.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-resolver:4.1.32.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-handler-proxy:4.1.32.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-handler:4.1.32.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-common:4.1.32.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-codec-socks:4.1.32.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-codec-http2:4.1.32.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-codec-http:4.1.32.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-codec:4.1.32.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-buffer:4.1.32.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.monix:monix_2.12:3.0.0-RC2:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.monix:monix-tail_2.12:3.0.0-RC2:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.monix:monix-reactive_2.12:3.0.0-RC2:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.monix:monix-java_2.12:3.0.0-RC2:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.monix:monix-execution_2.12:3.0.0-RC2:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.monix:monix-eval_2.12:3.0.0-RC2:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.monix:monix-catnap_2.12:3.0.0-RC2:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.grpc:grpc-stub:1.18.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.grpc:grpc-netty:1.18.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.grpc:grpc-core:1.18.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.grpc:grpc-context:1.18.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.thoughtworks.paranamer:paranamer:2.7:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.sksamuel.avro4s:avro4s-macros_2.12:1.8.4:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.sksamuel.avro4s:avro4s-core_2.12:1.8.4:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.google.protobuf:protobuf-java:3.6.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.google.j2objc:j2objc-annotations:1.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.google.guava:guava:25.1-android:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.google.errorprone:error_prone_annotations:2.2.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.google.code.gson:gson:2.7:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.google.code.findbugs:jsr305:3.0.2:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.chuusai:shapeless_2.12:2.3.3:jar" level="project" />
+    <orderEntry type="library" name="sbt: com.47deg:pbdirect_2.12:0.2.1:jar" level="project" />
+    <orderEntry type="library" name="sbt: co.fs2:fs2-core_2.12:1.0.4:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.lyranthe.fs2-grpc:java-runtime_2.12:0.4.0-M6:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scala-lang.modules:scala-collection-compat_2.12:0.3.0:jar" level="project" />
+    <orderEntry type="library" name="sbt: org.scodec:scodec-bits_2.12:1.1.9:jar" level="project" />
   </component>
 </module>

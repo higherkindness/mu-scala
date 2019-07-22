@@ -14,26 +14,43 @@
  * limitations under the License.
  */
 
+/*
+  RUN STREAMING EXAMPLE
+  Four different terminals, run (in order of appearance):
+    1.- sbt health-server/run
+    2.- sbt "health-client/run 1 watch"
+    3.- sbt "health-client/run 2 watch"
+    4.- sbt "health-client/run 1"
+  Expect:
+    1.- it runs service
+    2.- it watches "example1" service to update health status
+    3.- it watches "example2" service to update health status
+    4.- it updates health status for example 1
+ */
+
 package higherkindness.mu.rpc.healthcheck.client
 
 import cats.effect.{ExitCode, IO, IOApp}
 import higherkindness.mu.rpc.healthcheck.client.ClientProgram._
-import org.log4s.{getLogger, Logger}
 import higherkindness.mu.rpc.healthcheck.client.gclient.implicits._
 
 object ClientApp extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
 
-    val logger: Logger = getLogger
+    println("Starting client...")
 
-    logger.info(s"${Thread.currentThread().getName} Starting client...")
+    val (mode, who) = args.length match {
+      case 1 => (args.head, "")
+      case 2 => (args.head, args(1))
+      case _ => ("", "")
+    }
 
-    clientProgramIO.attempt
+    clientProgramIO(who, mode).attempt
       .map(_.fold({ _ =>
         ExitCode.Error
       }, { _ =>
-        logger.info(s"${Thread.currentThread().getName} Closing client...")
+        println("Closing client...")
         ExitCode.Success
       }))
 

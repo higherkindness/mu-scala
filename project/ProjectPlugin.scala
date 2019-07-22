@@ -128,6 +128,7 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %%("log4s", V.log4s),
         %%("monix", V.monix),
+        %%("fs2-core", V.fs2),
         %%("circe-core", V.circe),
         %%("circe-generic", V.circe),
         %%("circe-parser", V.circe),
