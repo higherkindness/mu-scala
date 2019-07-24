@@ -124,14 +124,18 @@ object ProjectPlugin extends AutoPlugin {
     )
 
 
-    lazy val healthCheckSettings: Seq[Def.Setting[_]] = Seq(
+    lazy val healthCheckSettingsFS2: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("log4s", V.log4s),
+        %%("fs2-core", V.fs2),
+        %%("cats-effect", V.catsEffect)
+      )
+    )
+
+    lazy val healthCheckSettingsMonix: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("log4s", V.log4s),
         %%("monix", V.monix),
-        %%("fs2-core", V.fs2),
-        %%("circe-core", V.circe),
-        %%("circe-generic", V.circe),
-        %%("circe-parser", V.circe),
         %%("cats-effect", V.catsEffect)
       )
     )
