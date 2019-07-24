@@ -20,7 +20,8 @@ import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc.ChannelFor
 import higherkindness.mu.rpc.config.channel.ConfigForAddress
 import higherkindness.mu.rpc.healthcheck.CommonRuntime
-import higherkindness.mu.rpc.healthcheck.service.HealthCheckService
+import higherkindness.mu.rpc.healthcheck.service.HealthCheckServiceMonix
+import org.log4s.getLogger
 
 object gclient {
 
@@ -29,8 +30,10 @@ object gclient {
     val channelFor: ChannelFor =
       ConfigForAddress[IO]("rpc.client.host", "rpc.client.port").unsafeRunSync()
 
-    val healthCheckServiceClient: Resource[IO, HealthCheckService[IO]] =
-      HealthCheckService.client[IO](channelFor)
+    val healthCheckServiceClient: Resource[IO, HealthCheckServiceMonix[IO]] =
+      HealthCheckServiceMonix.client[IO](channelFor)
+
+    implicit val logger = getLogger
 
     implicit val healthCheckClientHandler: HealthCheckClientHandler[IO] =
       new HealthCheckClientHandler[IO](healthCheckServiceClient)

@@ -18,36 +18,40 @@ package higherkindness.mu.rpc.healthcheck.client
 
 import cats.effect.IO
 import higherkindness.mu.rpc.healthcheck.ServerStatus
+import org.log4s.Logger
 
 object ClientProgram {
 
-  def clientProgramIO(who: String, mode: String)(implicit handler: HealthCheckClientHandler[IO]) =
+  def clientProgramIO(who: String, mode: String)(
+      implicit handler: HealthCheckClientHandler[IO],
+      logger: Logger) = {
+
     mode match {
       case "watch" =>
         for {
-          _ <- IO.delay(println("///////////////////////Starting watching"))
+          _ <- IO.delay(logger.info("///////////////////////Starting watching"))
           _ <- handler.watching("example" + who)
-          _ <- IO.delay(println("///////////////////////Exiting watching"))
+          _ <- IO.delay(logger.info("///////////////////////Exiting watching"))
         } yield ()
 
       case "simple" =>
         for {
-          _ <- IO.delay(println("///////////////////////Starting program"))
+          _ <- IO.delay(logger.info("///////////////////////Starting program"))
           _ <- handler.settingAndCheck("example", ServerStatus("SERVING"))
           _ <- handler.settingAndFullClean(
             List(("example1", ServerStatus("SERVING")), ("example2", ServerStatus("SERVING"))))
-          _ <- IO.delay(println("///////////////////////Exiting program"))
+          _ <- IO.delay(logger.info("///////////////////////Exiting program"))
         } yield ()
 
       case "update" =>
         for {
-          _ <- IO.delay(println("///////////////////////Starting program"))
+          _ <- IO.delay(logger.info("///////////////////////Starting program"))
           _ <- handler.updatingWatching("example" + who)
           _ <- handler.updatingWatching("example3")
-          _ <- IO.delay(println("///////////////////////Exiting program"))
+          _ <- IO.delay(logger.info("///////////////////////Exiting program"))
         } yield ()
 
-      case _ => IO.delay(println("Wrong input!"))
+      case _ => IO.delay(logger.info("Wrong input!"))
     }
-
+  }
 }

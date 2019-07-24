@@ -16,10 +16,19 @@
 
 package higherkindness.mu.rpc.healthcheck
 
-/*
-sealed trait ServerStatus
-case object NOTSERVING extends ServerStatus
-case object SERVING    extends ServerStatus
-case object UNKNOWN    extends ServerStatus
- */
-case class ServerStatus(status: String)
+import higherkindness.mu.rpc.protocol.{service, Empty, Protobuf}
+object service {
+
+  @service(Protobuf)
+  trait HealthCheckServiceUnary[F[_]] {
+
+    def setStatus(newStatus: HealthStatus): F[WentNice]
+
+    def check(service: HealthCheck): F[ServerStatus]
+    def clearStatus(service: HealthCheck): F[WentNice]
+
+    def checkAll(empty: Empty.type): F[AllStatus]
+    def cleanAll(empty: Empty.type): F[WentNice]
+
+  }
+}

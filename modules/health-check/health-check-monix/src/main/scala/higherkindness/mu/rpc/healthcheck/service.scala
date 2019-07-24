@@ -21,13 +21,8 @@ import monix.reactive.Observable
 
 object service {
 
-  case class HealthCheck(nameService: String)
-  case class HealthStatus(hc: HealthCheck, status: ServerStatus)
-  case class WentNice(ok: Boolean)
-
-  case class AllStatus(all: List[(HealthCheck, ServerStatus)])
   @service(Protobuf)
-  trait HealthCheckService[F[_]] {
+  trait HealthCheckServiceMonix[F[_]] {
 
     def check(service: HealthCheck): F[ServerStatus]
     def setStatus(newStatus: HealthStatus): F[WentNice]

@@ -18,22 +18,16 @@ package higherkindness.mu.rpc.healthcheck.handler
 
 import cats.effect.{Async, Concurrent, Sync}
 import cats.effect.concurrent.Ref
-import higherkindness.mu.rpc.healthcheck.{service, ServerStatus}
-import higherkindness.mu.rpc.healthcheck.service.{
-  AllStatus,
-  HealthCheck,
-  HealthCheckService,
-  HealthStatus,
-  WentNice
-}
+import higherkindness.mu.rpc.healthcheck._
+import higherkindness.mu.rpc.healthcheck.service.HealthCheckServiceFS2
+
 import cats.implicits._
 import fs2.Stream
 import fs2.concurrent.Topic
-import higherkindness.mu.rpc.protocol.Empty
 
 object HealthService {
 
-  def buildInstance[F[_]: Sync: Concurrent]: F[HealthCheckService[F]] = {
+  def buildInstance[F[_]: Sync: Concurrent]: F[HealthCheckServiceFS2[F]] = {
 
     val checkRef: F[Ref[F, Map[String, ServerStatus]]] =
       Ref.of[F, Map[String, ServerStatus]](Map.empty[String, ServerStatus])
@@ -44,39 +38,22 @@ object HealthService {
     for {
       c <- checkRef
       t <- watchTopic
-    } yield new HealthServiceImpl[F](c, t)
+    } yield new HealthCheckServiceFS2Impl[F](c, t)
   }
 }
-class HealthServiceImpl[F[_]: Async](
+class HealthCheckServiceFS2Impl[F[_]: Async](
     checkStatus: Ref[F, Map[String, ServerStatus]],
     watchTopic: Topic[F, HealthStatus])
-    extends HealthCheckService[F] {
+    extends AbstractHealthService[F](checkStatus)
+    with HealthCheckServiceFS2[F] {
 
-  override def check(service: HealthCheck): F[ServerStatus] =
-    checkStatus.modify(m => (m, m.getOrElse(service.nameService, ServerStatus("UNKNOWN"))))
-
-  override def setStatus(newStatus: HealthStatus): F[WentNice] =
+  def setStatus(newStatus: HealthStatus): F[WentNice] =
     checkStatus
       .tryUpdate(_ + (newStatus.hc.nameService -> newStatus.status))
       .map(WentNice) <*
       Stream.eval(watchTopic.publish1(newStatus)).compile.drain
 
-  override def clearStatus(service: HealthCheck): F[WentNice] =
-    checkStatus.tryUpdate(_ - service.nameService).map(WentNice)
-
-  override def checkAll(empty: Empty.type): F[service.AllStatus] =
-    checkStatus.get.map(m => m.keys.map(HealthCheck).toList.zip(m.values.toList)).map(AllStatus)
-
-  override def cleanAll(empty: Empty.type): F[WentNice] =
-    checkStatus.tryUpdate(_ => Map.empty[String, ServerStatus]).map(WentNice)
-
-  override def watch(service: HealthCheck): Stream[F, HealthStatus] =
+  def watch(service: HealthCheck): Stream[F, HealthStatus] =
     watchTopic.subscribe(20).filter(hs => hs.hc == service)
 
 }
-/*
-  //  val watchStream: F[Ref[F, Stream[F, ServerStatus]]] = Ref.of[F,Stream[F,ServerStatus]](Stream.empty)
-  val watchObservable: Observable[HealthStatus] =
-    Observable(HealthStatus(HealthCheck("exmaple"), ServerStatus("Serving")),
-      HealthStatus(HealthCheck("notExmaple"), ServerStatus("Serving")))
- */

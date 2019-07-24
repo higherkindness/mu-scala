@@ -118,18 +118,24 @@ lazy val server = project
 /////////////////////
 //// HEALTHCHECK ////
 /////////////////////
-lazy val `health-check-monix` = project
-  .in(file("modules/health-check/health-check-monix"))
+
+lazy val `health-check-unary` = project
+  .in(file("modules/health-check/health-check-unary"))
   .dependsOn(channel)
   .dependsOn(server)
+  .settings(healthCheckSettings)
+  .settings(moduleName := "mu-rpc-health-check-unary")
+
+lazy val `health-check-monix` = project
+  .in(file("modules/health-check/health-check-monix"))
+  .dependsOn(`health-check-unary`)
   .dependsOn(monix)
   .settings(healthCheckSettingsMonix)
   .settings(moduleName := "mu-rpc-health-check-monix")
 
 lazy val `health-check-fs2` = project
   .in(file("modules/health-check/health-check-fs2"))
-  .dependsOn(channel)
-  .dependsOn(server)
+  .dependsOn(`health-check-unary`)
   .dependsOn(fs2)
   .settings(healthCheckSettingsFS2)
   .settings(moduleName := "mu-rpc-health-check-fs2")
@@ -153,7 +159,6 @@ lazy val `health-client-monix` = project
   .dependsOn(netty)
   .settings(healthCheckSettingsMonix)
   .settings(moduleName := "mu-rpc-example-health-check-client-monix")
-
 
 
 /////////HealthCheck Server FS2 Example

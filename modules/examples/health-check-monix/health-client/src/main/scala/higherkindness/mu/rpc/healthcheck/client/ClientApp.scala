@@ -24,8 +24,6 @@ object ClientApp extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
 
-    println("Starting client...")
-
     val (mode, who) = args.length match {
       case 1 => (args.head, "")
       case 2 => (args.head, args(1))
@@ -38,7 +36,6 @@ object ClientApp extends IOApp {
         println(e.getStackTrace.mkString("\n"))
         ExitCode.Error
       }, { _ =>
-        println("Closing client...")
         ExitCode.Success
       }))
 

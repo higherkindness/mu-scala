@@ -18,20 +18,22 @@ package higherkindness.mu.rpc.healthcheck.client
 
 import cats.effect.{Async, Resource, Sync}
 import cats.implicits._
+import higherkindness.mu.rpc.healthcheck._
 import higherkindness.mu.rpc.protocol.Empty
 import monix.execution.Scheduler
 import monix.reactive.Consumer
 import higherkindness.mu.rpc.healthcheck.service._
-import higherkindness.mu.rpc.healthcheck.ServerStatus
+import org.log4s.Logger
 
-class HealthCheckClientHandler[F[_]: Async](client: Resource[F, HealthCheckService[F]])(
-    implicit s: Scheduler) {
+class HealthCheckClientHandler[F[_]: Async](client: Resource[F, HealthCheckServiceMonix[F]])(
+    implicit s: Scheduler,
+    logger: Logger) {
 
   def updatingWatching(name: String) =
     for {
       _      <- client.use(_.setStatus(HealthStatus(HealthCheck(name), ServerStatus("SERVING"))))
       status <- client.use(_.check(HealthCheck(name)))
-      _      <- Async[F].delay(println("Status of " + name + " service update to " + status))
+      _      <- Async[F].delay(logger.info("Status of " + name + " service update to " + status))
     } yield ()
 
   def watching(name: String) = {
@@ -45,42 +47,46 @@ class HealthCheckClientHandler[F[_]: Async](client: Resource[F, HealthCheckServi
 
   def settingAndCheck(name: String, status: ServerStatus) =
     for {
-      _     <- Sync[F].delay(println("/////////////////////////////////UNARY"))
-      _     <- Sync[F].delay(println("UNARY: Is there some server named " + name.toUpperCase + "?"))
+      _     <- Sync[F].delay(logger.info("/////////////////////////////////UNARY"))
+      _     <- Sync[F].delay(logger.info("UNARY: Is there some server named " + name.toUpperCase + "?"))
       known <- client.use(_.check(HealthCheck(name)))
-      _     <- Sync[F].delay(println("UNARY: Actually the status is " + known.status))
+      _     <- Sync[F].delay(logger.info("UNARY: Actually the status is " + known.status))
       _ <- Sync[F].delay(
-        println(
+        logger.info(
           "UNARY: Setting " + name.toUpperCase + " service with " + status.status + " status"))
       wentNiceSet <- client.use(_.setStatus(HealthStatus(HealthCheck(name), status)))
       _ <- Sync[F].delay(
-        println("UNARY: Added status: " + status.status + " to service: " + name.toUpperCase))
+        logger.info("UNARY: Added status: " + status.status + " to service: " + name.toUpperCase))
       status <- client.use(_.check(HealthCheck(name)))
       _ <- Sync[F].delay(
-        println(
+        logger.info(
           "UNARY: Checked the status of " + name.toUpperCase + ". Obtained: " + status.status))
       wentNiceClean <- client.use(_.clearStatus(HealthCheck(name)))
       _ <- Sync[F].delay(
-        println("UNARY: Cleaned " + name.toUpperCase + " status. Went ok?: " + wentNiceClean.ok))
+        logger.info(
+          "UNARY: Cleaned " + name.toUpperCase + " status. Went ok?: " + wentNiceClean.ok))
       unknown <- client.use(_.check(HealthCheck(name)))
       _ <- Sync[F].delay(
-        println("UNARY: Current status of " + name.toUpperCase + ": " + unknown.status))
+        logger.info("UNARY: Current status of " + name.toUpperCase + ": " + unknown.status))
     } yield ()
 
   def settingAndFullClean(namesAndStatuses: List[(String, ServerStatus)]) =
     for {
-      _ <- Sync[F].delay(println("/////////////////////////////////UNARY ALL"))
-      _ <- Sync[F].delay(println("UNARY ALL: Setting services: " + namesAndStatuses))
+      _ <- Sync[F].delay(logger.info("/////////////////////////////////UNARY ALL"))
+      _ <- Sync[F].delay(logger.info("UNARY ALL: Setting services: " + namesAndStatuses))
       wentNiceSet <- namesAndStatuses.traverse(l =>
         client.use(_.setStatus(HealthStatus(HealthCheck(l._1), l._2))))
       allStatuses1 <- client.use(_.checkAll(Empty))
-      _            <- Sync[F].delay(println("UNARY ALL: All statuses are: " + allStatuses1.all.mkString("\n")))
       _ <- Sync[F].delay(
-        println("UNARY ALL: Went it ok in all cases? " + !wentNiceSet.contains(WentNice(false))))
+        logger.info("UNARY ALL: All statuses are: " + allStatuses1.all.mkString("\n")))
+      _ <- Sync[F].delay(
+        logger.info(
+          "UNARY ALL: Went it ok in all cases? " + !wentNiceSet.contains(WentNice(false))))
       wentNiceClear <- client.use(_.cleanAll(Empty))
-      _             <- Sync[F].delay(println("UNARY ALL: Went the cleaning part nice? " + wentNiceClear.ok))
+      _             <- Sync[F].delay(logger.info("UNARY ALL: Went the cleaning part nice? " + wentNiceClear.ok))
       allStatuses2  <- client.use(_.checkAll(Empty))
-      _             <- Sync[F].delay(println("UNARY ALL: All statuses are: " + allStatuses2.all.mkString("\n")))
+      _ <- Sync[F].delay(
+        logger.info("UNARY ALL: All statuses are: " + allStatuses2.all.mkString("\n")))
 
     } yield ()
 

@@ -16,10 +16,9 @@
 
 package higherkindness.mu.rpc.healthcheck
 
-/*
-sealed trait ServerStatus
-case object NOTSERVING extends ServerStatus
-case object SERVING    extends ServerStatus
-case object UNKNOWN    extends ServerStatus
- */
 case class ServerStatus(status: String)
+case class HealthCheck(nameService: String)
+case class HealthStatus(hc: HealthCheck, status: ServerStatus)
+case class WentNice(ok: Boolean)
+
+case class AllStatus(all: List[(HealthCheck, ServerStatus)])
