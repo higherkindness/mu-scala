@@ -24,7 +24,7 @@ import service.HealthCheckServiceMonix
 import monix.execution.Scheduler
 import monix.reactive.{MulticastStrategy, Observable, Observer, Pipe}
 
-object HealthService {
+object HealthServiceMonix {
 
   def buildInstance[F[_]: Sync: Concurrent](
       implicit s: Scheduler): F[HealthCheckServiceMonix[F]] = {
@@ -35,7 +35,7 @@ object HealthService {
     val pipe: (Observer.Sync[HealthStatus], Observable[HealthStatus]) =
       Pipe(
         MulticastStrategy.behavior(
-          HealthStatus(HealthCheck("FirstStatus"), ServerStatus("UNKNOWN"))))
+          HealthStatus(new HealthCheck("FirstStatus"), ServerStatus("UNKNOWN"))))
         .concurrent(s)
 
     checkRef.map(c => new HealthCheckServiceMonixImpl[F](c, pipe))
@@ -48,10 +48,9 @@ class HealthCheckServiceMonixImpl[F[_]: Async](
     extends AbstractHealthService[F](checkStatus)
     with HealthCheckServiceMonix[F] {
 
-  override def setStatus(newStatus: HealthStatus): F[WentNice] =
+  override def setStatus(newStatus: HealthStatus): F[Unit] =
     checkStatus
-      .tryUpdate(_ + (newStatus.hc.nameService -> newStatus.status))
-      .map(WentNice) <*
+      .update(_ + (newStatus.hc.nameService -> newStatus.status)) <*
       Async[F].delay(pipe._1.onNext(newStatus))
 
   override def watch(service: HealthCheck): Observable[HealthStatus] =

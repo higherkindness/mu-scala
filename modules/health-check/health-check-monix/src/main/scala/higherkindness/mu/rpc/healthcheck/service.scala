@@ -25,11 +25,11 @@ object service {
   trait HealthCheckServiceMonix[F[_]] {
 
     def check(service: HealthCheck): F[ServerStatus]
-    def setStatus(newStatus: HealthStatus): F[WentNice]
-    def clearStatus(service: HealthCheck): F[WentNice]
+    def setStatus(newStatus: HealthStatus): F[Unit]
+    def clearStatus(service: HealthCheck): F[Unit]
 
     def checkAll(empty: Empty.type): F[AllStatus]
-    def cleanAll(empty: Empty.type): F[WentNice]
+    def cleanAll(empty: Empty.type): F[Unit]
 
     def watch(service: HealthCheck): Observable[HealthStatus]
   }

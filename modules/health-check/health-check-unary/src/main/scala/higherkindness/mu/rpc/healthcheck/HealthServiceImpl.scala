@@ -40,14 +40,16 @@ abstract class AbstractHealthService[F[_]: Async](checkStatus: Ref[F, Map[String
   def check(service: HealthCheck): F[ServerStatus] =
     checkStatus.modify(m => (m, m.getOrElse(service.nameService, ServerStatus("UNKNOWN"))))
 
-  def clearStatus(service: HealthCheck): F[WentNice] =
-    checkStatus.tryUpdate(_ - service.nameService).map(WentNice)
+  def clearStatus(service: HealthCheck): F[Unit] =
+    checkStatus.update(_ - service.nameService)
 
   def checkAll(empty: Empty.type): F[AllStatus] =
-    checkStatus.get.map(m => m.keys.map(HealthCheck).toList.zip(m.values.toList)).map(AllStatus)
+    checkStatus.get
+      .map(m => m.map(p => HealthStatus(new HealthCheck(p._1), p._2)).toList)
+      .map(AllStatus)
 
-  def cleanAll(empty: Empty.type): F[WentNice] =
-    checkStatus.tryUpdate(_ => Map.empty[String, ServerStatus]).map(WentNice)
+  def cleanAll(empty: Empty.type): F[Unit] =
+    checkStatus.update(_ => Map.empty[String, ServerStatus])
 
 }
 
@@ -55,8 +57,8 @@ class HealthCheckServiceUnaryImpl[F[_]: Async](checkStatus: Ref[F, Map[String, S
     extends AbstractHealthService[F](checkStatus)
     with HealthCheckServiceUnary[F] {
 
-  def setStatus(newStatus: HealthStatus): F[WentNice] =
+  def setStatus(newStatus: HealthStatus): F[Unit] =
     checkStatus
-      .tryUpdate(_ + (newStatus.hc.nameService -> newStatus.status))
-      .map(WentNice)
+      .update(_ + (newStatus.hc.nameService -> newStatus.status))
+
 }

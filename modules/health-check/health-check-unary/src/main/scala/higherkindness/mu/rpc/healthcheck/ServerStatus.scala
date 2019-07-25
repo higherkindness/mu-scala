@@ -16,9 +16,7 @@
 
 package higherkindness.mu.rpc.healthcheck
 
-case class ServerStatus(status: String)
-case class HealthCheck(nameService: String)
-case class HealthStatus(hc: HealthCheck, status: ServerStatus)
-case class WentNice(ok: Boolean)
-
-case class AllStatus(all: List[(HealthCheck, ServerStatus)])
+class HealthCheck(val nameService: String) extends AnyVal
+final case class ServerStatus(status: String)
+final case class HealthStatus(hc: HealthCheck, status: ServerStatus)
+final case class AllStatus(all: List[HealthStatus])

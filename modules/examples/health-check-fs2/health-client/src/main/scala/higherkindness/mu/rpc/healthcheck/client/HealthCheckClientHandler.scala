@@ -29,13 +29,13 @@ class HealthCheckClientHandler[F[_]: Async](client: Resource[F, HealthCheckServi
 
   def updatingWatching(name: String) =
     for {
-      _      <- client.use(_.setStatus(HealthStatus(HealthCheck(name), ServerStatus("SERVING"))))
-      status <- client.use(_.check(HealthCheck(name)))
+      _      <- client.use(_.setStatus(HealthStatus(new HealthCheck(name), ServerStatus("SERVING"))))
+      status <- client.use(_.check(new HealthCheck(name)))
       _      <- Async[F].delay(logger.info("Status of " + name + " service update to" + status))
     } yield ()
 
   def watching(name: String) = client.use(
-    _.watch(HealthCheck(name))
+    _.watch(new HealthCheck(name))
       .evalMap(hs =>
         Async[F].delay(logger.info(
           "Service " + hs.hc.nameService + " updated to status " + hs.status.status + ". ")))
@@ -47,23 +47,21 @@ class HealthCheckClientHandler[F[_]: Async](client: Resource[F, HealthCheckServi
     for {
       _     <- Sync[F].delay(logger.info("/////////////////////////////////UNARY"))
       _     <- Sync[F].delay(logger.info("UNARY: Is there some server named " + name.toUpperCase + "?"))
-      known <- client.use(_.check(HealthCheck(name)))
+      known <- client.use(_.check(new HealthCheck(name)))
       _     <- Sync[F].delay(logger.info("UNARY: Actually the status is " + known.status))
       _ <- Sync[F].delay(
         logger.info(
           "UNARY: Setting " + name.toUpperCase + " service with " + status.status + " status"))
-      wentNiceSet <- client.use(_.setStatus(HealthStatus(HealthCheck(name), status)))
+      _ <- client.use(_.setStatus(HealthStatus(new HealthCheck(name), status)))
       _ <- Sync[F].delay(
         logger.info("UNARY: Added status: " + status.status + " to service: " + name.toUpperCase))
-      status <- client.use(_.check(HealthCheck(name)))
+      status <- client.use(_.check(new HealthCheck(name)))
       _ <- Sync[F].delay(
         logger.info(
           "UNARY: Checked the status of " + name.toUpperCase + ". Obtained: " + status.status))
-      wentNiceClean <- client.use(_.clearStatus(HealthCheck(name)))
-      _ <- Sync[F].delay(
-        logger.info(
-          "UNARY: Cleaned " + name.toUpperCase + " status. Went ok?: " + wentNiceClean.ok))
-      unknown <- client.use(_.check(HealthCheck(name)))
+      _       <- client.use(_.clearStatus(new HealthCheck(name)))
+      _       <- Sync[F].delay(logger.info("UNARY: Cleaned " + name.toUpperCase + " status."))
+      unknown <- client.use(_.check(new HealthCheck(name)))
       _ <- Sync[F].delay(
         logger.info("UNARY: Current status of " + name.toUpperCase + ": " + unknown.status))
     } yield ()
@@ -72,20 +70,15 @@ class HealthCheckClientHandler[F[_]: Async](client: Resource[F, HealthCheckServi
     for {
       _ <- Sync[F].delay(logger.info("/////////////////////////////////UNARY ALL"))
       _ <- Sync[F].delay(logger.info("UNARY ALL: Setting services: " + namesAndStatuses))
-      wentNiceSet <- namesAndStatuses.traverse(l =>
-        client.use(_.setStatus(HealthStatus(HealthCheck(l._1), l._2))))
+      _ <- namesAndStatuses.traverse(l =>
+        client.use(_.setStatus(HealthStatus(new HealthCheck(l._1), l._2))))
       allStatuses1 <- client.use(_.checkAll(Empty))
       _ <- Sync[F].delay(
         logger.info("UNARY ALL: All statuses are: " + allStatuses1.all.mkString("\n")))
-      _ <- Sync[F].delay(
-        logger.info(
-          "UNARY ALL: Went it ok in all cases? " + !wentNiceSet.contains(WentNice(false))))
-      wentNiceClear <- client.use(_.cleanAll(Empty))
-      _             <- Sync[F].delay(logger.info("UNARY ALL: Went the cleaning part nice? " + wentNiceClear.ok))
-      allStatuses2  <- client.use(_.checkAll(Empty))
+      _            <- client.use(_.cleanAll(Empty))
+      allStatuses2 <- client.use(_.checkAll(Empty))
       _ <- Sync[F].delay(
         logger.info("UNARY ALL: All statuses are: " + allStatuses2.all.mkString("\n")))
-
     } yield ()
 
 }

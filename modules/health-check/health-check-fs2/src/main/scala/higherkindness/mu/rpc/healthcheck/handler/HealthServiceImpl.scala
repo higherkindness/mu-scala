@@ -25,7 +25,7 @@ import cats.implicits._
 import fs2.Stream
 import fs2.concurrent.Topic
 
-object HealthService {
+object HealthServiceFS2 {
 
   def buildInstance[F[_]: Sync: Concurrent]: F[HealthCheckServiceFS2[F]] = {
 
@@ -33,7 +33,7 @@ object HealthService {
       Ref.of[F, Map[String, ServerStatus]](Map.empty[String, ServerStatus])
 
     val watchTopic: F[Topic[F, HealthStatus]] = Topic(
-      HealthStatus(HealthCheck("FirstStatus"), ServerStatus("UNKNOWN")))
+      HealthStatus(new HealthCheck("FirstStatus"), ServerStatus("UNKNOWN")))
 
     for {
       c <- checkRef
@@ -47,10 +47,9 @@ class HealthCheckServiceFS2Impl[F[_]: Async](
     extends AbstractHealthService[F](checkStatus)
     with HealthCheckServiceFS2[F] {
 
-  def setStatus(newStatus: HealthStatus): F[WentNice] =
+  def setStatus(newStatus: HealthStatus): F[Unit] =
     checkStatus
-      .tryUpdate(_ + (newStatus.hc.nameService -> newStatus.status))
-      .map(WentNice) <*
+      .update(_ + (newStatus.hc.nameService -> newStatus.status)) <*
       Stream.eval(watchTopic.publish1(newStatus)).compile.drain
 
   def watch(service: HealthCheck): Stream[F, HealthStatus] =

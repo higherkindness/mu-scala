@@ -17,10 +17,9 @@
 package higherkindness.mu.rpc.healthcheck
 
 import cats.effect.IO
-import higherkindness.mu.rpc.healthcheck.handler.HealthService
+import higherkindness.mu.rpc.healthcheck.handler.HealthServiceMonix
 import higherkindness.mu.rpc.healthcheck.service.HealthCheckServiceMonix
 import higherkindness.mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
-
 import gserver.implicits._
 import cats.instances.list._
 import cats.syntax.traverse._
@@ -28,7 +27,7 @@ import cats.syntax.traverse._
 object ServerApp {
 
   def main(args: Array[String]): Unit = {
-    val healthCheck: IO[HealthCheckServiceMonix[IO]] = HealthService.buildInstance[IO]
+    val healthCheck: IO[HealthCheckServiceMonix[IO]] = HealthServiceMonix.buildInstance[IO]
 
     def grpcConfigs(implicit HC: HealthCheckServiceMonix[IO]): IO[List[GrpcConfig]] =
       List(

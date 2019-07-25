@@ -22,13 +22,13 @@ object service {
   @service(Protobuf)
   trait HealthCheckServiceUnary[F[_]] {
 
-    def setStatus(newStatus: HealthStatus): F[WentNice]
+    def setStatus(newStatus: HealthStatus): F[Unit]
 
     def check(service: HealthCheck): F[ServerStatus]
-    def clearStatus(service: HealthCheck): F[WentNice]
+    def clearStatus(service: HealthCheck): F[Unit]
 
     def checkAll(empty: Empty.type): F[AllStatus]
-    def cleanAll(empty: Empty.type): F[WentNice]
+    def cleanAll(empty: Empty.type): F[Unit]
 
   }
 }
