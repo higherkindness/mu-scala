@@ -16,7 +16,8 @@
 
 package higherkindness.mu.rpc.healthcheck
 
-import cats.effect.{Async, Concurrent, Sync}
+import cats.Functor
+import cats.effect.Sync
 import cats.effect.concurrent.Ref
 import cats.implicits._
 import com.google.common.util.concurrent.AbstractScheduledService.Scheduler
@@ -25,8 +26,7 @@ import higherkindness.mu.rpc.protocol.Empty
 
 object HealthService {
 
-  def buildInstance[F[_]: Sync: Concurrent](
-      implicit s: Scheduler): F[HealthCheckServiceUnary[F]] = {
+  def buildInstance[F[_]: Sync](implicit s: Scheduler): F[HealthCheckServiceUnary[F]] = {
 
     val checkRef: F[Ref[F, Map[String, ServerStatus]]] =
       Ref.of[F, Map[String, ServerStatus]](Map.empty[String, ServerStatus])
@@ -35,7 +35,8 @@ object HealthService {
   }
 }
 
-abstract class AbstractHealthService[F[_]: Async](checkStatus: Ref[F, Map[String, ServerStatus]]) {
+abstract class AbstractHealthService[F[_]: Functor](
+    checkStatus: Ref[F, Map[String, ServerStatus]]) {
 
   def check(service: HealthCheck): F[ServerStatus] =
     checkStatus.modify(m => (m, m.getOrElse(service.nameService, ServerStatus("UNKNOWN"))))
@@ -53,7 +54,7 @@ abstract class AbstractHealthService[F[_]: Async](checkStatus: Ref[F, Map[String
 
 }
 
-class HealthCheckServiceUnaryImpl[F[_]: Async](checkStatus: Ref[F, Map[String, ServerStatus]])
+class HealthCheckServiceUnaryImpl[F[_]: Functor](checkStatus: Ref[F, Map[String, ServerStatus]])
     extends AbstractHealthService[F](checkStatus)
     with HealthCheckServiceUnary[F] {
 

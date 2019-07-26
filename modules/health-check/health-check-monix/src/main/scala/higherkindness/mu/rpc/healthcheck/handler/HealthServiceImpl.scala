@@ -16,7 +16,7 @@
 
 package higherkindness.mu.rpc.healthcheck.handler
 
-import cats.effect.{Async, Concurrent, Sync}
+import cats.effect.Sync
 import cats.effect.concurrent.Ref
 import higherkindness.mu.rpc.healthcheck._
 import cats.implicits._
@@ -26,8 +26,7 @@ import monix.reactive.{MulticastStrategy, Observable, Observer, Pipe}
 
 object HealthServiceMonix {
 
-  def buildInstance[F[_]: Sync: Concurrent](
-      implicit s: Scheduler): F[HealthCheckServiceMonix[F]] = {
+  def buildInstance[F[_]: Sync](implicit s: Scheduler): F[HealthCheckServiceMonix[F]] = {
 
     val checkRef: F[Ref[F, Map[String, ServerStatus]]] =
       Ref.of[F, Map[String, ServerStatus]](Map.empty[String, ServerStatus])
@@ -42,7 +41,7 @@ object HealthServiceMonix {
   }
 }
 
-class HealthCheckServiceMonixImpl[F[_]: Async](
+class HealthCheckServiceMonixImpl[F[_]: Sync](
     checkStatus: Ref[F, Map[String, ServerStatus]],
     pipe: (Observer.Sync[HealthStatus], Observable[HealthStatus]))(implicit s: Scheduler)
     extends AbstractHealthService[F](checkStatus)
@@ -51,9 +50,9 @@ class HealthCheckServiceMonixImpl[F[_]: Async](
   override def setStatus(newStatus: HealthStatus): F[Unit] =
     checkStatus
       .update(_ + (newStatus.hc.nameService -> newStatus.status)) <*
-      Async[F].delay(pipe._1.onNext(newStatus))
+      Sync[F].delay(pipe._1.onNext(newStatus))
 
   override def watch(service: HealthCheck): Observable[HealthStatus] =
-    pipe._2.filter(hs => hs.hc == service)
+    pipe._2.filter(_.hc == service)
 
 }

@@ -16,18 +16,17 @@
 
 package higherkindness.mu.rpc.healthcheck.handler
 
-import cats.effect.{Async, Concurrent, Sync}
+import cats.effect.{Concurrent, Sync}
 import cats.effect.concurrent.Ref
 import higherkindness.mu.rpc.healthcheck._
 import higherkindness.mu.rpc.healthcheck.service.HealthCheckServiceFS2
-
 import cats.implicits._
 import fs2.Stream
 import fs2.concurrent.Topic
 
 object HealthServiceFS2 {
 
-  def buildInstance[F[_]: Sync: Concurrent]: F[HealthCheckServiceFS2[F]] = {
+  def buildInstance[F[_]: Concurrent]: F[HealthCheckServiceFS2[F]] = {
 
     val checkRef: F[Ref[F, Map[String, ServerStatus]]] =
       Ref.of[F, Map[String, ServerStatus]](Map.empty[String, ServerStatus])
@@ -41,7 +40,7 @@ object HealthServiceFS2 {
     } yield new HealthCheckServiceFS2Impl[F](c, t)
   }
 }
-class HealthCheckServiceFS2Impl[F[_]: Async](
+class HealthCheckServiceFS2Impl[F[_]: Sync](
     checkStatus: Ref[F, Map[String, ServerStatus]],
     watchTopic: Topic[F, HealthStatus])
     extends AbstractHealthService[F](checkStatus)
@@ -53,6 +52,5 @@ class HealthCheckServiceFS2Impl[F[_]: Async](
       Stream.eval(watchTopic.publish1(newStatus)).compile.drain
 
   def watch(service: HealthCheck): Stream[F, HealthStatus] =
-    watchTopic.subscribe(20).filter(hs => hs.hc == service)
-
+    watchTopic.subscribe(20).filter(_.hc == service)
 }

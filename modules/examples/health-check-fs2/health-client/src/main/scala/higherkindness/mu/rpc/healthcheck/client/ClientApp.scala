@@ -45,9 +45,7 @@ object ClientApp extends IOApp {
     }
 
     clientProgramIO(who, mode).attempt
-      .map(_.fold({ e =>
-        println(e.getMessage)
-        println(e.getStackTrace.mkString("\n"))
+      .map(_.fold({ _ =>
         ExitCode.Error
       }, { _ =>
         ExitCode.Success
