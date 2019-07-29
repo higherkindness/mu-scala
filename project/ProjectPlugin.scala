@@ -123,11 +123,11 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val healthCheckSettings: Seq[Def.Setting[_]] = Seq(
+    /*lazy val healthCheckSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect)
       )
-    )
+    )*/
 
     lazy val healthCheckSettingsFS2: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
