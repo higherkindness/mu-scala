@@ -110,6 +110,8 @@ lazy val server = project
   .in(file("modules/server"))
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`internal-core` % "compile->compile;test->test")
+  .dependsOn(`internal-monix`% "test->test")
+  .dependsOn(`internal-fs2`% "test->test")
   .dependsOn(channel)
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-server")
