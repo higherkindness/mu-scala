@@ -18,39 +18,40 @@ package higherkindness.mu.rpc.healthcheck.client.monix
 
 import cats.effect.IO
 import higherkindness.mu.rpc.healthcheck.ServerStatus
-import org.log4s.Logger
+import io.chrisdavenport.log4cats.Logger
+
 
 object ClientProgramMonix {
 
   def clientProgramIO(who: String, mode: String)(
       implicit handler: HealthCheckClientHandlerMonix[IO],
-      logger: Logger) =
+      logger: Logger[IO]) =
     mode match {
       case "watch" =>
         for {
-          _ <- IO.delay(logger.info("///////////////////////Starting watching"))
+          _ <- logger.info("///////////////////////Starting watching")
           _ <- handler.watching("example" + who)
-          _ <- IO.delay(logger.info("///////////////////////Exiting watching"))
+          _ <- logger.info("///////////////////////Exiting watching")
         } yield ()
 
       case "simple" =>
         for {
-          _ <- IO.delay(logger.info("///////////////////////Starting program"))
+          _ <- logger.info("///////////////////////Starting program")
           _ <- handler.settingAndCheck("example", ServerStatus("SERVING"))
           _ <- handler.settingAndFullClean(
             List(("example1", ServerStatus("SERVING")), ("example2", ServerStatus("SERVING"))))
-          _ <- IO.delay(logger.info("///////////////////////Exiting program"))
+          _ <- logger.info("///////////////////////Exiting program")
         } yield ()
 
       case "update" =>
         for {
-          _ <- IO.delay(logger.info("///////////////////////Starting program"))
+          _ <- logger.info("///////////////////////Starting program")
           _ <- handler.updatingWatching("example" + who)
           _ <- handler.updatingWatching("example3")
-          _ <- IO.delay(logger.info("///////////////////////Exiting program"))
+          _ <- logger.info("///////////////////////Exiting program")
         } yield ()
 
-      case _ => IO.delay(logger.info("Wrong input!"))
+      case _ => logger.info("Wrong input!")
     }
 
 }

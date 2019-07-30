@@ -30,33 +30,16 @@ object ClientApp extends IOApp {
       case _ => ("", "", "")
     }
 
-    stream match {
-      case "fs2" => {
+    val clientProgram: IO[Unit] = stream match {
+      case "fs2" =>
         import fs2.gclientFS2.implicits._
-
-        ClientProgramFS2
-          .clientProgramIO(who, mode)
-          .attempt
-          .map(_.fold({ _ =>
-            ExitCode.Error
-          }, { _ =>
-            ExitCode.Success
-          }))
-      }
-
-      case "monix" => {
+        ClientProgramFS2.clientProgramIO(who, mode)
+      case "monix" =>
         import monix.gclientMonix.implicits._
-
-        ClientProgramMonix
-          .clientProgramIO(who, mode)
-          .attempt
-          .map(_.fold({ _ =>
-            ExitCode.Error
-          }, { _ =>
-            ExitCode.Success
-          }))
-      }
+        ClientProgramMonix.clientProgramIO(who, mode)
     }
+    clientProgram.attempt.map(_.fold(_ => ExitCode.Error, _ => ExitCode.Success))
+
 
   }
 

@@ -37,6 +37,7 @@ object ProjectPlugin extends AutoPlugin {
       val http4s                     = "0.20.0-M6"
       val kindProjector: String      = "0.9.9"
       val log4cats: String           = "0.3.0"
+      val logbackClassic: String     = "1.2.3"
       val log4s: String              = "1.7.0"
       val logback: String            = "1.2.3"
       val monix: String              = "3.0.0-RC2"
@@ -126,8 +127,9 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val healthCheckSettingsFS2: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("log4s", V.log4s),
-        %("logback-classic", V.logback),
+        "ch.qos.logback" % "logback-classic" % V.logbackClassic,
+        "io.chrisdavenport" %% "log4cats-core" % V.log4cats,
+        "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
         %%("fs2-core", V.fs2),
         %%("cats-effect", V.catsEffect)
       )
@@ -135,8 +137,9 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val healthCheckSettingsMonix: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("log4s", V.log4s),
-        %("logback-classic", V.logback),
+        "ch.qos.logback" % "logback-classic" % V.logbackClassic,
+        "io.chrisdavenport" %% "log4cats-core" % V.log4cats,
+        "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
         %%("monix", V.monix),
         %%("cats-effect", V.catsEffect)
       )

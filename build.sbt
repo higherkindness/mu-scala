@@ -62,14 +62,12 @@ lazy val channel = project
 lazy val monix = project
   .in(file("modules/streaming/monix"))
   .dependsOn(channel)
-  .dependsOn(server)
   .dependsOn(`internal-monix`)
   .settings(moduleName := "mu-rpc-monix")
 
 lazy val fs2 = project
   .in(file("modules/streaming/fs2"))
   .dependsOn(channel)
-  .dependsOn(server)
   .dependsOn(`internal-fs2`)
   .settings(moduleName := "mu-rpc-fs2")
 
@@ -110,9 +108,9 @@ lazy val server = project
   .in(file("modules/server"))
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`internal-core` % "compile->compile;test->test")
-  .dependsOn(`internal-monix`% "test->test")
-  .dependsOn(`internal-fs2`% "test->test")
-  .dependsOn(channel)
+  .dependsOn(`internal-monix` % "test->test")
+  .dependsOn(`internal-fs2` % "test->test")
+  .dependsOn(channel % "test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-server")
   .settings(serverSettings)
@@ -144,7 +142,7 @@ lazy val `health-client` = project
   .dependsOn(netty)
   .settings(healthCheckSettingsMonix)
   .settings(healthCheckSettingsFS2)
-  .settings(moduleName := "mu-rpc-example-health-check-client-monix")
+  .settings(moduleName := "mu-rpc-example-health-check-client")
 
 ////////////////////
 //// PROMETHEUS ////

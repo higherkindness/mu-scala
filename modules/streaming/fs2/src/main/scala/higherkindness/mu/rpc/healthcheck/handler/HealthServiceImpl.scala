@@ -52,5 +52,5 @@ class HealthCheckServiceFS2Impl[F[_]: Sync](
       Stream.eval(watchTopic.publish1(newStatus)).compile.drain
 
   def watch(service: HealthCheck): Stream[F, HealthStatus] =
-    watchTopic.subscribe(20).filter(_.hc == service)
+    watchTopic.subscribe(100).filter(_.hc == service)
 }

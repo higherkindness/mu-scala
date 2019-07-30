@@ -20,8 +20,10 @@ import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc.ChannelFor
 import higherkindness.mu.rpc.healthcheck.CommonRuntimeFS2
 import higherkindness.mu.rpc.healthcheck.serviceFS2.HealthCheckServiceFS2
-import org.log4s.getLogger
+
 import higherkindness.mu.rpc.config.channel.ConfigForAddress
+import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
+import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 object gclientFS2 {
 
@@ -30,7 +32,8 @@ object gclientFS2 {
     val channelFor: ChannelFor =
       ConfigForAddress[IO]("localhost", "50051").unsafeRunSync()
 
-    implicit val logger = getLogger
+    implicit def logger: SelfAwareStructuredLogger[IO] =
+      Slf4jLogger.getLogger
 
     val healthCheckServiceClientFS2: Resource[IO, HealthCheckServiceFS2[IO]] =
       HealthCheckServiceFS2.client[IO](channelFor)

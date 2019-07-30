@@ -21,7 +21,9 @@ import higherkindness.mu.rpc.ChannelFor
 import higherkindness.mu.rpc.config.channel.ConfigForAddress
 import higherkindness.mu.rpc.healthcheck.CommonRuntimeMonix
 import higherkindness.mu.rpc.healthcheck.serviceMonix.HealthCheckServiceMonix
-import org.log4s.getLogger
+import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
+import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+
 
 object gclientMonix {
 
@@ -30,7 +32,8 @@ object gclientMonix {
     val channelFor: ChannelFor =
       ConfigForAddress[IO]("localhost", "50051").unsafeRunSync()
 
-    implicit val logger = getLogger
+    implicit def logger: SelfAwareStructuredLogger[IO] =
+      Slf4jLogger.getLogger
 
     val healthCheckServiceClientMonix: Resource[IO, HealthCheckServiceMonix[IO]] =
       HealthCheckServiceMonix.client[IO](channelFor)
