@@ -24,6 +24,7 @@ import higherkindness.mu.rpc.idlgen.Model.{
 }
 import higherkindness.mu.rpc.idlgen.avro.AvroSrcGenerator
 import higherkindness.mu.rpc.idlgen.proto.ProtoSrcGenerator
+import higherkindness.mu.rpc.idlgen.openapi.OpenApiSrcGenerator
 
 object SrcGenApplication {
   def apply(
@@ -38,7 +39,8 @@ object SrcGenApplication {
         marshallersImports,
         bigDecimalTypeGen,
         compressionType,
-        useIdiomaticEndpoints)
+        useIdiomaticEndpoints),
+      OpenApiSrcGenerator()
     ) {
       def main(args: Array[String]): Unit = {
         generateFrom(args)

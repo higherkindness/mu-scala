@@ -72,8 +72,9 @@ object ProtoSrcGenerator {
     }
 
     val parseProtocol: Protocol[Mu[ProtobufF]] => higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] =
-      higherkindness.skeuomorph.mu.Protocol
-        .fromProtobufProto(skeuomorphCompression, useIdiomaticEndpoints)
+      higherkindness.skeuomorph.mu.Protocol.fromProtobufProto
+      //FIXME Review this higherkindness.skeuomorph.mu.Protocol
+      // .fromProtobufProto(skeuomorphCompression, useIdiomaticEndpoints)
 
     val printProtocol: higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] => String =
       higherkindness.skeuomorph.mu.print.proto.print
