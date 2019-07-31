@@ -2,7 +2,7 @@
 <configuration scan="false" debug="false">
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%date{HH:mm:ss} %-5level %class - %msg%n</pattern>
+            <pattern>%date{HH:mm:ss} %-5level - %msg%n</pattern>
         </encoder>
     </appender>
     <root level="INFO">

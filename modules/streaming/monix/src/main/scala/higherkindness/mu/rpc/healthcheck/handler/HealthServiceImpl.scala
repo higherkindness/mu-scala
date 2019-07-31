@@ -31,28 +31,29 @@ object HealthServiceMonix {
     val checkRef: F[Ref[F, Map[String, ServerStatus]]] =
       Ref.of[F, Map[String, ServerStatus]](Map.empty[String, ServerStatus])
 
-    val pipe: (Observer.Sync[HealthStatus], Observable[HealthStatus]) =
+    val (observer, observable): (Observer.Sync[HealthStatus], Observable[HealthStatus]) =
       Pipe(
         MulticastStrategy.behavior(
           HealthStatus(new HealthCheck("FirstStatus"), ServerStatus("UNKNOWN"))))
         .concurrent(s)
 
-    checkRef.map(c => new HealthCheckServiceMonixImpl[F](c, pipe))
+    checkRef.map(c => new HealthCheckServiceMonixImpl[F](c, observer, observable))
   }
 }
 
 class HealthCheckServiceMonixImpl[F[_]: Sync](
     checkStatus: Ref[F, Map[String, ServerStatus]],
-    pipe: (Observer.Sync[HealthStatus], Observable[HealthStatus]))(implicit s: Scheduler)
+    observer: Observer.Sync[HealthStatus],
+    observable: Observable[HealthStatus])(implicit s: Scheduler)
     extends AbstractHealthService[F](checkStatus)
     with HealthCheckServiceMonix[F] {
 
   override def setStatus(newStatus: HealthStatus): F[Unit] =
     checkStatus
       .update(_ + (newStatus.hc.nameService -> newStatus.status)) <*
-      Sync[F].delay(pipe._1.onNext(newStatus))
+      Sync[F].delay(observer.onNext(newStatus))
 
   override def watch(service: HealthCheck): Observable[HealthStatus] =
-    pipe._2.filter(_.hc == service)
+    observable.filter(_.hc === service)
 
 }

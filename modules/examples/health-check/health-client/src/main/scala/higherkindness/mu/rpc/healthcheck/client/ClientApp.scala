@@ -40,7 +40,6 @@ object ClientApp extends IOApp {
     }
     clientProgram.attempt.map(_.fold(_ => ExitCode.Error, _ => ExitCode.Success))
 
-
   }
 
 }

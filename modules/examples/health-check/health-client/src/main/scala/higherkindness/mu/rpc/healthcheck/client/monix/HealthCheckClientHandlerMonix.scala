@@ -25,7 +25,6 @@ import io.chrisdavenport.log4cats.Logger
 import monix.execution.Scheduler
 import monix.reactive.Consumer
 
-
 class HealthCheckClientHandlerMonix[F[_]: Async](client: Resource[F, HealthCheckServiceMonix[F]])(
     implicit s: Scheduler,
     logger: Logger[F]) {
@@ -53,15 +52,15 @@ class HealthCheckClientHandlerMonix[F[_]: Async](client: Resource[F, HealthCheck
       known <- client.use(_.check(new HealthCheck(name)))
       _     <- logger.info("UNARY: Actually the status is " + known.status)
       _ <- logger.info(
-          "UNARY: Setting " + name.toUpperCase + " service with " + status.status + " status")
-      _ <- client.use(_.setStatus(HealthStatus(new HealthCheck(name), status)))
-      _ <- logger.info("UNARY: Added status: " + status.status + " to service: " + name.toUpperCase)
+        "UNARY: Setting " + name.toUpperCase + " service with " + status.status + " status")
+      _      <- client.use(_.setStatus(HealthStatus(new HealthCheck(name), status)))
+      _      <- logger.info("UNARY: Added status: " + status.status + " to service: " + name.toUpperCase)
       status <- client.use(_.check(new HealthCheck(name)))
       _ <- logger.info(
-          "UNARY: Checked the status of " + name.toUpperCase + ". Obtained: " + status.status)
+        "UNARY: Checked the status of " + name.toUpperCase + ". Obtained: " + status.status)
       _       <- client.use(_.clearStatus(new HealthCheck(name)))
       unknown <- client.use(_.check(new HealthCheck(name)))
-      _ <- logger.info("UNARY: Current status of " + name.toUpperCase + ": " + unknown.status)
+      _       <- logger.info("UNARY: Current status of " + name.toUpperCase + ": " + unknown.status)
     } yield ()
 
   def settingAndFullClean(namesAndStatuses: List[(String, ServerStatus)]) =
@@ -71,10 +70,10 @@ class HealthCheckClientHandlerMonix[F[_]: Async](client: Resource[F, HealthCheck
       _ <- namesAndStatuses.traverse(l =>
         client.use(_.setStatus(HealthStatus(new HealthCheck(l._1), l._2))))
       allStatuses1 <- client.use(_.checkAll(Empty))
-      _ <- logger.info("UNARY ALL: All statuses are: " + allStatuses1.all.mkString("\n"))
+      _            <- logger.info("UNARY ALL: All statuses are: " + allStatuses1.all.mkString("\n"))
       _            <- client.use(_.cleanAll(Empty))
       allStatuses2 <- client.use(_.checkAll(Empty))
-      _ <- logger.info("UNARY ALL: All statuses are: " + allStatuses2.all.mkString("\n"))
+      _            <- logger.info("UNARY ALL: All statuses are: " + allStatuses2.all.mkString("\n"))
 
     } yield ()
 

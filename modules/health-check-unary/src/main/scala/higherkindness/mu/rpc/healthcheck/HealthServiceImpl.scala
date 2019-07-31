@@ -26,13 +26,11 @@ import higherkindness.mu.rpc.protocol.Empty
 
 object HealthService {
 
-  def buildInstance[F[_]: Sync](implicit s: Scheduler): F[HealthCheckServiceUnary[F]] = {
+  def buildInstance[F[_]: Sync](implicit s: Scheduler): F[HealthCheckServiceUnary[F]] =
+    Ref
+      .of[F, Map[String, ServerStatus]](Map.empty[String, ServerStatus])
+      .map(new HealthCheckServiceUnaryImpl[F](_))
 
-    val checkRef: F[Ref[F, Map[String, ServerStatus]]] =
-      Ref.of[F, Map[String, ServerStatus]](Map.empty[String, ServerStatus])
-
-    checkRef.map(c => new HealthCheckServiceUnaryImpl[F](c))
-  }
 }
 
 abstract class AbstractHealthService[F[_]: Functor](
@@ -46,11 +44,11 @@ abstract class AbstractHealthService[F[_]: Functor](
 
   def checkAll(empty: Empty.type): F[AllStatus] =
     checkStatus.get
-      .map(m => m.map(p => HealthStatus(new HealthCheck(p._1), p._2)).toList)
+      .map(_.map(p => HealthStatus(new HealthCheck(p._1), p._2)).toList)
       .map(AllStatus)
 
   def cleanAll(empty: Empty.type): F[Unit] =
-    checkStatus.update(_ => Map.empty[String, ServerStatus])
+    checkStatus.set(Map.empty[String, ServerStatus])
 
 }
 

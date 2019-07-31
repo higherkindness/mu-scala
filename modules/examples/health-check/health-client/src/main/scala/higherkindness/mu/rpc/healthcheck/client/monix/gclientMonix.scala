@@ -24,7 +24,6 @@ import higherkindness.mu.rpc.healthcheck.serviceMonix.HealthCheckServiceMonix
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
-
 object gclientMonix {
 
   trait Implicits extends CommonRuntimeMonix {

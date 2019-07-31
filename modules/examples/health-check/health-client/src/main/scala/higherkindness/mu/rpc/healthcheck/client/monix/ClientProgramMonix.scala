@@ -20,7 +20,6 @@ import cats.effect.IO
 import higherkindness.mu.rpc.healthcheck.ServerStatus
 import io.chrisdavenport.log4cats.Logger
 
-
 object ClientProgramMonix {
 
   def clientProgramIO(who: String, mode: String)(

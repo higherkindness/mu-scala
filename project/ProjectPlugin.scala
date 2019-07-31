@@ -123,7 +123,12 @@ object ProjectPlugin extends AutoPlugin {
         compilerPlugin("com.olegpy" %% "better-monadic-for" % V.betterMonadicFor)
       )
     )
-    
+
+    lazy val healthCheckSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("cats-effect", V.catsEffect)
+      )
+    )
 
     lazy val healthCheckSettingsFS2: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
