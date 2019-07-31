@@ -123,14 +123,14 @@ lazy val server = project
 lazy val `health-check-unary` = project
   .in(file("modules/health-check-unary"))
   .dependsOn(channel)
-  .dependsOn(server)
   .settings(healthCheckSettings)
-  .settings(moduleName := "mu-rpc-example-health-check-unary")
+  .settings(moduleName := "mu-rpc-health-check-unary")
 
 /////////HealthCheck Server Monix Example
 lazy val `health-server-monix` = project
   .in(file("modules/examples/health-check/health-server-monix"))
   .dependsOn(monix)
+  .dependsOn(server)
   .settings(healthCheckSettingsMonix)
   .settings(moduleName := "mu-rpc-example-health-check-server-monix")
 
@@ -138,6 +138,7 @@ lazy val `health-server-monix` = project
 lazy val `health-server-fs2` = project
   .in(file("modules/examples/health-check/health-server-fs2"))
   .dependsOn(fs2)
+  .dependsOn(server)
   .settings(healthCheckSettingsFS2)
   .settings(moduleName := "mu-rpc-example-health-check-server-fs2")
 
@@ -578,7 +579,7 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `health-client`,
   `health-server-monix`,
   `health-server-fs2`
-  
+
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =
