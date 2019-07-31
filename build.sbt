@@ -573,7 +573,12 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `benchmarks-vnext`,
   `legacy-avro-decimal-compat-model`,
   `legacy-avro-decimal-compat-protocol`,
-  `legacy-avro-decimal-compat-encoders`
+  `legacy-avro-decimal-compat-encoders`,
+  `health-check-unary`,
+  `health-client`,
+  `health-server-monix`,
+  `health-server-fs2`
+  
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =
