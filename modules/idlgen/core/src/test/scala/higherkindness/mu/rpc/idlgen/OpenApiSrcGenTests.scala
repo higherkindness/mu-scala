@@ -19,39 +19,45 @@ package higherkindness.mu.rpc.idlgen
 import org.scalatest.{FlatSpec, Matchers, OptionValues}
 import Matchers._
 import java.io.File
+
 import higherkindness.mu.rpc.idlgen.openapi.OpenApiSrcGenerator
+import higherkindness.mu.rpc.idlgen.openapi.OpenApiSrcGenerator.HttpImpl
 
 class OpenApiSrcGenTests extends FlatSpec with OptionValues {
-  val module: String    = new java.io.File(".").getCanonicalPath
-  val openApiFile: File = new File(module + "/src/test/resources/openapi/bookstore/book.yaml")
+  val module: String       = new java.io.File(".").getCanonicalPath
+  val resourcesFiles: File = new File(module + "/src/test/resources/")
+  val openApiFile          = new File(resourcesFiles.getPath() ++ "/openapi/bookstore/book.yaml")
+
   it should "generate correct Scala" in {
-    val (_, path, code) = OpenApiSrcGenerator()
+    val (_, path, code) = OpenApiSrcGenerator(HttpImpl.Http4sV20, resourcesFiles.toPath())
       .generateFrom(Set(openApiFile), "", "")
       .headOption
       .value
-    code.headOption.value should ===(
-      """|object models {
-         |import shapeless.{:+:, CNil}
-         |import shapeless.Coproduct
-         |final case class Book(isbn: Long, title: String)
-         |object Book {
-         |
-         |  import io.circe._
-         |  import io.circe.generic.semiauto._
-         |  import org.http4s.{EntityEncoder, EntityDecoder}
-         |  import org.http4s.circe._
-         |  import cats.Applicative
-         |  import cats.effect.Sync
-         |  implicit val BookEncoder: Encoder[Book] = deriveEncoder[Book]
-         |  implicit val BookDecoder: Decoder[Book] = deriveDecoder[Book]
-         |  implicit def BookEntityEncoder[F[_]:Applicative]: EntityEncoder[F, Book] = jsonEncoderOf[F, Book]
-         |  implicit def OptionBookEntityEncoder[F[_]:Applicative]: EntityEncoder[F, Option[Book]] = jsonEncoderOf[F, Option[Book]]
-         |  implicit def BookEntityDecoder[F[_]:Sync]: EntityDecoder[F, Book] = jsonOf[F, Book]
-         |
-         |}
-         |}""".stripMargin
-    )
-
+    path should ===("bookstore/book.scala")
+    code should ===(
+      List(
+        "package bookstore",
+        """|object models {
+           |import shapeless.{:+:, CNil}
+           |import shapeless.Coproduct
+           |final case class Book(isbn: Long, title: String)
+           |object Book {
+           |
+           |  import io.circe._
+           |  import io.circe.generic.semiauto._
+           |  import org.http4s.{EntityEncoder, EntityDecoder}
+           |  import org.http4s.circe._
+           |  import cats.Applicative
+           |  import cats.effect.Sync
+           |  implicit val BookEncoder: Encoder[Book] = deriveEncoder[Book]
+           |  implicit val BookDecoder: Decoder[Book] = deriveDecoder[Book]
+           |  implicit def BookEntityEncoder[F[_]:Applicative]: EntityEncoder[F, Book] = jsonEncoderOf[F, Book]
+           |  implicit def OptionBookEntityEncoder[F[_]:Applicative]: EntityEncoder[F, Option[Book]] = jsonEncoderOf[F, Option[Book]]
+           |  implicit def BookEntityDecoder[F[_]:Sync]: EntityDecoder[F, Book] = jsonOf[F, Book]
+           |
+           |}
+           |}""".stripMargin
+      ))
   }
 
 }

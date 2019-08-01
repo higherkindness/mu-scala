@@ -73,7 +73,9 @@ object IdlGenPlugin extends AutoPlugin {
         "The Scala target directory, where the `srcGen` task will write the generated files " +
           "in subpackages based on the namespaces declared in the IDL files.")
 
-    @deprecated("Use the specific settings like `idlGenCompressionType` or `idlGenIdiomaticEndpoints`", "0.18.4")
+    @deprecated(
+      "Use the specific settings like `idlGenCompressionType` or `idlGenIdiomaticEndpoints`",
+      "0.18.4")
     lazy val genOptions: SettingKey[Seq[String]] =
       settingKey[Seq[String]](
         "Options for the generator, such as additional @service annotation parameters in srcGen.")
@@ -166,7 +168,8 @@ object IdlGenPlugin extends AutoPlugin {
                 idlGenMarshallerImports.value,
                 idlGenBigDecimal.value,
                 idlGenCompressionType.value,
-                UseIdiomaticEndpoints(idlGenIdiomaticEndpoints.value)
+                UseIdiomaticEndpoints(idlGenIdiomaticEndpoints.value),
+                ((Compile / resourceManaged).value).toPath()
               ),
               idlType.value,
               srcGenSerializationType.value,

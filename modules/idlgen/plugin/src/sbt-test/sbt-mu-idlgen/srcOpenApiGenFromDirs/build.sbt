@@ -17,11 +17,11 @@ lazy val root = project
     mappings in (Compile, packageBin) ~= { _.filter(!_._1.getName.endsWith(".class")) },
     idlType := "openapi",
     srcGenSourceDirs := Seq((Compile / resourceDirectory).value),
-    srcGenTargetDir := (Compile / sourceManaged).value / "compiled_openApi",
+    srcGenTargetDir := (Compile / sourceManaged).value / "compiled_openapi",
     sourceGenerators in Compile += (Compile / srcGen).taskValue,
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch),
     libraryDependencies ++= Seq(
-      "org.http4s" %% "http4s-blaze-server" % V.http4s,
+      "org.http4s" %% "http4s-blaze-client" % V.http4s,
       "org.http4s" %% "http4s-dsl"    % V.http4s,
       "org.http4s" %% "http4s-circe"  % V.http4s,
       "io.circe"   %% "circe-core"    % V.circe,

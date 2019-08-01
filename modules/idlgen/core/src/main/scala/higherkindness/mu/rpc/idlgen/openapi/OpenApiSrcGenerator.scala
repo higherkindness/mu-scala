@@ -26,7 +26,6 @@ import print._
 import client.print._
 import client.http4s.circe._
 import client.http4s.print._
-import client.http4s.print.v20._
 
 import cats.data.Nested
 import cats.implicits._
@@ -34,11 +33,22 @@ import cats.implicits._
 import higherkindness.skeuomorph.Parser
 import cats.effect._
 import higherkindness.skeuomorph.openapi.JsonSchemaF
+import scala.collection.JavaConverters._
 
 object OpenApiSrcGenerator {
+  sealed trait HttpImpl
+  object HttpImpl {
+    case object Http4sV20 extends HttpImpl
+    case object Http4sV18 extends HttpImpl
+  }
 
-  def apply(): SrcGenerator = new SrcGenerator {
+  def apply(httpImpl: HttpImpl, resourcesBasePath: Path): SrcGenerator = new SrcGenerator {
     def idlType: String = IdlType
+
+    implicit def http4sSpecifics: Http4sSpecifics = httpImpl match {
+      case HttpImpl.Http4sV18 => client.http4s.print.v18.v18Http4sSpecifics
+      case HttpImpl.Http4sV20 => client.http4s.print.v20.v20Http4sSpecifics
+    }
     protected def inputFiles(files: Set[File]): Seq[File] =
       files.filter(handleFile(_)(_ => true, _ => true, false)).toSeq
 
@@ -53,16 +63,29 @@ object OpenApiSrcGenerator {
         .apply(file)
         .map(OpenApi.extractNestedTypes[JsonSchemaF.Fixed])
         .map { openApi =>
-          pathFrom(Paths.get("."), "foo") ->
+          val (_, paths) =
+            file.getParentFile
+              .toPath()
+              .asScala
+              .splitAt(resourcesBasePath.iterator().asScala.size + 1) //we need to add one because it is changing the resource path, adding open api
+          val path: Path = Paths.get(paths.map(_.toString()).mkString("/"))
+          val pkg        = packageName(path)
+          pathFrom(path, file).toString ->
             Seq(
+              // s"//$resourcesBasePath",
+              // s"//${file.getParentFile.toPath()}",
+              s"package ${pkg.value}",
               model[JsonSchemaF.Fixed].print(openApi),
               interfaceDefinition.print(openApi),
-              impl.print(PackageName("foo") -> openApi)
-            )
+              impl.print(pkg -> openApi)
+            ).filter(_.nonEmpty)
         }
 
-    private def pathFrom(path: Path, name: String): String =
-      s"${path}/$name$ScalaFileExtension"
+    private def packageName(path: Path): PackageName =
+      PackageName(path.iterator.asScala.map(_.toString).mkString("."))
+
+    private def pathFrom(path: Path, file: File): Path =
+      path.resolve(s"${file.getName.split('.').head}$ScalaFileExtension")
 
     private def parseFile[F[_]: Sync]: File => Nested[F, Option, OpenApi[JsonSchemaF.Fixed]] =
       x =>
