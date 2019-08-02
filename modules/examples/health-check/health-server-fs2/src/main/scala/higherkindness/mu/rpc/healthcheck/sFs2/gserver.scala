@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.healthcheck
+package higherkindness.mu.rpc.healthcheck.sFs2
 
 object gserver {
 
-  object implicits extends CommonRuntimeMonix
+  object implicits extends CommonRuntimeFS2
 
 }

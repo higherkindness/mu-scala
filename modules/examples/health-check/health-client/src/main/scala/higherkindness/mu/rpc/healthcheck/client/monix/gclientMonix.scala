@@ -19,8 +19,8 @@ package higherkindness.mu.rpc.healthcheck.client.monix
 import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc.ChannelFor
 import higherkindness.mu.rpc.config.channel.ConfigForAddress
-import higherkindness.mu.rpc.healthcheck.CommonRuntimeMonix
-import higherkindness.mu.rpc.healthcheck.serviceMonix.HealthCheckServiceMonix
+import higherkindness.mu.rpc.healthcheck.monix.serviceMonix.HealthCheckServiceMonix
+import higherkindness.mu.rpc.healthcheck.sMonix.CommonRuntimeMonix
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 

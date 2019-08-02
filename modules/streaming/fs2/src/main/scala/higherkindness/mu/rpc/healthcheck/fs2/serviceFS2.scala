@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.healthcheck
+package higherkindness.mu.rpc.healthcheck.fs2
 
+import fs2.Stream
+import higherkindness.mu.rpc.healthcheck.unary.handler._
 import higherkindness.mu.rpc.protocol.{service, Empty, Protobuf}
-import monix.reactive.Observable
 
-object serviceMonix {
+object serviceFS2 {
 
   @service(Protobuf)
-  trait HealthCheckServiceMonix[F[_]] {
+  trait HealthCheckServiceFS2[F[_]] {
 
     def check(service: HealthCheck): F[ServerStatus]
     def setStatus(newStatus: HealthStatus): F[Unit]
@@ -31,6 +32,6 @@ object serviceMonix {
     def checkAll(empty: Empty.type): F[AllStatus]
     def cleanAll(empty: Empty.type): F[Unit]
 
-    def watch(service: HealthCheck): Observable[HealthStatus]
+    def watch(service: HealthCheck): Stream[F, HealthStatus]
   }
 }

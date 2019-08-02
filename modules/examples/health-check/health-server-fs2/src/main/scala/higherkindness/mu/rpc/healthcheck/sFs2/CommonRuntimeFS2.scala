@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.healthcheck
+package higherkindness.mu.rpc.healthcheck.sFs2
 
-class HealthCheck(val nameService: String) extends AnyVal
-final case class ServerStatus(status: String)
-final case class HealthStatus(hc: HealthCheck, status: ServerStatus)
-final case class AllStatus(all: List[HealthStatus])
+trait CommonRuntimeFS2 {
+
+  val EC: scala.concurrent.ExecutionContext =
+    scala.concurrent.ExecutionContext.Implicits.global
+
+  implicit val timer: cats.effect.Timer[cats.effect.IO] =
+    cats.effect.IO.timer(EC)
+  implicit val cs: cats.effect.ContextShift[cats.effect.IO] =
+    cats.effect.IO.contextShift(EC)
+
+}

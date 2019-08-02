@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.healthcheck
+package higherkindness.mu.rpc.healthcheck.sMonix
 
-import higherkindness.mu.rpc.protocol.{service, Empty, Protobuf}
+object gserver {
 
-object serviceUnary {
+  object implicits extends CommonRuntimeMonix
 
-  @service(Protobuf)
-  trait HealthCheckServiceUnary[F[_]] {
-
-    def setStatus(newStatus: HealthStatus): F[Unit]
-
-    def check(service: HealthCheck): F[ServerStatus]
-    def clearStatus(service: HealthCheck): F[Unit]
-
-    def checkAll(empty: Empty.type): F[AllStatus]
-    def cleanAll(empty: Empty.type): F[Unit]
-
-  }
 }

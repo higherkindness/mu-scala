@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.healthcheck
+package higherkindness.mu.rpc.healthcheck.unary.handler
 
 import cats.Functor
 import cats.effect.Sync
 import cats.effect.concurrent.Ref
 import cats.implicits._
-import com.google.common.util.concurrent.AbstractScheduledService.Scheduler
-import serviceUnary.HealthCheckServiceUnary
+import higherkindness.mu.rpc.healthcheck.unary.serviceUnary.HealthCheckServiceUnary
 import higherkindness.mu.rpc.protocol.Empty
 
 object HealthService {
 
-  def buildInstance[F[_]: Sync](implicit s: Scheduler): F[HealthCheckServiceUnary[F]] =
+  def buildInstance[F[_]: Sync]: F[HealthCheckServiceUnary[F]] =
     Ref
       .of[F, Map[String, ServerStatus]](Map.empty[String, ServerStatus])
       .map(new HealthCheckServiceUnaryImpl[F](_))

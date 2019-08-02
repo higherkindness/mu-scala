@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.healthcheck
+package higherkindness.mu.rpc.healthcheck.sFs2
 
 import cats.effect.IO
 import higherkindness.mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
 import gserver.implicits._
 import cats.instances.list._
 import cats.syntax.traverse._
-import higherkindness.mu.rpc.healthcheck.handler.HealthServiceFS2
-import higherkindness.mu.rpc.healthcheck.serviceFS2.HealthCheckServiceFS2
+import higherkindness.mu.rpc.healthcheck.fs2.handler.HealthServiceFS2
+import higherkindness.mu.rpc.healthcheck.fs2.serviceFS2.HealthCheckServiceFS2
 
 object ServerApp {
 

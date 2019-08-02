@@ -18,10 +18,9 @@ package higherkindness.mu.rpc.healthcheck.client.fs2
 
 import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc.ChannelFor
-import higherkindness.mu.rpc.healthcheck.CommonRuntimeFS2
-import higherkindness.mu.rpc.healthcheck.serviceFS2.HealthCheckServiceFS2
-
 import higherkindness.mu.rpc.config.channel.ConfigForAddress
+import higherkindness.mu.rpc.healthcheck.fs2.serviceFS2.HealthCheckServiceFS2
+import higherkindness.mu.rpc.healthcheck.sFs2.CommonRuntimeFS2
 import io.chrisdavenport.log4cats.SelfAwareStructuredLogger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 

@@ -16,14 +16,19 @@
 
 package higherkindness.mu.rpc.healthcheck
 
-trait CommonRuntimeFS2 {
+import cats.kernel.Order
+import cats.instances.string._
+import higherkindness.mu.rpc.healthcheck.unary.handler.HealthCheck
 
-  val EC: scala.concurrent.ExecutionContext =
-    scala.concurrent.ExecutionContext.Implicits.global
+package object ordering {
+  implicit val orderForHealthCheck: Order[HealthCheck] = new HealthCheckOrder
 
-  implicit val timer: cats.effect.Timer[cats.effect.IO] =
-    cats.effect.IO.timer(EC)
-  implicit val cs: cats.effect.ContextShift[cats.effect.IO] =
-    cats.effect.IO.contextShift(EC)
+  class HealthCheckOrder(implicit O: Order[String]) extends Order[HealthCheck] {
 
+    override def eqv(x: HealthCheck, y: HealthCheck): Boolean =
+      O.eqv(x.nameService, y.nameService)
+
+    def compare(x: HealthCheck, y: HealthCheck): Int =
+      O.compare(x.nameService, y.nameService)
+  }
 }

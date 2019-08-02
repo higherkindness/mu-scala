@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
+package higherkindness.mu.rpc.healthcheck.monix
 
-import cats.kernel.Order
-import cats.instances.string._
+import higherkindness.mu.rpc.healthcheck.unary.handler._
+import higherkindness.mu.rpc.protocol.{service, Empty, Protobuf}
+import monix.reactive.Observable
 
-package object healthcheck {
-  implicit val orderForHealthCheck: Order[HealthCheck] = new HealthCheckOrder
+object serviceMonix {
 
-  class HealthCheckOrder(implicit O: Order[String]) extends Order[HealthCheck] {
+  @service(Protobuf)
+  trait HealthCheckServiceMonix[F[_]] {
 
-    override def eqv(x: HealthCheck, y: HealthCheck): Boolean =
-      O.eqv(x.nameService, y.nameService)
+    def check(service: HealthCheck): F[ServerStatus]
+    def setStatus(newStatus: HealthStatus): F[Unit]
+    def clearStatus(service: HealthCheck): F[Unit]
 
-    def compare(x: HealthCheck, y: HealthCheck): Int =
-      O.compare(x.nameService, y.nameService)
+    def checkAll(empty: Empty.type): F[AllStatus]
+    def cleanAll(empty: Empty.type): F[Unit]
+
+    def watch(service: HealthCheck): Observable[HealthStatus]
   }
 }

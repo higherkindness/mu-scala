@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.healthcheck
+package higherkindness.mu.rpc.healthcheck.sMonix
 
 import cats.effect.IO
 import higherkindness.mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
 import gserver.implicits._
 import cats.instances.list._
 import cats.syntax.traverse._
-import higherkindness.mu.rpc.healthcheck.handler.HealthServiceMonix
-import higherkindness.mu.rpc.healthcheck.serviceMonix.HealthCheckServiceMonix
+import higherkindness.mu.rpc.healthcheck.monix.handler.HealthServiceMonix
+import higherkindness.mu.rpc.healthcheck.monix.serviceMonix.HealthCheckServiceMonix
 
 object ServerApp {
 

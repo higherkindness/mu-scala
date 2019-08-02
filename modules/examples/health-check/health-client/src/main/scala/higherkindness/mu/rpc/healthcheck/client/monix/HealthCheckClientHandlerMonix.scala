@@ -16,14 +16,15 @@
 
 package higherkindness.mu.rpc.healthcheck.client.monix
 
-import cats.effect.{Async, Resource, Sync}
+import cats.effect.{Async, Resource}
 import cats.implicits._
-import higherkindness.mu.rpc.healthcheck._
-import higherkindness.mu.rpc.healthcheck.serviceMonix.HealthCheckServiceMonix
-import higherkindness.mu.rpc.protocol.Empty
-import io.chrisdavenport.log4cats.Logger
 import monix.execution.Scheduler
 import monix.reactive.Consumer
+import higherkindness.mu.rpc.healthcheck.monix
+import higherkindness.mu.rpc.healthcheck.unary.handler.{HealthCheck, HealthStatus, ServerStatus}
+import higherkindness.mu.rpc.healthcheck.monix.serviceMonix.HealthCheckServiceMonix
+import higherkindness.mu.rpc.protocol.Empty
+import io.chrisdavenport.log4cats.Logger
 
 class HealthCheckClientHandlerMonix[F[_]: Async](client: Resource[F, HealthCheckServiceMonix[F]])(
     implicit s: Scheduler,

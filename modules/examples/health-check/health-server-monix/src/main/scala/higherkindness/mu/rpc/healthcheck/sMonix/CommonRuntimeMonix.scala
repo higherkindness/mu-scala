@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.healthcheck
+package higherkindness.mu.rpc.healthcheck.sMonix
 
-import fs2.Stream
-import higherkindness.mu.rpc.protocol.{service, Empty, Protobuf}
+trait CommonRuntimeMonix {
+  val EC: scala.concurrent.ExecutionContext =
+    scala.concurrent.ExecutionContext.Implicits.global
 
-object serviceFS2 {
+  implicit val S: monix.execution.Scheduler = monix.execution.Scheduler.Implicits.global
 
-  @service(Protobuf)
-  trait HealthCheckServiceFS2[F[_]] {
+  implicit val timer: cats.effect.Timer[cats.effect.IO] =
+    cats.effect.IO.timer(EC)
+  implicit val cs: cats.effect.ContextShift[cats.effect.IO] =
+    cats.effect.IO.contextShift(EC)
 
-    def check(service: HealthCheck): F[ServerStatus]
-    def setStatus(newStatus: HealthStatus): F[Unit]
-    def clearStatus(service: HealthCheck): F[Unit]
-
-    def checkAll(empty: Empty.type): F[AllStatus]
-    def cleanAll(empty: Empty.type): F[Unit]
-
-    def watch(service: HealthCheck): Stream[F, HealthStatus]
-  }
 }
