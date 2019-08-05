@@ -62,12 +62,14 @@ lazy val channel = project
 lazy val monix = project
   .in(file("modules/streaming/monix"))
   .dependsOn(channel)
+  .dependsOn(`health-check-unary`)
   .dependsOn(`internal-monix`)
   .settings(moduleName := "mu-rpc-monix")
 
 lazy val fs2 = project
   .in(file("modules/streaming/fs2"))
   .dependsOn(channel)
+  .dependsOn(`health-check-unary`)
   .dependsOn(`internal-fs2`)
   .settings(moduleName := "mu-rpc-fs2")
 
@@ -108,12 +110,53 @@ lazy val server = project
   .in(file("modules/server"))
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`internal-core` % "compile->compile;test->test")
+  .dependsOn(`internal-monix` % "test->test")
+  .dependsOn(`internal-fs2` % "test->test")
   .dependsOn(channel % "test->test")
-  .dependsOn(monix % "test->test")
-  .dependsOn(fs2 % "test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-server")
   .settings(serverSettings)
+
+//////////////////////////////
+//// HEALTHCHECK   ////
+//////////////////////////////
+lazy val `health-check-unary` = project
+  .in(file("modules/health-check-unary"))
+  .dependsOn(channel)
+  .settings(healthCheckSettings)
+  .settings(moduleName := "mu-rpc-health-check-unary")
+
+/////////HealthCheck Server Monix Example
+lazy val `health-server-monix` = project
+  .in(file("modules/examples/health-check/health-server-monix"))
+  .dependsOn(monix)
+  .dependsOn(`health-check-unary`)
+  .dependsOn(server)
+  .settings(healthCheckSettingsMonix)
+  .settings(coverageEnabled := false)
+  .settings(moduleName := "mu-rpc-example-health-check-server-monix")
+
+/////////HealthCheck Server FS2 Example
+lazy val `health-server-fs2` = project
+  .in(file("modules/examples/health-check/health-server-fs2"))
+  .dependsOn(fs2)
+  .dependsOn(`health-check-unary`)
+  .dependsOn(server)
+  .settings(healthCheckSettingsFS2)
+  .settings(coverageEnabled := false)
+  .settings(moduleName := "mu-rpc-example-health-check-server-fs2")
+
+/////////HealthCheck Client Example
+lazy val `health-client` = project
+  .in(file("modules/examples/health-check/health-client"))
+  .dependsOn(`health-server-monix`)
+  .dependsOn(`health-server-fs2`)
+  .dependsOn(config)
+  .dependsOn(netty)
+  .settings(healthCheckSettingsMonix)
+  .settings(healthCheckSettingsFS2)
+  .settings(coverageEnabled := false)
+  .settings(moduleName := "mu-rpc-example-health-check-client")
 
 ////////////////////
 //// PROMETHEUS ////
@@ -536,7 +579,12 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `benchmarks-vnext`,
   `legacy-avro-decimal-compat-model`,
   `legacy-avro-decimal-compat-protocol`,
-  `legacy-avro-decimal-compat-encoders`
+  `legacy-avro-decimal-compat-encoders`,
+  `health-check-unary`,
+  `health-client`,
+  `health-server-monix`,
+  `health-server-fs2`
+
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =
