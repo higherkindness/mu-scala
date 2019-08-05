@@ -22,11 +22,11 @@ import higherkindness.mu.rpc.healthcheck.unary.handler.HealthCheck
 
 class OrderingTest extends WordSpec with Matchers {
   "Ordering" should {
-    "works" in {
+    "work" in {
       assert(new HealthCheck("example") === new HealthCheck("example"))
       assert(new HealthCheck("example") !== new HealthCheck("not example"))
     }
-    "works with boolean comparison" in {
+    "work with boolean comparison" in {
       assert(orderForHealthCheck.eqv(new HealthCheck("example"), new HealthCheck("example")))
       assert(!orderForHealthCheck.eqv(new HealthCheck("example"), new HealthCheck("no example")))
     }
