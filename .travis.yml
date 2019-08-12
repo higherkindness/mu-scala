@@ -27,8 +27,8 @@ install:
   - gem install sass
   - gem install jekyll -v 3.2.1
 script:
-  - if [ $TRAVIS_SCALA_VERSION = "2.12.8" ]; then sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut; fi
-  - if [ $TRAVIS_SCALA_VERSION = "2.11.12" ]; then sbt ++$TRAVIS_SCALA_VERSION clean test; fi
+  - if [ $TRAVIS_SCALA_VERSION = "2.12.8" ]; then sbt ++$TRAVIS_SCALA_VERSION clean coverage example-codegen-app/compile test coverageReport coverageAggregate docs/tut; fi
+  - if [ $TRAVIS_SCALA_VERSION = "2.11.12" ]; then sbt ++$TRAVIS_SCALA_VERSION clean example-codegen-app/compile test; fi
   - bash <(curl -s https://codecov.io/bash)
 stages:
 - test
@@ -41,7 +41,6 @@ jobs:
     - stage: plugin
       scala: 2.12.8
       script:
-        - sbt ++$TRAVIS_SCALA_VERSION example-codegen-app/compile
         - sbt ++$TRAVIS_SCALA_VERSION idlgen-core/test
         - sbt ++$TRAVIS_SCALA_VERSION idlgen-sbt/test
         - sbt ++$TRAVIS_SCALA_VERSION publishLocal idlgen-sbt/publishLocal idlgen-sbt/scripted
