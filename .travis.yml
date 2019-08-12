@@ -41,6 +41,7 @@ jobs:
     - stage: plugin
       scala: 2.12.8
       script:
+        - sbt ++$TRAVIS_SCALA_VERSION example-codegen-app/compile
         - sbt ++$TRAVIS_SCALA_VERSION idlgen-core/test
         - sbt ++$TRAVIS_SCALA_VERSION idlgen-sbt/test
         - sbt ++$TRAVIS_SCALA_VERSION publishLocal idlgen-sbt/publishLocal idlgen-sbt/scripted
