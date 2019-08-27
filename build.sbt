@@ -117,9 +117,9 @@ lazy val server = project
   .settings(moduleName := "mu-rpc-server")
   .settings(serverSettings)
 
-//////////////////////////////
-//// HEALTHCHECK   ////
-//////////////////////////////
+/////////////////////
+//// HEALTHCHECK ////
+/////////////////////
 lazy val `health-check-unary` = project
   .in(file("modules/health-check-unary"))
   .dependsOn(channel)
@@ -190,6 +190,16 @@ lazy val http = project
   .dependsOn(server % "compile->compile;test->test")
   .settings(moduleName := "mu-rpc-http")
   .settings(httpSettings)
+
+///////////////
+//// KAFKA ////
+///////////////
+
+lazy val kafka = project
+  .in(file("modules/kafka"))
+  .dependsOn(channel)
+  .settings(moduleName := "mu-rpc-kafka")
+  .settings(kafkaSettings)
 
 ////////////////
 //// IDLGEN ////
@@ -564,6 +574,7 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   ssl,
   `idlgen-core`,
   http,
+  kafka,
   `marshallers-jodatime`,
   `example-routeguide-protocol`,
   `example-routeguide-common`,
@@ -584,7 +595,6 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `health-client`,
   `health-server-monix`,
   `health-server-fs2`
-
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =
