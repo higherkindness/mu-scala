@@ -48,5 +48,12 @@ object KafkaManagement {
         Cluster(ns.map(Node.fromKafkaNode).toList, Node.fromKafkaNode(c), id)
       }
     }
+    override def describeConfigs(rs: List[ConfigResource]): F[Configs] = for {
+      kConfigs <- adminClient.describeConfigs(rs.map(ConfigResource.toKafkaConfigResource))
+      configs = kConfigs.map { case (cr, ces) =>
+          ConfigResource.fromKafkaConfigResource(cr) ->
+            ces.map(ConfigEntry.fromKafkaConfigEntry)
+      }
+    } yield Configs(configs)
   }
 }

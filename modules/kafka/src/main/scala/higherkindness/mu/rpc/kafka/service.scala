@@ -31,6 +31,72 @@ object KafkaManagementService {
     def fromKafkaNode(n: KNode): Node = Node(n.id(), n.host(), n.port(), Option(n.rack()))
   }
   final case class Cluster(nodes: List[Node], controller: Node, clusterId: String)
+  sealed trait ConfigType
+  object ConfigType {
+    case object TopicConfigType extends ConfigType
+    case object BrokerConfigType extends ConfigType
+    case object UnknownConfigType extends ConfigType
+
+    def toKafkaConfigType(ct: ConfigType): KConfigResource.Type = ct match {
+      case TopicConfigType => KConfigResource.Type.TOPIC
+      case BrokerConfigType => KConfigResource.Type.BROKER
+      case UnknownConfigType => KConfigResource.Type.UNKNOWN
+    }
+    def fromKafkaConfigType(kct: KConfigResource.Type): ConfigType = kct match {
+      case KConfigResource.Type.TOPIC => TopicConfigType
+      case KConfigResource.Type.BROKER => BrokerConfigType
+      case KConfigResource.Type.UNKNOWN => UnknownConfigType
+    }
+  }
+  final case class ConfigResource(typ: ConfigType, name: String)
+  object ConfigResource {
+    def toKafkaConfigResource(cr: ConfigResource): KConfigResource =
+      new KConfigResource(ConfigType.toKafkaConfigType(cr.typ), cr.name)
+    def fromKafkaConfigResource(kcr: KConfigResource): ConfigResource =
+      ConfigResource(ConfigType.fromKafkaConfigType(kcr.`type`()), kcr.name())
+  }
+  sealed trait ConfigSource
+  object ConfigSource {
+    case object DynamicTopicConfig extends ConfigSource
+    case object DynamicBrokerConfig extends ConfigSource
+    case object DynamicDefaultBrokerConfig extends ConfigSource
+    case object StaticBrokerConfig extends ConfigSource
+    case object DefaultConfig extends ConfigSource
+    case object UnknownConfig extends ConfigSource
+
+    def fromKafkaConfigSource(kcs: KConfigEntry.ConfigSource): ConfigSource = kcs match {
+      case KConfigEntry.ConfigSource.DYNAMIC_TOPIC_CONFIG => DynamicTopicConfig
+      case KConfigEntry.ConfigSource.DYNAMIC_BROKER_CONFIG => DynamicBrokerConfig
+      case KConfigEntry.ConfigSource.DYNAMIC_DEFAULT_BROKER_CONFIG => DynamicDefaultBrokerConfig
+      case KConfigEntry.ConfigSource.STATIC_BROKER_CONFIG => StaticBrokerConfig
+      case KConfigEntry.ConfigSource.DEFAULT_CONFIG => DefaultConfig
+      case KConfigEntry.ConfigSource.UNKNOWN => UnknownConfig
+    }
+  }
+  final case class ConfigSynonym(name: String, value: String, source: ConfigSource)
+  object ConfigSynonym {
+    def fromKafkaConfigSynonym(kcs: KConfigEntry.ConfigSynonym): ConfigSynonym =
+      ConfigSynonym(kcs.name(), kcs.value(), ConfigSource.fromKafkaConfigSource(kcs.source()))
+  }
+  final case class ConfigEntry(
+    name: String,
+    value: String,
+    source: ConfigSource,
+    isSensitive: Boolean,
+    isReadOnly: Boolean,
+    synonyms: List[ConfigSynonym]
+  )
+  object ConfigEntry {
+    def fromKafkaConfigEntry(kce: KConfigEntry): ConfigEntry = ConfigEntry(
+      kce.name(),
+      kce.value(),
+      ConfigSource.fromKafkaConfigSource(kce.source()),
+      kce.isSensitive(),
+      kce.isReadOnly(),
+      kce.synonyms().asScala.map(ConfigSynonym.fromKafkaConfigSynonym).toList
+    )
+  }
+  final case class Configs(configs: Map[ConfigResource, List[ConfigEntry]])
 
   @service(Protobuf)
   trait KafkaManagement[F[_]] {
@@ -40,5 +106,6 @@ object KafkaManagementService {
     def deleteTopic(t: String): F[Unit]
     def deleteTopics(ts: List[String]): F[Unit]
     def describeCluster(request: Empty.type): F[Cluster]
+    def describeConfigs(rs: List[ConfigResource]): F[Configs]
   }
 }
