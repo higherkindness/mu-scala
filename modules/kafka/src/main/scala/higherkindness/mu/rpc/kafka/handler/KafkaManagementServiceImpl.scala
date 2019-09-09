@@ -42,5 +42,11 @@ object KafkaManagement {
       })
     override def deleteTopic(t: String): F[Unit]         = adminClient.deleteTopic(t)
     override def deleteTopics(ts: List[String]): F[Unit] = adminClient.deleteTopics(ts)
+    override def describeCluster(r: Empty.type): F[Cluster] = {
+      val dc = adminClient.describeCluster
+      (dc.clusterId, dc.controller, dc.nodes).mapN { (id, c, ns) =>
+        Cluster(ns.map(Node.fromKafkaNode).toList, Node.fromKafkaNode(c), id)
+      }
+    }
   }
 }

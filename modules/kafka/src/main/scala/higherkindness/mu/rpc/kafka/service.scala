@@ -26,6 +26,11 @@ import scala.collection.JavaConverters._
 object KafkaManagementService {
   final case class CreatePartitionsRequest(ps: Map[String, Int])
   final case class CreateTopicRequest(name: String, numPartitions: Int, replicationFactor: Short)
+  final case class Node(id: Int, host: String, port: Int, rack: Option[String])
+  object Node {
+    def fromKafkaNode(n: KNode): Node = Node(n.id(), n.host(), n.port(), Option(n.rack()))
+  }
+  final case class Cluster(nodes: List[Node], controller: Node, clusterId: String)
 
   @service(Protobuf)
   trait KafkaManagement[F[_]] {
@@ -34,5 +39,6 @@ object KafkaManagementService {
     def createTopics(ctrs: List[CreateTopicRequest]): F[Unit]
     def deleteTopic(t: String): F[Unit]
     def deleteTopics(ts: List[String]): F[Unit]
+    def describeCluster(request: Empty.type): F[Cluster]
   }
 }
