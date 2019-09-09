@@ -25,9 +25,12 @@ import scala.collection.JavaConverters._
 
 object KafkaManagementService {
   final case class CreatePartitionsRequest(ps: Map[String, Int])
+  final case class CreateTopicRequest(name: String, numPartitions: Int, replicationFactor: Short)
 
   @service(Protobuf)
   trait KafkaManagement[F[_]] {
     def createPartitions(cpr: CreatePartitionsRequest): F[Unit]
+    def createTopic(ctr: CreateTopicRequest): F[Unit]
+    def createTopics(ctrs: List[CreateTopicRequest]): F[Unit]
   }
 }

@@ -34,5 +34,11 @@ object KafkaManagement {
   ) extends KafkaManagement[F] {
     override def createPartitions(cpr: CreatePartitionsRequest): F[Unit] =
       adminClient.createPartitions(cpr.ps.mapValues(NewPartitions.increaseTo))
+    override def createTopic(ctr: CreateTopicRequest): F[Unit] =
+      adminClient.createTopic(new NewTopic(ctr.name, ctr.numPartitions, ctr.replicationFactor))
+    override def createTopics(ctrs: List[CreateTopicRequest]): F[Unit] =
+      adminClient.createTopics(ctrs.map { ctr =>
+        new NewTopic(ctr.name, ctr.numPartitions, ctr.replicationFactor)
+      })
   }
 }
