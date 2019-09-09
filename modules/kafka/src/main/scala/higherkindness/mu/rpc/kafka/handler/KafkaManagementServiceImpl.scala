@@ -40,5 +40,7 @@ object KafkaManagement {
       adminClient.createTopics(ctrs.map { ctr =>
         new NewTopic(ctr.name, ctr.numPartitions, ctr.replicationFactor)
       })
+    override def deleteTopic(t: String): F[Unit]         = adminClient.deleteTopic(t)
+    override def deleteTopics(ts: List[String]): F[Unit] = adminClient.deleteTopics(ts)
   }
 }

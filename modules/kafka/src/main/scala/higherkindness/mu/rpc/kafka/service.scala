@@ -32,5 +32,7 @@ object KafkaManagementService {
     def createPartitions(cpr: CreatePartitionsRequest): F[Unit]
     def createTopic(ctr: CreateTopicRequest): F[Unit]
     def createTopics(ctrs: List[CreateTopicRequest]): F[Unit]
+    def deleteTopic(t: String): F[Unit]
+    def deleteTopics(ts: List[String]): F[Unit]
   }
 }
