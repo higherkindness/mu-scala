@@ -23,6 +23,7 @@ import higherkindness.mu.rpc.kafka.KafkaManagementService._
 import higherkindness.mu.rpc.protocol.Empty
 import org.apache.kafka.clients.admin.NewPartitions
 import org.apache.kafka.clients.admin.NewTopic
+import higherkindness.mu.rpc.kafka.KafkaManagementService
 
 object KafkaManagement {
   def buildInstance[F[_]: ContextShift: Concurrent](): Resource[F, KafkaManagement[F]] =
@@ -66,5 +67,12 @@ object KafkaManagement {
         gid -> ConsumerGroupDescription.fromKafkaConsumerGroupDescription(cgd)
       }
     } yield ConsumerGroups(groups)
+
+    override def describeTopics(topics: List[String]): F[KafkaManagementService.Topics] = for {
+      kTopics <- adminClient.describeTopics(topics)
+      topics = kTopics.map { case (topic, desc) =>
+        topic -> TopicDescription.fromKafkaTopicDescription(desc)
+      }
+    } yield Topics(topics)
   }
 }

@@ -20,7 +20,8 @@ import higherkindness.mu.rpc.protocol.{service, Empty}
 import org.apache.kafka.common.{
   ConsumerGroupState => KConsumerGroupState,
   Node => KNode,
-  TopicPartition => KTopicPartition
+  TopicPartition => KTopicPartition,
+  TopicPartitionInfo => KTopicPartitionInfo
 }
 import org.apache.kafka.common.acl.{AclOperation => KAclOperation}
 import org.apache.kafka.common.config.{ConfigResource => KConfigResource}
@@ -28,11 +29,11 @@ import org.apache.kafka.clients.admin.{
   ConfigEntry => KConfigEntry,
   ConsumerGroupDescription => KConsumerGroupDescription,
   MemberAssignment => KMemberAssignment,
-  MemberDescription => KMemberDescription
+  MemberDescription => KMemberDescription,
+  TopicDescription => KTopicDescription
 }
 
 import scala.collection.JavaConverters._
-import fs2.kafka.KafkaAdminClient
 
 object KafkaManagementService {
   final case class CreatePartitionsRequest(ps: Map[String, Int])
@@ -210,6 +211,37 @@ object KafkaManagementService {
   }
   final case class ConsumerGroups(consumerGroups: Map[String, ConsumerGroupDescription])
 
+  final case class TopicPartitionInfo(
+    partition: Int,
+    leader: Node,
+    replicats: List[Node],
+    inSyncReplicas: List[Node]
+  )
+  object TopicPartitionInfo {
+    def fromKafkaTopicPartitionInfo(ktpi: KTopicPartitionInfo): TopicPartitionInfo =
+      TopicPartitionInfo(
+        ktpi.partition(),
+        Node.fromKafkaNode(ktpi.leader()),
+        ktpi.replicas().asScala.map(Node.fromKafkaNode).toList,
+        ktpi.isr().asScala.map(Node.fromKafkaNode).toList
+      )
+  }
+  final case class TopicDescription(
+    name: String,
+    internal: Boolean,
+    partitions: List[TopicPartitionInfo],
+    authorizedOperations: List[AclOperation]
+  )
+  object TopicDescription {
+    def fromKafkaTopicDescription(ktd: KTopicDescription): TopicDescription = TopicDescription(
+      ktd.name(),
+      ktd.isInternal(),
+      ktd.partitions().asScala.map(TopicPartitionInfo.fromKafkaTopicPartitionInfo).toList,
+      ktd.authorizedOperations().asScala.map(AclOperation.fromKafkaAclOperation).toList
+    )
+  }
+  final case class Topics(topics: Map[String, TopicDescription])
+
   @service(Protobuf)
   trait KafkaManagement[F[_]] {
     def createPartitions(cpr: CreatePartitionsRequest): F[Unit]
@@ -220,5 +252,6 @@ object KafkaManagementService {
     def describeCluster(request: Empty.type): F[Cluster]
     def describeConfigs(rs: List[ConfigResource]): F[Configs]
     def describeConsumerGroups(groupIds: List[String]): F[ConsumerGroups]
+    def describeTopics(topics: List[String]): F[Topics]
   }
 }
