@@ -34,20 +34,24 @@ object KafkaManagement {
   ) extends KafkaManagement[F] {
     override def createPartitions(cpr: CreatePartitionsRequest): F[Unit] =
       adminClient.createPartitions(cpr.ps.mapValues(NewPartitions.increaseTo))
+
     override def createTopic(ctr: CreateTopicRequest): F[Unit] =
       adminClient.createTopic(new NewTopic(ctr.name, ctr.numPartitions, ctr.replicationFactor))
     override def createTopics(ctrs: List[CreateTopicRequest]): F[Unit] =
       adminClient.createTopics(ctrs.map { ctr =>
         new NewTopic(ctr.name, ctr.numPartitions, ctr.replicationFactor)
       })
+
     override def deleteTopic(t: String): F[Unit]         = adminClient.deleteTopic(t)
     override def deleteTopics(ts: List[String]): F[Unit] = adminClient.deleteTopics(ts)
+
     override def describeCluster(r: Empty.type): F[Cluster] = {
       val dc = adminClient.describeCluster
       (dc.clusterId, dc.controller, dc.nodes).mapN { (id, c, ns) =>
         Cluster(ns.map(Node.fromKafkaNode).toList, Node.fromKafkaNode(c), id)
       }
     }
+
     override def describeConfigs(rs: List[ConfigResource]): F[Configs] = for {
       kConfigs <- adminClient.describeConfigs(rs.map(ConfigResource.toKafkaConfigResource))
       configs = kConfigs.map { case (cr, ces) =>
@@ -55,5 +59,12 @@ object KafkaManagement {
             ces.map(ConfigEntry.fromKafkaConfigEntry)
       }
     } yield Configs(configs)
+
+    override def describeConsumerGroups(groupIds: List[String]): F[ConsumerGroups] = for {
+      kGroups <- adminClient.describeConsumerGroups(groupIds)
+      groups = kGroups.map { case (gid, cgd) =>
+        gid -> ConsumerGroupDescription.fromKafkaConsumerGroupDescription(cgd)
+      }
+    } yield ConsumerGroups(groups)
   }
 }

@@ -17,25 +17,39 @@
 package higherkindness.mu.rpc.kafka
 
 import higherkindness.mu.rpc.protocol.{service, Empty}
-import org.apache.kafka.common.{Node => KNode}
+import org.apache.kafka.common.{
+  ConsumerGroupState => KConsumerGroupState,
+  Node => KNode,
+  TopicPartition => KTopicPartition
+}
+import org.apache.kafka.common.acl.{AclOperation => KAclOperation}
 import org.apache.kafka.common.config.{ConfigResource => KConfigResource}
-import org.apache.kafka.clients.admin.{ConfigEntry => KConfigEntry}
+import org.apache.kafka.clients.admin.{
+  ConfigEntry => KConfigEntry,
+  ConsumerGroupDescription => KConsumerGroupDescription,
+  MemberAssignment => KMemberAssignment,
+  MemberDescription => KMemberDescription
+}
 
 import scala.collection.JavaConverters._
+import fs2.kafka.KafkaAdminClient
 
 object KafkaManagementService {
   final case class CreatePartitionsRequest(ps: Map[String, Int])
+
   final case class CreateTopicRequest(name: String, numPartitions: Int, replicationFactor: Short)
+
   final case class Node(id: Int, host: String, port: Int, rack: Option[String])
   object Node {
     def fromKafkaNode(n: KNode): Node = Node(n.id(), n.host(), n.port(), Option(n.rack()))
   }
   final case class Cluster(nodes: List[Node], controller: Node, clusterId: String)
+
   sealed trait ConfigType
   object ConfigType {
-    case object TopicConfigType extends ConfigType
-    case object BrokerConfigType extends ConfigType
-    case object UnknownConfigType extends ConfigType
+    final case object TopicConfigType extends ConfigType
+    final case object BrokerConfigType extends ConfigType
+    final case object UnknownConfigType extends ConfigType
 
     def toKafkaConfigType(ct: ConfigType): KConfigResource.Type = ct match {
       case TopicConfigType => KConfigResource.Type.TOPIC
@@ -57,12 +71,12 @@ object KafkaManagementService {
   }
   sealed trait ConfigSource
   object ConfigSource {
-    case object DynamicTopicConfig extends ConfigSource
-    case object DynamicBrokerConfig extends ConfigSource
-    case object DynamicDefaultBrokerConfig extends ConfigSource
-    case object StaticBrokerConfig extends ConfigSource
-    case object DefaultConfig extends ConfigSource
-    case object UnknownConfig extends ConfigSource
+    final case object DynamicTopicConfig extends ConfigSource
+    final case object DynamicBrokerConfig extends ConfigSource
+    final case object DynamicDefaultBrokerConfig extends ConfigSource
+    final case object StaticBrokerConfig extends ConfigSource
+    final case object DefaultConfig extends ConfigSource
+    final case object UnknownConfig extends ConfigSource
 
     def fromKafkaConfigSource(kcs: KConfigEntry.ConfigSource): ConfigSource = kcs match {
       case KConfigEntry.ConfigSource.DYNAMIC_TOPIC_CONFIG => DynamicTopicConfig
@@ -98,6 +112,104 @@ object KafkaManagementService {
   }
   final case class Configs(configs: Map[ConfigResource, List[ConfigEntry]])
 
+  final case class TopicPartition(topic: String, partition: Int)
+  object TopicPartition {
+    def fromKafkaTopicPartition(ktp: KTopicPartition): TopicPartition =
+      TopicPartition(ktp.topic(), ktp.partition())
+  }
+  final case class MemberAssignment(topicPartitions: List[TopicPartition])
+  object MemberAssignment {
+    def fromKafkaMemberAssignment(kma: KMemberAssignment): MemberAssignment =
+      MemberAssignment(
+        kma.topicPartitions().asScala.map(TopicPartition.fromKafkaTopicPartition).toList)
+  }
+  final case class MemberDescription(
+    consumerId: String,
+    clientId: String,
+    host: String,
+    assignment: MemberAssignment
+  )
+  object MemberDescription {
+    def fromKafkaMemberDescription(kmd: KMemberDescription): MemberDescription = MemberDescription(
+      kmd.consumerId(),
+      kmd.clientId(),
+      kmd.host(),
+      MemberAssignment.fromKafkaMemberAssignment(kmd.assignment())
+    )
+  }
+  sealed trait ConsumerGroupState
+  object ConsumerGroupState {
+    final case object CompletingRebalance extends ConsumerGroupState
+    final case object Dead extends ConsumerGroupState
+    final case object Empty extends ConsumerGroupState
+    final case object PreparingRebalance extends ConsumerGroupState
+    final case object Stable extends ConsumerGroupState
+    final case object Unknown extends ConsumerGroupState
+
+    def fromKafkaConsumerGroupState(kcgs: KConsumerGroupState): ConsumerGroupState = kcgs match {
+      case KConsumerGroupState.COMPLETING_REBALANCE => CompletingRebalance
+      case KConsumerGroupState.DEAD => Dead
+      case KConsumerGroupState.EMPTY => Empty
+      case KConsumerGroupState.PREPARING_REBALANCE => PreparingRebalance
+      case KConsumerGroupState.STABLE => Stable
+      case KConsumerGroupState.UNKNOWN => Unknown
+    }
+  }
+  sealed trait AclOperation
+  object AclOperation {
+    final case object All extends AclOperation
+    final case object Alter extends AclOperation
+    final case object AlterConfigs extends AclOperation
+    final case object Any extends AclOperation
+    final case object ClusterAction extends AclOperation
+    final case object Create extends AclOperation
+    final case object Delete extends AclOperation
+    final case object Describe extends AclOperation
+    final case object DescribeConfigs extends AclOperation
+    final case object IdempotentWrite extends AclOperation
+    final case object Read extends AclOperation
+    final case object Unknown extends AclOperation
+    final case object Write extends AclOperation
+
+    def fromKafkaAclOperation(kao: KAclOperation): AclOperation = kao match {
+      case KAclOperation.ALL => All
+      case KAclOperation.ALTER => Alter
+      case KAclOperation.ALTER_CONFIGS => AlterConfigs
+      case KAclOperation.ANY => Any
+      case KAclOperation.CLUSTER_ACTION => ClusterAction
+      case KAclOperation.CREATE => Create
+      case KAclOperation.DELETE => Delete
+      case KAclOperation.DESCRIBE => Describe
+      case KAclOperation.DESCRIBE_CONFIGS => DescribeConfigs
+      case KAclOperation.IDEMPOTENT_WRITE => IdempotentWrite
+      case KAclOperation.READ => Read
+      case KAclOperation.UNKNOWN => Unknown
+      case KAclOperation.WRITE => Write
+    }
+  }
+  final case class ConsumerGroupDescription(
+    groupId: String,
+    isSimpleConsumerGroup: Boolean,
+    members: List[MemberDescription],
+    partitionAssignor: String,
+    state: ConsumerGroupState,
+    coordinator: Node,
+    authorizedOperations: List[AclOperation]
+  )
+  object ConsumerGroupDescription {
+    def fromKafkaConsumerGroupDescription(kcgd: KConsumerGroupDescription): ConsumerGroupDescription =
+      ConsumerGroupDescription(
+        kcgd.groupId(),
+        kcgd.isSimpleConsumerGroup(),
+        kcgd.members().asScala.map(MemberDescription.fromKafkaMemberDescription).toList,
+        kcgd.partitionAssignor(),
+        ConsumerGroupState.fromKafkaConsumerGroupState(kcgd.state()),
+        Node.fromKafkaNode(kcgd.coordinator()),
+        kcgd.authorizedOperations().asScala.map(AclOperation.fromKafkaAclOperation).toList
+      )
+  }
+  final case class ConsumerGroups(consumerGroups: Map[String, ConsumerGroupDescription])
+
   @service(Protobuf)
   trait KafkaManagement[F[_]] {
     def createPartitions(cpr: CreatePartitionsRequest): F[Unit]
@@ -107,5 +219,6 @@ object KafkaManagementService {
     def deleteTopics(ts: List[String]): F[Unit]
     def describeCluster(request: Empty.type): F[Cluster]
     def describeConfigs(rs: List[ConfigResource]): F[Configs]
+    def describeConsumerGroups(groupIds: List[String]): F[ConsumerGroups]
   }
 }
