@@ -49,30 +49,32 @@ object KafkaManagement {
     override def describeCluster(r: Empty.type): F[Cluster] = {
       val dc = adminClient.describeCluster
       (dc.clusterId, dc.controller, dc.nodes).mapN { (id, c, ns) =>
-        Cluster(ns.map(Node.fromKafkaNode).toList, Node.fromKafkaNode(c), id)
+        Cluster(ns.map(Node.fromJava).toList, Node.fromJava(c), id)
       }
     }
 
     override def describeConfigs(rs: List[ConfigResource]): F[Configs] = for {
       kConfigs <- adminClient.describeConfigs(rs.map(ConfigResource.toKafkaConfigResource))
       configs = kConfigs.map { case (cr, ces) =>
-          ConfigResource.fromKafkaConfigResource(cr) ->
-            ces.map(ConfigEntry.fromKafkaConfigEntry)
+        ConfigResource.fromJava(cr) -> ces.map(ConfigEntry.fromJava)
       }
     } yield Configs(configs)
 
     override def describeConsumerGroups(groupIds: List[String]): F[ConsumerGroups] = for {
       kGroups <- adminClient.describeConsumerGroups(groupIds)
-      groups = kGroups.map { case (gid, cgd) =>
-        gid -> ConsumerGroupDescription.fromKafkaConsumerGroupDescription(cgd)
-      }
+      groups = kGroups.map { case (gid, cgd) => gid -> ConsumerGroupDescription.fromJava(cgd) }
     } yield ConsumerGroups(groups)
 
     override def describeTopics(topics: List[String]): F[KafkaManagementService.Topics] = for {
       kTopics <- adminClient.describeTopics(topics)
-      topics = kTopics.map { case (topic, desc) =>
-        topic -> TopicDescription.fromKafkaTopicDescription(desc)
-      }
+      topics = kTopics.map { case (topic, desc) => topic -> TopicDescription.fromJava(desc) }
     } yield Topics(topics)
+
+    override def listConsumerGroupOffsets(groupId: String): F[ConsumerGroupOffsets] = for {
+      kOffsets <- adminClient.listConsumerGroupOffsets(groupId).partitionsToOffsetAndMetadata
+      offsets = kOffsets.map { case (topic, offset) =>
+        TopicPartition.fromJava(topic) -> OffsetAndMetadata.fromJava(offset)
+      }
+    } yield ConsumerGroupOffsets(offsets)
   }
 }

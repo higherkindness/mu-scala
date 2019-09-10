@@ -32,6 +32,7 @@ import org.apache.kafka.clients.admin.{
   MemberDescription => KMemberDescription,
   TopicDescription => KTopicDescription
 }
+import org.apache.kafka.clients.consumer.{OffsetAndMetadata => KOffsetAndMetadata}
 
 import scala.collection.JavaConverters._
 
@@ -42,7 +43,7 @@ object KafkaManagementService {
 
   final case class Node(id: Int, host: String, port: Int, rack: Option[String])
   object Node {
-    def fromKafkaNode(n: KNode): Node = Node(n.id(), n.host(), n.port(), Option(n.rack()))
+    def fromJava(n: KNode): Node = Node(n.id(), n.host(), n.port(), Option(n.rack()))
   }
   final case class Cluster(nodes: List[Node], controller: Node, clusterId: String)
 
@@ -57,7 +58,7 @@ object KafkaManagementService {
       case BrokerConfigType => KConfigResource.Type.BROKER
       case UnknownConfigType => KConfigResource.Type.UNKNOWN
     }
-    def fromKafkaConfigType(kct: KConfigResource.Type): ConfigType = kct match {
+    def fromJava(kct: KConfigResource.Type): ConfigType = kct match {
       case KConfigResource.Type.TOPIC => TopicConfigType
       case KConfigResource.Type.BROKER => BrokerConfigType
       case KConfigResource.Type.UNKNOWN => UnknownConfigType
@@ -67,8 +68,8 @@ object KafkaManagementService {
   object ConfigResource {
     def toKafkaConfigResource(cr: ConfigResource): KConfigResource =
       new KConfigResource(ConfigType.toKafkaConfigType(cr.typ), cr.name)
-    def fromKafkaConfigResource(kcr: KConfigResource): ConfigResource =
-      ConfigResource(ConfigType.fromKafkaConfigType(kcr.`type`()), kcr.name())
+    def fromJava(kcr: KConfigResource): ConfigResource =
+      ConfigResource(ConfigType.fromJava(kcr.`type`()), kcr.name())
   }
   sealed trait ConfigSource
   object ConfigSource {
@@ -79,7 +80,7 @@ object KafkaManagementService {
     final case object DefaultConfig extends ConfigSource
     final case object UnknownConfig extends ConfigSource
 
-    def fromKafkaConfigSource(kcs: KConfigEntry.ConfigSource): ConfigSource = kcs match {
+    def fromJava(kcs: KConfigEntry.ConfigSource): ConfigSource = kcs match {
       case KConfigEntry.ConfigSource.DYNAMIC_TOPIC_CONFIG => DynamicTopicConfig
       case KConfigEntry.ConfigSource.DYNAMIC_BROKER_CONFIG => DynamicBrokerConfig
       case KConfigEntry.ConfigSource.DYNAMIC_DEFAULT_BROKER_CONFIG => DynamicDefaultBrokerConfig
@@ -90,8 +91,8 @@ object KafkaManagementService {
   }
   final case class ConfigSynonym(name: String, value: String, source: ConfigSource)
   object ConfigSynonym {
-    def fromKafkaConfigSynonym(kcs: KConfigEntry.ConfigSynonym): ConfigSynonym =
-      ConfigSynonym(kcs.name(), kcs.value(), ConfigSource.fromKafkaConfigSource(kcs.source()))
+    def fromJava(kcs: KConfigEntry.ConfigSynonym): ConfigSynonym =
+      ConfigSynonym(kcs.name(), kcs.value(), ConfigSource.fromJava(kcs.source()))
   }
   final case class ConfigEntry(
     name: String,
@@ -102,27 +103,27 @@ object KafkaManagementService {
     synonyms: List[ConfigSynonym]
   )
   object ConfigEntry {
-    def fromKafkaConfigEntry(kce: KConfigEntry): ConfigEntry = ConfigEntry(
+    def fromJava(kce: KConfigEntry): ConfigEntry = ConfigEntry(
       kce.name(),
       kce.value(),
-      ConfigSource.fromKafkaConfigSource(kce.source()),
+      ConfigSource.fromJava(kce.source()),
       kce.isSensitive(),
       kce.isReadOnly(),
-      kce.synonyms().asScala.map(ConfigSynonym.fromKafkaConfigSynonym).toList
+      kce.synonyms().asScala.map(ConfigSynonym.fromJava).toList
     )
   }
   final case class Configs(configs: Map[ConfigResource, List[ConfigEntry]])
 
   final case class TopicPartition(topic: String, partition: Int)
   object TopicPartition {
-    def fromKafkaTopicPartition(ktp: KTopicPartition): TopicPartition =
+    def fromJava(ktp: KTopicPartition): TopicPartition =
       TopicPartition(ktp.topic(), ktp.partition())
   }
   final case class MemberAssignment(topicPartitions: List[TopicPartition])
   object MemberAssignment {
-    def fromKafkaMemberAssignment(kma: KMemberAssignment): MemberAssignment =
+    def fromJava(kma: KMemberAssignment): MemberAssignment =
       MemberAssignment(
-        kma.topicPartitions().asScala.map(TopicPartition.fromKafkaTopicPartition).toList)
+        kma.topicPartitions().asScala.map(TopicPartition.fromJava).toList)
   }
   final case class MemberDescription(
     consumerId: String,
@@ -131,11 +132,11 @@ object KafkaManagementService {
     assignment: MemberAssignment
   )
   object MemberDescription {
-    def fromKafkaMemberDescription(kmd: KMemberDescription): MemberDescription = MemberDescription(
+    def fromJava(kmd: KMemberDescription): MemberDescription = MemberDescription(
       kmd.consumerId(),
       kmd.clientId(),
       kmd.host(),
-      MemberAssignment.fromKafkaMemberAssignment(kmd.assignment())
+      MemberAssignment.fromJava(kmd.assignment())
     )
   }
   sealed trait ConsumerGroupState
@@ -147,7 +148,7 @@ object KafkaManagementService {
     final case object Stable extends ConsumerGroupState
     final case object Unknown extends ConsumerGroupState
 
-    def fromKafkaConsumerGroupState(kcgs: KConsumerGroupState): ConsumerGroupState = kcgs match {
+    def fromJava(kcgs: KConsumerGroupState): ConsumerGroupState = kcgs match {
       case KConsumerGroupState.COMPLETING_REBALANCE => CompletingRebalance
       case KConsumerGroupState.DEAD => Dead
       case KConsumerGroupState.EMPTY => Empty
@@ -172,7 +173,7 @@ object KafkaManagementService {
     final case object Unknown extends AclOperation
     final case object Write extends AclOperation
 
-    def fromKafkaAclOperation(kao: KAclOperation): AclOperation = kao match {
+    def fromJava(kao: KAclOperation): AclOperation = kao match {
       case KAclOperation.ALL => All
       case KAclOperation.ALTER => Alter
       case KAclOperation.ALTER_CONFIGS => AlterConfigs
@@ -198,15 +199,15 @@ object KafkaManagementService {
     authorizedOperations: List[AclOperation]
   )
   object ConsumerGroupDescription {
-    def fromKafkaConsumerGroupDescription(kcgd: KConsumerGroupDescription): ConsumerGroupDescription =
+    def fromJava(kcgd: KConsumerGroupDescription): ConsumerGroupDescription =
       ConsumerGroupDescription(
         kcgd.groupId(),
         kcgd.isSimpleConsumerGroup(),
-        kcgd.members().asScala.map(MemberDescription.fromKafkaMemberDescription).toList,
+        kcgd.members().asScala.map(MemberDescription.fromJava).toList,
         kcgd.partitionAssignor(),
-        ConsumerGroupState.fromKafkaConsumerGroupState(kcgd.state()),
-        Node.fromKafkaNode(kcgd.coordinator()),
-        kcgd.authorizedOperations().asScala.map(AclOperation.fromKafkaAclOperation).toList
+        ConsumerGroupState.fromJava(kcgd.state()),
+        Node.fromJava(kcgd.coordinator()),
+        kcgd.authorizedOperations().asScala.map(AclOperation.fromJava).toList
       )
   }
   final case class ConsumerGroups(consumerGroups: Map[String, ConsumerGroupDescription])
@@ -218,12 +219,12 @@ object KafkaManagementService {
     inSyncReplicas: List[Node]
   )
   object TopicPartitionInfo {
-    def fromKafkaTopicPartitionInfo(ktpi: KTopicPartitionInfo): TopicPartitionInfo =
+    def fromJava(ktpi: KTopicPartitionInfo): TopicPartitionInfo =
       TopicPartitionInfo(
         ktpi.partition(),
-        Node.fromKafkaNode(ktpi.leader()),
-        ktpi.replicas().asScala.map(Node.fromKafkaNode).toList,
-        ktpi.isr().asScala.map(Node.fromKafkaNode).toList
+        Node.fromJava(ktpi.leader()),
+        ktpi.replicas().asScala.map(Node.fromJava).toList,
+        ktpi.isr().asScala.map(Node.fromJava).toList
       )
   }
   final case class TopicDescription(
@@ -233,14 +234,29 @@ object KafkaManagementService {
     authorizedOperations: List[AclOperation]
   )
   object TopicDescription {
-    def fromKafkaTopicDescription(ktd: KTopicDescription): TopicDescription = TopicDescription(
+    def fromJava(ktd: KTopicDescription): TopicDescription = TopicDescription(
       ktd.name(),
       ktd.isInternal(),
-      ktd.partitions().asScala.map(TopicPartitionInfo.fromKafkaTopicPartitionInfo).toList,
-      ktd.authorizedOperations().asScala.map(AclOperation.fromKafkaAclOperation).toList
+      ktd.partitions().asScala.map(TopicPartitionInfo.fromJava).toList,
+      ktd.authorizedOperations().asScala.map(AclOperation.fromJava).toList
     )
   }
   final case class Topics(topics: Map[String, TopicDescription])
+
+  final case class OffsetAndMetadata(
+    offset: Long,
+    metadata: String,
+    leaderEpoch: Option[Int]
+  )
+  object OffsetAndMetadata {
+    def fromJava(koam: KOffsetAndMetadata): OffsetAndMetadata =
+      OffsetAndMetadata(
+        koam.offset(),
+        koam.metadata(),
+        if (koam.leaderEpoch().isPresent()) Some(koam.leaderEpoch().get) else None
+      )
+  }
+  final case class ConsumerGroupOffsets(offsets: Map[TopicPartition, OffsetAndMetadata])
 
   @service(Protobuf)
   trait KafkaManagement[F[_]] {
@@ -253,5 +269,6 @@ object KafkaManagementService {
     def describeConfigs(rs: List[ConfigResource]): F[Configs]
     def describeConsumerGroups(groupIds: List[String]): F[ConsumerGroups]
     def describeTopics(topics: List[String]): F[Topics]
+    def listConsumerGroupOffsets(groupId: String): F[ConsumerGroupOffsets]
   }
 }
