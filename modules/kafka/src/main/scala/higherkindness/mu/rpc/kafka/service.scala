@@ -28,6 +28,7 @@ import org.apache.kafka.common.config.{ConfigResource => KConfigResource}
 import org.apache.kafka.clients.admin.{
   ConfigEntry => KConfigEntry,
   ConsumerGroupDescription => KConsumerGroupDescription,
+  ConsumerGroupListing => KConsumerGroupListing,
   MemberAssignment => KMemberAssignment,
   MemberDescription => KMemberDescription,
   TopicDescription => KTopicDescription
@@ -258,6 +259,17 @@ object KafkaManagementService {
   }
   final case class ConsumerGroupOffsets(offsets: Map[TopicPartition, OffsetAndMetadata])
 
+  final case class ConsumerGroupListing(
+    groupId: String,
+    isSimpleConsumerGroup: Boolean
+  )
+  object ConsumerGroupListing {
+    def fromJava(kcgl: KConsumerGroupListing): ConsumerGroupListing = ConsumerGroupListing(
+      kcgl.groupId(),
+      kcgl.isSimpleConsumerGroup()
+    )
+  }
+
   @service(Protobuf)
   trait KafkaManagement[F[_]] {
     def createPartitions(cpr: CreatePartitionsRequest): F[Unit]
@@ -270,5 +282,6 @@ object KafkaManagementService {
     def describeConsumerGroups(groupIds: List[String]): F[ConsumerGroups]
     def describeTopics(topics: List[String]): F[Topics]
     def listConsumerGroupOffsets(groupId: String): F[ConsumerGroupOffsets]
+    def listConsumerGroups(request: Empty.type): F[List[ConsumerGroupListing]]
   }
 }

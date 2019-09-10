@@ -31,17 +31,18 @@ object KafkaManagement {
       .map(c => new KafkaManagementImpl(c))
 
   class KafkaManagementImpl[F[_]: ContextShift: Concurrent](
-      adminClient: KafkaAdminClient[F]
+    adminClient: KafkaAdminClient[F]
   ) extends KafkaManagement[F] {
     override def createPartitions(cpr: CreatePartitionsRequest): F[Unit] =
       adminClient.createPartitions(cpr.ps.mapValues(NewPartitions.increaseTo))
 
     override def createTopic(ctr: CreateTopicRequest): F[Unit] =
       adminClient.createTopic(new NewTopic(ctr.name, ctr.numPartitions, ctr.replicationFactor))
-    override def createTopics(ctrs: List[CreateTopicRequest]): F[Unit] =
-      adminClient.createTopics(ctrs.map { ctr =>
-        new NewTopic(ctr.name, ctr.numPartitions, ctr.replicationFactor)
-      })
+    override def createTopics(ctrs: List[CreateTopicRequest]): F[Unit] = for {
+      newTopics <- ctrs
+        .map(ctr => new NewTopic(ctr.name, ctr.numPartitions, ctr.replicationFactor)).pure[F]
+      _ <- adminClient.createTopics(newTopics)
+    } yield ()
 
     override def deleteTopic(t: String): F[Unit]         = adminClient.deleteTopic(t)
     override def deleteTopics(ts: List[String]): F[Unit] = adminClient.deleteTopics(ts)
@@ -76,5 +77,10 @@ object KafkaManagement {
         TopicPartition.fromJava(topic) -> OffsetAndMetadata.fromJava(offset)
       }
     } yield ConsumerGroupOffsets(offsets)
+
+    override def listConsumerGroups(r: Empty.type): F[List[ConsumerGroupListing]] = for {
+      kListings <- adminClient.listConsumerGroups.listings
+      listings = kListings.map(ConsumerGroupListing.fromJava)
+    } yield listings
   }
 }
