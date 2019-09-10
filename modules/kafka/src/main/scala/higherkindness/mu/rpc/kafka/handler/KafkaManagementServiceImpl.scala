@@ -82,5 +82,10 @@ object KafkaManagement {
       kListings <- adminClient.listConsumerGroups.listings
       listings = kListings.map(ConsumerGroupListing.fromJava)
     } yield listings
+
+    override def listTopics(r: Empty.type): F[List[TopicListing]] = for {
+      kListings <- adminClient.listTopics.includeInternal.listings
+      listings = kListings.map(TopicListing.fromJava)
+    } yield listings
   }
 }

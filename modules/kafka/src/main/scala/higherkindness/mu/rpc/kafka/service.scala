@@ -31,7 +31,8 @@ import org.apache.kafka.clients.admin.{
   ConsumerGroupListing => KConsumerGroupListing,
   MemberAssignment => KMemberAssignment,
   MemberDescription => KMemberDescription,
-  TopicDescription => KTopicDescription
+  TopicDescription => KTopicDescription,
+  TopicListing => KTopicListing
 }
 import org.apache.kafka.clients.consumer.{OffsetAndMetadata => KOffsetAndMetadata}
 
@@ -270,6 +271,14 @@ object KafkaManagementService {
     )
   }
 
+  final case class TopicListing(
+    name: String,
+    isInternal: Boolean
+  )
+  object TopicListing {
+    def fromJava(ktl: KTopicListing): TopicListing = TopicListing(ktl.name(), ktl.isInternal())
+  }
+
   @service(Protobuf)
   trait KafkaManagement[F[_]] {
     def createPartitions(cpr: CreatePartitionsRequest): F[Unit]
@@ -277,11 +286,12 @@ object KafkaManagementService {
     def createTopics(ctrs: List[CreateTopicRequest]): F[Unit]
     def deleteTopic(t: String): F[Unit]
     def deleteTopics(ts: List[String]): F[Unit]
-    def describeCluster(request: Empty.type): F[Cluster]
+    def describeCluster(r: Empty.type): F[Cluster]
     def describeConfigs(rs: List[ConfigResource]): F[Configs]
     def describeConsumerGroups(groupIds: List[String]): F[ConsumerGroups]
     def describeTopics(topics: List[String]): F[Topics]
     def listConsumerGroupOffsets(groupId: String): F[ConsumerGroupOffsets]
-    def listConsumerGroups(request: Empty.type): F[List[ConsumerGroupListing]]
+    def listConsumerGroups(r: Empty.type): F[List[ConsumerGroupListing]]
+    def listTopics(r: Empty.type): F[List[TopicListing]]
   }
 }
