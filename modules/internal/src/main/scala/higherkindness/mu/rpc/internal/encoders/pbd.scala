@@ -25,7 +25,9 @@ import com.google.protobuf.{CodedInputStream, CodedOutputStream}
 import higherkindness.mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTimeUtil}
 import io.grpc.MethodDescriptor.Marshaller
 
-object pbd extends OptionInstances with ListInstances {
+object pbd
+    extends OptionInstances
+    with ListInstances {
 
   import pbdirect._
 

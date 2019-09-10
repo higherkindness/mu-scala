@@ -198,6 +198,7 @@ lazy val http = project
 lazy val kafka = project
   .in(file("modules/kafka"))
   .dependsOn(channel)
+  .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-kafka")
   .settings(kafkaSettings)
 
