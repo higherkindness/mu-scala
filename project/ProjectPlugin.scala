@@ -57,6 +57,7 @@ object ProjectPlugin extends AutoPlugin {
       val slf4j: String              = "1.7.26"
       val dropwizard: String         = "4.0.5"
       val fs2Kafka: String           = "0.20.0-RC2-SNAPSHOT"
+      val embeddedKafka: String      = "2.3.0"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
@@ -211,7 +212,8 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val kafkaSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "com.ovoenergy" %% "fs2-kafka" % V.fs2Kafka
+        "com.ovoenergy" %% "fs2-kafka" % V.fs2Kafka,
+        "io.github.embeddedkafka" %% "embedded-kafka" % V.embeddedKafka % Test
       )
     )
 
