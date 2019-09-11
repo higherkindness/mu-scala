@@ -16,6 +16,9 @@
 
 package higherkindness.mu.rpc.kafka
 
+import cats.effect.{Concurrent, ContextShift, Resource}
+import cats.implicits._
+import fs2.kafka._
 import higherkindness.mu.rpc.protocol.{service, Empty}
 import org.apache.kafka.common.{
   ConsumerGroupState => KConsumerGroupState,
@@ -31,6 +34,8 @@ import org.apache.kafka.clients.admin.{
   ConsumerGroupListing => KConsumerGroupListing,
   MemberAssignment => KMemberAssignment,
   MemberDescription => KMemberDescription,
+  NewPartitions,
+  NewTopic,
   TopicDescription => KTopicDescription,
   TopicListing => KTopicListing
 }
@@ -292,5 +297,82 @@ object KafkaManagementService {
     def listConsumerGroupOffsets(groupId: String): F[ConsumerGroupOffsets]
     def listConsumerGroups(r: Empty.type): F[List[ConsumerGroupListing]]
     def listTopics(r: Empty.type): F[List[TopicListing]]
+  }
+
+  object KafkaManagement {
+    def buildInstance[F[_]: ContextShift: Concurrent](
+      settings: AdminClientSettings[F]
+    ): Resource[F, KafkaManagement[F]] =
+      adminClientResource[F](settings)
+        .map(c => new KafkaManagementImpl(c))
+  }
+
+  class KafkaManagementImpl[F[_]: ContextShift: Concurrent](
+      adminClient: KafkaAdminClient[F]
+  ) extends KafkaManagement[F] {
+    override def createPartitions(cpr: CreatePartitionsRequest): F[Unit] =
+      adminClient.createPartitions(cpr.ps.mapValues(NewPartitions.increaseTo))
+
+    override def createTopic(ctr: CreateTopicRequest): F[Unit] =
+      adminClient.createTopic(new NewTopic(ctr.name, ctr.numPartitions, ctr.replicationFactor))
+    override def createTopics(ctrs: List[CreateTopicRequest]): F[Unit] =
+      for {
+        newTopics <- ctrs
+          .map(ctr => new NewTopic(ctr.name, ctr.numPartitions, ctr.replicationFactor))
+          .pure[F]
+        _ <- adminClient.createTopics(newTopics)
+      } yield ()
+
+    override def deleteTopic(t: String): F[Unit]         = adminClient.deleteTopic(t)
+    override def deleteTopics(ts: List[String]): F[Unit] = adminClient.deleteTopics(ts)
+
+    override def describeCluster(r: Empty.type): F[Cluster] = {
+      val dc = adminClient.describeCluster
+      (dc.clusterId, dc.controller, dc.nodes).mapN { (id, c, ns) =>
+        Cluster(ns.map(Node.fromJava).toList, Node.fromJava(c), id)
+      }
+    }
+
+    override def describeConfigs(rs: List[ConfigResource]): F[Configs] =
+      for {
+        kConfigs <- adminClient.describeConfigs(rs.map(ConfigResource.toKafkaConfigResource))
+        configs = kConfigs.map {
+          case (cr, ces) =>
+            ConfigResource.fromJava(cr) -> ces.map(ConfigEntry.fromJava)
+        }
+      } yield Configs(configs)
+
+    override def describeConsumerGroups(groupIds: List[String]): F[ConsumerGroups] =
+      for {
+        kGroups <- adminClient.describeConsumerGroups(groupIds)
+        groups = kGroups.map { case (gid, cgd) => gid -> ConsumerGroupDescription.fromJava(cgd) }
+      } yield ConsumerGroups(groups)
+
+    override def describeTopics(topics: List[String]): F[Topics] =
+      for {
+        kTopics <- adminClient.describeTopics(topics)
+        topics = kTopics.map { case (topic, desc) => topic -> TopicDescription.fromJava(desc) }
+      } yield Topics(topics)
+
+    override def listConsumerGroupOffsets(groupId: String): F[ConsumerGroupOffsets] =
+      for {
+        kOffsets <- adminClient.listConsumerGroupOffsets(groupId).partitionsToOffsetAndMetadata
+        offsets = kOffsets.map {
+          case (topic, offset) =>
+            TopicPartition.fromJava(topic) -> OffsetAndMetadata.fromJava(offset)
+        }
+      } yield ConsumerGroupOffsets(offsets)
+
+    override def listConsumerGroups(r: Empty.type): F[List[ConsumerGroupListing]] =
+      for {
+        kListings <- adminClient.listConsumerGroups.listings
+        listings = kListings.map(ConsumerGroupListing.fromJava)
+      } yield listings
+
+    override def listTopics(r: Empty.type): F[List[TopicListing]] =
+      for {
+        kListings <- adminClient.listTopics.includeInternal.listings
+        listings = kListings.map(TopicListing.fromJava)
+      } yield listings
   }
 }
