@@ -16,12 +16,11 @@
 
 package higherkindness.mu.rpc.kafka
 
-import cats.effect.{ContextShift, IO, Resource, Sync}
-import cats.syntax.applicative._
-import fs2.kafka.AdminClientSettings
+import cats.effect.{ConcurrentEffect, ContextShift, IO, Resource, Sync}
+import fs2.kafka._
+import higherkindness.mu.rpc.protocol.Empty
 import higherkindness.mu.rpc.testing.servers.withServerChannel
 import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
-import io.grpc.{ManagedChannel, ServerServiceDefinition}
 import org.apache.kafka.clients.admin.AdminClientConfig
 import org.scalatest._
 
@@ -29,19 +28,8 @@ import scala.concurrent.ExecutionContext
 
 import KafkaManagementService._
 
-class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest {
+class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest with EmbeddedKafka {
   implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.Implicits.global)
-
-  def withClient[Client, A](
-      serviceDef: IO[ServerServiceDefinition],
-      resourceBuilder: IO[ManagedChannel] => Resource[IO, Client]
-  )(
-      f: Client => A
-  ): A =
-    withServerChannel(serviceDef)
-      .flatMap(sc => resourceBuilder(IO(sc.channel)))
-      .use(client => IO(f(client)))
-      .unsafeRunSync()
 
   def adminClientSettings[F[_]: Sync](config: EmbeddedKafkaConfig): AdminClientSettings[F] =
     AdminClientSettings[F].withProperties(
@@ -49,23 +37,31 @@ class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest {
     )
 
   def withKafka[F[_]: Sync, A](f: AdminClientSettings[F] => A): A =
-    EmbeddedKafka.withRunningKafkaOnFoundPort(
+    withRunningKafkaOnFoundPort(
       EmbeddedKafkaConfig()
     )(adminClientSettings[F] _ andThen f)
 
-  test("create a topic") {
-    withKafka[IO, IO[Unit]] { settings =>
-      KafkaManagement.buildInstance[IO](settings).use { service =>
-        implicit val s = service
-        withClient(KafkaManagement.bindService[IO], KafkaManagement.clientFromChannel[IO](_)) {
-          client =>
-            for {
-              create <- client.createTopic(CreateTopicRequest("topic", 2, 3)).attempt
-              _      <- println(create).pure[IO]
-              _      <- assert(create.isRight).pure[IO]
-            } yield ()
-        }
-      }
-    }.unsafeRunSync()
+  def withClient[F[_]: ContextShift: ConcurrentEffect, A](
+      settings: AdminClientSettings[F]
+  )(f: KafkaManagement[F] => F[A]): F[A] = {
+    val client: Resource[F, KafkaManagement[F]] = for {
+      km            <- KafkaManagement.buildInstance[F](settings)
+      serverChannel <- withServerChannel(KafkaManagement.bindService[F](ConcurrentEffect[F], km))
+      client        <- KafkaManagement.clientFromChannel[F](Sync[F].delay(serverChannel.channel))
+    } yield client
+
+    client.use(c => f(c))
+  }
+
+  test("list topics") {
+    withKafka { settings: AdminClientSettings[IO] =>
+      withClient(settings) { client =>
+        for {
+          list <- client.listTopics(Empty).attempt
+          _    <- IO(println(list))
+          _    <- IO(assert(list.isRight))
+        } yield ()
+      }.unsafeRunSync()
+    }
   }
 }
