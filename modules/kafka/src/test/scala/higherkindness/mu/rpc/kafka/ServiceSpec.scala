@@ -26,7 +26,7 @@ import org.scalatest._
 
 import scala.concurrent.ExecutionContext
 
-import KafkaManagementService._
+import kafkaManagementService._
 
 class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest with EmbeddedKafka {
   implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.Implicits.global)
