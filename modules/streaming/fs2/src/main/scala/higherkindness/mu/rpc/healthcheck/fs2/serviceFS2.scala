@@ -18,7 +18,7 @@ package higherkindness.mu.rpc.healthcheck.fs2
 
 import fs2.Stream
 import higherkindness.mu.rpc.healthcheck.unary.handler._
-import higherkindness.mu.rpc.protocol.{service, Empty, Protobuf}
+import higherkindness.mu.rpc.protocol.{service, Empty}
 
 object serviceFS2 {
 

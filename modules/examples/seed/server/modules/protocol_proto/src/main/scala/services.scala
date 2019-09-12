@@ -18,7 +18,6 @@ package example.seed.server.protocol.proto
 
 import higherkindness.mu.rpc.protocol._
 import fs2.Stream
-import shapeless.{:+:, CNil}
 
 import example.seed.server.protocol.proto.people.PeopleRequest
 import example.seed.server.protocol.proto.people.PeopleResponse
