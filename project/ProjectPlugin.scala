@@ -56,7 +56,7 @@ object ProjectPlugin extends AutoPlugin {
       val skeuomorph: String         = "0.0.11"
       val slf4j: String              = "1.7.26"
       val dropwizard: String         = "4.0.5"
-      val fs2Kafka: String           = "0.20.0-RC2-SNAPSHOT"
+      val fs2Kafka: String           = "0.20.0"
       val embeddedKafka: String      = "2.3.0"
     }
 
