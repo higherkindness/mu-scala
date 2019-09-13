@@ -118,7 +118,17 @@ class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest with Em
     }
   }
 
-  test("describe cluster") {}
+  test("describe cluster") {
+    withKafka { settings: AdminClientSettings[IO] =>
+      withClient(settings) { client =>
+        for {
+          cluster <- client.describeCluster(Empty).attempt
+          _       <- IO(assert(cluster.isRight))
+          _       <- IO(assert(cluster.toOption.map(_.nodes.length == 1).getOrElse(false)))
+        } yield ()
+      }.unsafeRunSync()
+    }
+  }
 
   test("alter/describe configs") {}
 
