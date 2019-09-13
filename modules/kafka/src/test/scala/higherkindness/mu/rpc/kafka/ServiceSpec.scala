@@ -16,7 +16,8 @@
 
 package higherkindness.mu.rpc.kafka
 
-import cats.effect.{ConcurrentEffect, ContextShift, IO, Resource, Sync}
+import cats.effect.{ConcurrentEffect, ContextShift, IO, Sync}
+import cats.syntax.applicative._
 import fs2.kafka._
 import higherkindness.mu.rpc.protocol.Empty
 import higherkindness.mu.rpc.testing.servers.withServerChannel
@@ -43,23 +44,26 @@ class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest with Em
 
   def withClient[F[_]: ContextShift: ConcurrentEffect, A](
       settings: AdminClientSettings[F]
-  )(f: KafkaManagement[F] => F[A]): F[A] = {
-    val client: Resource[F, KafkaManagement[F]] = for {
+  )(f: KafkaManagement[F] => F[A]): F[A] =
+    (for {
       km            <- KafkaManagement.buildInstance[F](settings)
       serverChannel <- withServerChannel(KafkaManagement.bindService[F](ConcurrentEffect[F], km))
       client        <- KafkaManagement.clientFromChannel[F](Sync[F].delay(serverChannel.channel))
-    } yield client
+    } yield client).use(f)
 
-    client.use(c => f(c))
-  }
-
-  test("list topics") {
+  test("create/list/delete topic") {
     withKafka { settings: AdminClientSettings[IO] =>
       withClient(settings) { client =>
         for {
-          list <- client.listTopics(Empty).attempt
-          _    <- IO(println(list))
-          _    <- IO(assert(list.isRight))
+          topicName  <- "topic".pure[IO]
+          create     <- client.createTopic(CreateTopicRequest(topicName, 2, 1)).attempt
+          _          <- IO(assert(create.isRight))
+          topicNames <- client.listTopics(Empty)
+          _          <- IO(assert(topicNames.listings.map(_.name).contains(topicName)))
+          delete     <- client.deleteTopic(topicName).attempt
+          _          <- IO(assert(delete.isRight))
+          topicNames <- client.listTopics(Empty)
+          _          <- IO(assert(topicNames.listings.map(_.name).forall(_ != topicName)))
         } yield ()
       }.unsafeRunSync()
     }
