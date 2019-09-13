@@ -68,4 +68,25 @@ class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest with Em
       }.unsafeRunSync()
     }
   }
+
+  test("create/list/delete topics") {
+    withKafka { settings: AdminClientSettings[IO] =>
+      withClient(settings) { client =>
+        for {
+          topicNames <- List("topic1", "topic2").pure[IO]
+          creates <- client
+            .createTopics(CreateTopicRequests(topicNames.map(CreateTopicRequest(_, 2, 1))))
+            .attempt
+          _                <- IO(assert(creates.isRight))
+          listedTopicNames <- client.listTopics(Empty)
+          _                <- IO(assert(topicNames.forall(listedTopicNames.listings.map(_.name).contains)))
+          deletes          <- client.deleteTopics(DeleteTopicsRequest(topicNames)).attempt
+          _                <- IO(assert(deletes.isRight))
+          listedTopicNames <- client.listTopics(Empty)
+          _ <- IO(
+            assert(topicNames.forall(n => !listedTopicNames.listings.map(_.name).contains(n))))
+        } yield ()
+      }.unsafeRunSync()
+    }
+  }
 }
