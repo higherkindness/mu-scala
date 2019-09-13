@@ -89,4 +89,38 @@ class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest with Em
       }.unsafeRunSync()
     }
   }
+
+  test("create/create partitions/describe topic") {
+    withKafka { settings: AdminClientSettings[IO] =>
+      withClient(settings) { client =>
+        for {
+          topicName <- "topic".pure[IO]
+          create    <- client.createTopic(CreateTopicRequest(topicName, 2, 1)).attempt
+          _         <- IO(assert(create.isRight))
+          describe  <- client.describeTopics(DescribeTopicsRequest(List(topicName))).attempt
+          _         <- IO(assert(describe.isRight))
+          _         <- IO(assert(describe.toOption.map(_.topics.size == 1).getOrElse(false)))
+          _ <- IO(
+            assert(
+              describe.toOption
+                .flatMap(_.topics.headOption)
+                .map(_.partitions.length == 2)
+                .getOrElse(false)))
+          partition <- client
+            .createPartitions(CreatePartitionsRequest(topicName, 4))
+            .attempt
+          _        <- IO(assert(partition.isRight))
+          describe <- client.describeTopics(DescribeTopicsRequest(List(topicName)))
+          _        <- IO(assert(describe.topics.size == 1))
+          _        <- IO(assert(describe.topics.headOption.map(_.partitions.length == 4).getOrElse(false)))
+        } yield ()
+      }.unsafeRunSync()
+    }
+  }
+
+  test("describe cluster") {}
+
+  test("alter/describe configs") {}
+
+  test("describe/list/list offsets consumer groups") {}
 }
