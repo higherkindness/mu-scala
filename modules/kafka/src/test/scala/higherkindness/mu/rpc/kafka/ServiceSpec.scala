@@ -130,7 +130,17 @@ class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest with Em
     }
   }
 
-  test("alter/describe configs") {}
+  test("alter/describe configs") {
+    withKafka { settings: AdminClientSettings[IO] =>
+      withClient(settings) { client =>
+        for {
+          describe <- client.describeConfigs(ConfigResources(ConfigResource(ConfigType.BrokerConfigType, "advertised.host.name") :: Nil)).attempt
+          _ <- IO(assert(describe.isRight))
+          _ <- IO(println(describe))
+        } yield ()
+      }.unsafeRunSync()
+    }
+  }
 
   test("describe/list/list offsets consumer groups") {}
 }
