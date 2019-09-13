@@ -58,7 +58,7 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
       configs = kConfigs.map {
         case (cr, ces) =>
           ConfigResource.fromJava(cr) -> ces.map(ConfigEntry.fromJava)
-      }
+      }.toList
     } yield Configs(configs)
 
   override def describeConsumerGroups(dcgr: DescribeConsumerGroupsRequest): F[ConsumerGroups] =

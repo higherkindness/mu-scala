@@ -121,7 +121,7 @@ object kafkaManagementService {
       kce.synonyms().asScala.map(ConfigSynonym.fromJava).toList
     )
   }
-  final case class Configs(configs: Map[ConfigResource, List[ConfigEntry]])
+  final case class Configs(configs: List[(ConfigResource, List[ConfigEntry])])
 
   final case class TopicPartition(topic: String, partition: Int)
   object TopicPartition {
