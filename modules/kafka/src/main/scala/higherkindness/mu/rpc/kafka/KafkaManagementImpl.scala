@@ -33,9 +33,9 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
   override def createTopic(ctr: CreateTopicRequest): F[Unit] =
     adminClient.createTopic(new NewTopic(ctr.name, ctr.numPartitions, ctr.replicationFactor))
 
-  override def createTopics(ctrs: List[CreateTopicRequest]): F[Unit] =
+  override def createTopics(ctrs: CreateTopicRequests): F[Unit] =
     for {
-      newTopics <- ctrs
+      newTopics <- ctrs.createTopicRequests
         .map(ctr => new NewTopic(ctr.name, ctr.numPartitions, ctr.replicationFactor))
         .pure[F]
       _ <- adminClient.createTopics(newTopics)
@@ -43,7 +43,7 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
 
   override def deleteTopic(t: String): F[Unit] = adminClient.deleteTopic(t)
 
-  override def deleteTopics(ts: List[String]): F[Unit] = adminClient.deleteTopics(ts)
+  override def deleteTopics(ts: DeleteTopicsRequest): F[Unit] = adminClient.deleteTopics(ts.names)
 
   override def describeCluster(r: Empty.type): F[Cluster] = {
     val dc = adminClient.describeCluster
@@ -52,18 +52,18 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
     }
   }
 
-  override def describeConfigs(rs: List[ConfigResource]): F[Configs] =
+  override def describeConfigs(rs: ConfigResources): F[Configs] =
     for {
-      kConfigs <- adminClient.describeConfigs(rs.map(ConfigResource.toKafkaConfigResource))
+      kConfigs <- adminClient.describeConfigs(rs.configResources.map(ConfigResource.toJava))
       configs = kConfigs.map {
         case (cr, ces) =>
           ConfigResource.fromJava(cr) -> ces.map(ConfigEntry.fromJava)
       }
     } yield Configs(configs)
 
-  override def describeConsumerGroups(groupIds: List[String]): F[ConsumerGroups] =
+  override def describeConsumerGroups(dcgr: DescribeConsumerGroupsRequest): F[ConsumerGroups] =
     for {
-      kGroups <- adminClient.describeConsumerGroups(groupIds)
+      kGroups <- adminClient.describeConsumerGroups(dcgr.groupIds)
       groups = kGroups.map { case (gid, cgd) => gid -> ConsumerGroupDescription.fromJava(cgd) }
     } yield ConsumerGroups(groups)
 
@@ -82,15 +82,15 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
       }
     } yield ConsumerGroupOffsets(offsets)
 
-  override def listConsumerGroups(r: Empty.type): F[List[ConsumerGroupListing]] =
+  override def listConsumerGroups(r: Empty.type): F[ConsumerGroupListings] =
     for {
       kListings <- adminClient.listConsumerGroups.listings
       listings = kListings.map(ConsumerGroupListing.fromJava)
-    } yield listings
+    } yield ConsumerGroupListings(listings)
 
-  override def listTopics(r: Empty.type): F[List[TopicListing]] =
+  override def listTopics(r: Empty.type): F[TopicListings] =
     for {
       kListings <- adminClient.listTopics.includeInternal.listings
       listings = kListings.map(TopicListing.fromJava)
-    } yield listings
+    } yield TopicListings(listings)
 }

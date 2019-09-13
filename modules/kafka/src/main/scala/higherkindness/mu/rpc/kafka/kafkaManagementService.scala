@@ -45,6 +45,9 @@ object kafkaManagementService {
   final case class CreatePartitionsRequest(ps: Map[String, Int])
 
   final case class CreateTopicRequest(name: String, numPartitions: Int, replicationFactor: Short)
+  final case class CreateTopicRequests(createTopicRequests: List[CreateTopicRequest])
+
+  final case class DeleteTopicsRequest(names: List[String])
 
   final case class Node(id: Int, host: String, port: Int, rack: Option[String])
   object Node {
@@ -58,7 +61,7 @@ object kafkaManagementService {
     final case object BrokerConfigType  extends ConfigType
     final case object UnknownConfigType extends ConfigType
 
-    def toKafkaConfigType(ct: ConfigType): KConfigResource.Type = ct match {
+    def toJava(ct: ConfigType): KConfigResource.Type = ct match {
       case TopicConfigType   => KConfigResource.Type.TOPIC
       case BrokerConfigType  => KConfigResource.Type.BROKER
       case UnknownConfigType => KConfigResource.Type.UNKNOWN
@@ -71,11 +74,12 @@ object kafkaManagementService {
   }
   final case class ConfigResource(typ: ConfigType, name: String)
   object ConfigResource {
-    def toKafkaConfigResource(cr: ConfigResource): KConfigResource =
-      new KConfigResource(ConfigType.toKafkaConfigType(cr.typ), cr.name)
+    def toJava(cr: ConfigResource): KConfigResource =
+      new KConfigResource(ConfigType.toJava(cr.typ), cr.name)
     def fromJava(kcr: KConfigResource): ConfigResource =
       ConfigResource(ConfigType.fromJava(kcr.`type`()), kcr.name())
   }
+  final case class ConfigResources(configResources: List[ConfigResource])
   sealed trait ConfigSource
   object ConfigSource {
     final case object DynamicTopicConfig         extends ConfigSource
@@ -215,6 +219,7 @@ object kafkaManagementService {
       )
   }
   final case class ConsumerGroups(consumerGroups: Map[String, ConsumerGroupDescription])
+  final case class DescribeConsumerGroupsRequest(groupIds: List[String])
 
   final case class TopicPartitionInfo(
       partition: Int,
@@ -272,6 +277,7 @@ object kafkaManagementService {
       kcgl.isSimpleConsumerGroup()
     )
   }
+  final case class ConsumerGroupListings(consumerGroupListings: List[ConsumerGroupListing])
 
   final case class TopicListing(
       name: String,
@@ -280,21 +286,22 @@ object kafkaManagementService {
   object TopicListing {
     def fromJava(ktl: KTopicListing): TopicListing = TopicListing(ktl.name(), ktl.isInternal())
   }
+  final case class TopicListings(listings: List[TopicListing])
 
   @service(Protobuf)
   trait KafkaManagement[F[_]] {
     def createPartitions(cpr: CreatePartitionsRequest): F[Unit]
     def createTopic(ctr: CreateTopicRequest): F[Unit]
-    def createTopics(ctrs: List[CreateTopicRequest]): F[Unit]
+    def createTopics(ctrs: CreateTopicRequests): F[Unit]
     def deleteTopic(t: String): F[Unit]
-    def deleteTopics(ts: List[String]): F[Unit]
+    def deleteTopics(ts: DeleteTopicsRequest): F[Unit]
     def describeCluster(r: Empty.type): F[Cluster]
-    def describeConfigs(rs: List[ConfigResource]): F[Configs]
-    def describeConsumerGroups(groupIds: List[String]): F[ConsumerGroups]
+    def describeConfigs(rs: ConfigResources): F[Configs]
+    def describeConsumerGroups(dcgr: DescribeConsumerGroupsRequest): F[ConsumerGroups]
     def describeTopics(topics: List[String]): F[Topics]
     def listConsumerGroupOffsets(groupId: String): F[ConsumerGroupOffsets]
-    def listConsumerGroups(r: Empty.type): F[List[ConsumerGroupListing]]
-    def listTopics(r: Empty.type): F[List[TopicListing]]
+    def listConsumerGroups(r: Empty.type): F[ConsumerGroupListings]
+    def listTopics(r: Empty.type): F[TopicListings]
   }
 
   object KafkaManagement {
