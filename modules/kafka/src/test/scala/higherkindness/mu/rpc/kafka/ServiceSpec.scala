@@ -23,6 +23,7 @@ import higherkindness.mu.rpc.protocol.Empty
 import higherkindness.mu.rpc.testing.servers.withServerChannel
 import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
 import org.apache.kafka.clients.admin.AdminClientConfig
+import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
 import org.scalatest._
 
 import scala.concurrent.ExecutionContext
@@ -147,5 +148,34 @@ class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest with Em
     }
   }
 
-  test("describe/list/list offsets consumer groups") {}
+  test("describe/list/list offsets consumer groups") {
+    withKafka { settings: AdminClientSettings[IO] =>
+      val topicName                                       = "topic"
+      implicit val stringSerializer: StringSerializer     = new StringSerializer
+      implicit val stringDeserializer: StringDeserializer = new StringDeserializer
+      createCustomTopic(topicName)
+      publishToKafka(topicName, (0 until 100).map(n => s"key-$n" -> s"value->$n"))
+      consumeFirstMessageFrom(topicName, autoCommit = true)
+
+      withClient(settings) { client =>
+        for {
+          list <- client.listConsumerGroups(Empty).attempt
+          _    <- IO(assert(list.isRight))
+          _    <- IO(assert(list.toOption.map(_.consumerGroupListings.size == 1).getOrElse(false)))
+          groupId = list.toOption
+            .flatMap(_.consumerGroupListings.headOption)
+            .map(_.groupId)
+            .getOrElse("")
+          offsets <- client.listConsumerGroupOffsets(groupId).attempt
+          _       <- IO(println(offsets))
+          _       <- IO(assert(offsets.isRight))
+          describe <- client
+            .describeConsumerGroups(DescribeConsumerGroupsRequest(List(groupId)))
+            .attempt
+          _ <- IO(println(describe))
+          _ <- IO(assert(describe.isRight))
+        } yield ()
+      }.unsafeRunSync()
+    }
+  }
 }
