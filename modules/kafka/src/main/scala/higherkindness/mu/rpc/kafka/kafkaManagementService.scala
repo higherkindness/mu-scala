@@ -42,7 +42,7 @@ import org.apache.kafka.clients.consumer.{OffsetAndMetadata => KOffsetAndMetadat
 import scala.collection.JavaConverters._
 
 object kafkaManagementService {
-  final case class CreatePartitionsRequest(ps: Map[String, Int])
+  final case class CreatePartitionsRequest(name: String, numPartitions: Int)
 
   final case class CreateTopicRequest(name: String, numPartitions: Int, replicationFactor: Short)
   final case class CreateTopicRequests(createTopicRequests: List[CreateTopicRequest])
@@ -250,7 +250,8 @@ object kafkaManagementService {
       ktd.authorizedOperations().asScala.map(AclOperation.fromJava).toList
     )
   }
-  final case class Topics(topics: Map[String, TopicDescription])
+  final case class Topics(topics: List[TopicDescription])
+  final case class DescribeTopicsRequest(names: List[String])
 
   final case class OffsetAndMetadata(
       offset: Long,
@@ -298,7 +299,7 @@ object kafkaManagementService {
     def describeCluster(r: Empty.type): F[Cluster]
     def describeConfigs(rs: ConfigResources): F[Configs]
     def describeConsumerGroups(dcgr: DescribeConsumerGroupsRequest): F[ConsumerGroups]
-    def describeTopics(topics: List[String]): F[Topics]
+    def describeTopics(topics: DescribeTopicsRequest): F[Topics]
     def listConsumerGroupOffsets(groupId: String): F[ConsumerGroupOffsets]
     def listConsumerGroups(r: Empty.type): F[ConsumerGroupListings]
     def listTopics(r: Empty.type): F[TopicListings]

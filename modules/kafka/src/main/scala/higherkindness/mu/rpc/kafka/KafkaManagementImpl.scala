@@ -28,7 +28,7 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
     adminClient: KafkaAdminClient[F]
 ) extends KafkaManagement[F] {
   override def createPartitions(cpr: CreatePartitionsRequest): F[Unit] =
-    adminClient.createPartitions(cpr.ps.mapValues(NewPartitions.increaseTo))
+    adminClient.createPartitions(Map(cpr.name -> NewPartitions.increaseTo(cpr.numPartitions)))
 
   override def createTopic(ctr: CreateTopicRequest): F[Unit] =
     adminClient.createTopic(new NewTopic(ctr.name, ctr.numPartitions, ctr.replicationFactor))
@@ -67,10 +67,10 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
       groups = kGroups.map { case (gid, cgd) => gid -> ConsumerGroupDescription.fromJava(cgd) }
     } yield ConsumerGroups(groups)
 
-  override def describeTopics(topics: List[String]): F[Topics] =
+  override def describeTopics(dtr: DescribeTopicsRequest): F[Topics] =
     for {
-      kTopics <- adminClient.describeTopics(topics)
-      topics = kTopics.map { case (topic, desc) => topic -> TopicDescription.fromJava(desc) }
+      kTopics <- adminClient.describeTopics(dtr.names)
+      topics = kTopics.map { case (topic, desc) => TopicDescription.fromJava(desc) }.toList
     } yield Topics(topics)
 
   override def listConsumerGroupOffsets(groupId: String): F[ConsumerGroupOffsets] =
