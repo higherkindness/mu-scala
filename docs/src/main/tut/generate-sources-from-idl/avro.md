@@ -8,6 +8,8 @@ permalink: /generate-sources-from-avro
 
 In this section we are going to explain how we can generate the different Scala structures using the `Avro` IDL.
 
+To achieve this generation **Mu** use [avrohugger](https://github.com/julianpeeters/avrohugger) behind the scenes on the command `srcGen` which runs on compile time by default.
+
 ## Protocols
 
 Let's start from the beginning, everything on `Avro` should be declared inside a `protocol`. 
@@ -52,7 +54,7 @@ record Person {
 
 ***srcGen =>***
 
-```scala
+```tut:silent
 final case class Person(name: String, age: Int, crossfitter: Boolean)
 ```
 
@@ -68,7 +70,7 @@ enum Errors {
 
 ***srcGen =>***
 
-```scala
+```tut:silent
 final object Errors extends Enumeration {
   type Errors = Value
   val NotFound, Duplicated, None = Value
@@ -94,7 +96,7 @@ record PeopleRequest {
 
 ***srcGen =>***
 
-```scala
+```tut:silent
 final case class PeopleRequest(name: Option[String])
 ```
 
@@ -110,7 +112,7 @@ record PeopleResponse {
 
 ***srcGen =>***
   
-```scala
+```tut:silent
 final case class PeopleResponse(result: Either[Errors.Value, Person])
 ```
 
@@ -127,7 +129,7 @@ record PeopleResponse {
 
 ***srcGen =>***
 
-```scala
+```tut:silent
 final case class PeopleResponse(result: String :+: Int :+: Errors.Value :+: CNil)
 ```
   
@@ -148,7 +150,7 @@ protocol PeopleService {
 
 ***srcGen =>***
 
-```scala
+```tut:silent
 @service(Avro) trait PeopleService[F[_]] {
 
   def getPerson(request: example.protocol.PeopleRequest): F[example.protocol.PeopleResponse]
@@ -168,7 +170,7 @@ protocol PeopleService {
 
 ***srcGen =>***
 
-```scala
+```tut:silent
 @service(Avro) trait PeopleService[F[_]] {
 
   def insertPerson(arg: Empty.type): F[Empty.type]
