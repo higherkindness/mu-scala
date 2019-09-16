@@ -10,7 +10,7 @@ In this section we are going to explain how we can generate the different Scala 
 
 To achieve this generation **Mu** use [avrohugger](https://github.com/julianpeeters/avrohugger) behind the scenes on the command `srcGen` which runs on compile time by default.
 
-## Protocols
+## Avro Protocols
 
 Let's start from the beginning, everything on `Avro` should be declared inside a `protocol`. 
 
@@ -119,7 +119,7 @@ final case class PeopleResponse(result: Either[Errors.Value, Person])
 ### Coproducts
 
 And finally, when we have **`three or more non-null types`** on a single `union`, 
-we'll have a [shapeless](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0)' `Coproduct` on the same order as well:
+we'll have a [shapeless](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#coproducts-and-discriminated-unions)' `Coproduct` on the same order as well:
 
 ```avroidl
 record PeopleResponse {
@@ -130,6 +130,8 @@ record PeopleResponse {
 ***srcGen =>***
 
 ```tut:silent
+import shapeless.{:+:, CNil}
+
 final case class PeopleResponse(result: String :+: Int :+: Errors.Value :+: CNil)
 ```
   
@@ -150,7 +152,7 @@ protocol PeopleService {
 
 ***srcGen =>***
 
-```tut:silent
+```scala
 @service(Avro) trait PeopleService[F[_]] {
 
   def getPerson(request: example.protocol.PeopleRequest): F[example.protocol.PeopleResponse]
@@ -170,7 +172,7 @@ protocol PeopleService {
 
 ***srcGen =>***
 
-```tut:silent
+```scala
 @service(Avro) trait PeopleService[F[_]] {
 
   def insertPerson(arg: Empty.type): F[Empty.type]
