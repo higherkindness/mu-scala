@@ -6,16 +6,16 @@ permalink: /
 
 # Quickstart
 
-## What is mu-rpc?
+## What is Mu?
 
-[mu] provides the ability to combine [RPC] protocols, services, and clients in your Scala program, thanks to [gRPC]. 
+[Mu] provides the ability to combine [RPC] protocols, services, and clients in your Scala program, thanks to [gRPC]. 
 Although it's fully integrated with [gRPC], there are some important differences when defining the protocols, as we’ll see later on.
 
 ## Installation
 
 [comment]: # (Start Replace)
 
-The current version for [mu] is "0.18.4" using the following common libraries and versions.
+The current version for [Mu] is "0.18.4" using the following common libraries and versions.
 
 [comment]: # (End Replace)
 
@@ -24,7 +24,7 @@ The current version for [mu] is "0.18.4" using the following common libraries an
  * [fs2] 1.0.4
  * [Monix] 3.0.0-RC2
 
-`mu-rpc` is cross-built for Scala `2.11.x` and `2.12.x`.
+`Mu` is cross-built for Scala `2.11.x` and `2.12.x`.
 
 To use the project, add the following to your build.sbt:
 
@@ -33,12 +33,12 @@ To use the project, add the following to your build.sbt:
 We've found that the compiler plugin needs to be added to your build.sbt file *after* your library dependencies due to the manner in which SBT evaluates the build file. 
 
 #### Artifacts
-[mu] is divided into multiple artifacts, grouped by scope:
+[Mu] is divided into multiple artifacts, grouped by scope:
 
 * `Server`: specifically for the RPC server.
-* `Client`: focused on the RPC auto-derived clients by `mu-rpc`.
+* `Client`: focused on the RPC auto-derived clients by `Mu`.
 * `Server/Client`: used from other artifacts for both Server and Client.
-* `Test`: useful to test `mu-rpc` applications.
+* `Test`: useful to test `Mu` applications.
 
 ###### Common
 *Artifact Name* | *Scope* | *Mandatory* | *Description*
@@ -74,7 +74,7 @@ We've found that the compiler plugin needs to be added to your build.sbt file *a
 *Artifact Name* | *Scope* | *Mandatory* | *Description*
 --- | --- | --- | ---
 `mu-config` | Server/Client | No | Provides configuration helpers using [mu-config] to load the application configuration values.
-`mu-rpc-testing` | Test | No | Utilities to test out `mu-rpc` applications. It provides the `grpc-testing` library as the transitive dependency.
+`mu-rpc-testing` | Test | No | Utilities to test out `Mu` applications. It provides the `grpc-testing` library as the transitive dependency.
 `mu-rpc-client-cache` | Client | No | Provides an algebra for caching RPC clients.
 `mu-rpc-marshallers-jodatime` | Server/Client | No | Provides marshallers for serializing and deserializing the `LocalDate` and `LocalDateTime` joda instances.
 
@@ -125,7 +125,7 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-client-cache" % "0.18.4"
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[mu]: https://github.com/higherkindness/mu
+[Mu]: https://github.com/higherkindness/mu
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

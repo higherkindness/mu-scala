@@ -6,14 +6,14 @@ permalink: /metrics-reporting
 
 # Metrics Reporting
 
-Currently, [mu] provides two different ways to monitor [gRPC] services: `Prometheus` and `Dropwizard`. The usage is quite similar for both.
+Currently, [Mu] provides two different ways to monitor [gRPC] services: `Prometheus` and `Dropwizard`. The usage is quite similar for both.
 
 ## Monitor Server Calls
 
 In order to monitor the RPC calls on the server side we need two things:
 
-* A `MetricsOps` implementation. `MetricsOps` is an algebra located in the `internal-core` module with the needed operations for registering metrics. [mu] provides two implementations, one for `Prometheus` and another one for `Dropwizard` but you can provide your own.
-* A `MetricsServerInterceptor`. [mu] provides an interceptor that receives a `MetricsOps` as an argument and register server metrics.
+* A `MetricsOps` implementation. `MetricsOps` is an algebra located in the `internal-core` module with the needed operations for registering metrics. [Mu] provides two implementations, one for `Prometheus` and another one for `Dropwizard` but you can provide your own.
+* A `MetricsServerInterceptor`. [Mu] provides an interceptor that receives a `MetricsOps` as an argument and register server metrics.
 
 Let's see how to register server metrics using `Prometheus` in the following fragment.
 
@@ -140,14 +140,14 @@ To check the metrics from our server or client, `Dropwizard` exposes it through 
 ```
 ## More
 
-For more details, in [metrics integration with mu] you can check a full example about [mu] metrics.
+For more details, in [metrics integration with Mu] you can check a full example about [Mu] metrics.
 
 
-[metrics integration with mu]: https://www.47deg.com/blog/metrics-integration-with-mu/
+[metrics integration with Mu]: https://www.47deg.com/blog/metrics-integration-with-mu/
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[mu]: https://github.com/higherkindness/mu
+[Mu]: https://github.com/higherkindness/mu
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
