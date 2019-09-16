@@ -9,7 +9,7 @@ permalink: /idl-generation
 
 As we said before, this feature is deprecated.  Even so, let's see how it works.
 
-The ability to generate `.proto`files from Scala definitions relies on `idlGen`, an sbt plugin to generate `Protobuf` and `Avro` IDL files from the [mu] service definitions.
+The ability to generate `.proto`files from Scala definitions relies on `idlGen`, an sbt plugin to generate `Protobuf` and `Avro` IDL files from the [Mu] service definitions.
 
 ## Plugin Installation
 
@@ -177,8 +177,8 @@ are converted (client and/or server-streaming services are ignored).
 When using `idlGen`, there are a couple key settings that can be configured according to various needs:
 
 * **`idlType`**: the type of IDL to be generated, either `proto` or `avro`.
-* **`idlGenSourceDir`**: the Scala source base directory, where your [mu] definitions are placed. By default: `Compile / sourceDirectory`, typically `src/main/scala/`.
-* **`idlGenTargetDir`**: the IDL target base directory, where the `idlGen` task will write the IDL files in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on [mu] service definitions. By default: `Compile / resourceManaged`, typically `target/scala-2.12/resource_managed/main/`.
+* **`idlGenSourceDir`**: the Scala source base directory, where your [Mu] definitions are placed. By default: `Compile / sourceDirectory`, typically `src/main/scala/`.
+* **`idlGenTargetDir`**: the IDL target base directory, where the `idlGen` task will write the IDL files in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on [Mu] service definitions. By default: `Compile / resourceManaged`, typically `target/scala-2.12/resource_managed/main/`.
 
 The source directory must exist, otherwise, the `idlGen` task will fail. Target directories will be created upon generation.
 
@@ -186,7 +186,7 @@ The source directory must exist, otherwise, the `idlGen` task will fail. Target 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[mu]: https://github.com/higherkindness/mu
+[Mu]: https://github.com/higherkindness/mu
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/
