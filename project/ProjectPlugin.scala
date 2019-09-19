@@ -24,44 +24,44 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String             = "1.8.4"
-      val avrohugger: String         = "1.0.0-RC15"
-      val betterMonadicFor: String   = "0.2.4"
-      val catsEffect: String         = "2.0.0"
-      val circe: String              = "0.11.1"
-      val frees: String              = "0.8.2"
-      val fs2: String                = "1.0.4"
-      val fs2Grpc: String            = "0.4.0-M6"
-      val grpc: String               = "1.18.0"
-      val jodaTime: String           = "2.10.1"
-      val http4s: String             = "0.20.0-M6"
-      val kindProjector: String      = "0.9.9"
-      val log4cats: String           = "0.3.0"
-      val logbackClassic: String     = "1.2.3"
-      val log4s: String              = "1.7.0"
-      val logback: String            = "1.2.3"
-      val monix: String              = "3.0.0-RC2"
-      val monocle: String            = "1.5.1-cats"
-      val nettySSL: String           = "2.0.20.Final"
-      val paradise: String           = "2.1.1"
-      val pbdirect: String           = "0.2.1"
-      val prometheus: String         = "0.6.0"
-      val pureconfig: String         = "0.10.2"
-      val reactiveStreams: String    = "1.0.2"
-      val scala: String              = "2.12.8"
-      val scopt: String              = "3.7.0"
-      val scalacheckToolbox: String  = "0.2.5"
-      val scalamockScalatest: String = "3.6.0"
-      val scalatest: String          = "3.0.6"
-      val skeuomorph: String         = "0.0.11"
-      val slf4j: String              = "1.7.26"
-      val dropwizard: String         = "4.0.5"
+      val avro4s: String            = "1.8.4"
+      val avrohugger: String        = "1.0.0-RC15"
+      val betterMonadicFor: String  = "0.2.4"
+      val catsEffect: String        = "2.0.0"
+      val circe: String             = "0.11.1"
+      val frees: String             = "0.8.2"
+      val fs2: String               = "1.0.4"
+      val fs2Grpc: String           = "0.4.0-M6"
+      val grpc: String              = "1.18.0"
+      val jodaTime: String          = "2.10.1"
+      val http4s: String            = "0.20.0-M6"
+      val kindProjector: String     = "0.10.3"
+      val log4cats: String          = "0.3.0"
+      val logbackClassic: String    = "1.2.3"
+      val log4s: String             = "1.7.0"
+      val logback: String           = "1.2.3"
+      val monix: String             = "3.0.0-RC2"
+      val monocle: String           = "1.5.1-cats"
+      val nettySSL: String          = "2.0.20.Final"
+      val paradise: String          = "2.1.1"
+      val pbdirect: String          = "0.2.1"
+      val prometheus: String        = "0.6.0"
+      val pureconfig: String        = "0.10.2"
+      val reactiveStreams: String   = "1.0.2"
+      val scala: String             = "2.12.10"
+      val scopt: String             = "3.7.0"
+      val scalacheckToolbox: String = "0.2.5"
+      val scalamock: String         = "4.4.0"
+      val scalatest: String         = "3.0.6"
+      val skeuomorph: String        = "0.0.11"
+      val slf4j: String             = "1.7.26"
+      val dropwizard: String        = "4.0.5"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect)                  % Test,
-        %%("scalamockScalatest")                         % Test,
+        %%("scalamock", V.scalamock)                                  % Test,
         %%("scheckToolboxDatetime", V.scalacheckToolbox) % Test
       )
     )
@@ -73,32 +73,32 @@ object ProjectPlugin extends AutoPlugin {
         "com.47deg" %% "pbdirect" % V.pbdirect,
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
-        "org.scala-lang"         % "scala-compiler" % scalaVersion.value,
-        %%("scalamockScalatest") % Test
+        "org.scala-lang"             % "scala-compiler" % scalaVersion.value,
+        %%("scalamock", V.scalamock) % Test
       )
     )
 
     lazy val internalMonixSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("monix", V.monix),
-        "org.reactivestreams"    % "reactive-streams" % V.reactiveStreams,
-        %%("scalamockScalatest") % Test
+        "org.reactivestreams"        % "reactive-streams" % V.reactiveStreams,
+        %%("scalamock", V.scalamock) % Test
       )
     )
 
     lazy val internalFs2Settings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("fs2-core", V.fs2),
-        "org.lyranthe.fs2-grpc"  %% "java-runtime" % V.fs2Grpc,
-        %%("scalamockScalatest") % Test
+        "org.lyranthe.fs2-grpc"      %% "java-runtime" % V.fs2Grpc,
+        %%("scalamock", V.scalamock) % Test
       )
     )
 
     lazy val clientCoreSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect),
-        %%("scalamockScalatest") % Test,
-        %("grpc-netty", V.grpc)  % Test
+        %%("scalamock", V.scalamock) % Test,
+        %("grpc-netty", V.grpc)      % Test
       )
     )
 
@@ -132,8 +132,8 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val healthCheckSettingsFS2: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "ch.qos.logback" % "logback-classic" % V.logbackClassic,
-        "io.chrisdavenport" %% "log4cats-core" % V.log4cats,
+        "ch.qos.logback"    % "logback-classic" % V.logbackClassic,
+        "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
         "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
         %%("fs2-core", V.fs2),
         %%("cats-effect", V.catsEffect)
@@ -142,8 +142,8 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val healthCheckSettingsMonix: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "ch.qos.logback" % "logback-classic" % V.logbackClassic,
-        "io.chrisdavenport" %% "log4cats-core" % V.log4cats,
+        "ch.qos.logback"    % "logback-classic" % V.logbackClassic,
+        "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
         "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
         %%("monix", V.monix),
         %%("cats-effect", V.catsEffect)
@@ -153,7 +153,7 @@ object ProjectPlugin extends AutoPlugin {
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %("grpc-netty", V.grpc),
-        %%("scalamockScalatest") % Test,
+        %%("scalamock", V.scalamock) % Test,
         "io.netty"               % "netty-tcnative-boringssl-static" % V.nettySSL % Test
       )
     )
@@ -259,7 +259,7 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
-      sbtPlugin:= true,
+      sbtPlugin := true,
       scriptedLaunchOpts := {
         scriptedLaunchOpts.value ++
           Seq(

@@ -206,7 +206,7 @@ lazy val `idlgen-sbt` = project
   .in(file("modules/idlgen/plugin"))
   .dependsOn(`idlgen-core`)
   .settings(moduleName := "sbt-mu-idlgen")
-  .settings(crossScalaVersions := Seq(scalac.`2.12`))
+  .settings(crossScalaVersions := Seq(V.scala))
   .settings(sbtPluginSettings: _*)
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
