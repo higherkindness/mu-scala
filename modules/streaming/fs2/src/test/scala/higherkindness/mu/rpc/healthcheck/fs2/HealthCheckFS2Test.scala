@@ -17,9 +17,6 @@
 package higherkindness.mu.rpc.healthcheck.fs2
 
 import cats.effect.IO
-import cats.effect.concurrent.Ref
-import fs2._
-import fs2.concurrent.Topic
 import higherkindness.mu.rpc.healthcheck.fs2.handler.HealthServiceFS2
 import higherkindness.mu.rpc.healthcheck.unary.handler.{HealthCheck, HealthStatus, ServerStatus}
 import org.scalatest.{Matchers, WordSpec}
