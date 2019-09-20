@@ -343,7 +343,7 @@ object ProjectPlugin extends AutoPlugin {
         organizationEmail = "hello@47deg.com"
       ),
       scalaVersion := V.scala,
-      crossScalaVersions := Seq("2.11.12", V.scala),
+      crossScalaVersions := Seq(V.scala),
       scalacOptions ++= scalacAdvancedOptions,
       scalacOptions ~= (_ filterNot Set("-Yliteral-types", "-Xlint").contains),
       Test / fork := true,
