@@ -20,7 +20,6 @@ import cats.effect.{Async, Resource}
 import cats.implicits._
 import monix.execution.Scheduler
 import monix.reactive.Consumer
-import higherkindness.mu.rpc.healthcheck.monix
 import higherkindness.mu.rpc.healthcheck.unary.handler.{HealthCheck, HealthStatus, ServerStatus}
 import higherkindness.mu.rpc.healthcheck.monix.serviceMonix.HealthCheckServiceMonix
 import higherkindness.mu.rpc.protocol.Empty
