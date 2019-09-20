@@ -73,9 +73,14 @@ case class AvroSrcGenerator(
       options: String*): Option[(String, Seq[String])] =
     generateFromSchemaProtocols(
       mainGenerator.fileParser
-        .getSchemaOrProtocols(inputFile, mainGenerator.format, mainGenerator.classStore),
+        .getSchemaOrProtocols(
+          inputFile,
+          mainGenerator.format,
+          mainGenerator.classStore,
+          mainGenerator.classLoader),
       serializationType,
-      options)
+      options
+    )
 
   def generateFrom(
       input: String,
