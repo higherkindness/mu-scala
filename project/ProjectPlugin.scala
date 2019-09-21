@@ -25,7 +25,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String            = "1.8.4"
-      val avrohugger: String        = "1.0.0-RC15"
+      val avrohugger: String        = "1.0.0-RC19"
       val betterMonadicFor: String  = "0.2.4"
       val catsEffect: String        = "2.0.0"
       val circe: String             = "0.11.1"
