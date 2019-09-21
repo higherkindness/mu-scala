@@ -35,7 +35,6 @@ package object channel {
       case OverrideAuthority(authority)      => mcb.overrideAuthority(authority)
       case UsePlaintext()                    => mcb.usePlaintext()
       case NameResolverFactory(rf)           => mcb.nameResolverFactory(rf)
-      case LoadBalancerFactory(lbf)          => mcb.loadBalancerFactory(lbf)
       case DefaultLoadBalancingPolicy(p)     => mcb.defaultLoadBalancingPolicy(p)
       case SetDecompressorRegistry(registry) => mcb.decompressorRegistry(registry)
       case SetCompressorRegistry(registry)   => mcb.compressorRegistry(registry)

@@ -25,7 +25,7 @@ import higherkindness.mu.rpc.common.{RpcBaseTestSuite, SC}
 import higherkindness.mu.rpc.server.netty._
 import io.grpc._
 import io.grpc.internal.GrpcUtil
-import io.grpc.netty.{GrpcSslContexts, ProtocolNegotiators}
+import io.grpc.netty.{GrpcSslContexts, InternalProtocolNegotiators}
 import io.grpc.util.MutableHandlerRegistry
 import io.netty.channel.ChannelOption
 import io.netty.channel.local.LocalServerChannel
@@ -109,12 +109,12 @@ trait RpcServerTestSuite extends RpcBaseTestSuite {
       BossEventLoopGroup(new NioEventLoopGroup(0)),
       WorkerEventLoopGroup(new NioEventLoopGroup(0)),
       SetSslContext(sslCtx),
-      SetProtocolNegotiator(ProtocolNegotiators.serverTls(sslCtx)),
+      SetProtocolNegotiator(InternalProtocolNegotiators.tls(sslCtx)),
       MaxConcurrentCallsPerConnection(1000),
       FlowControlWindow(5),
       MaxMessageSize(GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE),
       MaxHeaderListSize(GrpcUtil.DEFAULT_MAX_HEADER_LIST_SIZE),
-      KeepAliveTime(GrpcUtil.DEFAULT_KEEPALIVE_TIME_NANOS, TimeUnit.NANOSECONDS),
+      KeepAliveTime(GrpcUtil.DEFAULT_KEEPALIVE_TIMEOUT_NANOS, TimeUnit.NANOSECONDS),
       KeepAliveTimeout(GrpcUtil.DEFAULT_KEEPALIVE_TIMEOUT_NANOS, TimeUnit.NANOSECONDS),
       MaxConnectionIdle(1000, TimeUnit.MILLISECONDS),
       MaxConnectionAge(1000, TimeUnit.MILLISECONDS),

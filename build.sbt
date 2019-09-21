@@ -230,7 +230,7 @@ lazy val `idlgen-sbt` = project
 //// BENCHMARKS ////
 ////////////////////
 
-lazy val lastReleasedV = "0.18.0"
+lazy val lastReleasedV = "0.18.4"
 
 lazy val `benchmarks-vprev` = project
   .in(file("benchmarks/vprev"))
