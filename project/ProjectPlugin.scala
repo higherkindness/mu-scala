@@ -42,7 +42,7 @@ object ProjectPlugin extends AutoPlugin {
       val logback: String           = "1.2.3"
       val monix: String             = "3.0.0-RC2"
       val monocle: String           = "1.5.1-cats"
-      val nettySSL: String          = "2.0.20.Final"
+      val nettySSL: String          = "2.0.25.Final"
       val paradise: String          = "2.1.1"
       val pbdirect: String          = "0.2.1"
       val prometheus: String        = "0.6.0"
