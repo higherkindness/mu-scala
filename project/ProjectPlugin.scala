@@ -32,7 +32,7 @@ object ProjectPlugin extends AutoPlugin {
       val frees: String             = "0.8.2"
       val fs2: String               = "1.0.4"
       val fs2Grpc: String           = "0.4.0-M6"
-      val grpc: String              = "1.18.0"
+      val grpc: String              = "1.23.0"
       val jodaTime: String          = "2.10.1"
       val http4s: String            = "0.20.0-M6"
       val kindProjector: String     = "0.10.3"
