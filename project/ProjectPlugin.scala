@@ -55,7 +55,7 @@ object ProjectPlugin extends AutoPlugin {
       val scalatest: String         = "3.0.6"
       val skeuomorph: String        = "0.0.11"
       val slf4j: String             = "1.7.26"
-      val dropwizard: String        = "4.0.5"
+      val dropwizard: String        = "4.0.6"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
