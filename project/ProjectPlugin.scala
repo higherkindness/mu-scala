@@ -30,7 +30,7 @@ object ProjectPlugin extends AutoPlugin {
       val catsEffect: String        = "2.0.0"
       val circe: String             = "0.11.1"
       val frees: String             = "0.8.2"
-      val fs2: String               = "1.0.4"
+      val fs2: String               = "1.0.5"
       val fs2Grpc: String           = "0.4.0-M6"
       val grpc: String              = "1.18.0"
       val jodaTime: String          = "2.10.1"
