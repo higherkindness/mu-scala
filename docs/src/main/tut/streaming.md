@@ -6,7 +6,7 @@ permalink: /streaming
 
 # Streaming
 
-In the previous section, we saw that [mu] allows you to define unary services. Additionally, it supports the following streaming options:
+In the previous section, we saw that [Mu] allows you to define unary services. Additionally, it supports the following streaming options:
 
 * **Server streaming RPC**: similar to the unary service, but in this case the server will send back a stream of responses for a client request.
 * **Client streaming RPC**: in this case is the client which sends a stream of requests. The server will respond with a single response.
@@ -78,7 +78,7 @@ This code might be self-explanatory but let's review the different services one 
 
 ## Integrations
 
-In [mu], the streaming features have been implemented based on two data types. You can choose whichever data type fits your application's needs best.
+In [Mu], the streaming features have been implemented based on two data types. You can choose whichever data type fits your application's needs best.
 
 ### Observable
 
@@ -90,7 +90,7 @@ The example above shows a basic implementation of how to use this data type for 
 
 The second data type available for implementing streaming protocols is `fs2.Stream`, see the [FS2 Docs](https://github.com/functional-streams-for-scala/fs2) for more details. 
 
-Thanks to this new data type, [mu] supports `fs2.Stream[F, ?]` for all the types of streaming mentioned before.
+Thanks to this new data type, [Mu] supports `fs2.Stream[F, ?]` for all the types of streaming mentioned before.
 
 Let's compare our previous protocols using `fs2.Stream` instead of `Observable`.
 
@@ -142,7 +142,7 @@ As you can see, the Fs2 service is very similar to the Observable service.
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[mu]: https://github.com/higherkindness/mu
+[Mu]: https://github.com/higherkindness/mu
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

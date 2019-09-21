@@ -19,7 +19,7 @@ package server
 
 import java.util.concurrent.TimeUnit
 
-import io.grpc.netty.ProtocolNegotiator
+import io.grpc.netty.InternalProtocolNegotiator.ProtocolNegotiator
 import io.netty.channel.{ChannelOption, EventLoopGroup, ServerChannel}
 import io.netty.handler.ssl.SslContext
 

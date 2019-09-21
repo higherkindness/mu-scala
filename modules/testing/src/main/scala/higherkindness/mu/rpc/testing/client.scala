@@ -25,7 +25,7 @@ import io.grpc.NameResolver
 object client {
 
   case class FakeNameResolverFactory(expectedScheme: String) extends NameResolver.Factory {
-    def newNameResolver(targetUri: URI, params: Attributes): NameResolver =
+    override def newNameResolver(targetUri: URI, params: Attributes): NameResolver =
       if (expectedScheme == targetUri.getScheme) FakeNameResolver(targetUri) else null
 
     override def getDefaultScheme: String = expectedScheme

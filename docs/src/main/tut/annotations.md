@@ -6,7 +6,7 @@ permalink: /annotations
 
 # Annotations
 
-Below is a summary of all the current annotations that [mu] provides:
+Below is a summary of all the current annotations that [Mu] provides:
 
 Annotation | Scope | Arguments | Description
 --- | --- | --- | ---
@@ -19,7 +19,7 @@ Annotation | Scope | Arguments | Description
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[mu]: https://github.com/higherkindness/mu
+[Mu]: https://github.com/higherkindness/mu
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

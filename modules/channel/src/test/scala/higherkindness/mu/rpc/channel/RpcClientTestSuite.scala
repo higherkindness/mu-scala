@@ -26,7 +26,6 @@ import higherkindness.mu.rpc.common.{RpcBaseTestSuite, SC}
 import higherkindness.mu.rpc.testing.client.FakeNameResolverFactory
 import higherkindness.mu.rpc.testing.interceptors.NoopInterceptor
 import io.grpc.internal.testing.TestUtils
-import io.grpc.util.RoundRobinLoadBalancerFactory
 import io.grpc._
 
 trait RpcClientTestSuite extends RpcBaseTestSuite {
@@ -62,7 +61,6 @@ trait RpcClientTestSuite extends RpcBaseTestSuite {
       UsePlaintext(),
       NameResolverFactory(
         FakeNameResolverFactory(new URI("defaultscheme", "", "/[valid]", null).getScheme)),
-      LoadBalancerFactory(RoundRobinLoadBalancerFactory.getInstance()),
       DefaultLoadBalancingPolicy("round_robin"),
       SetDecompressorRegistry(DecompressorRegistry.getDefaultInstance),
       SetCompressorRegistry(CompressorRegistry.getDefaultInstance),

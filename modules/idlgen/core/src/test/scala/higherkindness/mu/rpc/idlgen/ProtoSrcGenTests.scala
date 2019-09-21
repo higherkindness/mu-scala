@@ -55,7 +55,7 @@ class ProtoSrcGenTests extends RpcBaseTestSuite {
       |@message final case class Book(isbn: Long, title: String, author: List[Option[Author]], binding_type: Option[BindingType])
       |@message final case class GetBookRequest(isbn: Long)
       |@message final case class GetBookViaAuthor(author: Option[Author])
-      |@message final case class BookStore(name: String, books: Map[Long, String], genres: List[Option[Genre]], payment_method: Long :+: Int :+: String :+: Option[Book] :+: CNil)
+      |@message final case class BookStore(name: String, books: Map[Long, String], genres: List[Option[Genre]], payment_method: Long :+: Int :+: String :+: Book :+: CNil)
       |
       |sealed trait Genre
       |object Genre {

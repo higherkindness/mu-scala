@@ -8,9 +8,9 @@ permalink: /ssl-tls
 
 > [gRPC](https://grpc.io/docs/guides/auth.html) has SSL/TLS integration and promotes the use of SSL/TLS to authenticate the server and encrypt all the data exchanged between the client and the server. Optional mechanisms are available for clients to provide certificates for mutual authentication.
 
-[mu] allows you to encrypt the connection between the server and the client through SSL/TLS. The main goal of using SSL is to protect your sensitive information and to keep your data secure between servers and clients.
+[Mu] allows you to encrypt the connection between the server and the client through SSL/TLS. The main goal of using SSL is to protect your sensitive information and to keep your data secure between servers and clients.
 
-As we mentioned in the [Main](/mu/scala/) section, we can choose to configure our client with `OkHttp` or `Netty` but if we want to encrypt our service, it's mandatory to use `Netty`. Currently, [mu] only supports encryption over *Netty*.
+As we mentioned in the [Main](/mu/scala/) section, we can choose to configure our client with `OkHttp` or `Netty` but if we want to encrypt our service, it's mandatory to use `Netty`. Currently, [Mu] only supports encryption over *Netty*.
 
 ## Requirements 
 
@@ -22,7 +22,7 @@ On the server and client side, we will need two files to configure the `SslConte
 
 ## Usage
 
-The first step to secure our [mu] services is to add the library dependencies `mu-rpc-netty-ssl` and `mu-rpc-netty` in our build.
+The first step to secure our [Mu] services is to add the library dependencies `mu-rpc-netty-ssl` and `mu-rpc-netty` in our build.
 
 For the second step, we have to move both server/client certificates and private keys to the `resources` folder.
 
@@ -116,8 +116,8 @@ trait Runtime extends CommonRuntime {
        .map(AddService)
        .map(c => List(SetSslContext(serverSslContext), c))
 
-  // Important. We have to create the server with Netty. OkHttp is not supported for the Ssl
-  // encryption in mu-rpc at this moment.
+  // Important. We have to create the server with Netty. OkHttp is not supported for the SSL
+  // encryption in Mu at this moment.
 
   val server: IO[GrpcServer[IO]] = grpcConfigs.flatMap(GrpcServer.netty[IO](8080, _))
 
@@ -186,7 +186,7 @@ For more details, [here](https://www.47deg.com/blog/mu-rpc-securing-communicatio
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[mu]: https://github.com/higherkindness/mu
+[Mu]: https://github.com/higherkindness/mu
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

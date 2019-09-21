@@ -1,10 +1,9 @@
 language: scala
 jdk:
-  - oraclejdk8
-dist: trusty
+  - openjdk8
+dist: xenial
 scala:
-  - 2.11.12
-  - 2.12.8
+  - 2.12.10
 before_cache:
   - du -h -d 1 $HOME/.ivy2/
   - du -h -d 2 $HOME/.sbt/
@@ -27,7 +26,7 @@ install:
   - gem install sass
   - gem install jekyll -v 3.2.1
 script:
-  - if [ $TRAVIS_SCALA_VERSION = "2.12.8" ]; then sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut; fi
+  - if [ $TRAVIS_SCALA_VERSION = "2.12.10" ]; then sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut; fi
   - if [ $TRAVIS_SCALA_VERSION = "2.11.12" ]; then sbt ++$TRAVIS_SCALA_VERSION clean test; fi
   - bash <(curl -s https://codecov.io/bash)
 stages:
@@ -39,13 +38,13 @@ stages:
 jobs:
   include:
     - stage: plugin
-      scala: 2.12.8
+      scala: 2.12.10
       script:
         - sbt ++$TRAVIS_SCALA_VERSION idlgen-core/test
         - sbt ++$TRAVIS_SCALA_VERSION idlgen-sbt/test
         - sbt ++$TRAVIS_SCALA_VERSION publishLocal idlgen-sbt/publishLocal idlgen-sbt/scripted
     - stage: deployPlugin
-      scala: 2.12.8
+      scala: 2.12.10
       if: branch = master AND type != pull_request AND env(SKIP_SBT_DEPLOY) = false
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
@@ -54,7 +53,7 @@ jobs:
             sbt ";project idlgen-sbt; release";
           fi
     - stage: deploy
-      scala: 2.12.8
+      scala: 2.12.10
       if: branch = master AND type != pull_request
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
@@ -68,7 +67,7 @@ jobs:
             sbt release;
           fi
     - stage: microsite
-      scala: 2.12.8
+      scala: 2.12.10
       if: branch = master AND type != pull_request
       script:
         - if grep -q "SNAPSHOT" version.sbt; then

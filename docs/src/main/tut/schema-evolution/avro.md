@@ -6,7 +6,7 @@ permalink: /schema-evolution/avro
 
 # Avro - Schema Evolution
 
-From now on, consider that we are using `AvroWithSchema` as the serialization mechanism in your [mu] program.
+From now on, consider that we are using `AvroWithSchema` as the serialization mechanism in your [Mu] program.
 
 According to the [Avro Specs](http://avro.apache.org/docs/current/spec.html#Schema+Resolution):
 
@@ -289,4 +289,4 @@ case class Response(a: String, b: Int = 123)
 case class NewResponse(a: String)
 ```
 
-[mu]: https://github.com/higherkindness/mu
+[Mu]: https://github.com/higherkindness/mu
