@@ -132,7 +132,6 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val healthCheckSettingsFS2: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "ch.qos.logback"    % "logback-classic" % V.logbackClassic,
         "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
         "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
         %%("fs2-core", V.fs2),
@@ -142,7 +141,6 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val healthCheckSettingsMonix: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "ch.qos.logback"    % "logback-classic" % V.logbackClassic,
         "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
         "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
         %%("monix", V.monix),
