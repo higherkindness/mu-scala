@@ -44,7 +44,7 @@ object ProjectPlugin extends AutoPlugin {
       val monocle: String           = "2.0.0"
       val nettySSL: String          = "2.0.25.Final"
       val paradise: String          = "2.1.1"
-      val pbdirect: String          = "0.2.3"
+      val pbdirect: String          = "0.3.1"
       val prometheus: String        = "0.6.0"
       val pureconfig: String        = "0.12.0"
       val reactiveStreams: String   = "1.0.3"
