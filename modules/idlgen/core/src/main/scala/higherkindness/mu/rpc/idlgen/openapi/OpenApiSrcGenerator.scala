@@ -72,8 +72,6 @@ object OpenApiSrcGenerator {
           val pkg        = packageName(path)
           pathFrom(path, file).toString ->
             Seq(
-              // s"//$resourcesBasePath",
-              // s"//${file.getParentFile.toPath()}",
               s"package ${pkg.value}",
               model[JsonSchemaF.Fixed].print(openApi),
               interfaceDefinition.print(openApi),
