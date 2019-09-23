@@ -1,11 +1,11 @@
 val V = new {
-  val circe          = "0.11.1"
-  val http4s         = "0.20.1"
-  val scalatest      = "3.0.5"
+  val circe          = "0.12.1"
+  val http4s         = "0.21.0-M5"
+  val scalatest      = "3.0.8"
   val logbackClassic = "1.2.3"
-  val cats           = "1.6.0"
-  val catsEffect     = "1.3.0"
-  val fs2            = "1.0.4"
+  val cats           = "2.0.0"
+  val catsEffect     = "2.0.0"
+  val fs2            = "2.0.1"
 }
 
 lazy val root = project
