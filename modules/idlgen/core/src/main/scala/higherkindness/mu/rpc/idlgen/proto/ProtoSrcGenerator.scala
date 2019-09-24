@@ -30,8 +30,8 @@ import higherkindness.mu.rpc.idlgen._
 import higherkindness.skeuomorph.mu.{CompressionType, MuF}
 import higherkindness.skeuomorph.protobuf.ParseProto.{parseProto, ProtoSource}
 import higherkindness.skeuomorph.protobuf.{ProtobufF, Protocol}
-import qq.droste.data.Mu
-import qq.droste.data.Mu._
+import higherkindness.droste.data.Mu
+import higherkindness.droste.data.Mu._
 
 import scala.util.matching.Regex
 
@@ -81,7 +81,7 @@ object ProtoSrcGenerator {
 
     private def getCode[F[_]: Sync](file: File): F[(String, Seq[String])] =
       parseProto[F, Mu[ProtobufF]]
-        .parse(ProtoSource(file.getName, file.getParent, idlTargetDir.getCanonicalPath))
+        .parse(ProtoSource(file.getName, file.getParent, Some(idlTargetDir.getCanonicalPath)))
         .map(
           protocol =>
             getPath(protocol) -> Seq(
