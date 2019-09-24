@@ -168,7 +168,8 @@ object IdlGenPlugin extends AutoPlugin {
                 idlGenMarshallerImports.value,
                 idlGenBigDecimal.value,
                 idlGenCompressionType.value,
-                UseIdiomaticEndpoints(idlGenIdiomaticEndpoints.value)
+                UseIdiomaticEndpoints(idlGenIdiomaticEndpoints.value),
+                srcGenIDLTargetDir.value
               ),
               idlType.value,
               srcGenSerializationType.value,

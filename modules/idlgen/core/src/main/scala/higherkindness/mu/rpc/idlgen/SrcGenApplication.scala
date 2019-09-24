@@ -16,6 +16,8 @@
 
 package higherkindness.mu.rpc.idlgen
 
+import java.io.File
+
 import higherkindness.mu.rpc.idlgen.Model.{
   BigDecimalTypeGen,
   CompressionTypeGen,
@@ -30,10 +32,11 @@ object SrcGenApplication {
       marshallersImports: List[MarshallersImport],
       bigDecimalTypeGen: BigDecimalTypeGen,
       compressionType: CompressionTypeGen,
-      useIdiomaticEndpoints: UseIdiomaticEndpoints
+      useIdiomaticEndpoints: UseIdiomaticEndpoints,
+      idlTargetDir: File
   ): GeneratorApplication[SrcGenerator] =
     new GeneratorApplication(
-      ProtoSrcGenerator.build(compressionType, useIdiomaticEndpoints),
+      ProtoSrcGenerator.build(compressionType, useIdiomaticEndpoints, idlTargetDir),
       AvroSrcGenerator(
         marshallersImports,
         bigDecimalTypeGen,
