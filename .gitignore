@@ -26,6 +26,8 @@ project/plugins/project/
 /out/
 .idea_modules/
 
+*.iml
+
 .DS_Store
 
 /secring.gpg
@@ -35,3 +37,6 @@ benchmarks/results
 .bloop/
 .metals/
 project/.bloop/
+
+*.iml
+

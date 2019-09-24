@@ -114,7 +114,7 @@ As you can see, the generic handler above requires `F` as the type parameter, wh
 
 ### Creating a runtime
 
-Since [mu] relies on `ConcurrentEffect` from the [cats-effect library](https://github.com/typelevel/cats-effect), we'll need a runtime for executing our effects. 
+Since [Mu] relies on `ConcurrentEffect` from the [cats-effect library](https://github.com/typelevel/cats-effect), we'll need a runtime for executing our effects. 
 
 We'll be using `IO` from `cats-effect`, but you can use any type that has a `ConcurrentEffect` instance.
 
@@ -258,7 +258,7 @@ run(new ServiceSpec)
 
 ## Client
 
-[mu] derives a client automatically based on the protocol. This is especially useful because you can distribute it depending on the protocol/service definitions. If you change something in your protocol definition, you will get a new client for free without having to write anything.
+[Mu] derives a client automatically based on the protocol. This is especially useful because you can distribute it depending on the protocol/service definitions. If you change something in your protocol definition, you will get a new client for free without having to write anything.
 
 You will need to add either `mu-rpc-netty` or `mu-rpc-okhttp` to your build.
 
@@ -342,7 +342,7 @@ You can check a full explanation about defining messages and services [here](htt
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[mu]: https://github.com/higherkindness/mu
+[Mu]: https://github.com/higherkindness/mu
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

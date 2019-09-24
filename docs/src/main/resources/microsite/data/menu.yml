@@ -14,6 +14,14 @@ options:
   - title: Generate sources from IDL
     url: generate-sources-from-idl
 
+    nested_options:
+
+      - title: Avro
+        url: generate-sources-from-avro
+
+      - title: Protocol Buffers
+        url: generate-sources-from-proto
+
   - title: IDL Generation
     url: idl-generation
 

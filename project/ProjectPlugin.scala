@@ -24,43 +24,45 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String             = "1.8.4"
-      val avrohugger: String         = "1.0.0-RC15"
-      val betterMonadicFor: String   = "0.2.4"
-      val catsEffect: String         = "1.2.0"
-      val circe: String              = "0.11.1"
-      val frees: String              = "0.8.2"
-      val fs2: String                = "1.0.4"
-      val fs2Grpc: String            = "0.4.0-M6"
-      val grpc: String               = "1.18.0"
-      val jodaTime: String           = "2.10.1"
-      val http4s                     = "0.20.0-M6"
-      val kindProjector: String      = "0.9.9"
-      val log4cats: String           = "0.3.0"
-      val log4s: String              = "1.7.0"
-      val logback: String            = "1.2.3"
-      val monix: String              = "3.0.0-RC2"
-      val monocle: String            = "1.5.1-cats"
-      val nettySSL: String           = "2.0.20.Final"
-      val paradise: String           = "2.1.1"
-      val pbdirect: String           = "0.2.1"
-      val prometheus: String         = "0.6.0"
-      val pureconfig: String         = "0.10.2"
-      val reactiveStreams: String    = "1.0.2"
-      val scala: String              = "2.12.8"
-      val scopt: String              = "3.7.0"
-      val scalacheckToolbox: String  = "0.2.5"
-      val scalamockScalatest: String = "3.6.0"
-      val scalatest: String          = "3.0.6"
-      val skeuomorph: String         = "0.0.11"
-      val slf4j: String              = "1.7.26"
-      val dropwizard: String         = "4.0.5"
+      val avro4s: String            = "1.8.4"
+      val avrohugger: String        = "1.0.0-RC19"
+      val betterMonadicFor: String  = "0.3.1"
+      val catsEffect: String        = "2.0.0"
+      val circe: String             = "0.12.1"
+      val frees: String             = "0.8.2"
+      val fs2: String               = "2.0.1"
+      val fs2Grpc: String           = "0.5.2"
+      val grpc: String              = "1.23.0"
+      val jodaTime: String          = "2.10.3"
+      val http4s: String            = "0.21.0-M5"
+      val kindProjector: String     = "0.10.3"
+      val log4cats: String          = "1.0.0"
+      val logbackClassic: String    = "1.2.3"
+      val log4s: String             = "1.8.2"
+      val logback: String           = "1.2.3"
+      val monix: String             = "3.0.0"
+      val monocle: String           = "2.0.0"
+      val nettySSL: String          = "2.0.25.Final"
+      val paradise: String          = "2.1.1"
+      val pbdirect: String          = "0.2.3"
+      val prometheus: String        = "0.6.0"
+      val pureconfig: String        = "0.12.0"
+      val reactiveStreams: String   = "1.0.3"
+      val scala: String             = "2.12.10"
+      val scopt: String             = "3.7.1"
+      val scalacheck: String        = "1.14.1"
+      val scalacheckToolbox: String = "0.3.1"
+      val scalamock: String         = "4.4.0"
+      val scalatest: String         = "3.0.8"
+      val skeuomorph: String        = "0.0.13"
+      val slf4j: String             = "1.7.28"
+      val dropwizard: String        = "4.1.0"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect)                  % Test,
-        %%("scalamockScalatest")                         % Test,
+        %%("scalamock", V.scalamock)                     % Test,
         %%("scheckToolboxDatetime", V.scalacheckToolbox) % Test
       )
     )
@@ -72,32 +74,32 @@ object ProjectPlugin extends AutoPlugin {
         "com.47deg" %% "pbdirect" % V.pbdirect,
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
-        "org.scala-lang"         % "scala-compiler" % scalaVersion.value,
-        %%("scalamockScalatest") % Test
+        "org.scala-lang"             % "scala-compiler" % scalaVersion.value,
+        %%("scalamock", V.scalamock) % Test
       )
     )
 
     lazy val internalMonixSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("monix", V.monix),
-        "org.reactivestreams"    % "reactive-streams" % V.reactiveStreams,
-        %%("scalamockScalatest") % Test
+        "org.reactivestreams"        % "reactive-streams" % V.reactiveStreams,
+        %%("scalamock", V.scalamock) % Test
       )
     )
 
     lazy val internalFs2Settings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("fs2-core", V.fs2),
-        "org.lyranthe.fs2-grpc"  %% "java-runtime" % V.fs2Grpc,
-        %%("scalamockScalatest") % Test
+        "org.lyranthe.fs2-grpc"      %% "java-runtime" % V.fs2Grpc,
+        %%("scalamock", V.scalamock) % Test
       )
     )
 
     lazy val clientCoreSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect),
-        %%("scalamockScalatest") % Test,
-        %("grpc-netty", V.grpc)  % Test
+        %%("scalamock", V.scalamock) % Test,
+        %("grpc-netty", V.grpc)      % Test
       )
     )
 
@@ -123,11 +125,37 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+    lazy val healthCheckSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("cats-effect", V.catsEffect)
+      )
+    )
+
+    lazy val healthCheckSettingsFS2: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        "ch.qos.logback"    % "logback-classic" % V.logbackClassic,
+        "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
+        "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
+        %%("fs2-core", V.fs2),
+        %%("cats-effect", V.catsEffect)
+      )
+    )
+
+    lazy val healthCheckSettingsMonix: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        "ch.qos.logback"    % "logback-classic" % V.logbackClassic,
+        "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
+        "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
+        %%("monix", V.monix),
+        %%("cats-effect", V.catsEffect)
+      )
+    )
+
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %("grpc-netty", V.grpc),
-        %%("scalamockScalatest") % Test,
-        "io.netty"               % "netty-tcnative-boringssl-static" % V.nettySSL % Test
+        %%("scalamock", V.scalamock) % Test,
+        "io.netty"                   % "netty-tcnative-boringssl-static" % V.nettySSL % Test
       )
     )
 
@@ -137,7 +165,7 @@ object ProjectPlugin extends AutoPlugin {
         %%("http4s-blaze-server", V.http4s),
         %%("http4s-circe", V.http4s),
         %%("http4s-blaze-client", V.http4s) % Test,
-        %%("circe-generic")                 % Test,
+        %%("circe-generic", V.circe)        % Test,
         "ch.qos.logback"                    % "logback-classic" % V.logback % Test
       )
     )
@@ -164,7 +192,7 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %("grpc-testing", V.grpc),
         %%("cats-effect", V.catsEffect),
-        %%("scalacheck") % Test
+        %%("scalacheck", V.scalacheck) % Test
       )
     )
 
@@ -232,7 +260,7 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
-      sbtPlugin:= true,
+      sbtPlugin := true,
       scriptedLaunchOpts := {
         scriptedLaunchOpts.value ++
           Seq(
@@ -315,14 +343,13 @@ object ProjectPlugin extends AutoPlugin {
         organizationEmail = "hello@47deg.com"
       ),
       scalaVersion := V.scala,
-      crossScalaVersions := Seq("2.11.12", V.scala),
+      crossScalaVersions := Seq(V.scala),
       scalacOptions ++= scalacAdvancedOptions,
       scalacOptions ~= (_ filterNot Set("-Yliteral-types", "-Xlint").contains),
       Test / fork := true,
       Tut / scalacOptions -= "-Ywarn-unused-import",
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
-      resolvers ++= Seq(Resolver.sonatypeRepo("releases"), Resolver.sonatypeRepo("snapshots")),
       addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
       addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
       libraryDependencies ++= Seq(
