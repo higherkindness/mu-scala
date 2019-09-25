@@ -37,7 +37,8 @@ object SrcGenApplication {
       compressionType: CompressionTypeGen,
       useIdiomaticEndpoints: UseIdiomaticEndpoints,
       idlTargetDir: File,
-      resourcesBasePath: Path
+      resourcesBasePath: Path,
+      httpImpl: HttpImpl
   ): GeneratorApplication[SrcGenerator] =
     new GeneratorApplication(
       ProtoSrcGenerator.build(compressionType, useIdiomaticEndpoints, idlTargetDir),
@@ -46,7 +47,7 @@ object SrcGenApplication {
         bigDecimalTypeGen,
         compressionType,
         useIdiomaticEndpoints),
-      OpenApiSrcGenerator(HttpImpl.Http4sV20, resourcesBasePath)
+      OpenApiSrcGenerator(httpImpl, resourcesBasePath)
     ) {
       def main(args: Array[String]): Unit = {
         generateFrom(args)

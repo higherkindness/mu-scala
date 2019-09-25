@@ -36,7 +36,7 @@ import higherkindness.skeuomorph.openapi.JsonSchemaF
 import scala.collection.JavaConverters._
 
 object OpenApiSrcGenerator {
-  sealed trait HttpImpl
+  sealed trait HttpImpl extends Product with Serializable
   object HttpImpl {
     case object Http4sV20 extends HttpImpl
     case object Http4sV18 extends HttpImpl
@@ -64,9 +64,7 @@ object OpenApiSrcGenerator {
         .map(OpenApi.extractNestedTypes[JsonSchemaF.Fixed])
         .map { openApi =>
           val (_, paths) =
-            file.getParentFile
-              .toPath()
-              .asScala
+            file.getParentFile.toPath.asScala
               .splitAt(resourcesBasePath.iterator().asScala.size + 1) //we need to add one because it is changing the resource path, adding open api
           val path: Path = Paths.get(paths.map(_.toString()).mkString("/"))
           val pkg        = packageName(path)
