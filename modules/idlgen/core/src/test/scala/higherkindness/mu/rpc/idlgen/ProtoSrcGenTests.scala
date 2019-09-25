@@ -33,7 +33,7 @@ class ProtoSrcGenTests extends RpcBaseTestSuite {
 
       val result: Option[(String, Seq[String])] =
         ProtoSrcGenerator
-          .build(NoCompressionGen, UseIdiomaticEndpoints(false))
+          .build(NoCompressionGen, UseIdiomaticEndpoints(false), new java.io.File("."))
           .generateFrom(files = Set(protoFile), serializationType = "", options = "")
           .map(t => (t._2, t._3.map(_.clean)))
           .headOption

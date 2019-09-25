@@ -44,7 +44,7 @@ object ProjectPlugin extends AutoPlugin {
       val nettySSL: String          = "2.0.25.Final"
       val paradise: String          = "2.1.1"
       val pbdirect: String          = "0.3.1"
-      val prometheus: String        = "0.6.0"
+      val prometheus: String        = "0.7.0"
       val pureconfig: String        = "0.12.0"
       val reactiveStreams: String   = "1.0.3"
       val scala: String             = "2.12.10"
@@ -53,7 +53,7 @@ object ProjectPlugin extends AutoPlugin {
       val scalacheckToolbox: String = "0.3.1"
       val scalamock: String         = "4.4.0"
       val scalatest: String         = "3.0.8"
-      val skeuomorph: String        = "0.0.14"
+      val skeuomorph: String        = "0.0.15"
       val slf4j: String             = "1.7.28"
       val dropwizard: String        = "4.1.0"
     }
