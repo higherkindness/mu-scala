@@ -26,6 +26,9 @@ import higherkindness.mu.rpc.idlgen.Model.{
 }
 import higherkindness.mu.rpc.idlgen.avro.AvroSrcGenerator
 import higherkindness.mu.rpc.idlgen.proto.ProtoSrcGenerator
+import higherkindness.mu.rpc.idlgen.openapi.OpenApiSrcGenerator
+import higherkindness.mu.rpc.idlgen.openapi.OpenApiSrcGenerator.HttpImpl
+import java.nio.file.Path
 
 object SrcGenApplication {
   def apply(
@@ -33,7 +36,9 @@ object SrcGenApplication {
       bigDecimalTypeGen: BigDecimalTypeGen,
       compressionType: CompressionTypeGen,
       useIdiomaticEndpoints: UseIdiomaticEndpoints,
-      idlTargetDir: File
+      idlTargetDir: File,
+      resourcesBasePath: Path,
+      httpImpl: HttpImpl
   ): GeneratorApplication[SrcGenerator] =
     new GeneratorApplication(
       ProtoSrcGenerator.build(compressionType, useIdiomaticEndpoints, idlTargetDir),
@@ -41,7 +46,8 @@ object SrcGenApplication {
         marshallersImports,
         bigDecimalTypeGen,
         compressionType,
-        useIdiomaticEndpoints)
+        useIdiomaticEndpoints),
+      OpenApiSrcGenerator(httpImpl, resourcesBasePath)
     ) {
       def main(args: Array[String]): Unit = {
         generateFrom(args)

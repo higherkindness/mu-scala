@@ -19,6 +19,7 @@ package higherkindness.mu.rpc.idlgen
 import java.io.File
 
 import higherkindness.mu.rpc.idlgen.Model._
+import higherkindness.mu.rpc.idlgen.openapi.OpenApiSrcGenerator.HttpImpl
 import sbt.Keys._
 import sbt._
 import sbt.io.{Path, PathFinder}
@@ -98,6 +99,11 @@ object IdlGenPlugin extends AutoPlugin {
       settingKey[Boolean](
         "If `true`, the gRPC endpoints generated in the services generated from idls will contain the " +
           "namespace as prefix and their method names will be capitalized. `false` by default.")
+
+    lazy val idlGenOpenApiHttpImpl: SettingKey[HttpImpl] =
+      settingKey[HttpImpl](
+        "The HTTP framework and version, used for the code generation." +
+          "`Http4sV20` by default.")
   }
 
   import higherkindness.mu.rpc.idlgen.IdlGenPlugin.autoImport._
@@ -127,7 +133,8 @@ object IdlGenPlugin extends AutoPlugin {
       else Nil
     },
     idlGenCompressionType := NoCompressionGen,
-    idlGenIdiomaticEndpoints := false
+    idlGenIdiomaticEndpoints := false,
+    idlGenOpenApiHttpImpl := HttpImpl.Http4sV20
   )
 
   lazy val taskSettings: Seq[Def.Setting[_]] = {
@@ -169,7 +176,9 @@ object IdlGenPlugin extends AutoPlugin {
                 idlGenBigDecimal.value,
                 idlGenCompressionType.value,
                 UseIdiomaticEndpoints(idlGenIdiomaticEndpoints.value),
-                srcGenIDLTargetDir.value
+                srcGenIDLTargetDir.value,
+                (Compile / resourceManaged).value.toPath,
+                idlGenOpenApiHttpImpl.value
               ),
               idlType.value,
               srcGenSerializationType.value,

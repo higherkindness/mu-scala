@@ -37,14 +37,13 @@ object ProjectPlugin extends AutoPlugin {
       val http4s: String            = "0.21.0-M5"
       val kindProjector: String     = "0.10.3"
       val log4cats: String          = "1.0.0"
-      val logbackClassic: String    = "1.2.3"
       val log4s: String             = "1.8.2"
       val logback: String           = "1.2.3"
       val monix: String             = "3.0.0"
       val monocle: String           = "2.0.0"
       val nettySSL: String          = "2.0.25.Final"
       val paradise: String          = "2.1.1"
-      val pbdirect: String          = "0.2.3"
+      val pbdirect: String          = "0.3.1"
       val prometheus: String        = "0.7.0"
       val pureconfig: String        = "0.12.0"
       val reactiveStreams: String   = "1.0.3"
@@ -133,7 +132,6 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val healthCheckSettingsFS2: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "ch.qos.logback"    % "logback-classic" % V.logbackClassic,
         "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
         "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
         %%("fs2-core", V.fs2),
@@ -143,7 +141,6 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val healthCheckSettingsMonix: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "ch.qos.logback"    % "logback-classic" % V.logbackClassic,
         "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
         "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
         %%("monix", V.monix),
