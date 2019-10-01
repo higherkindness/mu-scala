@@ -38,6 +38,7 @@ import org.apache.kafka.clients.admin.{
   TopicListing => KTopicListing
 }
 import org.apache.kafka.clients.consumer.{OffsetAndMetadata => KOffsetAndMetadata}
+import pbdirect.Pos
 
 import scala.collection.JavaConverters._
 
@@ -55,11 +56,11 @@ object kafkaManagementService {
   }
   final case class Cluster(nodes: List[Node], controller: Node, clusterId: String)
 
-  sealed trait ConfigType
+  sealed trait ConfigType extends Pos
   object ConfigType {
-    final case object TopicConfigType   extends ConfigType
-    final case object BrokerConfigType  extends ConfigType
-    final case object UnknownConfigType extends ConfigType
+    final case object TopicConfigType   extends ConfigType with Pos._0
+    final case object BrokerConfigType  extends ConfigType with Pos._1
+    final case object UnknownConfigType extends ConfigType with Pos._2
 
     def toJava(ct: ConfigType): KConfigResource.Type = ct match {
       case TopicConfigType   => KConfigResource.Type.TOPIC
@@ -80,14 +81,14 @@ object kafkaManagementService {
       ConfigResource(ConfigType.fromJava(kcr.`type`()), kcr.name())
   }
   final case class ConfigResources(configResources: List[ConfigResource])
-  sealed trait ConfigSource
+  sealed trait ConfigSource extends Pos
   object ConfigSource {
-    final case object DynamicTopicConfig         extends ConfigSource
-    final case object DynamicBrokerConfig        extends ConfigSource
-    final case object DynamicDefaultBrokerConfig extends ConfigSource
-    final case object StaticBrokerConfig         extends ConfigSource
-    final case object DefaultConfig              extends ConfigSource
-    final case object UnknownConfig              extends ConfigSource
+    final case object DynamicTopicConfig         extends ConfigSource with Pos._0
+    final case object DynamicBrokerConfig        extends ConfigSource with Pos._1
+    final case object DynamicDefaultBrokerConfig extends ConfigSource with Pos._2
+    final case object StaticBrokerConfig         extends ConfigSource with Pos._3
+    final case object DefaultConfig              extends ConfigSource with Pos._4
+    final case object UnknownConfig              extends ConfigSource with Pos._5
 
     def fromJava(kcs: KConfigEntry.ConfigSource): ConfigSource = kcs match {
       case KConfigEntry.ConfigSource.DYNAMIC_TOPIC_CONFIG          => DynamicTopicConfig
@@ -147,14 +148,14 @@ object kafkaManagementService {
       MemberAssignment.fromJava(kmd.assignment())
     )
   }
-  sealed trait ConsumerGroupState
+  sealed trait ConsumerGroupState extends Pos
   object ConsumerGroupState {
-    final case object CompletingRebalance extends ConsumerGroupState
-    final case object Dead                extends ConsumerGroupState
-    final case object Empty               extends ConsumerGroupState
-    final case object PreparingRebalance  extends ConsumerGroupState
-    final case object Stable              extends ConsumerGroupState
-    final case object Unknown             extends ConsumerGroupState
+    final case object CompletingRebalance extends ConsumerGroupState with Pos._0
+    final case object Dead                extends ConsumerGroupState with Pos._1
+    final case object Empty               extends ConsumerGroupState with Pos._2
+    final case object PreparingRebalance  extends ConsumerGroupState with Pos._3
+    final case object Stable              extends ConsumerGroupState with Pos._4
+    final case object Unknown             extends ConsumerGroupState with Pos._5
 
     def fromJava(kcgs: KConsumerGroupState): ConsumerGroupState = kcgs match {
       case KConsumerGroupState.COMPLETING_REBALANCE => CompletingRebalance
@@ -165,21 +166,21 @@ object kafkaManagementService {
       case KConsumerGroupState.UNKNOWN              => Unknown
     }
   }
-  sealed trait AclOperation
+  sealed trait AclOperation extends Pos
   object AclOperation {
-    final case object All             extends AclOperation
-    final case object Alter           extends AclOperation
-    final case object AlterConfigs    extends AclOperation
-    final case object Any             extends AclOperation
-    final case object ClusterAction   extends AclOperation
-    final case object Create          extends AclOperation
-    final case object Delete          extends AclOperation
-    final case object Describe        extends AclOperation
-    final case object DescribeConfigs extends AclOperation
-    final case object IdempotentWrite extends AclOperation
-    final case object Read            extends AclOperation
-    final case object Unknown         extends AclOperation
-    final case object Write           extends AclOperation
+    final case object All             extends AclOperation with Pos._0
+    final case object Alter           extends AclOperation with Pos._1
+    final case object AlterConfigs    extends AclOperation with Pos._2
+    final case object Any             extends AclOperation with Pos._3
+    final case object ClusterAction   extends AclOperation with Pos._4
+    final case object Create          extends AclOperation with Pos._5
+    final case object Delete          extends AclOperation with Pos._6
+    final case object Describe        extends AclOperation with Pos._7
+    final case object DescribeConfigs extends AclOperation with Pos._8
+    final case object IdempotentWrite extends AclOperation with Pos._9
+    final case object Read            extends AclOperation with Pos._10
+    final case object Unknown         extends AclOperation with Pos._11
+    final case object Write           extends AclOperation with Pos._12
 
     def fromJava(kao: KAclOperation): AclOperation = kao match {
       case KAclOperation.ALL              => All
