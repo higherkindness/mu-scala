@@ -57,7 +57,7 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
       kConfigs <- adminClient.describeConfigs(rs.configResources.map(ConfigResource.toJava))
       configs = kConfigs.map {
         case (cr, ces) =>
-          ConfigResource.fromJava(cr) -> ces.map(ConfigEntry.fromJava)
+          Config(ConfigResource.fromJava(cr), ces.map(ConfigEntry.fromJava))
       }.toList
     } yield Configs(configs)
 
