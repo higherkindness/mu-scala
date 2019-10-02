@@ -52,9 +52,9 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
     }
   }
 
-  override def describeConfigs(rs: ConfigResources): F[Configs] =
+  override def describeConfigs(dcr: DescribeConfigsRequest): F[Configs] =
     for {
-      kConfigs <- adminClient.describeConfigs(rs.configResources.map(ConfigResource.toJava))
+      kConfigs <- adminClient.describeConfigs(dcr.resources.map(ConfigResource.toJava))
       configs = kConfigs.map {
         case (cr, ces) =>
           Config(ConfigResource.fromJava(cr), ces.map(ConfigEntry.fromJava))

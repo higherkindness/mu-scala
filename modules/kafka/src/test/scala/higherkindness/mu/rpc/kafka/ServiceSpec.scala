@@ -146,7 +146,7 @@ class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest with Em
             false,
             false,
             Nil)
-          describe <- client.describeConfigs(ConfigResources(resource :: Nil)).attempt
+          describe <- client.describeConfigs(DescribeConfigsRequest(resource :: Nil)).attempt
           _        <- IO(assert(describe.isRight))
           _ <- IO(
             assert(

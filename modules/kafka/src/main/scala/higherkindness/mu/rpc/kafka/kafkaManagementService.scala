@@ -80,7 +80,7 @@ object kafkaManagementService {
     def fromJava(kcr: KConfigResource): ConfigResource =
       ConfigResource(ConfigType.fromJava(kcr.`type`()), kcr.name())
   }
-  final case class ConfigResources(configResources: List[ConfigResource])
+  final case class DescribeConfigsRequest(resources: List[ConfigResource])
   sealed trait ConfigSource extends Pos
   object ConfigSource {
     final case object DynamicTopicConfig         extends ConfigSource with Pos._0
@@ -299,7 +299,7 @@ object kafkaManagementService {
     def deleteTopic(t: String): F[Unit]
     def deleteTopics(ts: DeleteTopicsRequest): F[Unit]
     def describeCluster(r: Empty.type): F[Cluster]
-    def describeConfigs(rs: ConfigResources): F[Configs]
+    def describeConfigs(dcr: DescribeConfigsRequest): F[Configs]
     def describeConsumerGroups(dcgr: DescribeConsumerGroupsRequest): F[ConsumerGroups]
     def describeTopics(topics: DescribeTopicsRequest): F[Topics]
     def listConsumerGroupOffsets(groupId: String): F[ConsumerGroupOffsets]
