@@ -183,7 +183,6 @@ class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest with Em
             .map(_.groupId)
             .getOrElse("")
           offsets <- client.listConsumerGroupOffsets(groupId).attempt
-          _       <- IO(println(offsets))
           _       <- IO(assert(offsets.isRight))
           describe <- client
             .describeConsumerGroups(DescribeConsumerGroupsRequest(List(groupId)))

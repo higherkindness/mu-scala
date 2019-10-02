@@ -89,8 +89,8 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
       kOffsets <- adminClient.listConsumerGroupOffsets(groupId).partitionsToOffsetAndMetadata
       offsets = kOffsets.map {
         case (topic, offset) =>
-          TopicPartition.fromJava(topic) -> OffsetAndMetadata.fromJava(offset)
-      }
+          Offset(TopicPartition.fromJava(topic), OffsetAndMetadata.fromJava(offset))
+      }.toList
     } yield ConsumerGroupOffsets(offsets)
 
   override def listConsumerGroups(r: Empty.type): F[ConsumerGroupListings] =

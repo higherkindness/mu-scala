@@ -290,7 +290,8 @@ object kafkaManagementService {
         if (koam.leaderEpoch().isPresent()) Some(koam.leaderEpoch().get) else None
       )
   }
-  final case class ConsumerGroupOffsets(offsets: Map[TopicPartition, OffsetAndMetadata])
+  final case class Offset(topicPartition: TopicPartition, metadata: OffsetAndMetadata)
+  final case class ConsumerGroupOffsets(offsets: List[Offset])
 
   final case class ConsumerGroupListing(
       groupId: String,
