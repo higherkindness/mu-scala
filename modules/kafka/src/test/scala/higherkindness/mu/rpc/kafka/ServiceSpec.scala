@@ -133,16 +133,27 @@ class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest with Em
 
   test("alter/describe configs") {
     withKafka { settings: AdminClientSettings[IO] =>
-      val topicName = "topic"
-      createCustomTopic(topicName)
       withClient(settings) { client =>
         for {
-          describe <- client
-            .describeConfigs(
-              ConfigResources(List(ConfigResource(ConfigType.TopicConfigType, topicName))))
-            .attempt
-          _ <- IO(println(describe))
-          _ <- IO(assert(describe.isRight))
+          topicName <- "topic".pure[IO]
+          create    <- client.createTopic(CreateTopicRequest(topicName, 2, 1)).attempt
+          _         <- IO(assert(create.isRight))
+          resource = ConfigResource(ConfigType.TopicConfigType, topicName)
+          entry = ConfigEntry(
+            "min.insync.replicas",
+            "1",
+            ConfigSource.DefaultConfig,
+            false,
+            false,
+            Nil)
+          describe <- client.describeConfigs(ConfigResources(resource :: Nil)).attempt
+          _        <- IO(assert(describe.isRight))
+          _ <- IO(
+            assert(
+              describe.toOption
+                .flatMap(_.configs.headOption)
+                .map(c => c.resource == resource && c.entries.contains(entry))
+                .getOrElse(false)))
         } yield ()
       }.unsafeRunSync()
     }
