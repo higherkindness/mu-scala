@@ -29,6 +29,7 @@ import org.apache.kafka.common.{
 import org.apache.kafka.common.acl.{AclOperation => KAclOperation}
 import org.apache.kafka.common.config.{ConfigResource => KConfigResource}
 import org.apache.kafka.clients.admin.{
+  AlterConfigOp => KAlterConfigOp,
   ConfigEntry => KConfigEntry,
   ConsumerGroupDescription => KConsumerGroupDescription,
   ConsumerGroupListing => KConsumerGroupListing,
@@ -124,6 +125,27 @@ object kafkaManagementService {
   }
   final case class Config(resource: ConfigResource, entries: List[ConfigEntry])
   final case class Configs(configs: List[Config])
+  sealed trait OpType extends Pos
+  object OpType {
+    final case object Set      extends OpType with Pos._0
+    final case object Delete   extends OpType with Pos._1
+    final case object Append   extends OpType with Pos._2
+    final case object Subtract extends OpType with Pos._3
+
+    def toJava(ot: OpType): KAlterConfigOp.OpType = ot match {
+      case Set      => KAlterConfigOp.OpType.SET
+      case Delete   => KAlterConfigOp.OpType.DELETE
+      case Append   => KAlterConfigOp.OpType.APPEND
+      case Subtract => KAlterConfigOp.OpType.SUBTRACT
+    }
+  }
+  final case class AlterConfigOp(name: String, value: String, opType: OpType)
+  object AlterConfigOp {
+    def toJava(aco: AlterConfigOp): KAlterConfigOp =
+      new KAlterConfigOp(new KConfigEntry(aco.name, aco.value), OpType.toJava(aco.opType))
+  }
+  final case class AlterConfig(resource: ConfigResource, ops: List[AlterConfigOp])
+  final case class AlterConfigsRequest(configs: List[AlterConfig])
 
   final case class TopicPartition(topic: String, partition: Int)
   object TopicPartition {
@@ -293,6 +315,7 @@ object kafkaManagementService {
 
   @service(Protobuf)
   trait KafkaManagement[F[_]] {
+    def alterConfigs(acr: AlterConfigsRequest): F[Unit]
     def createPartitions(cpr: CreatePartitionsRequest): F[Unit]
     def createTopic(ctr: CreateTopicRequest): F[Unit]
     def createTopics(ctrs: CreateTopicRequests): F[Unit]

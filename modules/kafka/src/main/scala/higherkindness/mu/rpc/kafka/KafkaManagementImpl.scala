@@ -27,6 +27,17 @@ import kafkaManagementService._
 class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
     adminClient: KafkaAdminClient[F]
 ) extends KafkaManagement[F] {
+  override def alterConfigs(acr: AlterConfigsRequest): F[Unit] =
+    for {
+      configs <- acr.configs
+        .map { c =>
+          ConfigResource.toJava(c.resource) -> c.ops.map(AlterConfigOp.toJava)
+        }
+        .toMap
+        .pure[F]
+      alterConfigs <- adminClient.alterConfigs(configs)
+    } yield alterConfigs
+
   override def createPartitions(cpr: CreatePartitionsRequest): F[Unit] =
     adminClient.createPartitions(Map(cpr.name -> NewPartitions.increaseTo(cpr.numPartitions)))
 

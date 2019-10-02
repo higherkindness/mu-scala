@@ -139,10 +139,15 @@ class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest with Em
           create    <- client.createTopic(CreateTopicRequest(topicName, 2, 1)).attempt
           _         <- IO(assert(create.isRight))
           resource = ConfigResource(ConfigType.TopicConfigType, topicName)
+          request = AlterConfigsRequest(AlterConfig(
+            resource,
+            AlterConfigOp("cleanup.policy", "compact", OpType.Set) :: Nil) :: Nil)
+          alter <- client.alterConfigs(request).attempt
+          _     <- IO(assert(alter.isRight))
           entry = ConfigEntry(
-            "min.insync.replicas",
-            "1",
-            ConfigSource.DefaultConfig,
+            "cleanup.policy",
+            "compact",
+            ConfigSource.DynamicTopicConfig,
             false,
             false,
             Nil)
