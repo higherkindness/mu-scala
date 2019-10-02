@@ -175,20 +175,21 @@ class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest with Em
 
       withClient(settings) { client =>
         for {
-          list <- client.listConsumerGroups(Empty).attempt
-          _    <- IO(assert(list.isRight))
-          _    <- IO(assert(list.toOption.map(_.consumerGroupListings.size == 1).getOrElse(false)))
-          groupId = list.toOption
+          groups <- client.listConsumerGroups(Empty).attempt
+          _      <- IO(assert(groups.isRight))
+          _      <- IO(assert(groups.toOption.map(_.consumerGroupListings.size == 1).getOrElse(false)))
+          groupId = groups.toOption
             .flatMap(_.consumerGroupListings.headOption)
             .map(_.groupId)
             .getOrElse("")
           offsets <- client.listConsumerGroupOffsets(groupId).attempt
           _       <- IO(assert(offsets.isRight))
+          _       <- IO(assert(offsets.toOption.map(_.offsets.size == 1).getOrElse(false)))
           describe <- client
             .describeConsumerGroups(DescribeConsumerGroupsRequest(List(groupId)))
             .attempt
-          _ <- IO(println(describe))
           _ <- IO(assert(describe.isRight))
+          _ <- IO(assert(describe.toOption.map(_.consumerGroups.size == 1).getOrElse(false)))
         } yield ()
       }.unsafeRunSync()
     }

@@ -242,7 +242,8 @@ object kafkaManagementService {
         kcgd.authorizedOperations().asScala.map(AclOperation.fromJava).toList
       )
   }
-  final case class ConsumerGroups(consumerGroups: List[(String, ConsumerGroupDescription)])
+  final case class ConsumerGroup(groupId: String, description: ConsumerGroupDescription)
+  final case class ConsumerGroups(consumerGroups: List[ConsumerGroup])
   final case class DescribeConsumerGroupsRequest(groupIds: List[String])
 
   final case class TopicPartitionInfo(
