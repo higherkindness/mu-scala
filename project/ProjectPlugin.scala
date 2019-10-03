@@ -24,38 +24,40 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String            = "1.8.4"
-      val avrohugger: String        = "1.0.0-RC19"
-      val betterMonadicFor: String  = "0.3.1"
-      val catsEffect: String        = "2.0.0"
-      val circe: String             = "0.12.1"
-      val frees: String             = "0.8.2"
-      val fs2: String               = "2.0.1"
-      val fs2Grpc: String           = "0.5.2"
-      val grpc: String              = "1.24.0"
-      val jodaTime: String          = "2.10.3"
-      val http4s: String            = "0.21.0-M5"
-      val kindProjector: String     = "0.10.3"
-      val log4cats: String          = "1.0.0"
-      val log4s: String             = "1.8.2"
-      val logback: String           = "1.2.3"
-      val monix: String             = "3.0.0"
-      val monocle: String           = "2.0.0"
-      val nettySSL: String          = "2.0.25.Final"
-      val paradise: String          = "2.1.1"
-      val pbdirect: String          = "0.3.1"
-      val prometheus: String        = "0.7.0"
-      val pureconfig: String        = "0.12.1"
-      val reactiveStreams: String   = "1.0.3"
-      val scala: String             = "2.12.10"
-      val scopt: String             = "3.7.1"
-      val scalacheck: String        = "1.14.2"
-      val scalacheckToolbox: String = "0.3.1"
-      val scalamock: String         = "4.4.0"
-      val scalatest: String         = "3.0.8"
-      val skeuomorph: String        = "0.0.15"
-      val slf4j: String             = "1.7.28"
-      val dropwizard: String        = "4.1.0"
+      val avro4s: String             = "1.8.4"
+      val avrohugger: String         = "1.0.0-RC19"
+      val betterMonadicFor: String   = "0.3.1"
+      val catsEffect: String         = "2.0.0"
+      val circe: String              = "0.12.1"
+      val dropwizard: String         = "4.1.0"
+      val embeddedKafka: String      = "2.3.0"
+      val frees: String              = "0.8.2"
+      val fs2: String                = "2.0.1"
+      val fs2Grpc: String            = "0.5.2"
+      val fs2Kafka: String           = "0.20.1"
+      val grpc: String               = "1.24.0"
+      val jodaTime: String           = "2.10.3"
+      val http4s: String             = "0.21.0-M5"
+      val kindProjector: String      = "0.10.3"
+      val log4cats: String           = "1.0.0"
+      val log4s: String              = "1.8.2"
+      val logback: String            = "1.2.3"
+      val monix: String              = "3.0.0"
+      val monocle: String            = "2.0.0"
+      val nettySSL: String           = "2.0.25.Final"
+      val paradise: String           = "2.1.1"
+      val pbdirect: String           = "0.3.1"
+      val prometheus: String         = "0.7.0"
+      val pureconfig: String         = "0.12.1"
+      val reactiveStreams: String    = "1.0.3"
+      val scala: String              = "2.12.10"
+      val scopt: String              = "3.7.1"
+      val scalacheck: String         = "1.14.2"
+      val scalacheckToolbox: String  = "0.3.1"
+      val scalamock: String          = "4.4.0"
+      val scalatest: String          = "3.0.8"
+      val skeuomorph: String         = "0.0.15"
+      val slf4j: String              = "1.7.28"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
@@ -205,6 +207,13 @@ object ProjectPlugin extends AutoPlugin {
         "io.higherkindness" %% "skeuomorph"      % V.skeuomorph,
         "com.julianpeeters" %% "avrohugger-core" % V.avrohugger,
         %%("circe-generic", V.circe)
+      )
+    )
+
+    lazy val kafkaSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        "com.ovoenergy" %% "fs2-kafka" % V.fs2Kafka,
+        "io.github.embeddedkafka" %% "embedded-kafka" % V.embeddedKafka % Test
       )
     )
 

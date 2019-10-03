@@ -17,7 +17,7 @@
 package higherkindness.mu.rpc.healthcheck.monix
 
 import higherkindness.mu.rpc.healthcheck.unary.handler._
-import higherkindness.mu.rpc.protocol.{service, Empty, Protobuf}
+import higherkindness.mu.rpc.protocol.{service, Empty}
 import monix.reactive.Observable
 
 object serviceMonix {

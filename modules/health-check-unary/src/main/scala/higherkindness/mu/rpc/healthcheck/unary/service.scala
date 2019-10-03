@@ -17,7 +17,7 @@
 package higherkindness.mu.rpc.healthcheck.unary
 
 import higherkindness.mu.rpc.healthcheck.unary.handler._
-import higherkindness.mu.rpc.protocol.{service, Empty, Protobuf}
+import higherkindness.mu.rpc.protocol.{service, Empty}
 
 object serviceUnary {
 
