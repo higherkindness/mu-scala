@@ -29,9 +29,12 @@ object ProjectPlugin extends AutoPlugin {
       val betterMonadicFor: String   = "0.3.1"
       val catsEffect: String         = "2.0.0"
       val circe: String              = "0.12.1"
+      val dropwizard: String         = "4.1.0"
+      val embeddedKafka: String      = "2.3.0"
       val frees: String              = "0.8.2"
       val fs2: String                = "2.0.1"
       val fs2Grpc: String            = "0.5.2"
+      val fs2Kafka: String           = "0.20.1"
       val grpc: String               = "1.24.0"
       val jodaTime: String           = "2.10.3"
       val http4s: String             = "0.21.0-M5"
@@ -55,9 +58,6 @@ object ProjectPlugin extends AutoPlugin {
       val scalatest: String          = "3.0.8"
       val skeuomorph: String         = "0.0.15"
       val slf4j: String              = "1.7.28"
-      val dropwizard: String         = "4.1.0"
-      val fs2Kafka: String           = "0.20.1"
-      val embeddedKafka: String      = "2.3.0"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(

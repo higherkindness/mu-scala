@@ -337,6 +337,6 @@ object kafkaManagementService {
         settings: AdminClientSettings[F]
     ): Resource[F, KafkaManagement[F]] =
       adminClientResource[F](settings)
-        .map(c => new KafkaManagementImpl(c))
+        .map(new KafkaManagementImpl(_))
   }
 }

@@ -27,6 +27,7 @@ import kafkaManagementService._
 class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
     adminClient: KafkaAdminClient[F]
 ) extends KafkaManagement[F] {
+
   override def alterConfigs(acr: AlterConfigsRequest): F[Unit] =
     for {
       configs <- acr.configs
