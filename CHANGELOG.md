@@ -1,5 +1,31 @@
 # Changelog
 
+## 10/17/2019 - Version 0.19.0
+
+Release changes:
+
+* Upgrades Project ([#642](https://github.com/higherkindness/mu/pull/642))
+* Update fs2-core to 2.0.1 ([#660](https://github.com/higherkindness/mu/pull/660))
+* Update monocle-core to 1.6.0 ([#661](https://github.com/higherkindness/mu/pull/661))
+* Update monocle-core to 2.0.0 ([#663](https://github.com/higherkindness/mu/pull/663))
+* Add import root to protobuf source generator ([#627](https://github.com/higherkindness/mu/pull/627))
+* Update simpleclient to 0.7.0 ([#667](https://github.com/higherkindness/mu/pull/667))
+* Mmm/605 docs ([#625](https://github.com/higherkindness/mu/pull/625))
+* Update scalacheck to 1.14.2 ([#670](https://github.com/higherkindness/mu/pull/670))
+* Update sbt-microsites to 0.9.6 ([#668](https://github.com/higherkindness/mu/pull/668))
+* Open api generation ([#659](https://github.com/higherkindness/mu/pull/659))
+* Update pureconfig to 0.12.1 ([#671](https://github.com/higherkindness/mu/pull/671))
+* Update grpc-netty, grpc-okhttp, grpc-stub, ... to 1.24.0 ([#669](https://github.com/higherkindness/mu/pull/669))
+* Update sbt-microsites to 0.9.7 ([#672](https://github.com/higherkindness/mu/pull/672))
+* Mu kafka management service ([#638](https://github.com/higherkindness/mu/pull/638))
+* Update sbt-updates to 0.4.3 ([#675](https://github.com/higherkindness/mu/pull/675))
+* Update circe-core, circe-generic, ... to 0.12.2 ([#676](https://github.com/higherkindness/mu/pull/676))
+* Update sbt-updates to 0.5.0 ([#679](https://github.com/higherkindness/mu/pull/679))
+* Update log4cats-core, log4cats-slf4j to 1.0.1 ([#681](https://github.com/higherkindness/mu/pull/681))
+* Releases 0.19.0 ([#680](https://github.com/higherkindness/mu/pull/680))
+* Update sbt, scripted-plugin to 1.3.3 ([#678](https://github.com/higherkindness/mu/pull/678))
+
+
 ## 07/08/2019 - Version 0.18.4
 
 Release changes:
