@@ -10,7 +10,7 @@ Below is a summary of all the current annotations that [Mu] provides:
 
 Annotation | Scope | Arguments | Description
 --- | --- | --- | ---
-@service | `Trait` | (`SerializationType`, `Compression`) | Tags the trait as an [RPC] service in order to derive server and client code (macro expansion). For the `SerializationType` parameter value, `Protobuf` and `Avro` are the current supported serialization methods. For the `Compression` parameter value, only `Gzip` is supported.
+@service | `Trait` | (`SerializationType`, `Compression`) | Tags the trait as an [RPC] service in order to derive server and client code (macro expansion). For the `SerializationType` parameter value, `Protobuf` and `Avro` are the current supported serialization methods. Also, you can specify `Custom` serialization method. In that case, you need to provide own implementation of `io.grpc.MethodDescriptor.Marshaller[A]` for your type A. For the `Compression` parameter value, only `Gzip` is supported.
 @message | `Case Class` | - | Tags the case class as an RPC message.
 @option | `Object` | `(name: String, value: Any)` | Defines the equivalent headers in `.proto` files.
 @outputPackage | `Object` | `(value: String)` | Defines the `package` declaration in `.proto` files, and the `namespace` tag in `.avpr` files.

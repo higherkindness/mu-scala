@@ -28,6 +28,7 @@ sealed trait SerializationType extends Product with Serializable
 case object Protobuf           extends SerializationType
 case object Avro               extends SerializationType
 case object AvroWithSchema     extends SerializationType
+case object Custom             extends SerializationType
 
 sealed abstract class CompressionType extends Product with Serializable
 case object Identity                  extends CompressionType

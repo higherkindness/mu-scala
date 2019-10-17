@@ -222,8 +222,9 @@ object serviceImpl {
           case "Protobuf"       => Protobuf
           case "Avro"           => Avro
           case "AvroWithSchema" => AvroWithSchema
+          case "Custom"         => Custom
         }.getOrElse(sys.error(
-          "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema]"))
+          "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema|Custom]"))
 
       val encodersImport = serializationType match {
         case Protobuf =>
@@ -232,6 +233,8 @@ object serviceImpl {
           List(q"import _root_.higherkindness.mu.rpc.internal.encoders.avro._")
         case AvroWithSchema =>
           List(q"import _root_.higherkindness.mu.rpc.internal.encoders.avrowithschema._")
+        case Custom =>
+          List.empty
       }
 
       val methodDescriptors: List[Tree] = rpcRequests.map(_.methodDescriptor)
