@@ -93,6 +93,7 @@ object ScalaParser {
           case "Protobuf"       => Protobuf
           case "Avro"           => Avro
           case "AvroWithSchema" => AvroWithSchema
+          case "Custom"         => Custom
         })
   }
 }

@@ -18,7 +18,7 @@ package higherkindness.mu.rpc
 
 import higherkindness.mu.rpc.idlgen.util.Toolbox.u._
 import higherkindness.mu.rpc.idlgen.util.AstOptics.ast
-import higherkindness.mu.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
+import higherkindness.mu.rpc.protocol.{Avro, AvroWithSchema, Custom, Protobuf, SerializationType}
 
 package object idlgen {
 
@@ -28,7 +28,11 @@ package object idlgen {
   val ScalaFileExtension = ".scala"
 
   val serializationTypes: Map[String, SerializationType] =
-    Map("Protobuf" -> Protobuf, "Avro" -> Avro, "AvroWithSchema" -> AvroWithSchema)
+    Map(
+      "Protobuf"       -> Protobuf,
+      "Avro"           -> Avro,
+      "AvroWithSchema" -> AvroWithSchema,
+      "Custom"         -> Custom)
 
   object BaseType {
     def unapply(tpe: Tree): Option[String] = tpe match {

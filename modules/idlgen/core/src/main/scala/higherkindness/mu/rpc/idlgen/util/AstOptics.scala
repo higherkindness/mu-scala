@@ -18,7 +18,7 @@ package higherkindness.mu.rpc
 package idlgen
 package util
 
-import higherkindness.mu.rpc.protocol.{Avro, AvroWithSchema, Protobuf, SerializationType}
+import higherkindness.mu.rpc.protocol.{Avro, AvroWithSchema, Custom, Protobuf, SerializationType}
 import monocle._
 import monocle.function.all._
 
@@ -208,10 +208,12 @@ trait AstOptics {
     case Ident(TermName("Protobuf"))       => Protobuf
     case Ident(TermName("Avro"))           => Avro
     case Ident(TermName("AvroWithSchema")) => AvroWithSchema
+    case Ident(TermName("Custom"))         => Custom
   } {
     case Protobuf       => Ident(TermName("Protobuf"))
     case Avro           => Ident(TermName("Avro"))
     case AvroWithSchema => Ident(TermName("AvroWithSchema"))
+    case Custom         => Ident(TermName("Custom"))
   }
 
   val idlType: Traversal[Tree, SerializationType] =
