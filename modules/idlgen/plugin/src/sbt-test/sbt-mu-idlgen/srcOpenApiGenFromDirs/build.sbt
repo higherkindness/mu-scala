@@ -1,5 +1,5 @@
 val V = new {
-  val circe          = "0.12.2"
+  val circe          = "0.12.3"
   val http4s         = "0.21.0-M5"
   val scalatest      = "3.0.8"
   val logbackClassic = "1.2.3"
