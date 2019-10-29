@@ -28,6 +28,7 @@ install:
 stages:
   - test
   - deploy
+  - microsite
 jobs:
   include:
     - script:
@@ -58,7 +59,7 @@ jobs:
             git pull origin master;
             sbt release;
           fi
-    - stage: deploy
+    - stage: microsite
       if: branch = master AND type != pull_request
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
