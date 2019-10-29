@@ -10,6 +10,7 @@ import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
 import sbtorgpolicies.runnable.syntax._
 import sbtrelease.ReleasePlugin.autoImport._
+import sbtrelease.ReleaseStateTransformations._
 import scoverage.ScoverageKeys._
 
 import scala.language.reflectiveCalls
@@ -335,7 +336,7 @@ object ProjectPlugin extends AutoPlugin {
   }
 
   override def projectSettings: Seq[Def.Setting[_]] =
-    sharedReleaseProcess ++ warnUnusedImport ++ Seq(
+    warnUnusedImport ++ Seq(
       description := "mu RPC is a purely functional library for " +
         "building RPC endpoint based services with support for RPC and HTTP/2",
       startYear := Some(2017),
@@ -361,6 +362,18 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %%("scalatest", V.scalatest) % "test",
         %("slf4j-nop", V.slf4j)      % Test
+      ),
+      releaseProcess := Seq[ReleaseStep](
+        orgInitialVcsChecks,
+        checkSnapshotDependencies,
+        orgInquireVersions,
+        orgTagRelease,
+        orgUpdateChangeLog,
+        releaseStepCommandAndRemaining("publishSigned"),
+        releaseStepCommand("sonatypeBundleRelease"),
+        setNextVersion,
+        orgCommitNextVersion,
+        orgPostRelease
       )
     ) ++ Seq(
       // sbt-org-policies settings:
