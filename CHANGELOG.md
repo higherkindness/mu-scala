@@ -1,5 +1,19 @@
 # Changelog
 
+## 10/29/2019 - Version 0.19.1
+
+Release changes:
+
+* Allow specifying custom serialization mechanism ([#683](https://github.com/higherkindness/mu/pull/683))
+* Update metrics-core to 4.1.1 ([#684](https://github.com/higherkindness/mu/pull/684))
+* Update circe-core, circe-generic, ... to 0.12.3 ([#685](https://github.com/higherkindness/mu/pull/685))
+* Update grpc-netty, grpc-okhttp, grpc-stub, ... to 1.24.1 ([#686](https://github.com/higherkindness/mu/pull/686))
+* Update joda-time to 2.10.5 ([#688](https://github.com/higherkindness/mu/pull/688))
+* Update embedded-kafka to 2.3.1 ([#689](https://github.com/higherkindness/mu/pull/689))
+* Update simpleclient to 0.8.0 ([#687](https://github.com/higherkindness/mu/pull/687))
+* Releases 0.19.1 ([#690](https://github.com/higherkindness/mu/pull/690))
+
+
 ## 10/17/2019 - Version 0.19.0
 
 Release changes:
