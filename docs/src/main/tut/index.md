@@ -41,43 +41,41 @@ We've found that the compiler plugin needs to be added to your build.sbt file *a
 * `Test`: useful to test `Mu` applications.
 
 ###### Common
-*Artifact Name* | *Scope* | *Mandatory* | *Description*
---- | --- | --- | ---
-`mu-common` | Server/Client | Provided* | Common things that are used throughout the project.
-`mu-rpc-internal-core` | Server/Client | Provided* | Macros.
-`mu-rpc-internal-monix` | Server/Client | Provided* | Macros.
-`mu-rpc-internal-fs2` | Server/Client | Provided* | Macros.
+| *Artifact Name*  | *Scope*  | *Mandatory*  | *Description*  |
+|---|---|---|---|
+| `mu-common`  | Server/Client  | Provided*  | Common things that are used throughout the project.  |
+| `mu-rpc-internal-core`  | Server/Client  | Provided*  | Macros.  |
+| `mu-rpc-internal-monix`  | Server/Client  | Provided*  | Macros.  |
+| `mu-rpc-internal-fs2`  | Server/Client  | Provided*  | Macros.  |
 
 ###### Client/Server
-*Artifact Name* | *Scope* | *Mandatory* | *Description*
---- | --- | --- | ---
-`mu-rpc-server` | Server | Yes | Needed to attach RPC Services and spin-up an RPC Server.
-`mu-rpc-channel` | Client | Yes | Mandatory to define protocols and auto-derived clients.
-`mu-rpc-monix` | Client | Yes | Mandatory to define streaming operations with Monix Observables.
-`mu-rpc-fs2` | Client | Yes | Mandatory to define streaming operations with fs2 Streams.
-`mu-rpc-netty` | Client | Yes* | Mandatory on the client side if we are using `Netty` on the server side.
-`mu-rpc-netty-ssl` | Server/Client | No | Adds the `io.netty:netty-tcnative-boringssl-static:jar` dependency, aligned with the Netty version (if that's the case) used in the `mu-rpc` build. See [this section](https://github.com/grpc/grpc-java/blob/master/SECURITY.md#netty) for more information. By adding this you wouldn't need to figure the right version, `mu-rpc` gives you the right one.
-`mu-rpc-okhttp` | Client | Yes* | Mandatory on the client side if we are using `OkHttp` on the server side.
-
+| *Artifact Name*  | *Scope*  | *Mandatory*  | *Description*  |
+|---|---|---|---|
+| `mu-rpc-server`  | Server  | Yes  | Needed to attach RPC Services and spin-up an RPC Server.  |
+| `mu-rpc-channel`  | Client  | Yes  | Mandatory to define protocols and auto-derived clients.  |
+| `mu-rpc-monix`  | Client  | Yes  | Mandatory to define streaming operations with Monix Observables.  |
+| `mu-rpc-fs2`  | Client  | Yes  | Mandatory to define streaming operations with fs2 Streams.  |
+| `mu-rpc-netty`  | Client  | Yes*  | Mandatory on the client side if we are using `Netty` on the server side.  |
+| `mu-rpc-netty-ssl`  | Server/Client  | No  | Adds the `io.netty:netty-tcnative-boringssl-static:jar` dependency, aligned with the Netty version (if that's the case) used in the `mu-rpc` build. See [this section](https://github.com/grpc/grpc-java/blob/master/SECURITY.md#netty) for more information. By adding this you wouldn't need to figure the right version, `mu-rpc` gives you the right one.  |
+| `mu-rpc-okhttp`  | Client  | Yes*  | Mandatory on the client side if we are using `OkHttp` on the server side.  |
 
 * `Yes*`: on the client-side, you must choose either `Netty` or `OkHttp` as the transport layer.
 * `Provided*`: you don't need to add it to your build, it'll be transitively provided when using other dependencies.
 
 
 ###### Metrics
-*Artifact Name* | *Scope* | *Mandatory* | *Description*
---- | --- | --- | ---
-`mu-rpc-prometheus` | Server/Client | No | Scala interceptors which can be used to monitor gRPC services using Prometheus.
-`mu-rpc-dropwizard` | Server/Client | No | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics.
+| *Artifact Name*   | *Scope*  | *Mandatory*  | *Description*  |
+|---|---|---|---|
+| `mu-rpc-prometheus`  | Server/Client  | No  | Scala interceptors which can be used to monitor gRPC services using Prometheus.  |
+| `mu-rpc-dropwizard`  | Server/Client  | No  | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics.  |
 
 ###### Other
-*Artifact Name* | *Scope* | *Mandatory* | *Description*
---- | --- | --- | ---
-`mu-config` | Server/Client | No | Provides configuration helpers using [mu-config] to load the application configuration values.
-`mu-rpc-testing` | Test | No | Utilities to test out `Mu` applications. It provides the `grpc-testing` library as the transitive dependency.
-`mu-rpc-client-cache` | Client | No | Provides an algebra for caching RPC clients.
-`mu-rpc-marshallers-jodatime` | Server/Client | No | Provides marshallers for serializing and deserializing the `LocalDate` and `LocalDateTime` joda instances.
-
+| *Artifact Name*  | *Scope*  | *Mandatory*  | *Description*  |
+|---|---|---|---|
+| `mu-config`  | Server/Client  | No  | Provides configuration helpers using [mu-config] to load the application configuration values.  |
+| `mu-rpc-testing`  | Test  | No  | Utilities to test out `Mu` applications. It provides the `grpc-testing` library as the transitive dependency.  |
+| `mu-rpc-client-cache`  | Client  | No  | Provides an algebra for caching RPC clients.  |
+| `mu-rpc-marshallers-jodatime`  | Server/Client  | No  | Provides marshallers for serializing and deserializing the `LocalDate` and `LocalDateTime` joda instances.  |
 
 #### Build
 You can install any of these dependencies in your build as follows:

@@ -25,26 +25,19 @@ install:
   - rvm use 2.3.0 --install --fuzzy
   - gem install sass
   - gem install jekyll -v 3.2.1
-script:
-  - if [ $TRAVIS_SCALA_VERSION = "2.12.10" ]; then sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut; fi
-  - if [ $TRAVIS_SCALA_VERSION = "2.11.12" ]; then sbt ++$TRAVIS_SCALA_VERSION clean test; fi
-  - bash <(curl -s https://codecov.io/bash)
 stages:
-- test
-- plugin
-- deployPlugin
-- deploy
-- microsite
+  - test
+  - deploy
 jobs:
   include:
-    - stage: plugin
-      scala: 2.12.10
-      script:
-        - sbt ++$TRAVIS_SCALA_VERSION idlgen-core/test
-        - sbt ++$TRAVIS_SCALA_VERSION idlgen-sbt/test
-        - sbt ++$TRAVIS_SCALA_VERSION publishLocal idlgen-sbt/publishLocal idlgen-sbt/scripted
-    - stage: deployPlugin
-      scala: 2.12.10
+    - script:
+      - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut
+      - bash <(curl -s https://codecov.io/bash)
+    - script:
+      - sbt ++$TRAVIS_SCALA_VERSION idlgen-core/test
+      - sbt ++$TRAVIS_SCALA_VERSION idlgen-sbt/test
+      - sbt ++$TRAVIS_SCALA_VERSION publishLocal idlgen-sbt/publishLocal idlgen-sbt/scripted
+    - stage: deploy
       if: branch = master AND type != pull_request AND env(SKIP_SBT_DEPLOY) = false
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
@@ -53,7 +46,6 @@ jobs:
             sbt ";project idlgen-sbt; release";
           fi
     - stage: deploy
-      scala: 2.12.10
       if: branch = master AND type != pull_request
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
@@ -66,8 +58,7 @@ jobs:
             git pull origin master;
             sbt release;
           fi
-    - stage: microsite
-      scala: 2.12.10
+    - stage: deploy
       if: branch = master AND type != pull_request
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
