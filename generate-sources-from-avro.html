@@ -45,9 +45,8 @@ The <code class="highlighter-rouge">record</code> will be translated to a <code 
 
 <p><strong><em>srcGen =&gt;</em></strong></p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">Person</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">age</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">crossfitter</span><span class="k">:</span> <span class="kt">Boolean</span><span class="o">)</span>
-</code></pre>
-</div>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">Person</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">age</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">crossfitter</span><span class="k">:</span> <span class="kt">Boolean</span><span class="o">)</span>
+</code></pre></div></div>
 
 <h2 id="enums">Enums</h2>
 
@@ -60,12 +59,11 @@ The <code class="highlighter-rouge">record</code> will be translated to a <code 
 
 <p><strong><em>srcGen =&gt;</em></strong></p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">final</span> <span class="k">object</span> <span class="nc">Errors</span> <span class="k">extends</span> <span class="nc">Enumeration</span> <span class="o">{</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">final</span> <span class="k">object</span> <span class="nc">Errors</span> <span class="k">extends</span> <span class="nc">Enumeration</span> <span class="o">{</span>
   <span class="k">type</span> <span class="kt">Errors</span> <span class="o">=</span> <span class="nc">Value</span>
-  <span class="k">val</span> <span class="nc">NotFound</span><span class="o">,</span> <span class="nc">Duplicated</span><span class="o">,</span> <span class="nc">None</span> <span class="k">=</span> <span class="nc">Value</span>
+  <span class="k">val</span> <span class="nv">NotFound</span><span class="o">,</span> <span class="nc">Duplicated</span><span class="o">,</span> <span class="nc">None</span> <span class="k">=</span> <span class="nc">Value</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="unions">Unions</h2>
 
@@ -85,9 +83,8 @@ As its name suggest, it represents a type composed by another types.</p>
 
 <p><strong><em>srcGen =&gt;</em></strong></p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">PeopleRequest</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span>
-</code></pre>
-</div>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">PeopleRequest</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span>
+</code></pre></div></div>
 
 <h3 id="eithers">Eithers</h3>
 
@@ -100,9 +97,8 @@ As its name suggest, it represents a type composed by another types.</p>
 
 <p><strong><em>srcGen =&gt;</em></strong></p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">PeopleResponse</span><span class="o">(</span><span class="n">result</span><span class="k">:</span> <span class="kt">Either</span><span class="o">[</span><span class="kt">Errors.Value</span>, <span class="kt">Person</span><span class="o">])</span>
-</code></pre>
-</div>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">PeopleResponse</span><span class="o">(</span><span class="n">result</span><span class="k">:</span> <span class="kt">Either</span><span class="o">[</span><span class="kt">Errors.Value</span>, <span class="kt">Person</span><span class="o">])</span>
+</code></pre></div></div>
 
 <h3 id="coproducts">Coproducts</h3>
 
@@ -116,11 +112,10 @@ we’ll have a <a href="https://github.com/milessabin/shapeless/wiki/Feature-ove
 
 <p><strong><em>srcGen =&gt;</em></strong></p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">shapeless.</span><span class="o">{:+:,</span> <span class="nc">CNil</span><span class="o">}</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">shapeless.</span><span class="o">{:+:,</span> <span class="nc">CNil</span><span class="o">}</span>
 
 <span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">PeopleResponse</span><span class="o">(</span><span class="n">result</span><span class="k">:</span> <span class="kt">String</span> <span class="kt">:+:</span> <span class="kt">Int</span> <span class="kt">:+:</span> <span class="kt">Errors.Value</span> <span class="kt">:+:</span> <span class="kt">CNil</span><span class="o">)</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="services">Services</h2>
 
@@ -138,13 +133,12 @@ we’ll have a <a href="https://github.com/milessabin/shapeless/wiki/Feature-ove
 
 <p><strong><em>srcGen =&gt;</em></strong></p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="nd">@service</span><span class="o">(</span><span class="nc">Avro</span><span class="o">)</span> <span class="k">trait</span> <span class="nc">PeopleService</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@service</span><span class="o">(</span><span class="nc">Avro</span><span class="o">)</span> <span class="k">trait</span> <span class="nc">PeopleService</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
 
-  <span class="k">def</span> <span class="n">getPerson</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">example.protocol.PeopleRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">example.protocol.PeopleResponse</span><span class="o">]</span>
+  <span class="k">def</span> <span class="nf">getPerson</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">example.protocol.PeopleRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">example.protocol.PeopleResponse</span><span class="o">]</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Also, an endpoint can be declared without params or non returning anything and <code class="highlighter-rouge">Mu</code> will use its <code class="highlighter-rouge">Empty</code> type to cover these cases:</p>
 
@@ -157,13 +151,12 @@ we’ll have a <a href="https://github.com/milessabin/shapeless/wiki/Feature-ove
 
 <p><strong><em>srcGen =&gt;</em></strong></p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="nd">@service</span><span class="o">(</span><span class="nc">Avro</span><span class="o">)</span> <span class="k">trait</span> <span class="nc">PeopleService</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@service</span><span class="o">(</span><span class="nc">Avro</span><span class="o">)</span> <span class="k">trait</span> <span class="nc">PeopleService</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
 
-  <span class="k">def</span> <span class="n">insertPerson</span><span class="o">(</span><span class="n">arg</span><span class="k">:</span> <span class="kt">Empty.</span><span class="k">type</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">Empty.</span><span class="k">type</span><span class="o">]</span>
+  <span class="k">def</span> <span class="nf">insertPerson</span><span class="o">(</span><span class="n">arg</span><span class="k">:</span> <span class="kt">Empty.</span><span class="k">type</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">Empty.</span><span class="k">type</span><span class="o">]</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>That’s all from the <em>Mu</em> source generation from <code class="highlighter-rouge">Avro</code>. 
 For a full understanding of the <code class="highlighter-rouge">Avro</code> syntax we recommend you to take a look to the <a href="http://avro.apache.org/docs/current/idl.html">Avro Official site</a>

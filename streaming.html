@@ -10,7 +10,7 @@
 
 <p>Let’s keep going. We’ll be completing our protocol’s example with the three streaming options:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">higherkindness.mu.rpc.protocol._</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">higherkindness.mu.rpc.protocol._</span>
 
 <span class="k">object</span> <span class="nc">service</span> <span class="o">{</span>
 
@@ -32,7 +32,7 @@
      * @param request Single client request.
      * @return Stream of server responses.
      */</span>
-    <span class="k">def</span> <span class="n">lotsOfReplies</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">lotsOfReplies</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
 
     <span class="cm">/**
      * Client streaming RPC where the client writes a sequence of messages and sends them to the server,
@@ -44,7 +44,7 @@
      * @param request Stream of client requests.
      * @return Single server response.
      */</span>
-    <span class="k">def</span> <span class="n">lotsOfGreetings</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">lotsOfGreetings</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
 
     <span class="cm">/**
      * Bidirectional streaming RPC where both sides send a sequence of messages using a read-write stream.
@@ -58,13 +58,12 @@
      * @param request Stream of client requests.
      * @return Stream of server responses.
      */</span>
-    <span class="k">def</span> <span class="n">bidiHello</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">bidiHello</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
 
   <span class="o">}</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>This code might be self-explanatory but let’s review the different services one by one:</p>
 
@@ -92,7 +91,7 @@
 
 <p>Let’s compare our previous protocols using <code class="highlighter-rouge">fs2.Stream</code> instead of <code class="highlighter-rouge">Observable</code>.</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">higherkindness.mu.rpc.protocol._</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">higherkindness.mu.rpc.protocol._</span>
 
 <span class="k">object</span> <span class="nc">service</span> <span class="o">{</span>
 
@@ -111,7 +110,7 @@
      * @param request Single client request.
      * @return Stream of server responses.
      */</span>
-    <span class="k">def</span> <span class="n">lotsOfReplies</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">lotsOfReplies</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloResponse</span><span class="o">]</span>
 
     <span class="cm">/**
      * Client streaming RPC 
@@ -119,7 +118,7 @@
      * @param request Stream of client requests.
      * @return Single server response.
      */</span>
-    <span class="k">def</span> <span class="n">lotsOfGreetings</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">lotsOfGreetings</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
 
     <span class="cm">/**
      * Bidirectional streaming RPC 
@@ -127,13 +126,12 @@
      * @param request Stream of client requests.
      * @return Stream of server responses.
      */</span>
-    <span class="k">def</span> <span class="n">bidiHello</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">bidiHello</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloResponse</span><span class="o">]</span>
 
   <span class="o">}</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>As you can see, the Fs2 service is very similar to the Observable service.</p>
 

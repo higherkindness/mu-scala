@@ -13,9 +13,8 @@ In the future, both (<code class="highlighter-rouge">Avro</code> and <code class
 
 <p>Add the following line to <em>project/plugins.sbt</em>:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="n">addSbtPlugin</span><span class="o">(</span><span class="s">"io.higherkindness"</span> <span class="o">%</span> <span class="s">"sbt-mu-idlgen"</span> <span class="o">%</span> <span class="s">"0.18.4"</span><span class="o">)</span>
-</code></pre>
-</div>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">addSbtPlugin</span><span class="o">(</span><span class="s">"io.higherkindness"</span> <span class="o">%</span> <span class="s">"sbt-mu-idlgen"</span> <span class="o">%</span> <span class="s">"0.19.1"</span><span class="o">)</span>
+</code></pre></div></div>
 
 <p>Note that the plugin is only available for Scala 2.12.</p>
 
@@ -23,15 +22,13 @@ In the future, both (<code class="highlighter-rouge">Avro</code> and <code class
 
 <p>For generating <code class="highlighter-rouge">Scala</code> definitions we use <code class="highlighter-rouge">srcGen</code>. The easiest way to use the plugin is by integrating the source generation in your compile process adding this import to your <code class="highlighter-rouge">build.sbt</code> file:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">higherkindness.mu.rpc.idlgen.IdlGenPlugin.autoImport._</span>
-</code></pre>
-</div>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">higherkindness.mu.rpc.idlgen.IdlGenPlugin.autoImport._</span>
+</code></pre></div></div>
 <p>and the setting,</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="n">idlType</span> <span class="o">:=</span> <span class="n">proto</span>  
-<span class="n">sourceGenerators</span> <span class="n">in</span> <span class="nc">Compile</span> <span class="o">+=</span> <span class="o">(</span><span class="n">srcGen</span> <span class="n">in</span> <span class="nc">Compile</span><span class="o">).</span><span class="n">taskValue</span>
-</code></pre>
-</div>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">idlType</span> <span class="o">:=</span> <span class="n">proto</span>  
+<span class="n">sourceGenerators</span> <span class="n">in</span> <span class="nc">Compile</span> <span class="o">+=</span> <span class="o">(</span><span class="n">srcGen</span> <span class="n">in</span> <span class="nc">Compile</span><span class="o">).</span><span class="py">taskValue</span>
+</code></pre></div></div>
 
 <p>Otherwise, you can run the following sbt task (with the settings above in your <code class="highlighter-rouge">build.sbt</code>):</p>
 
@@ -44,12 +41,11 @@ srcGen
 
 <p>There are a couple of key settings that can be configured according to various needs. In that case, you can add them like in the following example:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="n">idlType</span> <span class="o">:=</span> <span class="s">"proto"</span><span class="o">,</span>
-<span class="n">srcGenTargetDir</span> <span class="o">:=</span> <span class="o">(</span><span class="nc">Compile</span> <span class="o">/</span> <span class="n">sourceManaged</span><span class="o">).</span><span class="n">value</span> <span class="o">/</span> <span class="s">"mu_proto"</span><span class="o">,</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">idlType</span> <span class="o">:=</span> <span class="s">"proto"</span><span class="o">,</span>
+<span class="n">srcGenTargetDir</span> <span class="o">:=</span> <span class="o">(</span><span class="nc">Compile</span> <span class="o">/</span> <span class="n">sourceManaged</span><span class="o">).</span><span class="py">value</span> <span class="o">/</span> <span class="s">"mu_proto"</span><span class="o">,</span>
 <span class="n">srcGenSerializationType</span> <span class="o">:=</span> <span class="s">"Protobuf"</span><span class="o">,</span>
-<span class="n">sourceGenerators</span> <span class="n">in</span> <span class="nc">Compile</span> <span class="o">+=</span> <span class="o">(</span><span class="n">srcGen</span> <span class="n">in</span> <span class="nc">Compile</span><span class="o">).</span><span class="n">taskValue</span>
-</code></pre>
-</div>
+<span class="n">sourceGenerators</span> <span class="n">in</span> <span class="nc">Compile</span> <span class="o">+=</span> <span class="o">(</span><span class="n">srcGen</span> <span class="n">in</span> <span class="nc">Compile</span><span class="o">).</span><span class="py">taskValue</span>
+</code></pre></div></div>
 
 <p>In the example above we are using <code class="highlighter-rouge">proto</code> files with <code class="highlighter-rouge">Protobuf</code> serialization. 
 The plugin generates them in <code class="highlighter-rouge">target/scala-2.12/src_managed/main/mu_proto</code>.</p>
@@ -106,28 +102,27 @@ will be distributed in the resulting jar artifact preserving the same folder str
 
 <p>The following example shows how to set up a dependency with another artifact or sbt module containing the IDL definitions (<code class="highlighter-rouge">foo-domain</code>):</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="c1">//...
-</span><span class="o">.</span><span class="n">settings</span><span class="o">(</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//...
+</span><span class="o">.</span><span class="py">settings</span><span class="o">(</span>
   <span class="nc">Seq</span><span class="o">(</span>
       <span class="n">idlType</span> <span class="o">:=</span> <span class="s">"avro"</span><span class="o">,</span>
       <span class="n">srcGenSerializationType</span> <span class="o">:=</span> <span class="s">"AvroWithSchema"</span><span class="o">,</span>
       <span class="n">srcGenJarNames</span> <span class="o">:=</span> <span class="nc">Seq</span><span class="o">(</span><span class="s">"foo-domain"</span><span class="o">),</span>
-      <span class="n">srcGenTargetDir</span> <span class="o">:=</span> <span class="o">(</span><span class="nc">Compile</span> <span class="o">/</span> <span class="n">sourceManaged</span><span class="o">).</span><span class="n">value</span> <span class="o">/</span> <span class="s">"compiled_avro"</span><span class="o">,</span>
-      <span class="n">sourceGenerators</span> <span class="n">in</span> <span class="nc">Compile</span> <span class="o">+=</span> <span class="o">(</span><span class="nc">Compile</span> <span class="o">/</span> <span class="n">srcGen</span><span class="o">).</span><span class="n">taskValue</span><span class="o">,</span>
+      <span class="n">srcGenTargetDir</span> <span class="o">:=</span> <span class="o">(</span><span class="nc">Compile</span> <span class="o">/</span> <span class="n">sourceManaged</span><span class="o">).</span><span class="py">value</span> <span class="o">/</span> <span class="s">"compiled_avro"</span><span class="o">,</span>
+      <span class="n">sourceGenerators</span> <span class="n">in</span> <span class="nc">Compile</span> <span class="o">+=</span> <span class="o">(</span><span class="nc">Compile</span> <span class="o">/</span> <span class="n">srcGen</span><span class="o">).</span><span class="py">taskValue</span><span class="o">,</span>
       <span class="n">libraryDependencies</span> <span class="o">++=</span> <span class="nc">Seq</span><span class="o">(</span>
-        <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-channel"</span> <span class="o">%</span> <span class="n">V</span><span class="o">.</span><span class="n">muRPC</span>
+        <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-channel"</span> <span class="o">%</span> <span class="nv">V</span><span class="o">.</span><span class="py">muRPC</span>
       <span class="o">)</span>
   <span class="o">)</span>
 <span class="o">)</span>
 <span class="c1">//...
-</span></code></pre>
-</div>
+</span></code></pre></div></div>
 
 <h2 id="generating-sources">Generating sources</h2>
 
 <p>Let’s suppose a <code class="highlighter-rouge">proto</code> file like</p>
 
-<div class="language-proto highlighter-rouge"><pre class="highlight"><code><span class="na">syntax</span> <span class="o">=</span> <span class="s">"proto3"</span><span class="p">;</span>
+<div class="language-proto highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">syntax</span> <span class="o">=</span> <span class="s">"proto3"</span><span class="p">;</span>
 
 <span class="kn">package</span> <span class="nn">foo</span><span class="o">.</span><span class="n">bar</span><span class="p">;</span>
 
@@ -150,13 +145,12 @@ will be distributed in the resulting jar artifact preserving the same folder str
   <span class="k">rpc</span> <span class="n">BidiHelloProto</span> <span class="p">(</span><span class="n">stream</span> <span class="n">HelloRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">stream</span> <span class="n">HelloResponse</span><span class="p">);</span>
   <span class="k">rpc</span> <span class="n">BidiHelloFs2Proto</span> <span class="p">(</span><span class="n">stream</span> <span class="n">HelloRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">stream</span> <span class="n">HelloResponse</span><span class="p">);</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>As you can see, we are defining two case classes, <code class="highlighter-rouge">HelloRequest</code> and <code class="highlighter-rouge">HelloResponse</code>, and a service, <code class="highlighter-rouge">ProtoGreeter</code>. 
  Therefore, the generated scala definition is</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">package</span> <span class="nn">foo.bar</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="nn">foo.bar</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.protocol._</span>
 <span class="k">import</span> <span class="nn">fs2.Stream</span>
 <span class="k">import</span> <span class="nn">shapeless.</span><span class="o">{:+:,</span> <span class="nc">CNil</span><span class="o">}</span>
@@ -168,16 +162,15 @@ will be distributed in the resulting jar artifact preserving the same folder str
 <span class="nd">@message</span> <span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloResponse</span><span class="o">(</span><span class="n">arg1</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">arg2</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">arg3</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span>
 
   <span class="nd">@service</span><span class="o">(</span><span class="nc">Protobuf</span><span class="o">)</span> <span class="k">trait</span> <span class="nc">ProtoGreeter</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
-    <span class="k">def</span> <span class="nc">SayHelloProto</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
-    <span class="k">def</span> <span class="nc">LotsOfRepliesProto</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloResponse</span><span class="o">]</span>
-    <span class="k">def</span> <span class="nc">LotsOfGreetingsProto</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
-    <span class="k">def</span> <span class="nc">BidiHelloProto</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloResponse</span><span class="o">]</span>
-    <span class="k">def</span> <span class="nc">BidiHelloFs2Proto</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">SayHelloProto</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">LotsOfRepliesProto</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">LotsOfGreetingsProto</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">BidiHelloProto</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">BidiHelloFs2Proto</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloResponse</span><span class="o">]</span>
   <span class="o">}</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Note that Scala case class is preceded by the <code class="highlighter-rouge">@message</code> annotation. It’s generated by <code class="highlighter-rouge">srcGen</code> but not necessary for <a href="https://github.com/higherkindness/mu">Mu</a>.</p>
 
@@ -280,7 +273,7 @@ protocol MyGreeterService{
 
 <p>We’ll get the same service:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">package</span> <span class="nn">foo.bar</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="nn">foo.bar</span>
 
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.internal.encoders.avro.javatime._</span>
@@ -292,13 +285,12 @@ protocol MyGreeterService{
 
 <span class="nd">@service</span><span class="o">(</span><span class="nc">Avro</span><span class="o">)</span> <span class="k">trait</span> <span class="nc">MyGreeterService</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
 
-  <span class="k">def</span> <span class="n">sayHelloAvro</span><span class="o">(</span><span class="n">arg</span><span class="k">:</span> <span class="kt">foo.bar.HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">foo.bar.HelloResponse</span><span class="o">]</span>
+  <span class="k">def</span> <span class="nf">sayHelloAvro</span><span class="o">(</span><span class="n">arg</span><span class="k">:</span> <span class="kt">foo.bar.HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">foo.bar.HelloResponse</span><span class="o">]</span>
 
-  <span class="k">def</span> <span class="n">sayNothingAvro</span><span class="o">(</span><span class="n">arg</span><span class="k">:</span> <span class="kt">Empty.</span><span class="k">type</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">Empty.</span><span class="k">type</span><span class="o">]</span>
+  <span class="k">def</span> <span class="nf">sayNothingAvro</span><span class="o">(</span><span class="n">arg</span><span class="k">:</span> <span class="kt">Empty.</span><span class="k">type</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">Empty.</span><span class="k">type</span><span class="o">]</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 </section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/mu/highlight/highlight.pack.js"></script><script>hljs.configure({languages:['scala','java','bash']});
 hljs.initHighlighting();

@@ -10,7 +10,7 @@
 
 <p>Next, our dummy <code class="highlighter-rouge">Greeter</code> server implementation:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.Async</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.Async</span>
 <span class="k">import</span> <span class="nn">cats.syntax.applicative._</span>
 <span class="k">import</span> <span class="nn">monix.execution.Scheduler</span>
 <span class="k">import</span> <span class="nn">monix.reactive.Observable</span>
@@ -20,40 +20,39 @@
 
 <span class="k">class</span> <span class="nc">ServiceHandler</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span><span class="kt">:</span> <span class="kt">Async</span><span class="o">](</span><span class="k">implicit</span> <span class="n">S</span><span class="k">:</span> <span class="kt">Scheduler</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">Greeter</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span> <span class="o">{</span>
 
-  <span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">val</span> <span class="n">dummyObservableResponse</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span> <span class="k">=</span>
-    <span class="nc">Observable</span><span class="o">.</span><span class="n">fromIterable</span><span class="o">(</span><span class="mi">1</span> <span class="n">to</span> <span class="mi">5</span> <span class="n">map</span> <span class="o">(</span><span class="n">i</span> <span class="k">=&gt;</span> <span class="nc">HelloResponse</span><span class="o">(</span><span class="n">s</span><span class="s">"Reply $i"</span><span class="o">)))</span>
+  <span class="k">private</span><span class="o">[</span><span class="kt">this</span><span class="o">]</span> <span class="k">val</span> <span class="nv">dummyObservableResponse</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span> <span class="k">=</span>
+    <span class="nv">Observable</span><span class="o">.</span><span class="py">fromIterable</span><span class="o">(</span><span class="mi">1</span> <span class="n">to</span> <span class="mi">5</span> <span class="nf">map</span> <span class="o">(</span><span class="n">i</span> <span class="k">=&gt;</span> <span class="nc">HelloResponse</span><span class="o">(</span><span class="n">s</span><span class="s">"Reply $i"</span><span class="o">)))</span>
 
-  <span class="k">override</span> <span class="k">def</span> <span class="n">sayHello</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span> <span class="k">=</span>
-    <span class="nc">HelloResponse</span><span class="o">(</span><span class="n">reply</span> <span class="k">=</span> <span class="s">"Good bye!"</span><span class="o">).</span><span class="n">pure</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span>
+  <span class="k">override</span> <span class="k">def</span> <span class="nf">sayHello</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span> <span class="k">=</span>
+    <span class="nc">HelloResponse</span><span class="o">(</span><span class="n">reply</span> <span class="k">=</span> <span class="s">"Good bye!"</span><span class="o">).</span><span class="py">pure</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span>
 
-  <span class="k">override</span> <span class="k">def</span> <span class="n">lotsOfReplies</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span> <span class="k">=</span>
+  <span class="k">override</span> <span class="k">def</span> <span class="nf">lotsOfReplies</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span> <span class="k">=</span>
     <span class="n">dummyObservableResponse</span>
 
-  <span class="k">override</span> <span class="k">def</span> <span class="n">lotsOfGreetings</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span> <span class="k">=</span>
+  <span class="k">override</span> <span class="k">def</span> <span class="nf">lotsOfGreetings</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span> <span class="k">=</span>
     <span class="n">request</span>
-      <span class="o">.</span><span class="n">foldLeftL</span><span class="o">((</span><span class="mi">0</span><span class="o">,</span> <span class="nc">HelloResponse</span><span class="o">(</span><span class="s">""</span><span class="o">)))</span> <span class="o">{</span>
-        <span class="k">case</span> <span class="o">((</span><span class="n">i</span><span class="o">,</span> <span class="n">response</span><span class="o">),</span> <span class="n">currentRequest</span><span class="o">)</span> <span class="k">=&gt;</span>
-          <span class="k">val</span> <span class="n">currentReply</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">reply</span>
+      <span class="o">.</span><span class="py">foldLeftL</span><span class="o">((</span><span class="mi">0</span><span class="o">,</span> <span class="nc">HelloResponse</span><span class="o">(</span><span class="s">""</span><span class="o">)))</span> <span class="o">{</span>
+        <span class="nf">case</span> <span class="o">((</span><span class="n">i</span><span class="o">,</span> <span class="n">response</span><span class="o">),</span> <span class="n">currentRequest</span><span class="o">)</span> <span class="k">=&gt;</span>
+          <span class="k">val</span> <span class="nv">currentReply</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="nv">response</span><span class="o">.</span><span class="py">reply</span>
           <span class="o">(</span>
             <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span>
-            <span class="n">response</span><span class="o">.</span><span class="n">copy</span><span class="o">(</span>
+            <span class="nv">response</span><span class="o">.</span><span class="py">copy</span><span class="o">(</span>
               <span class="n">reply</span> <span class="k">=</span> <span class="n">s</span><span class="s">"$currentReply\nRequest ${currentRequest.greeting} -&gt; Response: Reply $i"</span><span class="o">))</span>
       <span class="o">}</span>
-      <span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">_2</span><span class="o">)</span>
-      <span class="o">.</span><span class="n">toAsync</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span>
+      <span class="o">.</span><span class="py">map</span><span class="o">(</span><span class="nv">_</span><span class="o">.</span><span class="py">_2</span><span class="o">)</span>
+      <span class="o">.</span><span class="py">toAsync</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span>
 
-  <span class="k">override</span> <span class="k">def</span> <span class="n">bidiHello</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span> <span class="k">=</span>
+  <span class="k">override</span> <span class="k">def</span> <span class="nf">bidiHello</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span> <span class="k">=</span>
     <span class="n">request</span>
-      <span class="o">.</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span> <span class="o">=&gt;</span>
-        <span class="n">println</span><span class="o">(</span><span class="n">s</span><span class="s">"Saving $request..."</span><span class="o">)</span>
+      <span class="o">.</span><span class="py">flatMap</span> <span class="o">{</span> <span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span> <span class="o">=&gt;</span>
+        <span class="nf">println</span><span class="o">(</span><span class="n">s</span><span class="s">"Saving $request..."</span><span class="o">)</span>
         <span class="n">dummyObservableResponse</span>
       <span class="o">}</span>
-      <span class="o">.</span><span class="n">onErrorHandle</span> <span class="o">{</span> <span class="n">e</span> <span class="k">=&gt;</span>
+      <span class="o">.</span><span class="py">onErrorHandle</span> <span class="o">{</span> <span class="n">e</span> <span class="k">=&gt;</span>
         <span class="k">throw</span> <span class="n">e</span>
       <span class="o">}</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>As you can see, we need a <code class="highlighter-rouge">monix.execution.Scheduler</code> implicit. This is needed in order to resolve the <code class="highlighter-rouge">cats.effect</code> instances for <code class="highlighter-rouge">Monix</code>.</p>
 
@@ -73,19 +72,18 @@
 
 <p><em>Note:</em> You’d need an implicit <code class="highlighter-rouge">monix.execution.Scheduler</code> in the case you’re using Monix observables.</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">trait</span> <span class="nc">CommonRuntime</span> <span class="o">{</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="nc">CommonRuntime</span> <span class="o">{</span>
 
-  <span class="k">val</span> <span class="nc">EC</span><span class="k">:</span> <span class="kt">scala.concurrent.ExecutionContext</span> <span class="o">=</span>
-    <span class="n">scala</span><span class="o">.</span><span class="n">concurrent</span><span class="o">.</span><span class="nc">ExecutionContext</span><span class="o">.</span><span class="nc">Implicits</span><span class="o">.</span><span class="n">global</span>
+  <span class="k">val</span> <span class="nv">EC</span><span class="k">:</span> <span class="kt">scala.concurrent.ExecutionContext</span> <span class="o">=</span>
+    <span class="nv">scala</span><span class="o">.</span><span class="py">concurrent</span><span class="o">.</span><span class="py">ExecutionContext</span><span class="o">.</span><span class="py">Implicits</span><span class="o">.</span><span class="py">global</span>
 
-  <span class="k">implicit</span> <span class="k">val</span> <span class="n">S</span><span class="k">:</span> <span class="kt">monix.execution.Scheduler</span> <span class="o">=</span> <span class="n">monix</span><span class="o">.</span><span class="n">execution</span><span class="o">.</span><span class="nc">Scheduler</span><span class="o">.</span><span class="nc">Implicits</span><span class="o">.</span><span class="n">global</span>
+  <span class="k">implicit</span> <span class="k">val</span> <span class="nv">S</span><span class="k">:</span> <span class="kt">monix.execution.Scheduler</span> <span class="o">=</span> <span class="nv">monix</span><span class="o">.</span><span class="py">execution</span><span class="o">.</span><span class="py">Scheduler</span><span class="o">.</span><span class="py">Implicits</span><span class="o">.</span><span class="py">global</span>
 
-  <span class="k">implicit</span> <span class="k">val</span> <span class="n">timer</span><span class="k">:</span> <span class="kt">cats.effect.Timer</span><span class="o">[</span><span class="kt">cats.effect.IO</span><span class="o">]</span>     <span class="k">=</span> <span class="n">cats</span><span class="o">.</span><span class="n">effect</span><span class="o">.</span><span class="nc">IO</span><span class="o">.</span><span class="n">timer</span><span class="o">(</span><span class="nc">EC</span><span class="o">)</span>
-  <span class="k">implicit</span> <span class="k">val</span> <span class="n">cs</span><span class="k">:</span> <span class="kt">cats.effect.ContextShift</span><span class="o">[</span><span class="kt">cats.effect.IO</span><span class="o">]</span> <span class="k">=</span> <span class="n">cats</span><span class="o">.</span><span class="n">effect</span><span class="o">.</span><span class="nc">IO</span><span class="o">.</span><span class="n">contextShift</span><span class="o">(</span><span class="nc">EC</span><span class="o">)</span>
+  <span class="k">implicit</span> <span class="k">val</span> <span class="nv">timer</span><span class="k">:</span> <span class="kt">cats.effect.Timer</span><span class="o">[</span><span class="kt">cats.effect.IO</span><span class="o">]</span>     <span class="k">=</span> <span class="nv">cats</span><span class="o">.</span><span class="py">effect</span><span class="o">.</span><span class="py">IO</span><span class="o">.</span><span class="py">timer</span><span class="o">(</span><span class="nc">EC</span><span class="o">)</span>
+  <span class="k">implicit</span> <span class="k">val</span> <span class="nv">cs</span><span class="k">:</span> <span class="kt">cats.effect.ContextShift</span><span class="o">[</span><span class="kt">cats.effect.IO</span><span class="o">]</span> <span class="k">=</span> <span class="nv">cats</span><span class="o">.</span><span class="py">effect</span><span class="o">.</span><span class="py">IO</span><span class="o">.</span><span class="py">contextShift</span><span class="o">(</span><span class="nc">EC</span><span class="o">)</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>As a side note, <code class="highlighter-rouge">CommonRuntime</code> will also be used later on for the client example program.</p>
 
@@ -107,7 +105,7 @@
 
 <p>In summary, the result would be as follows:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.server._</span>
 <span class="k">import</span> <span class="nn">monix.execution.Scheduler</span>
 <span class="k">import</span> <span class="nn">service._</span>
@@ -116,41 +114,39 @@
 
   <span class="k">trait</span> <span class="nc">Implicits</span> <span class="k">extends</span> <span class="nc">CommonRuntime</span> <span class="o">{</span>
 
-    <span class="k">implicit</span> <span class="k">val</span> <span class="n">greeterServiceHandler</span><span class="k">:</span> <span class="kt">ServiceHandler</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ServiceHandler</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
+    <span class="k">implicit</span> <span class="k">val</span> <span class="nv">greeterServiceHandler</span><span class="k">:</span> <span class="kt">ServiceHandler</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ServiceHandler</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
 
   <span class="o">}</span>
 
   <span class="k">object</span> <span class="nc">implicits</span> <span class="k">extends</span> <span class="nc">Implicits</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h3 id="server-bootstrap">Server Bootstrap</h3>
 
 <p>What else is needed? We just need to define a <code class="highlighter-rouge">main</code> method:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.server.GrpcServer</span>
 
 <span class="k">object</span> <span class="nc">RPCServer</span> <span class="o">{</span>
 
   <span class="k">import</span> <span class="nn">gserver.implicits._</span>
 
-  <span class="k">def</span> <span class="n">main</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="nf">main</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="o">{</span>
 
-    <span class="k">val</span> <span class="n">runServer</span> <span class="k">=</span> <span class="k">for</span> <span class="o">{</span>
-      <span class="n">grpcConfig</span> <span class="k">&lt;-</span> <span class="nc">Greeter</span><span class="o">.</span><span class="n">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
-      <span class="n">server</span>     <span class="k">&lt;-</span> <span class="nc">GrpcServer</span><span class="o">.</span><span class="n">default</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="mi">8080</span><span class="o">,</span> <span class="nc">List</span><span class="o">(</span><span class="nc">AddService</span><span class="o">(</span><span class="n">grpcConfig</span><span class="o">)))</span>
-      <span class="n">runServer</span>  <span class="k">&lt;-</span> <span class="nc">GrpcServer</span><span class="o">.</span><span class="n">server</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="n">server</span><span class="o">)</span>
+    <span class="k">val</span> <span class="nv">runServer</span> <span class="k">=</span> <span class="k">for</span> <span class="o">{</span>
+      <span class="n">grpcConfig</span> <span class="k">&lt;-</span> <span class="nv">Greeter</span><span class="o">.</span><span class="py">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
+      <span class="n">server</span>     <span class="k">&lt;-</span> <span class="nv">GrpcServer</span><span class="o">.</span><span class="py">default</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="mi">8080</span><span class="o">,</span> <span class="nc">List</span><span class="o">(</span><span class="nc">AddService</span><span class="o">(</span><span class="n">grpcConfig</span><span class="o">)))</span>
+      <span class="n">runServer</span>  <span class="k">&lt;-</span> <span class="nv">GrpcServer</span><span class="o">.</span><span class="py">server</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="n">server</span><span class="o">)</span>
     <span class="o">}</span> <span class="k">yield</span> <span class="n">runServer</span>
 
-    <span class="n">runServer</span><span class="o">.</span><span class="n">unsafeRunSync</span><span class="o">()</span>
+    <span class="nv">runServer</span><span class="o">.</span><span class="py">unsafeRunSync</span><span class="o">()</span>
   <span class="o">}</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>The Server will bootstrap on port <code class="highlighter-rouge">8080</code>.</p>
 
@@ -160,7 +156,7 @@
 
 <p>Thanks to <code class="highlighter-rouge">withServerChannel</code> from the package <code class="highlighter-rouge">mu.rpc.testing.servers</code>, you will be able to run in-memory instances of the server, which is very convenient for testing purposes. Below, a very simple property-based test for proving <code class="highlighter-rouge">Greeter.sayHello</code>:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.Resource</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.Resource</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.testing.servers.withServerChannel</span>
 <span class="k">import</span> <span class="nn">io.grpc.</span><span class="o">{</span><span class="nc">ManagedChannel</span><span class="o">,</span> <span class="nc">ServerServiceDefinition</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">org.scalatestplus.scalacheck.Checkers</span>
@@ -173,45 +169,43 @@
 
   <span class="k">import</span> <span class="nn">gserver.implicits._</span>
     
-  <span class="k">def</span> <span class="n">withClient</span><span class="o">[</span><span class="kt">Client</span>, <span class="kt">A</span><span class="o">](</span>
+  <span class="k">def</span> <span class="nf">withClient</span><span class="o">[</span><span class="kt">Client</span>, <span class="kt">A</span><span class="o">](</span>
       <span class="n">serviceDef</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">ServerServiceDefinition</span><span class="o">],</span>
       <span class="n">resourceBuilder</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">ManagedChannel</span><span class="o">]</span> <span class="k">=&gt;</span> <span class="nc">Resource</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">Client</span><span class="o">])(</span>
       <span class="n">f</span><span class="k">:</span> <span class="kt">Client</span> <span class="o">=&gt;</span> <span class="n">A</span><span class="o">)</span><span class="k">:</span> <span class="kt">A</span> <span class="o">=</span>
-    <span class="n">withServerChannel</span><span class="o">(</span><span class="n">serviceDef</span><span class="o">)</span>
-      <span class="o">.</span><span class="n">flatMap</span><span class="o">(</span><span class="n">sc</span> <span class="k">=&gt;</span> <span class="n">resourceBuilder</span><span class="o">(</span><span class="nc">IO</span><span class="o">(</span><span class="n">sc</span><span class="o">.</span><span class="n">channel</span><span class="o">)))</span>
-      <span class="o">.</span><span class="n">use</span><span class="o">(</span><span class="n">client</span> <span class="k">=&gt;</span> <span class="nc">IO</span><span class="o">(</span><span class="n">f</span><span class="o">(</span><span class="n">client</span><span class="o">)))</span>
-      <span class="o">.</span><span class="n">unsafeRunSync</span><span class="o">()</span>
+    <span class="nf">withServerChannel</span><span class="o">(</span><span class="n">serviceDef</span><span class="o">)</span>
+      <span class="o">.</span><span class="py">flatMap</span><span class="o">(</span><span class="n">sc</span> <span class="k">=&gt;</span> <span class="nf">resourceBuilder</span><span class="o">(</span><span class="nc">IO</span><span class="o">(</span><span class="nv">sc</span><span class="o">.</span><span class="py">channel</span><span class="o">)))</span>
+      <span class="o">.</span><span class="py">use</span><span class="o">(</span><span class="n">client</span> <span class="k">=&gt;</span> <span class="nc">IO</span><span class="o">(</span><span class="nf">f</span><span class="o">(</span><span class="n">client</span><span class="o">)))</span>
+      <span class="o">.</span><span class="py">unsafeRunSync</span><span class="o">()</span>
 
-  <span class="k">def</span> <span class="n">sayHelloTest</span><span class="o">(</span><span class="n">requestGen</span><span class="k">:</span> <span class="kt">Gen</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">],</span> <span class="n">expected</span><span class="k">:</span> <span class="kt">HelloResponse</span><span class="o">)</span><span class="k">:</span> <span class="kt">Assertion</span> <span class="o">=</span>
-    <span class="n">withClient</span><span class="o">(</span>
-      <span class="nc">Greeter</span><span class="o">.</span><span class="n">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">],</span> 
-      <span class="nc">Greeter</span><span class="o">.</span><span class="n">clientFromChannel</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="k">_</span><span class="o">))</span> <span class="o">{</span> <span class="n">client</span> <span class="k">=&gt;</span>
+  <span class="k">def</span> <span class="nf">sayHelloTest</span><span class="o">(</span><span class="n">requestGen</span><span class="k">:</span> <span class="kt">Gen</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">],</span> <span class="n">expected</span><span class="k">:</span> <span class="kt">HelloResponse</span><span class="o">)</span><span class="k">:</span> <span class="kt">Assertion</span> <span class="o">=</span>
+    <span class="nf">withClient</span><span class="o">(</span>
+      <span class="nv">Greeter</span><span class="o">.</span><span class="py">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">],</span> 
+      <span class="nv">Greeter</span><span class="o">.</span><span class="py">clientFromChannel</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="k">_</span><span class="o">))</span> <span class="o">{</span> <span class="n">client</span> <span class="k">=&gt;</span>
         <span class="n">check</span> <span class="o">{</span>
-          <span class="n">forAll</span><span class="o">(</span><span class="n">requestGen</span><span class="o">)</span> <span class="o">{</span> <span class="n">request</span> <span class="k">=&gt;</span>
-            <span class="n">client</span><span class="o">.</span><span class="n">sayHello</span><span class="o">(</span><span class="n">request</span><span class="o">).</span><span class="n">unsafeRunSync</span><span class="o">()</span> <span class="o">==</span> <span class="n">expected</span>
+          <span class="nf">forAll</span><span class="o">(</span><span class="n">requestGen</span><span class="o">)</span> <span class="o">{</span> <span class="n">request</span> <span class="k">=&gt;</span>
+            <span class="nv">client</span><span class="o">.</span><span class="py">sayHello</span><span class="o">(</span><span class="n">request</span><span class="o">).</span><span class="py">unsafeRunSync</span><span class="o">()</span> <span class="o">==</span> <span class="n">expected</span>
           <span class="o">}</span>
         <span class="o">}</span>
       <span class="o">}</span>
 
-  <span class="k">val</span> <span class="n">requestGen</span><span class="k">:</span> <span class="kt">Gen</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Gen</span><span class="o">.</span><span class="n">alphaStr</span> <span class="n">map</span> <span class="nc">HelloRequest</span>
+  <span class="k">val</span> <span class="nv">requestGen</span><span class="k">:</span> <span class="kt">Gen</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">]</span> <span class="k">=</span> <span class="nv">Gen</span><span class="o">.</span><span class="py">alphaStr</span> <span class="n">map</span> <span class="nc">HelloRequest</span>
 
-  <span class="n">test</span><span class="o">(</span><span class="s">"Get a valid response when a proper request is passed"</span><span class="o">)</span> <span class="o">{</span>
-    <span class="n">sayHelloTest</span><span class="o">(</span><span class="n">requestGen</span><span class="o">,</span> <span class="nc">HelloResponse</span><span class="o">(</span><span class="n">reply</span> <span class="k">=</span> <span class="s">"Good bye!"</span><span class="o">))</span>
+  <span class="nf">test</span><span class="o">(</span><span class="s">"Get a valid response when a proper request is passed"</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nf">sayHelloTest</span><span class="o">(</span><span class="n">requestGen</span><span class="o">,</span> <span class="nc">HelloResponse</span><span class="o">(</span><span class="n">reply</span> <span class="k">=</span> <span class="s">"Good bye!"</span><span class="o">))</span>
   <span class="o">}</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p><code class="highlighter-rouge">Greeter.bindService</code> is an auto-derived method which creates, behind the scenes, the binding service for <a href="https://grpc.io/">gRPC</a>. It requires <code class="highlighter-rouge">F[_]</code> as the type parameter, the target/concurrent monad, in our example: <code class="highlighter-rouge">cats.effects.IO</code>.</p>
 
 <p>Running the test:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="n">scala</span><span class="o">&gt;</span> <span class="n">run</span><span class="o">(</span><span class="k">new</span> <span class="nc">ServiceSpec</span><span class="o">)</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">scala</span><span class="o">&gt;</span> <span class="nf">run</span><span class="o">(</span><span class="k">new</span> <span class="nc">ServiceSpec</span><span class="o">)</span>
 <span class="nc">ServiceSpec</span><span class="k">:</span>
 <span class="kt">-</span> <span class="kt">Get</span> <span class="kt">a</span> <span class="kt">valid</span> <span class="kt">response</span> <span class="kt">when</span> <span class="kt">a</span> <span class="kt">proper</span> <span class="kt">request</span> <span class="kt">is</span> <span class="kt">passed</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="client">Client</h2>
 
@@ -244,7 +238,7 @@
 
 <p>So, taking into account all of that, how would our code look?</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">}</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.config._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.config.channel._</span>
@@ -254,17 +248,16 @@
 
   <span class="k">trait</span> <span class="nc">Implicits</span> <span class="k">extends</span> <span class="nc">CommonRuntime</span> <span class="o">{</span>
 
-    <span class="k">val</span> <span class="n">channelFor</span><span class="k">:</span> <span class="kt">ChannelFor</span> <span class="o">=</span>
-      <span class="nc">ConfigForAddress</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="s">"rpc.host"</span><span class="o">,</span> <span class="s">"rpc.port"</span><span class="o">).</span><span class="n">unsafeRunSync</span>
+    <span class="k">val</span> <span class="nv">channelFor</span><span class="k">:</span> <span class="kt">ChannelFor</span> <span class="o">=</span>
+      <span class="nc">ConfigForAddress</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="s">"rpc.host"</span><span class="o">,</span> <span class="s">"rpc.port"</span><span class="o">).</span><span class="py">unsafeRunSync</span>
 
-    <span class="k">implicit</span> <span class="k">val</span> <span class="n">serviceClient</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">Greeter</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span>
-      <span class="nc">Greeter</span><span class="o">.</span><span class="n">client</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="n">channelFor</span><span class="o">)</span>
+    <span class="k">implicit</span> <span class="k">val</span> <span class="nv">serviceClient</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">Greeter</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span>
+      <span class="nv">Greeter</span><span class="o">.</span><span class="py">client</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="n">channelFor</span><span class="o">)</span>
   <span class="o">}</span>
 
   <span class="k">object</span> <span class="nc">implicits</span> <span class="k">extends</span> <span class="nc">Implicits</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p><strong>Notes</strong>:</p>
 
@@ -277,24 +270,23 @@
 
 <p>Once we have our runtime configuration defined as above, everything gets easier on the client side. This is an example of a client application, following our dummy quickstart:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
 <span class="k">import</span> <span class="nn">service._</span>
 <span class="k">import</span> <span class="nn">gclient.implicits._</span>
 
 <span class="k">object</span> <span class="nc">RPCDemoApp</span> <span class="o">{</span>
 
-  <span class="k">def</span> <span class="n">main</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="nf">main</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="o">{</span>
 
-    <span class="k">val</span> <span class="n">hello</span> <span class="k">=</span> <span class="n">serviceClient</span><span class="o">.</span><span class="n">use</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">sayHello</span><span class="o">(</span><span class="nc">HelloRequest</span><span class="o">(</span><span class="s">"foo"</span><span class="o">))).</span><span class="n">flatMap</span> <span class="o">{</span> <span class="n">result</span> <span class="k">=&gt;</span>
-      <span class="nc">IO</span><span class="o">(</span><span class="n">println</span><span class="o">(</span><span class="n">s</span><span class="s">"Result = $result"</span><span class="o">))</span>
+    <span class="k">val</span> <span class="nv">hello</span> <span class="k">=</span> <span class="nv">serviceClient</span><span class="o">.</span><span class="py">use</span><span class="o">(</span><span class="nv">_</span><span class="o">.</span><span class="py">sayHello</span><span class="o">(</span><span class="nc">HelloRequest</span><span class="o">(</span><span class="s">"foo"</span><span class="o">))).</span><span class="py">flatMap</span> <span class="o">{</span> <span class="n">result</span> <span class="k">=&gt;</span>
+      <span class="nc">IO</span><span class="o">(</span><span class="nf">println</span><span class="o">(</span><span class="n">s</span><span class="s">"Result = $result"</span><span class="o">))</span>
     <span class="o">}</span>
 
-    <span class="n">hello</span><span class="o">.</span><span class="n">unsafeRunSync</span><span class="o">()</span>
+    <span class="nv">hello</span><span class="o">.</span><span class="py">unsafeRunSync</span><span class="o">()</span>
   <span class="o">}</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <h2 id="more">More</h2>
 
 <p>You can check a full explanation about defining messages and services <a href="https://www.47deg.com/blog/mu-rpc-defining-messages-and-services/">here</a> or some examples <a href="https://github.com/higherkindness/mu/tree/master/modules/examples">here</a>.</p>

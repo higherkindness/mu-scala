@@ -13,7 +13,7 @@
 
 <p>Let’s see how to register server metrics using <code class="highlighter-rouge">Prometheus</code> in the following fragment.</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.prometheus.PrometheusMetrics</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.server._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.server.interceptors.implicits._</span>
@@ -23,26 +23,25 @@
 
 <span class="k">object</span> <span class="nc">InterceptingServerCalls</span> <span class="k">extends</span> <span class="nc">CommonRuntime</span> <span class="o">{</span>
 
-  <span class="k">lazy</span> <span class="k">val</span> <span class="n">cr</span><span class="k">:</span> <span class="kt">CollectorRegistry</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">CollectorRegistry</span><span class="o">()</span>
+  <span class="k">lazy</span> <span class="k">val</span> <span class="nv">cr</span><span class="k">:</span> <span class="kt">CollectorRegistry</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">CollectorRegistry</span><span class="o">()</span>
 
-  <span class="k">implicit</span> <span class="k">val</span> <span class="n">greeterServiceHandler</span><span class="k">:</span> <span class="kt">ServiceHandler</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ServiceHandler</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
+  <span class="k">implicit</span> <span class="k">val</span> <span class="nv">greeterServiceHandler</span><span class="k">:</span> <span class="kt">ServiceHandler</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">ServiceHandler</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
   
-  <span class="k">val</span> <span class="n">server</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">GrpcServer</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span> <span class="k">for</span> <span class="o">{</span>
-    <span class="n">metricsOps</span> <span class="k">&lt;-</span> <span class="nc">PrometheusMetrics</span><span class="o">.</span><span class="n">build</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="n">cr</span><span class="o">,</span> <span class="s">"server"</span><span class="o">)</span>
-    <span class="n">service</span>    <span class="k">&lt;-</span> <span class="nc">Greeter</span><span class="o">.</span><span class="n">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
-    <span class="n">grpcConfig</span> <span class="k">=</span> <span class="nc">AddService</span><span class="o">(</span><span class="n">service</span><span class="o">.</span><span class="n">interceptWith</span><span class="o">(</span><span class="nc">MetricsServerInterceptor</span><span class="o">(</span><span class="n">metricsOps</span><span class="o">)))</span>
-    <span class="n">server</span>     <span class="k">&lt;-</span> <span class="nc">GrpcServer</span><span class="o">.</span><span class="n">default</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="mi">8080</span><span class="o">,</span> <span class="nc">List</span><span class="o">(</span><span class="n">grpcConfig</span><span class="o">))</span>
+  <span class="k">val</span> <span class="nv">server</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">GrpcServer</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span> <span class="k">for</span> <span class="o">{</span>
+    <span class="n">metricsOps</span> <span class="k">&lt;-</span> <span class="nv">PrometheusMetrics</span><span class="o">.</span><span class="py">build</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="n">cr</span><span class="o">,</span> <span class="s">"server"</span><span class="o">)</span>
+    <span class="n">service</span>    <span class="k">&lt;-</span> <span class="nv">Greeter</span><span class="o">.</span><span class="py">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
+    <span class="n">grpcConfig</span> <span class="k">=</span> <span class="nc">AddService</span><span class="o">(</span><span class="nv">service</span><span class="o">.</span><span class="py">interceptWith</span><span class="o">(</span><span class="nc">MetricsServerInterceptor</span><span class="o">(</span><span class="n">metricsOps</span><span class="o">)))</span>
+    <span class="n">server</span>     <span class="k">&lt;-</span> <span class="nv">GrpcServer</span><span class="o">.</span><span class="py">default</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="mi">8080</span><span class="o">,</span> <span class="nc">List</span><span class="o">(</span><span class="n">grpcConfig</span><span class="o">))</span>
   <span class="o">}</span> <span class="k">yield</span> <span class="n">server</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="monitor-client-calls">Monitor Client Calls</h2>
 
 <p>In this case, in order to intercept the client calls we need additional configuration settings (by using <code class="highlighter-rouge">AddInterceptor</code>):</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">}</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">}</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.config._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.channel._</span>
@@ -53,19 +52,18 @@
 
 <span class="k">object</span> <span class="nc">InterceptingClientCalls</span> <span class="k">extends</span> <span class="nc">CommonRuntime</span> <span class="o">{</span>
 
-  <span class="k">lazy</span> <span class="k">val</span> <span class="n">cr</span><span class="k">:</span> <span class="kt">CollectorRegistry</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">CollectorRegistry</span><span class="o">()</span>
+  <span class="k">lazy</span> <span class="k">val</span> <span class="nv">cr</span><span class="k">:</span> <span class="kt">CollectorRegistry</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">CollectorRegistry</span><span class="o">()</span>
 
-  <span class="k">implicit</span> <span class="k">val</span> <span class="n">serviceClient</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">Greeter</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span> 
+  <span class="k">implicit</span> <span class="k">val</span> <span class="nv">serviceClient</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">Greeter</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span> 
     <span class="k">for</span> <span class="o">{</span>
-      <span class="n">channelFor</span>    <span class="k">&lt;-</span> <span class="nc">Resource</span><span class="o">.</span><span class="n">liftF</span><span class="o">(</span><span class="nc">ConfigForAddress</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="s">"rpc.host"</span><span class="o">,</span> <span class="s">"rpc.port"</span><span class="o">))</span>
-      <span class="n">metricsOps</span>    <span class="k">&lt;-</span> <span class="nc">Resource</span><span class="o">.</span><span class="n">liftF</span><span class="o">(</span><span class="nc">PrometheusMetrics</span><span class="o">.</span><span class="n">build</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="n">cr</span><span class="o">,</span> <span class="s">"client"</span><span class="o">))</span>
-      <span class="n">serviceClient</span> <span class="k">&lt;-</span> <span class="nc">Greeter</span><span class="o">.</span><span class="n">client</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span>
+      <span class="n">channelFor</span>    <span class="k">&lt;-</span> <span class="nv">Resource</span><span class="o">.</span><span class="py">liftF</span><span class="o">(</span><span class="nc">ConfigForAddress</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="s">"rpc.host"</span><span class="o">,</span> <span class="s">"rpc.port"</span><span class="o">))</span>
+      <span class="n">metricsOps</span>    <span class="k">&lt;-</span> <span class="nv">Resource</span><span class="o">.</span><span class="py">liftF</span><span class="o">(</span><span class="nv">PrometheusMetrics</span><span class="o">.</span><span class="py">build</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="n">cr</span><span class="o">,</span> <span class="s">"client"</span><span class="o">))</span>
+      <span class="n">serviceClient</span> <span class="k">&lt;-</span> <span class="nv">Greeter</span><span class="o">.</span><span class="py">client</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span>
         <span class="n">channelFor</span> <span class="k">=</span> <span class="n">channelFor</span><span class="o">,</span> 
         <span class="n">channelConfigList</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="nc">UsePlaintext</span><span class="o">(),</span> <span class="nc">AddInterceptor</span><span class="o">(</span><span class="nc">MetricsChannelInterceptor</span><span class="o">(</span><span class="n">metricsOps</span><span class="o">))))</span>
     <span class="o">}</span> <span class="k">yield</span> <span class="n">serviceClient</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>That is how we use <code class="highlighter-rouge">Prometheus</code> to monitor both <a href="https://grpc.io/">gRPC</a> ends.</p>
 
@@ -73,26 +71,23 @@
 
 <p>The usage the same as before, but in this case we need to create a <code class="highlighter-rouge">Dropwizard</code> backed <code class="highlighter-rouge">MetricsOps</code></p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.IO</span>
 <span class="k">import</span> <span class="nn">com.codahale.metrics.MetricRegistry</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.dropwizard.DropWizardMetrics</span>
 <span class="k">import</span> <span class="nn">com.codahale.metrics.MetricRegistry</span>
 
-<span class="k">val</span> <span class="n">registry</span><span class="k">:</span> <span class="kt">MetricRegistry</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">MetricRegistry</span><span class="o">()</span>
-<span class="k">val</span> <span class="n">metricsOps</span> <span class="k">=</span> <span class="nc">DropWizardMetrics</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="n">registry</span><span class="o">)</span>
-</code></pre>
-</div>
+<span class="k">val</span> <span class="nv">registry</span><span class="k">:</span> <span class="kt">MetricRegistry</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">MetricRegistry</span><span class="o">()</span>
+<span class="k">val</span> <span class="nv">metricsOps</span> <span class="k">=</span> <span class="nc">DropWizardMetrics</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="n">registry</span><span class="o">)</span>
+</code></pre></div></div>
 
 <p>To check the metrics from our server or client, <code class="highlighter-rouge">Dropwizard</code> exposes it through <code class="highlighter-rouge">JMX</code>. You’ll need the following dependency:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code> <span class="s">"io.dropwizard.metrics"</span> <span class="o">%</span> <span class="s">"metrics-jmx"</span> <span class="o">%</span> <span class="s">"4.0.5"</span>
-</code></pre>
-</div>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="s">"io.dropwizard.metrics"</span> <span class="o">%</span> <span class="s">"metrics-jmx"</span> <span class="o">%</span> <span class="s">"4.0.5"</span>
+</code></pre></div></div>
 <p>And to associate the reporter with the metrics registry on your project,</p>
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code> <span class="k">val</span> <span class="n">jmxReporter</span> <span class="k">=</span> <span class="nc">JmxReporter</span><span class="o">.</span><span class="n">forRegistry</span><span class="o">(</span><span class="n">registry</span><span class="o">)</span>
- <span class="n">jmxReporter</span><span class="o">.</span><span class="n">build</span><span class="o">().</span><span class="n">start</span><span class="o">()</span>
-</code></pre>
-</div>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">val</span> <span class="nv">jmxReporter</span> <span class="k">=</span> <span class="nv">JmxReporter</span><span class="o">.</span><span class="py">forRegistry</span><span class="o">(</span><span class="n">registry</span><span class="o">)</span>
+ <span class="nv">jmxReporter</span><span class="o">.</span><span class="py">build</span><span class="o">().</span><span class="py">start</span><span class="o">()</span>
+</code></pre></div></div>
 <h2 id="more">More</h2>
 
 <p>For more details, in <a href="https://www.47deg.com/blog/metrics-integration-with-mu/">metrics integration with Mu</a> you can check a full example about <a href="https://github.com/higherkindness/mu">Mu</a> metrics.</p>

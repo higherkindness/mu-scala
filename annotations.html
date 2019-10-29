@@ -16,7 +16,7 @@
       <td>@service</td>
       <td><code class="highlighter-rouge">Trait</code></td>
       <td>(<code class="highlighter-rouge">SerializationType</code>, <code class="highlighter-rouge">Compression</code>)</td>
-      <td>Tags the trait as an <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> service in order to derive server and client code (macro expansion). For the <code class="highlighter-rouge">SerializationType</code> parameter value, <code class="highlighter-rouge">Protobuf</code> and <code class="highlighter-rouge">Avro</code> are the current supported serialization methods. For the <code class="highlighter-rouge">Compression</code> parameter value, only <code class="highlighter-rouge">Gzip</code> is supported.</td>
+      <td>Tags the trait as an <a href="https://en.wikipedia.org/wiki/Remote_procedure_call">RPC</a> service in order to derive server and client code (macro expansion). For the <code class="highlighter-rouge">SerializationType</code> parameter value, <code class="highlighter-rouge">Protobuf</code> and <code class="highlighter-rouge">Avro</code> are the current supported serialization methods. Also, you can specify <code class="highlighter-rouge">Custom</code> serialization method. In that case, you need to provide own implementation of <code class="highlighter-rouge">io.grpc.MethodDescriptor.Marshaller[A]</code> for your type A. For the <code class="highlighter-rouge">Compression</code> parameter value, only <code class="highlighter-rouge">Gzip</code> is supported.</td>
     </tr>
     <tr>
       <td>@message</td>

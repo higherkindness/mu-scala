@@ -8,9 +8,8 @@
 
 <p>Add the following line to <em>project/plugins.sbt</em>:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="n">addSbtPlugin</span><span class="o">(</span><span class="s">"io.higherkindness"</span> <span class="o">%</span> <span class="s">"sbt-mu-idlgen"</span> <span class="o">%</span> <span class="s">"0.18.4"</span><span class="o">)</span>
-</code></pre>
-</div>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">addSbtPlugin</span><span class="o">(</span><span class="s">"io.higherkindness"</span> <span class="o">%</span> <span class="s">"sbt-mu-idlgen"</span> <span class="o">%</span> <span class="s">"0.19.1"</span><span class="o">)</span>
+</code></pre></div></div>
 
 <p>Note that the plugin is only available for Scala 2.12.</p>
 
@@ -18,7 +17,7 @@
 
 <p>Let’s take our previous service and add an Avro-specific request and some useful annotations described in the <a href="annotations">Annotations section</a>:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">higherkindness.mu.rpc.protocol._</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">higherkindness.mu.rpc.protocol._</span>
 
 <span class="nd">@option</span><span class="o">(</span><span class="s">"java_multiple_files"</span><span class="o">,</span> <span class="kc">true</span><span class="o">)</span>
 <span class="nd">@option</span><span class="o">(</span><span class="s">"java_outer_classname"</span><span class="o">,</span> <span class="s">"Quickstart"</span><span class="o">)</span>
@@ -37,48 +36,44 @@
   <span class="nd">@service</span><span class="o">(</span><span class="nc">Protobuf</span><span class="o">)</span>
   <span class="k">trait</span> <span class="nc">ProtoGreeter</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
 
-    <span class="k">def</span> <span class="n">sayHello</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">sayHello</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
 
-    <span class="k">def</span> <span class="n">lotsOfReplies</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">lotsOfReplies</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
 
-    <span class="k">def</span> <span class="n">lotsOfGreetings</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">lotsOfGreetings</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
 
-    <span class="k">def</span> <span class="n">bidiHello</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">bidiHello</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">Observable</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
     
   <span class="o">}</span>
   
   <span class="nd">@service</span><span class="o">(</span><span class="nc">Avro</span><span class="o">)</span>
   <span class="k">trait</span> <span class="nc">AvroGreeter</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
-    <span class="k">def</span> <span class="n">sayHelloAvro</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">sayHelloAvro</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
   <span class="o">}</span>
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 <p>Note that, <code class="highlighter-rouge">HelloResponse</code> and <code class="highlighter-rouge">HelloRequest</code> case classes are preceded by the <code class="highlighter-rouge">@message</code> annotation.</p>
 
 <p>At this point, each time you want to update your <code class="highlighter-rouge">.proto</code> IDL files from the scala definitions, 
 you have to run the following sbt task:</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>sbt <span class="s2">"idlGen proto"</span>
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sbt <span class="s2">"idlGen proto"</span>
+</code></pre></div></div>
 
 <p>However, as we said in <a href="generate-sources-from-idl">the previous section</a>, the easiest way to use the plugin is integrating the source generation in your compile process by adding this import to your <code class="highlighter-rouge">build.sbt</code> file:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code> <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.idlgen.IdlGenPlugin.autoImport._</span>
-</code></pre>
-</div>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.idlgen.IdlGenPlugin.autoImport._</span>
+</code></pre></div></div>
 <p>and the setting,</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code> <span class="n">idlType</span> <span class="o">:=</span> <span class="n">proto</span>  
- <span class="n">sourceGenerators</span> <span class="n">in</span> <span class="nc">Compile</span> <span class="o">+=</span> <span class="o">(</span><span class="n">idlGen</span> <span class="n">in</span> <span class="nc">Compile</span><span class="o">).</span><span class="n">taskValue</span>
-</code></pre>
-</div>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="n">idlType</span> <span class="o">:=</span> <span class="n">proto</span>  
+ <span class="n">sourceGenerators</span> <span class="n">in</span> <span class="nc">Compile</span> <span class="o">+=</span> <span class="o">(</span><span class="n">idlGen</span> <span class="n">in</span> <span class="nc">Compile</span><span class="o">).</span><span class="py">taskValue</span>
+</code></pre></div></div>
 
 <p>Using this example, the resulting <code class="highlighter-rouge">Protobuf</code> IDL would be generated in <code class="highlighter-rouge">/src/main/resources/proto/service.proto</code>, 
 assuming that the scala file is named <code class="highlighter-rouge">service.scala</code>. The content should be similar to:</p>
 
-<div class="language-proto highlighter-rouge"><pre class="highlight"><code><span class="c1">// This file has been automatically generated for use by
+<div class="language-proto highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// This file has been automatically generated for use by
 // the idlGen plugin, from mu-rpc service definitions.
 // Read more at: https://higherkindness.github.io/mu/scala/
 </span>
@@ -102,61 +97,57 @@ assuming that the scala file is named <code class="highlighter-rouge">service.sc
   <span class="k">rpc</span> <span class="n">LotsOfGreetings</span> <span class="p">(</span><span class="n">stream</span> <span class="n">HelloRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">HelloResponse</span><span class="p">);</span>
   <span class="k">rpc</span> <span class="n">BidiHello</span> <span class="p">(</span><span class="n">stream</span> <span class="n">HelloRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">stream</span> <span class="n">HelloResponse</span><span class="p">);</span>
 <span class="p">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>To generate <code class="highlighter-rouge">Avro</code> IDL instead, use:</p>
 
-<div class="language-bash highlighter-rouge"><pre class="highlight"><code>sbt <span class="s2">"idlGen avro"</span>
-</code></pre>
-</div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sbt <span class="s2">"idlGen avro"</span>
+</code></pre></div></div>
 <p>or change the settings in your <code class="highlighter-rouge">build.sbt</code>:</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code> <span class="n">idlType</span> <span class="o">:=</span> <span class="n">avro</span>  
- <span class="n">sourceGenerators</span> <span class="n">in</span> <span class="nc">Compile</span> <span class="o">+=</span> <span class="o">(</span><span class="n">idlGen</span> <span class="n">in</span> <span class="nc">Compile</span><span class="o">).</span><span class="n">taskValue</span>
-</code></pre>
-</div>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="n">idlType</span> <span class="o">:=</span> <span class="n">avro</span>  
+ <span class="n">sourceGenerators</span> <span class="n">in</span> <span class="nc">Compile</span> <span class="o">+=</span> <span class="o">(</span><span class="n">idlGen</span> <span class="n">in</span> <span class="nc">Compile</span><span class="o">).</span><span class="py">taskValue</span>
+</code></pre></div></div>
 
 <p>And the resulting <code class="highlighter-rouge">Avro</code> IDL would be generated in <code class="highlighter-rouge">target/scala-2.12/resource_managed/main/avro/service.avpr</code>:</p>
 
-<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="w">
-  </span><span class="nt">"protocol"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"GreeterService"</span><span class="p">,</span><span class="w">
-  </span><span class="nt">"types"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"protocol"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"GreeterService"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"types"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
     </span><span class="p">{</span><span class="w">
-      </span><span class="nt">"name"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"HelloRequest"</span><span class="p">,</span><span class="w">
-      </span><span class="nt">"type"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"record"</span><span class="p">,</span><span class="w">
-      </span><span class="nt">"fields"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="nl">"name"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"HelloRequest"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"record"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"fields"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
         </span><span class="p">{</span><span class="w">
-          </span><span class="nt">"name"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"greeting"</span><span class="p">,</span><span class="w">
-          </span><span class="nt">"type"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="w">
+          </span><span class="nl">"name"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"greeting"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"type"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="w">
         </span><span class="p">}</span><span class="w">
       </span><span class="p">]</span><span class="w">
     </span><span class="p">},</span><span class="w">
     </span><span class="p">{</span><span class="w">
-      </span><span class="nt">"name"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"HelloResponse"</span><span class="p">,</span><span class="w">
-      </span><span class="nt">"type"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"record"</span><span class="p">,</span><span class="w">
-      </span><span class="nt">"fields"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="nl">"name"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"HelloResponse"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"record"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"fields"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
         </span><span class="p">{</span><span class="w">
-          </span><span class="nt">"name"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"reply"</span><span class="p">,</span><span class="w">
-          </span><span class="nt">"type"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="w">
+          </span><span class="nl">"name"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"reply"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"type"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"string"</span><span class="w">
         </span><span class="p">}</span><span class="w">
       </span><span class="p">]</span><span class="w">
     </span><span class="p">}</span><span class="w">
   </span><span class="p">],</span><span class="w">
-  </span><span class="nt">"messages"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-    </span><span class="nt">"sayHelloAvro"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-      </span><span class="nt">"request"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+  </span><span class="nl">"messages"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"sayHelloAvro"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"request"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
         </span><span class="p">{</span><span class="w">
-          </span><span class="nt">"name"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"arg"</span><span class="p">,</span><span class="w">
-          </span><span class="nt">"type"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"HelloRequest"</span><span class="w">
+          </span><span class="nl">"name"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"arg"</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"type"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"HelloRequest"</span><span class="w">
         </span><span class="p">}</span><span class="w">
       </span><span class="p">],</span><span class="w">
-      </span><span class="nt">"response"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"HelloResponse"</span><span class="w">
+      </span><span class="nl">"response"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"HelloResponse"</span><span class="w">
     </span><span class="p">}</span><span class="w">
   </span><span class="p">}</span><span class="w">
 </span><span class="p">}</span><span class="w">
-</span></code></pre>
-</div>
+</span></code></pre></div></div>
 
 <p>Note that due to limitations in the <code class="highlighter-rouge">Avro</code> IDL, currently only unary RPC services 
 are converted (client and/or server-streaming services are ignored).</p>

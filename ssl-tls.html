@@ -33,7 +33,7 @@
 
 <p>We won’t cover the details regarding creation of <code class="highlighter-rouge">RPCService</code>, <code class="highlighter-rouge">ServerRPCService</code> and runtime implicits. You can find more information about these in the <a href="patterns">Patterns</a> section.</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">java.io.File</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">java.io.File</span>
 <span class="k">import</span> <span class="nn">java.security.cert.X509Certificate</span>
 
 <span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">}</span>
@@ -45,48 +45,47 @@
 
 <span class="k">trait</span> <span class="nc">Runtime</span> <span class="k">extends</span> <span class="nc">CommonRuntime</span> <span class="o">{</span>
 
-  <span class="k">implicit</span> <span class="k">val</span> <span class="n">muRPCHandler</span><span class="k">:</span> <span class="kt">ServiceHandler</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span> <span class="k">=</span>
+  <span class="k">implicit</span> <span class="k">val</span> <span class="nv">muRPCHandler</span><span class="k">:</span> <span class="kt">ServiceHandler</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span> <span class="k">=</span>
     <span class="k">new</span> <span class="nc">ServiceHandler</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
 
   <span class="c1">// First of all, we have to load the certs into files. These files have to be placed in the resources folder.
 </span>
-  <span class="k">val</span> <span class="n">serverCertFile</span><span class="k">:</span> <span class="kt">File</span>                         <span class="o">=</span> <span class="nc">TestUtils</span><span class="o">.</span><span class="n">loadCert</span><span class="o">(</span><span class="s">"server1.pem"</span><span class="o">)</span>
-  <span class="k">val</span> <span class="n">serverPrivateKeyFile</span><span class="k">:</span> <span class="kt">File</span>                   <span class="o">=</span> <span class="nc">TestUtils</span><span class="o">.</span><span class="n">loadCert</span><span class="o">(</span><span class="s">"server1.key"</span><span class="o">)</span>
-  <span class="k">val</span> <span class="n">serverTrustedCaCerts</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">X509Certificate</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Array</span><span class="o">(</span><span class="nc">TestUtils</span><span class="o">.</span><span class="n">loadX509Cert</span><span class="o">(</span><span class="s">"ca.pem"</span><span class="o">))</span>
+  <span class="k">val</span> <span class="nv">serverCertFile</span><span class="k">:</span> <span class="kt">File</span>                         <span class="o">=</span> <span class="nv">TestUtils</span><span class="o">.</span><span class="py">loadCert</span><span class="o">(</span><span class="s">"server1.pem"</span><span class="o">)</span>
+  <span class="k">val</span> <span class="nv">serverPrivateKeyFile</span><span class="k">:</span> <span class="kt">File</span>                   <span class="o">=</span> <span class="nv">TestUtils</span><span class="o">.</span><span class="py">loadCert</span><span class="o">(</span><span class="s">"server1.key"</span><span class="o">)</span>
+  <span class="k">val</span> <span class="nv">serverTrustedCaCerts</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">X509Certificate</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Array</span><span class="o">(</span><span class="nv">TestUtils</span><span class="o">.</span><span class="py">loadX509Cert</span><span class="o">(</span><span class="s">"ca.pem"</span><span class="o">))</span>
 
   <span class="c1">// We have to build the SslContext passing our server certificates, configuring the OpenSSL
 </span>  <span class="c1">// and requiring the client auth.
 </span>
-  <span class="k">val</span> <span class="n">serverSslContext</span><span class="k">:</span> <span class="kt">SslContext</span> <span class="o">=</span>
+  <span class="k">val</span> <span class="nv">serverSslContext</span><span class="k">:</span> <span class="kt">SslContext</span> <span class="o">=</span>
     <span class="nc">GrpcSslContexts</span>
-      <span class="o">.</span><span class="n">configure</span><span class="o">(</span>
-        <span class="nc">GrpcSslContexts</span><span class="o">.</span><span class="n">forServer</span><span class="o">(</span><span class="n">serverCertFile</span><span class="o">,</span> <span class="n">serverPrivateKeyFile</span><span class="o">),</span>
-        <span class="nc">SslProvider</span><span class="o">.</span><span class="nc">OPENSSL</span><span class="o">)</span>
-      <span class="o">.</span><span class="n">trustManager</span><span class="o">(</span><span class="n">serverTrustedCaCerts</span><span class="k">:</span> <span class="k">_</span><span class="kt">*</span><span class="o">)</span>
-      <span class="o">.</span><span class="n">clientAuth</span><span class="o">(</span><span class="nc">ClientAuth</span><span class="o">.</span><span class="nc">REQUIRE</span><span class="o">)</span>
-      <span class="o">.</span><span class="n">build</span><span class="o">()</span>
+      <span class="o">.</span><span class="py">configure</span><span class="o">(</span>
+        <span class="nv">GrpcSslContexts</span><span class="o">.</span><span class="py">forServer</span><span class="o">(</span><span class="n">serverCertFile</span><span class="o">,</span> <span class="n">serverPrivateKeyFile</span><span class="o">),</span>
+        <span class="nv">SslProvider</span><span class="o">.</span><span class="py">OPENSSL</span><span class="o">)</span>
+      <span class="o">.</span><span class="py">trustManager</span><span class="o">(</span><span class="n">serverTrustedCaCerts</span><span class="k">:</span> <span class="k">_</span><span class="kt">*</span><span class="o">)</span>
+      <span class="o">.</span><span class="py">clientAuth</span><span class="o">(</span><span class="nv">ClientAuth</span><span class="o">.</span><span class="py">REQUIRE</span><span class="o">)</span>
+      <span class="o">.</span><span class="py">build</span><span class="o">()</span>
 
   <span class="c1">// Adding to the GrpConfig list the SslContext:
 </span>
-  <span class="k">val</span> <span class="n">grpcConfigs</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">GrpcConfig</span><span class="o">]]</span> <span class="k">=</span>
-     <span class="nc">Greeter</span><span class="o">.</span><span class="n">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
-       <span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="nc">AddService</span><span class="o">)</span>
-       <span class="o">.</span><span class="n">map</span><span class="o">(</span><span class="n">c</span> <span class="k">=&gt;</span> <span class="nc">List</span><span class="o">(</span><span class="nc">SetSslContext</span><span class="o">(</span><span class="n">serverSslContext</span><span class="o">),</span> <span class="n">c</span><span class="o">))</span>
+  <span class="k">val</span> <span class="nv">grpcConfigs</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">GrpcConfig</span><span class="o">]]</span> <span class="k">=</span>
+     <span class="nv">Greeter</span><span class="o">.</span><span class="py">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
+       <span class="o">.</span><span class="py">map</span><span class="o">(</span><span class="nc">AddService</span><span class="o">)</span>
+       <span class="o">.</span><span class="py">map</span><span class="o">(</span><span class="n">c</span> <span class="k">=&gt;</span> <span class="nc">List</span><span class="o">(</span><span class="nc">SetSslContext</span><span class="o">(</span><span class="n">serverSslContext</span><span class="o">),</span> <span class="n">c</span><span class="o">))</span>
 
   <span class="c1">// Important. We have to create the server with Netty. OkHttp is not supported for the SSL
 </span>  <span class="c1">// encryption in Mu at this moment.
 </span>
-  <span class="k">val</span> <span class="n">server</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">GrpcServer</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span> <span class="n">grpcConfigs</span><span class="o">.</span><span class="n">flatMap</span><span class="o">(</span><span class="nc">GrpcServer</span><span class="o">.</span><span class="n">netty</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="mi">8080</span><span class="o">,</span> <span class="k">_</span><span class="o">))</span>
+  <span class="k">val</span> <span class="nv">server</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">GrpcServer</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span> <span class="nv">grpcConfigs</span><span class="o">.</span><span class="py">flatMap</span><span class="o">(</span><span class="nv">GrpcServer</span><span class="o">.</span><span class="py">netty</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="mi">8080</span><span class="o">,</span> <span class="k">_</span><span class="o">))</span>
 
 <span class="o">}</span>
 
 <span class="k">object</span> <span class="nc">implicits</span> <span class="k">extends</span> <span class="nc">Runtime</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Lastly, as we did before with the server side, let’s see what happens on the client side.</p>
 
-<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.syntax.either._</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.syntax.either._</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.ChannelForAddress</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.channel.OverrideAuthority</span>
 <span class="k">import</span> <span class="nn">higherkindness.mu.rpc.channel.netty.</span><span class="o">{</span>
@@ -100,17 +99,17 @@
 
   <span class="c1">// First of all, we have to load the certs files.
 </span>
-  <span class="k">val</span> <span class="n">clientCertChainFile</span><span class="k">:</span> <span class="kt">File</span>                    <span class="o">=</span> <span class="nc">TestUtils</span><span class="o">.</span><span class="n">loadCert</span><span class="o">(</span><span class="s">"client.pem"</span><span class="o">)</span>
-  <span class="k">val</span> <span class="n">clientPrivateKeyFile</span><span class="k">:</span> <span class="kt">File</span>                   <span class="o">=</span> <span class="nc">TestUtils</span><span class="o">.</span><span class="n">loadCert</span><span class="o">(</span><span class="s">"client.key"</span><span class="o">)</span>
-  <span class="k">val</span> <span class="n">clientTrustedCaCerts</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">X509Certificate</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Array</span><span class="o">(</span><span class="nc">TestUtils</span><span class="o">.</span><span class="n">loadX509Cert</span><span class="o">(</span><span class="s">"ca.pem"</span><span class="o">))</span>
+  <span class="k">val</span> <span class="nv">clientCertChainFile</span><span class="k">:</span> <span class="kt">File</span>                    <span class="o">=</span> <span class="nv">TestUtils</span><span class="o">.</span><span class="py">loadCert</span><span class="o">(</span><span class="s">"client.pem"</span><span class="o">)</span>
+  <span class="k">val</span> <span class="nv">clientPrivateKeyFile</span><span class="k">:</span> <span class="kt">File</span>                   <span class="o">=</span> <span class="nv">TestUtils</span><span class="o">.</span><span class="py">loadCert</span><span class="o">(</span><span class="s">"client.key"</span><span class="o">)</span>
+  <span class="k">val</span> <span class="nv">clientTrustedCaCerts</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">X509Certificate</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Array</span><span class="o">(</span><span class="nv">TestUtils</span><span class="o">.</span><span class="py">loadX509Cert</span><span class="o">(</span><span class="s">"ca.pem"</span><span class="o">))</span>
 
   <span class="c1">// We have to create the SslContext for the client like as we did in the server.
 </span>
-  <span class="k">val</span> <span class="n">clientSslContext</span><span class="k">:</span> <span class="kt">SslContext</span> <span class="o">=</span>
-    <span class="nc">GrpcSslContexts</span><span class="o">.</span><span class="n">forClient</span>
-      <span class="o">.</span><span class="n">keyManager</span><span class="o">(</span><span class="n">clientCertChainFile</span><span class="o">,</span> <span class="n">clientPrivateKeyFile</span><span class="o">)</span>
-      <span class="o">.</span><span class="n">trustManager</span><span class="o">(</span><span class="n">clientTrustedCaCerts</span><span class="k">:</span> <span class="k">_</span><span class="kt">*</span><span class="o">)</span>
-      <span class="o">.</span><span class="n">build</span><span class="o">()</span>
+  <span class="k">val</span> <span class="nv">clientSslContext</span><span class="k">:</span> <span class="kt">SslContext</span> <span class="o">=</span>
+    <span class="nv">GrpcSslContexts</span><span class="o">.</span><span class="py">forClient</span>
+      <span class="o">.</span><span class="py">keyManager</span><span class="o">(</span><span class="n">clientCertChainFile</span><span class="o">,</span> <span class="n">clientPrivateKeyFile</span><span class="o">)</span>
+      <span class="o">.</span><span class="py">trustManager</span><span class="o">(</span><span class="n">clientTrustedCaCerts</span><span class="k">:</span> <span class="k">_</span><span class="kt">*</span><span class="o">)</span>
+      <span class="o">.</span><span class="py">build</span><span class="o">()</span>
 <span class="o">}</span>
 
 <span class="k">object</span> <span class="nc">MainApp</span> <span class="k">extends</span> <span class="nc">CommonRuntime</span> <span class="o">{</span>
@@ -122,21 +121,20 @@
   <span class="c1">// In this case, we are creating the channel interpreter with a specific ManagedChannelConfig
 </span>  <span class="c1">// These configs allow us to encrypt the connection with the server.
 </span>
-  <span class="k">val</span> <span class="n">channelInterpreter</span><span class="k">:</span> <span class="kt">NettyChannelInterpreter</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">NettyChannelInterpreter</span><span class="o">(</span>
+  <span class="k">val</span> <span class="nv">channelInterpreter</span><span class="k">:</span> <span class="kt">NettyChannelInterpreter</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">NettyChannelInterpreter</span><span class="o">(</span>
     <span class="nc">ChannelForAddress</span><span class="o">(</span><span class="s">"localhost"</span><span class="o">,</span> <span class="mi">8080</span><span class="o">),</span>
-    <span class="nc">List</span><span class="o">(</span><span class="nc">OverrideAuthority</span><span class="o">(</span><span class="nc">TestUtils</span><span class="o">.</span><span class="nc">TEST_SERVER_HOST</span><span class="o">)),</span>
+    <span class="nc">List</span><span class="o">(</span><span class="nc">OverrideAuthority</span><span class="o">(</span><span class="nv">TestUtils</span><span class="o">.</span><span class="py">TEST_SERVER_HOST</span><span class="o">)),</span>
     <span class="nc">List</span><span class="o">(</span>
-      <span class="nc">NettyNegotiationType</span><span class="o">(</span><span class="nc">NegotiationType</span><span class="o">.</span><span class="nc">TLS</span><span class="o">),</span>
+      <span class="nc">NettyNegotiationType</span><span class="o">(</span><span class="nv">NegotiationType</span><span class="o">.</span><span class="py">TLS</span><span class="o">),</span>
       <span class="nc">NettySslContext</span><span class="o">(</span><span class="n">clientSslContext</span><span class="o">)</span>
     <span class="o">)</span>
   <span class="o">)</span>
 
-  <span class="k">val</span> <span class="n">muRPCServiceClient</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">Greeter</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span>
-    <span class="nc">Greeter</span><span class="o">.</span><span class="n">clientFromChannel</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="nc">IO</span><span class="o">(</span><span class="n">channelInterpreter</span><span class="o">.</span><span class="n">build</span><span class="o">))</span>
+  <span class="k">val</span> <span class="nv">muRPCServiceClient</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">Greeter</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span>
+    <span class="nv">Greeter</span><span class="o">.</span><span class="py">clientFromChannel</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="nc">IO</span><span class="o">(</span><span class="nv">channelInterpreter</span><span class="o">.</span><span class="py">build</span><span class="o">))</span>
 
 <span class="o">}</span>
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <h2 id="more">More</h2>
 <p>For more details, <a href="https://www.47deg.com/blog/mu-rpc-securing-communications-with-mu/">here</a> you can check a full explanation and an example about securing communications.</p>
