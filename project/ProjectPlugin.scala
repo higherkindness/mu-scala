@@ -369,9 +369,10 @@ object ProjectPlugin extends AutoPlugin {
         orgInquireVersions,
         orgTagRelease,
         orgUpdateChangeLog,
+        releaseStepCommandAndRemaining("publishSigned"),
+        releaseStepCommand("sonatypeBundleRelease"),
         setNextVersion,
         orgCommitNextVersion,
-        ReleaseStep(action = "sonatypeReleaseAll" :: _),
         orgPostRelease
       )
     ) ++ Seq(
