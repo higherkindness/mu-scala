@@ -23,8 +23,10 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest._
 import scala.compat.Platform
 import scala.io._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-trait RpcBaseTestSuite extends WordSpec with Matchers with OneInstancePerTest with MockFactory {
+trait RpcBaseTestSuite extends AnyWordSpec with Matchers with OneInstancePerTest with MockFactory {
 
   trait Helpers {
 

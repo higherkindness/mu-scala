@@ -19,9 +19,10 @@ package higherkindness.mu.rpc.healthcheck.unary
 import cats.effect.IO
 import higherkindness.mu.rpc.healthcheck.unary.handler._
 import higherkindness.mu.rpc.protocol.Empty
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class HealthServiceUnaryTest extends WordSpec with Matchers {
+class HealthServiceUnaryTest extends AnyWordSpec with Matchers {
 
   "Unary health check service" should {
 

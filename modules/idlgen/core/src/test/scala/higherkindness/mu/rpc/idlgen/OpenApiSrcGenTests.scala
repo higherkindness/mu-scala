@@ -16,14 +16,16 @@
 
 package higherkindness.mu.rpc.idlgen
 
-import org.scalatest.{FlatSpec, Matchers, OptionValues}
+import org.scalatest.OptionValues
 import Matchers._
 import java.io.File
 
 import higherkindness.mu.rpc.idlgen.openapi.OpenApiSrcGenerator
 import higherkindness.mu.rpc.idlgen.openapi.OpenApiSrcGenerator.HttpImpl
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class OpenApiSrcGenTests extends FlatSpec with OptionValues {
+class OpenApiSrcGenTests extends AnyFlatSpec with OptionValues {
   val module: String       = new java.io.File(".").getCanonicalPath
   val resourcesFiles: File = new File(module + "/src/test/resources/")
   val openApiFile          = new File(resourcesFiles.getPath() ++ "/openapi/bookstore/book.yaml")

@@ -23,8 +23,10 @@ import org.scalatestplus.scalacheck.Checkers
 import org.scalacheck.Prop._
 
 import scala.collection.JavaConverters._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class ServersTests extends WordSpec with Matchers with Checkers {
+class ServersTests extends AnyWordSpec with Matchers with Checkers {
 
   import TestingUtils._
 

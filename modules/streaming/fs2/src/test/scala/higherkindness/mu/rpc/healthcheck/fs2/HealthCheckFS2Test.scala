@@ -19,9 +19,10 @@ package higherkindness.mu.rpc.healthcheck.fs2
 import cats.effect.IO
 import higherkindness.mu.rpc.healthcheck.fs2.handler.HealthServiceFS2
 import higherkindness.mu.rpc.healthcheck.unary.handler.{HealthCheck, HealthStatus, ServerStatus}
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class HealthCheckFS2Test extends WordSpec with Matchers {
+class HealthCheckFS2Test extends AnyWordSpec with Matchers {
 
   "FS2 health check service" should {
 

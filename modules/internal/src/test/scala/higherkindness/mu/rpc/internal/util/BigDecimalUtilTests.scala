@@ -23,8 +23,10 @@ import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest._
 import org.scalacheck.Prop._
 import org.scalatestplus.scalacheck.Checkers
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class BigDecimalUtilTests extends WordSpec with Matchers with Checkers {
+class BigDecimalUtilTests extends AnyWordSpec with Matchers with Checkers {
 
   def checkAll[T](f: T => BigDecimal)(implicit N: Numeric[T], C: Choose[T]): Assertion = {
     implicit val bigDecimalArbitrary: Arbitrary[BigDecimal] =

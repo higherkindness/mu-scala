@@ -16,11 +16,12 @@
 
 package higherkindness.mu.rpc.healthcheck.unary
 
-import org.scalatest.{Matchers, WordSpec}
 import higherkindness.mu.rpc.healthcheck.ordering._
 import higherkindness.mu.rpc.healthcheck.unary.handler.HealthCheck
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class OrderingTest extends WordSpec with Matchers {
+class OrderingTest extends AnyWordSpec with Matchers {
   "Ordering" should {
     "work" in {
       assert(new HealthCheck("example") === new HealthCheck("example"))

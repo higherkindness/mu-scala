@@ -23,11 +23,12 @@ import cats.effect.concurrent.Ref
 import cats.implicits._
 import fs2.Stream
 import higherkindness.mu.rpc.common.util.FakeClock
-import org.scalatest.{Matchers, WordSpec}
 
 import scala.concurrent.duration._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class ClientCacheTests extends WordSpec with Matchers {
+class ClientCacheTests extends AnyWordSpec with Matchers {
 
   val EC: scala.concurrent.ExecutionContext =
     scala.concurrent.ExecutionContext.Implicits.global

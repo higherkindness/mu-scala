@@ -25,8 +25,10 @@ import higherkindness.mu.rpc.jodatime.util.JodaTimeUtil
 import org.scalatest._
 import org.scalacheck.Prop._
 import org.scalatestplus.scalacheck.Checkers
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class JodaTimeUtilTest extends WordSpec with Matchers with Checkers {
+class JodaTimeUtilTest extends AnyWordSpec with Matchers with Checkers {
 
   val from: DateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeZone.UTC)
 
