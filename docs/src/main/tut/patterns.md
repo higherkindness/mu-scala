@@ -138,49 +138,25 @@ trait CommonRuntime {
 
 As a side note, `CommonRuntime` will also be used later on for the client example program.
 
-### Transport Implicits
+### Server Bootstrap
 
 For the server bootstrapping, remember to add the `mu-rpc-server` dependency to your build.
 
-Now, we need to implicitly provide two things:
+Now, we need to implicitly provide a runtime interpreter of our `ServiceHandler` tied to a specific type. In our case, we'll use `cats.effects.IO`.
 
-* A runtime interpreter of our `ServiceHandler` tied to a specific type. In our case, we'll use `cats.effects.IO`.
-* A `ServerW` implicit evidence, compounded by:
+We also need to explicitly provide:
 	* RPC port where the server will bootstrap.
-	* The set of configurations we want to add to our [gRPC] server, like our `Greeter` service definition. All these configurations are aggregated in a `List[GrpcConfig]`. Later on, an internal builder will build the final server based on this list. The full list of exposed settings is available in [this file](https://github.com/higherkindness/mu/blob/master/modules/server/src/main/scala/GrpcConfig.scala).
-
-In summary, the result would be as follows:
-
-```tut:silent
-import cats.effect.IO
-import higherkindness.mu.rpc.server._
-import monix.execution.Scheduler
-import service._
-
-object gserver {
-
-  trait Implicits extends CommonRuntime {
-
-    implicit val greeterServiceHandler: ServiceHandler[IO] = new ServiceHandler[IO]
-
-  }
-
-  object implicits extends Implicits
-
-}
-```
-
-### Server Bootstrap
+	* The set of configurations we want to add to our [gRPC] server, like our `Greeter` service definition. All these configurations are aggregated in a `List[GrpcConfig]`. The full list of exposed settings is available in [this file](https://github.com/higherkindness/mu/blob/master/modules/server/src/main/scala/GrpcConfig.scala).
 
 What else is needed? We just need to define a `main` method:
 
 ```tut:silent
 import cats.effect.IO
-import higherkindness.mu.rpc.server.GrpcServer
+import higherkindness.mu.rpc.server._
 
-object RPCServer {
+object RPCServer extends CommonRuntime {
 
-  import gserver.implicits._
+  implicit val greeterServiceHandler: Greeter[IO] = new ServiceHandler[IO]
 
   def main(args: Array[String]): Unit = {
 
@@ -196,9 +172,7 @@ object RPCServer {
 }
 ```
 
-The Server will bootstrap on port `8080`.
-
-Fortunately, once all the runtime requirements are in place (**`import gserver.implicits._`**), we only have to write the previous piece of code, which primarily, should be the same in all cases (except if your target Monad is different from `cats.effects.IO`).
+The server will run on port `8080`.
 
 ### Service testing
 
@@ -214,10 +188,10 @@ import org.scalacheck.Gen
 import org.scalacheck.Prop.forAll
 import service._
 
-class ServiceSpec extends FunSuite with Matchers with Checkers with OneInstancePerTest {
+class ServiceSpec extends FunSuite with Matchers with Checkers with OneInstancePerTest with CommonRuntime {
 
-  import gserver.implicits._
-    
+  implicit val greeterServiceHandler: Greeter[IO] = new ServiceHandler[IO]
+
   def withClient[Client, A](
       serviceDef: IO[ServerServiceDefinition],
       resourceBuilder: IO[ManagedChannel] => Resource[IO, Client])(
@@ -229,7 +203,7 @@ class ServiceSpec extends FunSuite with Matchers with Checkers with OneInstanceP
 
   def sayHelloTest(requestGen: Gen[HelloRequest], expected: HelloResponse): Assertion =
     withClient(
-      Greeter.bindService[IO], 
+      Greeter.bindService[IO],
       Greeter.clientFromChannel[IO](_)) { client =>
         check {
           forAll(requestGen) { request =>
