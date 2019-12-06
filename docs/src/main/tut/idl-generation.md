@@ -56,9 +56,9 @@ object service {
     def lotsOfGreetings(request: Observable[HelloRequest]): F[HelloResponse]
 
     def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
-    
+
   }
-  
+
   @service(Avro)
   trait AvroGreeter[F[_]] {
     def sayHelloAvro(request: HelloRequest): F[HelloResponse]
@@ -67,7 +67,7 @@ object service {
 ```
 Note that, ``HelloResponse`` and `HelloRequest` case classes are preceded by the `@message` annotation.
 
-At this point, each time you want to update your `.proto` IDL files from the scala definitions, 
+At this point, each time you want to update your `.proto` IDL files from the scala definitions,
 you have to run the following sbt task:
 
 ```bash
@@ -78,18 +78,18 @@ However, as we said in [the previous section](generate-sources-from-idl), the ea
 
 ```scala
  import higherkindness.mu.rpc.idlgen.IdlGenPlugin.autoImport._
-``` 
-and the setting,   
-                                                                                
-```scala  
- idlType := proto  
+```
+and the setting,
+
+```scala
+ idlType := "proto"
  sourceGenerators in Compile += (idlGen in Compile).taskValue
 ```
 
-Using this example, the resulting `Protobuf` IDL would be generated in `/src/main/resources/proto/service.proto`, 
+Using this example, the resulting `Protobuf` IDL would be generated in `/src/main/resources/proto/service.proto`,
 assuming that the scala file is named `service.scala`. The content should be similar to:
 
-```proto
+```protobuf
 // This file has been automatically generated for use by
 // the idlGen plugin, from mu-rpc service definitions.
 // Read more at: https://higherkindness.github.io/mu/scala/
@@ -123,8 +123,8 @@ sbt "idlGen avro"
 ```
 or change the settings in your `build.sbt`:
 
-```scala  
- idlType := avro  
+```scala
+ idlType := "avro"
  sourceGenerators in Compile += (idlGen in Compile).taskValue
 ```
 
@@ -169,7 +169,7 @@ And the resulting `Avro` IDL would be generated in `target/scala-2.12/resource_m
 }
 ```
 
-Note that due to limitations in the `Avro` IDL, currently only unary RPC services 
+Note that due to limitations in the `Avro` IDL, currently only unary RPC services
 are converted (client and/or server-streaming services are ignored).
 
 ### Plugin Settings

@@ -313,7 +313,8 @@ object ProjectPlugin extends AutoPlugin {
         "gray-light"      -> "#EDEDED",
         "gray-lighter"    -> "#F4F5F9",
         "white-color"     -> "#E6E7EC"
-      )
+      ),
+      micrositeHighlightLanguages += "protobuf"
     )
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
