@@ -14,7 +14,7 @@ Predictably, generating the server code is just creating an implementation for y
 
 First, here's our `Greeter` RPC protocol definition:
 
-```tut:invisible
+```tut:silent
 import higherkindness.mu.rpc.protocol._
 
 object service {
