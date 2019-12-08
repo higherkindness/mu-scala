@@ -38,7 +38,7 @@ object ProjectPlugin extends AutoPlugin {
       val fs2Kafka: String           = "0.20.2"
       val grpc: String               = "1.24.2"
       val jodaTime: String           = "2.10.5"
-      val http4s: String             = "0.21.0-M5"
+      val http4s: String             = "0.21.0-M6"
       val kindProjector: String      = "0.10.3"
       val log4cats: String           = "1.0.1"
       val log4s: String              = "1.8.2"
@@ -56,8 +56,8 @@ object ProjectPlugin extends AutoPlugin {
       val scalacheck: String         = "1.14.2"
       val scalacheckToolbox: String  = "0.3.1"
       val scalamock: String          = "4.4.0"
-      val scalatest: String          = "3.1.0"
-      val skeuomorph: String         = "0.0.15"
+      val scalatest: String          = "3.0.8"
+      val skeuomorph: String         = "0.0.17"
       val slf4j: String              = "1.7.29"
     }
 
