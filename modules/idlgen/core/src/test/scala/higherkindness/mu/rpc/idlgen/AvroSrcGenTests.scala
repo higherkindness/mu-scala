@@ -23,7 +23,7 @@ import higherkindness.mu.rpc.idlgen.avro._
 import org.scalatestplus.scalacheck.Checkers
 import org.scalacheck.Prop.forAll
 
-class SrcGenTests extends RpcBaseTestSuite with Checkers {
+class AvroSrcGenTests extends RpcBaseTestSuite with Checkers {
 
   "Avro Scala Generator" should {
 

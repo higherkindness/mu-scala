@@ -21,28 +21,62 @@ import java.io.File
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
 import higherkindness.mu.rpc.idlgen.proto.ProtoSrcGenerator
 import higherkindness.mu.rpc.idlgen.Model.{NoCompressionGen, UseIdiomaticEndpoints}
+import org.scalatest.OptionValues
 
-class ProtoSrcGenTests extends RpcBaseTestSuite {
+class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
 
-  val module: String  = new java.io.File(".").getCanonicalPath
-  val protoFile: File = new File(module + "/src/test/resources/proto/book.proto")
+  val module: String = new java.io.File(".").getCanonicalPath
+  def protoFile(filename: String): File =
+    new File(s"$module/src/test/resources/proto/$filename.proto")
 
   "Proto Scala Generator" should {
 
     "generate correct Scala classes" in {
 
-      val result: Option[(String, Seq[String])] =
+      val result: Option[(String, String)] =
         ProtoSrcGenerator
           .build(NoCompressionGen, UseIdiomaticEndpoints(false), new java.io.File("."))
-          .generateFrom(files = Set(protoFile), serializationType = "", options = "")
-          .map(t => (t._2, t._3.map(_.clean)))
+          .generateFrom(files = Set(protoFile("book")), serializationType = "", options = "")
+          .map(t => (t._2, t._3.mkString("\n").clean))
           .headOption
 
-      result shouldBe Some(("com/proto/book.scala", Seq(expectation.clean)))
+      result shouldBe Some(("com/proto/book.scala", bookExpectation.clean))
     }
+
+    case class ImportsTestCase(
+        protoFilename: String,
+        shouldIncludeFS2Import: Boolean,
+        shouldIncludeShapelessImport: Boolean
+    )
+
+    for (test <- List(
+        ImportsTestCase("streaming_no_shapeless_no", false, false),
+        ImportsTestCase("streaming_yes_shapeless_no", true, false),
+        ImportsTestCase("streaming_no_shapeless_yes", false, true),
+        ImportsTestCase("streaming_yes_shapeless_yes", true, true)
+      )) {
+
+      s"include the correct imports (${test.protoFilename})" in {
+
+        val result: Option[String] =
+          ProtoSrcGenerator
+            .build(NoCompressionGen, UseIdiomaticEndpoints(false), new java.io.File("."))
+            .generateFrom(
+              files = Set(protoFile(test.protoFilename)),
+              serializationType = "",
+              options = "")
+            .map(_._3.mkString("\n"))
+            .headOption
+
+        assert(result.value.contains("import fs2.") == test.shouldIncludeFS2Import)
+        assert(result.value.contains("import shapeless.") == test.shouldIncludeShapelessImport)
+      }
+
+    }
+
   }
 
-  val expectation =
+  val bookExpectation =
     """package com.proto
       |
       |import higherkindness.mu.rpc.protocol._
