@@ -20,6 +20,7 @@ import java.io.File
 
 import cats.effect.{IO, Sync}
 import cats.syntax.functor._
+import cats.syntax.option._
 import higherkindness.mu.rpc.idlgen.Model.{
   CompressionTypeGen,
   GzipGen,
@@ -55,7 +56,7 @@ object ProtoSrcGenerator {
 
     def withImports(self: String): String =
       (self.split("\n", 2).toList match {
-        case h :: t => imports(h) :: t
+        case h :: t => h :: imports(t.mkString("\n")) :: t
         case a      => a
       }).mkString("\n")
 
@@ -85,13 +86,25 @@ object ProtoSrcGenerator {
         .map(
           protocol =>
             getPath(protocol) -> Seq(
-              (parseProtocol andThen printProtocol andThen withImports andThen withCoproducts)(
+              (parseProtocol andThen printProtocol andThen withCoproducts andThen withImports)(
                 protocol)))
 
     private def getPath(p: Protocol[Mu[ProtobufF]]): String =
       s"${p.pkg.replace('.', '/')}/${p.name}$ScalaFileExtension"
 
-    def imports(pkg: String): String =
-      s"$pkg\nimport higherkindness.mu.rpc.protocol._\nimport fs2.Stream\nimport shapeless.{:+:, CNil}"
+    def imports(fileContent: String): String = {
+      List(
+        "import higherkindness.mu.rpc.protocol._".some,
+        if (fileContent.contains("Stream[F,"))
+          "import fs2.Stream".some
+        else
+          None,
+        if (fileContent.contains(":+:"))
+          "import shapeless.{:+:, CNil}".some
+        else
+          None
+      ).flatten.mkString("\n")
+    }
+
   }
 }
