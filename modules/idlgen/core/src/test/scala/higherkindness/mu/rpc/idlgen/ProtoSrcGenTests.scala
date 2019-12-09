@@ -33,14 +33,14 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
 
     "generate correct Scala classes" in {
 
-      val result: Option[(String, Seq[String])] =
+      val result: Option[(String, String)] =
         ProtoSrcGenerator
           .build(NoCompressionGen, UseIdiomaticEndpoints(false), new java.io.File("."))
           .generateFrom(files = Set(protoFile("book")), serializationType = "", options = "")
-          .map(t => (t._2, t._3.map(_.clean)))
+          .map(t => (t._2, t._3.mkString("\n").clean))
           .headOption
 
-      result shouldBe Some(("com/proto/book.scala", Seq(bookExpectation.clean)))
+      result shouldBe Some(("com/proto/book.scala", bookExpectation.clean))
     }
 
     case class ImportsTestCase(
@@ -65,7 +65,7 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
               files = Set(protoFile(test.protoFilename)),
               serializationType = "",
               options = "")
-            .flatMap(t => t._3)
+            .map(_._3.mkString("\n"))
             .headOption
 
         assert(result.value.contains("import fs2.") == test.shouldIncludeFS2Import)

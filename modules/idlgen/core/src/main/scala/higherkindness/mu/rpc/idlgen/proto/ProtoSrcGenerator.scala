@@ -54,19 +54,21 @@ object ProtoSrcGenerator {
         options: String*): Option[(String, Seq[String])] =
       getCode[IO](inputFile).map(Some(_)).unsafeRunSync
 
-    def withImports(self: String): String =
-      (self.split("\n", 2).toList match {
-        case h :: t => h :: imports(t.mkString("\n")) :: t
-        case a      => a
-      }).mkString("\n")
+    def withImports(lines: List[String]): List[String] =
+      lines match {
+        case h :: t =>
+          // first line of file is package declaration
+          h :: imports(t) ++ t
+        case a => a
+      }
 
     val copRegExp: Regex = """((Cop\[)(((\w+)((\[)(\w+)(\]))?(\s)?(\:\:)(\s)?)+)(TNil)(\]))""".r
 
     val cleanCop: String => String =
       _.replace("Cop[", "").replace("::", ":+:").replace("TNil]", "CNil")
 
-    val withCoproducts: String => String = self =>
-      copRegExp.replaceAllIn(self, m => cleanCop(m.matched))
+    val withCoproducts: List[String] => List[String] = lines =>
+      lines.map(line => copRegExp.replaceAllIn(line, m => cleanCop(m.matched)))
 
     val skeuomorphCompression: CompressionType = compressionTypeGen match {
       case GzipGen          => CompressionType.Gzip
@@ -80,30 +82,31 @@ object ProtoSrcGenerator {
     val printProtocol: higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] => String =
       higherkindness.skeuomorph.mu.print.proto.print
 
+    val splitLines: String => List[String] = _.split("\n").toList
+
     private def getCode[F[_]: Sync](file: File): F[(String, Seq[String])] =
       parseProto[F, Mu[ProtobufF]]
         .parse(ProtoSource(file.getName, file.getParent, Some(idlTargetDir.getCanonicalPath)))
-        .map(
-          protocol =>
-            getPath(protocol) -> Seq(
-              (parseProtocol andThen printProtocol andThen withCoproducts andThen withImports)(
-                protocol)))
+        .map(protocol =>
+          getPath(protocol) ->
+            (parseProtocol andThen printProtocol andThen splitLines andThen withCoproducts andThen withImports)(
+              protocol))
 
     private def getPath(p: Protocol[Mu[ProtobufF]]): String =
       s"${p.pkg.replace('.', '/')}/${p.name}$ScalaFileExtension"
 
-    def imports(fileContent: String): String = {
+    def imports(fileLines: List[String]): List[String] = {
       List(
         "import higherkindness.mu.rpc.protocol._".some,
-        if (fileContent.contains("Stream[F,"))
+        if (fileLines.exists(_.contains("Stream[F,")))
           "import fs2.Stream".some
         else
           None,
-        if (fileContent.contains(":+:"))
+        if (fileLines.exists(_.contains(":+:")))
           "import shapeless.{:+:, CNil}".some
         else
           None
-      ).flatten.mkString("\n")
+      ).flatten
     }
 
   }
