@@ -39,8 +39,8 @@ case class AvroSrcGenerator(
   private[this] val logger = getLogger
 
   private val avroBigDecimal: AvroScalaDecimalType = bigDecimalTypeGen match {
-    case ScalaBigDecimalGen       => ScalaBigDecimal
-    case ScalaBigDecimalTaggedGen => ScalaBigDecimalWithPrecision
+    case ScalaBigDecimalGen       => ScalaBigDecimal(None)
+    case ScalaBigDecimalTaggedGen => ScalaBigDecimalWithPrecision(None)
   }
   private val avroScalaCustomTypes = Standard.defaultTypes.copy(decimal = avroBigDecimal)
   private val mainGenerator        = Generator(Standard, avroScalaCustomTypes = Some(avroScalaCustomTypes))
