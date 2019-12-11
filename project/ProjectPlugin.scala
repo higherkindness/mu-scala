@@ -32,6 +32,7 @@ object ProjectPlugin extends AutoPlugin {
       val circe: String              = "0.12.3"
       val dropwizard: String         = "4.1.2"
       val embeddedKafka: String      = "2.3.1"
+      val enumeratum: String         = "1.5.13"
       val frees: String              = "0.8.2"
       val fs2: String                = "2.1.0"
       val fs2Grpc: String            = "0.6.0"
@@ -74,6 +75,7 @@ object ProjectPlugin extends AutoPlugin {
         %%("cats-effect", V.catsEffect),
         %("grpc-stub", V.grpc),
         "com.47deg" %% "pbdirect" % V.pbdirect,
+        "com.beachape" %% "enumeratum" % V.enumeratum,
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
         "org.scala-lang"             % "scala-compiler" % scalaVersion.value,
