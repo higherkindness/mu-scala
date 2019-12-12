@@ -24,6 +24,7 @@ import cats.instances._
 import com.google.protobuf.{CodedInputStream, CodedOutputStream}
 import higherkindness.mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTimeUtil}
 import io.grpc.MethodDescriptor.Marshaller
+import org.apache.commons.compress.utils.IOUtils
 
 object pbd extends OptionInstances with ListInstances {
 
@@ -32,8 +33,7 @@ object pbd extends OptionInstances with ListInstances {
   implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader]: Marshaller[A] =
     new Marshaller[A] {
 
-      override def parse(stream: InputStream): A =
-        Iterator.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray.pbTo[A]
+      override def parse(stream: InputStream): A = IOUtils.toByteArray(stream).pbTo[A]
 
       override def stream(value: A): InputStream = new ByteArrayInputStream(value.toPB)
 
