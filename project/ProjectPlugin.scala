@@ -54,7 +54,7 @@ object ProjectPlugin extends AutoPlugin {
       val reactiveStreams: String    = "1.0.3"
       val scala: String              = "2.12.10"
       val scopt: String              = "3.7.1"
-      val scalacheck: String         = "1.14.2"
+      val scalacheck: String         = "1.14.3"
       val scalacheckToolbox: String  = "0.3.1"
       val scalamock: String          = "4.4.0"
       val scalatest: String          = "3.0.8"
