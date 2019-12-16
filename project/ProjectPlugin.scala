@@ -31,7 +31,7 @@ object ProjectPlugin extends AutoPlugin {
       val catsEffect: String         = "2.0.0"
       val circe: String              = "0.12.3"
       val dropwizard: String         = "4.1.2"
-      val embeddedKafka: String      = "2.3.1"
+      val embeddedKafka: String      = "2.4.0"
       val enumeratum: String         = "1.5.13"
       val frees: String              = "0.8.2"
       val fs2: String                = "2.1.0"
