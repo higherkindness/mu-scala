@@ -30,7 +30,7 @@ object pbd extends OptionInstances with ListInstances {
 
   import pbdirect._
 
-  implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader]: Marshaller[A] =
+  implicit def defaultDirectPBMarshallers[A: PBMessageWriter: PBReader]: Marshaller[A] =
     new Marshaller[A] {
 
       override def parse(stream: InputStream): A = IOUtils.toByteArray(stream).pbTo[A]
@@ -41,7 +41,7 @@ object pbd extends OptionInstances with ListInstances {
 
   object bigDecimal {
 
-    implicit object BigDecimalWriter extends PBWriter[BigDecimal] {
+    implicit object BigDecimalWriter extends PBFieldWriter[BigDecimal] {
       override def writeTo(index: Int, value: BigDecimal, out: CodedOutputStream): Unit =
         out.writeByteArray(index, BigDecimalUtil.bigDecimalToByte(value))
     }
@@ -54,7 +54,7 @@ object pbd extends OptionInstances with ListInstances {
 
   object javatime {
 
-    implicit object LocalDateWriter extends PBWriter[LocalDate] {
+    implicit object LocalDateWriter extends PBFieldWriter[LocalDate] {
       override def writeTo(index: Int, value: LocalDate, out: CodedOutputStream): Unit =
         out.writeByteArray(index, EncoderUtil.intToByteArray(JavaTimeUtil.localDateToInt(value)))
     }
@@ -64,7 +64,7 @@ object pbd extends OptionInstances with ListInstances {
         JavaTimeUtil.intToLocalDate(EncoderUtil.byteArrayToInt(input.readByteArray()))
     }
 
-    implicit object LocalDateTimeWriter extends PBWriter[LocalDateTime] {
+    implicit object LocalDateTimeWriter extends PBFieldWriter[LocalDateTime] {
       override def writeTo(index: Int, value: LocalDateTime, out: CodedOutputStream): Unit =
         out.writeByteArray(
           index,
@@ -76,7 +76,7 @@ object pbd extends OptionInstances with ListInstances {
         JavaTimeUtil.longToLocalDateTime(EncoderUtil.byteArrayToLong(input.readByteArray()))
     }
 
-    implicit object InstantWriter extends PBWriter[Instant] {
+    implicit object InstantWriter extends PBFieldWriter[Instant] {
       override def writeTo(index: Int, value: Instant, out: CodedOutputStream): Unit =
         out.writeByteArray(index, EncoderUtil.longToByteArray(JavaTimeUtil.instantToLong(value)))
     }

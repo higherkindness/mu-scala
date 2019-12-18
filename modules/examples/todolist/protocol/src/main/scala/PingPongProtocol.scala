@@ -18,6 +18,7 @@ package examples.todolist
 package protocol
 
 import higherkindness.mu.rpc.protocol._
+import pbdirect._
 
 trait PingPongProtocol {
 
@@ -26,7 +27,7 @@ trait PingPongProtocol {
    *
    * @param time Current timestamp.
    */
-  case class Pong(time: Long = System.currentTimeMillis() / 1000L)
+  case class Pong(@pbIndex(1) time: Long = System.currentTimeMillis() / 1000L)
 
   @service(Protobuf)
   trait PingPongService[F[_]] {

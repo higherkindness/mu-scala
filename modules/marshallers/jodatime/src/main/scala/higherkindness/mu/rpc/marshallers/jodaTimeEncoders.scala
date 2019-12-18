@@ -34,7 +34,7 @@ object jodaTimeEncoders {
 
     import pbdirect._
 
-    implicit object JodaLocalDateWriter extends PBWriter[LocalDate] {
+    implicit object JodaLocalDateWriter extends PBFieldWriter[LocalDate] {
       override def writeTo(index: Int, value: LocalDate, out: CodedOutputStream): Unit =
         out.writeByteArray(
           index,
@@ -46,7 +46,7 @@ object jodaTimeEncoders {
         JodaTimeUtil.intToJodaLocalDate(EncoderUtil.byteArrayToInt(input.readByteArray()))
     }
 
-    implicit object JodaLocalDateTimeWriter extends PBWriter[LocalDateTime] {
+    implicit object JodaLocalDateTimeWriter extends PBFieldWriter[LocalDateTime] {
       override def writeTo(index: Int, value: LocalDateTime, out: CodedOutputStream): Unit =
         out.writeByteArray(
           index,

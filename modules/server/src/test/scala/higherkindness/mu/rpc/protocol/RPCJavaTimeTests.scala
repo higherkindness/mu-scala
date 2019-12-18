@@ -29,6 +29,7 @@ import higherkindness.mu.rpc.internal.encoders.avro.javatime._
 import higherkindness.mu.rpc.internal.encoders.avro.javatime.marshallers._
 import higherkindness.mu.rpc.internal.encoders.pbd.javatime._
 import higherkindness.mu.rpc.protocol.Utils._
+import pbdirect._
 import org.scalacheck.Arbitrary
 import org.scalatest._
 import org.scalacheck.Prop._
@@ -38,20 +39,21 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
   object RPCDateService {
 
-    case class Request(date: LocalDate, dateTime: LocalDateTime, instant: Instant, label: String)
+    case class Request(
+        @pbIndex(1) date: LocalDate,
+        @pbIndex(2) dateTime: LocalDateTime,
+        @pbIndex(3) instant: Instant,
+        @pbIndex(4) label: String)
 
     case class Response(
-        date: LocalDate,
-        dateTime: LocalDateTime,
-        instant: Instant,
-        result: String,
-        check: Boolean)
+        @pbIndex(1) date: LocalDate,
+        @pbIndex(2) dateTime: LocalDateTime,
+        @pbIndex(3) instant: Instant,
+        @pbIndex(4) result: String,
+        @pbIndex(5) check: Boolean)
 
     @service(Protobuf)
     trait ProtoRPCDateServiceDef[F[_]] {
-      def localDateProto(date: LocalDate): F[LocalDate]
-      def localDateTimeProto(dateTime: LocalDateTime): F[LocalDateTime]
-      def instantProto(instant: Instant): F[Instant]
       def dateProtoWrapper(req: Request): F[Response]
     }
 
@@ -76,9 +78,6 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
         with AvroRPCDateServiceDef[F]
         with AvroWithSchemaRPCDateServiceDef[F] {
 
-      def localDateProto(date: LocalDate): F[LocalDate]                 = date.pure
-      def localDateTimeProto(dateTime: LocalDateTime): F[LocalDateTime] = dateTime.pure
-      def instantProto(instant: Instant): F[Instant]                    = instant.pure
       def dateProtoWrapper(req: Request): F[Response] =
         Response(req.date, req.dateTime, req.instant, req.label, check = true).pure
       def localDateAvro(date: LocalDate): F[LocalDate]                 = date.pure
@@ -105,51 +104,6 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
     val from: ZonedDateTime = ZonedDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)
     val range: Duration     = Duration.ofDays(365 * 200)
-
-    "be able to serialize and deserialize LocalDate using proto format" in {
-
-      withClient(
-        ProtoRPCDateServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
-        check {
-          forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
-            val date = zdt.toLocalDate
-            client.localDateProto(date).unsafeRunSync() == date
-          }
-        }
-      }
-
-    }
-
-    "be able to serialize and deserialize LocalDateTime using proto format" in {
-
-      withClient(
-        ProtoRPCDateServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
-        check {
-          forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
-            val dateTime = zdt.toLocalDateTime
-            client.localDateTimeProto(dateTime).unsafeRunSync() == dateTime
-          }
-        }
-      }
-
-    }
-
-    "be able to serialize and deserialize Instant using proto format" in {
-
-      withClient(
-        ProtoRPCDateServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
-        check {
-          forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
-            val instant = zdt.toInstant
-            client.instantProto(instant).unsafeRunSync() == instant
-          }
-        }
-      }
-
-    }
 
     "be able to serialize and deserialize LocalDate, LocalDateTime, and Instant in a Request using proto format" in {
 

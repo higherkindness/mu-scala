@@ -21,10 +21,11 @@ import java.io.File
 import java.security.cert.X509Certificate
 
 import cats.effect.Effect
-import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.common.{ConcurrentMonad, SC}
 import higherkindness.mu.rpc.protocol._
 import higherkindness.mu.rpc.server.netty.SetSslContext
 import higherkindness.mu.rpc.server.{AddService, GrpcConfig, GrpcServer}
+import higherkindness.mu.rpc.testmodels._
 import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.GrpcSslContexts
 import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}

@@ -21,11 +21,12 @@ import java.net.ServerSocket
 import cats.Functor
 import cats.effect.{Resource, Sync}
 import cats.syntax.functor._
-import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.server._
 import higherkindness.mu.rpc.testing.servers.withServerChannel
 import io.grpc.{ManagedChannel, ServerServiceDefinition}
 import org.slf4j.LoggerFactory
+import higherkindness.mu.rpc.testmodels._
+import higherkindness.mu.rpc.common.{suspendM, ConcurrentMonad, SC}
 
 import scala.util.{Failure, Success, Try}
 

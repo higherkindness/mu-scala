@@ -17,7 +17,7 @@
 package higherkindness.mu.rpc.healthcheck.client.fs2
 
 import cats.effect.IO
-import higherkindness.mu.rpc.healthcheck.unary.handler.ServerStatus
+import higherkindness.mu.rpc.healthcheck.fs2.serviceFS2.ServerStatus
 import io.chrisdavenport.log4cats.Logger
 
 object ClientProgramFS2 {

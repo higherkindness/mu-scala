@@ -18,6 +18,7 @@ package example.routeguide.protocol
 
 import higherkindness.mu.rpc.protocol._
 import monix.reactive.Observable
+import pbdirect._
 
 @outputPackage("routeguide")
 @option("java_multiple_files", true)
@@ -37,7 +38,7 @@ object Protocols {
    * @param longitude Longitude.
    */
   @message
-  case class Point(latitude: Int, longitude: Int)
+  case class Point(@pbIndex(1) latitude: Int, @pbIndex(2) longitude: Int)
 
   /**
    * A latitude-longitude rectangle, represented as two diagonally opposite
@@ -47,7 +48,7 @@ object Protocols {
    * @param hi The other corner of the rectangle.
    */
   @message
-  case class Rectangle(lo: Point, hi: Point)
+  case class Rectangle(@pbIndex(1) lo: Point, @pbIndex(2) hi: Point)
 
   /**
    * A feature names something at a given point.
@@ -57,14 +58,14 @@ object Protocols {
    * @param location The point where the feature is detected.
    */
   @message
-  case class Feature(name: String, location: Point)
+  case class Feature(@pbIndex(1) name: String, @pbIndex(2) location: Point)
 
   /**
    * Not used in the RPC. Instead, this is here for the form serialized to disk.
    * @param feature Feature.
    */
   @message
-  case class FeatureDatabase(feature: List[Feature])
+  case class FeatureDatabase(@pbIndex(1) feature: List[Feature])
 
   /**
    * A RouteNote is a message sent while at a given point.
@@ -73,7 +74,7 @@ object Protocols {
    * @param message The message to be sent.
    */
   @message
-  case class RouteNote(location: Point, message: String)
+  case class RouteNote(@pbIndex(1) location: Point, @pbIndex(2) message: String)
 
   /**
    * A RouteSummary is received in response to a RecordRoute rpc.
@@ -87,7 +88,11 @@ object Protocols {
    * @param elapsed_time The duration of the traversal in seconds.
    */
   @message
-  case class RouteSummary(point_count: Int, feature_count: Int, distance: Int, elapsed_time: Int)
+  case class RouteSummary(
+      @pbIndex(1) point_count: Int,
+      @pbIndex(2) feature_count: Int,
+      @pbIndex(3) distance: Int,
+      @pbIndex(4) elapsed_time: Int)
 
   @service(Protobuf)
   trait RouteGuideService[F[_]] {

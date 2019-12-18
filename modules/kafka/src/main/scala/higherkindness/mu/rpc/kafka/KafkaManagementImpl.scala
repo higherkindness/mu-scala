@@ -53,7 +53,7 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
       _ <- adminClient.createTopics(newTopics)
     } yield ()
 
-  override def deleteTopic(t: String): F[Unit] = adminClient.deleteTopic(t)
+  override def deleteTopic(t: DeleteTopicRequest): F[Unit] = adminClient.deleteTopic(t.name)
 
   override def deleteTopics(ts: DeleteTopicsRequest): F[Unit] = adminClient.deleteTopics(ts.names)
 
@@ -87,9 +87,9 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
       topics = kTopics.map { case (topic, desc) => TopicDescription.fromJava(desc) }.toList
     } yield Topics(topics)
 
-  override def listConsumerGroupOffsets(groupId: String): F[ConsumerGroupOffsets] =
+  override def listConsumerGroupOffsets(groupId: GroupId): F[ConsumerGroupOffsets] =
     for {
-      kOffsets <- adminClient.listConsumerGroupOffsets(groupId).partitionsToOffsetAndMetadata
+      kOffsets <- adminClient.listConsumerGroupOffsets(groupId.id).partitionsToOffsetAndMetadata
       offsets = kOffsets.map {
         case (topic, offset) =>
           Offset(TopicPartition.fromJava(topic), OffsetAndMetadata.fromJava(offset))

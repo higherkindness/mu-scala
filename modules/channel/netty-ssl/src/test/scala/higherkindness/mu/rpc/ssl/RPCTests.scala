@@ -25,7 +25,7 @@ import higherkindness.mu.rpc.channel.netty.{
   NettySslContext,
   NettyUsePlaintext
 }
-import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.common.{ConcurrentMonad, RpcBaseTestSuite, SC}
 import higherkindness.mu.rpc.server._
 import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.NegotiationType

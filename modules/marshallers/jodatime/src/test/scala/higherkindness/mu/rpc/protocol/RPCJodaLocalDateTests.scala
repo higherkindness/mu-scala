@@ -26,6 +26,7 @@ import com.fortysevendeg.scalacheck.datetime.GenDateTime._
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.testing.servers.withServerChannel
 import io.grpc.{ManagedChannel, ServerServiceDefinition}
+import pbdirect._
 import org.scalacheck.Arbitrary
 import org.scalatest._
 import org.scalacheck.Prop._
@@ -44,15 +45,17 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
 
   object RPCJodaLocalDateService {
 
-    case class Request(date: LocalDate, label: String)
+    case class Request(@pbIndex(1) date: LocalDate, @pbIndex(2) label: String)
 
-    case class Response(date: LocalDate, label: String, check: Boolean)
+    case class Response(
+        @pbIndex(1) date: LocalDate,
+        @pbIndex(2) label: String,
+        @pbIndex(3) check: Boolean)
 
     object ProtobufService {
       import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.pbd._
       @service(Protobuf)
       trait Def[F[_]] {
-        def jodaLocalDateProto(date: LocalDate): F[LocalDate]
         def jodaLocalDateReqProto(request: Request): F[Response]
       }
     }
@@ -77,7 +80,6 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
         with AvroService.Def[F]
         with AvroService.WithSchemaDef[F] {
 
-      def jodaLocalDateProto(date: LocalDate): F[LocalDate] = date.pure
       def jodaLocalDateReqProto(request: Request): F[Response] =
         Response(request.date, request.label, check = true).pure
 
@@ -102,22 +104,6 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
 
     val from: DateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeZone.UTC)
     val range: Period  = Period.years(200)
-
-    "be able to serialize and deserialize joda.time.LocalDate using proto format" in {
-
-      withClient(
-        ProtobufService.Def.bindService[ConcurrentMonad],
-        ProtobufService.Def.clientFromChannel[ConcurrentMonad](_)) { client =>
-        check {
-          forAll(genDateTimeWithinRange(from, range)) { dt: DateTime =>
-            val date = dt.toLocalDate
-            client.jodaLocalDateProto(date).unsafeRunSync() == date
-
-          }
-        }
-
-      }
-    }
 
     "be able to serialize and deserialize joda.time.LocalDate in a Request using proto format" in {
 

@@ -18,8 +18,7 @@ package higherkindness.mu.rpc.healthcheck.client.fs2
 
 import cats.effect.{Async, Resource}
 import cats.implicits._
-import higherkindness.mu.rpc.healthcheck.fs2.serviceFS2.HealthCheckServiceFS2
-import higherkindness.mu.rpc.healthcheck.unary.handler._
+import higherkindness.mu.rpc.healthcheck.fs2.serviceFS2._
 import higherkindness.mu.rpc.protocol.Empty
 import io.chrisdavenport.log4cats.Logger
 

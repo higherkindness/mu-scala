@@ -17,8 +17,9 @@
 package higherkindness.mu.rpc
 package fs2
 
-import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.common.{ConcurrentMonad, RpcBaseTestSuite, SC}
 import higherkindness.mu.rpc.server._
+import higherkindness.mu.rpc.testmodels._
 import _root_.fs2.Stream
 import org.scalatest._
 

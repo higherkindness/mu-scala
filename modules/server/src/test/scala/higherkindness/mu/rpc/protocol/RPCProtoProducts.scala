@@ -21,6 +21,7 @@ import cats.Applicative
 import cats.syntax.applicative._
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.protocol.Utils._
+import pbdirect._
 import org.scalatest._
 import org.scalacheck.Prop._
 import org.scalatestplus.scalacheck.Checkers
@@ -29,15 +30,15 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
   object RPCService {
 
-    case class MyParam(value: String)
+    case class MyParam(@pbIndex(1) value: String)
 
-    case class RequestOption(param1: Option[MyParam])
+    case class RequestOption(@pbIndex(1) param1: Option[MyParam])
 
-    case class ResponseOption(param1: Option[String], param2: Boolean)
+    case class ResponseOption(@pbIndex(1) param1: Option[String], @pbIndex(2) param2: Boolean)
 
-    case class RequestList(param1: List[MyParam])
+    case class RequestList(@pbIndex(1) param1: List[MyParam])
 
-    case class ResponseList(param1: List[String], param2: Boolean)
+    case class ResponseList(@pbIndex(1) param1: List[String], @pbIndex(2) param2: Boolean)
 
     @service(Protobuf)
     trait ProtoRPCServiceDef[F[_]] {

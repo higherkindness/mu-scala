@@ -17,10 +17,15 @@
 package higherkindness.mu.rpc.healthcheck.fs2
 
 import fs2.Stream
-import higherkindness.mu.rpc.healthcheck.unary.handler._
+import pbdirect._
 import higherkindness.mu.rpc.protocol.{service, Empty}
 
 object serviceFS2 {
+
+  final case class HealthCheck(@pbIndex(1) nameService: String)
+  final case class ServerStatus(@pbIndex(1) status: String)
+  final case class HealthStatus(@pbIndex(1) hc: HealthCheck, @pbIndex(2) status: ServerStatus)
+  final case class AllStatus(@pbIndex(2) all: List[HealthStatus])
 
   @service(Protobuf)
   trait HealthCheckServiceFS2[F[_]] {

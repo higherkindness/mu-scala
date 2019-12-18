@@ -23,14 +23,15 @@ import higherkindness.mu.rpc.protocol.Utils._
 import org.scalacheck.Prop._
 import org.scalatest._
 import org.scalatestplus.scalacheck.Checkers
+import pbdirect._
 
 class RPCNamespaceTests extends RpcBaseTestSuite with BeforeAndAfterAll with Checkers {
 
   object RPCService {
 
-    case class Request(s: String)
+    case class Request(@pbIndex(1) s: String)
 
-    case class Response(length: Int)
+    case class Response(@pbIndex(1) length: Int)
 
     @service(Protobuf, namespace = Some("my.namespace")) trait ProtoRPCServiceDef[F[_]] {
       def proto1(req: Request): F[Response]

@@ -17,8 +17,9 @@
 package higherkindness.mu.rpc
 package fs2
 
-import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.testmodels._
 import higherkindness.mu.rpc.protocol._
+import higherkindness.mu.rpc.common.ConcurrentMonad
 import _root_.fs2._
 import cats.effect.{Effect, Resource}
 import io.grpc.Status

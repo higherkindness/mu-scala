@@ -14,11 +14,24 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.healthcheck.unary.handler
+package higherkindness.mu.rpc
 
 import pbdirect._
 
-final case class HealthCheck(@pbIndex(1) nameService: String)
-final case class ServerStatus(@pbIndex(1) status: String)
-final case class HealthStatus(@pbIndex(1) hc: HealthCheck, @pbIndex(2) status: ServerStatus)
-final case class AllStatus(@pbIndex(2) all: List[HealthStatus])
+object testmodels {
+
+  case class A(@pbIndex(1) x: Int, @pbIndex(2) y: Int)
+
+  case class B(@pbIndex(1) a1: A, @pbIndex(2) a2: A)
+
+  case class C(@pbIndex(1) foo: String, @pbIndex(2) a: A)
+
+  case class D(@pbIndex(1) bar: Int)
+
+  case class E(@pbIndex(1) a: A, @pbIndex(2) foo: String)
+
+  object ExternalScope {
+    case class External(@pbIndex(1) e: E)
+  }
+
+}

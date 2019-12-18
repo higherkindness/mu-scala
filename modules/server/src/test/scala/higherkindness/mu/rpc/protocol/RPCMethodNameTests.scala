@@ -20,6 +20,7 @@ import cats.Applicative
 import cats.syntax.applicative._
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.protocol.Utils._
+import pbdirect._
 import org.scalacheck.Prop._
 import org.scalatest._
 import org.scalatestplus.scalacheck.Checkers
@@ -28,9 +29,9 @@ class RPCMethodNameTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
   object RPCService {
 
-    case class Request(s: String)
+    case class Request(@pbIndex(1) s: String)
 
-    case class Response(length: Int)
+    case class Response(@pbIndex(1) length: Int)
 
     @service(Protobuf, methodNameStyle = Capitalize) trait ProtoRPCServiceDef[F[_]] {
       def proto(req: Request): F[Response]

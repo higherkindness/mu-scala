@@ -19,11 +19,10 @@ package higherkindness.mu.rpc.healthcheck.monix.handler
 import cats.effect.Sync
 import cats.effect.concurrent.Ref
 import cats.implicits._
-import higherkindness.mu.rpc.healthcheck.monix.serviceMonix.HealthCheckServiceMonix
-import higherkindness.mu.rpc.healthcheck.unary.handler._
-import higherkindness.mu.rpc.healthcheck.ordering._
 import monix.execution.Scheduler
 import monix.reactive.{MulticastStrategy, Observable, Observer, Pipe}
+import higherkindness.mu.rpc.healthcheck.monix.serviceMonix._
+import higherkindness.mu.rpc.protocol.Empty
 
 object HealthServiceMonix {
 
@@ -46,8 +45,21 @@ class HealthCheckServiceMonixImpl[F[_]: Sync](
     checkStatus: Ref[F, Map[String, ServerStatus]],
     observer: Observer.Sync[HealthStatus],
     observable: Observable[HealthStatus])(implicit s: Scheduler)
-    extends AbstractHealthService[F](checkStatus)
-    with HealthCheckServiceMonix[F] {
+    extends HealthCheckServiceMonix[F] {
+
+  def check(service: HealthCheck): F[ServerStatus] =
+    checkStatus.modify(m => (m, m.getOrElse(service.nameService, ServerStatus("UNKNOWN"))))
+
+  def clearStatus(service: HealthCheck): F[Unit] =
+    checkStatus.update(_ - service.nameService)
+
+  def checkAll(empty: Empty.type): F[AllStatus] =
+    checkStatus.get
+      .map(_.map(p => HealthStatus(new HealthCheck(p._1), p._2)).toList)
+      .map(AllStatus)
+
+  def cleanAll(empty: Empty.type): F[Unit] =
+    checkStatus.set(Map.empty[String, ServerStatus])
 
   override def setStatus(newStatus: HealthStatus): F[Unit] =
     checkStatus
@@ -55,6 +67,6 @@ class HealthCheckServiceMonixImpl[F[_]: Sync](
       Sync[F].delay(observer.onNext(newStatus))
 
   override def watch(service: HealthCheck): Observable[HealthStatus] =
-    observable.filter(_.hc === service)
+    observable.filter(_.hc.nameService === service.nameService)
 
 }

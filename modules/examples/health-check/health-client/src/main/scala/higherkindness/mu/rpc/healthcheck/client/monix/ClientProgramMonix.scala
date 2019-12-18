@@ -17,7 +17,7 @@
 package higherkindness.mu.rpc.healthcheck.client.monix
 
 import cats.effect.IO
-import higherkindness.mu.rpc.healthcheck.unary.handler.ServerStatus
+import higherkindness.mu.rpc.healthcheck.monix.serviceMonix.ServerStatus
 import io.chrisdavenport.log4cats.Logger
 
 object ClientProgramMonix {

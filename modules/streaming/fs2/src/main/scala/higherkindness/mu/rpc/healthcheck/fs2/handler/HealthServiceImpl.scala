@@ -18,12 +18,11 @@ package higherkindness.mu.rpc.healthcheck.fs2.handler
 
 import cats.effect.{Concurrent, Sync}
 import cats.effect.concurrent.Ref
-import higherkindness.mu.rpc.healthcheck.ordering._
 import cats.implicits._
 import fs2.Stream
 import fs2.concurrent.Topic
-import higherkindness.mu.rpc.healthcheck.fs2.serviceFS2.HealthCheckServiceFS2
-import higherkindness.mu.rpc.healthcheck.unary.handler._
+import higherkindness.mu.rpc.healthcheck.fs2.serviceFS2._
+import higherkindness.mu.rpc.protocol.Empty
 
 object HealthServiceFS2 {
 
@@ -41,11 +40,25 @@ object HealthServiceFS2 {
     } yield new HealthCheckServiceFS2Impl[F](c, t)
   }
 }
+
 class HealthCheckServiceFS2Impl[F[_]: Sync](
     checkStatus: Ref[F, Map[String, ServerStatus]],
     watchTopic: Topic[F, HealthStatus])
-    extends AbstractHealthService[F](checkStatus)
-    with HealthCheckServiceFS2[F] {
+    extends HealthCheckServiceFS2[F] {
+
+  def check(service: HealthCheck): F[ServerStatus] =
+    checkStatus.modify(m => (m, m.getOrElse(service.nameService, ServerStatus("UNKNOWN"))))
+
+  def clearStatus(service: HealthCheck): F[Unit] =
+    checkStatus.update(_ - service.nameService)
+
+  def checkAll(empty: Empty.type): F[AllStatus] =
+    checkStatus.get
+      .map(_.map(p => HealthStatus(new HealthCheck(p._1), p._2)).toList)
+      .map(AllStatus)
+
+  def cleanAll(empty: Empty.type): F[Unit] =
+    checkStatus.set(Map.empty[String, ServerStatus])
 
   def setStatus(newStatus: HealthStatus): F[Unit] =
     checkStatus
@@ -53,5 +66,5 @@ class HealthCheckServiceFS2Impl[F[_]: Sync](
       Stream.eval(watchTopic.publish1(newStatus)).compile.drain
 
   def watch(service: HealthCheck): Stream[F, HealthStatus] =
-    watchTopic.subscribe(100).filter(_.hc === service)
+    watchTopic.subscribe(100).filter(_.hc.nameService === service.nameService)
 }

@@ -62,14 +62,12 @@ lazy val channel = project
 lazy val monix = project
   .in(file("modules/streaming/monix"))
   .dependsOn(channel)
-  .dependsOn(`health-check-unary`)
   .dependsOn(`internal-monix`)
   .settings(moduleName := "mu-rpc-monix")
 
 lazy val fs2 = project
   .in(file("modules/streaming/fs2"))
   .dependsOn(channel)
-  .dependsOn(`health-check-unary`)
   .dependsOn(`internal-fs2`)
   .settings(moduleName := "mu-rpc-fs2")
 

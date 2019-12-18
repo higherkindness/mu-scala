@@ -25,6 +25,7 @@ import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._
 import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._
 import higherkindness.mu.rpc.internal.encoders.pbd.bigDecimal._
 import higherkindness.mu.rpc.protocol.Utils._
+import pbdirect._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Prop._
 import org.scalatestplus.scalacheck.Checkers
@@ -51,9 +52,12 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
   object RPCService {
 
-    case class Request(bigDecimal: BigDecimal, label: String)
+    case class Request(@pbIndex(1) bigDecimal: BigDecimal, @pbIndex(2) label: String)
 
-    case class Response(bigDecimal: BigDecimal, result: String, check: Boolean)
+    case class Response(
+        @pbIndex(1) bigDecimal: BigDecimal,
+        @pbIndex(2) result: String,
+        @pbIndex(3) check: Boolean)
 
     case class RequestPS(
         bd1: BigDecimal @@ (Nat._8, Nat._2),
@@ -69,7 +73,6 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
         check: Boolean)
 
     @service(Protobuf) trait ProtoRPCServiceDef[F[_]] {
-      def bigDecimalProto(bd: BigDecimal): F[BigDecimal]
       def bigDecimalProtoWrapper(req: Request): F[Response]
     }
     @service(Avro) trait AvroRPCServiceDef[F[_]] {
@@ -86,8 +89,6 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
         extends ProtoRPCServiceDef[F]
         with AvroRPCServiceDef[F]
         with AvroWithSchemaRPCServiceDef[F] {
-
-      def bigDecimalProto(bd: BigDecimal): F[BigDecimal] = bd.pure
 
       def bigDecimalProtoWrapper(req: Request): F[Response] =
         Response(req.bigDecimal, req.label, check = true).pure
@@ -137,20 +138,6 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
     import RPCService._
 
     implicit val H: RPCServiceDefImpl[ConcurrentMonad] = new RPCServiceDefImpl[ConcurrentMonad]
-
-    "be able to serialize and deserialize BigDecimal using proto format" in {
-
-      withClient(
-        ProtoRPCServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
-        check {
-          forAll { bd: BigDecimal =>
-            client.bigDecimalProto(bd).unsafeRunSync() == bd
-          }
-        }
-      }
-
-    }
 
     "be able to serialize and deserialize BigDecimal in a Request using proto format" in {
 

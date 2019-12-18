@@ -16,11 +16,16 @@
 
 package higherkindness.mu.rpc.healthcheck.monix
 
-import higherkindness.mu.rpc.healthcheck.unary.handler._
 import higherkindness.mu.rpc.protocol.{service, Empty}
 import monix.reactive.Observable
+import pbdirect._
 
 object serviceMonix {
+
+  final case class HealthCheck(@pbIndex(1) nameService: String)
+  final case class ServerStatus(@pbIndex(1) status: String)
+  final case class HealthStatus(@pbIndex(1) hc: HealthCheck, @pbIndex(2) status: ServerStatus)
+  final case class AllStatus(@pbIndex(2) all: List[HealthStatus])
 
   @service(Protobuf)
   trait HealthCheckServiceMonix[F[_]] {

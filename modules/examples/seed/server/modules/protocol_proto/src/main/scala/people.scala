@@ -17,11 +17,12 @@
 package example.seed.server.protocol.proto
 
 import higherkindness.mu.rpc.protocol._
+import pbdirect._
 
 object people {
 
-  @message final case class Person(name: String, age: Int)
-  @message final case class PeopleRequest(name: String)
-  @message final case class PeopleResponse(person: Person)
+  @message final case class Person(@pbIndex(1) name: String, @pbIndex(2) age: Int)
+  @message final case class PeopleRequest(@pbIndex(1) name: String)
+  @message final case class PeopleResponse(@pbIndex(2) person: Person)
 
 }

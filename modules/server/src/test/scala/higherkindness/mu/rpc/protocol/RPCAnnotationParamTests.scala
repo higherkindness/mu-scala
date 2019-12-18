@@ -19,11 +19,12 @@ package higherkindness.mu.rpc.protocol
 import higherkindness.mu.rpc.common._
 import org.scalatest._
 import org.scalatestplus.scalacheck.Checkers
+import pbdirect._
 
 class RPCAnnotationParamTests extends RpcBaseTestSuite with BeforeAndAfterAll with Checkers {
 
-  case class Request(s: String)
-  case class Response(length: Int)
+  case class Request(@pbIndex(1) s: String)
+  case class Response(@pbIndex(1) length: Int)
 
   "The service annotation" should {
 
