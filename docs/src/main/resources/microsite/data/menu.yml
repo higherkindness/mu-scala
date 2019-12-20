@@ -1,6 +1,6 @@
 options:
   - title: Quickstart
-    url:
+    url: /
 
   - title: Core concepts
     url: core-concepts

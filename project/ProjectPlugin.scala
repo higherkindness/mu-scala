@@ -1,5 +1,6 @@
 import com.typesafe.sbt.site.jekyll.JekyllPlugin.autoImport._
-import microsites.MicrositeKeys._
+import microsites.MicrositesPlugin.autoImport._
+import microsites._
 import sbt.Keys._
 import sbt.ScriptedPlugin.autoImport._
 import sbt._
@@ -296,14 +297,14 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
-      micrositeName := "Mu",
-      micrositeBaseUrl := "/mu",
+      micrositeName := "Mu-Scala",
+      micrositeBaseUrl := "mu-scala",
       micrositeDescription := "A purely functional library for building RPC endpoint-based services",
       micrositeGithubOwner := "higherkindness",
-      micrositeGithubRepo := "mu",
+      micrositeGithubRepo := "mu-scala",
       micrositeGitterChannelUrl := "47deg/mu",
-      micrositeOrganizationHomepage := "http://www.47deg.com",
-      includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
+      micrositeOrganizationHomepage := "https://www.47deg.com",
+      micrositeCompilingDocsTool := WithTut,
       micrositePushSiteWith := GitHub4s,
       micrositeGithubToken := sys.env.get(orgGithubTokenSetting.value),
       micrositePalette := Map(
@@ -316,6 +317,7 @@ object ProjectPlugin extends AutoPlugin {
         "gray-lighter"    -> "#F4F5F9",
         "white-color"     -> "#E6E7EC"
       ),
+      micrositeHighlightTheme := "tomorrow-night-eighties",
       micrositeHighlightLanguages += "protobuf"
     )
 
