@@ -296,13 +296,13 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
-      micrositeName := "Mu",
-      micrositeBaseUrl := "/mu",
+      micrositeName := "Mu-Scala",
+      micrositeBaseUrl := "mu-scala",
       micrositeDescription := "A purely functional library for building RPC endpoint-based services",
       micrositeGithubOwner := "higherkindness",
-      micrositeGithubRepo := "mu",
+      micrositeGithubRepo := "mu-scala",
       micrositeGitterChannelUrl := "47deg/mu",
-      micrositeOrganizationHomepage := "http://www.47deg.com",
+      micrositeOrganizationHomepage := "https://www.47deg.com",
       includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
       micrositePushSiteWith := GitHub4s,
       micrositeGithubToken := sys.env.get(orgGithubTokenSetting.value),
