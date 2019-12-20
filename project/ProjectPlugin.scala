@@ -317,6 +317,7 @@ object ProjectPlugin extends AutoPlugin {
         "gray-lighter"    -> "#F4F5F9",
         "white-color"     -> "#E6E7EC"
       ),
+      micrositeHighlightTheme := "tomorrow-night-eighties",
       micrositeHighlightLanguages += "protobuf"
     )
 
