@@ -102,4 +102,9 @@ object Model {
     def apply(v: Boolean): UseIdiomaticEndpoints =
       tag[UseIdiomaticEndpointsTag][Boolean](v)
   }
+
+  sealed trait StreamingImplementation
+  case object Fs2Stream       extends StreamingImplementation
+  case object MonixObservable extends StreamingImplementation
+
 }
