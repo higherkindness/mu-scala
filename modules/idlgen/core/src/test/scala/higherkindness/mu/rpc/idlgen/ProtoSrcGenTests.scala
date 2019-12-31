@@ -20,7 +20,12 @@ import java.io.File
 
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
 import higherkindness.mu.rpc.idlgen.proto.ProtoSrcGenerator
-import higherkindness.mu.rpc.idlgen.Model.{Fs2Stream, NoCompressionGen, UseIdiomaticEndpoints}
+import higherkindness.mu.rpc.idlgen.Model.{
+  Fs2Stream,
+  MonixObservable,
+  NoCompressionGen,
+  UseIdiomaticEndpoints
+}
 import org.scalatest.OptionValues
 
 class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
@@ -31,8 +36,7 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
 
   "Proto Scala Generator" should {
 
-    "generate correct Scala classes" in {
-
+    "generate the expected Scala code (FS2 stream)" in {
       val result: Option[(String, String)] =
         ProtoSrcGenerator
           .build(NoCompressionGen, UseIdiomaticEndpoints(false), Fs2Stream, new java.io.File("."))
@@ -40,7 +44,25 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
           .map(t => (t._2, t._3.mkString("\n").clean))
           .headOption
 
-      result shouldBe Some(("com/proto/book.scala", bookExpectation.clean))
+      val expectedFileContent = bookExpectation(tpe => s"_root_.fs2.Stream[F, $tpe]").clean
+      result shouldBe Some(("com/proto/book.scala", expectedFileContent.clean))
+    }
+
+    "generate the expected Scala code (Monix Observable)" in {
+      val result: Option[(String, String)] =
+        ProtoSrcGenerator
+          .build(
+            NoCompressionGen,
+            UseIdiomaticEndpoints(false),
+            MonixObservable,
+            new java.io.File("."))
+          .generateFrom(files = Set(protoFile("book")), serializationType = "", options = "")
+          .map(t => (t._2, t._3.mkString("\n").clean))
+          .headOption
+
+      val expectedFileContent =
+        bookExpectation(tpe => s"_root_.monix.reactive.Observable[$tpe]").clean
+      result shouldBe Some(("com/proto/book.scala", expectedFileContent))
     }
 
     case class ImportsTestCase(
@@ -72,8 +94,8 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
 
   }
 
-  val bookExpectation =
-    """package com.proto
+  def bookExpectation(streamOf: String => String): String =
+    s"""package com.proto
       |
       |import higherkindness.mu.rpc.protocol._
       |import shapeless.{:+:, CNil}
@@ -102,9 +124,9 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
       |
       |@service(Protobuf,Identity) trait BookService[F[_]] {
       |  def GetBook(req: GetBookRequest): F[Book]
-      |  def GetBooksViaAuthor(req: GetBookViaAuthor): _root_.fs2.Stream[F, Book]
-      |  def GetGreatestBook(req: _root_.fs2.Stream[F, GetBookRequest]): F[Book]
-      |  def GetBooks(req: _root_.fs2.Stream[F, GetBookRequest]): _root_.fs2.Stream[F, Book]
+      |  def GetBooksViaAuthor(req: GetBookViaAuthor): ${streamOf("Book")}
+      |  def GetGreatestBook(req: ${streamOf("GetBookRequest")}): F[Book]
+      |  def GetBooks(req: ${streamOf("GetBookRequest")}): ${streamOf("Book")}
       |}
       |
       |}""".stripMargin
