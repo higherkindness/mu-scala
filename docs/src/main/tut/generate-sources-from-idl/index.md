@@ -88,7 +88,7 @@ Extra settings:
   * `List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)` if `srcGenSerializationType` is `Protobuf`.
 * **`idlGenCompressionType`**: Specifies the compression type that will be used by the IDL generated services. Set to `higherkindness.mu.rpc.idlgen.Model.GzipGen` for compressed communications with Gzip. `higherkindness.mu.rpc.idlgen.Model.NoCompressionGen` by default.
 * **`idlGenIdiomaticEndpoints`**: Flag indicating if idiomatic gRPC endpoints should be used. If `true`, the service operations will be prefixed by the namespace and the methods will be capitalized. `false` by default.
-
+* **`srcGenStreamingImplementation`**: Specifies whether generated Scala code will use FS2 `Stream[F, A]` or Monix `Observable[A]` as its streaming implementation. FS2 is the default. This setting is only relevant if you have any RPC endpoint definitions that involve streaming.
 The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also available, but they need the dependency `mu-rpc-marshallers-jodatime`.
 You can also specify custom imports with the following:
   * `idlGenMarshallerImports := List(higherkindness.mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))`
@@ -99,7 +99,7 @@ You can even use `IDL` definitions packaged into artifacts within your classpath
 In that particular situation, you need to setup `srcGenJarNames`,
 specifying the artifact names (or sbt module names) that will be unzipped/used to extract the `IDL` files.
 
-`srcGenJarNames ` can be very useful when you want to distribute your `IDL` files
+`srcGenJarNames` can be very useful when you want to distribute your `IDL` files
 without binary code (to prevent binary conflicts in clients).
 
 
