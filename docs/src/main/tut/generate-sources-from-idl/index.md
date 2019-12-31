@@ -185,7 +185,7 @@ Note that Scala case class is preceded by the `@message` annotation. It's genera
 
 Also, we can use `avro`. From an `.avpr`:
 
-```avroidl
+```plaintext
 {
   "namespace" : "foo.bar",
   "protocol" : "MyGreeterService",
@@ -258,9 +258,10 @@ Also, we can use `avro`. From an `.avpr`:
 }
 
 ```
+
 or ``.avdl``:
 
-```avroidl
+```plaintext
 @namespace("foo.bar")
 protocol MyGreeterService{
 

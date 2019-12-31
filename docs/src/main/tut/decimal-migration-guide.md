@@ -28,7 +28,7 @@ Let's see it with an example. Suppose the following service definition:
 
 `models.avdl`
 
-```avroidl
+```plaintext
 @namespace("mu.rpc.protocols")
 
 protocol StockInfoModels {
@@ -48,13 +48,13 @@ protocol StockInfoModels {
 
 `services.avdl`
 
-```avroidl
+```plaintext
 @namespace("mu.rpc.protocols")
 
 protocol StockInfoService {
 
   import idl "models.avdl";
-  
+
   mu.rpc.protocols.StockInfoResponse getStockInfo(mu.rpc.protocols.StockInfoRequest request);
 
 }
@@ -128,12 +128,12 @@ Luckily, there are a couple of modules created for facilitating this task:
 * `"io.higherkindness" %% "legacy-avro-decimal-compat-protocol" % "x.x.x"`
 
 Provides an avdl file (`legacyAvroDecimalCompatProtocol.avdl`) with the custom type (`mu.rpc.protocols.LegacyAvroDecimalCompat`) to replace your old `decimal` values. That way, you could go from this:
-                        
-```avroidl 
+
+```plaintext
 @namespace("mu.rpc.protocols")
 
 protocol StockInfoModels {
-            
+
   record StockInfoRequest {
     string stockId;
   }
@@ -149,7 +149,7 @@ protocol StockInfoModels {
 
 To this:
 
-```avroidl
+```plaintext
 @namespace("mu.rpc.protocols")
 
 protocol StockInfoModel {
