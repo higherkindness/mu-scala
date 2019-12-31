@@ -12,14 +12,14 @@ To achieve this generation **Mu** use [avrohugger](https://github.com/julianpeet
 
 ## Avro Protocols
 
-Let's start from the beginning, everything on `Avro` should be declared inside a `protocol`. 
+Let's start from the beginning, everything on `Avro` should be declared inside a `protocol`.
 
 The name of that protocol will be the name of our Scala file.
 
-```avroidl 
-protocol People { 
- ... 
-} 
+```plaintext
+protocol People {
+ ...
+}
 ```
 
 ***srcGen =>***
@@ -28,23 +28,23 @@ protocol People {
 
 Furthermore, the `protocol` can have a `namespace` which will be our Scala package:
 
-```avroidl
+```plaintext
 @namespace("example.protocol")
 protocol People {
  ...
 }
 ```
- 
+
 ***srcGen =>***
 
 `example.protocol.People.scala`
 
 ## Messages
 
-On `Avro`, the messages are declared with the keyword `record` and contains different fields inside. 
+On `Avro`, the messages are declared with the keyword `record` and contains different fields inside.
 The `record` will be translated to a `case class` with the same fields on it:
 
-```avroidl
+```plaintext
 record Person {
   string name;
   int age;
@@ -62,7 +62,7 @@ final case class Person(name: String, age: Int, crossfitter: Boolean)
 
 `Avro` supports `enum`s too and they are translated to a Scala `Enumeration`:
 
-```avroidl
+```plaintext
 enum Errors {
   NotFound, Duplicated, None
 }
@@ -88,7 +88,7 @@ Depending on the types composing the `union`, `Mu` will interpret it on differen
 
 When we add a **`null`** to a `union` expression, we'll get a Scala `Option` of the other types declared along the `null`:
 
-```avroidl
+```plaintext
 record PeopleRequest {
   union {null, string} name;
 }
@@ -104,7 +104,7 @@ final case class PeopleRequest(name: Option[String])
 
 When we join **`two non-null types`** on a `union` we'll get an Scala `Either` with the same types order:
 
-```avroidl
+```plaintext
 record PeopleResponse {
   union { Errors, Person } result;
 }
@@ -121,7 +121,7 @@ final case class PeopleResponse(result: Either[Errors.Value, Person])
 And finally, when we have **`three or more non-null types`** on a single `union`, 
 we'll have a [shapeless](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#coproducts-and-discriminated-unions)' `Coproduct` on the same order as well:
 
-```avroidl
+```plaintext
 record PeopleResponse {
   union{ string, int, Errors } result;
 }
@@ -141,7 +141,7 @@ When we declare a method or `endpoint` inside a `protocol` this will be converte
 
 As we would want to have our models separated from our services. `Avro` make us able to import other `Avro` files to use their `record`s:
 
-```avroidl
+```plaintext
 protocol PeopleService {
   import idl "People.avdl"; //Under the same folder
 
@@ -162,7 +162,7 @@ protocol PeopleService {
 
 Also, an endpoint can be declared without params or non returning anything and `Mu` will use its `Empty` type to cover these cases:
 
-```avroidl
+```plaintext
 protocol PeopleService {
 
   void insertPerson();

@@ -25,6 +25,7 @@ import higherkindness.mu.rpc.idlgen.Model.{
   CompressionTypeGen,
   GzipGen,
   NoCompressionGen,
+  StreamingImplementation,
   UseIdiomaticEndpoints
 }
 import higherkindness.mu.rpc.idlgen._
@@ -35,12 +36,15 @@ import higherkindness.droste.data.Mu
 import higherkindness.droste.data.Mu._
 
 import scala.util.matching.Regex
+import higherkindness.mu.rpc.idlgen.Model.Fs2Stream
+import higherkindness.mu.rpc.idlgen.Model.MonixObservable
 
 object ProtoSrcGenerator {
 
   def build(
       compressionTypeGen: CompressionTypeGen,
       useIdiomaticEndpoints: UseIdiomaticEndpoints,
+      streamingImplementation: StreamingImplementation,
       idlTargetDir: File): SrcGenerator = new SrcGenerator {
 
     val idlType: String = proto.IdlType
@@ -62,6 +66,17 @@ object ProtoSrcGenerator {
         case a => a
       }
 
+    val streamPattern = "Stream[F, "
+
+    def withStreamingImpl(lines: List[String]): List[String] = streamingImplementation match {
+      case Fs2Stream =>
+        lines.map(_.replaceAllLiterally(streamPattern, "_root_.fs2.Stream[F, "))
+      case MonixObservable =>
+        lines.map(_.replaceAllLiterally(streamPattern, "_root_.monix.reactive.Observable["))
+    }
+
+    // TODO delete the coproduct rewriting when we upgrade skeuomorph
+    // (see https://github.com/higherkindness/skeuomorph/pull/197)
     val copRegExp: Regex = """((Cop\[)(((\w+)((\[)(\w+)(\]))?(\s)?(\:\:)(\s)?)+)(TNil)(\]))""".r
 
     val cleanCop: String => String =
@@ -89,7 +104,7 @@ object ProtoSrcGenerator {
         .parse(ProtoSource(file.getName, file.getParent, Some(idlTargetDir.getCanonicalPath)))
         .map(protocol =>
           getPath(protocol) ->
-            (parseProtocol andThen printProtocol andThen splitLines andThen withCoproducts andThen withImports)(
+            (parseProtocol andThen printProtocol andThen splitLines andThen withCoproducts andThen withStreamingImpl andThen withImports)(
               protocol))
 
     private def getPath(p: Protocol[Mu[ProtobufF]]): String =
@@ -98,10 +113,8 @@ object ProtoSrcGenerator {
     def imports(fileLines: List[String]): List[String] = {
       List(
         "import higherkindness.mu.rpc.protocol._".some,
-        if (fileLines.exists(_.contains("Stream[F,")))
-          "import fs2.Stream".some
-        else
-          None,
+        // TODO the shapeless imports can be removed when we upgrade skeuomorph
+        // (see https://github.com/higherkindness/skeuomorph/pull/197)
         if (fileLines.exists(_.contains(":+:")))
           "import shapeless.{:+:, CNil}".some
         else

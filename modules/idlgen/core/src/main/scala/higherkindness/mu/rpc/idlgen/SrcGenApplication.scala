@@ -22,6 +22,7 @@ import higherkindness.mu.rpc.idlgen.Model.{
   BigDecimalTypeGen,
   CompressionTypeGen,
   MarshallersImport,
+  StreamingImplementation,
   UseIdiomaticEndpoints
 }
 import higherkindness.mu.rpc.idlgen.avro.AvroSrcGenerator
@@ -36,12 +37,14 @@ object SrcGenApplication {
       bigDecimalTypeGen: BigDecimalTypeGen,
       compressionType: CompressionTypeGen,
       useIdiomaticEndpoints: UseIdiomaticEndpoints,
+      streamingImplementation: StreamingImplementation,
       idlTargetDir: File,
       resourcesBasePath: Path,
       httpImpl: HttpImpl
   ): GeneratorApplication[SrcGenerator] =
     new GeneratorApplication(
-      ProtoSrcGenerator.build(compressionType, useIdiomaticEndpoints, idlTargetDir),
+      ProtoSrcGenerator
+        .build(compressionType, useIdiomaticEndpoints, streamingImplementation, idlTargetDir),
       AvroSrcGenerator(
         marshallersImports,
         bigDecimalTypeGen,

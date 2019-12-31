@@ -20,7 +20,12 @@ import java.io.File
 
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
 import higherkindness.mu.rpc.idlgen.proto.ProtoSrcGenerator
-import higherkindness.mu.rpc.idlgen.Model.{NoCompressionGen, UseIdiomaticEndpoints}
+import higherkindness.mu.rpc.idlgen.Model.{
+  Fs2Stream,
+  MonixObservable,
+  NoCompressionGen,
+  UseIdiomaticEndpoints
+}
 import org.scalatest.OptionValues
 
 class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
@@ -31,36 +36,50 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
 
   "Proto Scala Generator" should {
 
-    "generate correct Scala classes" in {
-
+    "generate the expected Scala code (FS2 stream)" in {
       val result: Option[(String, String)] =
         ProtoSrcGenerator
-          .build(NoCompressionGen, UseIdiomaticEndpoints(false), new java.io.File("."))
+          .build(NoCompressionGen, UseIdiomaticEndpoints(false), Fs2Stream, new java.io.File("."))
           .generateFrom(files = Set(protoFile("book")), serializationType = "", options = "")
           .map(t => (t._2, t._3.mkString("\n").clean))
           .headOption
 
-      result shouldBe Some(("com/proto/book.scala", bookExpectation.clean))
+      val expectedFileContent = bookExpectation(tpe => s"_root_.fs2.Stream[F, $tpe]").clean
+      result shouldBe Some(("com/proto/book.scala", expectedFileContent.clean))
+    }
+
+    "generate the expected Scala code (Monix Observable)" in {
+      val result: Option[(String, String)] =
+        ProtoSrcGenerator
+          .build(
+            NoCompressionGen,
+            UseIdiomaticEndpoints(false),
+            MonixObservable,
+            new java.io.File("."))
+          .generateFrom(files = Set(protoFile("book")), serializationType = "", options = "")
+          .map(t => (t._2, t._3.mkString("\n").clean))
+          .headOption
+
+      val expectedFileContent =
+        bookExpectation(tpe => s"_root_.monix.reactive.Observable[$tpe]").clean
+      result shouldBe Some(("com/proto/book.scala", expectedFileContent))
     }
 
     case class ImportsTestCase(
         protoFilename: String,
-        shouldIncludeFS2Import: Boolean,
         shouldIncludeShapelessImport: Boolean
     )
 
     for (test <- List(
-        ImportsTestCase("streaming_no_shapeless_no", false, false),
-        ImportsTestCase("streaming_yes_shapeless_no", true, false),
-        ImportsTestCase("streaming_no_shapeless_yes", false, true),
-        ImportsTestCase("streaming_yes_shapeless_yes", true, true)
+        ImportsTestCase("shapeless_no", false),
+        ImportsTestCase("shapeless_yes", true),
       )) {
 
       s"include the correct imports (${test.protoFilename})" in {
 
         val result: Option[String] =
           ProtoSrcGenerator
-            .build(NoCompressionGen, UseIdiomaticEndpoints(false), new java.io.File("."))
+            .build(NoCompressionGen, UseIdiomaticEndpoints(false), Fs2Stream, new java.io.File("."))
             .generateFrom(
               files = Set(protoFile(test.protoFilename)),
               serializationType = "",
@@ -68,7 +87,6 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
             .map(_._3.mkString("\n"))
             .headOption
 
-        assert(result.value.contains("import fs2.") == test.shouldIncludeFS2Import)
         assert(result.value.contains("import shapeless.") == test.shouldIncludeShapelessImport)
       }
 
@@ -76,11 +94,10 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
 
   }
 
-  val bookExpectation =
-    """package com.proto
+  def bookExpectation(streamOf: String => String): String =
+    s"""package com.proto
       |
       |import higherkindness.mu.rpc.protocol._
-      |import fs2.Stream
       |import shapeless.{:+:, CNil}
       |import com.proto.author.Author
       |
@@ -107,9 +124,9 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
       |
       |@service(Protobuf,Identity) trait BookService[F[_]] {
       |  def GetBook(req: GetBookRequest): F[Book]
-      |  def GetBooksViaAuthor(req: GetBookViaAuthor): Stream[F, Book]
-      |  def GetGreatestBook(req: Stream[F, GetBookRequest]): F[Book]
-      |  def GetBooks(req: Stream[F, GetBookRequest]): Stream[F, Book]
+      |  def GetBooksViaAuthor(req: GetBookViaAuthor): ${streamOf("Book")}
+      |  def GetGreatestBook(req: ${streamOf("GetBookRequest")}): F[Book]
+      |  def GetBooks(req: ${streamOf("GetBookRequest")}): ${streamOf("Book")}
       |}
       |
       |}""".stripMargin
