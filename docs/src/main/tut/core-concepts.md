@@ -309,15 +309,14 @@ object protocol {
   import com.google.protobuf.{CodedInputStream, CodedOutputStream}
   import pbdirect._
 
-  implicit object LocalDateWriter extends PBWriter[LocalDate] {
-    override def writeTo(index: Int, value: LocalDate, out: CodedOutputStream): Unit =
-      out.writeString(index, value.format(DateTimeFormatter.ISO_LOCAL_DATE))
-  }
+  import cats.syntax.contravariant._
+  import cats.syntax.functor._
 
-  implicit object LocalDateReader extends PBReader[LocalDate] {
-    override def read(input: CodedInputStream): LocalDate =
-      LocalDate.parse(input.readString(), DateTimeFormatter.ISO_LOCAL_DATE)
-  }
+  implicit val localDateWriter: PBScalarValueWriter[LocalDate] =
+    PBScalarValueWriter[String].contramap[LocalDate](_.format(DateTimeFormatter.ISO_LOCAL_DATE))
+
+  implicit val localDateReader: PBScalarValueReader[LocalDate] =
+    PBScalarValueReader[String].map(string => LocalDate.parse(string, DateTimeFormatter.ISO_LOCAL_DATE))
 
   case class HelloRequest(name: String, date: LocalDate)
 
