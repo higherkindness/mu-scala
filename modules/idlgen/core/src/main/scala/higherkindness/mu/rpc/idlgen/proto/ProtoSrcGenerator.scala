@@ -20,7 +20,6 @@ import java.io.File
 
 import cats.effect.{IO, Sync}
 import cats.syntax.functor._
-import cats.syntax.option._
 import higherkindness.mu.rpc.idlgen.Model.{
   CompressionTypeGen,
   GzipGen,
@@ -57,12 +56,14 @@ object ProtoSrcGenerator {
         options: String*): Option[(String, Seq[String])] =
       getCode[IO](inputFile).map(Some(_)).unsafeRunSync
 
-    def withImports(lines: List[String]): List[String] =
+    val muProtocolImport = "import higherkindness.mu.rpc.protocol._"
+
+    def withImport(lines: List[String]): List[String] =
       lines match {
         case h :: t =>
           // first line of file is package declaration
-          h :: imports(t) ++ t
-        case a => a
+          h :: muProtocolImport :: t
+        case Nil => Nil
       }
 
     val streamPattern = "Stream[F, "
@@ -93,23 +94,11 @@ object ProtoSrcGenerator {
         .parse(ProtoSource(file.getName, file.getParent, Some(idlTargetDir.getCanonicalPath)))
         .map(protocol =>
           getPath(protocol) ->
-            (parseProtocol andThen printProtocol andThen splitLines andThen withStreamingImpl andThen withImports)(
+            (parseProtocol andThen printProtocol andThen splitLines andThen withStreamingImpl andThen withImport)(
               protocol))
 
     private def getPath(p: Protocol[Mu[ProtobufF]]): String =
       s"${p.pkg.replace('.', '/')}/${p.name}$ScalaFileExtension"
-
-    def imports(fileLines: List[String]): List[String] = {
-      List(
-        "import higherkindness.mu.rpc.protocol._".some,
-        // TODO the shapeless imports can be removed when we upgrade skeuomorph
-        // (see https://github.com/higherkindness/skeuomorph/pull/197)
-        if (fileLines.exists(_.contains(":+:")))
-          "import shapeless.{:+:, CNil}".some
-        else
-          None
-      ).flatten
-    }
 
   }
 }

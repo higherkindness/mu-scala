@@ -65,40 +65,12 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
       result shouldBe Some(("com/proto/book.scala", expectedFileContent))
     }
 
-    case class ImportsTestCase(
-        protoFilename: String,
-        shouldIncludeShapelessImport: Boolean
-    )
-
-    for (test <- List(
-        ImportsTestCase("shapeless_no", false),
-        ImportsTestCase("shapeless_yes", true),
-      )) {
-
-      s"include the correct imports (${test.protoFilename})" in {
-
-        val result: Option[String] =
-          ProtoSrcGenerator
-            .build(NoCompressionGen, UseIdiomaticEndpoints(false), Fs2Stream, new java.io.File("."))
-            .generateFrom(
-              files = Set(protoFile(test.protoFilename)),
-              serializationType = "",
-              options = "")
-            .map(_._3.mkString("\n"))
-            .headOption
-
-        assert(result.value.contains("import shapeless.") == test.shouldIncludeShapelessImport)
-      }
-
-    }
-
   }
 
   def bookExpectation(streamOf: String => String): String =
     s"""package com.proto
       |
       |import higherkindness.mu.rpc.protocol._
-      |import shapeless.{:+:, CNil}
       |
       |object book {
       |
@@ -116,9 +88,18 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
       |)
       |@message final case class BookStore(
       |  @_root_.pbdirect.pbIndex(1) name: _root_.java.lang.String,
-      |  @_root_.pbdirect.pbIndex(2) books: _root_.scala.Map[_root_.scala.Long, _root_.java.lang.String],
+      |  @_root_.pbdirect.pbIndex(2) books: _root_.scala.Predef.Map[_root_.scala.Long, _root_.java.lang.String],
       |  @_root_.pbdirect.pbIndex(3) genres: _root_.scala.List[_root_.com.proto.book.Genre],
-      |  @_root_.pbdirect.pbIndex(4,5,6,7) payment_method: _root_.scala.Option[_root_.scala.Long _root_.shapeless.:+: _root_.scala.Int _root_.shapeless.:+: _root_.java.lang.String _root_.shapeless.:+: _root_.com.proto.book.Book :+: _root_.shapeless.CNil]
+      |  @_root_.pbdirect.pbIndex(4,5,6,7) payment_method: _root_.scala.Option[
+      |    _root_.shapeless.:+:[
+      |      _root_.scala.Long,
+      |      _root_.shapeless.:+:[
+      |        _root_.scala.Int,
+      |        _root_.shapeless.:+:[
+      |          _root_.java.lang.String,
+      |          _root_.shapeless.:+:[
+      |            _root_.com.proto.book.Book,
+      |            _root_.shapeless.CNil]]]]]
       |)
       |
       |sealed abstract class Genre(val value: _root_.scala.Int) extends _root_.enumeratum.values.IntEnumEntry
