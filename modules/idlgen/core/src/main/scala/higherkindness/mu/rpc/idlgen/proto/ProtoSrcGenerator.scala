@@ -35,7 +35,6 @@ import higherkindness.skeuomorph.protobuf.{ProtobufF, Protocol}
 import higherkindness.droste.data.Mu
 import higherkindness.droste.data.Mu._
 
-import scala.util.matching.Regex
 import higherkindness.mu.rpc.idlgen.Model.Fs2Stream
 import higherkindness.mu.rpc.idlgen.Model.MonixObservable
 
@@ -75,16 +74,6 @@ object ProtoSrcGenerator {
         lines.map(_.replaceAllLiterally(streamPattern, "_root_.monix.reactive.Observable["))
     }
 
-    // TODO delete the coproduct rewriting when we upgrade skeuomorph
-    // (see https://github.com/higherkindness/skeuomorph/pull/197)
-    val copRegExp: Regex = """((Cop\[)(((\w+)((\[)(\w+)(\]))?(\s)?(\:\:)(\s)?)+)(TNil)(\]))""".r
-
-    val cleanCop: String => String =
-      _.replace("Cop[", "").replace("::", ":+:").replace("TNil]", "CNil")
-
-    val withCoproducts: List[String] => List[String] = lines =>
-      lines.map(line => copRegExp.replaceAllIn(line, m => cleanCop(m.matched)))
-
     val skeuomorphCompression: CompressionType = compressionTypeGen match {
       case GzipGen          => CompressionType.Gzip
       case NoCompressionGen => CompressionType.Identity
@@ -104,7 +93,7 @@ object ProtoSrcGenerator {
         .parse(ProtoSource(file.getName, file.getParent, Some(idlTargetDir.getCanonicalPath)))
         .map(protocol =>
           getPath(protocol) ->
-            (parseProtocol andThen printProtocol andThen splitLines andThen withCoproducts andThen withStreamingImpl andThen withImports)(
+            (parseProtocol andThen printProtocol andThen splitLines andThen withStreamingImpl andThen withImports)(
               protocol))
 
     private def getPath(p: Protocol[Mu[ProtobufF]]): String =
