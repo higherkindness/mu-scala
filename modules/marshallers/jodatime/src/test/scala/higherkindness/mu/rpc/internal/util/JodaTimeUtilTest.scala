@@ -51,7 +51,7 @@ class JodaTimeUtilTest extends WordSpec with Matchers with Checkers {
       check {
         forAll(genDateTimeWithinRange(from, range)) { dt: DateTime =>
           val date: LocalDateTime = dt.toDateTime(DateTimeZone.UTC).toLocalDateTime
-          val value: Long         = JodaTimeUtil.jodaLocalDatetimeToLong(date)
+          val value: Long         = JodaTimeUtil.jodaLocalDateTimeToLong(date)
 
           JodaTimeUtil.longToJodaLocalDateTime(value) == date
         }
