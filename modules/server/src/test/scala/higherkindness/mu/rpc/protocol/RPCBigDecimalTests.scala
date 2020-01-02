@@ -69,7 +69,6 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
         check: Boolean)
 
     @service(Protobuf) trait ProtoRPCServiceDef[F[_]] {
-      def bigDecimalProto(bd: BigDecimal): F[BigDecimal]
       def bigDecimalProtoWrapper(req: Request): F[Response]
     }
     @service(Avro) trait AvroRPCServiceDef[F[_]] {
@@ -86,8 +85,6 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
         extends ProtoRPCServiceDef[F]
         with AvroRPCServiceDef[F]
         with AvroWithSchemaRPCServiceDef[F] {
-
-      def bigDecimalProto(bd: BigDecimal): F[BigDecimal] = bd.pure
 
       def bigDecimalProtoWrapper(req: Request): F[Response] =
         Response(req.bigDecimal, req.label, check = true).pure
@@ -137,20 +134,6 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
     import RPCService._
 
     implicit val H: RPCServiceDefImpl[ConcurrentMonad] = new RPCServiceDefImpl[ConcurrentMonad]
-
-    "be able to serialize and deserialize BigDecimal using proto format" in {
-
-      withClient(
-        ProtoRPCServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
-        check {
-          forAll { bd: BigDecimal =>
-            client.bigDecimalProto(bd).unsafeRunSync() == bd
-          }
-        }
-      }
-
-    }
 
     "be able to serialize and deserialize BigDecimal in a Request using proto format" in {
 

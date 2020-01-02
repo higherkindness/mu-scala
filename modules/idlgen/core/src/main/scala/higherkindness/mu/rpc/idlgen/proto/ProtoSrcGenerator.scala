@@ -20,7 +20,6 @@ import java.io.File
 
 import cats.effect.{IO, Sync}
 import cats.syntax.functor._
-import cats.syntax.option._
 import higherkindness.mu.rpc.idlgen.Model.{
   CompressionTypeGen,
   GzipGen,
@@ -35,7 +34,6 @@ import higherkindness.skeuomorph.protobuf.{ProtobufF, Protocol}
 import higherkindness.droste.data.Mu
 import higherkindness.droste.data.Mu._
 
-import scala.util.matching.Regex
 import higherkindness.mu.rpc.idlgen.Model.Fs2Stream
 import higherkindness.mu.rpc.idlgen.Model.MonixObservable
 
@@ -58,12 +56,14 @@ object ProtoSrcGenerator {
         options: String*): Option[(String, Seq[String])] =
       getCode[IO](inputFile).map(Some(_)).unsafeRunSync
 
-    def withImports(lines: List[String]): List[String] =
+    val muProtocolImport = "import higherkindness.mu.rpc.protocol._"
+
+    def withImport(lines: List[String]): List[String] =
       lines match {
         case h :: t =>
           // first line of file is package declaration
-          h :: imports(t) ++ t
-        case a => a
+          h :: muProtocolImport :: t
+        case Nil => Nil
       }
 
     val streamPattern = "Stream[F, "
@@ -74,16 +74,6 @@ object ProtoSrcGenerator {
       case MonixObservable =>
         lines.map(_.replaceAllLiterally(streamPattern, "_root_.monix.reactive.Observable["))
     }
-
-    // TODO delete the coproduct rewriting when we upgrade skeuomorph
-    // (see https://github.com/higherkindness/skeuomorph/pull/197)
-    val copRegExp: Regex = """((Cop\[)(((\w+)((\[)(\w+)(\]))?(\s)?(\:\:)(\s)?)+)(TNil)(\]))""".r
-
-    val cleanCop: String => String =
-      _.replace("Cop[", "").replace("::", ":+:").replace("TNil]", "CNil")
-
-    val withCoproducts: List[String] => List[String] = lines =>
-      lines.map(line => copRegExp.replaceAllIn(line, m => cleanCop(m.matched)))
 
     val skeuomorphCompression: CompressionType = compressionTypeGen match {
       case GzipGen          => CompressionType.Gzip
@@ -104,23 +94,11 @@ object ProtoSrcGenerator {
         .parse(ProtoSource(file.getName, file.getParent, Some(idlTargetDir.getCanonicalPath)))
         .map(protocol =>
           getPath(protocol) ->
-            (parseProtocol andThen printProtocol andThen splitLines andThen withCoproducts andThen withStreamingImpl andThen withImports)(
+            (parseProtocol andThen printProtocol andThen splitLines andThen withStreamingImpl andThen withImport)(
               protocol))
 
     private def getPath(p: Protocol[Mu[ProtobufF]]): String =
       s"${p.pkg.replace('.', '/')}/${p.name}$ScalaFileExtension"
-
-    def imports(fileLines: List[String]): List[String] = {
-      List(
-        "import higherkindness.mu.rpc.protocol._".some,
-        // TODO the shapeless imports can be removed when we upgrade skeuomorph
-        // (see https://github.com/higherkindness/skeuomorph/pull/197)
-        if (fileLines.exists(_.contains(":+:")))
-          "import shapeless.{:+:, CNil}".some
-        else
-          None
-      ).flatten
-    }
 
   }
 }

@@ -20,9 +20,9 @@ The current version for [Mu] is "0.19.1" using the following common libraries an
 [comment]: # (End Replace)
 
  * [avro4s] 1.8.4
- * [cats-effect] 1.2.0
- * [fs2] 1.0.4
- * [Monix] 3.0.0-RC2
+ * [cats-effect] 2.x
+ * [fs2] 2.x
+ * [Monix] 3.x
 
 `Mu` is cross-built for Scala `2.11.x` and `2.12.x`.
 

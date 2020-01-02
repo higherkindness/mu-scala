@@ -94,9 +94,13 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
         ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
           forAll { maybeString: Option[String] =>
+            // if the string is "", i.e. the protobuf default value,
+            // it will not be written on the wire by the client,
+            // so the server will decode it as `None`
+            val expectedOption = maybeString.filter(_.nonEmpty)
             client
               .optionProto(RequestOption(maybeString.map(MyParam)))
-              .unsafeRunSync() == ResponseOption(maybeString, true)
+              .unsafeRunSync() == ResponseOption(expectedOption, true)
           }
         }
 

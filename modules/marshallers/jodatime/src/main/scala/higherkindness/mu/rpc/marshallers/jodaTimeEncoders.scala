@@ -19,8 +19,9 @@ package marshallers
 
 import java.io.{ByteArrayInputStream, InputStream}
 
+import cats.syntax.contravariant._
+import cats.syntax.functor._
 import com.google.common.io.ByteStreams
-import com.google.protobuf.{CodedInputStream, CodedOutputStream}
 import higherkindness.mu.rpc.internal.util.EncoderUtil
 import higherkindness.mu.rpc.jodatime.util.JodaTimeUtil
 import io.grpc.MethodDescriptor.Marshaller
@@ -34,29 +35,17 @@ object jodaTimeEncoders {
 
     import pbdirect._
 
-    implicit object JodaLocalDateWriter extends PBWriter[LocalDate] {
-      override def writeTo(index: Int, value: LocalDate, out: CodedOutputStream): Unit =
-        out.writeByteArray(
-          index,
-          EncoderUtil.intToByteArray(JodaTimeUtil.jodaLocalDateToInt(value)))
-    }
+    implicit val jodaLocalDateWriter: PBScalarValueWriter[LocalDate] =
+      PBScalarValueWriter[Int].contramap[LocalDate](JodaTimeUtil.jodaLocalDateToInt)
 
-    implicit object JodaLocalDateReader extends PBReader[LocalDate] {
-      override def read(input: CodedInputStream): LocalDate =
-        JodaTimeUtil.intToJodaLocalDate(EncoderUtil.byteArrayToInt(input.readByteArray()))
-    }
+    implicit val jodaLocalDateReader: PBScalarValueReader[LocalDate] =
+      PBScalarValueReader[Int].map(JodaTimeUtil.intToJodaLocalDate)
 
-    implicit object JodaLocalDateTimeWriter extends PBWriter[LocalDateTime] {
-      override def writeTo(index: Int, value: LocalDateTime, out: CodedOutputStream): Unit =
-        out.writeByteArray(
-          index,
-          EncoderUtil.longToByteArray(JodaTimeUtil.jodaLocalDatetimeToLong(value)))
-    }
+    implicit val jodaLocalDateTimeWriter: PBScalarValueWriter[LocalDateTime] =
+      PBScalarValueWriter[Long].contramap[LocalDateTime](JodaTimeUtil.jodaLocalDateTimeToLong)
 
-    implicit object JodaLocalDateTimeReader extends PBReader[LocalDateTime] {
-      override def read(input: CodedInputStream): LocalDateTime =
-        JodaTimeUtil.longToJodaLocalDateTime(EncoderUtil.byteArrayToLong(input.readByteArray()))
-    }
+    implicit val jodaLocalDateTimeReader: PBScalarValueReader[LocalDateTime] =
+      PBScalarValueReader[Long].map(JodaTimeUtil.longToJodaLocalDateTime)
 
   }
 
@@ -89,9 +78,15 @@ object jodaTimeEncoders {
 
     implicit object JodaLocalDateTimeToValue extends ToValue[LocalDateTime] {
       override def apply(value: LocalDateTime): Long =
-        JodaTimeUtil.jodaLocalDatetimeToLong(value)
+        JodaTimeUtil.jodaLocalDateTimeToLong(value)
     }
 
+    /*
+     * These marshallers are only used when the entire gRPC request/response
+     * is a LocalDate/LocalDateTime. When a LocalDate/LocalDateTime is a field
+     * of a larger message, the polymorphic marshaller defined in
+     * higherkindness.mu.rpc.internal.encoders.{avro,avrowithschema} is used.
+     */
     object marshallers {
 
       implicit object JodaLocalDateMarshaller extends Marshaller[LocalDate] {
@@ -107,7 +102,7 @@ object jodaTimeEncoders {
       implicit object JodaLocalDateTimeMarshaller extends Marshaller[LocalDateTime] {
         override def stream(value: LocalDateTime): InputStream =
           new ByteArrayInputStream(
-            EncoderUtil.longToByteArray(JodaTimeUtil.jodaLocalDatetimeToLong(value)))
+            EncoderUtil.longToByteArray(JodaTimeUtil.jodaLocalDateTimeToLong(value)))
 
         override def parse(stream: InputStream): LocalDateTime =
           JodaTimeUtil.longToJodaLocalDateTime(

@@ -65,68 +65,67 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
       result shouldBe Some(("com/proto/book.scala", expectedFileContent))
     }
 
-    case class ImportsTestCase(
-        protoFilename: String,
-        shouldIncludeShapelessImport: Boolean
-    )
-
-    for (test <- List(
-        ImportsTestCase("shapeless_no", false),
-        ImportsTestCase("shapeless_yes", true),
-      )) {
-
-      s"include the correct imports (${test.protoFilename})" in {
-
-        val result: Option[String] =
-          ProtoSrcGenerator
-            .build(NoCompressionGen, UseIdiomaticEndpoints(false), Fs2Stream, new java.io.File("."))
-            .generateFrom(
-              files = Set(protoFile(test.protoFilename)),
-              serializationType = "",
-              options = "")
-            .map(_._3.mkString("\n"))
-            .headOption
-
-        assert(result.value.contains("import shapeless.") == test.shouldIncludeShapelessImport)
-      }
-
-    }
-
   }
 
   def bookExpectation(streamOf: String => String): String =
     s"""package com.proto
       |
       |import higherkindness.mu.rpc.protocol._
-      |import shapeless.{:+:, CNil}
-      |import com.proto.author.Author
       |
       |object book {
       |
-      |@message final case class Book(isbn: Long, title: String, author: List[Option[Author]], binding_type: Option[BindingType])
-      |@message final case class GetBookRequest(isbn: Long)
-      |@message final case class GetBookViaAuthor(author: Option[Author])
-      |@message final case class BookStore(name: String, books: Map[Long, String], genres: List[Option[Genre]], payment_method: Long :+: Int :+: String :+: Book :+: CNil)
+      |@message final case class Book(
+      |  @_root_.pbdirect.pbIndex(1) isbn: _root_.scala.Long,
+      |  @_root_.pbdirect.pbIndex(2) title: _root_.java.lang.String,
+      |  @_root_.pbdirect.pbIndex(3) author: _root_.scala.List[_root_.com.proto.author.Author],
+      |  @_root_.pbdirect.pbIndex(9) binding_type: _root_.scala.Option[_root_.com.proto.book.BindingType]
+      |)
+      |@message final case class GetBookRequest(
+      |  @_root_.pbdirect.pbIndex(1) isbn: _root_.scala.Long
+      |)
+      |@message final case class GetBookViaAuthor(
+      |  @_root_.pbdirect.pbIndex(1) author: _root_.scala.Option[_root_.com.proto.author.Author]
+      |)
+      |@message final case class BookStore(
+      |  @_root_.pbdirect.pbIndex(1) name: _root_.java.lang.String,
+      |  @_root_.pbdirect.pbIndex(2) books: _root_.scala.Predef.Map[_root_.scala.Long, _root_.java.lang.String],
+      |  @_root_.pbdirect.pbIndex(3) genres: _root_.scala.List[_root_.com.proto.book.Genre],
+      |  @_root_.pbdirect.pbIndex(4,5,6,7) payment_method: _root_.scala.Option[
+      |    _root_.shapeless.:+:[
+      |      _root_.scala.Long,
+      |      _root_.shapeless.:+:[
+      |        _root_.scala.Int,
+      |        _root_.shapeless.:+:[
+      |          _root_.java.lang.String,
+      |          _root_.shapeless.:+:[
+      |            _root_.com.proto.book.Book,
+      |            _root_.shapeless.CNil]]]]]
+      |)
       |
-      |sealed trait Genre
-      |object Genre {
-      |  case object UNKNOWN extends Genre
-      |  case object SCIENCE_FICTION extends Genre
-      |  case object POETRY extends Genre
+      |sealed abstract class Genre(val value: _root_.scala.Int) extends _root_.enumeratum.values.IntEnumEntry
+      |object Genre extends _root_.enumeratum.values.IntEnum[Genre] {
+      |  case object UNKNOWN extends Genre(0)
+      |  case object SCIENCE_FICTION extends Genre(1)
+      |  case object POETRY extends Genre(2)
+      |
+      |  val values = findValues
       |}
       |
+      |sealed abstract class BindingType(val value: _root_.scala.Int) extends _root_.enumeratum.values.IntEnumEntry
+      |object BindingType extends _root_.enumeratum.values.IntEnum[BindingType] {
+      |  case object HARDCOVER extends BindingType(0)
+      |  case object PAPERBACK extends BindingType(1)
       |
-      |sealed trait BindingType
-      |object BindingType {
-      |  case object HARDCOVER extends BindingType
-      |  case object PAPERBACK extends BindingType
+      |  val values = findValues
       |}
       |
-      |@service(Protobuf,Identity) trait BookService[F[_]] {
-      |  def GetBook(req: GetBookRequest): F[Book]
-      |  def GetBooksViaAuthor(req: GetBookViaAuthor): ${streamOf("Book")}
-      |  def GetGreatestBook(req: ${streamOf("GetBookRequest")}): F[Book]
-      |  def GetBooks(req: ${streamOf("GetBookRequest")}): ${streamOf("Book")}
+      |@service(Protobuf, Identity) trait BookService[F[_]] {
+      |  def GetBook(req: _root_.com.proto.book.GetBookRequest): F[_root_.com.proto.book.Book]
+      |  def GetBooksViaAuthor(req: _root_.com.proto.book.GetBookViaAuthor): ${streamOf(
+         "_root_.com.proto.book.Book")}
+      |  def GetGreatestBook(req: ${streamOf("_root_.com.proto.book.GetBookRequest")}): F[_root_.com.proto.book.Book]
+      |  def GetBooks(req: ${streamOf("_root_.com.proto.book.GetBookRequest")}): ${streamOf(
+         "_root_.com.proto.book.Book")}
       |}
       |
       |}""".stripMargin

@@ -21,16 +21,19 @@ import java.io.{ByteArrayInputStream, InputStream}
 import java.time.{Instant, LocalDate, LocalDateTime}
 
 import cats.instances._
+import cats.syntax.contravariant._
+import cats.syntax.functor._
 import com.google.protobuf.{CodedInputStream, CodedOutputStream}
-import higherkindness.mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTimeUtil}
+import higherkindness.mu.rpc.internal.util.{BigDecimalUtil, JavaTimeUtil}
 import io.grpc.MethodDescriptor.Marshaller
 import org.apache.commons.compress.utils.IOUtils
+import com.google.protobuf.WireFormat
 
 object pbd extends OptionInstances with ListInstances {
 
   import pbdirect._
 
-  implicit def defaultDirectPBMarshallers[A: PBWriter: PBReader]: Marshaller[A] =
+  implicit def defaultDirectPBMarshallers[A: PBMessageWriter: PBMessageReader]: Marshaller[A] =
     new Marshaller[A] {
 
       override def parse(stream: InputStream): A = IOUtils.toByteArray(stream).pbTo[A]
@@ -41,12 +44,16 @@ object pbd extends OptionInstances with ListInstances {
 
   object bigDecimal {
 
-    implicit object BigDecimalWriter extends PBWriter[BigDecimal] {
-      override def writeTo(index: Int, value: BigDecimal, out: CodedOutputStream): Unit =
-        out.writeByteArray(index, BigDecimalUtil.bigDecimalToByte(value))
+    implicit object BigDecimalWriter extends PBScalarValueWriter[BigDecimal] {
+      override def wireType: Int                         = WireFormat.WIRETYPE_LENGTH_DELIMITED
+      override def isDefault(value: BigDecimal): Boolean = false
+      override def writeWithoutTag(value: BigDecimal, out: CodedOutputStream): Unit =
+        out.writeByteArrayNoTag(BigDecimalUtil.bigDecimalToByte(value))
     }
 
-    implicit object BigDecimalReader extends PBReader[BigDecimal] {
+    implicit object BigDecimalReader extends PBScalarValueReader[BigDecimal] {
+      override def defaultValue: BigDecimal = BigDecimal(0.0)
+      override def canBePacked: Boolean     = false
       override def read(input: CodedInputStream): BigDecimal =
         BigDecimalUtil.byteToBigDecimal(input.readByteArray())
     }
@@ -54,37 +61,24 @@ object pbd extends OptionInstances with ListInstances {
 
   object javatime {
 
-    implicit object LocalDateWriter extends PBWriter[LocalDate] {
-      override def writeTo(index: Int, value: LocalDate, out: CodedOutputStream): Unit =
-        out.writeByteArray(index, EncoderUtil.intToByteArray(JavaTimeUtil.localDateToInt(value)))
-    }
+    implicit val localDateWriter: PBScalarValueWriter[LocalDate] =
+      PBScalarValueWriter[Int].contramap[LocalDate](JavaTimeUtil.localDateToInt)
 
-    implicit object LocalDateReader extends PBReader[LocalDate] {
-      override def read(input: CodedInputStream): LocalDate =
-        JavaTimeUtil.intToLocalDate(EncoderUtil.byteArrayToInt(input.readByteArray()))
-    }
+    implicit val localDateReader: PBScalarValueReader[LocalDate] =
+      PBScalarValueReader[Int].map(JavaTimeUtil.intToLocalDate)
 
-    implicit object LocalDateTimeWriter extends PBWriter[LocalDateTime] {
-      override def writeTo(index: Int, value: LocalDateTime, out: CodedOutputStream): Unit =
-        out.writeByteArray(
-          index,
-          EncoderUtil.longToByteArray(JavaTimeUtil.localDateTimeToLong(value)))
-    }
+    implicit val localDateTimeWriter: PBScalarValueWriter[LocalDateTime] =
+      PBScalarValueWriter[Long].contramap[LocalDateTime](JavaTimeUtil.localDateTimeToLong)
 
-    implicit object LocalDateTimeReader extends PBReader[LocalDateTime] {
-      override def read(input: CodedInputStream): LocalDateTime =
-        JavaTimeUtil.longToLocalDateTime(EncoderUtil.byteArrayToLong(input.readByteArray()))
-    }
+    implicit val localDateTimeReader: PBScalarValueReader[LocalDateTime] =
+      PBScalarValueReader[Long].map(JavaTimeUtil.longToLocalDateTime)
 
-    implicit object InstantWriter extends PBWriter[Instant] {
-      override def writeTo(index: Int, value: Instant, out: CodedOutputStream): Unit =
-        out.writeByteArray(index, EncoderUtil.longToByteArray(JavaTimeUtil.instantToLong(value)))
-    }
+    implicit val instantWriter: PBScalarValueWriter[Instant] =
+      PBScalarValueWriter[Long].contramap[Instant](JavaTimeUtil.instantToLong)
 
-    implicit object InstantReader extends PBReader[Instant] {
-      override def read(input: CodedInputStream): Instant =
-        JavaTimeUtil.longToInstant(EncoderUtil.byteArrayToLong(input.readByteArray()))
-    }
+    implicit val instantReader: PBScalarValueReader[Instant] =
+      PBScalarValueReader[Long].map(JavaTimeUtil.longToInstant)
 
   }
+
 }

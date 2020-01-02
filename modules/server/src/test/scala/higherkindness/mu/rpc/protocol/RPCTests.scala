@@ -20,7 +20,6 @@ package protocol
 import cats.{Monad, MonadError}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import com.google.protobuf.InvalidProtocolBufferException
 import org.scalatest._
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.protocol.Utils.handlers.client._
@@ -171,15 +170,6 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       }
 
       clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe ((c1, c1, cList, dResult, e1, e1))
-
-    }
-
-    "#67 issue - booleans as request are not allowed" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[C] =
-        APP.notAllowed(true)
-
-      assertThrows[InvalidProtocolBufferException](clientProgram[ConcurrentMonad].unsafeRunSync())
 
     }
 
@@ -338,15 +328,6 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       }
 
       clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe ((c1, c1, cList, dResult, e1, e1))
-
-    }
-
-    "#67 issue - booleans as request are not allowed" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[C] =
-        APP.notAllowed(true)
-
-      assertThrows[InvalidProtocolBufferException](clientProgram[ConcurrentMonad].unsafeRunSync())
 
     }
 

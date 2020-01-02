@@ -61,7 +61,7 @@ class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest with Em
           _          <- IO(assert(create.isRight))
           topicNames <- client.listTopics(Empty)
           _          <- IO(assert(topicNames.listings.map(_.name).contains(topicName)))
-          delete     <- client.deleteTopic(topicName).attempt
+          delete     <- client.deleteTopic(DeleteTopicRequest(topicName)).attempt
           _          <- IO(assert(delete.isRight))
           topicNames <- client.listTopics(Empty)
           _          <- IO(assert(topicNames.listings.map(_.name).forall(_ != topicName)))
@@ -182,9 +182,11 @@ class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest with Em
             .flatMap(_.consumerGroupListings.headOption)
             .map(_.groupId)
             .getOrElse("")
-          offsets <- client.listConsumerGroupOffsets(groupId).attempt
-          _       <- IO(assert(offsets.isRight))
-          _       <- IO(assert(offsets.toOption.map(_.offsets.size == 1).getOrElse(false)))
+          offsets <- client
+            .listConsumerGroupOffsets(ListConsumerGroupOffsetsRequest(groupId))
+            .attempt
+          _ <- IO(assert(offsets.isRight))
+          _ <- IO(assert(offsets.toOption.map(_.offsets.size == 1).getOrElse(false)))
           describe <- client
             .describeConsumerGroups(DescribeConsumerGroupsRequest(List(groupId)))
             .attempt
