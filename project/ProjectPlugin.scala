@@ -345,7 +345,7 @@ object ProjectPlugin extends AutoPlugin {
       description := "mu RPC is a purely functional library for " +
         "building RPC endpoint based services with support for RPC and HTTP/2",
       startYear := Some(2017),
-      orgProjectName := "mu",
+      orgProjectName := "mu-scala",
       orgGithubSetting := GitHubSettings(
         organization = "higherkindness",
         project = (name in LocalRootProject).value,
@@ -387,11 +387,11 @@ object ProjectPlugin extends AutoPlugin {
       orgBadgeListSetting := List(
         TravisBadge.apply,
         FixedCodecovBadge.apply,
-        { info => MavenCentralBadge.apply(info.copy(libName = "mu")) },
+        { info => MavenCentralBadge.apply(info.copy(libName = "mu-scala")) },
         ScalaLangBadge.apply,
         LicenseBadge.apply,
         // Gitter badge (owner field) can be configured with default value if we migrate it to the higherkindness organization
-        { info => GitterBadge.apply(info.copy(owner = "47deg", repo = "mu")) },
+        { info => GitterBadge.apply(info.copy(owner = "47deg", repo = "mu-scala")) },
         GitHubIssuesBadge.apply
       ),
       orgEnforcedFilesSetting := List(
@@ -399,7 +399,7 @@ object ProjectPlugin extends AutoPlugin {
         ContributingFileType(
           orgProjectName.value,
           // Organization field can be configured with default value if we migrate it to the higherkindness organization
-          orgGithubSetting.value.copy(organization = "47deg", project = "mu")
+          orgGithubSetting.value.copy(organization = "47deg", project = "mu-scala")
         ),
         AuthorsFileType(
           name.value,
