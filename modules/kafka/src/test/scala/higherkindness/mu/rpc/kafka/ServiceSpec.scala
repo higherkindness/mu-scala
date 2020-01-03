@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ class ServiceSpec extends AnyFunSuite with Matchers with OneInstancePerTest with
           _          <- IO(assert(create.isRight))
           topicNames <- client.listTopics(Empty)
           _          <- IO(assert(topicNames.listings.map(_.name).contains(topicName)))
-          delete     <- client.deleteTopic(topicName).attempt
+          delete     <- client.deleteTopic(DeleteTopicRequest(topicName)).attempt
           _          <- IO(assert(delete.isRight))
           topicNames <- client.listTopics(Empty)
           _          <- IO(assert(topicNames.listings.map(_.name).forall(_ != topicName)))
@@ -184,9 +184,11 @@ class ServiceSpec extends AnyFunSuite with Matchers with OneInstancePerTest with
             .flatMap(_.consumerGroupListings.headOption)
             .map(_.groupId)
             .getOrElse("")
-          offsets <- client.listConsumerGroupOffsets(groupId).attempt
-          _       <- IO(assert(offsets.isRight))
-          _       <- IO(assert(offsets.toOption.map(_.offsets.size == 1).getOrElse(false)))
+          offsets <- client
+            .listConsumerGroupOffsets(ListConsumerGroupOffsetsRequest(groupId))
+            .attempt
+          _ <- IO(assert(offsets.isRight))
+          _ <- IO(assert(offsets.toOption.map(_.offsets.size == 1).getOrElse(false)))
           describe <- client
             .describeConsumerGroups(DescribeConsumerGroupsRequest(List(groupId)))
             .attempt

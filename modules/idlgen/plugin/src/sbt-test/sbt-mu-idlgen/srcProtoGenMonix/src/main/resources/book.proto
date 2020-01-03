@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package com.proto;
+
+import "author.proto";
+
+message Book {
+    reserved 4, 8;
+    reserved 12 to 15;
+    int64 isbn = 1;
+    string title = 2;
+    repeated Author author = 3;
+    BindingType binding_type = 9;
+}
+
+message GetBookRequest {
+    int64 isbn = 1;
+}
+
+message GetBookViaAuthor {
+    Author author = 1;
+}
+
+service BookService {
+    rpc GetBook (GetBookRequest) returns (Book) {}
+    rpc GetBooksViaAuthor (GetBookViaAuthor) returns (stream Book) {}
+    rpc GetGreatestBook (stream GetBookRequest) returns (Book) {}
+    rpc GetBooks (stream GetBookRequest) returns (stream Book) {}
+}
+
+message BookStore {
+    string name = 1;
+    map<int64, string> books = 2;
+    repeated Genre genres = 3;
+
+    oneof payment_method {
+        int64 credit_card_number = 4;
+        int32 cash = 5;
+        string iou_note = 6;
+        Book barter = 7;
+    }
+}
+
+enum Genre {
+    option allow_alias = true;
+    UNKNOWN = 0;
+    SCIENCE_FICTION = 1;
+    SPECULATIVE_FICTION = 1;
+    POETRY = 2;
+    SCI_FI = 1;
+}
+
+enum BindingType {
+    HARDCOVER = 0;
+    PAPERBACK = 1;
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,9 +94,13 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
         ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
         check {
           forAll { maybeString: Option[String] =>
+            // if the string is "", i.e. the protobuf default value,
+            // it will not be written on the wire by the client,
+            // so the server will decode it as `None`
+            val expectedOption = maybeString.filter(_.nonEmpty)
             client
               .optionProto(RequestOption(maybeString.map(MyParam)))
-              .unsafeRunSync() == ResponseOption(maybeString, true)
+              .unsafeRunSync() == ResponseOption(expectedOption, true)
           }
         }
 

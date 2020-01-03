@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,10 +51,12 @@ object serviceImpl {
     }
     object TypeTypology {
       def apply(t: Tree): TypeTypology = t match {
-        case tq"Observable[..$tpts]"       => MonixObservableTpe(t, tpts.headOption)
-        case tq"Stream[$carrier, ..$tpts]" => Fs2StreamTpe(t, tpts.headOption)
-        case tq"Empty.type"                => EmptyTpe(t)
-        case tq"$carrier[..$tpts]"         => UnaryTpe(t, tpts.headOption)
+        case tq"Observable[..$tpts]"                       => MonixObservableTpe(t, tpts.headOption)
+        case tq"_root_.monix.reactive.Observable[..$tpts]" => MonixObservableTpe(t, tpts.headOption)
+        case tq"Stream[$carrier, ..$tpts]"                 => Fs2StreamTpe(t, tpts.headOption)
+        case tq"_root_.fs2.Stream[$carrier, ..$tpts]"      => Fs2StreamTpe(t, tpts.headOption)
+        case tq"Empty.type"                                => EmptyTpe(t)
+        case tq"$carrier[..$tpts]"                         => UnaryTpe(t, tpts.headOption)
       }
     }
     case class EmptyTpe(tpe: Tree)                                extends TypeTypology(tpe, None)

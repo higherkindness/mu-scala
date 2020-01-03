@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,6 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
       import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.pbd._
       @service(Protobuf)
       trait Def[F[_]] {
-        def jodaLocalDateProto(date: LocalDate): F[LocalDate]
         def jodaLocalDateReqProto(request: Request): F[Response]
       }
     }
@@ -77,7 +76,6 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
         with AvroService.Def[F]
         with AvroService.WithSchemaDef[F] {
 
-      def jodaLocalDateProto(date: LocalDate): F[LocalDate] = date.pure
       def jodaLocalDateReqProto(request: Request): F[Response] =
         Response(request.date, request.label, check = true).pure
 
@@ -102,22 +100,6 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
 
     val from: DateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeZone.UTC)
     val range: Period  = Period.years(200)
-
-    "be able to serialize and deserialize joda.time.LocalDate using proto format" in {
-
-      withClient(
-        ProtobufService.Def.bindService[ConcurrentMonad],
-        ProtobufService.Def.clientFromChannel[ConcurrentMonad](_)) { client =>
-        check {
-          forAll(genDateTimeWithinRange(from, range)) { dt: DateTime =>
-            val date = dt.toLocalDate
-            client.jodaLocalDateProto(date).unsafeRunSync() == date
-
-          }
-        }
-
-      }
-    }
 
     "be able to serialize and deserialize joda.time.LocalDate in a Request using proto format" in {
 

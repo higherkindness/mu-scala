@@ -1,5 +1,6 @@
 import com.typesafe.sbt.site.jekyll.JekyllPlugin.autoImport._
-import microsites.MicrositeKeys._
+import microsites.MicrositesPlugin.autoImport._
+import microsites._
 import sbt.Keys._
 import sbt.ScriptedPlugin.autoImport._
 import sbt._
@@ -26,12 +27,13 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String             = "1.8.4"
-      val avrohugger: String         = "1.0.0-RC19"
+      val avrohugger: String         = "1.0.0-RC22"
       val betterMonadicFor: String   = "0.3.1"
       val catsEffect: String         = "2.0.0"
       val circe: String              = "0.12.3"
-      val dropwizard: String         = "4.1.1"
-      val embeddedKafka: String      = "2.3.1"
+      val dropwizard: String         = "4.1.2"
+      val embeddedKafka: String      = "2.4.0"
+      val enumeratum: String         = "1.5.15"
       val frees: String              = "0.8.2"
       val fs2: String                = "2.1.0"
       val fs2Grpc: String            = "0.6.0"
@@ -47,18 +49,18 @@ object ProjectPlugin extends AutoPlugin {
       val monocle: String            = "2.0.0"
       val nettySSL: String           = "2.0.25.Final"
       val paradise: String           = "2.1.1"
-      val pbdirect: String           = "0.3.1"
+      val pbdirect: String           = "0.4.0"
       val prometheus: String         = "0.8.0"
-      val pureconfig: String         = "0.12.1"
+      val pureconfig: String         = "0.12.2"
       val reactiveStreams: String    = "1.0.3"
       val scala: String              = "2.12.10"
       val scopt: String              = "3.7.1"
-      val scalacheck: String         = "1.14.2"
+      val scalacheck: String         = "1.14.3"
       val scalacheckToolbox: String  = "0.3.1"
       val scalamock: String          = "4.4.0"
-      val scalatest: String          = "3.1.0"
-      val skeuomorph: String         = "0.0.17"
-      val slf4j: String              = "1.7.29"
+      val scalatest: String          = "3.0.8"
+      val skeuomorph: String         = "0.0.19"
+      val slf4j: String              = "1.7.30"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
@@ -74,6 +76,7 @@ object ProjectPlugin extends AutoPlugin {
         %%("cats-effect", V.catsEffect),
         %("grpc-stub", V.grpc),
         "com.47deg" %% "pbdirect" % V.pbdirect,
+        "com.beachape" %% "enumeratum" % V.enumeratum,
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
         "org.scala-lang"             % "scala-compiler" % scalaVersion.value,
@@ -294,14 +297,14 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
-      micrositeName := "Mu",
-      micrositeBaseUrl := "/mu",
+      micrositeName := "Mu-Scala",
+      micrositeBaseUrl := "mu-scala",
       micrositeDescription := "A purely functional library for building RPC endpoint-based services",
       micrositeGithubOwner := "higherkindness",
-      micrositeGithubRepo := "mu",
+      micrositeGithubRepo := "mu-scala",
       micrositeGitterChannelUrl := "47deg/mu",
-      micrositeOrganizationHomepage := "http://www.47deg.com",
-      includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
+      micrositeOrganizationHomepage := "https://www.47deg.com",
+      micrositeCompilingDocsTool := WithTut,
       micrositePushSiteWith := GitHub4s,
       micrositeGithubToken := sys.env.get(orgGithubTokenSetting.value),
       micrositePalette := Map(
@@ -313,7 +316,9 @@ object ProjectPlugin extends AutoPlugin {
         "gray-light"      -> "#EDEDED",
         "gray-lighter"    -> "#F4F5F9",
         "white-color"     -> "#E6E7EC"
-      )
+      ),
+      micrositeHighlightTheme := "tomorrow-night-eighties",
+      micrositeHighlightLanguages += "protobuf"
     )
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(

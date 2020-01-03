@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,4 +102,9 @@ object Model {
     def apply(v: Boolean): UseIdiomaticEndpoints =
       tag[UseIdiomaticEndpointsTag][Boolean](v)
   }
+
+  sealed trait StreamingImplementation
+  case object Fs2Stream       extends StreamingImplementation
+  case object MonixObservable extends StreamingImplementation
+
 }

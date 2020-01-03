@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ object kafkaManagementService {
   final case class CreateTopicRequest(name: String, numPartitions: Int, replicationFactor: Short)
   final case class CreateTopicRequests(createTopicRequests: List[CreateTopicRequest])
 
+  final case class DeleteTopicRequest(name: String)
   final case class DeleteTopicsRequest(names: List[String])
 
   final case class Node(id: Int, host: String, port: Int, rack: Option[String])
@@ -292,6 +293,7 @@ object kafkaManagementService {
       )
   }
   final case class Offset(topicPartition: TopicPartition, metadata: OffsetAndMetadata)
+  final case class ListConsumerGroupOffsetsRequest(groupId: String)
   final case class ConsumerGroupOffsets(offsets: List[Offset])
 
   final case class ConsumerGroupListing(
@@ -321,13 +323,13 @@ object kafkaManagementService {
     def createPartitions(cpr: CreatePartitionsRequest): F[Unit]
     def createTopic(ctr: CreateTopicRequest): F[Unit]
     def createTopics(ctrs: CreateTopicRequests): F[Unit]
-    def deleteTopic(t: String): F[Unit]
+    def deleteTopic(t: DeleteTopicRequest): F[Unit]
     def deleteTopics(ts: DeleteTopicsRequest): F[Unit]
     def describeCluster(r: Empty.type): F[Cluster]
     def describeConfigs(dcr: DescribeConfigsRequest): F[Configs]
     def describeConsumerGroups(dcgr: DescribeConsumerGroupsRequest): F[ConsumerGroups]
     def describeTopics(topics: DescribeTopicsRequest): F[Topics]
-    def listConsumerGroupOffsets(groupId: String): F[ConsumerGroupOffsets]
+    def listConsumerGroupOffsets(lcgor: ListConsumerGroupOffsetsRequest): F[ConsumerGroupOffsets]
     def listConsumerGroups(r: Empty.type): F[ConsumerGroupListings]
     def listTopics(r: Empty.type): F[TopicListings]
   }

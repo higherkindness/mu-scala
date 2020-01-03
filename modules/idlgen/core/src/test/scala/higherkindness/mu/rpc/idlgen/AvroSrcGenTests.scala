@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import higherkindness.mu.rpc.idlgen.avro._
 import org.scalatestplus.scalacheck.Checkers
 import org.scalacheck.Prop.forAll
 
-class SrcGenTests extends RpcBaseTestSuite with Checkers {
+class AvroSrcGenTests extends RpcBaseTestSuite with Checkers {
 
   "Avro Scala Generator" should {
 

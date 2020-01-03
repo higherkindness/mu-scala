@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import higherkindness.mu.rpc.idlgen.Model.{
   BigDecimalTypeGen,
   CompressionTypeGen,
   MarshallersImport,
+  StreamingImplementation,
   UseIdiomaticEndpoints
 }
 import higherkindness.mu.rpc.idlgen.avro.AvroSrcGenerator
@@ -36,12 +37,14 @@ object SrcGenApplication {
       bigDecimalTypeGen: BigDecimalTypeGen,
       compressionType: CompressionTypeGen,
       useIdiomaticEndpoints: UseIdiomaticEndpoints,
+      streamingImplementation: StreamingImplementation,
       idlTargetDir: File,
       resourcesBasePath: Path,
       httpImpl: HttpImpl
   ): GeneratorApplication[SrcGenerator] =
     new GeneratorApplication(
-      ProtoSrcGenerator.build(compressionType, useIdiomaticEndpoints, idlTargetDir),
+      ProtoSrcGenerator
+        .build(compressionType, useIdiomaticEndpoints, streamingImplementation, idlTargetDir),
       AvroSrcGenerator(
         marshallersImports,
         bigDecimalTypeGen,

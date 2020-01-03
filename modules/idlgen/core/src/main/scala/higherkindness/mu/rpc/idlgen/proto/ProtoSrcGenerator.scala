@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import higherkindness.mu.rpc.idlgen.Model.{
   CompressionTypeGen,
   GzipGen,
   NoCompressionGen,
+  StreamingImplementation,
   UseIdiomaticEndpoints
 }
 import higherkindness.mu.rpc.idlgen._
@@ -33,13 +34,15 @@ import higherkindness.skeuomorph.protobuf.{ProtobufF, Protocol}
 import higherkindness.droste.data.Mu
 import higherkindness.droste.data.Mu._
 
-import scala.util.matching.Regex
+import higherkindness.mu.rpc.idlgen.Model.Fs2Stream
+import higherkindness.mu.rpc.idlgen.Model.MonixObservable
 
 object ProtoSrcGenerator {
 
   def build(
       compressionTypeGen: CompressionTypeGen,
       useIdiomaticEndpoints: UseIdiomaticEndpoints,
+      streamingImplementation: StreamingImplementation,
       idlTargetDir: File): SrcGenerator = new SrcGenerator {
 
     val idlType: String = proto.IdlType
@@ -53,19 +56,24 @@ object ProtoSrcGenerator {
         options: String*): Option[(String, Seq[String])] =
       getCode[IO](inputFile).map(Some(_)).unsafeRunSync
 
-    def withImports(self: String): String =
-      (self.split("\n", 2).toList match {
-        case h :: t => imports(h) :: t
-        case a      => a
-      }).mkString("\n")
+    val muProtocolImport = "import higherkindness.mu.rpc.protocol._"
 
-    val copRegExp: Regex = """((Cop\[)(((\w+)((\[)(\w+)(\]))?(\s)?(\:\:)(\s)?)+)(TNil)(\]))""".r
+    def withImport(lines: List[String]): List[String] =
+      lines match {
+        case h :: t =>
+          // first line of file is package declaration
+          h :: muProtocolImport :: t
+        case Nil => Nil
+      }
 
-    val cleanCop: String => String =
-      _.replace("Cop[", "").replace("::", ":+:").replace("TNil]", "CNil")
+    val streamPattern = "Stream[F, "
 
-    val withCoproducts: String => String = self =>
-      copRegExp.replaceAllIn(self, m => cleanCop(m.matched))
+    def withStreamingImpl(lines: List[String]): List[String] = streamingImplementation match {
+      case Fs2Stream =>
+        lines.map(_.replaceAllLiterally(streamPattern, "_root_.fs2.Stream[F, "))
+      case MonixObservable =>
+        lines.map(_.replaceAllLiterally(streamPattern, "_root_.monix.reactive.Observable["))
+    }
 
     val skeuomorphCompression: CompressionType = compressionTypeGen match {
       case GzipGen          => CompressionType.Gzip
@@ -79,19 +87,18 @@ object ProtoSrcGenerator {
     val printProtocol: higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] => String =
       higherkindness.skeuomorph.mu.print.proto.print
 
+    val splitLines: String => List[String] = _.split("\n").toList
+
     private def getCode[F[_]: Sync](file: File): F[(String, Seq[String])] =
       parseProto[F, Mu[ProtobufF]]
         .parse(ProtoSource(file.getName, file.getParent, Some(idlTargetDir.getCanonicalPath)))
-        .map(
-          protocol =>
-            getPath(protocol) -> Seq(
-              (parseProtocol andThen printProtocol andThen withImports andThen withCoproducts)(
-                protocol)))
+        .map(protocol =>
+          getPath(protocol) ->
+            (parseProtocol andThen printProtocol andThen splitLines andThen withStreamingImpl andThen withImport)(
+              protocol))
 
     private def getPath(p: Protocol[Mu[ProtobufF]]): String =
       s"${p.pkg.replace('.', '/')}/${p.name}$ScalaFileExtension"
 
-    def imports(pkg: String): String =
-      s"$pkg\nimport higherkindness.mu.rpc.protocol._\nimport fs2.Stream\nimport shapeless.{:+:, CNil}"
   }
 }

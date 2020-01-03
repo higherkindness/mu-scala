@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,6 +104,13 @@ object IdlGenPlugin extends AutoPlugin {
       settingKey[HttpImpl](
         "The HTTP framework and version, used for the code generation." +
           "`Http4sV20` by default.")
+
+    lazy val srcGenStreamingImplementation: SettingKey[StreamingImplementation] =
+      settingKey[StreamingImplementation](
+        "The streaming implementation to use when generating Scala sources from IDL definitions that involve streaming. " +
+          "FS2 Stream and Monix Observable are the current supported implementations. " +
+          "By default, the streaming implementation is FS2 Stream.")
+
   }
 
   import higherkindness.mu.rpc.idlgen.IdlGenPlugin.autoImport._
@@ -134,7 +141,8 @@ object IdlGenPlugin extends AutoPlugin {
     },
     idlGenCompressionType := NoCompressionGen,
     idlGenIdiomaticEndpoints := false,
-    idlGenOpenApiHttpImpl := HttpImpl.Http4sV20
+    idlGenOpenApiHttpImpl := HttpImpl.Http4sV20,
+    srcGenStreamingImplementation := Fs2Stream
   )
 
   lazy val taskSettings: Seq[Def.Setting[_]] = {
@@ -176,6 +184,7 @@ object IdlGenPlugin extends AutoPlugin {
                 idlGenBigDecimal.value,
                 idlGenCompressionType.value,
                 UseIdiomaticEndpoints(idlGenIdiomaticEndpoints.value),
+                srcGenStreamingImplementation.value,
                 srcGenIDLTargetDir.value,
                 (Compile / resourceManaged).value.toPath,
                 idlGenOpenApiHttpImpl.value

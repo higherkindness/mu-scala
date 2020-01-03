@@ -25,7 +25,7 @@ As you might know, [gRPC] uses protocol buffers (a.k.a. *protobuf*) by default:
 
 In the example given in the [gRPC guide], you might have a proto file like this:
 
-```proto
+```protobuf
 message Person {
   string name = 1;
   int32 id = 2;
@@ -37,7 +37,7 @@ Then, once you’ve specified your data structures, you can use the protobuf com
 
 Likewise, you can define [gRPC] services in your proto files, with RPC method parameters and return types specified as protocol buffer messages:
 
-```proto
+```protobuf
 // The greeter service definition.
 service Greeter {
   // Sends a greeting
@@ -298,7 +298,7 @@ In the [Streaming section](streaming), we are going to see all the streaming opt
 
 If you're using `Protobuf`, [Mu] uses instances of [PBDirect] for creating the `Marshaller` instances. For `Avro`, it uses instances of [Avro4s].
 
-Let's see a couple of samples, one per each type of serialization. Suppose you want to serialize `java.time.LocalDate` as part of your messages in `String` format. With `Probobuf`, as we've mentioned, you need to provide the instances of [PBDirect] for that type. Specifically, you need to provide a `PBWriter` and a `PBReader`.
+Let's see a couple of samples, one per each type of serialization. Suppose you want to serialize `java.time.LocalDate` as part of your messages in `String` format. With `Protobuf`, as we've mentioned, you need to provide the instances of [PBDirect] for that type. Specifically, you need to provide a `PBWriter` and a `PBReader`.
 
 ```tut:silent
 object protocol {
@@ -309,15 +309,14 @@ object protocol {
   import com.google.protobuf.{CodedInputStream, CodedOutputStream}
   import pbdirect._
 
-  implicit object LocalDateWriter extends PBWriter[LocalDate] {
-    override def writeTo(index: Int, value: LocalDate, out: CodedOutputStream): Unit =
-      out.writeString(index, value.format(DateTimeFormatter.ISO_LOCAL_DATE))
-  }
+  import cats.syntax.contravariant._
+  import cats.syntax.functor._
 
-  implicit object LocalDateReader extends PBReader[LocalDate] {
-    override def read(input: CodedInputStream): LocalDate =
-      LocalDate.parse(input.readString(), DateTimeFormatter.ISO_LOCAL_DATE)
-  }
+  implicit val localDateWriter: PBScalarValueWriter[LocalDate] =
+    PBScalarValueWriter[String].contramap[LocalDate](_.format(DateTimeFormatter.ISO_LOCAL_DATE))
+
+  implicit val localDateReader: PBScalarValueReader[LocalDate] =
+    PBScalarValueReader[String].map(string => LocalDate.parse(string, DateTimeFormatter.ISO_LOCAL_DATE))
 
   case class HelloRequest(name: String, date: LocalDate)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ object Utils extends CommonUtils {
     @service(Protobuf, Gzip) trait CompressedProtoRPCService[F[_]] {
       import ExternalScope._
 
-      def notAllowedCompressed(b: Boolean): F[C]
       def emptyCompressed(empty: Empty.type): F[Empty.type]
       def emptyParamCompressed(a: A): F[Empty.type]
       def emptyParamResponseCompressed(empty: Empty.type): F[A]
@@ -70,7 +69,6 @@ object Utils extends CommonUtils {
     @service(Protobuf) trait ProtoRPCService[F[_]] {
       import ExternalScope._
 
-      def notAllowed(b: Boolean): F[C]
       def empty(empty: Empty.type): F[Empty.type]
       def emptyParam(a: A): F[Empty.type]
       def emptyParamResponse(empty: Empty.type): F[A]
@@ -92,7 +90,6 @@ object Utils extends CommonUtils {
   object client {
 
     trait MyRPCClient[F[_]] {
-      def notAllowed(b: Boolean): F[C]
       def empty: F[Empty.type]
       def emptyParam(a: A): F[Empty.type]
       def emptyParamResponse: F[A]
@@ -132,8 +129,6 @@ object Utils extends CommonUtils {
           with CompressedAvroWithSchemaRPCService[F] {
 
         import monix.execution.Scheduler.Implicits.global
-
-        def notAllowed(b: Boolean): F[C] = c1.pure[F]
 
         def empty(empty: Empty.type): F[Empty.type] = Empty.pure[F]
 
@@ -204,8 +199,6 @@ object Utils extends CommonUtils {
 
         def save(e: E) = e // do something else with e?
 
-        def notAllowedCompressed(b: Boolean): F[C] = notAllowed(b)
-
         def emptyCompressed(empty: Empty.type): F[Empty.type] = Empty.pure[F]
 
         def emptyParamCompressed(a: A): F[Empty.type] = emptyParam(a)
@@ -266,9 +259,6 @@ object Utils extends CommonUtils {
           extends MyRPCClient[F] {
 
         import monix.execution.Scheduler.Implicits.global
-
-        override def notAllowed(b: Boolean): F[C] =
-          proto.use(_.notAllowed(b))
 
         override def empty: F[Empty.type] =
           proto.use(_.empty(protocol.Empty))
@@ -376,9 +366,6 @@ object Utils extends CommonUtils {
           extends MyRPCClient[F] {
 
         import monix.execution.Scheduler.Implicits.global
-
-        override def notAllowed(b: Boolean): F[C] =
-          proto.use(_.notAllowedCompressed(b))
 
         override def empty: F[Empty.type] =
           proto.use(_.emptyCompressed(protocol.Empty))

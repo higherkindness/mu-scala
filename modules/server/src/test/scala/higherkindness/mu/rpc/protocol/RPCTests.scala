@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ package protocol
 import cats.{Monad, MonadError}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import com.google.protobuf.InvalidProtocolBufferException
 import org.scalatest._
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.protocol.Utils.handlers.client._
@@ -171,15 +170,6 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       }
 
       clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe ((c1, c1, cList, dResult, e1, e1))
-
-    }
-
-    "#67 issue - booleans as request are not allowed" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[C] =
-        APP.notAllowed(true)
-
-      assertThrows[InvalidProtocolBufferException](clientProgram[ConcurrentMonad].unsafeRunSync())
 
     }
 
@@ -338,15 +328,6 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       }
 
       clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe ((c1, c1, cList, dResult, e1, e1))
-
-    }
-
-    "#67 issue - booleans as request are not allowed" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[C] =
-        APP.notAllowed(true)
-
-      assertThrows[InvalidProtocolBufferException](clientProgram[ConcurrentMonad].unsafeRunSync())
 
     }
 

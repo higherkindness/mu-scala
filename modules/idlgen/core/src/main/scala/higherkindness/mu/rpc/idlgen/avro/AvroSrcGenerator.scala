@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@ case class AvroSrcGenerator(
   private[this] val logger = getLogger
 
   private val avroBigDecimal: AvroScalaDecimalType = bigDecimalTypeGen match {
-    case ScalaBigDecimalGen       => ScalaBigDecimal
-    case ScalaBigDecimalTaggedGen => ScalaBigDecimalWithPrecision
+    case ScalaBigDecimalGen       => ScalaBigDecimal(None)
+    case ScalaBigDecimalTaggedGen => ScalaBigDecimalWithPrecision(None)
   }
   private val avroScalaCustomTypes = Standard.defaultTypes.copy(decimal = avroBigDecimal)
   private val mainGenerator        = Generator(Standard, avroScalaCustomTypes = Some(avroScalaCustomTypes))

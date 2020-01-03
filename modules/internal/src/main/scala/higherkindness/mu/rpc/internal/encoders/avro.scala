@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,6 +90,12 @@ object avro extends AvroMarshallers {
         ByteBuffer.wrap(BigDecimalUtil.bigDecimalToByte(value))
     }
 
+    /*
+     * These marshallers are only used when the entire gRPC request/response is
+     * a BigDecimal. When a BigDecimal is a field of a larger message, the
+     * polymorphic marshaller defined in the `avro` or `avrowithschema` object
+     * is used.
+     */
     object marshallers {
 
       implicit val bigDecimalMarshaller: Marshaller[BigDecimal] = new Marshaller[BigDecimal] {
@@ -243,6 +249,12 @@ object avro extends AvroMarshallers {
       BigDecimal @@ ((A, B), (C, D))] =
       bigDecimalToValue[(A, B), (C, D)](avro4sPrecisionAndScale[A, B, C, D])
 
+    /*
+     * These marshallers are only used when the entire gRPC request/response is
+     * a tagged BigDecimal. When a tagged BigDecimal is a field of a larger
+     * message, the polymorphic marshaller defined in the `avro` or
+     * `avrowithschema` object is used.
+     */
     object marshallers {
 
       implicit def bigDecimalMarshaller2[A <: Nat, B <: Nat](
@@ -340,6 +352,12 @@ object avro extends AvroMarshallers {
         JavaTimeUtil.instantToLong(value)
     }
 
+    /*
+     * These marshallers are only used when the entire gRPC request/response
+     * is a LocalDate/LocalDateTime/Instant. When a LocalDate/LocalDateTime/Instant
+     * is a field of a larger message, the polymorphic marshaller defined in
+     * the `avro` or `avrowithschema` object is used.
+     */
     object marshallers {
 
       implicit val localDateMarshaller: Marshaller[LocalDate] = new Marshaller[LocalDate] {

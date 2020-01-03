@@ -40,3 +40,6 @@ project/.bloop/
 
 # Visual Studio Code Specific
 .vscode/
+
+# Microsite
+/_site

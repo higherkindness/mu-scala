@@ -20,9 +20,9 @@ The current version for [Mu] is "0.19.1" using the following common libraries an
 [comment]: # (End Replace)
 
  * [avro4s] 1.8.4
- * [cats-effect] 1.2.0
- * [fs2] 1.0.4
- * [Monix] 3.0.0-RC2
+ * [cats-effect] 2.x
+ * [fs2] 2.x
+ * [Monix] 3.x
 
 `Mu` is cross-built for Scala `2.11.x` and `2.12.x`.
 
@@ -32,7 +32,7 @@ To use the project, add the following to your build.sbt:
 
 We've found that the compiler plugin needs to be added to your build.sbt file *after* your library dependencies due to the manner in which SBT evaluates the build file. 
 
-#### Artifacts
+### Artifacts
 [Mu] is divided into multiple artifacts, grouped by scope:
 
 * `Server`: specifically for the RPC server.
@@ -40,7 +40,8 @@ We've found that the compiler plugin needs to be added to your build.sbt file *a
 * `Server/Client`: used from other artifacts for both Server and Client.
 * `Test`: useful to test `Mu` applications.
 
-###### Common
+#### Common
+
 | *Artifact Name*  | *Scope*  | *Mandatory*  | *Description*  |
 |---|---|---|---|
 | `mu-common`  | Server/Client  | Provided*  | Common things that are used throughout the project.  |
@@ -48,7 +49,8 @@ We've found that the compiler plugin needs to be added to your build.sbt file *a
 | `mu-rpc-internal-monix`  | Server/Client  | Provided*  | Macros.  |
 | `mu-rpc-internal-fs2`  | Server/Client  | Provided*  | Macros.  |
 
-###### Client/Server
+#### Client/Server
+
 | *Artifact Name*  | *Scope*  | *Mandatory*  | *Description*  |
 |---|---|---|---|
 | `mu-rpc-server`  | Server  | Yes  | Needed to attach RPC Services and spin-up an RPC Server.  |
@@ -62,14 +64,15 @@ We've found that the compiler plugin needs to be added to your build.sbt file *a
 * `Yes*`: on the client-side, you must choose either `Netty` or `OkHttp` as the transport layer.
 * `Provided*`: you don't need to add it to your build, it'll be transitively provided when using other dependencies.
 
+#### Metrics
 
-###### Metrics
 | *Artifact Name*   | *Scope*  | *Mandatory*  | *Description*  |
 |---|---|---|---|
 | `mu-rpc-prometheus`  | Server/Client  | No  | Scala interceptors which can be used to monitor gRPC services using Prometheus.  |
 | `mu-rpc-dropwizard`  | Server/Client  | No  | Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics.  |
 
-###### Other
+#### Other
+
 | *Artifact Name*  | *Scope*  | *Mandatory*  | *Description*  |
 |---|---|---|---|
 | `mu-config`  | Server/Client  | No  | Provides configuration helpers using [mu-config] to load the application configuration values.  |
@@ -77,7 +80,7 @@ We've found that the compiler plugin needs to be added to your build.sbt file *a
 | `mu-rpc-client-cache`  | Client  | No  | Provides an algebra for caching RPC clients.  |
 | `mu-rpc-marshallers-jodatime`  | Server/Client  | No  | Provides marshallers for serializing and deserializing the `LocalDate` and `LocalDateTime` joda instances.  |
 
-#### Build
+### Build
 You can install any of these dependencies in your build as follows:
 
 [comment]: # (Start Replace)
