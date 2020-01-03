@@ -604,7 +604,7 @@ lazy val allModulesDeps: Seq[ClasspathDependency] =
 
 lazy val root = project
   .in(file("."))
-  .settings(name := "mu")
+  .settings(name := "mu-scala")
   .settings(noPublishSettings)
   .aggregate(allModules: _*)
   .dependsOn(allModulesDeps: _*)
