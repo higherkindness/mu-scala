@@ -30,15 +30,18 @@ stages:
   - microsite
 jobs:
   include:
-    - script:
-      - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut
-      - bash <(curl -s https://codecov.io/bash)
-    - script:
-      - sbt ++$TRAVIS_SCALA_VERSION idlgen-core/test
-      - sbt ++$TRAVIS_SCALA_VERSION idlgen-sbt/test
-      - sbt ++$TRAVIS_SCALA_VERSION publishLocal idlgen-sbt/publishLocal idlgen-sbt/scripted
+    - name: "Tests, coverage and docs compilation"
+      script:
+        - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut
+        - bash <(curl -s https://codecov.io/bash)
+    - name: "sbt plugin tests"
+      script:
+        - sbt ++$TRAVIS_SCALA_VERSION idlgen-core/test
+        - sbt ++$TRAVIS_SCALA_VERSION idlgen-sbt/test
+        - sbt ++$TRAVIS_SCALA_VERSION publishLocal idlgen-sbt/publishLocal idlgen-sbt/scripted
     - stage: deploy
       if: branch = master AND type != pull_request AND env(SKIP_SBT_DEPLOY) = false
+      name: "Publish sbt plugin"
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
             sbt idlgen-sbt/publish;
@@ -47,6 +50,7 @@ jobs:
           fi
     - stage: deploy
       if: branch = master AND type != pull_request
+      name: "Publish all other artifacts"
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
             sbt +publish;
@@ -60,6 +64,7 @@ jobs:
           fi
     - stage: microsite
       if: branch = master AND type != pull_request
+      name: "Publish microsite"
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
             echo "Skipping microsite publication, snapshot version";
