@@ -89,6 +89,7 @@ Extra settings:
 * **`idlGenCompressionType`**: Specifies the compression type that will be used by the IDL generated services. Set to `higherkindness.mu.rpc.idlgen.Model.GzipGen` for compressed communications with Gzip. `higherkindness.mu.rpc.idlgen.Model.NoCompressionGen` by default.
 * **`idlGenIdiomaticEndpoints`**: Flag indicating if idiomatic gRPC endpoints should be used. If `true`, the service operations will be prefixed by the namespace and the methods will be capitalized. `false` by default.
 * **`srcGenStreamingImplementation`**: Specifies whether generated Scala code will use FS2 `Stream[F, A]` or Monix `Observable[A]` as its streaming implementation. FS2 is the default. This setting is only relevant if you have any RPC endpoint definitions that involve streaming.
+
 The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also available, but they need the dependency `mu-rpc-marshallers-jodatime`.
 You can also specify custom imports with the following:
   * `idlGenMarshallerImports := List(higherkindness.mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))`

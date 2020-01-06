@@ -2,6 +2,76 @@
 
 ## 01/03/2020 - Version 0.20.0
 
+This release focussed on improving Protobuf support, introducing a number of new
+features and bug fixes but also some breaking changes.
+
+New features/improvements/bug fixes:
+
+* Scala reserved words are now escaped properly in generated code, so you can
+  safely use words such as `type` or `private` in your Protobuf definitions.
+
+* Type names in generated code are now fully qualified, so use of words such as
+  `Option` or `Either` in your Protobuf definitions will not cause name clashes
+  with other Scala types.
+
+* The sbt plugin no longer includes unnecessary imports in generated code. For
+  example, if your RPC endpoints do not make use of streaming, the generated
+  code will not include any FS2 or Monix imports.
+
+* Protobuf enums are now supported. They are encoded as [enumeratum](https://github.com/lloydmeta/enumeratum)
+  `IntEnum`s in the generated code.
+
+* Protobuf `oneof` fields are now supported. They are encoded as
+  [Shapeless](https://github.com/milessabin/shapeless) Coproduct types in the
+  generated code.
+
+* Field numbers are now respected when encoding/decoding Protobuf messages. This
+  is important if you want your Mu server or client to communicate correctly
+  with 3rd parties using Protobuf.
+
+* Default values for Protobuf scalar fields are now supported correctly. When
+  reading a message with a missing field, the field is correctly instantiated
+  with the default value for its type. When writing a message, a field is
+  skipped if it has the default value. See [this
+  table](https://github.com/47deg/pbdirect/blob/a9eee69a90d424889fd3eb421babb07f87f9495b/README.md#default-values-and-missing-fields)
+  for more details about default values for various types.
+
+* Repeated Protobuf fields with primitive types are now encoded using the
+  [packed
+  encoding](https://developers.google.com/protocol-buffers/docs/encoding#packed)
+  by default, for compliance with the `proto3` spec.
+
+* A new `srcGenStreamingImplementation` setting has been added to the sbt
+  plugin, allowing you to choose which streaming implementation (FS2 or Monix)
+  to use when generating code.  Previously this was hardcoded to FS2 and not
+  configurable. See [the
+  docs](https://higherkindness.io/mu-scala/generate-sources-from-idl#plugin-settings)
+  for more details.
+
+Breaking changes:
+
+* We have fixed a number of bugs in Protobuf encoding/decoding, and we now have
+  a test suite to check that Mu's Protobuf encoding matches that of `protoc`,
+  the official Protobuf CLI tool. However, this means that clients and servers
+  using Mu v0.20.0 or newer will not be able to communicate with older versions
+  of Mu via Protobuf.
+
+* The Protobuf encoders and decoders for `java.time` classes (`LocalDate`,
+  `LocalDateTime` and `Instant`) and joda-time classes (`LocalDate` and
+  `LocalDateTime`) have been simplified. They now encode values as `int32` or
+  `int64` instead of converting them to byte arrays. This is consistent with the
+  equivalent Avro encoders/decoders.
+
+* If you define any Protobuf codecs for custom types, you now need to define
+  instances of `PBScalarValueReader` and/or `PBScalarValueWriter` instead of
+  `PBReader`/`PBWriter`. See [the
+  docs](https://higherkindness.io/mu-scala/core-concepts#custom-codecs) for an
+  example.
+
+* Using a simple type (e.g. `Boolean`, `String`, `LocalDate`) as an RPC request
+  or response is no longer supported for Protobuf services. Only proper message
+  types (i.e. case classes) are allowed.
+
 Release changes:
 
 * Update skeuomorph to 0.0.17 ([#713](https://github.com/higherkindness/mu-scala/pull/713))
