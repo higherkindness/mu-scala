@@ -391,7 +391,7 @@ object ProjectPlugin extends AutoPlugin {
         ScalaLangBadge.apply,
         LicenseBadge.apply,
         // Gitter badge (owner field) can be configured with default value if we migrate it to the higherkindness organization
-        { info => GitterBadge.apply(info.copy(owner = "47deg", repo = "mu-scala")) },
+        { info => GitterBadge.apply(info.copy(owner = "47deg", repo = "mu")) },
         GitHubIssuesBadge.apply
       ),
       orgEnforcedFilesSetting := List(
