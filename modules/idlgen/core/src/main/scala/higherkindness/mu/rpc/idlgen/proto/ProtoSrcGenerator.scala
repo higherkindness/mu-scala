@@ -37,6 +37,8 @@ import higherkindness.droste.data.Mu._
 import higherkindness.mu.rpc.idlgen.Model.Fs2Stream
 import higherkindness.mu.rpc.idlgen.Model.MonixObservable
 
+import scala.meta._
+
 object ProtoSrcGenerator {
 
   def build(
@@ -56,23 +58,9 @@ object ProtoSrcGenerator {
         options: String*): Option[(String, Seq[String])] =
       getCode[IO](inputFile).map(Some(_)).unsafeRunSync
 
-    val muProtocolImport = "import higherkindness.mu.rpc.protocol._"
-
-    def withImport(lines: List[String]): List[String] =
-      lines match {
-        case h :: t =>
-          // first line of file is package declaration
-          h :: muProtocolImport :: t
-        case Nil => Nil
-      }
-
-    val streamPattern = "Stream[F, "
-
-    def withStreamingImpl(lines: List[String]): List[String] = streamingImplementation match {
-      case Fs2Stream =>
-        lines.map(_.replaceAllLiterally(streamPattern, "_root_.fs2.Stream[F, "))
-      case MonixObservable =>
-        lines.map(_.replaceAllLiterally(streamPattern, "_root_.monix.reactive.Observable["))
+    val streamCtor: (Type, Type) => Type.Apply = streamingImplementation match {
+      case Fs2Stream       => { case (f, a) => t"_root_.fs2.Stream[$f, $a]" }
+      case MonixObservable => { case (_, a) => t"_root_.monix.reactive.Observable[$a]" }
     }
 
     val skeuomorphCompression: CompressionType = compressionTypeGen match {
@@ -85,7 +73,7 @@ object ProtoSrcGenerator {
         .fromProtobufProto(skeuomorphCompression, useIdiomaticEndpoints)
 
     val printProtocol: higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] => String =
-      higherkindness.skeuomorph.mu.print.proto.print
+      higherkindness.skeuomorph.mu.codegen.protocol(_, streamCtor).right.get.syntax
 
     val splitLines: String => List[String] = _.split("\n").toList
 
@@ -94,8 +82,7 @@ object ProtoSrcGenerator {
         .parse(ProtoSource(file.getName, file.getParent, Some(idlTargetDir.getCanonicalPath)))
         .map(protocol =>
           getPath(protocol) ->
-            (parseProtocol andThen printProtocol andThen splitLines andThen withStreamingImpl andThen withImport)(
-              protocol))
+            (parseProtocol andThen printProtocol andThen splitLines)(protocol))
 
     private def getPath(p: Protocol[Mu[ProtobufF]]): String =
       s"${p.pkg.replace('.', '/')}/${p.name}$ScalaFileExtension"
