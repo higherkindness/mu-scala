@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.idlgen
+package higherkindness.mu.rpc.srcgen
 
-import higherkindness.mu.rpc.idlgen.avro.AvroIdlGenerator
-import higherkindness.mu.rpc.idlgen.proto.ProtoIdlGenerator
+import scala.reflect.runtime.universe.runtimeMirror
+import scala.tools.reflect.ToolBox
 
-object IdlGenApplication extends GeneratorApplication(ProtoIdlGenerator, AvroIdlGenerator) {
-  def main(args: Array[String]): Unit = {
-    generateFrom(args)
-    (): Unit
-  }
+package object util {
+  val mirror                                          = runtimeMirror(getClass.getClassLoader)
+  val Toolbox: ToolBox[reflect.runtime.universe.type] = ToolBox(mirror).mkToolBox()
 }

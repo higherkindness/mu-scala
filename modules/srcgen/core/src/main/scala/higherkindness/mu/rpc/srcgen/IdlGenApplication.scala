@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.idlgen
+package higherkindness.mu.rpc.srcgen
 
-package object avro {
-  val IdlType       = "avro"
-  val AvprExtension = ".avpr"
-  val AvdlExtension = ".avdl"
+import higherkindness.mu.rpc.srcgen.avro.AvroIdlGenerator
+import higherkindness.mu.rpc.srcgen.proto.ProtoIdlGenerator
+
+object IdlGenApplication extends GeneratorApplication(ProtoIdlGenerator, AvroIdlGenerator) {
+  def main(args: Array[String]): Unit = {
+    generateFrom(args)
+    (): Unit
+  }
 }

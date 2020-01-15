@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.idlgen
+package higherkindness.mu.rpc.srcgen
 
 import java.io.File
 
-import higherkindness.mu.rpc.idlgen.Model.{
+import higherkindness.mu.rpc.srcgen.Model.{
   BigDecimalTypeGen,
   CompressionTypeGen,
   MarshallersImport,
   StreamingImplementation,
   UseIdiomaticEndpoints
 }
-import higherkindness.mu.rpc.idlgen.avro.AvroSrcGenerator
-import higherkindness.mu.rpc.idlgen.proto.ProtoSrcGenerator
-import higherkindness.mu.rpc.idlgen.openapi.OpenApiSrcGenerator
-import higherkindness.mu.rpc.idlgen.openapi.OpenApiSrcGenerator.HttpImpl
+import higherkindness.mu.rpc.srcgen.avro.AvroSrcGenerator
+import higherkindness.mu.rpc.srcgen.proto.ProtoSrcGenerator
+import higherkindness.mu.rpc.srcgen.openapi.OpenApiSrcGenerator
+import higherkindness.mu.rpc.srcgen.openapi.OpenApiSrcGenerator.HttpImpl
 import java.nio.file.Path
 
 object SrcGenApplication {

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.idlgen
+package higherkindness.mu.rpc.srcgen
 
 import org.scalatest.{FlatSpec, Matchers, OptionValues}
 import Matchers._
 import java.io.File
 
-import higherkindness.mu.rpc.idlgen.openapi.OpenApiSrcGenerator
-import higherkindness.mu.rpc.idlgen.openapi.OpenApiSrcGenerator.HttpImpl
+import higherkindness.mu.rpc.srcgen.openapi.OpenApiSrcGenerator
+import higherkindness.mu.rpc.srcgen.openapi.OpenApiSrcGenerator.HttpImpl
 
 class OpenApiSrcGenTests extends FlatSpec with OptionValues {
   val module: String       = new java.io.File(".").getCanonicalPath

@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.idlgen
+package higherkindness.mu.rpc.srcgen
 
-import scala.reflect.runtime.universe.runtimeMirror
-import scala.tools.reflect.ToolBox
-
-package object util {
-  val mirror                                          = runtimeMirror(getClass.getClassLoader)
-  val Toolbox: ToolBox[reflect.runtime.universe.type] = ToolBox(mirror).mkToolBox()
+package object proto {
+  val IdlType        = "proto"
+  val ProtoExtension = ".proto"
+  val ProtoEmpty     = "google.protobuf.Empty"
 }

@@ -14,28 +14,29 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.idlgen.proto
+package higherkindness.mu.rpc.srcgen.proto
 
 import java.io.File
 
 import cats.effect.{IO, Sync}
+import cats.syntax.functor._
 import cats.syntax.flatMap._
-import higherkindness.mu.rpc.idlgen.Model.{
+import higherkindness.mu.rpc.srcgen.Model.{
   CompressionTypeGen,
   GzipGen,
   NoCompressionGen,
   StreamingImplementation,
   UseIdiomaticEndpoints
 }
-import higherkindness.mu.rpc.idlgen._
+import higherkindness.mu.rpc.srcgen._
 import higherkindness.skeuomorph.mu.{CompressionType, MuF}
 import higherkindness.skeuomorph.protobuf.ParseProto.{parseProto, ProtoSource}
 import higherkindness.skeuomorph.protobuf.{ProtobufF, Protocol}
 import higherkindness.droste.data.Mu
 import higherkindness.droste.data.Mu._
 
-import higherkindness.mu.rpc.idlgen.Model.Fs2Stream
-import higherkindness.mu.rpc.idlgen.Model.MonixObservable
+import higherkindness.mu.rpc.srcgen.Model.Fs2Stream
+import higherkindness.mu.rpc.srcgen.Model.MonixObservable
 
 import scala.meta._
 import scala.util.control.NoStackTrace

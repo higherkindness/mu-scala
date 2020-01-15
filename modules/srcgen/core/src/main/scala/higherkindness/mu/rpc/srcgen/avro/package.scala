@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.idlgen
+package higherkindness.mu.rpc.srcgen
 
-package object proto {
-  val IdlType        = "proto"
-  val ProtoExtension = ".proto"
-  val ProtoEmpty     = "google.protobuf.Empty"
+package object avro {
+  val IdlType       = "avro"
+  val AvprExtension = ".avpr"
+  val AvdlExtension = ".avdl"
 }

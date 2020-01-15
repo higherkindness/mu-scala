@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.idlgen.avro
+package higherkindness.mu.rpc.srcgen.avro
 
 import java.io.File
 
 import avrohugger.Generator
 import avrohugger.format.Standard
 import avrohugger.types._
-import higherkindness.mu.rpc.idlgen._
-import higherkindness.mu.rpc.idlgen.Model._
+import higherkindness.mu.rpc.srcgen._
+import higherkindness.mu.rpc.srcgen.Model._
 import org.apache.avro._
 import org.log4s._
 

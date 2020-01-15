@@ -16,11 +16,11 @@
 
 package higherkindness.mu.rpc
 
-import higherkindness.mu.rpc.idlgen.util.Toolbox.u._
-import higherkindness.mu.rpc.idlgen.util.AstOptics.ast
+import higherkindness.mu.rpc.srcgen.util.Toolbox.u._
+import higherkindness.mu.rpc.srcgen.util.AstOptics.ast
 import higherkindness.mu.rpc.protocol.{Avro, AvroWithSchema, Custom, Protobuf, SerializationType}
 
-package object idlgen {
+package object srcgen {
 
   val DefaultRequestParamName = "arg"
   val EmptyType               = "Empty.type"

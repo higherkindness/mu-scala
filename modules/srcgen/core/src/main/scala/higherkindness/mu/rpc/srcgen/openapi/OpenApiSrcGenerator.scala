@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.idlgen.openapi
+package higherkindness.mu.rpc.srcgen.openapi
 
 import java.io.File
 import java.nio.file.{Path, Paths}
-import higherkindness.mu.rpc.idlgen._
+import higherkindness.mu.rpc.srcgen._
 import higherkindness.skeuomorph.openapi._
 import schema.OpenApi
 import ParseOpenApi._

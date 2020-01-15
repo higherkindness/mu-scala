@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.idlgen
+package higherkindness.mu.rpc.srcgen
 
 import higherkindness.mu.rpc.internal.util.FileUtil._
 import java.io.File

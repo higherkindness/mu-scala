@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.idlgen
+package higherkindness.mu.rpc.srcgen
 
-package object openapi {
-  val IdlType       = "openapi"
-  val JsonExtension = ".json"
-  val YamlExtension = ".yaml"
-}
+trait SrcGenerator extends Generator

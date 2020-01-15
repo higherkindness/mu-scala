@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.idlgen
+package higherkindness.mu.rpc.srcgen
 
-import higherkindness.mu.rpc.idlgen.Model._
+import higherkindness.mu.rpc.srcgen.Model._
 import org.scalacheck.{Arbitrary, Gen}
 
 trait AvroScalaGeneratorArbitrary {

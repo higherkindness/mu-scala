@@ -15,7 +15,7 @@
  */
 
 package higherkindness.mu.rpc
-package idlgen
+package srcgen
 package util
 
 import higherkindness.mu.rpc.protocol.{Avro, AvroWithSchema, Custom, Protobuf, SerializationType}

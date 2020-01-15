@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.idlgen.avro
+package higherkindness.mu.rpc.srcgen.avro
 
-import higherkindness.mu.rpc.idlgen._
-import higherkindness.mu.rpc.idlgen.util._
+import higherkindness.mu.rpc.srcgen._
+import higherkindness.mu.rpc.srcgen.util._
 import higherkindness.mu.rpc.internal.util._
 import higherkindness.mu.rpc.protocol._
 import io.circe._

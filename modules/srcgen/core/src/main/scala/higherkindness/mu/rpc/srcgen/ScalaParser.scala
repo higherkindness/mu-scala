@@ -15,9 +15,9 @@
  */
 
 package higherkindness.mu.rpc
-package idlgen
+package srcgen
 
-import higherkindness.mu.rpc.idlgen.util.{AstOptics, Toolbox}
+import higherkindness.mu.rpc.srcgen.util.{AstOptics, Toolbox}
 import higherkindness.mu.rpc.internal.util.StringUtil._
 import higherkindness.mu.rpc.protocol._
 

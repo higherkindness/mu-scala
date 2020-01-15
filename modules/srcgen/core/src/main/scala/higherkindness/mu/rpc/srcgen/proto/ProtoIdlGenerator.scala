@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.idlgen.proto
+package higherkindness.mu.rpc.srcgen.proto
 
-import higherkindness.mu.rpc.idlgen._
-import higherkindness.mu.rpc.idlgen.util.{AstOptics, Toolbox}
+import higherkindness.mu.rpc.srcgen._
+import higherkindness.mu.rpc.srcgen.util.{AstOptics, Toolbox}
 import higherkindness.mu.rpc.protocol._
 
 object ProtoIdlGenerator extends IdlGenerator {
@@ -33,7 +33,7 @@ object ProtoIdlGenerator extends IdlGenerator {
 
   private val HeaderLines = Seq(
     "// This file has been automatically generated for use by",
-    "// the idlGen plugin, from mu service definitions.",
+    "// the srcGen plugin, from mu service definitions.",
     "// Read more at: https://higherkindness.github.io/mu/scala/",
     "",
     "syntax = \"proto3\";",

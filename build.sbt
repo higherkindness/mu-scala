@@ -212,7 +212,7 @@ lazy val `srcgen-core` = project
   .dependsOn(`internal-core` % "compile->compile;test->test")
   .dependsOn(channel % "test->test")
   .settings(moduleName := "mu-srcgen-core")
-  .settings(idlGenSettings)
+  .settings(srcGenSettings)
 
 lazy val `srcgen-sbt` = project
   .in(file("modules/srcgen/plugin"))

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.idlgen
+package higherkindness.mu.rpc.srcgen
 
 import java.io.File
 import java.nio.file.{Files, Paths}
 
-import higherkindness.mu.rpc.idlgen.util._
+import higherkindness.mu.rpc.srcgen.util._
 import higherkindness.mu.rpc.protocol.SerializationType
 
 import scala.collection.JavaConverters._

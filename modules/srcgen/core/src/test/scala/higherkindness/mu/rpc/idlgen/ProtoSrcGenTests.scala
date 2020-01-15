@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.idlgen
+package higherkindness.mu.rpc.srcgen
 
 import java.io.File
 
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
-import higherkindness.mu.rpc.idlgen.proto.ProtoSrcGenerator
-import higherkindness.mu.rpc.idlgen.Model.{
+import higherkindness.mu.rpc.srcgen.proto.ProtoSrcGenerator
+import higherkindness.mu.rpc.srcgen.Model.{
   Fs2Stream,
   MonixObservable,
   NoCompressionGen,

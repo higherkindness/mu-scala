@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.idlgen
+package higherkindness.mu.rpc.srcgen
 
-import higherkindness.mu.rpc.idlgen.util.Toolbox
+import higherkindness.mu.rpc.srcgen.util.Toolbox
 import higherkindness.mu.rpc.internal.util.StringUtil._
 import higherkindness.mu.rpc.protocol._
 import shapeless.tag
