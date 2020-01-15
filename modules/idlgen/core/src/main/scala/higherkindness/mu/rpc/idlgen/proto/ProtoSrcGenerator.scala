@@ -19,7 +19,7 @@ package higherkindness.mu.rpc.idlgen.proto
 import java.io.File
 
 import cats.effect.{IO, Sync}
-import cats.syntax.functor._
+import cats.syntax.flatMap._
 import higherkindness.mu.rpc.idlgen.Model.{
   CompressionTypeGen,
   GzipGen,
@@ -38,8 +38,11 @@ import higherkindness.mu.rpc.idlgen.Model.Fs2Stream
 import higherkindness.mu.rpc.idlgen.Model.MonixObservable
 
 import scala.meta._
+import scala.util.control.NoStackTrace
 
 object ProtoSrcGenerator {
+
+  case class ProtobufSrcGenException(message: String) extends NoStackTrace
 
   def build(
       compressionTypeGen: CompressionTypeGen,
@@ -68,21 +71,31 @@ object ProtoSrcGenerator {
       case NoCompressionGen => CompressionType.Identity
     }
 
-    val parseProtocol: Protocol[Mu[ProtobufF]] => higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] =
+    val transformToMuProtocol: Protocol[Mu[ProtobufF]] => higherkindness.skeuomorph.mu.Protocol[Mu[
+      MuF]] =
       higherkindness.skeuomorph.mu.Protocol
         .fromProtobufProto(skeuomorphCompression, useIdiomaticEndpoints)
 
-    val printProtocol: higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] => String =
-      higherkindness.skeuomorph.mu.codegen.protocol(_, streamCtor).right.get.syntax
+    val generateScalaSource: higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] => Either[
+      String,
+      String] =
+      higherkindness.skeuomorph.mu.codegen.protocol(_, streamCtor).map(_.syntax)
 
     val splitLines: String => List[String] = _.split("\n").toList
 
-    private def getCode[F[_]: Sync](file: File): F[(String, Seq[String])] =
+    private def getCode[F[_]](file: File)(implicit F: Sync[F]): F[(String, Seq[String])] =
       parseProto[F, Mu[ProtobufF]]
         .parse(ProtoSource(file.getName, file.getParent, Some(idlTargetDir.getCanonicalPath)))
-        .map(protocol =>
-          getPath(protocol) ->
-            (parseProtocol andThen printProtocol andThen splitLines)(protocol))
+        .flatMap { protocol =>
+          val path = getPath(protocol)
+          (transformToMuProtocol andThen generateScalaSource)(protocol) match {
+            case Left(error) =>
+              F.raiseError(ProtobufSrcGenException(
+                s"Failed to generate Scala source from Protobuf file ${file.getAbsolutePath}. Error details: $error"))
+            case Right(fileContent) =>
+              F.pure(path -> splitLines(fileContent))
+          }
+        }
 
     private def getPath(p: Protocol[Mu[ProtobufF]]): String =
       s"${p.pkg.replace('.', '/')}/${p.name}$ScalaFileExtension"
