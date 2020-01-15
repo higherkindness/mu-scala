@@ -208,16 +208,16 @@ lazy val kafka = project
 ////////////////
 
 lazy val `idlgen-core` = project
-  .in(file("modules/idlgen/core"))
+  .in(file("modules/srcgen/core"))
   .dependsOn(`internal-core` % "compile->compile;test->test")
   .dependsOn(channel % "test->test")
-  .settings(moduleName := "mu-idlgen-core")
+  .settings(moduleName := "mu-srcgen-core")
   .settings(idlGenSettings)
 
 lazy val `idlgen-sbt` = project
-  .in(file("modules/idlgen/plugin"))
+  .in(file("modules/srcgen/plugin"))
   .dependsOn(`idlgen-core`)
-  .settings(moduleName := "sbt-mu-idlgen")
+  .settings(moduleName := "sbt-mu-srcgen")
   .settings(crossScalaVersions := Seq(V.scala))
   .settings(sbtPluginSettings: _*)
   .enablePlugins(BuildInfoPlugin)
