@@ -207,22 +207,22 @@ lazy val kafka = project
 //// IDLGEN ////
 ////////////////
 
-lazy val `idlgen-core` = project
+lazy val `srcgen-core` = project
   .in(file("modules/srcgen/core"))
   .dependsOn(`internal-core` % "compile->compile;test->test")
   .dependsOn(channel % "test->test")
   .settings(moduleName := "mu-srcgen-core")
   .settings(idlGenSettings)
 
-lazy val `idlgen-sbt` = project
+lazy val `srcgen-sbt` = project
   .in(file("modules/srcgen/plugin"))
-  .dependsOn(`idlgen-core`)
+  .dependsOn(`srcgen-core`)
   .settings(moduleName := "sbt-mu-srcgen")
   .settings(crossScalaVersions := Seq(V.scala))
   .settings(sbtPluginSettings: _*)
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
-  .settings(buildInfoPackage := "mu.rpc.idlgen")
+  .settings(buildInfoPackage := "mu.rpc.srcgen")
   // See https://github.com/sbt/sbt/issues/3248
   .settings(publishLocal := publishLocal
     .dependsOn(
@@ -233,7 +233,7 @@ lazy val `idlgen-sbt` = project
       `internal-fs2` / publishLocal,
       fs2 / publishLocal,
       `marshallers-jodatime` / publishLocal,
-      `idlgen-core` / publishLocal
+      `srcgen-core` / publishLocal
     )
     .value)
   .enablePlugins(SbtPlugin)
@@ -574,7 +574,7 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   prometheus,
   testing,
   ssl,
-  `idlgen-core`,
+  `srcgen-core`,
   http,
   kafka,
   `marshallers-jodatime`,
