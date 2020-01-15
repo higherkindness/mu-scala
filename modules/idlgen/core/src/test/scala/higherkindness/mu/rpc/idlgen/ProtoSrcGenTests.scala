@@ -62,6 +62,7 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
 
       val expectedFileContent =
         bookExpectation(tpe => s"_root_.monix.reactive.Observable[$tpe]").clean
+
       result shouldBe Some(("com/proto/book.scala", expectedFileContent))
     }
 
@@ -70,7 +71,7 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
   def bookExpectation(streamOf: String => String): String =
     s"""package com.proto
       |
-      |import higherkindness.mu.rpc.protocol._
+      |import _root_.higherkindness.mu.rpc.protocol._
       |
       |object book {
       |
