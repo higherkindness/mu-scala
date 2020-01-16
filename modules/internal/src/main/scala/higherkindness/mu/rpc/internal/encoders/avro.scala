@@ -50,10 +50,7 @@ object avro extends AvroMarshallers {
     new Marshaller[A] {
 
       override def parse(stream: InputStream): A = {
-        val bytes: Array[Byte] =
-          Iterator.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray
-        val in: ByteArrayInputStream        = new ByteArrayInputStream(bytes)
-        val input: AvroBinaryInputStream[A] = AvroInputStream.binary[A](in)
+        val input: AvroBinaryInputStream[A] = AvroInputStream.binary[A](stream)
         input.iterator.toList.head
       }
 

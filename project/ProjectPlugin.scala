@@ -46,10 +46,10 @@ object ProjectPlugin extends AutoPlugin {
       val log4s: String              = "1.8.2"
       val logback: String            = "1.2.3"
       val monix: String              = "3.1.0"
-      val monocle: String            = "2.0.0"
+      val monocle: String            = "2.0.1"
       val nettySSL: String           = "2.0.25.Final"
       val paradise: String           = "2.1.1"
-      val pbdirect: String           = "0.4.0"
+      val pbdirect: String           = "0.4.1"
       val prometheus: String         = "0.8.0"
       val pureconfig: String         = "0.12.2"
       val reactiveStreams: String    = "1.0.3"
@@ -58,8 +58,8 @@ object ProjectPlugin extends AutoPlugin {
       val scalacheck: String         = "1.14.3"
       val scalacheckToolbox: String  = "0.3.1"
       val scalamock: String          = "4.4.0"
-      val scalatest: String          = "3.1.0"
-      val skeuomorph: String         = "0.0.19"
+      val scalatest: String          = "3.0.8"
+      val skeuomorph: String         = "0.0.20"
       val slf4j: String              = "1.7.30"
     }
 
@@ -345,7 +345,7 @@ object ProjectPlugin extends AutoPlugin {
       description := "mu RPC is a purely functional library for " +
         "building RPC endpoint based services with support for RPC and HTTP/2",
       startYear := Some(2017),
-      orgProjectName := "mu",
+      orgProjectName := "mu-scala",
       orgGithubSetting := GitHubSettings(
         organization = "higherkindness",
         project = (name in LocalRootProject).value,
@@ -387,7 +387,7 @@ object ProjectPlugin extends AutoPlugin {
       orgBadgeListSetting := List(
         TravisBadge.apply,
         FixedCodecovBadge.apply,
-        { info => MavenCentralBadge.apply(info.copy(libName = "mu")) },
+        { info => MavenCentralBadge.apply(info.copy(libName = "mu-scala")) },
         ScalaLangBadge.apply,
         LicenseBadge.apply,
         // Gitter badge (owner field) can be configured with default value if we migrate it to the higherkindness organization
@@ -399,7 +399,7 @@ object ProjectPlugin extends AutoPlugin {
         ContributingFileType(
           orgProjectName.value,
           // Organization field can be configured with default value if we migrate it to the higherkindness organization
-          orgGithubSetting.value.copy(organization = "47deg", project = "mu")
+          orgGithubSetting.value.copy(organization = "47deg", project = "mu-scala")
         ),
         AuthorsFileType(
           name.value,
