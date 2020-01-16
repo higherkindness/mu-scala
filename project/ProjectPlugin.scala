@@ -283,7 +283,7 @@ object ProjectPlugin extends AutoPlugin {
       // Custom release process for the plugin:
       releaseProcess := Seq[ReleaseStep](
         releaseStepCommandAndRemaining("^ publishSigned"),
-        ReleaseStep(action = "sonatypeReleaseAll" :: _)
+        releaseStepCommand("sonatypeBundleRelease")
       )
     )
 
@@ -375,7 +375,7 @@ object ProjectPlugin extends AutoPlugin {
         orgTagRelease,
         orgUpdateChangeLog,
         releaseStepCommandAndRemaining("publishSigned"),
-        releaseStepCommand("sonatypeReleaseAll"),
+        releaseStepCommand("sonatypeBundleRelease"),
         setNextVersion,
         orgCommitNextVersion,
         orgPostRelease
