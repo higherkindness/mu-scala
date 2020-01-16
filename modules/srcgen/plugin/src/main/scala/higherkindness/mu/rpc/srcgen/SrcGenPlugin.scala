@@ -30,6 +30,9 @@ object SrcGenPlugin extends AutoPlugin {
 
   object autoImport {
 
+    lazy val idlGen: TaskKey[Seq[File]] =
+      taskKey[Seq[File]]("Generates IDL files from mu service definitions")
+
     lazy val srcGen: TaskKey[Seq[File]] =
       taskKey[Seq[File]]("Generates mu Scala files from IDL definitions")
 
@@ -46,8 +49,13 @@ object SrcGenPlugin extends AutoPlugin {
           "Protobuf, Avro or AvroWithSchema are the current supported serialization types. " +
           "By default, the serialization type is 'Avro'.")
 
-    lazy val srcGenSourceDir: SettingKey[File] =
+    lazy val idlGenSourceDir: SettingKey[File] =
       settingKey[File]("The Scala source directory, where your mu service definitions are placed.")
+
+    lazy val idlGenTargetDir: SettingKey[File] =
+      settingKey[File](
+        "The IDL target directory, where the `idlGen` task will write the generated files " +
+          "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on mu service definitions.")
 
     lazy val srcGenSourceDirs: SettingKey[Seq[File]] =
       settingKey[Seq[File]]("The IDL directories, where your IDL definitions are placed.")
@@ -67,32 +75,32 @@ object SrcGenPlugin extends AutoPlugin {
           "in subpackages based on the namespaces declared in the IDL files.")
 
     @deprecated(
-      "Use the specific settings like `srcGenCompressionType` or `srcGenIdiomaticEndpoints`",
+      "Use the specific settings like `idlGenCompressionType` or `idlGenIdiomaticEndpoints`",
       "0.18.4")
     lazy val genOptions: SettingKey[Seq[String]] =
       settingKey[Seq[String]](
         "Options for the generator, such as additional @service annotation parameters in srcGen.")
 
-    lazy val srcGenBigDecimal: SettingKey[BigDecimalTypeGen] =
+    lazy val idlGenBigDecimal: SettingKey[BigDecimalTypeGen] =
       settingKey[BigDecimalTypeGen](
         "The Scala generated type for `decimals`. Possible values are `ScalaBigDecimalGen` and `ScalaBigDecimalTaggedGen`" +
           "The difference is that `ScalaBigDecimalTaggedGen` will append the 'precision' and the 'scale' as tagged types, i.e. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`")
 
-    lazy val srcGenMarshallerImports: SettingKey[List[MarshallersImport]] =
+    lazy val idlGenMarshallerImports: SettingKey[List[MarshallersImport]] =
       settingKey[List[MarshallersImport]](
         "List of imports needed for creating the request/response marshallers. " +
           "By default, this include the instances for serializing `BigDecimal`, `java.time.LocalDate`, and `java.time.LocalDateTime`")
 
-    lazy val srcGenCompressionType: SettingKey[CompressionTypeGen] =
+    lazy val idlGenCompressionType: SettingKey[CompressionTypeGen] =
       settingKey[CompressionTypeGen](
         "Specifies the compression type. `NoCompressionGen` by default.")
 
-    lazy val srcGenIdiomaticEndpoints: SettingKey[Boolean] =
+    lazy val idlGenIdiomaticEndpoints: SettingKey[Boolean] =
       settingKey[Boolean](
         "If `true`, the gRPC endpoints generated in the services generated from idls will contain the " +
           "namespace as prefix and their method names will be capitalized. `false` by default.")
 
-    lazy val srcGenOpenApiHttpImpl: SettingKey[HttpImpl] =
+    lazy val idlGenOpenApiHttpImpl: SettingKey[HttpImpl] =
       settingKey[HttpImpl](
         "The HTTP framework and version, used for the code generation." +
           "`Http4sV20` by default.")
@@ -113,17 +121,17 @@ object SrcGenPlugin extends AutoPlugin {
                      else if (idlType.value == "proto") "proto"
                      else "unknown"),
     srcGenSerializationType := "Avro",
-    srcGenSourceDir := (Compile / sourceDirectory).value,
-    srcGenTargetDir := (Compile / resourceManaged).value,
+    idlGenSourceDir := (Compile / sourceDirectory).value,
+    idlGenTargetDir := (Compile / resourceManaged).value,
     srcGenJarNames := Seq.empty,
     srcGenSourceDirs := Seq((Compile / resourceDirectory).value),
     srcGenIDLTargetDir := (Compile / resourceManaged).value / idlType.value,
     srcGenTargetDir := (Compile / sourceManaged).value,
     genOptions := Seq.empty,
-    srcGenBigDecimal := ScalaBigDecimalTaggedGen,
-    srcGenMarshallerImports := {
+    idlGenBigDecimal := ScalaBigDecimalTaggedGen,
+    idlGenMarshallerImports := {
       if (srcGenSerializationType.value == "Avro" || srcGenSerializationType.value == "AvroWithSchema")
-        (srcGenBigDecimal.value match {
+        (idlGenBigDecimal.value match {
           case ScalaBigDecimalGen       => BigDecimalAvroMarshallers
           case ScalaBigDecimalTaggedGen => BigDecimalTaggedAvroMarshallers
         }) :: JavaTimeDateAvroMarshallers :: List.empty[MarshallersImport]
@@ -131,21 +139,21 @@ object SrcGenPlugin extends AutoPlugin {
         List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)
       else Nil
     },
-    srcGenCompressionType := NoCompressionGen,
-    srcGenIdiomaticEndpoints := false,
-    srcGenOpenApiHttpImpl := HttpImpl.Http4sV20,
+    idlGenCompressionType := NoCompressionGen,
+    idlGenIdiomaticEndpoints := false,
+    idlGenOpenApiHttpImpl := HttpImpl.Http4sV20,
     srcGenStreamingImplementation := Fs2Stream
   )
 
   lazy val taskSettings: Seq[Def.Setting[_]] = {
     Seq(
-      srcGen := srcGenTask(
+      idlGen := idlGenTask(
         IdlGenApplication,
         idlType.value,
         srcGenSerializationType.value,
         genOptions.value,
-        srcGenTargetDir.value,
-        target.value / "srcGen")(srcGenSourceDir.value.allPaths.get.toSet).toSeq,
+        idlGenTargetDir.value,
+        target.value / "idlGen")(idlGenSourceDir.value.allPaths.get.toSet).toSeq,
       srcGen := Def
         .sequential(
           Def.task {
@@ -170,16 +178,16 @@ object SrcGenPlugin extends AutoPlugin {
               }
           },
           Def.task {
-            srcGenTask(
+            idlGenTask(
               SrcGenApplication(
-                srcGenMarshallerImports.value,
-                srcGenBigDecimal.value,
-                srcGenCompressionType.value,
-                UseIdiomaticEndpoints(srcGenIdiomaticEndpoints.value),
+                idlGenMarshallerImports.value,
+                idlGenBigDecimal.value,
+                idlGenCompressionType.value,
+                UseIdiomaticEndpoints(idlGenIdiomaticEndpoints.value),
                 srcGenStreamingImplementation.value,
                 srcGenIDLTargetDir.value,
                 (Compile / resourceManaged).value.toPath,
-                srcGenOpenApiHttpImpl.value
+                idlGenOpenApiHttpImpl.value
               ),
               idlType.value,
               srcGenSerializationType.value,
@@ -204,7 +212,7 @@ object SrcGenPlugin extends AutoPlugin {
     },
   )
 
-  private def srcGenTask(
+  private def idlGenTask(
       generator: GeneratorApplication[_],
       idlType: String,
       serializationType: String,

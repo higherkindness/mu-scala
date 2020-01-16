@@ -16,7 +16,7 @@ $ delete target/scala-2.12/src_managed/main/io/higherkindness/service.scala
 
 $ exists src/main/resources/service.avdl
 > 'set idlType := "avro"'
-> 'set idlGenMarshallerImports := List(higherkindness.mu.rpc.srcGen.Model.CustomMarshallersImport("com.sample.marshallers._"))'
+> 'set idlGenMarshallerImports := List(higherkindness.mu.rpc.srcgen.Model.CustomMarshallersImport("com.sample.marshallers._"))'
 > srcGen
 > compile
 $ exists target/scala-2.12/src_managed/main/io/higherkindness/service.scala
@@ -24,7 +24,7 @@ $ delete target/scala-2.12/src_managed/main/io/higherkindness/service.scala
 
 $ exists src/main/resources/service.avdl
 > 'set idlType := "avro"'
-> 'set idlGenMarshallerImports := List(higherkindness.mu.rpc.srcGen.Model.BigDecimalAvroMarshallers, higherkindness.mu.rpc.srcGen.Model.JavaTimeDateAvroMarshallers, higherkindness.mu.rpc.srcGen.Model.JodaDateTimeAvroMarshallers, higherkindness.mu.rpc.srcGen.Model.CustomMarshallersImport("com.sample.marshallers._"))'
+> 'set idlGenMarshallerImports := List(higherkindness.mu.rpc.srcgen.Model.BigDecimalAvroMarshallers, higherkindness.mu.rpc.srcgen.Model.JavaTimeDateAvroMarshallers, higherkindness.mu.rpc.srcgen.Model.JodaDateTimeAvroMarshallers, higherkindness.mu.rpc.srcgen.Model.CustomMarshallersImport("com.sample.marshallers._"))'
 > srcGen
 > compile
 $ exists target/scala-2.12/src_managed/main/io/higherkindness/service.scala

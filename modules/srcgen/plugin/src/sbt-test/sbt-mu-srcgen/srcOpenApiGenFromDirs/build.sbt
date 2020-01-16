@@ -19,7 +19,7 @@ lazy val root = project
     srcGenSourceDirs := Seq((Compile / resourceDirectory).value),
     srcGenTargetDir := (Compile / sourceManaged).value / "compiled_openapi",
     sourceGenerators in Compile += (Compile / srcGen).taskValue,
-    idlGenOpenApiHttpImpl := higherkindness.mu.rpc.idlgen.openapi.OpenApiSrcGenerator.HttpImpl.Http4sV20,
+    idlGenOpenApiHttpImpl := higherkindness.mu.rpc.srcgen.openapi.OpenApiSrcGenerator.HttpImpl.Http4sV20,
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch),
     libraryDependencies ++= Seq(
       "org.http4s" %% "http4s-blaze-client" % V.http4s,
