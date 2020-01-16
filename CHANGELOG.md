@@ -1,5 +1,38 @@
 # Changelog
 
+## 01/16/2020 - Version 0.20.1
+
+Release changes:
+
+* Bumps avrohugger to 1.0.0-RC22 ([#718](https://github.com/higherkindness/mu-scala/pull/718))
+* Add a dependency on Enumeratum ([#719](https://github.com/higherkindness/mu-scala/pull/719))
+* Micro-optimisation: use IOUtils to copy InputStream to byte array ([#720](https://github.com/higherkindness/mu-scala/pull/720))
+* Update sbt, scripted-plugin to 1.3.5 ([#721](https://github.com/higherkindness/mu-scala/pull/721))
+* Update scalacheck to 1.14.3 ([#722](https://github.com/higherkindness/mu-scala/pull/722))
+* Update slf4j-nop to 1.7.30 ([#725](https://github.com/higherkindness/mu-scala/pull/725))
+* Update embedded-kafka to 2.4.0 ([#724](https://github.com/higherkindness/mu-scala/pull/724))
+* Update enumeratum to 1.5.14 ([#723](https://github.com/higherkindness/mu-scala/pull/723))
+* Update microsite using sbt-microsites 1.0.2 ([#728](https://github.com/higherkindness/mu-scala/pull/728))
+* Update pureconfig to 0.12.2 ([#729](https://github.com/higherkindness/mu-scala/pull/729))
+* Make the streaming implementation configurable ([#731](https://github.com/higherkindness/mu-scala/pull/731))
+* Update sbt to 1.3.6 ([#732](https://github.com/higherkindness/mu-scala/pull/732))
+* Update enumeratum to 1.5.15 ([#733](https://github.com/higherkindness/mu-scala/pull/733))
+* Happy new year! ([#734](https://github.com/higherkindness/mu-scala/pull/734))
+* Upgrade to pbdirect 0.4.0 and skeuomorph 0.0.19 ([#735](https://github.com/higherkindness/mu-scala/pull/735))
+* Release v0.20.0 ([#736](https://github.com/higherkindness/mu-scala/pull/736))
+* Fixes project name ([#737](https://github.com/higherkindness/mu-scala/pull/737))
+* Name the scripts in Travis ([#738](https://github.com/higherkindness/mu-scala/pull/738))
+* Add release notes for v0.20.0 ([#739](https://github.com/higherkindness/mu-scala/pull/739))
+* Simplify Avro marshaller ([#740](https://github.com/higherkindness/mu-scala/pull/740))
+* Update monocle-core to 2.0.1 ([#741](https://github.com/higherkindness/mu-scala/pull/741))
+* Fix gitter channel badge ([#743](https://github.com/higherkindness/mu-scala/pull/743))
+* Update sbt-microsites to 1.1.0 ([#745](https://github.com/higherkindness/mu-scala/pull/745))
+* Update pbdirect to 0.4.1 ([#744](https://github.com/higherkindness/mu-scala/pull/744))
+* Scalameta codegen ([#746](https://github.com/higherkindness/mu-scala/pull/746))
+* Update sbt, scripted-plugin to 1.3.7 ([#747](https://github.com/higherkindness/mu-scala/pull/747))
+* Release 0.20.1 ([#748](https://github.com/higherkindness/mu-scala/pull/748))
+
+
 ## 01/03/2020 - Version 0.20.0
 
 This release focussed on improving Protobuf support, introducing a number of new
