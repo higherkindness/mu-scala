@@ -26,8 +26,8 @@ In the future, both (<code class="highlighter-rouge">Avro</code> and <code class
 </code></pre></div></div>
 <p>and the setting,</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">idlType</span> <span class="o">:=</span> <span class="s">"proto"</span> <span class="c1">// or "avro"
-</span><span class="n">sourceGenerators</span> <span class="n">in</span> <span class="nc">Compile</span> <span class="o">+=</span> <span class="o">(</span><span class="n">srcGen</span> <span class="n">in</span> <span class="nc">Compile</span><span class="o">).</span><span class="py">taskValue</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">idlType</span> <span class="o">:=</span> <span class="s">"proto"</span> <span class="c1">// or "avro"</span>
+<span class="n">sourceGenerators</span> <span class="n">in</span> <span class="nc">Compile</span> <span class="o">+=</span> <span class="o">(</span><span class="n">srcGen</span> <span class="n">in</span> <span class="nc">Compile</span><span class="o">).</span><span class="py">taskValue</span>
 </code></pre></div></div>
 
 <p>Otherwise, you can run the following sbt task (with the settings above in your <code class="highlighter-rouge">build.sbt</code>):</p>
@@ -81,14 +81,14 @@ The plugin generates them in <code class="highlighter-rouge">target/scala-2.12/s
   </li>
   <li><strong><code class="highlighter-rouge">idlGenCompressionType</code></strong>: Specifies the compression type that will be used by the IDL generated services. Set to <code class="highlighter-rouge">higherkindness.mu.rpc.idlgen.Model.GzipGen</code> for compressed communications with Gzip. <code class="highlighter-rouge">higherkindness.mu.rpc.idlgen.Model.NoCompressionGen</code> by default.</li>
   <li><strong><code class="highlighter-rouge">idlGenIdiomaticEndpoints</code></strong>: Flag indicating if idiomatic gRPC endpoints should be used. If <code class="highlighter-rouge">true</code>, the service operations will be prefixed by the namespace and the methods will be capitalized. <code class="highlighter-rouge">false</code> by default.</li>
-  <li><strong><code class="highlighter-rouge">srcGenStreamingImplementation</code></strong>: Specifies whether generated Scala code will use FS2 <code class="highlighter-rouge">Stream[F, A]</code> or Monix <code class="highlighter-rouge">Observable[A]</code> as its streaming implementation. FS2 is the default. This setting is only relevant if you have any RPC endpoint definitions that involve streaming.
-The <code class="highlighter-rouge">JodaDateTimeAvroMarshallers</code> and <code class="highlighter-rouge">JodaDateTimeProtobufMarshallers</code> are also available, but they need the dependency <code class="highlighter-rouge">mu-rpc-marshallers-jodatime</code>.
-You can also specify custom imports with the following:
-    <ul>
-      <li><code class="highlighter-rouge">idlGenMarshallerImports := List(higherkindness.mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))</code></li>
-      <li>See the <a href="core-concepts#custom-codecs">Custom codecs section in core concepts</a> for more information.</li>
-    </ul>
-  </li>
+  <li><strong><code class="highlighter-rouge">srcGenStreamingImplementation</code></strong>: Specifies whether generated Scala code will use FS2 <code class="highlighter-rouge">Stream[F, A]</code> or Monix <code class="highlighter-rouge">Observable[A]</code> as its streaming implementation. FS2 is the default. This setting is only relevant if you have any RPC endpoint definitions that involve streaming.</li>
+</ul>
+
+<p>The <code class="highlighter-rouge">JodaDateTimeAvroMarshallers</code> and <code class="highlighter-rouge">JodaDateTimeProtobufMarshallers</code> are also available, but they need the dependency <code class="highlighter-rouge">mu-rpc-marshallers-jodatime</code>.
+You can also specify custom imports with the following:</p>
+<ul>
+  <li><code class="highlighter-rouge">idlGenMarshallerImports := List(higherkindness.mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))</code></li>
+  <li>See the <a href="core-concepts#custom-codecs">Custom codecs section in core concepts</a> for more information.</li>
 </ul>
 
 <p>You can even use <code class="highlighter-rouge">IDL</code> definitions packaged into artifacts within your classpath.
@@ -103,8 +103,8 @@ will be distributed in the resulting jar artifact preserving the same folder str
 
 <p>The following example shows how to set up a dependency with another artifact or sbt module containing the IDL definitions (<code class="highlighter-rouge">foo-domain</code>):</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//...
-</span><span class="o">.</span><span class="py">settings</span><span class="o">(</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//...</span>
+<span class="o">.</span><span class="py">settings</span><span class="o">(</span>
   <span class="nc">Seq</span><span class="o">(</span>
       <span class="n">idlType</span> <span class="o">:=</span> <span class="s">"avro"</span><span class="o">,</span>
       <span class="n">srcGenSerializationType</span> <span class="o">:=</span> <span class="s">"AvroWithSchema"</span><span class="o">,</span>
@@ -116,8 +116,8 @@ will be distributed in the resulting jar artifact preserving the same folder str
       <span class="o">)</span>
   <span class="o">)</span>
 <span class="o">)</span>
-<span class="c1">//...
-</span></code></pre></div></div>
+<span class="c1">//...</span>
+</code></pre></div></div>
 
 <h2 id="generating-sources">Generating sources</h2>
 
@@ -294,7 +294,22 @@ protocol MyGreeterService{
 <span class="o">}</span>
 </code></pre></div></div>
 
-</section></div></div></div></div><script src="/mu-scala/highlight/highlight.pack.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/protobuf.min.js"></script><script>hljs.configure({languages:['scala','java','bash','protobuf']});
+</section></div></div></div></div><script src="/mu-scala/highlight/highlight.pack.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/protobuf.min.js"></script><script>
+// For all code blocks, copy the language from the containing div
+// to the inner code tag (where hljs expects it to be)
+const langPrefix = 'language-';
+document.querySelectorAll(`div[class^='${langPrefix}']`).forEach(function(div) {
+  div.classList.forEach(function(cssClass) {
+    if (cssClass.startsWith(langPrefix)) {
+      const lang = cssClass.substring(langPrefix.length);
+      div.querySelectorAll('pre code').forEach(function(code) {
+        code.classList.add(lang);
+      });
+    }
+  });
+});
+
+hljs.configure({languages:['scala','java','bash','protobuf']});
 hljs.initHighlightingOnLoad();
-              </script><script>console.info('\x57\x65\x62\x73\x69\x74\x65\x20\x62\x75\x69\x6c\x74\x20\x77\x69\x74\x68\x3a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x5f\x5f\x0a\x20\x20\x20\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x5f\x20\x20\x2f\x20\x2f\x5f\x20\x20\x20\x20\x20\x20\x5f\x5f\x5f\x5f\x20\x5f\x5f\x5f\x20\x20\x28\x5f\x29\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x28\x5f\x29\x20\x2f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x0a\x20\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x60\x5f\x5f\x20\x5c\x2f\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x20\x2f\x20\x5f\x5f\x2f\x20\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x0a\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x5f\x2f\x20\x2f\x20\x2f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x5f\x5f\x2f\x20\x2f\x20\x20\x2f\x20\x2f\x5f\x2f\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x20\x2f\x5f\x2f\x20\x20\x5f\x5f\x28\x5f\x5f\x20\x20\x29\x0a\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2e\x5f\x5f\x5f\x2f\x5c\x5f\x5f\x2f\x20\x20\x20\x20\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x2f\x20\x20\x20\x5c\x5f\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x0a\x0a\x68\x74\x74\x70\x73\x3a\x2f\x2f\x34\x37\x64\x65\x67\x2e\x67\x69\x74\x68\x75\x62\x2e\x69\x6f\x2f\x73\x62\x74\x2d\x6d\x69\x63\x72\x6f\x73\x69\x74\x65\x73')</script><script>((window.gitter = {}).chat = {}).options = {
+      </script><script>console.info('\x57\x65\x62\x73\x69\x74\x65\x20\x62\x75\x69\x6c\x74\x20\x77\x69\x74\x68\x3a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x5f\x5f\x0a\x20\x20\x20\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x5f\x20\x20\x2f\x20\x2f\x5f\x20\x20\x20\x20\x20\x20\x5f\x5f\x5f\x5f\x20\x5f\x5f\x5f\x20\x20\x28\x5f\x29\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x28\x5f\x29\x20\x2f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x0a\x20\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x60\x5f\x5f\x20\x5c\x2f\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x20\x2f\x20\x5f\x5f\x2f\x20\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x0a\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x5f\x2f\x20\x2f\x20\x2f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x5f\x5f\x2f\x20\x2f\x20\x20\x2f\x20\x2f\x5f\x2f\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x20\x2f\x5f\x2f\x20\x20\x5f\x5f\x28\x5f\x5f\x20\x20\x29\x0a\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2e\x5f\x5f\x5f\x2f\x5c\x5f\x5f\x2f\x20\x20\x20\x20\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x2f\x20\x20\x20\x5c\x5f\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x0a\x0a\x68\x74\x74\x70\x73\x3a\x2f\x2f\x34\x37\x64\x65\x67\x2e\x67\x69\x74\x68\x75\x62\x2e\x69\x6f\x2f\x73\x62\x74\x2d\x6d\x69\x63\x72\x6f\x73\x69\x74\x65\x73')</script><script>((window.gitter = {}).chat = {}).options = {
 room: '47deg/mu'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/mu-scala/js/docs.js"></script></body></html>
