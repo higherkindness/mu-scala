@@ -205,7 +205,7 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val idlGenSettings: Seq[Def.Setting[_]] = Seq(
+    lazy val srcGenSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("monocle-core", V.monocle),
         "io.higherkindness" %% "skeuomorph"      % V.skeuomorph,
