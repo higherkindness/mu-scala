@@ -36,17 +36,17 @@ jobs:
         - bash <(curl -s https://codecov.io/bash)
     - name: "sbt plugin tests"
       script:
-        - sbt ++$TRAVIS_SCALA_VERSION idlgen-core/test
-        - sbt ++$TRAVIS_SCALA_VERSION idlgen-sbt/test
-        - sbt ++$TRAVIS_SCALA_VERSION publishLocal idlgen-sbt/publishLocal idlgen-sbt/scripted
+        - sbt ++$TRAVIS_SCALA_VERSION srcgen-core/test
+        - sbt ++$TRAVIS_SCALA_VERSION srcgen-sbt/test
+        - sbt ++$TRAVIS_SCALA_VERSION publishLocal srcgen-sbt/publishLocal srcgen-sbt/scripted
     - stage: deploy
       if: branch = master AND type != pull_request AND env(SKIP_SBT_DEPLOY) = false
       name: "Publish sbt plugin"
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
-            sbt idlgen-sbt/publish;
+            sbt srcgen-sbt/publish;
           else
-            sbt ";project idlgen-sbt; release";
+            sbt ";project srcgen-sbt; release";
           fi
     - stage: deploy
       if: branch = master AND type != pull_request
