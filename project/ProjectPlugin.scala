@@ -375,7 +375,7 @@ object ProjectPlugin extends AutoPlugin {
         orgTagRelease,
         orgUpdateChangeLog,
         releaseStepCommandAndRemaining("publishSigned"),
-        releaseStepCommand("sonatypeBundleRelease"),
+        releaseStepCommand("sonatypeReleaseAll"),
         setNextVersion,
         orgCommitNextVersion,
         orgPostRelease
