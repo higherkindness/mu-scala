@@ -19,7 +19,6 @@ package higherkindness.mu.rpc.srcgen.proto
 import java.io.File
 
 import cats.effect.{IO, Sync}
-import cats.syntax.functor._
 import cats.syntax.flatMap._
 import higherkindness.mu.rpc.srcgen.Model.{
   CompressionTypeGen,
