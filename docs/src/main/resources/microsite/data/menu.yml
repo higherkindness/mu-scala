@@ -22,9 +22,6 @@ options:
       - title: Protocol Buffers
         url: generate-sources-from-proto
 
-  - title: IDL Generation
-    url: idl-generation
-
   - title: Patterns
     url: patterns
 

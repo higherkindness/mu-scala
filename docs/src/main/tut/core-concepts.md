@@ -61,18 +61,15 @@ You can find more information about Protocol Buffers in the [Protocol Buffers' d
 
 ### Mu-RPC
 
-In the previous section, we’ve seen an overview of what [gRPC] offers for defining protocols and generating code (compiling protocol buffers). 
+In the previous section, we’ve seen an overview of what [gRPC] offers for defining protocols and generating code (compiling protocol buffers).
 Now, we'll show how [Mu] offers the same thing, but following FP principles.
 
 First things first, the main difference with respect to [gRPC] is that your protocols, both messages and services,
-will reside with your business-logic in your Scala files using [scalamacros] annotations to set them up. 
+will reside with your business-logic in your Scala files using [scalamacros] annotations to set them up.
 We’ll see more details on this shortly.
- 
-As a recommended approach, [Mu] generates the services and messages definitions in Scala code from `IDL` files. 
-We'll check out this feature further in [this section](generate-sources-from-idl).
 
-With [Mu] you can still generate `.proto` files based on the protocols defined in your Scala code. 
-However, this feature is now **deprecated** and it will disappear in future versions.
+As a recommended approach, [Mu] generates the services and messages definitions in Scala code from `IDL` files.
+We'll check out this feature further in [this section](generate-sources-from-idl).
 
 Let’s start looking at how to define the `Person` message that we saw previously.
 Before starting, this is the Scala import we need:
@@ -126,7 +123,7 @@ object protocol {
 }
 ```
 
-Naturally, the [RPC] services are grouped in a *Tagless Final* algebra. 
+Naturally, the [RPC] services are grouped in a *Tagless Final* algebra.
 Therefore, you only need to concentrate on the API that you want to expose as abstract smart constructors, without worrying how they will be implemented.
 
 In the above example, we can see that `sayHello` returns an `F[HelloReply]`. However, very often the services might:
@@ -213,7 +210,7 @@ To enable compression on the client side, we just have to add an option to the c
 
 Let's see an example of a client with the compression enabled.
 
-Since [Mu] relies on `ConcurrentEffect` from the [cats-effect library](https://github.com/typelevel/cats-effect), we'll need a runtime for executing our effects. 
+Since [Mu] relies on `ConcurrentEffect` from the [cats-effect library](https://github.com/typelevel/cats-effect), we'll need a runtime for executing our effects.
 
 We'll be using `IO` from `cats-effect`, but you can use any type that has a `ConcurrentEffect` instance.
 
@@ -388,7 +385,7 @@ Mu also provides instances for `org.joda.time.LocalDate` and `org.joda.time.Loca
   * `import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.pbd._`
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
   * `import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.avro._`
-  
+
 **Note**: If you want to send one of these instances directly as a request or response through Avro, you need to provide an instance of `Marshaller`. [Mu] provides the marshallers for `BigDecimal`, `java.time.LocalDate`, `java.time.LocalDateTime`, `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in a separate package:
 * `BigDecimal` in `Avro`
   * `import higherkindness.mu.rpc.internal.encoders.avro.bigdecimal.marshallers._`
