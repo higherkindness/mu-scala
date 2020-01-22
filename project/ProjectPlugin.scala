@@ -35,7 +35,7 @@ object ProjectPlugin extends AutoPlugin {
       val embeddedKafka: String      = "2.4.0"
       val enumeratum: String         = "1.5.15"
       val frees: String              = "0.8.2"
-      val fs2: String                = "2.1.0"
+      val fs2: String                = "2.2.1"
       val fs2Grpc: String            = "0.6.0"
       val fs2Kafka: String           = "0.20.2"
       val grpc: String               = "1.24.2"
