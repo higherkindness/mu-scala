@@ -32,7 +32,7 @@ Specifically, Mu helps you to build:
 
 [comment]: # (Start Replace)
 
-The current version for [Mu] is "0.20.1".
+The current version of [Mu] is "0.20.1".
 
 [comment]: # (End Replace)
 
@@ -145,7 +145,7 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-client-cache" % "0.20.1"
 [FS2]: https://github.com/functional-streams-for-scala/fs2
 [gRPC]: https://grpc.io/
 [Monix]: https://monix.io/
-[Mu]: https://github.com/higherkindness/mu
+[Mu]: https://github.com/higherkindness/mu-scala
 [OpenAPI]: https://swagger.io/docs/specification/about/
 [Protobuf]: https://developers.google.com/protocol-buffers
 [pureconfig]: https://github.com/pureconfig/pureconfig

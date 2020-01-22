@@ -295,7 +295,7 @@ In the [Streaming section](streaming), we are going to see all the streaming opt
 
 If you're using `Protobuf`, [Mu] uses instances of [PBDirect] for creating the `Marshaller` instances. For `Avro`, it uses instances of [Avro4s].
 
-Let's see a couple of samples, one per each type of serialization. Suppose you want to serialize `java.time.LocalDate` as part of your messages in `String` format. With `Protobuf`, as we've mentioned, you need to provide the instances of [PBDirect] for that type. Specifically, you need to provide a `PBWriter` and a `PBReader`.
+Let's see a couple of samples, one per each type of serialization. Suppose you want to serialize `java.time.LocalDate` as part of your messages in `String` format. With `Protobuf`, as we've mentioned, you need to provide the instances of [PBDirect] for that type. Specifically, you need to provide a `PBScalarValueWriter` and a `PBScalarValueReader`.
 
 ```tut:silent
 object protocol {

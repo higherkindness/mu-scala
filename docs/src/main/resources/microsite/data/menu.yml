@@ -22,6 +22,9 @@ options:
       - title: Protocol Buffers
         url: generate-sources-from-proto
 
+      - title: OpenAPI
+        url: generate-sources-from-openapi
+
   - title: Patterns
     url: patterns
 
