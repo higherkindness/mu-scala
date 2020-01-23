@@ -312,7 +312,7 @@ object ProjectPlugin extends AutoPlugin {
         "brand-secondary" -> "#F44336",
         "white-color"     -> "#E6E7EC"
       ),
-      micrositeHighlightTheme := "tomorrow-night-eighties",
+      micrositeHighlightTheme := "github-gist",
       micrositeHighlightLanguages += "protobuf"
     )
 
