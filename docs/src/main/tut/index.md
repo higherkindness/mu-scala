@@ -8,31 +8,49 @@ permalink: /
 
 ## What is Mu?
 
-[Mu] provides the ability to combine [RPC] protocols, services, and clients in your Scala program, thanks to [gRPC]. 
-Although it's fully integrated with [gRPC], there are some important differences when defining the protocols, as we’ll see later on.
+[Mu] is a toolkit designed to make it easier to build and maintain
+microservices in a functional style.
+
+While you focus on implementing the business logic for your service, let Mu take
+care of the boilerplate, including:
+
+* generation of model classes, service interfaces and clients from [Avro],
+  [Protobuf] or [OpenAPI] <abbr title="Interface definition language">IDL</abbr> files
+* serialization of requests and responses into Avro/Protobuf/JSON
+* handling of streaming requests and responses using either [FS2] or [Monix]
+  Observables.
+* schema management and schema evolution
+* metrics reporting
+* ... and plenty more features on the way!
+
+Specifically, Mu helps you to build:
+
+* [gRPC] servers and clients based on either [Avro] or [Protobuf] protocol definitions
+* REST servers and clients based on [OpenAPI] definitions
 
 ## Installation
 
 [comment]: # (Start Replace)
 
-The current version for [Mu] is "0.20.1" using the following common libraries and versions.
+The current version of [Mu] is "0.20.1".
 
 [comment]: # (End Replace)
 
- * [avro4s] 1.8.4
- * [cats-effect] 2.x
- * [fs2] 2.x
- * [Monix] 3.x
+Mu is published for Scala `2.12.x`.
 
-`Mu` is cross-built for Scala `2.11.x` and `2.12.x`.
+Because Mu makes use of macro annotations, you need to add the following to your
+build.sbt:
 
-To use the project, add the following to your build.sbt:
+```
+addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch)
+```
 
-```addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch)```
-
-We've found that the compiler plugin needs to be added to your build.sbt file *after* your library dependencies due to the manner in which SBT evaluates the build file. 
+We've found that the compiler plugin needs to be added to your build.sbt file
+*after* your library dependencies due to the manner in which SBT evaluates the
+build file.
 
 ### Artifacts
+
 [Mu] is divided into multiple artifacts, grouped by scope:
 
 * `Server`: specifically for the RPC server.
@@ -75,7 +93,7 @@ We've found that the compiler plugin needs to be added to your build.sbt file *a
 
 | *Artifact Name*  | *Scope*  | *Mandatory*  | *Description*  |
 |---|---|---|---|
-| `mu-config`  | Server/Client  | No  | Provides configuration helpers using [mu-config] to load the application configuration values.  |
+| `mu-config`  | Server/Client  | No  | Provides configuration helpers using [pureconfig] to load the application configuration values.  |
 | `mu-rpc-testing`  | Test  | No  | Utilities to test out `Mu` applications. It provides the `grpc-testing` library as the transitive dependency.  |
 | `mu-rpc-client-cache`  | Client  | No  | Provides an algebra for caching RPC clients.  |
 | `mu-rpc-marshallers-jodatime`  | Server/Client  | No  | Provides marshallers for serializing and deserializing the `LocalDate` and `LocalDateTime` joda instances.  |
@@ -123,17 +141,11 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-client-cache" % "0.20.1"
 
 [comment]: # (End Replace)
 
-[RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
-[HTTP/2]: https://http2.github.io/
+[Avro]: https://avro.apache.org/
+[FS2]: https://github.com/functional-streams-for-scala/fs2
 [gRPC]: https://grpc.io/
-[Mu]: https://github.com/higherkindness/mu
-[Java gRPC]: https://github.com/grpc/grpc-java
-[JSON]: https://en.wikipedia.org/wiki/JSON
-[gRPC guide]: https://grpc.io/docs/guides/
-[PBDirect]: https://github.com/47deg/pbdirect
-[scalamacros]: https://github.com/scalamacros/paradise
 [Monix]: https://monix.io/
-[cats-effect]: https://github.com/typelevel/cats-effect
-[Metrifier]: https://github.com/47deg/metrifier
-[fs2]: https://github.com/functional-streams-for-scala/fs2
-[avro4s]: https://github.com/sksamuel/avro4s
+[Mu]: https://github.com/higherkindness/mu-scala
+[OpenAPI]: https://swagger.io/docs/specification/about/
+[Protobuf]: https://developers.google.com/protocol-buffers
+[pureconfig]: https://github.com/pureconfig/pureconfig
