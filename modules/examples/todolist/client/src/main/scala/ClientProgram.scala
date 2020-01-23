@@ -32,7 +32,8 @@ object ClientProgram {
   def exampleProgram[M[_]: Monad](
       implicit tagClient: TagClient[M],
       todoListClient: TodoListClient[M],
-      todoItemClient: TodoItemClient[M]): M[Unit] =
+      todoItemClient: TodoItemClient[M]
+  ): M[Unit] =
     for {
       _      <- tagClient.reset()
       _      <- todoListClient.reset()

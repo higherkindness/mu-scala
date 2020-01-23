@@ -31,7 +31,8 @@ object Model {
       outputPackage: Option[String],
       options: Seq[RpcOption],
       messages: Seq[RpcMessage],
-      services: Seq[RpcService])
+      services: Seq[RpcService]
+  )
 
   case class RpcOption(name: String, value: String)
 
@@ -40,7 +41,8 @@ object Model {
     override def equals(other: Any): Boolean = other match {
       case that: RpcMessage =>
         this.name == that.name && this.params.map(_.toString.trimAll) == that.params.map(
-          _.toString.trimAll)
+          _.toString.trimAll
+        )
       case _ => false
     }
   }
@@ -48,13 +50,15 @@ object Model {
   case class RpcService(
       serializationType: SerializationType,
       name: String,
-      requests: Seq[RpcRequest])
+      requests: Seq[RpcRequest]
+  )
 
   case class RpcRequest(
       name: String,
       requestType: Tree,
       responseType: Tree,
-      streamingType: Option[StreamingType] = None) {
+      streamingType: Option[StreamingType] = None
+  ) {
     // Workaround for `Type` using referential equality; needed mostly for unit testing
     override def equals(other: Any): Boolean = other match {
       case that: RpcRequest =>

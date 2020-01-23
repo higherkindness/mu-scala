@@ -67,11 +67,13 @@ sealed trait RepositoriesImplicits {
     new TagRepositoryHandler[IO]
 
   implicit def todoListRepositoryHandler(
-      implicit T: Transactor[IO]): TodoListRepository.Handler[IO] =
+      implicit T: Transactor[IO]
+  ): TodoListRepository.Handler[IO] =
     new TodoListRepositoryHandler[IO]
 
   implicit def todoItemRespositoryHandler(
-      implicit T: Transactor[IO]): TodoItemRepository.Handler[IO] =
+      implicit T: Transactor[IO]
+  ): TodoItemRepository.Handler[IO] =
     new TodoItemRepositoryHandler[IO]
 }
 

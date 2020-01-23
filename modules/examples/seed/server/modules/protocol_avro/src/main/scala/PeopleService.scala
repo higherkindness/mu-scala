@@ -20,7 +20,8 @@ import higherkindness.mu.rpc.protocol._
 
 @service(AvroWithSchema) trait PeopleService[F[_]] {
 
-  def getPerson(request: example.seed.server.protocol.avro.PeopleRequest): F[
-    example.seed.server.protocol.avro.PeopleResponse]
+  def getPerson(
+      request: example.seed.server.protocol.avro.PeopleRequest
+  ): F[example.seed.server.protocol.avro.PeopleResponse]
 
 }

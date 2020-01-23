@@ -24,14 +24,16 @@ package object server {
 
   private[internal] def addCompression[F[_]: Sync, A](
       observer: StreamObserver[A],
-      algorithm: Option[String]): F[Unit] =
+      algorithm: Option[String]
+  ): F[Unit] =
     (observer, algorithm) match {
       case (o: ServerCallStreamObserver[_], Some(alg)) => Sync[F].delay(o.setCompression(alg))
       case _                                           => Sync[F].unit
     }
 
   private[internal] def completeObserver[F[_]: Sync, A](
-      observer: StreamObserver[A]): Either[Throwable, A] => F[Unit] = {
+      observer: StreamObserver[A]
+  ): Either[Throwable, A] => F[Unit] = {
     case Right(value) =>
       Sync[F].delay {
         observer.onNext(value)

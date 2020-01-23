@@ -38,7 +38,8 @@ object models {
       gender: String,
       location: Location,
       email: String,
-      picture: Option[Picture])
+      picture: Option[Picture]
+  )
 
   case class PersonName(title: String, first: String, last: String)
 

@@ -26,18 +26,21 @@ import org.http4s.client._
 
 class UnaryGreeterRestClient[F[_]: Sync](uri: Uri) {
 
-  def getHello()(client: Client[F])(
-      implicit decoderHelloResponse: io.circe.Decoder[HelloResponse]): F[HelloResponse] = {
+  def getHello()(
+      client: Client[F]
+  )(implicit decoderHelloResponse: io.circe.Decoder[HelloResponse]): F[HelloResponse] = {
     val request = Request[F](Method.GET, uri / "getHello")
     client.expectOr[HelloResponse](request)(handleResponseError)(jsonOf[F, HelloResponse])
   }
 
   def sayHello(arg: HelloRequest)(client: Client[F])(
       implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
-      decoderHelloResponse: io.circe.Decoder[HelloResponse]): F[HelloResponse] = {
+      decoderHelloResponse: io.circe.Decoder[HelloResponse]
+  ): F[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHello")
     client.expectOr[HelloResponse](request.withEntity(arg.asJson))(handleResponseError)(
-      jsonOf[F, HelloResponse])
+      jsonOf[F, HelloResponse]
+    )
   }
 
 }
@@ -46,22 +49,26 @@ class Fs2GreeterRestClient[F[_]: Sync](uri: Uri) {
 
   def sayHellos(arg: Stream[F, HelloRequest])(client: Client[F])(
       implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
-      decoderHelloResponse: io.circe.Decoder[HelloResponse]): F[HelloResponse] = {
+      decoderHelloResponse: io.circe.Decoder[HelloResponse]
+  ): F[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellos")
     client.expectOr[HelloResponse](request.withEntity(arg.map(_.asJson)))(handleResponseError)(
-      jsonOf[F, HelloResponse])
+      jsonOf[F, HelloResponse]
+    )
   }
 
   def sayHelloAll(arg: HelloRequest)(client: Client[F])(
       implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
-      decoderHelloResponse: io.circe.Decoder[HelloResponse]): Stream[F, HelloResponse] = {
+      decoderHelloResponse: io.circe.Decoder[HelloResponse]
+  ): Stream[F, HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHelloAll")
     client.stream(request.withEntity(arg.asJson)).flatMap(_.asStream[HelloResponse])
   }
 
   def sayHellosAll(arg: Stream[F, HelloRequest])(client: Client[F])(
       implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
-      decoderHelloResponse: io.circe.Decoder[HelloResponse]): Stream[F, HelloResponse] = {
+      decoderHelloResponse: io.circe.Decoder[HelloResponse]
+  ): Stream[F, HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellosAll")
     client.stream(request.withEntity(arg.map(_.asJson))).flatMap(_.asStream[HelloResponse])
   }

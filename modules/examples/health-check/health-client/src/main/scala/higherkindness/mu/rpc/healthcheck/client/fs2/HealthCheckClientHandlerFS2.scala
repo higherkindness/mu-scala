@@ -24,7 +24,8 @@ import higherkindness.mu.rpc.protocol.Empty
 import io.chrisdavenport.log4cats.Logger
 
 class HealthCheckClientHandlerFS2[F[_]: Async](client: Resource[F, HealthCheckServiceFS2[F]])(
-    implicit logger: Logger[F]) {
+    implicit logger: Logger[F]
+) {
 
   def updatingWatching(name: String) =
     for {
@@ -37,7 +38,9 @@ class HealthCheckClientHandlerFS2[F[_]: Async](client: Resource[F, HealthCheckSe
     _.watch(new HealthCheck(name))
       .evalMap(hs =>
         logger.info(
-          "Service " + hs.hc.nameService + " updated to status " + hs.status.status + ". "))
+          "Service " + hs.hc.nameService + " updated to status " + hs.status.status + ". "
+        )
+      )
       .compile
       .drain
   )
@@ -49,12 +52,14 @@ class HealthCheckClientHandlerFS2[F[_]: Async](client: Resource[F, HealthCheckSe
       known <- client.use(_.check(new HealthCheck(name)))
       _     <- logger.info("UNARY: Actually the status is " + known.status)
       _ <- logger.info(
-        "UNARY: Setting " + name.toUpperCase + " service with " + status.status + " status")
+        "UNARY: Setting " + name.toUpperCase + " service with " + status.status + " status"
+      )
       _      <- client.use(_.setStatus(HealthStatus(new HealthCheck(name), status)))
       _      <- logger.info("UNARY: Added status: " + status.status + " to service: " + name.toUpperCase)
       status <- client.use(_.check(new HealthCheck(name)))
       _ <- logger.info(
-        "UNARY: Checked the status of " + name.toUpperCase + ". Obtained: " + status.status)
+        "UNARY: Checked the status of " + name.toUpperCase + ". Obtained: " + status.status
+      )
       _       <- client.use(_.clearStatus(new HealthCheck(name)))
       _       <- logger.info("UNARY: Cleaned " + name.toUpperCase + " status.")
       unknown <- client.use(_.check(new HealthCheck(name)))
@@ -66,7 +71,8 @@ class HealthCheckClientHandlerFS2[F[_]: Async](client: Resource[F, HealthCheckSe
       _ <- logger.info("/////////////////////////////////UNARY ALL")
       _ <- logger.info("UNARY ALL: Setting services: " + namesAndStatuses)
       _ <- namesAndStatuses.traverse(l =>
-        client.use(_.setStatus(HealthStatus(new HealthCheck(l._1), l._2))))
+        client.use(_.setStatus(HealthStatus(new HealthCheck(l._1), l._2)))
+      )
       allStatuses1 <- client.use(_.checkAll(Empty))
       _            <- logger.info("UNARY ALL: All statuses are: " + allStatuses1.all.mkString("\n"))
       _            <- client.use(_.cleanAll(Empty))

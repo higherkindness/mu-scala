@@ -34,7 +34,8 @@ object monixCalls {
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions): Observable[Res] =
+      options: CallOptions
+  ): Observable[Res] =
     Observable
       .fromReactivePublisher(createPublisher(request, descriptor, channel, options))
 
@@ -42,14 +43,14 @@ object monixCalls {
       input: Observable[Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions)(implicit S: Scheduler): F[Res] =
+      options: CallOptions
+  )(implicit S: Scheduler): F[Res] =
     input
       .liftByOperator(
-        StreamObserver2MonixOperator(
-          (outputObserver: StreamObserver[Res]) =>
-            ClientCalls.asyncClientStreamingCall(
-              channel.newCall(descriptor, options),
-              outputObserver
+        StreamObserver2MonixOperator((outputObserver: StreamObserver[Res]) =>
+          ClientCalls.asyncClientStreamingCall(
+            channel.newCall(descriptor, options),
+            outputObserver
           )
         )
       )
@@ -60,21 +61,23 @@ object monixCalls {
       input: Observable[Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions): Observable[Res] =
+      options: CallOptions
+  ): Observable[Res] =
     input.liftByOperator(
-      StreamObserver2MonixOperator(
-        (outputObserver: StreamObserver[Res]) =>
-          ClientCalls.asyncBidiStreamingCall(
-            channel.newCall(descriptor, options),
-            outputObserver
-        ))
+      StreamObserver2MonixOperator((outputObserver: StreamObserver[Res]) =>
+        ClientCalls.asyncBidiStreamingCall(
+          channel.newCall(descriptor, options),
+          outputObserver
+        )
+      )
     )
 
   private[this] def createPublisher[Res, Req](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions): Publisher[Res] = {
+      options: CallOptions
+  ): Publisher[Res] = {
     new Publisher[Res] {
       override def subscribe(s: Subscriber[_ >: Res]): Unit = {
         val subscriber: Subscriber[Res] = s.asInstanceOf[Subscriber[Res]]

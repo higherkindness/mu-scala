@@ -66,7 +66,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       new MuRPCServiceClientHandler[ConcurrentMonad](
         protoRPCServiceClient,
         avroRPCServiceClient,
-        awsRPCServiceClient)
+        awsRPCServiceClient
+      )
 
     "be able to run unary services" in {
 
@@ -80,7 +81,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "handle errors in unary services" in {
 
       def clientProgram[F[_]](
-          errorCode: String)(implicit APP: MyRPCClient[F], M: MonadError[F, Throwable]): F[C] =
+          errorCode: String
+      )(implicit APP: MyRPCClient[F], M: MonadError[F, Throwable]): F[C] =
         M.handleError(APP.uwe(a1, errorCode))(ex => C(ex.getMessage, a1))
 
       clientProgram[ConcurrentMonad]("SE")
@@ -113,9 +115,9 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "handle errors in server streaming services" in {
 
-      def clientProgram[F[_]](errorCode: String)(
-          implicit APP: MyRPCClient[F],
-          M: MonadError[F, Throwable]): F[List[C]] =
+      def clientProgram[F[_]](
+          errorCode: String
+      )(implicit APP: MyRPCClient[F], M: MonadError[F, Throwable]): F[List[C]] =
         M.handleError(APP.sswe(a1, errorCode))(ex => List(C(ex.getMessage, a1)))
 
       clientProgram[ConcurrentMonad]("SE")
@@ -257,7 +259,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       new MuRPCServiceClientCompressedHandler[ConcurrentMonad](
         compressedprotoRPCServiceClient,
         compressedavroRPCServiceClient,
-        compressedawsRPCServiceClient)
+        compressedawsRPCServiceClient
+      )
 
     "be able to run unary services" in {
 

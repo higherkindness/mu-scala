@@ -72,7 +72,8 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
 
       the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
         Status.BadRequest,
-        Some("INVALID_ARGUMENT: SRE"))
+        Some("INVALID_ARGUMENT: SRE")
+      )
     }
 
     "handle a raised non-gRPC exception in a unary POST request" in {
@@ -81,7 +82,8 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
 
       the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
         Status.InternalServerError,
-        Some("RTE"))
+        Some("RTE")
+      )
     }
 
     "handle a thrown exception in a unary POST request" in {
@@ -89,7 +91,8 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
         BlazeClientBuilder[IO](ec).resource.use(unaryClient.sayHello(HelloRequest("TR"))(_))
 
       the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
-        Status.InternalServerError)
+        Status.InternalServerError
+      )
     }
 
     "serve a POST request with fs2 streaming request" in {

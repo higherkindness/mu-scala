@@ -33,8 +33,8 @@ case class AvroSrcGenerator(
     marshallersImports: List[MarshallersImport],
     bigDecimalTypeGen: BigDecimalTypeGen,
     compressionTypeGen: CompressionTypeGen,
-    useIdiomaticEndpoints: UseIdiomaticEndpoints)
-    extends SrcGenerator {
+    useIdiomaticEndpoints: UseIdiomaticEndpoints
+) extends SrcGenerator {
 
   private[this] val logger = getLogger
 
@@ -44,8 +44,9 @@ case class AvroSrcGenerator(
   }
   private val avroScalaCustomTypes = Standard.defaultTypes.copy(decimal = avroBigDecimal)
   private val mainGenerator        = Generator(Standard, avroScalaCustomTypes = Some(avroScalaCustomTypes))
-  private val adtGenerator = mainGenerator.copy(avroScalaCustomTypes = Some(
-    mainGenerator.avroScalaTypes.copy(protocol = ScalaADT))) // ScalaADT: sealed trait hierarchies
+  private val adtGenerator = mainGenerator.copy(avroScalaCustomTypes =
+    Some(mainGenerator.avroScalaTypes.copy(protocol = ScalaADT))
+  ) // ScalaADT: sealed trait hierarchies
 
   val idlType: String = avro.IdlType
 
@@ -62,7 +63,8 @@ case class AvroSrcGenerator(
   override def generateFrom(
       files: Set[File],
       serializationType: String,
-      options: String*): Seq[(File, String, Seq[String])] =
+      options: String*
+  ): Seq[(File, String, Seq[String])] =
     super
       .generateFrom(files, serializationType: String, options: _*)
       .filter(output => files.contains(output._1))
@@ -70,14 +72,16 @@ case class AvroSrcGenerator(
   def generateFrom(
       inputFile: File,
       serializationType: String,
-      options: String*): Option[(String, Seq[String])] =
+      options: String*
+  ): Option[(String, Seq[String])] =
     generateFromSchemaProtocols(
       mainGenerator.fileParser
         .getSchemaOrProtocols(
           inputFile,
           mainGenerator.format,
           mainGenerator.classStore,
-          mainGenerator.classLoader),
+          mainGenerator.classLoader
+        ),
       serializationType,
       options
     )
@@ -85,17 +89,20 @@ case class AvroSrcGenerator(
   def generateFrom(
       input: String,
       serializationType: String,
-      options: String*): Option[(String, Seq[String])] =
+      options: String*
+  ): Option[(String, Seq[String])] =
     generateFromSchemaProtocols(
       mainGenerator.stringParser
         .getSchemaOrProtocols(input, mainGenerator.schemaStore),
       serializationType,
-      options)
+      options
+    )
 
   private def generateFromSchemaProtocols(
       schemasOrProtocols: List[Either[Schema, Protocol]],
       serializationType: String,
-      options: Seq[String]): Option[(String, Seq[String])] =
+      options: Seq[String]
+  ): Option[(String, Seq[String])] =
     Some(schemasOrProtocols)
       .filter(_.nonEmpty)
       .flatMap(_.last match {
@@ -107,7 +114,8 @@ case class AvroSrcGenerator(
   def generateFrom(
       protocol: Protocol,
       serializationType: String,
-      options: Seq[String]): (String, Seq[String]) = {
+      options: Seq[String]
+  ): (String, Seq[String]) = {
 
     val outputPath =
       s"${protocol.getNamespace.replace('.', '/')}/${protocol.getName}$ScalaFileExtension"
@@ -118,7 +126,7 @@ case class AvroSrcGenerator(
       .mkString
       .split('\n')
       .toSeq
-      .tail // remove top comment and get package declaration on first line
+      .tail                 // remove top comment and get package declaration on first line
       .filterNot(_ == "()") // https://github.com/julianpeeters/sbt-avrohugger/issues/33
 
     val packageLines = Seq(schemaLines.head, "")
@@ -129,7 +137,8 @@ case class AvroSrcGenerator(
         .map("import " + _)).sorted
 
     val messageLines = schemaLines.tail.map(line =>
-      if (line.contains("case class")) s"@message $line" else line) :+ "" // note: can be "final case class"
+      if (line.contains("case class")) s"@message $line" else line
+    ) :+ "" // note: can be "final case class"
 
     val requestLines = protocol.getMessages.asScala.toSeq.flatMap {
       case (name, message) =>
@@ -146,8 +155,11 @@ case class AvroSrcGenerator(
       if (options.isEmpty) {
         s"compressionType = ${compressionTypeGen.value}" +:
           (if (useIdiomaticEndpoints) {
-           List(s"""namespace = Some("${protocol.getNamespace}")""", "methodNameStyle = Capitalize")
-         } else Nil)
+             List(
+               s"""namespace = Some("${protocol.getNamespace}")""",
+               "methodNameStyle = Capitalize"
+             )
+           } else Nil)
       } else options.toList
 
     val serviceParams: String = (serializationType +: extraParams).mkString(",")

@@ -45,7 +45,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
         dateTime: LocalDateTime,
         instant: Instant,
         result: String,
-        check: Boolean)
+        check: Boolean
+    )
 
     @service(Protobuf)
     trait ProtoRPCDateServiceDef[F[_]] {
@@ -110,7 +111,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         ProtoRPCDateServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
             val date = zdt.toLocalDate
@@ -125,7 +127,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         ProtoRPCDateServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
             val dateTime = zdt.toLocalDateTime
@@ -140,7 +143,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         ProtoRPCDateServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
             val instant = zdt.toInstant
@@ -155,7 +159,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         ProtoRPCDateServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
             (zdt: ZonedDateTime, s: String) =>
@@ -176,7 +181,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         AvroRPCDateServiceDef.bindService[ConcurrentMonad],
-        AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
             val date = zdt.toLocalDate
@@ -192,7 +198,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         AvroRPCDateServiceDef.bindService[ConcurrentMonad],
-        AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
             val dateTime = zdt.toLocalDateTime
@@ -207,7 +214,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         AvroRPCDateServiceDef.bindService[ConcurrentMonad],
-        AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
             val instant = zdt.toInstant
@@ -223,7 +231,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         AvroRPCDateServiceDef.bindService[ConcurrentMonad],
-        AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
             (zdt: ZonedDateTime, s: String) =>
@@ -244,7 +253,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         AvroWithSchemaRPCDateServiceDef.bindService[ConcurrentMonad],
-        AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
             val date = zdt.toLocalDate
@@ -260,7 +270,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         AvroWithSchemaRPCDateServiceDef.bindService[ConcurrentMonad],
-        AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
             val dateTime = zdt.toLocalDateTime
@@ -276,7 +287,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         AvroWithSchemaRPCDateServiceDef.bindService[ConcurrentMonad],
-        AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
             val instant = zdt.toInstant
@@ -292,7 +304,8 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         AvroWithSchemaRPCDateServiceDef.bindService[ConcurrentMonad],
-        AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
             (zdt: ZonedDateTime, s: String) =>

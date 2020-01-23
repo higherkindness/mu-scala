@@ -29,14 +29,16 @@ trait AvroScalaGeneratorArbitrary {
       marshallersImports: List[MarshallersImport],
       options: Seq[String],
       compressionTypeGen: CompressionTypeGen,
-      useIdiomaticEndpoints: UseIdiomaticEndpoints)
+      useIdiomaticEndpoints: UseIdiomaticEndpoints
+  )
 
   def generateOutput(
       serializationType: String,
       marshallersImports: List[MarshallersImport],
       options: Option[String],
       compressionTypeGen: CompressionTypeGen,
-      useIdiomaticEndpoints: UseIdiomaticEndpoints): List[String] = {
+      useIdiomaticEndpoints: UseIdiomaticEndpoints
+  ): List[String] = {
 
     val imports: String = ("import higherkindness.mu.rpc.protocol._" :: marshallersImports
       .map(_.marshallersImport)
@@ -48,7 +50,8 @@ trait AvroScalaGeneratorArbitrary {
         serializationType ::
           s"compressionType = ${compressionTypeGen.value}" ::
           List(s"""namespace = Some("foo.bar")""", "methodNameStyle = Capitalize").filter(_ =>
-          useIdiomaticEndpoints)
+            useIdiomaticEndpoints
+          )
       } else serializationType +: options.toSeq
 
     s"""
@@ -76,7 +79,8 @@ trait AvroScalaGeneratorArbitrary {
     Gen
       .choose(1, 5)
       .flatMap(
-        Gen.listOfN(_, importSliceGen).map(_.mkString(".") + "._").map(CustomMarshallersImport))
+        Gen.listOfN(_, importSliceGen).map(_.mkString(".") + "._").map(CustomMarshallersImport)
+      )
 
   def marshallersImportGen(serializationType: String): Gen[MarshallersImport] =
     serializationType match {
@@ -105,22 +109,22 @@ trait AvroScalaGeneratorArbitrary {
       options               <- Gen.option("Gzip")
       compressionTypeGen    <- Gen.oneOf(GzipGen, NoCompressionGen)
       useIdiomaticEndpoints <- Arbitrary.arbBool.arbitrary.map(UseIdiomaticEndpoints(_))
-    } yield
-      Scenario(
-        inputResourcePath,
-        generateOutput(
-          serializationType,
-          marshallersImports,
-          options,
-          compressionTypeGen,
-          useIdiomaticEndpoints),
-        "foo/bar/MyGreeterService.scala",
+    } yield Scenario(
+      inputResourcePath,
+      generateOutput(
         serializationType,
         marshallersImports,
-        options.toSeq,
+        options,
         compressionTypeGen,
         useIdiomaticEndpoints
-      )
+      ),
+      "foo/bar/MyGreeterService.scala",
+      serializationType,
+      marshallersImports,
+      options.toSeq,
+      compressionTypeGen,
+      useIdiomaticEndpoints
+    )
   }
 
 }

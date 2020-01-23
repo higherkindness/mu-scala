@@ -32,13 +32,15 @@ trait MetricsOps[F[_]] {
   def recordHeadersTime(
       methodInfo: GrpcMethodInfo,
       elapsed: Long,
-      classifier: Option[String]): F[Unit]
+      classifier: Option[String]
+  ): F[Unit]
 
   def recordTotalTime(
       methodInfo: GrpcMethodInfo,
       status: Status,
       elapsed: Long,
-      classifier: Option[String]): F[Unit]
+      classifier: Option[String]
+  ): F[Unit]
 
 }
 

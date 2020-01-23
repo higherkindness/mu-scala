@@ -32,14 +32,16 @@ abstract class GeneratorApplication[T <: Generator](generators: T*) {
   def generateFrom(args: Array[String]): Seq[File] = {
     validate(
       args.length >= 4,
-      s"Usage: ${getClass.getName.dropRight(1)} idlType serializationType inputPath outputPath [option1 option2 ...]")
+      s"Usage: ${getClass.getName.dropRight(1)} idlType serializationType inputPath outputPath [option1 option2 ...]"
+    )
 
     val idlType           = args(0)
     val serializationType = args(1)
 
     validate(
       serializationTypes.contains(serializationType),
-      s"Unknown Serialization type '$serializationType'. Valid values: ${serializationTypes.mkString(", ")}")
+      s"Unknown Serialization type '$serializationType'. Valid values: ${serializationTypes.mkString(", ")}"
+    )
 
     val inputPath = new File(args(2))
     validate(
@@ -56,10 +58,12 @@ abstract class GeneratorApplication[T <: Generator](generators: T*) {
       serializationType: String,
       inputFiles: Set[File],
       outputDir: File,
-      options: String*): Seq[File] = {
+      options: String*
+  ): Seq[File] = {
     validate(
       idlTypes.contains(idlType),
-      s"Unknown IDL type '$idlType'. Valid values: ${idlTypes.mkString(", ")}")
+      s"Unknown IDL type '$idlType'. Valid values: ${idlTypes.mkString(", ")}"
+    )
     generatorsByType(idlType).generateFrom(inputFiles, serializationType, options: _*).map {
       case (inputFile, outputFilePath, output) =>
         val outputFile = new File(outputDir, outputFilePath)

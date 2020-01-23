@@ -37,12 +37,14 @@ trait IdlGenerator extends Generator {
   def generateFrom(
       inputFile: File,
       serializationType: String,
-      options: String*): Option[(String, Seq[String])] = {
+      options: String*
+  ): Option[(String, Seq[String])] = {
     val inputName = inputFile.getName.replaceAll(ScalaFileExtension, "")
     val definitions =
       ScalaParser.parse(
         Toolbox.parse(Files.readAllLines(Paths.get(inputFile.toURI)).asScala.mkString("\n")),
-        inputName)
+        inputName
+      )
     generateFrom(definitions).map(output => s"$outputSubdir/$inputName$fileExtension" -> output)
   }
 
@@ -59,7 +61,8 @@ trait IdlGenerator extends Generator {
       outputPackage: Option[String],
       options: Seq[RpcOption],
       messages: Seq[RpcMessage],
-      services: Seq[RpcService]): Seq[String]
+      services: Seq[RpcService]
+  ): Seq[String]
 
   private def filterServices(services: Seq[RpcService]): Seq[RpcService] =
     services

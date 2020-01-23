@@ -33,7 +33,8 @@ object HttpServer {
   def bind[F[_]: ConcurrentEffect: Timer](
       port: Int,
       host: String,
-      routes: RouteMap[F]*): BlazeServerBuilder[F] =
+      routes: RouteMap[F]*
+  ): BlazeServerBuilder[F] =
     BlazeServerBuilder[F]
       .bindHttp(port, host)
       .withHttpApp(Router(routes.map(r => (s"/${r.prefix}", r.route)): _*).orNotFound)

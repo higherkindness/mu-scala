@@ -42,10 +42,9 @@ trait ProtoPeopleServiceClient[F[_]] {
 }
 object ProtoPeopleServiceClient {
 
-  def apply[F[_]](client: PeopleService[F])(
-      implicit F: Effect[F],
-      L: Logger[F],
-      T: Timer[F]): ProtoPeopleServiceClient[F] =
+  def apply[F[_]](
+      client: PeopleService[F]
+  )(implicit F: Effect[F], L: Logger[F], T: Timer[F]): ProtoPeopleServiceClient[F] =
     new ProtoPeopleServiceClient[F] {
 
       val serviceName = "ProtoPeopleClient"
@@ -74,7 +73,8 @@ object ProtoPeopleServiceClient {
     }
 
   def createClient[F[_]: ContextShift: Logger: Timer](hostname: String, port: Int)(
-      implicit F: ConcurrentEffect[F]): fs2.Stream[F, ProtoPeopleServiceClient[F]] = {
+      implicit F: ConcurrentEffect[F]
+  ): fs2.Stream[F, ProtoPeopleServiceClient[F]] = {
 
     val channel: F[ManagedChannel] =
       F.delay(InetAddress.getByName(hostname).getHostAddress).flatMap { ip =>

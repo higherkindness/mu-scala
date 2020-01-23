@@ -51,7 +51,8 @@ trait AvroIdlGenerator extends IdlGenerator {
       outputPackage: Option[String],
       options: Seq[RpcOption],
       messages: Seq[RpcMessage],
-      services: Seq[RpcService]): Seq[String] = {
+      services: Seq[RpcService]
+  ): Seq[String] = {
 
     val avroRecords = messages.map {
       case RpcMessage(name, params) =>
@@ -71,7 +72,8 @@ trait AvroIdlGenerator extends IdlGenerator {
           name -> AvroMessage(
             Seq(AvroField(DefaultRequestParamName, mappedType(reqType)))
               .filterNot(_.`type` == AvroEmpty),
-            mappedType(respType))
+            mappedType(respType)
+          )
       }
       .toMap
     val protocol = AvroProtocol(outputPackage.getOrElse(""), outputName, avroRecords, avroMessages)
@@ -82,7 +84,8 @@ trait AvroIdlGenerator extends IdlGenerator {
       namespace: String,
       protocol: String,
       types: Seq[AvroRecord],
-      messages: Map[String, AvroMessage])
+      messages: Map[String, AvroMessage]
+  )
 
   case class AvroRecord(name: String, `type`: String = "record", fields: Seq[AvroField])
 

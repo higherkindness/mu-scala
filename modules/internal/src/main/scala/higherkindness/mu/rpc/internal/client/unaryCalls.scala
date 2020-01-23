@@ -28,8 +28,10 @@ object unaryCalls {
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions): F[Res] =
+      options: CallOptions
+  ): F[Res] =
     listenableFuture2Async[F, Res](
       ClientCalls
-        .futureUnaryCall(channel.newCall(descriptor, options), request))
+        .futureUnaryCall(channel.newCall(descriptor, options), request)
+    )
 }

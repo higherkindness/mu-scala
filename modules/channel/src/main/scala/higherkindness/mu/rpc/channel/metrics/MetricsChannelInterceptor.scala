@@ -27,13 +27,14 @@ import scala.concurrent.duration._
 
 case class MetricsChannelInterceptor[F[_]: Effect: Clock](
     metricsOps: MetricsOps[F],
-    classifier: Option[String] = None)
-    extends ClientInterceptor {
+    classifier: Option[String] = None
+) extends ClientInterceptor {
 
   override def interceptCall[Req, Res](
       methodDescriptor: MethodDescriptor[Req, Res],
       callOptions: CallOptions,
-      channel: Channel): ClientCall[Req, Res] = {
+      channel: Channel
+  ): ClientCall[Req, Res] = {
 
     val methodInfo: GrpcMethodInfo = GrpcMethodInfo(methodDescriptor)
 
@@ -41,7 +42,8 @@ case class MetricsChannelInterceptor[F[_]: Effect: Clock](
       channel.newCall(methodDescriptor, callOptions),
       methodInfo,
       metricsOps,
-      classifier)
+      classifier
+    )
   }
 }
 
@@ -49,7 +51,8 @@ case class MetricsClientCall[F[_]: Clock, Req, Res](
     clientCall: ClientCall[Req, Res],
     methodInfo: GrpcMethodInfo,
     metricsOps: MetricsOps[F],
-    classifier: Option[String])(implicit E: Effect[F])
+    classifier: Option[String]
+)(implicit E: Effect[F])
     extends ForwardingClientCall.SimpleForwardingClientCall[Req, Res](clientCall) {
 
   override def start(responseListener: ClientCall.Listener[Res], headers: Metadata): Unit =
@@ -60,7 +63,8 @@ case class MetricsClientCall[F[_]: Clock, Req, Res](
           delegate = responseListener,
           methodInfo = methodInfo,
           metricsOps = metricsOps,
-          classifier = classifier)
+          classifier = classifier
+        )
         st <- E.delay(delegate.start(listener, headers))
       } yield st
     }.unsafeRunSync
@@ -77,7 +81,8 @@ class MetricsChannelCallListener[F[_], Res](
     methodInfo: GrpcMethodInfo,
     metricsOps: MetricsOps[F],
     startTime: Long,
-    classifier: Option[String])(implicit E: Effect[F], C: Clock[F])
+    classifier: Option[String]
+)(implicit E: Effect[F], C: Clock[F])
     extends ForwardingClientCallListener[Res] {
 
   override def onHeaders(headers: Metadata): Unit =
@@ -111,7 +116,8 @@ object MetricsChannelCallListener {
       delegate: ClientCall.Listener[Res],
       methodInfo: GrpcMethodInfo,
       metricsOps: MetricsOps[F],
-      classifier: Option[String])(implicit C: Clock[F]): F[MetricsChannelCallListener[F, Res]] =
+      classifier: Option[String]
+  )(implicit C: Clock[F]): F[MetricsChannelCallListener[F, Res]] =
     C.monotonic(NANOSECONDS)
       .map(new MetricsChannelCallListener[F, Res](delegate, methodInfo, metricsOps, _, classifier))
 }

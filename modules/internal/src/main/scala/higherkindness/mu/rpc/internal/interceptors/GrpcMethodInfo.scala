@@ -32,7 +32,8 @@ case class GrpcMethodInfo(
     serviceName: String,
     fullMethodName: String,
     methodName: String,
-    `type`: MethodType)
+    `type`: MethodType
+)
 
 object GrpcMethodInfo {
 
@@ -46,7 +47,8 @@ object GrpcMethodInfo {
       serviceName,
       methodDescriptor.getFullMethodName,
       methodName,
-      methodDescriptor.getType)
+      methodDescriptor.getType
+    )
 
   }
 

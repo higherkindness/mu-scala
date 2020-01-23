@@ -33,7 +33,8 @@ object Utils {
       street = "1494 avenue du fort-caire",
       city = "orléans",
       state = "aveyron",
-      postCode = 91831),
+      postCode = 91831
+    ),
     email = "valentine.lacroix@example.com",
     picture = None
   )

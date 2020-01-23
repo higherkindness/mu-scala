@@ -92,14 +92,16 @@ object GrpcServer {
   }
 
   def default[F[_]](port: Int, configList: List[GrpcConfig])(
-      implicit F: Sync[F]): F[GrpcServer[F]] =
+      implicit F: Sync[F]
+  ): F[GrpcServer[F]] =
     F.delay(buildServer(ServerBuilder.forPort(port), configList)).map(fromServer[F])
 
   def netty[F[_]](port: Int, configList: List[GrpcConfig])(implicit F: Sync[F]): F[GrpcServer[F]] =
     netty(ChannelForPort(port), configList)
 
   def netty[F[_]](channelFor: ChannelFor, configList: List[GrpcConfig])(
-      implicit F: Sync[F]): F[GrpcServer[F]] =
+      implicit F: Sync[F]
+  ): F[GrpcServer[F]] =
     for {
       builder <- F.delay(nettyBuilder(channelFor))
       server  <- F.delay(buildNettyServer(builder, configList))
@@ -118,7 +120,8 @@ object GrpcServer {
 
   private[this] def buildNettyServer(
       bldr: NettyServerBuilder,
-      configList: List[GrpcConfig]): Server = {
+      configList: List[GrpcConfig]
+  ): Server = {
     configList
       .foldLeft(bldr) { (bldr, cfg) =>
         (SBuilder(bldr) orElse NettySBuilder(bldr))(cfg)

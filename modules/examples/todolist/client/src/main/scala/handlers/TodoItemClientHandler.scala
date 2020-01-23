@@ -27,8 +27,8 @@ import higherkindness.mu.rpc.protocol.Empty
 import freestyle.tagless.logging.LoggingM
 
 class TodoItemClientHandler[F[_]: Sync](client: Resource[F, TodoItemRpcService[F]])(
-    implicit log: LoggingM[F])
-    extends TodoItemClient[F] {
+    implicit log: LoggingM[F]
+) extends TodoItemClient[F] {
 
   override def reset(): F[Int] =
     for {
@@ -39,7 +39,8 @@ class TodoItemClientHandler[F[_]: Sync](client: Resource[F, TodoItemRpcService[F
   override def insert(request: TodoItemRequest): F[Option[TodoItemMessage]] =
     for {
       _ <- log.debug(
-        s"Calling to insert todo item with item ${request.item} to list ${request.todoListId}")
+        s"Calling to insert todo item with item ${request.item} to list ${request.todoListId}"
+      )
       t <- client.use(_.insert(request))
     } yield t.msg
 
@@ -58,7 +59,8 @@ class TodoItemClientHandler[F[_]: Sync](client: Resource[F, TodoItemRpcService[F
   override def update(todoItem: TodoItemMessage): F[Option[TodoItemMessage]] =
     for {
       _ <- log.debug(
-        s"Calling to update todo item ${todoItem.id} with item ${todoItem.id} from list ${todoItem.todoListId} and completed status ${todoItem.completed}")
+        s"Calling to update todo item ${todoItem.id} with item ${todoItem.id} from list ${todoItem.todoListId} and completed status ${todoItem.completed}"
+      )
       r <- client.use(_.update(todoItem))
     } yield r.msg
 

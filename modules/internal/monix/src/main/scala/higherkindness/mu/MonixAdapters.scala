@@ -96,7 +96,8 @@ object converters extends MonixAdapters {
   }
 
   private[internal] def StreamObserver2MonixOperator[Req, Res](
-      op: StreamObserver[Res] => StreamObserver[Req]): Operator[Req, Res] =
+      op: StreamObserver[Res] => StreamObserver[Req]
+  ): Operator[Req, Res] =
     (outputSubscriber: Subscriber[Res]) =>
       op(outputSubscriber.toStreamObserver).toSubscriber(outputSubscriber.scheduler)
 

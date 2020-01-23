@@ -255,7 +255,8 @@ object Utils extends CommonUtils {
       class MuRPCServiceClientHandler[F[_]: Async](
           proto: Resource[F, ProtoRPCService[F]],
           avro: Resource[F, AvroRPCService[F]],
-          aws: Resource[F, AvroWithSchemaRPCService[F]])(implicit M: MonadError[F, Throwable])
+          aws: Resource[F, AvroWithSchemaRPCService[F]]
+      )(implicit M: MonadError[F, Throwable])
           extends MyRPCClient[F] {
 
         import monix.execution.Scheduler.Implicits.global
@@ -306,13 +307,15 @@ object Utils extends CommonUtils {
                     c
                 }
                 .toListL
-                .toAsync[F])
+                .toAsync[F]
+            )
 
         override def ss192(a: Int, b: Int): F[List[C]] =
           proto
             .use(
               _.serverStreaming(B(A(a, a), A(b, b))).toListL
-                .toAsync[F])
+                .toAsync[F]
+            )
 
         override def sswe(a: A, err: String): F[List[C]] =
           proto
@@ -324,7 +327,8 @@ object Utils extends CommonUtils {
                     c
                 }
                 .toListL
-                .toAsync[F])
+                .toAsync[F]
+            )
 
         override def cs(cList: List[C], bar: Int): F[D] =
           proto.use(_.clientStreaming(Observable.fromIterable(cList.map(c => c.a))))
@@ -340,7 +344,8 @@ object Utils extends CommonUtils {
                     c
                 }
                 .toListL
-                .toAsync[F])
+                .toAsync[F]
+            )
             .map(_.head)
 
         override def bsws(eList: List[E]): F[E] =
@@ -353,7 +358,8 @@ object Utils extends CommonUtils {
                     c
                 }
                 .toListL
-                .toAsync[F])
+                .toAsync[F]
+            )
             .map(_.head)
 
       }
@@ -361,8 +367,8 @@ object Utils extends CommonUtils {
       class MuRPCServiceClientCompressedHandler[F[_]: Async](
           proto: Resource[F, CompressedProtoRPCService[F]],
           avro: Resource[F, CompressedAvroRPCService[F]],
-          aws: Resource[F, CompressedAvroWithSchemaRPCService[F]])(
-          implicit M: MonadError[F, Throwable])
+          aws: Resource[F, CompressedAvroWithSchemaRPCService[F]]
+      )(implicit M: MonadError[F, Throwable])
           extends MyRPCClient[F] {
 
         import monix.execution.Scheduler.Implicits.global
@@ -413,13 +419,15 @@ object Utils extends CommonUtils {
                     c
                 }
                 .toListL
-                .toAsync[F])
+                .toAsync[F]
+            )
 
         override def ss192(a: Int, b: Int): F[List[C]] =
           proto
             .use(
               _.serverStreamingCompressed(B(A(a, a), A(b, b))).toListL
-                .toAsync[F])
+                .toAsync[F]
+            )
 
         override def sswe(a: A, err: String): F[List[C]] =
           proto
@@ -431,7 +439,8 @@ object Utils extends CommonUtils {
                     c
                 }
                 .toListL
-                .toAsync[F])
+                .toAsync[F]
+            )
 
         override def cs(cList: List[C], bar: Int): F[D] =
           proto.use(_.clientStreamingCompressed(Observable.fromIterable(cList.map(c => c.a))))
@@ -447,7 +456,8 @@ object Utils extends CommonUtils {
                     c
                 }
                 .toListL
-                .toAsync[F])
+                .toAsync[F]
+            )
             .map(_.head)
 
         override def bsws(eList: List[E]): F[E] =
@@ -460,7 +470,8 @@ object Utils extends CommonUtils {
                     c
                 }
                 .toListL
-                .toAsync[F])
+                .toAsync[F]
+            )
             .map(_.head)
 
       }
@@ -510,17 +521,17 @@ object Utils extends CommonUtils {
     val awsRPCServiceClient: Resource[ConcurrentMonad, AvroWithSchemaRPCService[ConcurrentMonad]] =
       AvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
 
-    val compressedprotoRPCServiceClient: Resource[
-      ConcurrentMonad,
-      CompressedProtoRPCService[ConcurrentMonad]] =
+    val compressedprotoRPCServiceClient: Resource[ConcurrentMonad, CompressedProtoRPCService[
+      ConcurrentMonad
+    ]] =
       CompressedProtoRPCService.client[ConcurrentMonad](createChannelFor)
-    val compressedavroRPCServiceClient: Resource[
-      ConcurrentMonad,
-      CompressedAvroRPCService[ConcurrentMonad]] =
+    val compressedavroRPCServiceClient: Resource[ConcurrentMonad, CompressedAvroRPCService[
+      ConcurrentMonad
+    ]] =
       CompressedAvroRPCService.client[ConcurrentMonad](createChannelFor)
-    val compressedawsRPCServiceClient: Resource[
-      ConcurrentMonad,
-      CompressedAvroWithSchemaRPCService[ConcurrentMonad]] =
+    val compressedawsRPCServiceClient: Resource[ConcurrentMonad, CompressedAvroWithSchemaRPCService[
+      ConcurrentMonad
+    ]] =
       CompressedAvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
 
   }
