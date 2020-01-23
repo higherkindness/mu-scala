@@ -35,8 +35,8 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
 
   def withClient[Client, A](
       serviceDef: ConcurrentMonad[ServerServiceDefinition],
-      resourceBuilder: ConcurrentMonad[ManagedChannel] => Resource[ConcurrentMonad, Client])(
-      f: Client => A): A =
+      resourceBuilder: ConcurrentMonad[ManagedChannel] => Resource[ConcurrentMonad, Client]
+  )(f: Client => A): A =
     withServerChannel(serviceDef)
       .flatMap(sc => resourceBuilder(suspendM(sc.channel)))
       .use(client => suspendM(f(client)))
@@ -105,7 +105,8 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
 
       withClient(
         ProtobufService.Def.bindService[ConcurrentMonad],
-        ProtobufService.Def.clientFromChannel[ConcurrentMonad](_)) { client =>
+        ProtobufService.Def.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
             (dt: DateTime, s: String) =>
@@ -125,7 +126,8 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
 
       withClient(
         AvroService.Def.bindService[ConcurrentMonad],
-        AvroService.Def.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroService.Def.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(genDateTimeWithinRange(from, range)) { dt: DateTime =>
             val date = dt.toLocalDate
@@ -141,7 +143,8 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
 
       withClient(
         AvroService.Def.bindService[ConcurrentMonad],
-        AvroService.Def.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroService.Def.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
             (dt: DateTime, s: String) =>
@@ -161,7 +164,8 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
 
       withClient(
         AvroService.WithSchemaDef.bindService[ConcurrentMonad],
-        AvroService.WithSchemaDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroService.WithSchemaDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(genDateTimeWithinRange(from, range)) { dt: DateTime =>
             val date = dt.toLocalDate
@@ -176,7 +180,8 @@ class RPCJodaLocalDateTests extends RpcBaseTestSuite with BeforeAndAfterAll with
 
       withClient(
         AvroService.WithSchemaDef.bindService[ConcurrentMonad],
-        AvroService.WithSchemaDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroService.WithSchemaDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
             (dt: DateTime, s: String) =>

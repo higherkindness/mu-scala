@@ -28,26 +28,29 @@ import scala.concurrent.duration._
 
 case class MetricsServerInterceptor[F[_]: Clock](
     metricsOps: MetricsOps[F],
-    classifier: Option[String] = None)(implicit E: Effect[F])
+    classifier: Option[String] = None
+)(implicit E: Effect[F])
     extends ServerInterceptor {
 
   override def interceptCall[Req, Res](
       call: ServerCall[Req, Res],
       requestHeaders: Metadata,
-      next: ServerCallHandler[Req, Res]): ServerCall.Listener[Req] = {
+      next: ServerCallHandler[Req, Res]
+  ): ServerCall.Listener[Req] = {
 
     val methodInfo: GrpcMethodInfo = GrpcMethodInfo(call.getMethodDescriptor)
 
     E.toIO(
         MetricsServerCall
           .build[F, Req, Res](call, methodInfo, metricsOps, classifier)
-          .map(
-            metricsCall =>
-              MetricsServerCallListener[F, Req](
-                next.startCall(metricsCall, requestHeaders),
-                methodInfo,
-                metricsOps,
-                classifier))
+          .map(metricsCall =>
+            MetricsServerCallListener[F, Req](
+              next.startCall(metricsCall, requestHeaders),
+              methodInfo,
+              metricsOps,
+              classifier
+            )
+          )
       )
       .unsafeRunSync
   }
@@ -58,7 +61,8 @@ case class MetricsServerCall[F[_], Req, Res](
     methodInfo: GrpcMethodInfo,
     metricsOps: MetricsOps[F],
     startTime: Long,
-    classifier: Option[String])(implicit E: Effect[F], C: Clock[F])
+    classifier: Option[String]
+)(implicit E: Effect[F], C: Clock[F])
     extends ForwardingServerCall.SimpleForwardingServerCall[Req, Res](serverCall) {
 
   override def close(status: Status, responseHeaders: Metadata): Unit =
@@ -82,7 +86,8 @@ object MetricsServerCall {
       serverCall: ServerCall[Req, Res],
       methodInfo: GrpcMethodInfo,
       metricsOps: MetricsOps[F],
-      classifier: Option[String])(implicit C: Clock[F]): F[MetricsServerCall[F, Req, Res]] =
+      classifier: Option[String]
+  )(implicit C: Clock[F]): F[MetricsServerCall[F, Req, Res]] =
     C.monotonic(NANOSECONDS)
       .map(new MetricsServerCall[F, Req, Res](serverCall, methodInfo, metricsOps, _, classifier))
 }
@@ -91,7 +96,8 @@ case class MetricsServerCallListener[F[_], Req](
     delegate: ServerCall.Listener[Req],
     methodInfo: GrpcMethodInfo,
     metricsOps: MetricsOps[F],
-    classifier: Option[String])(implicit E: Effect[F])
+    classifier: Option[String]
+)(implicit E: Effect[F])
     extends ForwardingServerCallListener[Req] {
 
   override def onMessage(request: Req): Unit =

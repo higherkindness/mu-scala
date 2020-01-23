@@ -57,7 +57,8 @@ class OpenApiSrcGenTests extends FlatSpec with OptionValues {
            |
            |}
            |}""".stripMargin
-      ))
+      )
+    )
   }
 
 }

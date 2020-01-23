@@ -30,7 +30,8 @@ object fs2Calls {
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions): F[Res] =
+      options: CallOptions
+  ): F[Res] =
     Fs2ClientCall[F](channel, descriptor, options)
       .flatMap(_.unaryToUnaryCall(request, new Metadata()))
 
@@ -38,7 +39,8 @@ object fs2Calls {
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions): Stream[F, Res] =
+      options: CallOptions
+  ): Stream[F, Res] =
     Stream
       .eval(Fs2ClientCall[F](channel, descriptor, options))
       .flatMap(_.unaryToStreamingCall(request, new Metadata()))
@@ -47,7 +49,8 @@ object fs2Calls {
       input: Stream[F, Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions): F[Res] =
+      options: CallOptions
+  ): F[Res] =
     Fs2ClientCall[F](channel, descriptor, options)
       .flatMap(_.streamingToUnaryCall(input, new Metadata()))
 
@@ -55,7 +58,8 @@ object fs2Calls {
       input: Stream[F, Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions): Stream[F, Res] =
+      options: CallOptions
+  ): Stream[F, Res] =
     Stream
       .eval(Fs2ClientCall[F](channel, descriptor, options))
       .flatMap(_.streamingToStreamingCall(input, new Metadata()))

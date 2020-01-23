@@ -60,7 +60,8 @@ trait RpcClientTestSuite extends RpcBaseTestSuite {
       OverrideAuthority(TestUtils.TEST_SERVER_HOST),
       UsePlaintext(),
       NameResolverFactory(
-        FakeNameResolverFactory(new URI("defaultscheme", "", "/[valid]", null).getScheme)),
+        FakeNameResolverFactory(new URI("defaultscheme", "", "/[valid]", null).getScheme)
+      ),
       DefaultLoadBalancingPolicy("round_robin"),
       SetDecompressorRegistry(DecompressorRegistry.getDefaultInstance),
       SetCompressorRegistry(CompressorRegistry.getDefaultInstance),

@@ -91,7 +91,8 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         ProtoRPCServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll { maybeString: Option[String] =>
             // if the string is "", i.e. the protobuf default value,
@@ -112,7 +113,8 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         AvroRPCServiceDef.bindService[ConcurrentMonad],
-        AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll { maybeString: Option[String] =>
             client
@@ -129,7 +131,8 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         AvroWithSchemaRPCServiceDef.bindService[ConcurrentMonad],
-        AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll { maybeString: Option[String] =>
             client
@@ -146,7 +149,8 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         ProtoRPCServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll { list: List[String] =>
             client
@@ -163,7 +167,8 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         AvroRPCServiceDef.bindService[ConcurrentMonad],
-        AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll { list: List[String] =>
             client
@@ -179,7 +184,8 @@ class RPCProtoProducts extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
 
       withClient(
         AvroWithSchemaRPCServiceDef.bindService[ConcurrentMonad],
-        AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll { list: List[String] =>
             client

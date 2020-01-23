@@ -51,7 +51,8 @@ class ClientCacheTests extends WordSpec with Matchers {
       ref1: Ref[IO, Int],
       ref2: Ref[IO, Int],
       keys: List[H],
-      cleanUp: Int): IO[Unit] =
+      cleanUp: Int
+  ): IO[Unit] =
     (for {
       keyRef <- Stream.eval(Ref.of[IO, List[H]](keys))
       timer  <- Stream.eval(buildTimer)

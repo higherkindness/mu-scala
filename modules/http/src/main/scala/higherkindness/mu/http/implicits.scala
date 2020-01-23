@@ -62,7 +62,8 @@ object implicits {
 
     def jsonBodyAsStream[A](
         implicit decoder: Decoder[A],
-        F: ApplicativeError[F, Throwable]): Stream[F, A] =
+        F: ApplicativeError[F, Throwable]
+    ): Stream[F, A] =
       message.body.chunks.parseJsonStream.map(_.as[A]).rethrow
   }
 
@@ -82,7 +83,8 @@ object implicits {
     def asStream[A](
         implicit decoder: Decoder[A],
         F: ApplicativeError[F, Throwable],
-        R: RaiseThrowable[F]): Stream[F, A] =
+        R: RaiseThrowable[F]
+    ): Stream[F, A] =
       if (response.status.code != Ok.code) Stream.raiseError(ResponseError(response.status))
       else response.jsonBodyAsStream[Either[UnexpectedError, A]].rethrow
   }
@@ -115,7 +117,8 @@ object implicits {
 
   def handleResponseError[F[_]: Sync](errorResponse: Response[F]): F[Throwable] =
     errorResponse.bodyAsText.compile.foldMonoid.map(body =>
-      ResponseError(errorResponse.status, Some(body).filter(_.nonEmpty)))
+      ResponseError(errorResponse.status, Some(body).filter(_.nonEmpty))
+    )
 
   implicit class ThrowableOps(self: Throwable) {
     def toUnexpected: UnexpectedError =

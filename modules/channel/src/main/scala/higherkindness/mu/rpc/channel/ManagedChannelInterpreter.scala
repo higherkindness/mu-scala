@@ -25,7 +25,8 @@ import io.grpc._
 
 class ManagedChannelInterpreter[F[_]](
     initConfig: ChannelFor,
-    configList: List[ManagedChannelConfig])(implicit F: Sync[F]) {
+    configList: List[ManagedChannelConfig]
+)(implicit F: Sync[F]) {
 
   def apply[A](fa: ManagedChannelOps[F, A]): F[A] =
     fa(build)

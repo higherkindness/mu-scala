@@ -31,8 +31,8 @@ import scala.concurrent.duration._
 
 class RouteGuideClientHandler[F[_]: ConcurrentEffect](
     implicit client: Resource[F, RouteGuideService[F]],
-    E: Effect[Task])
-    extends RouteGuideClient[F] {
+    E: Effect[Task]
+) extends RouteGuideClient[F] {
 
   val logger = getLogger
 
@@ -49,19 +49,22 @@ class RouteGuideClientHandler[F[_]: ConcurrentEffect](
           case e: StatusRuntimeException =>
             Async[F].delay(logger.warn(s"RPC failed:${e.getStatus} $e")) *> ApplicativeError[
               F,
-              Throwable].raiseError(e)
+              Throwable
+            ].raiseError(e)
         }
 
   override def listFeatures(lowLat: Int, lowLon: Int, hiLat: Int, hiLon: Int): F[Unit] =
     Async[F].delay(
-      logger.info(s"*** ListFeatures: lowLat=$lowLat lowLon=$lowLon hiLat=$hiLat hiLon=$hiLon")) *>
+      logger.info(s"*** ListFeatures: lowLat=$lowLat lowLon=$lowLon hiLat=$hiLat hiLon=$hiLon")
+    ) *>
       client
         .use(
           _.listFeatures(
             Rectangle(
               lo = Point(lowLat, lowLon),
               hi = Point(hiLat, hiLon)
-            )).zipWithIndex
+            )
+          ).zipWithIndex
             .map {
               case (feature, i) =>
                 logger.info(s"Result #$i: $feature")
@@ -72,7 +75,8 @@ class RouteGuideClientHandler[F[_]: ConcurrentEffect](
                 throw e
             }
             .completedL
-            .toAsync[F])
+            .toAsync[F]
+        )
 
   override def recordRoute(features: List[Feature], numPoints: Int): F[Unit] = {
     def takeN: List[Feature] = scala.util.Random.shuffle(features).take(numPoints)
@@ -84,11 +88,14 @@ class RouteGuideClientHandler[F[_]: ConcurrentEffect](
           _.recordRoute(
             Observable
               .fromIterable(points)
-              .delayOnNext(500.milliseconds)))
+              .delayOnNext(500.milliseconds)
+          )
+        )
         .map { summary: RouteSummary =>
           logger.info(
             s"Finished trip with ${summary.point_count} points. Passed ${summary.feature_count} features. " +
-              s"Travelled ${summary.distance} meters. It took ${summary.elapsed_time} seconds.")
+              s"Travelled ${summary.distance} meters. It took ${summary.elapsed_time} seconds."
+          )
         }
         .handleErrorWith { e: Throwable =>
           Async[F].delay(logger.warn(s"RecordRoute Failed: ${Status.fromThrowable(e)} $e")) *> e
@@ -102,21 +109,27 @@ class RouteGuideClientHandler[F[_]: ConcurrentEffect](
         .use(
           _.routeChat(
             Observable
-              .fromIterable(List(
-                RouteNote(message = "First message", location = Point(0, 0)),
-                RouteNote(message = "Second message", location = Point(0, 1)),
-                RouteNote(message = "Third message", location = Point(1, 0)),
-                RouteNote(message = "Fourth message", location = Point(1, 1))
-              ))
+              .fromIterable(
+                List(
+                  RouteNote(message = "First message", location = Point(0, 0)),
+                  RouteNote(message = "Second message", location = Point(0, 1)),
+                  RouteNote(message = "Third message", location = Point(1, 0)),
+                  RouteNote(message = "Fourth message", location = Point(1, 1))
+                )
+              )
               .delayOnNext(10.milliseconds)
               .map { routeNote =>
-                logger.info(s"Sending message '${routeNote.message}' at " +
-                  s"${routeNote.location.latitude}, ${routeNote.location.longitude}")
+                logger.info(
+                  s"Sending message '${routeNote.message}' at " +
+                    s"${routeNote.location.latitude}, ${routeNote.location.longitude}"
+                )
                 routeNote
               }
           ).map { note: RouteNote =>
-              logger.info(s"Got message '${note.message}' at " +
-                s"${note.location.latitude}, ${note.location.longitude}")
+              logger.info(
+                s"Got message '${note.message}' at " +
+                  s"${note.location.latitude}, ${note.location.longitude}"
+              )
             }
             .onErrorHandle {
               case e: Throwable =>
@@ -124,6 +137,7 @@ class RouteGuideClientHandler[F[_]: ConcurrentEffect](
                 throw e
             }
             .completedL
-            .toAsync[F])
+            .toAsync[F]
+        )
 
 }

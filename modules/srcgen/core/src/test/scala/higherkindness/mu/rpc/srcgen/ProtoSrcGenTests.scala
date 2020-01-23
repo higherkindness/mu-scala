@@ -55,7 +55,8 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
             NoCompressionGen,
             UseIdiomaticEndpoints(false),
             MonixObservable,
-            new java.io.File("."))
+            new java.io.File(".")
+          )
           .generateFrom(files = Set(protoFile("book")), serializationType = "", options = "")
           .map(t => (t._2, t._3.mkString("\n").clean))
           .headOption
@@ -123,10 +124,12 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
       |@service(Protobuf, Identity) trait BookService[F[_]] {
       |  def GetBook(req: _root_.com.proto.book.GetBookRequest): F[_root_.com.proto.book.Book]
       |  def GetBooksViaAuthor(req: _root_.com.proto.book.GetBookViaAuthor): ${streamOf(
-         "_root_.com.proto.book.Book")}
+         "_root_.com.proto.book.Book"
+       )}
       |  def GetGreatestBook(req: ${streamOf("_root_.com.proto.book.GetBookRequest")}): F[_root_.com.proto.book.Book]
       |  def GetBooks(req: ${streamOf("_root_.com.proto.book.GetBookRequest")}): ${streamOf(
-         "_root_.com.proto.book.Book")}
+         "_root_.com.proto.book.Book"
+       )}
       |}
       |
       |}""".stripMargin

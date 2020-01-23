@@ -43,7 +43,8 @@ object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
       gaugeName: String,
       gaugeType: GaugeType,
       op: IO[Unit],
-      status: Option[Status] = None): IO[Boolean] =
+      status: Option[Status] = None
+  ): IO[Boolean] =
     (1 to numberOfCalls).toList
       .map(_ => op)
       .sequence_
@@ -167,7 +168,8 @@ object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
               numberOfCalls,
               registry,
               s"$prefix.$classifier.${methodTypeDescription(methodInfo)}",
-              Timer) &&
+              Timer
+            ) &&
             checkMetrics(
               numberOfCalls,
               registry,

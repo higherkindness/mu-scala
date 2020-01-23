@@ -90,8 +90,8 @@ trait CommonUtils {
 
   def withClient[Client, A](
       serviceDef: ConcurrentMonad[ServerServiceDefinition],
-      resourceBuilder: ConcurrentMonad[ManagedChannel] => Resource[ConcurrentMonad, Client])(
-      f: Client => A): A =
+      resourceBuilder: ConcurrentMonad[ManagedChannel] => Resource[ConcurrentMonad, Client]
+  )(f: Client => A): A =
     withServerChannel(serviceDef)
       .flatMap(sc => resourceBuilder(suspendM(sc.channel)))
       .use(client => suspendM(f(client)))

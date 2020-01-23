@@ -135,7 +135,8 @@ trait AstOptics {
   val streamingTypeFromConstructor: Optional[Tree, String] = ast._AppliedTypeTree ^|-> appliedTypeTreeTpt ^<-? ast._Ident ^<-? _StreamingConstructor
 
   val returnType: Lens[DefDef, Tree] = Lens[DefDef, Tree](_.tpt)(tpt =>
-    defdef => DefDef(defdef.mods, defdef.name, defdef.tparams, defdef.vparamss, tpt, defdef.rhs))
+    defdef => DefDef(defdef.mods, defdef.name, defdef.tparams, defdef.vparamss, tpt, defdef.rhs)
+  )
 
   val returnTypeAsString = returnType ^|-? rpcTypeNameFromTypeConstructor
 
@@ -200,7 +201,8 @@ trait AstOptics {
 
   val annotations: Lens[Modifiers, List[Tree]] =
     Lens[Modifiers, List[Tree]](_.annotations)(anns =>
-      mod => Modifiers(mod.flags, mod.privateWithin, anns))
+      mod => Modifiers(mod.flags, mod.privateWithin, anns)
+    )
 
   val parsedAnnotations: Traversal[Tree, Annotation] = modifiers ^|-> annotations ^|->> each ^|-? toAnnotation
 

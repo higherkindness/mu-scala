@@ -173,21 +173,22 @@ object Utils extends CommonUtils {
       ProtoRPCService.client[ConcurrentMonad](createChannelFor)
     val muAvroRPCServiceClient: Resource[ConcurrentMonad, AvroRPCService[ConcurrentMonad]] =
       AvroRPCService.client[ConcurrentMonad](createChannelFor)
-    val muAvroWithSchemaRPCServiceClient: Resource[
-      ConcurrentMonad,
-      AvroWithSchemaRPCService[ConcurrentMonad]] =
+    val muAvroWithSchemaRPCServiceClient: Resource[ConcurrentMonad, AvroWithSchemaRPCService[
+      ConcurrentMonad
+    ]] =
       AvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
-    val muCompressedProtoRPCServiceClient: Resource[
-      ConcurrentMonad,
-      CompressedProtoRPCService[ConcurrentMonad]] =
+    val muCompressedProtoRPCServiceClient: Resource[ConcurrentMonad, CompressedProtoRPCService[
+      ConcurrentMonad
+    ]] =
       CompressedProtoRPCService.client[ConcurrentMonad](createChannelFor)
-    val muCompressedAvroRPCServiceClient: Resource[
-      ConcurrentMonad,
-      CompressedAvroRPCService[ConcurrentMonad]] =
+    val muCompressedAvroRPCServiceClient: Resource[ConcurrentMonad, CompressedAvroRPCService[
+      ConcurrentMonad
+    ]] =
       CompressedAvroRPCService.client[ConcurrentMonad](createChannelFor)
     val muCompressedAvroWithSchemaRPCServiceClient: Resource[
       ConcurrentMonad,
-      CompressedAvroWithSchemaRPCService[ConcurrentMonad]] =
+      CompressedAvroWithSchemaRPCService[ConcurrentMonad]
+    ] =
       CompressedAvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
 
   }

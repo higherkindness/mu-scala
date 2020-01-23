@@ -59,14 +59,16 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
         bd1: BigDecimal @@ (Nat._8, Nat._2),
         bd2: BigDecimal @@ ((Nat._1, Nat._2), Nat._2),
         bd3: BigDecimal @@ ((Nat._2, Nat._0), (Nat._1, Nat._2)),
-        label: String)
+        label: String
+    )
 
     case class ResponsePS(
         bd1: BigDecimal @@ (Nat._8, Nat._2),
         bd2: BigDecimal @@ ((Nat._1, Nat._2), Nat._2),
         bd3: BigDecimal @@ ((Nat._2, Nat._0), (Nat._1, Nat._2)),
         result: String,
-        check: Boolean)
+        check: Boolean
+    )
 
     @service(Protobuf) trait ProtoRPCServiceDef[F[_]] {
       def bigDecimalProtoWrapper(req: Request): F[Response]
@@ -77,7 +79,8 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
     }
     @service(AvroWithSchema) trait AvroWithSchemaRPCServiceDef[F[_]] {
       def bigDecimalAvroWithSchema(
-          bd: BigDecimal @@ (Nat._8, Nat._2)): F[BigDecimal @@ (Nat._8, Nat._2)]
+          bd: BigDecimal @@ (Nat._8, Nat._2)
+      ): F[BigDecimal @@ (Nat._8, Nat._2)]
       def bigDecimalAvroWithSchemaWrapper(req: RequestPS): F[ResponsePS]
     }
 
@@ -96,7 +99,8 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
         ResponsePS(req.bd1, req.bd2, req.bd3, req.label, check = true).pure
 
       def bigDecimalAvroWithSchema(
-          bd: BigDecimal @@ (Nat._8, Nat._2)): F[BigDecimal @@ (Nat._8, Nat._2)] = bd.pure
+          bd: BigDecimal @@ (Nat._8, Nat._2)
+      ): F[BigDecimal @@ (Nat._8, Nat._2)] = bd.pure
 
       def bigDecimalAvroWithSchemaWrapper(req: RequestPS): F[ResponsePS] =
         ResponsePS(req.bd1, req.bd2, req.bd3, req.label, check = true).pure
@@ -139,13 +143,15 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
       withClient(
         ProtoRPCServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll { (bd: BigDecimal, s: String) =>
             client.bigDecimalProtoWrapper(Request(bd, s)).unsafeRunSync() == Response(
               bd,
               s,
-              check = true)
+              check = true
+            )
           }
         }
       }
@@ -156,7 +162,8 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
       withClient(
         AvroRPCServiceDef.bindService[ConcurrentMonad],
-        AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(bigDecimalGen(2)) { bd =>
             client.bigDecimalAvro(tag[(Nat._8, Nat._2)][BigDecimal](bd)).unsafeRunSync() == bd
@@ -170,7 +177,8 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
       withClient(
         AvroRPCServiceDef.bindService[ConcurrentMonad],
-        AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll { request: RequestPS =>
             client.bigDecimalAvroWrapper(request).unsafeRunSync() == ResponsePS(
@@ -178,7 +186,8 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
               request.bd2,
               request.bd3,
               request.label,
-              check = true)
+              check = true
+            )
           }
         }
       }
@@ -189,7 +198,8 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
       withClient(
         AvroWithSchemaRPCServiceDef.bindService[ConcurrentMonad],
-        AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(bigDecimalGen(2)) { bd =>
             client
@@ -205,7 +215,8 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
       withClient(
         AvroWithSchemaRPCServiceDef.bindService[ConcurrentMonad],
-        AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll { request: RequestPS =>
             client
@@ -215,7 +226,8 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
               request.bd2,
               request.bd3,
               request.label,
-              check = true)
+              check = true
+            )
           }
         }
       }
@@ -234,7 +246,8 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
       withClient(
         AvroRPCServiceDef.bindService[ConcurrentMonad],
-        AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(bigDecimalGen(12)) { bd =>
             client
@@ -251,7 +264,8 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
       withClient(
         AvroRPCServiceDef.bindService[ConcurrentMonad],
-        AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll(bigDecimalGen(12)) { bd =>
             val bdTagged = tag[(Nat._8, Nat._2)][BigDecimal](bd)
@@ -260,7 +274,8 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
               .unsafeRunSync() == Response(
               tag[(Nat._8, Nat._2)][BigDecimal](bd.setScale(2, RM)),
               "label",
-              check = true)
+              check = true
+            )
           }
         }
       }

@@ -25,7 +25,8 @@ import com.google.common.util.concurrent.{FutureCallback, Futures, ListenableFut
 package object client {
 
   private[internal] def listenableFuture2Async[F[_], A](
-      fa: => ListenableFuture[A])(implicit E: Effect[F], CS: ContextShift[F]): F[A] =
+      fa: => ListenableFuture[A]
+  )(implicit E: Effect[F], CS: ContextShift[F]): F[A] =
     E.async { cb =>
       Futures.addCallback(
         fa,

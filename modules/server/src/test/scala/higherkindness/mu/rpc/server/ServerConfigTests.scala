@@ -53,7 +53,8 @@ class ServerConfigTests extends RpcServerTestSuite {
       val server: IO[GrpcServer[IO]] =
         GrpcServer.netty(
           ChannelForSocketAddress(new InetSocketAddress(SC.host, SC.port)),
-          configList)
+          configList
+        )
 
       server.flatMap(_.getServices).unsafeRunSync shouldBe List(sd1)
     }

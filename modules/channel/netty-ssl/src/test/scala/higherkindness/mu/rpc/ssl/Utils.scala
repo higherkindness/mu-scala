@@ -90,7 +90,8 @@ object Utils extends CommonUtils {
       GrpcSslContexts
         .configure(
           GrpcSslContexts.forServer(serverCertFile, serverPrivateKeyFile),
-          SslProvider.OPENSSL)
+          SslProvider.OPENSSL
+        )
         .trustManager(serverTrustedCaCerts: _*)
         .clientAuth(ClientAuth.REQUIRE)
         .build()
@@ -98,7 +99,8 @@ object Utils extends CommonUtils {
     val grpcConfigs: ConcurrentMonad[List[GrpcConfig]] =
       List(
         AvroRPCService.bindService[ConcurrentMonad],
-        AvroWithSchemaRPCService.bindService[ConcurrentMonad]).sequence
+        AvroWithSchemaRPCService.bindService[ConcurrentMonad]
+      ).sequence
         .map(_.map(AddService))
         .map(services => SetSslContext(serverSslContext) :: services)
 

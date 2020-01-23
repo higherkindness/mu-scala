@@ -55,7 +55,8 @@ object OpenApiSrcGenerator {
     protected def generateFrom(
         inputFile: File,
         serializationType: String,
-        options: String*): Option[(String, Seq[String])] =
+        options: String*
+    ): Option[(String, Seq[String])] =
       getCode[IO](inputFile).value.unsafeRunSync()
 
     private def getCode[F[_]: Sync](file: File): Nested[F, Option, (String, Seq[String])] =
@@ -90,10 +91,12 @@ object OpenApiSrcGenerator {
             Parser[F, JsonSource, OpenApi[JsonSchemaF.Fixed]].parse(_).map(_.some),
             Parser[F, YamlSource, OpenApi[JsonSchemaF.Fixed]].parse(_).map(_.some),
             Sync[F].delay(none)
-          ))
+          )
+        )
 
     private def handleFile[T](
-        file: File)(json: JsonSource => T, yaml: YamlSource => T, none: T): T = file match {
+        file: File
+    )(json: JsonSource => T, yaml: YamlSource => T, none: T): T = file match {
       case x if (x.getName().endsWith(JsonExtension)) => json(JsonSource(file))
       case x if (x.getName().endsWith(YamlExtension)) => yaml(YamlSource(file))
       case _                                          => none

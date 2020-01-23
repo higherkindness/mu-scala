@@ -25,7 +25,8 @@ object unaryCalls {
 
   def unaryMethod[F[_]: Effect, Req, Res](
       f: Req => F[Res],
-      maybeCompression: Option[String]): UnaryMethod[Req, Res] =
+      maybeCompression: Option[String]
+  ): UnaryMethod[Req, Res] =
     new UnaryMethod[Req, Res] {
       override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
         Effect[F]

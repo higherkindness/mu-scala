@@ -38,21 +38,24 @@ object AvroPeopleServiceClient {
 
   val serviceName = "AvroPeopleClient"
 
-  def apply[F[_]: Effect](client: PeopleService[F])(
-      implicit L: Logger[F]): AvroPeopleServiceClient[F] =
+  def apply[F[_]: Effect](
+      client: PeopleService[F]
+  )(implicit L: Logger[F]): AvroPeopleServiceClient[F] =
     new AvroPeopleServiceClient[F] {
 
       def getPerson(name: String): F[Either[PeopleError, Person]] =
         for {
           response <- client.getPerson(PeopleRequest(name))
           _ <- L.info(
-            s"$serviceName - Request: $name - Result: ${response.result.map(PeopleResponseLogger).unify}")
+            s"$serviceName - Request: $name - Result: ${response.result.map(PeopleResponseLogger).unify}"
+          )
         } yield response.result.map(PeopleResponseHandler).unify
 
     }
 
   def createClient[F[_]: ContextShift: Logger](hostname: String, port: Int)(
-      implicit F: ConcurrentEffect[F]): fs2.Stream[F, AvroPeopleServiceClient[F]] = {
+      implicit F: ConcurrentEffect[F]
+  ): fs2.Stream[F, AvroPeopleServiceClient[F]] = {
 
     val channel: F[ManagedChannel] =
       F.delay(InetAddress.getByName(hostname).getHostAddress).flatMap { ip =>

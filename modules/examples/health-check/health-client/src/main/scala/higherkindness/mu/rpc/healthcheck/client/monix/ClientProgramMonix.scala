@@ -22,9 +22,10 @@ import io.chrisdavenport.log4cats.Logger
 
 object ClientProgramMonix {
 
-  def clientProgramIO(who: String, mode: String)(
-      implicit handler: HealthCheckClientHandlerMonix[IO],
-      logger: Logger[IO]) =
+  def clientProgramIO(
+      who: String,
+      mode: String
+  )(implicit handler: HealthCheckClientHandlerMonix[IO], logger: Logger[IO]) =
     mode match {
       case "watch" =>
         for {
@@ -38,7 +39,8 @@ object ClientProgramMonix {
           _ <- logger.info("///////////////////////Starting program")
           _ <- handler.settingAndCheck("example", ServerStatus("SERVING"))
           _ <- handler.settingAndFullClean(
-            List(("example1", ServerStatus("SERVING")), ("example2", ServerStatus("SERVING"))))
+            List(("example1", ServerStatus("SERVING")), ("example2", ServerStatus("SERVING")))
+          )
           _ <- logger.info("///////////////////////Exiting program")
         } yield ()
 

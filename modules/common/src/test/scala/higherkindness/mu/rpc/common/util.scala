@@ -43,7 +43,8 @@ object util {
   object FakeClock {
     def build[F[_]: Sync](
         step: Long = 50,
-        timeUnit: TimeUnit = TimeUnit.NANOSECONDS): F[FakeClock[F]] =
+        timeUnit: TimeUnit = TimeUnit.NANOSECONDS
+    ): F[FakeClock[F]] =
       Ref.of[F, Long](0).map(FakeClock(step, timeUnit))
   }
 

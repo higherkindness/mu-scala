@@ -70,8 +70,8 @@ class MetricsServerInterceptorTests extends RpcBaseTestSuite {
   }
 
   private[this] def makeProtoCalls[A](metricsOps: MetricsOps[IO], clock: FakeClock[IO])(
-      f: ProtoRPCService[IO] => IO[A])(
-      implicit H: ProtoRPCService[IO]): IO[Either[Throwable, A]] = {
+      f: ProtoRPCService[IO] => IO[A]
+  )(implicit H: ProtoRPCService[IO]): IO[Either[Throwable, A]] = {
     implicit val _: Clock[IO] = clock
     withServerChannel[IO](
       service = ProtoRPCService
@@ -84,7 +84,8 @@ class MetricsServerInterceptorTests extends RpcBaseTestSuite {
   private[this] def checkCalls(
       metricsOps: MetricsOpsRegister,
       methodCalls: List[GrpcMethodInfo],
-      serverError: Boolean = false): IO[Assertion] = {
+      serverError: Boolean = false
+  ): IO[Assertion] = {
     for {
       decArgs   <- metricsOps.decreaseActiveCallsReg.get
       incArgs   <- metricsOps.increaseActiveCallsReg.get

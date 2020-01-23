@@ -67,26 +67,30 @@ object PrometheusMetrics {
 
   def build[F[_]: Sync](
       cr: CollectorRegistry,
-      prefix: String = "higherkindness_mu"): F[MetricsOps[F]] =
+      prefix: String = "higherkindness_mu"
+  ): F[MetricsOps[F]] =
     buildMetrics[F](prefix, cr).map(PrometheusMetrics[F])
 
   def apply[F[_]: Sync](metrics: Metrics)(implicit F: Sync[F]): MetricsOps[F] =
     new MetricsOps[F] {
       override def increaseActiveCalls(
           methodInfo: GrpcMethodInfo,
-          classifier: Option[String]): F[Unit] = F.delay {
+          classifier: Option[String]
+      ): F[Unit] = F.delay {
         metrics.activeCalls.labels(label(classifier)).inc()
       }
 
       override def decreaseActiveCalls(
           methodInfo: GrpcMethodInfo,
-          classifier: Option[String]): F[Unit] = F.delay {
+          classifier: Option[String]
+      ): F[Unit] = F.delay {
         metrics.activeCalls.labels(label(classifier)).dec()
       }
 
       override def recordMessageSent(
           methodInfo: GrpcMethodInfo,
-          classifier: Option[String]): F[Unit] = F.delay {
+          classifier: Option[String]
+      ): F[Unit] = F.delay {
         metrics.messagesSent
           .labels(label(classifier), methodInfo.serviceName, methodInfo.methodName)
           .inc()
@@ -94,7 +98,8 @@ object PrometheusMetrics {
 
       override def recordMessageReceived(
           methodInfo: GrpcMethodInfo,
-          classifier: Option[String]): F[Unit] = F.delay {
+          classifier: Option[String]
+      ): F[Unit] = F.delay {
         metrics.messagesReceived
           .labels(label(classifier), methodInfo.serviceName, methodInfo.methodName)
           .inc()
@@ -103,7 +108,8 @@ object PrometheusMetrics {
       override def recordHeadersTime(
           methodInfo: GrpcMethodInfo,
           elapsed: Long,
-          classifier: Option[String]): F[Unit] = F.delay {
+          classifier: Option[String]
+      ): F[Unit] = F.delay {
         metrics.headersTime
           .labels(label(classifier))
           .observe(SimpleTimer.elapsedSecondsFromNanos(0, elapsed))
@@ -113,19 +119,22 @@ object PrometheusMetrics {
           methodInfo: GrpcMethodInfo,
           status: Status,
           elapsed: Long,
-          classifier: Option[String]): F[Unit] = F.delay {
+          classifier: Option[String]
+      ): F[Unit] = F.delay {
         metrics.totalTime
           .labels(
             label(classifier),
             methodTypeDescription(methodInfo),
-            statusDescription(grpcStatusFromRawStatus(status)))
+            statusDescription(grpcStatusFromRawStatus(status))
+          )
           .observe(SimpleTimer.elapsedSecondsFromNanos(0, elapsed))
       }
     }
 
   private[this] def buildMetrics[F[_]: Sync](
       prefix: String,
-      registry: CollectorRegistry): F[Metrics] = Sync[F].delay {
+      registry: CollectorRegistry
+  ): F[Metrics] = Sync[F].delay {
     Metrics(
       activeCalls = Gauge
         .build()

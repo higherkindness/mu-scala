@@ -32,9 +32,11 @@ class OrderingTest extends WordSpec with Matchers {
     }
     "work with integer comparison" in {
       assert(
-        orderForHealthCheck.compare(new HealthCheck("example"), new HealthCheck("example")) == 0)
+        orderForHealthCheck.compare(new HealthCheck("example"), new HealthCheck("example")) == 0
+      )
       assert(
-        orderForHealthCheck.compare(new HealthCheck("example"), new HealthCheck("no example")) < 0)
+        orderForHealthCheck.compare(new HealthCheck("example"), new HealthCheck("no example")) < 0
+      )
     }
   }
 

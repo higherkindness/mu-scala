@@ -23,12 +23,14 @@ import higherkindness.mu.rpc.server.{GrpcConfig, GrpcServer}
 package object server {
 
   def BuildServerFromConfig[F[_]: Functor](portPath: String, configList: List[GrpcConfig] = Nil)(
-      implicit SC: ServerConfig[F]): F[GrpcServer[F]] =
+      implicit SC: ServerConfig[F]
+  ): F[GrpcServer[F]] =
     SC.buildServer(portPath, configList)
 
   def BuildNettyServerFromConfig[F[_]: Functor](
       portPath: String,
-      configList: List[GrpcConfig] = Nil)(implicit SC: ServerConfig[F]): F[GrpcServer[F]] =
+      configList: List[GrpcConfig] = Nil
+  )(implicit SC: ServerConfig[F]): F[GrpcServer[F]] =
     SC.buildNettyServer(portPath, configList)
 
 }

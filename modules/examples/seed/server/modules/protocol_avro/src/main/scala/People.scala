@@ -31,5 +31,5 @@ sealed trait People extends Product with Serializable
 @message final case class PeopleRequest(name: String) extends People
 
 @message final case class PeopleResponse(
-    result: Person :+: NotFoundError :+: DuplicatedPersonError :+: CNil)
-    extends People
+    result: Person :+: NotFoundError :+: DuplicatedPersonError :+: CNil
+) extends People

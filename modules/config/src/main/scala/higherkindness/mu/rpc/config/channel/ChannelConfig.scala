@@ -35,7 +35,8 @@ class ChannelConfig[F[_]](implicit S: Sync[F], C: ConfigM[F]) {
       config <- C.load
       host <- S.pure(
         Either
-          .catchOnly[Missing](config.getString(hostPath)))
+          .catchOnly[Missing](config.getString(hostPath))
+      )
       port <- S.pure(Either.catchOnly[Missing](config.getInt(portPath)))
     } yield ChannelForAddress(host.getOrElse(defaultHost), port.getOrElse(defaultPort))
 

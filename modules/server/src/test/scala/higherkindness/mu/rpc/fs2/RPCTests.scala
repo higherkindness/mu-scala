@@ -86,7 +86,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
             _.serverStreamingWithError(E(a1, errorCode))
               .handleErrorWith(ex => Stream(C(ex.getMessage, a1)))
               .compile
-              .toList)
+              .toList
+          )
 
       clientProgram("SE")
         .unsafeRunSync() shouldBe List(C("INVALID_ARGUMENT: SE", a1))
@@ -117,7 +118,9 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run client bidirectional streaming services with avro schema" in {
 
       muAvroWithSchemaRPCServiceClient
-        .use(_.biStreamingWithSchema(Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList)
+        .use(
+          _.biStreamingWithSchema(Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList
+        )
         .unsafeRunSync()
         .distinct shouldBe eList
 
@@ -131,11 +134,15 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
           muAvroWithSchemaRPCServiceClient.use(_.unaryWithSchema(a1)),
           muProtoRPCServiceClient.use(_.serverStreaming(b1).compile.toList),
           muProtoRPCServiceClient.use(
-            _.clientStreaming(Stream.fromIterator[ConcurrentMonad](aList.iterator))),
+            _.clientStreaming(Stream.fromIterator[ConcurrentMonad](aList.iterator))
+          ),
           muAvroRPCServiceClient.use(
-            _.biStreaming(Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList),
-          muAvroWithSchemaRPCServiceClient.use(_.biStreamingWithSchema(
-            Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList))
+            _.biStreaming(Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList
+          ),
+          muAvroWithSchemaRPCServiceClient.use(
+            _.biStreamingWithSchema(Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList
+          )
+        )
 
       tuple._1.unsafeRunSync() shouldBe c1
       tuple._2.unsafeRunSync() shouldBe c1
@@ -182,7 +189,9 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run client bidirectional streaming services" in {
 
       muCompressedAvroRPCServiceClient
-        .use(_.biStreamingCompressed(Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList)
+        .use(
+          _.biStreamingCompressed(Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList
+        )
         .unsafeRunSync()
         .distinct shouldBe eList
 
@@ -192,7 +201,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       muCompressedAvroWithSchemaRPCServiceClient
         .use(
-          _.biStreamingCompressedWithSchema(Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList)
+          _.biStreamingCompressedWithSchema(Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList
+        )
         .unsafeRunSync()
         .distinct shouldBe eList
 
@@ -206,13 +216,18 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
           muCompressedAvroWithSchemaRPCServiceClient.use(_.unaryCompressedWithSchema(a1)),
           muCompressedProtoRPCServiceClient.use(_.serverStreamingCompressed(b1).compile.toList),
           muCompressedProtoRPCServiceClient.use(
-            _.clientStreamingCompressed(Stream.fromIterator[ConcurrentMonad](aList.iterator))),
-          muCompressedAvroRPCServiceClient.use(_.biStreamingCompressed(
-            Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList),
+            _.clientStreamingCompressed(Stream.fromIterator[ConcurrentMonad](aList.iterator))
+          ),
+          muCompressedAvroRPCServiceClient.use(
+            _.biStreamingCompressed(Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList
+          ),
           muCompressedAvroWithSchemaRPCServiceClient
             .use(
               _.biStreamingCompressedWithSchema(
-                Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList))
+                Stream.fromIterator[ConcurrentMonad](eList.iterator)
+              ).compile.toList
+            )
+        )
 
       tuple._1.unsafeRunSync() shouldBe c1
       tuple._2.unsafeRunSync() shouldBe c1

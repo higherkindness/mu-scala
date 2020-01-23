@@ -69,20 +69,21 @@ class MonitoringChannelInterceptorTests extends RpcBaseTestSuite {
   }
 
   private[this] def makeProtoCalls[A](metricsOps: MetricsOps[IO], clock: FakeClock[IO])(
-      f: ProtoRPCService[IO] => IO[A])(
-      implicit H: ProtoRPCService[IO]): IO[Either[Throwable, A]] = {
+      f: ProtoRPCService[IO] => IO[A]
+  )(implicit H: ProtoRPCService[IO]): IO[Either[Throwable, A]] = {
     implicit val _: Clock[IO] = clock
     withServerChannel[IO](
       service = ProtoRPCService.bindService[IO],
-      clientInterceptor = Some(MetricsChannelInterceptor(metricsOps, myClassifier)))
-      .flatMap(createClient)
+      clientInterceptor = Some(MetricsChannelInterceptor(metricsOps, myClassifier))
+    ).flatMap(createClient)
       .use(f(_).attempt)
   }
 
   private[this] def checkCalls(
       metricsOps: MetricsOpsRegister,
       methodCalls: List[GrpcMethodInfo],
-      serverError: Boolean = false): IO[Assertion] = {
+      serverError: Boolean = false
+  ): IO[Assertion] = {
     for {
       incArgs     <- metricsOps.increaseActiveCallsReg.get
       sentArgs    <- metricsOps.recordMessageSentReg.get
