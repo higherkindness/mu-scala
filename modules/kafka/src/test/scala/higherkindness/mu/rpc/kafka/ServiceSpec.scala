@@ -87,7 +87,8 @@ class ServiceSpec extends AnyFunSuite with Matchers with OneInstancePerTest with
           _                <- IO(assert(deletes.isRight))
           listedTopicNames <- client.listTopics(Empty)
           _ <- IO(
-            assert(topicNames.forall(n => !listedTopicNames.listings.map(_.name).contains(n))))
+            assert(topicNames.forall(n => !listedTopicNames.listings.map(_.name).contains(n)))
+          )
         } yield ()
       }.unsafeRunSync()
     }
@@ -108,7 +109,9 @@ class ServiceSpec extends AnyFunSuite with Matchers with OneInstancePerTest with
               describe.toOption
                 .flatMap(_.topics.headOption)
                 .map(_.partitions.length == 2)
-                .getOrElse(false)))
+                .getOrElse(false)
+            )
+          )
           partition <- client
             .createPartitions(CreatePartitionsRequest(topicName, 4))
             .attempt
@@ -141,9 +144,9 @@ class ServiceSpec extends AnyFunSuite with Matchers with OneInstancePerTest with
           create    <- client.createTopic(CreateTopicRequest(topicName, 2, 1)).attempt
           _         <- IO(assert(create.isRight))
           resource = ConfigResource(ConfigType.TopicConfigType, topicName)
-          request = AlterConfigsRequest(AlterConfig(
-            resource,
-            AlterConfigOp("cleanup.policy", "compact", OpType.Set) :: Nil) :: Nil)
+          request = AlterConfigsRequest(
+            AlterConfig(resource, AlterConfigOp("cleanup.policy", "compact", OpType.Set) :: Nil) :: Nil
+          )
           alter <- client.alterConfigs(request).attempt
           _     <- IO(assert(alter.isRight))
           entry = ConfigEntry(
@@ -152,7 +155,8 @@ class ServiceSpec extends AnyFunSuite with Matchers with OneInstancePerTest with
             ConfigSource.DynamicTopicConfig,
             false,
             false,
-            Nil)
+            Nil
+          )
           describe <- client.describeConfigs(DescribeConfigsRequest(resource :: Nil)).attempt
           _        <- IO(assert(describe.isRight))
           _ <- IO(
@@ -160,7 +164,9 @@ class ServiceSpec extends AnyFunSuite with Matchers with OneInstancePerTest with
               describe.toOption
                 .flatMap(_.configs.headOption)
                 .map(c => c.resource == resource && c.entries.contains(entry))
-                .getOrElse(false)))
+                .getOrElse(false)
+            )
+          )
         } yield ()
       }.unsafeRunSync()
     }

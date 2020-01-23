@@ -30,11 +30,13 @@ object ConfigService {
   def apply[F[_]: Effect]: ConfigService[F] = new ConfigService[F] {
 
     override def serviceConfig[Config](
-        implicit reader: Derivation[ConfigReader[Config]]): F[Config] =
+        implicit reader: Derivation[ConfigReader[Config]]
+    ): F[Config] =
       Effect[F].fromEither(
         pureconfig
           .loadConfig[Config]
-          .leftMap(e => new IllegalStateException(s"Error loading configuration: $e")))
+          .leftMap(e => new IllegalStateException(s"Error loading configuration: $e"))
+      )
 
   }
 }

@@ -42,7 +42,8 @@ class GrpcServerTests extends RpcServerTestSuite {
         Boolean,
         Boolean,
         Boolean,
-        Unit)
+        Unit
+    )
 
     "behaves as expected" in {
 
@@ -78,7 +79,8 @@ class GrpcServerTests extends RpcServerTestSuite {
         b,
         b,
         b,
-        unit): Result)
+        unit
+      ): Result)
 
       (serverMock.start _: () => Server).verify().once()
       (serverMock.getPort _: () => Int).verify().once()

@@ -25,7 +25,8 @@ object interceptors {
     def interceptCall[ReqT, RespT](
         method: MethodDescriptor[ReqT, RespT],
         callOptions: CallOptions,
-        next: Channel): ClientCall[ReqT, RespT] = next.newCall(method, callOptions)
+        next: Channel
+    ): ClientCall[ReqT, RespT] = next.newCall(method, callOptions)
   }
 
 }

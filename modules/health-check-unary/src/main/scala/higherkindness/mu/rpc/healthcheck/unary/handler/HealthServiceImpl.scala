@@ -33,7 +33,8 @@ object HealthService {
 }
 
 abstract class AbstractHealthService[F[_]: Functor](
-    checkStatus: Ref[F, Map[String, ServerStatus]]) {
+    checkStatus: Ref[F, Map[String, ServerStatus]]
+) {
 
   def check(service: HealthCheck): F[ServerStatus] =
     checkStatus.modify(m => (m, m.getOrElse(service.nameService, ServerStatus("UNKNOWN"))))

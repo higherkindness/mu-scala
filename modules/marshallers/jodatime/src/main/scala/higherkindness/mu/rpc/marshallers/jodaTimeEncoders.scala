@@ -92,21 +92,25 @@ object jodaTimeEncoders {
       implicit object JodaLocalDateMarshaller extends Marshaller[LocalDate] {
         override def stream(value: LocalDate): InputStream =
           new ByteArrayInputStream(
-            EncoderUtil.intToByteArray(JodaTimeUtil.jodaLocalDateToInt(value)))
+            EncoderUtil.intToByteArray(JodaTimeUtil.jodaLocalDateToInt(value))
+          )
 
         override def parse(stream: InputStream): LocalDate =
           JodaTimeUtil.intToJodaLocalDate(
-            EncoderUtil.byteArrayToInt(ByteStreams.toByteArray(stream)))
+            EncoderUtil.byteArrayToInt(ByteStreams.toByteArray(stream))
+          )
       }
 
       implicit object JodaLocalDateTimeMarshaller extends Marshaller[LocalDateTime] {
         override def stream(value: LocalDateTime): InputStream =
           new ByteArrayInputStream(
-            EncoderUtil.longToByteArray(JodaTimeUtil.jodaLocalDateTimeToLong(value)))
+            EncoderUtil.longToByteArray(JodaTimeUtil.jodaLocalDateTimeToLong(value))
+          )
 
         override def parse(stream: InputStream): LocalDateTime =
           JodaTimeUtil.longToJodaLocalDateTime(
-            EncoderUtil.byteArrayToLong(ByteStreams.toByteArray(stream)))
+            EncoderUtil.byteArrayToLong(ByteStreams.toByteArray(stream))
+          )
       }
 
     }

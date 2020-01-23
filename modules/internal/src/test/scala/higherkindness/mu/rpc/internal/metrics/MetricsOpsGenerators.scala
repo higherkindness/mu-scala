@@ -37,14 +37,15 @@ object MetricsOpsGenerators {
           MethodType.CLIENT_STREAMING,
           MethodType.SERVER_STREAMING,
           MethodType.UNARY,
-          MethodType.UNKNOWN))
-    } yield
-      GrpcMethodInfo(
-        serviceName,
-        fullMethodName,
-        methodName,
-        methodType
+          MethodType.UNKNOWN
+        )
       )
+    } yield GrpcMethodInfo(
+      serviceName,
+      fullMethodName,
+      methodName,
+      methodType
+    )
 
   def statusGen: Gen[Status] = Gen.oneOf(
     Status.ABORTED,

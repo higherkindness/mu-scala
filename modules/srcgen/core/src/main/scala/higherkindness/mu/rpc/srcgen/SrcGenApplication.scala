@@ -49,7 +49,8 @@ object SrcGenApplication {
         marshallersImports,
         bigDecimalTypeGen,
         compressionType,
-        useIdiomaticEndpoints),
+        useIdiomaticEndpoints
+      ),
       OpenApiSrcGenerator(httpImpl, resourcesBasePath)
     ) {
       def main(args: Array[String]): Unit = {

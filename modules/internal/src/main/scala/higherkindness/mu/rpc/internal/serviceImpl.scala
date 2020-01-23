@@ -83,7 +83,8 @@ object serviceImpl {
 
       require(
         validStreamingComb,
-        s"RPC service $name has different streaming implementations for request and response")
+        s"RPC service $name has different streaming implementations for request and response"
+      )
 
       val isMonixObservable: Boolean = List(request, response).collect {
         case m: MonixObservableTpe => m
@@ -108,7 +109,8 @@ object serviceImpl {
           Modifiers(
             mod.flags,
             mod.privateWithin,
-            q"new _root_.java.lang.SuppressWarnings(_root_.scala.Array(..$argList))" :: mod.annotations)
+            q"new _root_.java.lang.SuppressWarnings(_root_.scala.Array(..$argList))" :: mod.annotations
+          )
         }
       }
 
@@ -161,7 +163,8 @@ object serviceImpl {
 
       require(
         serviceDef.tparams.length == 1,
-        s"@service-annotated class $serviceName must have a single type parameter")
+        s"@service-annotated class $serviceName must have a single type parameter"
+      )
 
       val F_ : TypeDef = serviceDef.tparams.head
       val F: TypeName  = F_.name
@@ -208,12 +211,11 @@ object serviceImpl {
         params <- d.vparamss
         _ = require(params.length == 1, s"RPC call ${d.name} has more than one request parameter")
         p <- params.headOption.toList
-      } yield
-        RpcRequest(
-          Operation(d.name, TypeTypology(p.tpt), TypeTypology(d.tpt)),
-          compressionType,
-          methodNameStyle
-        )
+      } yield RpcRequest(
+        Operation(d.name, TypeTypology(p.tpt), TypeTypology(d.tpt)),
+        compressionType,
+        methodNameStyle
+      )
 
       val imports: List[Tree] = defs.collect {
         case imp: Import => imp
@@ -225,8 +227,11 @@ object serviceImpl {
           case "Avro"           => Avro
           case "AvroWithSchema" => AvroWithSchema
           case "Custom"         => Custom
-        }.getOrElse(sys.error(
-          "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema|Custom]"))
+        }.getOrElse(
+          sys.error(
+            "@service annotation should have a SerializationType parameter [Protobuf|Avro|AvroWithSchema|Custom]"
+          )
+        )
 
       val encodersImport = serializationType match {
         case Protobuf =>
@@ -261,7 +266,8 @@ object serviceImpl {
       val bindService: DefDef = q"""
         def bindService[$F_](implicit ..$bindImplicits): $F[_root_.io.grpc.ServerServiceDefinition] =
           _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](${lit(
-        fullyServiceName)}, ..$serverCallDescriptorsAndHandlers)
+        fullyServiceName
+      )}, ..$serverCallDescriptorsAndHandlers)
         """
 
       private val clientCallMethods: List[Tree] = rpcRequests.map(_.clientDef)
@@ -327,7 +333,8 @@ object serviceImpl {
       private def lit(x: Any): Literal = Literal(Constant(x.toString))
 
       private def annotationParam[A](pos: Int, name: String)(
-          pf: PartialFunction[String, A]): Option[A] = {
+          pf: PartialFunction[String, A]
+      ): Option[A] = {
 
         def findNamed: Option[Either[String, (String, String)]] =
           annotationParams.find(_.exists(_._1 == name))
@@ -407,15 +414,18 @@ object serviceImpl {
           case Some(RequestStreaming) =>
             q"""
             def $name(input: ${request.getTpe}): ${response.getTpe} = ${clientCallMethodFor(
-              "clientStreaming")}"""
+              "clientStreaming"
+            )}"""
           case Some(ResponseStreaming) =>
             q"""
             def $name(input: ${request.getTpe}): ${response.getTpe} = ${clientCallMethodFor(
-              "serverStreaming")}"""
+              "serverStreaming"
+            )}"""
           case Some(BidirectionalStreaming) =>
             q"""
             def $name(input: ${request.getTpe}): ${response.getTpe} = ${clientCallMethodFor(
-              "bidiStreaming")}"""
+              "bidiStreaming"
+            )}"""
           case None =>
             q"""
             def $name(input: ${request.getTpe}): ${response.getTpe} = ${clientCallMethodFor("unary")}"""
@@ -442,7 +452,8 @@ object serviceImpl {
               q"_root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.higherkindness.mu.rpc.internal.server.unaryCalls.unaryMethod(algebra.$name, $compressionOption))"
             case _ =>
               sys.error(
-                s"Unable to define a handler for the streaming type $streamingType and $prevalentStreamingTarget for the method $name in the service $serviceName")
+                s"Unable to define a handler for the streaming type $streamingType and $prevalentStreamingTarget for the method $name in the service $serviceName"
+              )
           }
           q"($methodDescriptorName, $handler)"
         }
@@ -546,7 +557,8 @@ object serviceImpl {
         op = Operation(d.name, TypeTypology(p.tpt), TypeTypology(d.tpt))
         _ = if (op.isMonixObservable)
           sys.error(
-            "Monix.Observable is not compatible with streaming services. Please consider using Fs2.Stream instead.")
+            "Monix.Observable is not compatible with streaming services. Please consider using Fs2.Stream instead."
+          )
       } yield HttpOperation(op)
 
       val streamConstraints: List[Tree] = List(q"F: _root_.cats.effect.Sync[$F]")
@@ -586,15 +598,18 @@ object serviceImpl {
       val requestDecoders =
         requestTypes.map(n =>
           q"""implicit private val ${TermName("entityDecoder" + n)}:_root_.org.http4s.EntityDecoder[F, ${TypeName(
-            n)}] = jsonOf[F, ${TypeName(n)}]""")
+            n
+          )}] = jsonOf[F, ${TypeName(n)}]"""
+        )
 
       val HttpRestService: TypeName = TypeName(serviceDef.name.toString + "RestService")
 
       val arguments: List[Tree] = List(q"handler: ${serviceDef.name}[F]") ++
-        requestTypes.map(n =>
-          q"${TermName("decoder" + n)}: _root_.io.circe.Decoder[${TypeName(n)}]") ++
+        requestTypes.map(n => q"${TermName("decoder" + n)}: _root_.io.circe.Decoder[${TypeName(n)}]"
+        ) ++
         responseTypes.map(n =>
-          q"${TermName("encoder" + n)}: _root_.io.circe.Encoder[${TypeName(n)}]") ++
+          q"${TermName("encoder" + n)}: _root_.io.circe.Encoder[${TypeName(n)}]"
+        ) ++
         streamConstraints
 
       val httpRestServiceClass: Tree = q"""
@@ -635,7 +650,9 @@ object serviceImpl {
                     List(),
                     List(List()),
                     TypeTree(),
-                    Block(List(pendingSuperCall), Literal(Constant(())))))
+                    Block(List(pendingSuperCall), Literal(Constant(())))
+                  )
+                )
               )
             )
         }

@@ -48,7 +48,8 @@ object ProtoSrcGenerator {
       compressionTypeGen: CompressionTypeGen,
       useIdiomaticEndpoints: UseIdiomaticEndpoints,
       streamingImplementation: StreamingImplementation,
-      idlTargetDir: File): SrcGenerator = new SrcGenerator {
+      idlTargetDir: File
+  ): SrcGenerator = new SrcGenerator {
 
     val idlType: String = proto.IdlType
 
@@ -58,7 +59,8 @@ object ProtoSrcGenerator {
     def generateFrom(
         inputFile: File,
         serializationType: String,
-        options: String*): Option[(String, Seq[String])] =
+        options: String*
+    ): Option[(String, Seq[String])] =
       getCode[IO](inputFile).map(Some(_)).unsafeRunSync
 
     val streamCtor: (Type, Type) => Type.Apply = streamingImplementation match {
@@ -72,13 +74,15 @@ object ProtoSrcGenerator {
     }
 
     val transformToMuProtocol: Protocol[Mu[ProtobufF]] => higherkindness.skeuomorph.mu.Protocol[Mu[
-      MuF]] =
+      MuF
+    ]] =
       higherkindness.skeuomorph.mu.Protocol
         .fromProtobufProto(skeuomorphCompression, useIdiomaticEndpoints)
 
     val generateScalaSource: higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] => Either[
       String,
-      String] =
+      String
+    ] =
       higherkindness.skeuomorph.mu.codegen.protocol(_, streamCtor).map(_.syntax)
 
     val splitLines: String => List[String] = _.split("\n").toList
@@ -90,8 +94,11 @@ object ProtoSrcGenerator {
           val path = getPath(protocol)
           (transformToMuProtocol andThen generateScalaSource)(protocol) match {
             case Left(error) =>
-              F.raiseError(ProtobufSrcGenException(
-                s"Failed to generate Scala source from Protobuf file ${file.getAbsolutePath}. Error details: $error"))
+              F.raiseError(
+                ProtobufSrcGenException(
+                  s"Failed to generate Scala source from Protobuf file ${file.getAbsolutePath}. Error details: $error"
+                )
+              )
             case Right(fileContent) =>
               F.pure(path -> splitLines(fileContent))
           }

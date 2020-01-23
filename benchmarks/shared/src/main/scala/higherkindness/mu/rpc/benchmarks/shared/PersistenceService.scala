@@ -32,7 +32,8 @@ class PersistenceService[F[_]: Effect] {
     Effect[F].delay(
       database.persons
         .find(_.id == pId.id)
-        .getOrElse(throw DatabaseException(s"User $pId not found")))
+        .getOrElse(throw DatabaseException(s"User $pId not found"))
+    )
 
   def getPersonLinks(pId: PersonId): F[PersonLinkList] = {
     val search = database.personLinks.filter(link => link.p1.id == pId.id || link.p2.id == pId.id)

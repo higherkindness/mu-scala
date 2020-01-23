@@ -34,7 +34,8 @@ class GRPCServiceDefBuilderTests extends RpcBaseTestSuite {
   val handler: ServerCallHandler[String, Integer] = new ServerCallHandler[String, Integer]() {
     override def startCall(
         call: ServerCall[String, Integer],
-        headers: Metadata): ServerCall.Listener[String] = listener
+        headers: Metadata
+    ): ServerCall.Listener[String] = listener
   }
 
   "GRPCServiceDefBuilder.apply" should {

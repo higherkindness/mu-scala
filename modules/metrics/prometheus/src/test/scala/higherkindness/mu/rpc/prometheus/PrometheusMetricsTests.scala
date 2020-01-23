@@ -43,8 +43,8 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
       labelNames: List[String],
       labelValues: List[String],
       op: IO[Unit],
-      status: Option[Status] = None)(
-      checkSamples: List[MetricFamilySamples.Sample] => Boolean): IO[Boolean] =
+      status: Option[Status] = None
+  )(checkSamples: List[MetricFamilySamples.Sample] => Boolean): IO[Boolean] =
     (1 to numberOfCalls).toList
       .map(_ => op)
       .sequence_
@@ -52,14 +52,17 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
 
   def findRecordedMetric(
       metricName: String,
-      registry: CollectorRegistry): Option[Collector.MetricFamilySamples] =
+      registry: CollectorRegistry
+  ): Option[Collector.MetricFamilySamples] =
     registry.metricFamilySamples.asScala.find(_.name == metricName)
 
   def findRecordedMetricOrThrow(
       metricName: String,
-      registry: CollectorRegistry): Collector.MetricFamilySamples =
+      registry: CollectorRegistry
+  ): Collector.MetricFamilySamples =
     findRecordedMetric(metricName, registry).getOrElse(
-      throw new IllegalArgumentException(s"Could not find metric with name: $metricName"))
+      throw new IllegalArgumentException(s"Could not find metric with name: $metricName")
+    )
 
   def checkMetrics(
       registry: CollectorRegistry,
@@ -70,7 +73,8 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
     checkSamples(findRecordedMetricOrThrow(metricName, registry).samples.asScala.toList)
 
   def checkSingleSamples(metricName: String, value: Double)(
-      samples: List[MetricFamilySamples.Sample]): Boolean =
+      samples: List[MetricFamilySamples.Sample]
+  ): Boolean =
     samples.find(_.name == metricName).exists(_.value == value)
 
   // Prometheus can return the value with a difference of 0.0000000001
@@ -78,7 +82,8 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
     Math.abs(v1 - v2) < Math.pow(10, -10)
 
   def checkSeriesSamples(metricName: String, numberOfCalls: Int, elapsed: Int)(
-      samples: List[MetricFamilySamples.Sample]): Boolean = {
+      samples: List[MetricFamilySamples.Sample]
+  ): Boolean = {
     samples.find(_.name == metricName + "_count").exists(_.value == numberOfCalls.toDouble) &&
     samples
       .find(_.name == metricName + "_sum")
@@ -111,7 +116,7 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
             List("classifier"),
             List(classifier),
             metrics.decreaseActiveCalls(methodInfo, Some(classifier))
-          )(checkSingleSamples(metricName, 0l))
+          )(checkSingleSamples(metricName, 0L))
         } yield op1 && op2).unsafeRunSync()
     }
 
@@ -174,7 +179,8 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
                 List(
                   classifier,
                   methodTypeDescription(methodInfo),
-                  statusDescription(MetricsOps.grpcStatusFromRawStatus(status)))
+                  statusDescription(MetricsOps.grpcStatusFromRawStatus(status))
+                )
               )(checkSeriesSamples(metricName, numberOfCalls, elapsed))
             }
         } yield op1).unsafeRunSync()

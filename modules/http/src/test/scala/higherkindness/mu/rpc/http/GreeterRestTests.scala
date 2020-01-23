@@ -56,9 +56,9 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
 
   val server: BlazeServerBuilder[IO] = BlazeServerBuilder[IO]
     .bindHttp(Port, Hostname)
-    .withHttpApp(Router(
-      s"/$UnaryServicePrefix" -> unaryService,
-      s"/$Fs2ServicePrefix"   -> fs2Service).orNotFound)
+    .withHttpApp(
+      Router(s"/$UnaryServicePrefix" -> unaryService, s"/$Fs2ServicePrefix" -> fs2Service).orNotFound
+    )
 
   var serverTask: Fiber[IO, Nothing] = _
   before(serverTask = server.resource.use(_ => IO.never).start.unsafeRunSync())
@@ -86,7 +86,8 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
       val response =
         BlazeClientBuilder[IO](ec).resource.use(_.expect[Json](request.withEntity(requestBody)))
       the[UnexpectedStatus] thrownBy response.unsafeRunSync() shouldBe UnexpectedStatus(
-        Status.BadRequest)
+        Status.BadRequest
+      )
     }
 
     "return a 400 Bad Request for a malformed streaming POST request" in {
@@ -95,7 +96,8 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
       val response =
         BlazeClientBuilder[IO](ec).resource.use(_.expect[Json](request.withEntity(requestBody)))
       the[UnexpectedStatus] thrownBy response.unsafeRunSync() shouldBe UnexpectedStatus(
-        Status.BadRequest)
+        Status.BadRequest
+      )
     }
 
   }
@@ -125,7 +127,8 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
         BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.sayHello(request)(_))
       the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
         Status.BadRequest,
-        Some("INVALID_ARGUMENT: SRE"))
+        Some("INVALID_ARGUMENT: SRE")
+      )
     }
 
     "handle a raised non-gRPC exception in a unary POST request" in {
@@ -134,7 +137,8 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
         BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.sayHello(request)(_))
       the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
         Status.InternalServerError,
-        Some("RTE"))
+        Some("RTE")
+      )
     }
 
     "handle a thrown exception in a unary POST request" in {
@@ -142,7 +146,8 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
       val response =
         BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.sayHello(request)(_))
       the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
-        Status.InternalServerError)
+        Status.InternalServerError
+      )
     }
 
     "serve a POST request with fs2 streaming request" in {

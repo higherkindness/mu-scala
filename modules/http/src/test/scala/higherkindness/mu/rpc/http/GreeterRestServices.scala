@@ -28,8 +28,8 @@ import org.http4s.dsl.Http4sDsl
 class UnaryGreeterRestService[F[_]: Sync](
     implicit handler: UnaryGreeter[F],
     decoderHelloRequest: io.circe.Decoder[HelloRequest],
-    encoderHelloResponse: io.circe.Encoder[HelloResponse])
-    extends Http4sDsl[F] {
+    encoderHelloResponse: io.circe.Encoder[HelloResponse]
+) extends Http4sDsl[F] {
 
   import higherkindness.mu.rpc.protocol.Empty
 
@@ -50,8 +50,8 @@ class UnaryGreeterRestService[F[_]: Sync](
 class Fs2GreeterRestService[F[_]: Sync](
     implicit handler: Fs2Greeter[F],
     decoderHelloRequest: io.circe.Decoder[HelloRequest],
-    encoderHelloResponse: io.circe.Encoder[HelloResponse])
-    extends Http4sDsl[F] {
+    encoderHelloResponse: io.circe.Encoder[HelloResponse]
+) extends Http4sDsl[F] {
 
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
 

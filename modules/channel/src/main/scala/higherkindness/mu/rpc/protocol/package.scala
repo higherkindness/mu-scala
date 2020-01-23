@@ -29,8 +29,8 @@ package object protocol {
       val serializationType: SerializationType,
       val compressionType: CompressionType = Identity,
       val namespace: Option[String] = None,
-      val methodNameStyle: MethodNameStyle = Unchanged)
-      extends StaticAnnotation {
+      val methodNameStyle: MethodNameStyle = Unchanged
+  ) extends StaticAnnotation {
     def macroTransform(annottees: Any*): Any = macro serviceImpl.service
   }
 }

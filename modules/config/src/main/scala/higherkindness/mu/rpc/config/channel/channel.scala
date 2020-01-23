@@ -22,11 +22,13 @@ import cats.Functor
 package object channel {
 
   def ConfigForAddress[F[_]: Functor](hostPath: String, portPath: String)(
-      implicit CC: ChannelConfig[F]): F[ChannelForAddress] =
+      implicit CC: ChannelConfig[F]
+  ): F[ChannelForAddress] =
     CC.loadChannelAddress(hostPath, portPath)
 
-  def ConfigForTarget[F[_]: Functor](target: String)(
-      implicit CC: ChannelConfig[F]): F[ChannelForTarget] =
+  def ConfigForTarget[F[_]: Functor](
+      target: String
+  )(implicit CC: ChannelConfig[F]): F[ChannelForTarget] =
     CC.loadChannelTarget(target)
 
 }

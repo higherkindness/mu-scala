@@ -31,18 +31,21 @@ class RPCTests extends RpcBaseTestSuite {
   import higherkindness.mu.rpc.avro.Utils.implicits._
 
   def createClient(
-      sc: ServerChannel): Resource[ConcurrentMonad, service.RPCService[ConcurrentMonad]] =
+      sc: ServerChannel
+  ): Resource[ConcurrentMonad, service.RPCService[ConcurrentMonad]] =
     service.RPCService.clientFromChannel[ConcurrentMonad](IO(sc.channel))
 
   def runSucceedAssertion[A](ssd: ConcurrentMonad[ServerServiceDefinition], response: A)(
-      f: service.RPCService[ConcurrentMonad] => ConcurrentMonad[A]): Assertion =
+      f: service.RPCService[ConcurrentMonad] => ConcurrentMonad[A]
+  ): Assertion =
     withServerChannel[ConcurrentMonad](ssd)
       .flatMap(createClient)
       .use(f)
       .unsafeRunSync() shouldBe response
 
-  def runFailedAssertion[A](ssd: ConcurrentMonad[ServerServiceDefinition])(
-      f: service.RPCService[ConcurrentMonad] => ConcurrentMonad[A]): Assertion =
+  def runFailedAssertion[A](
+      ssd: ConcurrentMonad[ServerServiceDefinition]
+  )(f: service.RPCService[ConcurrentMonad] => ConcurrentMonad[A]): Assertion =
     withServerChannel[ConcurrentMonad](ssd)
       .flatMap(createClient)
       .use(f)
@@ -55,12 +58,14 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to respond to an outdated request without the new value" in {
         runSucceedAssertion(
           serviceRequestAddedBoolean.RPCService.bindService[ConcurrentMonad],
-          response)(_.get(request))
+          response
+        )(_.get(request))
       }
       "be able to respond to an outdated request without the new value within a coproduct" in {
         runSucceedAssertion(
           serviceRequestAddedBoolean.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)))
+          responseCoproduct(response)
+        )(_.getCoproduct(requestCoproduct(request)))
       }
     }
 
@@ -68,12 +73,14 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to respond to an outdated request without the new optional value" in {
         runSucceedAssertion(
           serviceRequestAddedOptionalBoolean.RPCService.bindService[ConcurrentMonad],
-          response)(_.get(request))
+          response
+        )(_.get(request))
       }
       "be able to respond to an outdated request without the new optional value within a coproduct" in {
         runSucceedAssertion(
           serviceRequestAddedOptionalBoolean.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)))
+          responseCoproduct(response)
+        )(_.getCoproduct(requestCoproduct(request)))
       }
     }
 
@@ -81,7 +88,8 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to respond to an outdated request with the previous coproduct" in {
         runSucceedAssertion(
           serviceRequestAddedCoproductItem.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)))
+          responseCoproduct(response)
+        )(_.getCoproduct(requestCoproduct(request)))
       }
     }
 
@@ -89,13 +97,15 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to respond to an outdated request with the previous coproduct" in {
         runSucceedAssertion(
           serviceRequestRemovedCoproductItem.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)))
+          responseCoproduct(response)
+        )(_.getCoproduct(requestCoproduct(request)))
       }
 
       "be able to respond to an outdated request with the removed valued of the previous coproduct" in {
         runSucceedAssertion(
           serviceRequestRemovedCoproductItem.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproductInt))
+          responseCoproduct(response)
+        )(_.getCoproduct(requestCoproductInt))
       }
 
     }
@@ -104,13 +114,14 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to respond to an outdated request with the previous coproduct" in {
         runSucceedAssertion(
           serviceRequestReplacedCoproductItem.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)))
+          responseCoproduct(response)
+        )(_.getCoproduct(requestCoproduct(request)))
       }
 
       "be able to respond to an outdated request with the previous coproduct AAAAA" in {
         runFailedAssertion(
-          serviceRequestReplacedCoproductItem.RPCService.bindService[ConcurrentMonad])(
-          _.getCoproduct(requestCoproductString))
+          serviceRequestReplacedCoproductItem.RPCService.bindService[ConcurrentMonad]
+        )(_.getCoproduct(requestCoproductString))
       }
 
     }
@@ -119,12 +130,14 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to respond to an outdated request with the old value" in {
         runSucceedAssertion(
           serviceRequestDroppedField.RPCService.bindService[ConcurrentMonad],
-          response)(_.get(request))
+          response
+        )(_.get(request))
       }
       "be able to respond to an outdated request with the old value within a coproduct" in {
         runSucceedAssertion(
           serviceRequestDroppedField.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)))
+          responseCoproduct(response)
+        )(_.getCoproduct(requestCoproduct(request)))
       }
     }
 
@@ -132,12 +145,14 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to respond to an outdated request with the previous value" in {
         runSucceedAssertion(
           serviceRequestReplacedType.RPCService.bindService[ConcurrentMonad],
-          response)(_.get(request))
+          response
+        )(_.get(request))
       }
       "be able to respond to an outdated request with the previous value within a coproduct" in {
         runSucceedAssertion(
           serviceRequestReplacedType.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)))
+          responseCoproduct(response)
+        )(_.getCoproduct(requestCoproduct(request)))
       }
     }
 
@@ -145,12 +160,14 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to respond to an outdated request with the previous name" in {
         runSucceedAssertion(
           serviceRequestRenamedField.RPCService.bindService[ConcurrentMonad],
-          response)(_.get(request))
+          response
+        )(_.get(request))
       }
       "be able to respond to an outdated request with the previous name within a coproduct" in {
         runSucceedAssertion(
           serviceRequestRenamedField.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)))
+          responseCoproduct(response)
+        )(_.getCoproduct(requestCoproduct(request)))
       }
     }
 
@@ -162,12 +179,14 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to provide a compatible response" in {
         runSucceedAssertion(
           serviceResponseAddedBoolean.RPCService.bindService[ConcurrentMonad],
-          response)(_.get(request))
+          response
+        )(_.get(request))
       }
       "be able to provide a compatible response within a coproduct" in {
         runSucceedAssertion(
           serviceResponseAddedBoolean.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)))
+          responseCoproduct(response)
+        )(_.getCoproduct(requestCoproduct(request)))
       }
     }
 
@@ -175,8 +194,8 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to provide a compatible response within a coproduct" in {
         runSucceedAssertion(
           serviceResponseAddedBooleanCoproduct.RPCService.bindService[ConcurrentMonad],
-          ResponseCoproduct(Coproduct[Response :+: Int :+: String :+: CNil](0)))(
-          _.getCoproduct(requestCoproduct(request)))
+          ResponseCoproduct(Coproduct[Response :+: Int :+: String :+: CNil](0))
+        )(_.getCoproduct(requestCoproduct(request)))
       }
     }
 
@@ -184,7 +203,8 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to provide a compatible response" in {
         runSucceedAssertion(
           serviceResponseRemovedIntCoproduct.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)))
+          responseCoproduct(response)
+        )(_.getCoproduct(requestCoproduct(request)))
       }
     }
 
@@ -192,7 +212,8 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to provide a compatible response" in {
         runSucceedAssertion(
           serviceResponseReplacedCoproduct.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)))
+          responseCoproduct(response)
+        )(_.getCoproduct(requestCoproduct(request)))
       }
 
     }
@@ -201,12 +222,14 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to provide a compatible response" in {
         runSucceedAssertion(
           serviceResponseReplacedType.RPCService.bindService[ConcurrentMonad],
-          response)(_.get(request))
+          response
+        )(_.get(request))
       }
       "be able to provide a compatible response within a coproduct" in {
         runSucceedAssertion(
           serviceResponseReplacedType.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)))
+          responseCoproduct(response)
+        )(_.getCoproduct(requestCoproduct(request)))
       }
     }
 
@@ -214,12 +237,14 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to provide a compatible response" in {
         runSucceedAssertion(
           serviceResponseRenamedField.RPCService.bindService[ConcurrentMonad],
-          response)(_.get(request))
+          response
+        )(_.get(request))
       }
       "be able to provide a compatible response within a coproduct" in {
         runSucceedAssertion(
           serviceResponseRenamedField.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)))
+          responseCoproduct(response)
+        )(_.getCoproduct(requestCoproduct(request)))
       }
     }
 
@@ -227,12 +252,14 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to provide a compatible response" in {
         runSucceedAssertion(
           serviceResponseDroppedField.RPCService.bindService[ConcurrentMonad],
-          response)(_.get(request))
+          response
+        )(_.get(request))
       }
       "be able to provide a compatible response within a coproduct" in {
         runSucceedAssertion(
           serviceResponseDroppedField.RPCService.bindService[ConcurrentMonad],
-          responseCoproduct(response))(_.getCoproduct(requestCoproduct(request)))
+          responseCoproduct(response)
+        )(_.getCoproduct(requestCoproduct(request)))
       }
     }
 

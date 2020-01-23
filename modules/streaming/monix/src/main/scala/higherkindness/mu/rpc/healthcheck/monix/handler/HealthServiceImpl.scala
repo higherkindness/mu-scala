@@ -34,9 +34,9 @@ object HealthServiceMonix {
 
     val (observer, observable): (Observer.Sync[HealthStatus], Observable[HealthStatus]) =
       Pipe(
-        MulticastStrategy.behavior(
-          HealthStatus(new HealthCheck("FirstStatus"), ServerStatus("UNKNOWN"))))
-        .concurrent(s)
+        MulticastStrategy
+          .behavior(HealthStatus(new HealthCheck("FirstStatus"), ServerStatus("UNKNOWN")))
+      ).concurrent(s)
 
     checkRef.map(c => new HealthCheckServiceMonixImpl[F](c, observer, observable))
   }
@@ -45,7 +45,8 @@ object HealthServiceMonix {
 class HealthCheckServiceMonixImpl[F[_]: Sync](
     checkStatus: Ref[F, Map[String, ServerStatus]],
     observer: Observer.Sync[HealthStatus],
-    observable: Observable[HealthStatus])(implicit s: Scheduler)
+    observable: Observable[HealthStatus]
+)(implicit s: Scheduler)
     extends AbstractHealthService[F](checkStatus)
     with HealthCheckServiceMonix[F] {
 

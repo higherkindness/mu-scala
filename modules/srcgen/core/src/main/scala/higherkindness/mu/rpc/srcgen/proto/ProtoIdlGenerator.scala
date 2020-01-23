@@ -45,7 +45,8 @@ object ProtoIdlGenerator extends IdlGenerator {
       outputPackage: Option[String],
       options: Seq[RpcOption],
       messages: Seq[RpcMessage],
-      services: Seq[RpcService]): Seq[String] = {
+      services: Seq[RpcService]
+  ): Seq[String] = {
 
     val packageLines = outputPackage.map(pkg => Seq(s"package $pkg;", "")).getOrElse(Seq.empty)
 
@@ -93,7 +94,8 @@ object ProtoIdlGenerator extends IdlGenerator {
   private def paramType(
       tpe: Tree,
       streamingType: Option[StreamingType],
-      matchingStreamingTypes: StreamingType*): String = {
+      matchingStreamingTypes: StreamingType*
+  ): String = {
     val t     = tpe.toString
     val pType = if (t == EmptyType) ProtoEmpty else t
     if (streamingType.exists(matchingStreamingTypes.contains)) s"stream $pType" else pType

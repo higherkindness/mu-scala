@@ -39,10 +39,10 @@ class ProtoPeopleServiceHandler[F[_]: Timer](implicit F: Sync[F], L: Logger[F])
       val response = PeopleResponse(Person(person.name, 10))
       Stream
         .awakeEvery[F](2.seconds)
-        .evalMap(
-          _ =>
-            L.info(s"$serviceName - Stream Response: $response")
-              .as(response))
+        .evalMap(_ =>
+          L.info(s"$serviceName - Stream Response: $response")
+            .as(response)
+        )
     }
 
     for {

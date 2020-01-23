@@ -25,7 +25,8 @@ package object netty {
   class NettyChannelInterpreter(
       initConfig: ChannelFor,
       configList: List[ManagedChannelConfig],
-      nettyConfigList: List[NettyChannelConfig]) {
+      nettyConfigList: List[NettyChannelConfig]
+  ) {
 
     def build: ManagedChannel = {
       val builder: NettyChannelBuilder = initConfig match {

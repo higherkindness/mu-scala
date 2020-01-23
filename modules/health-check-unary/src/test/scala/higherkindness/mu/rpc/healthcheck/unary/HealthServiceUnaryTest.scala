@@ -105,7 +105,8 @@ class HealthServiceUnaryTest extends AnyWordSpec with Matchers {
         AllStatus(
           List(
             HealthStatus(hc1, ServerStatus("SERVING")),
-            HealthStatus(hc2, ServerStatus("SERVING")))
+            HealthStatus(hc2, ServerStatus("SERVING"))
+          )
         ),
         AllStatus(
           List.empty

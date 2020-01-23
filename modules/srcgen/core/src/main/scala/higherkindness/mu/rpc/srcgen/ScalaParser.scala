@@ -88,12 +88,11 @@ object ScalaParser {
         clazz             <- ast._ClassDef.getOption(tree)
         serviceAnnotation <- annotationsNamed("service").getAll(clazz).headOption
         serialization     <- serviceAnnotation.firstArg
-      } yield
-        (clazz, serialization.toString match {
-          case "Protobuf"       => Protobuf
-          case "Avro"           => Avro
-          case "AvroWithSchema" => AvroWithSchema
-          case "Custom"         => Custom
-        })
+      } yield (clazz, serialization.toString match {
+        case "Protobuf"       => Protobuf
+        case "Avro"           => Avro
+        case "AvroWithSchema" => AvroWithSchema
+        case "Custom"         => Custom
+      })
   }
 }

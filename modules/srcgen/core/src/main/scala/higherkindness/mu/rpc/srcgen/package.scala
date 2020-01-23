@@ -32,7 +32,8 @@ package object srcgen {
       "Protobuf"       -> Protobuf,
       "Avro"           -> Avro,
       "AvroWithSchema" -> AvroWithSchema,
-      "Custom"         -> Custom)
+      "Custom"         -> Custom
+    )
 
   object BaseType {
     def unapply(tpe: Tree): Option[String] = tpe match {

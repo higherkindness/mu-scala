@@ -42,13 +42,15 @@ case class MetricsOpsRegister(
   def recordHeadersTime(
       methodInfo: GrpcMethodInfo,
       elapsed: Long,
-      classifier: Option[String]): IO[Unit] =
+      classifier: Option[String]
+  ): IO[Unit] =
     recordHeadersTimeReg.update(_ :+ ((methodInfo, elapsed, classifier)))
   def recordTotalTime(
       methodInfo: GrpcMethodInfo,
       status: Status,
       elapsed: Long,
-      classifier: Option[String]): IO[Unit] =
+      classifier: Option[String]
+  ): IO[Unit] =
     recordTotalTimeReg.update(_ :+ ((methodInfo, status, elapsed, classifier)))
 }
 
@@ -60,6 +62,6 @@ object MetricsOpsRegister {
       Ref.of[IO, List[(GrpcMethodInfo, Option[String])]](Nil),
       Ref.of[IO, List[(GrpcMethodInfo, Option[String])]](Nil),
       Ref.of[IO, List[(GrpcMethodInfo, Long, Option[String])]](Nil),
-      Ref.of[IO, List[(GrpcMethodInfo, Status, Long, Option[String])]](Nil))
-      .mapN(MetricsOpsRegister.apply)
+      Ref.of[IO, List[(GrpcMethodInfo, Status, Long, Option[String])]](Nil)
+    ).mapN(MetricsOpsRegister.apply)
 }

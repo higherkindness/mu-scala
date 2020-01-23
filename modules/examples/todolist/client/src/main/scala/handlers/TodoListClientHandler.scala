@@ -27,8 +27,8 @@ import higherkindness.mu.rpc.protocol.Empty
 import freestyle.tagless.logging.LoggingM
 
 class TodoListClientHandler[F[_]: Sync](client: Resource[F, TodoListRpcService[F]])(
-    implicit log: LoggingM[F])
-    extends TodoListClient[F] {
+    implicit log: LoggingM[F]
+) extends TodoListClient[F] {
 
   override def reset(): F[Int] =
     for {
@@ -39,7 +39,8 @@ class TodoListClientHandler[F[_]: Sync](client: Resource[F, TodoListRpcService[F
   override def insert(request: TodoListRequest): F[Option[TodoListMessage]] =
     for {
       _ <- log.debug(
-        s"Calling to insert todo list with name: ${request.title} and id: ${request.tagId}")
+        s"Calling to insert todo list with name: ${request.title} and id: ${request.tagId}"
+      )
       t <- client.use(_.insert(request))
     } yield t.msg
 
@@ -58,7 +59,8 @@ class TodoListClientHandler[F[_]: Sync](client: Resource[F, TodoListRpcService[F
   override def update(todoList: TodoListMessage): F[Option[TodoListMessage]] =
     for {
       _ <- log.debug(
-        s"Calling to update todo list with title: ${todoList.title}, tagId: ${todoList.tagId} and id: ${todoList.id}")
+        s"Calling to update todo list with title: ${todoList.title}, tagId: ${todoList.tagId} and id: ${todoList.id}"
+      )
       r <- client.use(_.update(todoList))
     } yield r.msg
 

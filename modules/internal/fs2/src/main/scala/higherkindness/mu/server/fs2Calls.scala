@@ -27,22 +27,26 @@ object fs2Calls {
 
   def unaryMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Req => F[Res],
-      maybeCompression: Option[String]): ServerCallHandler[Req, Res] =
+      maybeCompression: Option[String]
+  ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F].unaryToUnaryCall[Req, Res]((req, _) => f(req))
 
   def clientStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Stream[F, Req] => F[Res],
-      maybeCompression: Option[String]): ServerCallHandler[Req, Res] =
+      maybeCompression: Option[String]
+  ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F].streamingToUnaryCall[Req, Res]((stream, _) => f(stream))
 
   def serverStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Req => Stream[F, Res],
-      maybeCompression: Option[String]): ServerCallHandler[Req, Res] =
+      maybeCompression: Option[String]
+  ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F].unaryToStreamingCall[Req, Res]((req, _) => f(req))
 
   def bidiStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Stream[F, Req] => Stream[F, Res],
-      maybeCompression: Option[String]): ServerCallHandler[Req, Res] =
+      maybeCompression: Option[String]
+  ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F].streamingToStreamingCall[Req, Res]((stream, _) => f(stream))
 
 }

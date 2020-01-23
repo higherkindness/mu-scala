@@ -28,7 +28,8 @@ object methods {
       .newBuilder[Void, Void]()
       .setType(MethodType.UNARY)
       .setFullMethodName(
-        methodName.getOrElse(MethodDescriptor.generateFullMethodName("service_foo", "method_bar")))
+        methodName.getOrElse(MethodDescriptor.generateFullMethodName("service_foo", "method_bar"))
+      )
       .setRequestMarshaller(TestMethodDescriptors.voidMarshaller())
       .setResponseMarshaller(TestMethodDescriptors.voidMarshaller())
       .build()

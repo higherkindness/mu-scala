@@ -33,7 +33,8 @@ object HealthServiceFS2 {
       Ref.of[F, Map[String, ServerStatus]](Map.empty[String, ServerStatus])
 
     val watchTopic: F[Topic[F, HealthStatus]] = Topic(
-      HealthStatus(new HealthCheck("FirstStatus"), ServerStatus("UNKNOWN")))
+      HealthStatus(new HealthCheck("FirstStatus"), ServerStatus("UNKNOWN"))
+    )
 
     for {
       c <- checkRef
@@ -43,8 +44,8 @@ object HealthServiceFS2 {
 }
 class HealthCheckServiceFS2Impl[F[_]: Sync](
     checkStatus: Ref[F, Map[String, ServerStatus]],
-    watchTopic: Topic[F, HealthStatus])
-    extends AbstractHealthService[F](checkStatus)
+    watchTopic: Topic[F, HealthStatus]
+) extends AbstractHealthService[F](checkStatus)
     with HealthCheckServiceFS2[F] {
 
   def setStatus(newStatus: HealthStatus): F[Unit] =
