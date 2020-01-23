@@ -41,13 +41,15 @@ object SrcGenPlugin extends AutoPlugin {
 
     lazy val idlExtension: SettingKey[String] =
       settingKey[String](
-        "The IDL extension to work with, files with a different extension will be omitted. By default 'avdl' for avro and 'proto' for proto")
+        "The IDL extension to work with, files with a different extension will be omitted. By default 'avdl' for avro and 'proto' for proto"
+      )
 
     lazy val srcGenSerializationType: SettingKey[String] =
       settingKey[String](
         "The serialization type when generating Scala sources from the IDL definitions." +
           "Protobuf, Avro or AvroWithSchema are the current supported serialization types. " +
-          "By default, the serialization type is 'Avro'.")
+          "By default, the serialization type is 'Avro'."
+      )
 
     lazy val idlGenSourceDir: SettingKey[File] =
       settingKey[File]("The Scala source directory, where your mu service definitions are placed.")
@@ -55,7 +57,8 @@ object SrcGenPlugin extends AutoPlugin {
     lazy val idlGenTargetDir: SettingKey[File] =
       settingKey[File](
         "The IDL target directory, where the `idlGen` task will write the generated files " +
-          "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on mu service definitions.")
+          "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on mu service definitions."
+      )
 
     lazy val srcGenSourceDirs: SettingKey[Seq[File]] =
       settingKey[Seq[File]]("The IDL directories, where your IDL definitions are placed.")
@@ -63,53 +66,64 @@ object SrcGenPlugin extends AutoPlugin {
     lazy val srcGenJarNames: SettingKey[Seq[String]] =
       settingKey[Seq[String]](
         "The names of those jars containing IDL definitions that will be used at " +
-          "compilation time to generate the Scala Sources. By default, this sequence is empty.")
+          "compilation time to generate the Scala Sources. By default, this sequence is empty."
+      )
 
     lazy val srcGenIDLTargetDir: SettingKey[File] =
       settingKey[File](
-        "The target directory where all the IDL files specified in 'srcGenSourceDirs' will be copied.")
+        "The target directory where all the IDL files specified in 'srcGenSourceDirs' will be copied."
+      )
 
     lazy val srcGenTargetDir: SettingKey[File] =
       settingKey[File](
         "The Scala target directory, where the `srcGen` task will write the generated files " +
-          "in subpackages based on the namespaces declared in the IDL files.")
+          "in subpackages based on the namespaces declared in the IDL files."
+      )
 
     @deprecated(
       "Use the specific settings like `idlGenCompressionType` or `idlGenIdiomaticEndpoints`",
-      "0.18.4")
+      "0.18.4"
+    )
     lazy val genOptions: SettingKey[Seq[String]] =
       settingKey[Seq[String]](
-        "Options for the generator, such as additional @service annotation parameters in srcGen.")
+        "Options for the generator, such as additional @service annotation parameters in srcGen."
+      )
 
     lazy val idlGenBigDecimal: SettingKey[BigDecimalTypeGen] =
       settingKey[BigDecimalTypeGen](
         "The Scala generated type for `decimals`. Possible values are `ScalaBigDecimalGen` and `ScalaBigDecimalTaggedGen`" +
-          "The difference is that `ScalaBigDecimalTaggedGen` will append the 'precision' and the 'scale' as tagged types, i.e. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`")
+          "The difference is that `ScalaBigDecimalTaggedGen` will append the 'precision' and the 'scale' as tagged types, i.e. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`"
+      )
 
     lazy val idlGenMarshallerImports: SettingKey[List[MarshallersImport]] =
       settingKey[List[MarshallersImport]](
         "List of imports needed for creating the request/response marshallers. " +
-          "By default, this include the instances for serializing `BigDecimal`, `java.time.LocalDate`, and `java.time.LocalDateTime`")
+          "By default, this include the instances for serializing `BigDecimal`, `java.time.LocalDate`, and `java.time.LocalDateTime`"
+      )
 
     lazy val idlGenCompressionType: SettingKey[CompressionTypeGen] =
       settingKey[CompressionTypeGen](
-        "Specifies the compression type. `NoCompressionGen` by default.")
+        "Specifies the compression type. `NoCompressionGen` by default."
+      )
 
     lazy val idlGenIdiomaticEndpoints: SettingKey[Boolean] =
       settingKey[Boolean](
         "If `true`, the gRPC endpoints generated in the services generated from idls will contain the " +
-          "namespace as prefix and their method names will be capitalized. `false` by default.")
+          "namespace as prefix and their method names will be capitalized. `false` by default."
+      )
 
     lazy val idlGenOpenApiHttpImpl: SettingKey[HttpImpl] =
       settingKey[HttpImpl](
         "The HTTP framework and version, used for the code generation." +
-          "`Http4sV20` by default.")
+          "`Http4sV20` by default."
+      )
 
     lazy val srcGenStreamingImplementation: SettingKey[StreamingImplementation] =
       settingKey[StreamingImplementation](
         "The streaming implementation to use when generating Scala sources from IDL definitions that involve streaming. " +
           "FS2 Stream and Monix Observable are the current supported implementations. " +
-          "By default, the streaming implementation is FS2 Stream.")
+          "By default, the streaming implementation is FS2 Stream."
+      )
 
   }
 
@@ -153,17 +167,19 @@ object SrcGenPlugin extends AutoPlugin {
         srcGenSerializationType.value,
         genOptions.value,
         idlGenTargetDir.value,
-        target.value / "idlGen")(idlGenSourceDir.value.allPaths.get.toSet).toSeq,
+        target.value / "idlGen"
+      )(idlGenSourceDir.value.allPaths.get.toSet).toSeq,
       srcGen := Def
         .sequential(
           Def.task {
-            (Compile / dependencyClasspath).value.map(
-              entry =>
-                extractIDLDefinitionsFromJar(
-                  entry,
-                  srcGenJarNames.value,
-                  srcGenIDLTargetDir.value,
-                  idlExtension.value))
+            (Compile / dependencyClasspath).value.map(entry =>
+              extractIDLDefinitionsFromJar(
+                entry,
+                srcGenJarNames.value,
+                srcGenIDLTargetDir.value,
+                idlExtension.value
+              )
+            )
           },
           Def.task {
             srcGenSourceDirs.value.toSet
@@ -174,7 +190,9 @@ object SrcGenPlugin extends AutoPlugin {
                   CopyOptions(
                     overwrite = true,
                     preserveLastModified = true,
-                    preserveExecutable = true))
+                    preserveExecutable = true
+                  )
+                )
               }
           },
           Def.task {
@@ -209,7 +227,7 @@ object SrcGenPlugin extends AutoPlugin {
       IO.copy(idlMappings, overwrite = true, preserveLastModified = true, preserveExecutable = true)
 
       idlMappings.map { case (f1, f2) => (f1, f2.getAbsolutePath) }
-    },
+    }
   )
 
   private def idlGenTask(
@@ -218,7 +236,8 @@ object SrcGenPlugin extends AutoPlugin {
       serializationType: String,
       options: Seq[String],
       targetDir: File,
-      cacheDir: File): Set[File] => Set[File] =
+      cacheDir: File
+  ): Set[File] => Set[File] =
     FileFunction.cached(cacheDir, FilesInfo.lastModified, FilesInfo.exists) {
       inputFiles: Set[File] =>
         generator.generateFrom(idlType, serializationType, inputFiles, targetDir, options: _*).toSet
@@ -228,7 +247,8 @@ object SrcGenPlugin extends AutoPlugin {
       classpathEntry: Attributed[File],
       jarNames: Seq[String],
       target: File,
-      idlExtension: String): File = {
+      idlExtension: String
+  ): File = {
 
     val nameFilter: NameFilter = new NameFilter {
       override def accept(name: String): Boolean =
@@ -245,7 +265,8 @@ object SrcGenPlugin extends AutoPlugin {
               sources.filter(tuple => nameFilter.accept(tuple._2)),
               overwrite = true,
               preserveLastModified = true,
-              preserveExecutable = true)
+              preserveExecutable = true
+            )
             (): Unit
           } else if (classpathEntry.data.exists) {
             IO.unzip(classpathEntry.data, tmpDir, nameFilter)
