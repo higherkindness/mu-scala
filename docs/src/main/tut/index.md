@@ -36,7 +36,7 @@ The current version of [Mu] is "0.20.1".
 
 [comment]: # (End Replace)
 
-Mu is cross-built for Scala `2.11.x` and `2.12.x`.
+Mu is published for Scala `2.12.x`.
 
 Because Mu makes use of macro annotations, you need to add the following to your
 build.sbt:
