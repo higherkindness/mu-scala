@@ -30,9 +30,6 @@ object SrcGenPlugin extends AutoPlugin {
 
   object autoImport {
 
-    lazy val idlGen: TaskKey[Seq[File]] =
-      taskKey[Seq[File]]("Generates IDL files from mu service definitions")
-
     lazy val srcGen: TaskKey[Seq[File]] =
       taskKey[Seq[File]]("Generates mu Scala files from IDL definitions")
 
@@ -49,15 +46,6 @@ object SrcGenPlugin extends AutoPlugin {
         "The serialization type when generating Scala sources from the IDL definitions." +
           "Protobuf, Avro or AvroWithSchema are the current supported serialization types. " +
           "By default, the serialization type is 'Avro'."
-      )
-
-    lazy val idlGenSourceDir: SettingKey[File] =
-      settingKey[File]("The Scala source directory, where your mu service definitions are placed.")
-
-    lazy val idlGenTargetDir: SettingKey[File] =
-      settingKey[File](
-        "The IDL target directory, where the `idlGen` task will write the generated files " +
-          "in subdirectories such as `proto` for Protobuf and `avro` for Avro, based on mu service definitions."
       )
 
     lazy val srcGenSourceDirs: SettingKey[Seq[File]] =
@@ -135,8 +123,6 @@ object SrcGenPlugin extends AutoPlugin {
                      else if (idlType.value == "proto") "proto"
                      else "unknown"),
     srcGenSerializationType := "Avro",
-    idlGenSourceDir := (Compile / sourceDirectory).value,
-    idlGenTargetDir := (Compile / resourceManaged).value,
     srcGenJarNames := Seq.empty,
     srcGenSourceDirs := Seq((Compile / resourceDirectory).value),
     srcGenIDLTargetDir := (Compile / resourceManaged).value / idlType.value,
@@ -161,14 +147,6 @@ object SrcGenPlugin extends AutoPlugin {
 
   lazy val taskSettings: Seq[Def.Setting[_]] = {
     Seq(
-      idlGen := idlGenTask(
-        IdlGenApplication,
-        idlType.value,
-        srcGenSerializationType.value,
-        genOptions.value,
-        idlGenTargetDir.value,
-        target.value / "idlGen"
-      )(idlGenSourceDir.value.allPaths.get.toSet).toSeq,
       srcGen := Def
         .sequential(
           Def.task {
@@ -196,7 +174,7 @@ object SrcGenPlugin extends AutoPlugin {
               }
           },
           Def.task {
-            idlGenTask(
+            srcGenTask(
               SrcGenApplication(
                 idlGenMarshallerImports.value,
                 idlGenBigDecimal.value,
@@ -230,7 +208,7 @@ object SrcGenPlugin extends AutoPlugin {
     }
   )
 
-  private def idlGenTask(
+  private def srcGenTask(
       generator: GeneratorApplication[_],
       idlType: String,
       serializationType: String,
