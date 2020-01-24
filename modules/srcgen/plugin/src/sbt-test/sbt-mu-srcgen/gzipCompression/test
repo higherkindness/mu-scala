@@ -1,33 +1,33 @@
 $ exists src/main/resources/service.avdl
-> 'set idlType := "avro"'
-> 'set srcGenSerializationType := "Avro"'
-> srcGen
+> 'set muSrcGenIdlType := "avro"'
+> 'set muSrcGenSerializationType := "Avro"'
+> muSrcGen
 > compile
 $ exists target/scala-2.12/src_managed/main/io/higherkindness/service.scala
 $ delete target/scala-2.12/src_managed/main/io/higherkindness/service.scala
 
 $ exists src/main/resources/service.avdl
-> 'set idlType := "avro"'
-> 'set srcGenSerializationType := "AvroWithSchema"'
+> 'set muSrcGenIdlType := "avro"'
+> 'set muSrcGenSerializationType := "AvroWithSchema"'
 > 'set genOptions := Seq("Gzip")'
-> srcGen
+> muSrcGen
 > compile
 $ exists target/scala-2.12/src_managed/main/io/higherkindness/service.scala
 $ delete target/scala-2.12/src_managed/main/io/higherkindness/service.scala
 
 $ exists src/main/resources/service.avdl
-> 'set idlType := "avro"'
-> 'set srcGenSerializationType := "AvroWithSchema"'
-> 'set idlGenCompressionType := higherkindness.mu.rpc.srcgen.Model.GzipGen'
-> srcGen
+> 'set muSrcGenIdlType := "avro"'
+> 'set muSrcGenSerializationType := "AvroWithSchema"'
+> 'set muSrcGenCompressionType := higherkindness.mu.rpc.srcgen.Model.GzipGen'
+> muSrcGen
 > compile
 $ exists target/scala-2.12/src_managed/main/io/higherkindness/service.scala
 $ delete target/scala-2.12/src_managed/main/io/higherkindness/service.scala
 
 $ exists src/main/resources/service.avdl
-> 'set idlType := "avro"'
-> 'set srcGenSerializationType := "AvroWithSchema"'
-> 'set idlGenCompressionType := higherkindness.mu.rpc.srcgen.Model.NoCompressionGen'
-> srcGen
+> 'set muSrcGenIdlType := "avro"'
+> 'set muSrcGenSerializationType := "AvroWithSchema"'
+> 'set muSrcGenCompressionType := higherkindness.mu.rpc.srcgen.Model.NoCompressionGen'
+> muSrcGen
 > compile
 $ exists target/scala-2.12/src_managed/main/io/higherkindness/service.scala
