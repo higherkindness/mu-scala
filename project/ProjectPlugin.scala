@@ -308,16 +308,11 @@ object ProjectPlugin extends AutoPlugin {
       micrositePushSiteWith := GitHub4s,
       micrositeGithubToken := sys.env.get(orgGithubTokenSetting.value),
       micrositePalette := Map(
-        "brand-primary"   -> "#de3423",
-        "brand-secondary" -> "#852319",
-        "brand-tertiary"  -> "#381C19",
-        "gray-dark"       -> "#333333",
-        "gray"            -> "#666666",
-        "gray-light"      -> "#EDEDED",
-        "gray-lighter"    -> "#F4F5F9",
+        "brand-primary"   -> "#001e38",
+        "brand-secondary" -> "#F44336",
         "white-color"     -> "#E6E7EC"
       ),
-      micrositeHighlightTheme := "tomorrow-night-eighties",
+      micrositeHighlightTheme := "github-gist",
       micrositeHighlightLanguages += "protobuf"
     )
 
