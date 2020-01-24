@@ -59,6 +59,7 @@ object ProjectPlugin extends AutoPlugin {
       val scalacheckToolbox: String  = "0.3.1"
       val scalamock: String          = "4.4.0"
       val scalatest: String          = "3.1.0"
+      val scalatestplusScheck        = "3.1.0.0-RC2"
       val skeuomorph: String         = "0.0.20"
       val slf4j: String              = "1.7.30"
     }
@@ -67,7 +68,8 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect)                  % Test,
         %%("scalamock", V.scalamock)                     % Test,
-        %%("scheckToolboxDatetime", V.scalacheckToolbox) % Test
+        %%("scheckToolboxDatetime", V.scalacheckToolbox) % Test,
+        "org.scalatestplus" %% "scalatestplus-scalacheck" % V.scalatestplusScheck % Test
       )
     )
 
