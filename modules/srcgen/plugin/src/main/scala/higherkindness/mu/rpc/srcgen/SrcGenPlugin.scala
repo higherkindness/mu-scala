@@ -57,7 +57,7 @@ object SrcGenPlugin extends AutoPlugin {
           "compilation time to generate the Scala Sources. By default, this sequence is empty."
       )
 
-    lazy val muSrcGenIDLTargetDir: SettingKey[File] =
+    lazy val muSrcGenIdlTargetDir: SettingKey[File] =
       settingKey[File](
         "The target directory where all the IDL files specified in 'srcGenSourceDirs' will be copied."
       )
@@ -125,7 +125,7 @@ object SrcGenPlugin extends AutoPlugin {
     muSrcGenSerializationType := "Avro",
     muSrcGenJarNames := Seq.empty,
     muSrcGenSourceDirs := Seq((Compile / resourceDirectory).value),
-    muSrcGenIDLTargetDir := (Compile / resourceManaged).value / muSrcGenIdlType.value,
+    muSrcGenIdlTargetDir := (Compile / resourceManaged).value / muSrcGenIdlType.value,
     muSrcGenTargetDir := (Compile / sourceManaged).value,
     genOptions := Seq.empty,
     muSrcGenBigDecimal := ScalaBigDecimalTaggedGen,
@@ -154,7 +154,7 @@ object SrcGenPlugin extends AutoPlugin {
               extractIDLDefinitionsFromJar(
                 entry,
                 muSrcGenJarNames.value,
-                muSrcGenIDLTargetDir.value,
+                muSrcGenIdlTargetDir.value,
                 muSrcGenIdlExtension.value
               )
             )
@@ -164,7 +164,7 @@ object SrcGenPlugin extends AutoPlugin {
               .foreach { f: File =>
                 IO.copyDirectory(
                   f,
-                  muSrcGenIDLTargetDir.value,
+                  muSrcGenIdlTargetDir.value,
                   CopyOptions(
                     overwrite = true,
                     preserveLastModified = true,
@@ -181,7 +181,7 @@ object SrcGenPlugin extends AutoPlugin {
                 muSrcGenCompressionType.value,
                 UseIdiomaticEndpoints(muSrcGenIdiomaticEndpoints.value),
                 muSrcGenStreamingImplementation.value,
-                muSrcGenIDLTargetDir.value,
+                muSrcGenIdlTargetDir.value,
                 (Compile / resourceManaged).value.toPath,
                 muSrcGenOpenApiHttpImpl.value
               ),
@@ -190,7 +190,7 @@ object SrcGenPlugin extends AutoPlugin {
               genOptions.value,
               muSrcGenTargetDir.value,
               target.value / "srcGen"
-            )(muSrcGenIDLTargetDir.value.allPaths.get.toSet).toSeq
+            )(muSrcGenIdlTargetDir.value.allPaths.get.toSet).toSeq
           }
         )
         .value
@@ -199,9 +199,9 @@ object SrcGenPlugin extends AutoPlugin {
 
   lazy val packagingSettings: Seq[Def.Setting[_]] = Seq(
     mappings in (Compile, packageSrc) ++= {
-      val allIDLDefinitions = ((Compile / muSrcGenIDLTargetDir).value ** "*") filter { _.isFile }
+      val allIDLDefinitions = ((Compile / muSrcGenIdlTargetDir).value ** "*") filter { _.isFile }
       val idlMappings = allIDLDefinitions.get pair Path
-        .rebase((Compile / muSrcGenIDLTargetDir).value, (Compile / classDirectory).value)
+        .rebase((Compile / muSrcGenIdlTargetDir).value, (Compile / classDirectory).value)
       IO.copy(idlMappings, overwrite = true, preserveLastModified = true, preserveExecutable = true)
 
       idlMappings.map { case (f1, f2) => (f1, f2.getAbsolutePath) }
