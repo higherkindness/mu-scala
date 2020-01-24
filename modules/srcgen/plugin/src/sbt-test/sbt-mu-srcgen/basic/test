@@ -1,6 +1,6 @@
 $ exists src/main/resources/model.avdl
-> 'set idlType := "avro"'
-> srcGen
+> 'set muSrcGenIdlType := "avro"'
+> muSrcGen
 > compile
 $ exists target/scala-2.12/src_managed/main/model.scala
 $ delete target/scala-2.12/src_managed/main/model.scala
