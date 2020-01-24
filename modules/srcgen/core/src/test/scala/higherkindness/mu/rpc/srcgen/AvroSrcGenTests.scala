@@ -44,10 +44,10 @@ class AvroSrcGenTests extends RpcBaseTestSuite with Checkers {
         scenario.compressionTypeGen,
         scenario.useIdiomaticEndpoints
       ).generateFrom(
-          resource(scenario.inputResourcePath).mkString,
-          scenario.serializationType,
-          scenario.options: _*
-        )
+        resource(scenario.inputResourcePath).mkString,
+        scenario.serializationType,
+        scenario.options: _*
+      )
     output should not be empty
     output forall {
       case (filePath, contents) =>
