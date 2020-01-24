@@ -48,9 +48,6 @@ object SrcGenPlugin extends AutoPlugin {
           "By default, the serialization type is 'Avro'."
       )
 
-    lazy val idlGenSourceDir: SettingKey[File] =
-      settingKey[File]("The Scala source directory, where your mu service definitions are placed.")
-
     lazy val srcGenSourceDirs: SettingKey[Seq[File]] =
       settingKey[Seq[File]]("The IDL directories, where your IDL definitions are placed.")
 
@@ -126,7 +123,6 @@ object SrcGenPlugin extends AutoPlugin {
                      else if (idlType.value == "proto") "proto"
                      else "unknown"),
     srcGenSerializationType := "Avro",
-    idlGenSourceDir := (Compile / sourceDirectory).value,
     srcGenJarNames := Seq.empty,
     srcGenSourceDirs := Seq((Compile / resourceDirectory).value),
     srcGenIDLTargetDir := (Compile / resourceManaged).value / idlType.value,
@@ -178,7 +174,7 @@ object SrcGenPlugin extends AutoPlugin {
               }
           },
           Def.task {
-            idlGenTask(
+            srcGenTask(
               SrcGenApplication(
                 idlGenMarshallerImports.value,
                 idlGenBigDecimal.value,
@@ -212,7 +208,7 @@ object SrcGenPlugin extends AutoPlugin {
     }
   )
 
-  private def idlGenTask(
+  private def srcGenTask(
       generator: GeneratorApplication[_],
       idlType: String,
       serializationType: String,
