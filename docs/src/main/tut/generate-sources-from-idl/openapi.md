@@ -22,13 +22,13 @@ Then configure the plugin by adding a few lines to `build.sbt`:
 
 ```scala
 // Look for OpenAPI IDL files
-idlType := "openapi"
+muSrcGenIdlType := "openapi"
 
 // Generate code that is compatible with http4s v0.20.x
-idlGenOpenApiHttpImpl := higherkindness.mu.rpc.idlgen.openapi.OpenApiSrcGenerator.HttpImpl.Http4sV20
+muSrcGenOpenApiHttpImpl := higherkindness.mu.rpc.idlgen.openapi.OpenApiSrcGenerator.HttpImpl.Http4sV20
 
 // Run the source generation automatically before compilation
-sourceGenerators in Compile += (srcGen in Compile).taskValue
+sourceGenerators in Compile += (muSrcGen in Compile).taskValue
 ```
 
 Finally add the appropriate Circe and http4s dependencies so the generated code
@@ -49,7 +49,7 @@ Suppose you want to generate Scala code for a REST service based on the
 You can run the source generator directly:
 
 ```sh
-$ sbt srcGen
+$ sbt muSrcGen
 ```
 
 or as part of compilation:
