@@ -16,20 +16,18 @@
 
 package example.seed.server.protocol.avro
 
-import higherkindness.mu.rpc.protocol._
-
 import shapeless.{:+:, CNil}
 
 sealed trait People extends Product with Serializable
 
-@message final case class Person(name: String, age: Int) extends People
+final case class Person(name: String, age: Int) extends People
 
-@message final case class NotFoundError(message: String) extends People
+final case class NotFoundError(message: String) extends People
 
-@message final case class DuplicatedPersonError(message: String) extends People
+final case class DuplicatedPersonError(message: String) extends People
 
-@message final case class PeopleRequest(name: String) extends People
+final case class PeopleRequest(name: String) extends People
 
-@message final case class PeopleResponse(
+final case class PeopleResponse(
     result: Person :+: NotFoundError :+: DuplicatedPersonError :+: CNil
 ) extends People

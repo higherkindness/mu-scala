@@ -21,13 +21,13 @@ import higherkindness.mu.rpc.protocol._
 
 trait TodoListProtocol {
 
-  final case class TodoListMessage(title: String, tagId: Int, id: Int)
+  case class TodoListMessage(title: String, tagId: Int, id: Int)
 
-  final case class TodoListRequest(title: String, tagId: Int)
+  case class TodoListRequest(title: String, tagId: Int)
 
-  final case class TodoListList(list: List[TodoListMessage])
+  case class TodoListList(list: List[TodoListMessage])
 
-  final case class TodoListResponse(msg: Option[TodoListMessage])
+  case class TodoListResponse(msg: Option[TodoListMessage])
 
   @service(Avro)
   trait TodoListRpcService[F[_]] {
