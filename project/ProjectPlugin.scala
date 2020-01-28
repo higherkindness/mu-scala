@@ -15,7 +15,7 @@ import sbtrelease.ReleaseStateTransformations._
 import scoverage.ScoverageKeys._
 
 import scala.language.reflectiveCalls
-import tut.TutPlugin.autoImport._
+import mdoc.MdocPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
 
@@ -304,8 +304,9 @@ object ProjectPlugin extends AutoPlugin {
       micrositeGithubRepo := "mu-scala",
       micrositeGitterChannelUrl := "47deg/mu",
       micrositeOrganizationHomepage := "https://www.47deg.com",
-      micrositeCompilingDocsTool := WithTut,
+      micrositeCompilingDocsTool := WithMdoc,
       micrositePushSiteWith := GitHub4s,
+      mdocIn := (sourceDirectory in Compile).value / "docs",
       micrositeGithubToken := sys.env.get(orgGithubTokenSetting.value),
       micrositePalette := Map(
         "brand-primary"   -> "#001e38",
@@ -316,9 +317,13 @@ object ProjectPlugin extends AutoPlugin {
       micrositeHighlightLanguages += "protobuf"
     )
 
+    lazy val customScalacOptions: Seq[String] = scalacAdvancedOptions.filterNot(Set("-Yliteral-types", "-Xlint").contains)
+    lazy val docsExclusions: Seq[String] => Seq[String] = (current: Seq[String]) => current.filterNot(Set("-Xfatal-warnings", "-Ywarn-unused-import", "-Xlint").contains)
+
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies += %%("scalatest", V.scalatest),
-      scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
+      mdocExtraArguments ++= Seq("--no-link-hygiene"),
+      scalacOptions ~= docsExclusions
     )
 
   }
@@ -351,16 +356,14 @@ object ProjectPlugin extends AutoPlugin {
       ),
       scalaVersion := V.scala,
       crossScalaVersions := Seq(V.scala),
-      scalacOptions ++= scalacAdvancedOptions,
-      scalacOptions ~= (_ filterNot Set("-Yliteral-types", "-Xlint").contains),
+      scalacOptions ++= customScalacOptions,
       Test / fork := true,
-      Tut / scalacOptions -= "-Ywarn-unused-import",
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
       addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
       addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
       libraryDependencies ++= Seq(
-        %%("scalatest", V.scalatest) % "test",
+        %%("scalatest", V.scalatest) % Test,
         %("slf4j-nop", V.slf4j)      % Test
       ),
       releaseProcess := Seq[ReleaseStep](

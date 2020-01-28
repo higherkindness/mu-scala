@@ -14,7 +14,7 @@ Predictably, generating the server code is just creating an implementation for y
 
 First, here's our `Greeter` RPC protocol definition:
 
-```tut:silent
+```scala mdoc:silent
 import higherkindness.mu.rpc.protocol._
 
 object service {
@@ -59,7 +59,7 @@ object service {
 
 Next, our dummy `Greeter` server implementation:
 
-```tut:silent
+```scala mdoc:silent
 import cats.effect.Async
 import cats.syntax.applicative._
 import monix.execution.Scheduler
@@ -122,7 +122,7 @@ For executing `IO` we need a `ContextShift[IO]` used for running `IO` instances 
 
 *Note:* You'd need an implicit `monix.execution.Scheduler` in the case you're using Monix observables.
 
-```tut:silent
+```scala mdoc:silent
 trait CommonRuntime {
 
   val EC: scala.concurrent.ExecutionContext =
@@ -150,7 +150,7 @@ We also need to explicitly provide:
 
 What else is needed? We just need to define a `main` method:
 
-```tut:silent
+```scala mdoc:silent
 import cats.effect.IO
 import higherkindness.mu.rpc.server._
 
@@ -178,7 +178,7 @@ The server will run on port `8080`.
 
 Thanks to `withServerChannel` from the package `mu.rpc.testing.servers`, you will be able to run in-memory instances of the server, which is very convenient for testing purposes. Below, a very simple property-based test for proving `Greeter.sayHello`:
 
-```tut:silent
+```scala mdoc:silent
 import cats.effect.Resource
 import higherkindness.mu.rpc.testing.servers.withServerChannel
 import io.grpc.{ManagedChannel, ServerServiceDefinition}
@@ -225,7 +225,7 @@ class ServiceSpec extends FunSuite with Matchers with Checkers with OneInstanceP
 
 Running the test:
 
-```tut
+```scala mdoc
 run(new ServiceSpec)
 ```
 
@@ -259,7 +259,7 @@ As we will see shortly in our example, we are going relay on the default behavio
 
 So, taking into account all of that, how would our code look?
 
-```tut:silent
+```scala mdoc:silent
 import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc._
 import higherkindness.mu.rpc.config._
@@ -290,7 +290,7 @@ object gclient {
 
 Once we have our runtime configuration defined as above, everything gets easier on the client side. This is an example of a client application, following our dummy quickstart:
 
-```tut:silent
+```scala mdoc:silent
 import cats.effect.IO
 import service._
 import gclient.implicits._

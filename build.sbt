@@ -621,3 +621,4 @@ lazy val docs = project
   .settings(micrositeSettings: _*)
   .settings(noPublishSettings: _*)
   .enablePlugins(MicrositesPlugin)
+  .enablePlugins(MdocPlugin)

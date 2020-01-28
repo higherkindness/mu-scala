@@ -14,7 +14,7 @@ In the previous section, we saw that [Mu] allows you to define unary services. A
 
 Let's keep going. We'll be completing our protocol's example with the three streaming options:
 
-```tut:silent
+```scala mdoc:silent
 import higherkindness.mu.rpc.protocol._
 
 object service {
@@ -94,10 +94,10 @@ Thanks to this new data type, [Mu] supports `fs2.Stream[F, ?]` for all the types
 
 Let's compare our previous protocols using `fs2.Stream` instead of `Observable`.
 
-```tut:silent
+```scala mdoc:silent
 import higherkindness.mu.rpc.protocol._
 
-object service {
+object servicefs2 {
 
   import fs2.Stream
 
