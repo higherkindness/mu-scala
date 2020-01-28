@@ -62,7 +62,7 @@ case class AvroSrcGenerator(
   // so we then reduce our output to that based on this fileset
   override def generateFrom(
       files: Set[File],
-      serializationType: String,
+      serializationType: String
   ): Seq[(File, String, Seq[String])] =
     super
       .generateFrom(files, serializationType: String)
@@ -145,13 +145,13 @@ case class AvroSrcGenerator(
     }
 
     val extraParams: List[String] =
-        s"compressionType = ${compressionTypeGen.value}" +:
-          (if (useIdiomaticEndpoints) {
-             List(
-               s"""namespace = Some("${protocol.getNamespace}")""",
-               "methodNameStyle = Capitalize"
-             )
-           } else Nil)
+      s"compressionType = ${compressionTypeGen.value}" +:
+        (if (useIdiomaticEndpoints) {
+           List(
+             s"""namespace = Some("${protocol.getNamespace}")""",
+             "methodNameStyle = Capitalize"
+           )
+         } else Nil)
 
     val serviceParams: String = (serializationType +: extraParams).mkString(",")
 

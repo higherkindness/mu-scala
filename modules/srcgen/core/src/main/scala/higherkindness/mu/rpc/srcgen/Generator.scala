@@ -37,6 +37,6 @@ trait Generator {
 
   protected def generateFrom(
       inputFile: File,
-      serializationType: String,
+      serializationType: String
   ): Option[(String, Seq[String])]
 }
