@@ -21,8 +21,10 @@ import org.scalacheck.Gen
 import org.scalatest._
 import org.scalatestplus.scalacheck.Checkers
 import org.scalacheck.Prop._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class MethodsTests extends WordSpec with Matchers with Checkers {
+class MethodsTests extends AnyWordSpec with Matchers with Checkers {
 
   "methods.voidMethod" should {
 

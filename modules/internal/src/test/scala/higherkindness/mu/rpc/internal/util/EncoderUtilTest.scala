@@ -21,8 +21,10 @@ package util
 import org.scalatest._
 import org.scalacheck.Prop._
 import org.scalatestplus.scalacheck.Checkers
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class EncoderUtilTest extends WordSpec with Matchers with Checkers {
+class EncoderUtilTest extends AnyWordSpec with Matchers with Checkers {
 
   "EncoderUtil" should {
 
