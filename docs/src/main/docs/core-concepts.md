@@ -94,7 +94,7 @@ case class Person(name: String, id: Int, has_ponycopter: Boolean)
 As we can see, this is quite simple. By the same token, let’s see now how the `Greeter` service would be translated to the [Mu] style (in your `.scala` file):
 
 ```scala mdoc:silent
-object protocol {
+object protocol1 {
 
   /**
     * The request message containing the user's name.
@@ -137,7 +137,7 @@ In the above example, we can see that `sayHello` returns an `F[HelloReply]`. How
 For instance:
 
 ```scala mdoc:silent
-object protocol {
+object protocol2 {
 
   /**
    * The request message containing the user's name.
@@ -188,7 +188,7 @@ For server side compression, we just have to add the annotation `Gzip` in our de
 Let's see an example of a unary service:
 
 ```scala mdoc:silent
-object service {
+object service1 {
 
   @service(Protobuf, Gzip)
   trait Greeter[F[_]] {
@@ -260,7 +260,7 @@ As [gRPC], [Mu] allows you to define two main kinds of service methods:
 Let's complete our protocol's example with an unary service method:
 
 ```scala mdoc:silent
-object service {
+object service2 {
 
   case class HelloRequest(greeting: String)
 
@@ -298,7 +298,7 @@ If you're using `Protobuf`, [Mu] uses instances of [PBDirect] for creating the `
 Let's see a couple of samples, one per each type of serialization. Suppose you want to serialize `java.time.LocalDate` as part of your messages in `String` format. With `Protobuf`, as we've mentioned, you need to provide the instances of [PBDirect] for that type. Specifically, you need to provide a `PBScalarValueWriter` and a `PBScalarValueReader`.
 
 ```scala mdoc:silent
-object protocol {
+object protocol3 {
 
   import java.time._
   import java.time.format._
@@ -330,7 +330,7 @@ object protocol {
 For `Avro` the process is quite similar, but in this case we need to provide three instances of [Avro4s]. `ToSchema`, `FromValue`, and `ToValue`.
 
 ```scala mdoc:silent
-object protocol {
+object protocol4 {
 
   import java.time._
   import java.time.format._
