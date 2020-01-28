@@ -25,8 +25,10 @@ import com.fortysevendeg.scalacheck.datetime.GenDateTime._
 import org.scalatest._
 import org.scalacheck.Prop._
 import org.scalatestplus.scalacheck.Checkers
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class JavaTimeUtilTests extends WordSpec with Matchers with Checkers {
+class JavaTimeUtilTests extends AnyWordSpec with Matchers with Checkers {
 
   val from: ZonedDateTime = ZonedDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)
   val range: Duration     = Duration.ofDays(365 * 200)
