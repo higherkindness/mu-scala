@@ -72,7 +72,6 @@ object jodaTimeEncoders {
     implicit val JodaLocalDateTimeEncoder: Encoder[LocalDateTime] =
       Encoder[Long].comap(JodaTimeUtil.jodaLocalDateTimeToLong)
 
-    //
     /*
      * These marshallers are only used when the entire gRPC request/response
      * is a LocalDate/LocalDateTime. When a LocalDate/LocalDateTime is a field
