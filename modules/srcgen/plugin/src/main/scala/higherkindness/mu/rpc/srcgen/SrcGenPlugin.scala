@@ -68,15 +68,6 @@ object SrcGenPlugin extends AutoPlugin {
           "in subpackages based on the namespaces declared in the IDL files."
       )
 
-    @deprecated(
-      "Use the specific settings like `muSrcGenCompressionType` or `muSrcGenIdiomaticEndpoints`",
-      "0.18.4"
-    )
-    lazy val genOptions: SettingKey[Seq[String]] =
-      settingKey[Seq[String]](
-        "Options for the generator, such as additional @service annotation parameters in srcGen."
-      )
-
     lazy val muSrcGenBigDecimal: SettingKey[BigDecimalTypeGen] =
       settingKey[BigDecimalTypeGen](
         "The Scala generated type for `decimals`. Possible values are `ScalaBigDecimalGen` and `ScalaBigDecimalTaggedGen`" +
@@ -127,7 +118,6 @@ object SrcGenPlugin extends AutoPlugin {
     muSrcGenSourceDirs := Seq((Compile / resourceDirectory).value),
     muSrcGenIdlTargetDir := (Compile / resourceManaged).value / muSrcGenIdlType.value,
     muSrcGenTargetDir := (Compile / sourceManaged).value,
-    genOptions := Seq.empty,
     muSrcGenBigDecimal := ScalaBigDecimalTaggedGen,
     muSrcGenMarshallerImports := {
       if (muSrcGenSerializationType.value == "Avro" || muSrcGenSerializationType.value == "AvroWithSchema")
@@ -187,7 +177,6 @@ object SrcGenPlugin extends AutoPlugin {
               ),
               muSrcGenIdlType.value,
               muSrcGenSerializationType.value,
-              genOptions.value,
               muSrcGenTargetDir.value,
               target.value / "srcGen"
             )(muSrcGenIdlTargetDir.value.allPaths.get.toSet).toSeq
@@ -212,13 +201,12 @@ object SrcGenPlugin extends AutoPlugin {
       generator: GeneratorApplication[_],
       idlType: String,
       serializationType: String,
-      options: Seq[String],
       targetDir: File,
       cacheDir: File
   ): Set[File] => Set[File] =
     FileFunction.cached(cacheDir, FilesInfo.lastModified, FilesInfo.exists) {
       inputFiles: Set[File] =>
-        generator.generateFrom(idlType, serializationType, inputFiles, targetDir, options: _*).toSet
+        generator.generateFrom(idlType, serializationType, inputFiles, targetDir).toSet
     }
 
   private def extractIDLDefinitionsFromJar(

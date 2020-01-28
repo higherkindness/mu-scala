@@ -54,8 +54,7 @@ object OpenApiSrcGenerator {
 
     protected def generateFrom(
         inputFile: File,
-        serializationType: String,
-        options: String*
+        serializationType: String
     ): Option[(String, Seq[String])] =
       getCode[IO](inputFile).value.unsafeRunSync()
 

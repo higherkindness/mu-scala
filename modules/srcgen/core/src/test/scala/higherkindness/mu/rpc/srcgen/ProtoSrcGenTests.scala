@@ -40,7 +40,7 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
       val result: Option[(String, String)] =
         ProtoSrcGenerator
           .build(NoCompressionGen, UseIdiomaticEndpoints(false), Fs2Stream, new java.io.File("."))
-          .generateFrom(files = Set(protoFile("book")), serializationType = "", options = "")
+          .generateFrom(files = Set(protoFile("book")), serializationType = "")
           .map(t => (t._2, t._3.mkString("\n").clean))
           .headOption
 
@@ -57,7 +57,7 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
             MonixObservable,
             new java.io.File(".")
           )
-          .generateFrom(files = Set(protoFile("book")), serializationType = "", options = "")
+          .generateFrom(files = Set(protoFile("book")), serializationType = "")
           .map(t => (t._2, t._3.mkString("\n").clean))
           .headOption
 
