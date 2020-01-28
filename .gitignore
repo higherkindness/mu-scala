@@ -43,3 +43,5 @@ project/.bloop/
 
 # Microsite
 /_site
+
+.jekyll-cache/
