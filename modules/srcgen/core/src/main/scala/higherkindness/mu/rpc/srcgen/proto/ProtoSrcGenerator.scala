@@ -58,8 +58,7 @@ object ProtoSrcGenerator {
 
     def generateFrom(
         inputFile: File,
-        serializationType: String,
-        options: String*
+        serializationType: String
     ): Option[(String, Seq[String])] =
       getCode[IO](inputFile).map(Some(_)).unsafeRunSync
 

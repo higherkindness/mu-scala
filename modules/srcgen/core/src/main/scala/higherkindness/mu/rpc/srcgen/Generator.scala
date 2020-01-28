@@ -24,11 +24,10 @@ trait Generator {
 
   def generateFrom(
       files: Set[File],
-      serializationType: String,
-      options: String*
+      serializationType: String
   ): Seq[(File, String, Seq[String])] =
     inputFiles(files).flatMap(inputFile =>
-      generateFrom(inputFile, serializationType, options: _*).map {
+      generateFrom(inputFile, serializationType).map {
         case (outputPath, output) =>
           (inputFile, outputPath, output)
       }
@@ -38,7 +37,6 @@ trait Generator {
 
   protected def generateFrom(
       inputFile: File,
-      serializationType: String,
-      options: String*
+      serializationType: String
   ): Option[(String, Seq[String])]
 }
