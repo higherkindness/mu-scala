@@ -22,13 +22,13 @@ Then configure the plugin by adding a few lines to `build.sbt`:
 
 ```scala
 // Look for .proto files
-idlType := "proto"
+muSrcGenIdlType := "proto"
 
 // Make it easy for 3rd-party clients to communicate with our gRPC server
-idlGenIdiomaticEndpoints := true
+muSrcGenIdlGenIdiomaticEndpoints := true
 
 // Run the source generation automatically before compilation
-sourceGenerators in Compile += (srcGen in Compile).taskValue
+sourceGenerators in Compile += (muSrcGen in Compile).taskValue
 ```
 
 Finally, make sure you have enabled the scalamacros compiler plugin so that
@@ -65,7 +65,7 @@ service ProtoGreeter {
 You can run the source generator directly:
 
 ```sh
-$ sbt srcGen
+$ sbt muSrcGen
 ```
 
 or as part of compilation:

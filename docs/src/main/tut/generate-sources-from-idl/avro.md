@@ -22,13 +22,13 @@ Then configure the plugin by adding a few lines to `build.sbt`:
 
 ```scala
 // Look for Avro IDL files
-idlType := "avro"
+muSrcGenIdlType := "avro"
 
 // Make it easy for 3rd-party clients to communicate with our gRPC server
-idlGenIdiomaticEndpoints := true
+muSrcGenIdiomaticEndpoints := true
 
 // Run the source generation automatically before compilation
-sourceGenerators in Compile += (srcGen in Compile).taskValue
+sourceGenerators in Compile += (muSrcGen in Compile).taskValue
 ```
 
 Finally, make sure you have enabled the scalamacros compiler plugin so that
@@ -65,7 +65,7 @@ protocol AvroGreeter {
 You can run the source generator directly:
 
 ```sh
-$ sbt srcGen
+$ sbt muSrcGen
 ```
 
 or as part of compilation:
@@ -175,7 +175,7 @@ Suppose you delete `src/main/resources/hello.avdl` and replace it with `src/main
 }
 ```
 
-If you run `sbt clean srcGen`, you should end up with exactly the same generated
+If you run `sbt clean muSrcGen`, you should end up with exactly the same generated
 Scala file as before.
 
 ## Avro code generation details
@@ -196,7 +196,7 @@ protocol People {
 }
 ```
 
-***srcGen =>***
+***muSrcGen =>***
 
 `People.scala`
 
@@ -209,7 +209,7 @@ protocol People {
 }
 ```
 
-***srcGen =>***
+***muSrcGen =>***
 
 `example.protocol.People.scala`
 
@@ -226,7 +226,7 @@ record Person {
 }
 ```
 
-***srcGen =>***
+***muSrcGen =>***
 
 ```tut:silent
 final case class Person(name: String, age: Int, crossfitter: Boolean)
@@ -242,7 +242,7 @@ enum Errors {
 }
 ```
 
-***srcGen =>***
+***muSrcGen =>***
 
 ```tut:silent
 final object Errors extends Enumeration {
@@ -268,7 +268,7 @@ record PeopleRequest {
 }
 ```
 
-***srcGen =>***
+***muSrcGen =>***
 
 ```tut:silent
 final case class PeopleRequest(name: Option[String])
@@ -284,7 +284,7 @@ record PeopleResponse {
 }
 ```
 
-***srcGen =>***
+***muSrcGen =>***
 
 ```tut:silent
 final case class PeopleResponse(result: Either[Errors.Value, Person])
@@ -301,7 +301,7 @@ record PeopleResponse {
 }
 ```
 
-***srcGen =>***
+***muSrcGen =>***
 
 ```tut:silent
 import shapeless.{:+:, CNil}
@@ -324,7 +324,7 @@ protocol PeopleService {
 }
 ```
 
-***srcGen =>***
+***muSrcGen =>***
 
 ```scala
 @service(Avro) trait PeopleService[F[_]] {
@@ -344,7 +344,7 @@ protocol PeopleService {
 }
 ```
 
-***srcGen =>***
+***muSrcGen =>***
 
 ```scala
 @service(Avro) trait PeopleService[F[_]] {

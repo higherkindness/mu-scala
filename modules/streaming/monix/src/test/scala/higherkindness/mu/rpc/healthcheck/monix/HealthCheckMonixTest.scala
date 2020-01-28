@@ -19,9 +19,10 @@ package higherkindness.mu.rpc.healthcheck.monix
 import cats.effect.IO
 import higherkindness.mu.rpc.healthcheck.monix.handler.HealthServiceMonix
 import higherkindness.mu.rpc.healthcheck.unary.handler.{HealthCheck, HealthStatus, ServerStatus}
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class HealthCheckMonixTest extends WordSpec with Matchers {
+class HealthCheckMonixTest extends AnyWordSpec with Matchers {
 
   "Monix health check service" should {
 

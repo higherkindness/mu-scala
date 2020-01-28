@@ -26,48 +26,50 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String             = "1.8.4"
-      val avrohugger: String         = "1.0.0-RC22"
-      val betterMonadicFor: String   = "0.3.1"
-      val catsEffect: String         = "2.0.0"
-      val circe: String              = "0.12.3"
-      val dropwizard: String         = "4.1.2"
-      val embeddedKafka: String      = "2.4.0"
-      val enumeratum: String         = "1.5.15"
-      val frees: String              = "0.8.2"
-      val fs2: String                = "2.2.1"
-      val fs2Grpc: String            = "0.6.0"
-      val fs2Kafka: String           = "0.20.2"
-      val grpc: String               = "1.24.2"
-      val jodaTime: String           = "2.10.5"
-      val http4s: String             = "0.21.0-RC2"
-      val kindProjector: String      = "0.10.3"
-      val log4cats: String           = "1.0.1"
-      val log4s: String              = "1.8.2"
-      val logback: String            = "1.2.3"
-      val monix: String              = "3.1.0"
-      val monocle: String            = "2.0.1"
-      val nettySSL: String           = "2.0.25.Final"
-      val paradise: String           = "2.1.1"
-      val pbdirect: String           = "0.4.1"
-      val prometheus: String         = "0.8.1"
-      val pureconfig: String         = "0.12.2"
-      val reactiveStreams: String    = "1.0.3"
-      val scala: String              = "2.12.10"
-      val scopt: String              = "3.7.1"
-      val scalacheck: String         = "1.14.3"
-      val scalacheckToolbox: String  = "0.3.1"
-      val scalamock: String          = "4.4.0"
-      val scalatest: String          = "3.0.8"
-      val skeuomorph: String         = "0.0.20"
-      val slf4j: String              = "1.7.30"
+      val avro4s: String              = "1.8.4"
+      val avrohugger: String          = "1.0.0-RC22"
+      val betterMonadicFor: String    = "0.3.1"
+      val catsEffect: String          = "2.0.0"
+      val circe: String               = "0.12.3"
+      val dropwizard: String          = "4.1.2"
+      val embeddedKafka: String       = "2.4.0"
+      val enumeratum: String          = "1.5.15"
+      val frees: String               = "0.8.2"
+      val fs2: String                 = "2.2.1"
+      val fs2Grpc: String             = "0.6.0"
+      val fs2Kafka: String            = "0.20.2"
+      val grpc: String                = "1.24.2"
+      val jodaTime: String            = "2.10.5"
+      val http4s: String              = "0.21.0-M6"
+      val kindProjector: String       = "0.10.3"
+      val log4cats: String            = "1.0.1"
+      val log4s: String               = "1.8.2"
+      val logback: String             = "1.2.3"
+      val monix: String               = "3.1.0"
+      val monocle: String             = "2.0.1"
+      val nettySSL: String            = "2.0.25.Final"
+      val paradise: String            = "2.1.1"
+      val pbdirect: String            = "0.4.1"
+      val prometheus: String          = "0.8.1"
+      val pureconfig: String          = "0.12.2"
+      val reactiveStreams: String     = "1.0.3"
+      val scala: String               = "2.12.10"
+      val scopt: String               = "3.7.1"
+      val scalacheck: String          = "1.14.3"
+      val scalacheckToolbox: String   = "0.3.1"
+      val scalamock: String           = "4.4.0"
+      val scalatest: String           = "3.1.0"
+      val scalatestplusScheck: String = "3.1.0.0-RC2"
+      val skeuomorph: String          = "0.0.20"
+      val slf4j: String               = "1.7.30"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect)                  % Test,
         %%("scalamock", V.scalamock)                     % Test,
-        %%("scheckToolboxDatetime", V.scalacheckToolbox) % Test
+        %%("scheckToolboxDatetime", V.scalacheckToolbox) % Test,
+        "org.scalatestplus"                              %% "scalatestplus-scalacheck" % V.scalatestplusScheck % Test
       )
     )
 
@@ -75,7 +77,7 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect),
         %("grpc-stub", V.grpc),
-        "com.47deg" %% "pbdirect" % V.pbdirect,
+        "com.47deg"    %% "pbdirect"   % V.pbdirect,
         "com.beachape" %% "enumeratum" % V.enumeratum,
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
@@ -195,7 +197,8 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %("grpc-testing", V.grpc),
         %%("cats-effect", V.catsEffect),
-        %%("scalacheck", V.scalacheck) % Test
+        %%("scalacheck", V.scalacheck) % Test,
+        "org.scalatestplus"            %% "scalatestplus-scalacheck" % V.scalatestplusScheck % Test
       )
     )
 
@@ -216,7 +219,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val kafkaSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "com.ovoenergy" %% "fs2-kafka" % V.fs2Kafka,
+        "com.ovoenergy"           %% "fs2-kafka"      % V.fs2Kafka,
         "io.github.embeddedkafka" %% "embedded-kafka" % V.embeddedKafka % Test
       )
     )
@@ -317,7 +320,10 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies += %%("scalatest", V.scalatest),
+      libraryDependencies ++= Seq(
+        %%("scalatest", V.scalatest),
+        "org.scalatestplus" %% "scalatestplus-scalacheck" % V.scalatestplusScheck
+      ),
       scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
     )
 

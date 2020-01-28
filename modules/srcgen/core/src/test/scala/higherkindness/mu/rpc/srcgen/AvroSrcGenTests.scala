@@ -45,8 +45,7 @@ class AvroSrcGenTests extends RpcBaseTestSuite with Checkers {
         scenario.useIdiomaticEndpoints
       ).generateFrom(
         resource(scenario.inputResourcePath).mkString,
-        scenario.serializationType,
-        scenario.options: _*
+        scenario.serializationType
       )
     output should not be empty
     output forall {

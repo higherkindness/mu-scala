@@ -50,21 +50,20 @@ abstract class GeneratorApplication[T <: Generator](generators: T*) {
     )
     val outputDir = new File(args(3))
     val options   = args.drop(4)
-    generateFrom(idlType, serializationType, inputPath.allFiles.toSet, outputDir, options: _*)
+    generateFrom(idlType, serializationType, inputPath.allFiles.toSet, outputDir)
   }
 
   def generateFrom(
       idlType: String,
       serializationType: String,
       inputFiles: Set[File],
-      outputDir: File,
-      options: String*
+      outputDir: File
   ): Seq[File] = {
     validate(
       idlTypes.contains(idlType),
       s"Unknown IDL type '$idlType'. Valid values: ${idlTypes.mkString(", ")}"
     )
-    generatorsByType(idlType).generateFrom(inputFiles, serializationType, options: _*).map {
+    generatorsByType(idlType).generateFrom(inputFiles, serializationType).map {
       case (inputFile, outputFilePath, output) =>
         val outputFile = new File(outputDir, outputFilePath)
         logger.info(s"$inputFile -> $outputFile")
