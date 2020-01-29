@@ -33,9 +33,9 @@ import io.prometheus.client._
  * {prefix}_messages_sent{labels=classifier,service,method} - Counter
  * {prefix}_messages_received{labels=classifier,service,method} - Counter
  * {prefix}_calls_header{labels=classifier} - Histogram
- * {prefix}_calls_total{labels=classifier,method,status} - Histogram
+ * {prefix}_calls_total{labels=classifier,methodType,status} - Histogram
  *
- * `method` can be one of the following:
+ * `methodType` can be one of the following:
  *    - "unary"
  *    - "client-streaming"
  *    - "server-streaming"
@@ -54,6 +54,12 @@ import io.prometheus.client._
  *    - "unknown-status"
  *    - "unreachable-error"
  *
+ * The `buildFullTotal` method contains the following metrics:
+ *
+ * {prefix}_active_calls{labels=classifier} - Counter
+ * {prefix}_messages_sent{labels=classifier,service,method} - Counter
+ * {prefix}_messages_received{labels=classifier,service,method} - Counter
+ * {prefix}_calls_total{labels=classifier,service,method,status} - Histogram
  */
 object PrometheusMetrics {
 
@@ -73,6 +79,33 @@ object PrometheusMetrics {
 
   def apply[F[_]: Sync](metrics: Metrics): MetricsOps[F] =
     new DefaultPrometheusMetricsOps(metrics)
+
+  def buildFullTotal[F[_]: Sync](
+      cr: CollectorRegistry,
+      prefix: String = "higherkindness_mu"
+  ): F[MetricsOps[F]] =
+    buildFullTotalMetrics[F](prefix, cr).map { metrics =>
+      new DefaultPrometheusMetricsOps[F](metrics) {
+        override def recordTotalTime(
+            methodInfo: GrpcMethodInfo,
+            status: Status,
+            elapsed: Long,
+            classifier: Option[String]
+        ): F[Unit] =
+          metrics.totalTime.fold(().pure[F])(hist =>
+            Sync[F].delay(
+              hist
+                .labels(
+                  label(classifier),
+                  methodInfo.serviceName,
+                  methodInfo.methodName,
+                  statusDescription(grpcStatusFromRawStatus(status))
+                )
+                .observe(SimpleTimer.elapsedSecondsFromNanos(0, elapsed))
+            )
+          )
+      }
+    }
 
   class DefaultPrometheusMetricsOps[F[_]](metrics: Metrics)(implicit F: Sync[F])
       extends MetricsOps[F] {
@@ -170,6 +203,14 @@ object PrometheusMetrics {
       .labelNames("classifier", "method", "status")
       .register(registry)
 
+  def fullTotalTime(prefix: String, registry: CollectorRegistry): Histogram =
+    Histogram
+      .build()
+      .name(s"${prefix}_calls_total")
+      .help("Total time for all calls")
+      .labelNames("classifier", "service", "method", "status")
+      .register(registry)
+
   private[this] def buildMetrics[F[_]: Sync](
       prefix: String,
       registry: CollectorRegistry
@@ -180,6 +221,19 @@ object PrometheusMetrics {
       messagesReceived = defaultMessageReceived(prefix, registry).some,
       headersTime = defaultHeadersTime(prefix, registry).some,
       totalTime = defaultTotalTime(prefix, registry).some
+    )
+  }
+
+  private[this] def buildFullTotalMetrics[F[_]: Sync](
+      prefix: String,
+      registry: CollectorRegistry
+  ): F[Metrics] = Sync[F].delay {
+    Metrics(
+      activeCalls = defaultActiveCalls(prefix, registry).some,
+      messagesSent = defaultMessageSent(prefix, registry).some,
+      messagesReceived = defaultMessageReceived(prefix, registry).some,
+      headersTime = None,
+      totalTime = fullTotalTime(prefix, registry).some
     )
   }
 

@@ -160,7 +160,7 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
         } yield op1).unsafeRunSync()
     }
 
-  property("creates and updates timer for total time") =
+  property("creates and updates timer for total time metrics") =
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10), statusGen, Gen.chooseNum(100, 1000)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int, status: Status, elapsed: Int) =>
         val registry   = new CollectorRegistry()
@@ -179,6 +179,33 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
                 List(
                   classifier,
                   methodTypeDescription(methodInfo),
+                  statusDescription(MetricsOps.grpcStatusFromRawStatus(status))
+                )
+              )(checkSeriesSamples(metricName, numberOfCalls, elapsed))
+            }
+        } yield op1).unsafeRunSync()
+    }
+
+  property("creates and updates timer for full total time metrics") =
+    forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10), statusGen, Gen.chooseNum(100, 1000)) {
+      (methodInfo: GrpcMethodInfo, numberOfCalls: Int, status: Status, elapsed: Int) =>
+        val registry   = new CollectorRegistry()
+        val metricName = s"${prefix}_calls_total"
+
+        (for {
+          metrics <- PrometheusMetrics.buildFullTotal[IO](registry, prefix)
+          op1 <- (1 to numberOfCalls).toList
+            .map(_ => metrics.recordTotalTime(methodInfo, status, elapsed.toLong, Some(classifier)))
+            .sequence_
+            .map { _ =>
+              checkMetrics(
+                registry,
+                metricName,
+                List("classifier", "service", "method", "status"),
+                List(
+                  classifier,
+                  methodInfo.serviceName,
+                  methodInfo.methodName,
                   statusDescription(MetricsOps.grpcStatusFromRawStatus(status))
                 )
               )(checkSeriesSamples(metricName, numberOfCalls, elapsed))
