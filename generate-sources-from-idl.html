@@ -1,204 +1,110 @@
-<html><head><title>Mu-Scala: Generating sources from IDL</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="47 Degrees" /><meta name="description" content="A purely functional library for building RPC endpoint-based services" /><meta name="og:image" content="/mu-scala/img/poster.png" /><meta name="image" property="og:image" content="/mu-scala/img/poster.png" /><meta name="og:title" content="Mu-Scala: Generating sources from IDL" /><meta name="title" property="og:title" content="Mu-Scala: Generating sources from IDL" /><meta name="og:site_name" content="Mu-Scala" /><meta name="og:url" content="https://higherkindness.github.io/mu-scala/" /><meta name="og:type" content="website" /><meta name="og:description" content="A purely functional library for building RPC endpoint-based services" /><link rel="icon" type="image/png" href="/mu-scala/img/favicon.png" /><meta name="twitter:title" content="Mu-Scala: Generating sources from IDL" /><meta name="twitter:image" content="/mu-scala/img/poster.png" /><meta name="twitter:description" content="A purely functional library for building RPC endpoint-based services" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/mu-scala/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/mu-scala/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/mu-scala/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/mu-scala/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/mu-scala/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/mu-scala/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/mu-scala/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/mu-scala/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/mu-scala/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/mu-scala/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/mu-scala/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/mu-scala/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/mu-scala/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/mu-scala/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/mu-scala/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/mu-scala/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/mu-scala/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/mu-scala/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/mu-scala/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/mu-scala/img/favicon310x150.png" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/mu-scala/highlight/styles/github-gist.css" /><link rel="stylesheet" href="/mu-scala/css/light-style.css" /><link rel="stylesheet" href="/mu-scala/css/mu-styles.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><div id="sidebar-brand"><a href="/mu-scala/" class="brand"><div class="brand-wrapper"></div><span>Mu-Scala</span></a><button id="main-toggle" class="sidebar-toggle"><span class="close"></span></button></div><div class="sidebar-nav"> <div class="sidebar-nav-item  "><a href="/mu-scala/" title="Quickstart" class="">Quickstart</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/core-concepts" title="Core concepts" class="">Core concepts</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/streaming" title="Streaming" class="">Streaming</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/annotations" title="Annotations" class="">Annotations</a></div> <div class="sidebar-nav-item active open"><a href="/mu-scala/generate-sources-from-idl" title="Generate sources from IDL" class="drop-nested">Generate sources from IDL</a><i class="fa fa-angle-right"></i><div class="sub-section"> <a href="/mu-scala/generate-sources-from-avro" title="Avro" class="">Avro</a> <a href="/mu-scala/generate-sources-from-proto" title="Protocol Buffers" class="">Protocol Buffers</a> <a href="/mu-scala/generate-sources-from-openapi" title="OpenAPI" class="">OpenAPI</a></div></div> <div class="sidebar-nav-item  "><a href="/mu-scala/patterns" title="Patterns" class="">Patterns</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/ssl-tls" title="SSL/TLS" class="">SSL/TLS</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/metrics-reporting" title="Metrics Reporting" class="">Metrics Reporting</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/decimal-migration-guide" title="Migration guide for decimal types" class="">Migration guide for decimal types</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/schema-evolution" title="Schema Evolution" class="drop-nested">Schema Evolution</a><i class="fa fa-angle-right"></i><div class="sub-section"> <a href="/mu-scala/schema-evolution/avro" title="Avro" class="">Avro</a> <a href="/mu-scala/schema-evolution/proto" title="Protocol Buffers" class="">Protocol Buffers</a></div></div> <div class="sidebar-nav-item  "><a href="/mu-scala/references" title="References" class="">References</a></div></div></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li id="gh-eyes-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu-scala" target="_blank" rel="noopener noreferrer"><i class="fa fa-eye"></i><span>Watchers<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu-scala" target="_blank" rel="noopener noreferrer"><i class="fa fa-star-o"></i><span>Stars<span id="stars" class="label label-default">--</span></span></a></li></ul></div></div></div></div><div id="content" data-github-owner="higherkindness" data-github-repo="mu-scala"><div class="content-wrapper"><section><h1 id="generate-sources-from-idl">Generate sources from IDL</h1>
+<html><head><title>Mu-Scala: Generating sources from IDL</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="47 Degrees" /><meta name="description" content="A purely functional library for building RPC endpoint-based services" /><meta name="og:image" content="/mu-scala/img/poster.png" /><meta name="image" property="og:image" content="/mu-scala/img/poster.png" /><meta name="og:title" content="Mu-Scala: Generating sources from IDL" /><meta name="title" property="og:title" content="Mu-Scala: Generating sources from IDL" /><meta name="og:site_name" content="Mu-Scala" /><meta name="og:url" content="https://higherkindness.github.io/mu-scala/" /><meta name="og:type" content="website" /><meta name="og:description" content="A purely functional library for building RPC endpoint-based services" /><link rel="icon" type="image/png" href="/mu-scala/img/favicon.png" /><meta name="twitter:title" content="Mu-Scala: Generating sources from IDL" /><meta name="twitter:image" content="/mu-scala/img/poster.png" /><meta name="twitter:description" content="A purely functional library for building RPC endpoint-based services" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/mu-scala/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/mu-scala/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/mu-scala/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/mu-scala/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/mu-scala/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/mu-scala/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/mu-scala/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/mu-scala/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/mu-scala/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/mu-scala/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/mu-scala/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/mu-scala/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/mu-scala/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/mu-scala/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/mu-scala/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/mu-scala/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/mu-scala/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/mu-scala/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/mu-scala/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/mu-scala/img/favicon310x150.png" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/mu-scala/highlight/styles/tomorrow-night-eighties.css" /><link rel="stylesheet" href="/mu-scala/css/light-style.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><div id="sidebar-brand"><a href="/mu-scala/" class="brand"><div class="brand-wrapper"></div><span>Mu-Scala</span></a><button id="main-toggle" class="sidebar-toggle"><span class="close"></span></button></div><div class="sidebar-nav"> <div class="sidebar-nav-item  "><a href="/mu-scala/" title="Quickstart" class="">Quickstart</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/core-concepts" title="Core concepts" class="">Core concepts</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/streaming" title="Streaming" class="">Streaming</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/annotations" title="Annotations" class="">Annotations</a></div> <div class="sidebar-nav-item active open"><a href="/mu-scala/generate-sources-from-idl" title="Generate sources from IDL" class="drop-nested">Generate sources from IDL</a><i class="fa fa-angle-right"></i><div class="sub-section"> <a href="/mu-scala/generate-sources-from-avro" title="Avro" class="">Avro</a> <a href="/mu-scala/generate-sources-from-proto" title="Protocol Buffers" class="">Protocol Buffers</a></div></div> <div class="sidebar-nav-item  "><a href="/mu-scala/idl-generation" title="IDL Generation" class="">IDL Generation</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/patterns" title="Patterns" class="">Patterns</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/ssl-tls" title="SSL/TLS" class="">SSL/TLS</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/metrics-reporting" title="Metrics Reporting" class="">Metrics Reporting</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/decimal-migration-guide" title="Migration guide for decimal types" class="">Migration guide for decimal types</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/schema-evolution" title="Schema Evolution" class="drop-nested">Schema Evolution</a><i class="fa fa-angle-right"></i><div class="sub-section"> <a href="/mu-scala/schema-evolution/avro" title="Avro" class="">Avro</a> <a href="/mu-scala/schema-evolution/proto" title="Protocol Buffers" class="">Protocol Buffers</a></div></div> <div class="sidebar-nav-item  "><a href="/mu-scala/references" title="References" class="">References</a></div></div></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li id="gh-eyes-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu-scala" target="_blank" rel="noopener noreferrer"><i class="fa fa-eye"></i><span>Watchers<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu-scala" target="_blank" rel="noopener noreferrer"><i class="fa fa-star-o"></i><span>Stars<span id="stars" class="label label-default">--</span></span></a></li></ul></div></div></div></div><div id="content" data-github-owner="higherkindness" data-github-repo="mu-scala"><div class="content-wrapper"><section><h1 id="generate-sources-from-idl">Generate sources from IDL</h1>
 
-<p>While it is possible to use Mu by hand-writing your service definitions, message
-classes and clients in Scala, we recommend you use <code class="highlighter-rouge">sbt-mu-srcgen</code> to generate
-this code from Protobuf/Avro/OpenAPI IDL files.</p>
+<p>Since <code class="highlighter-rouge">Protobuf</code> and <code class="highlighter-rouge">Avro</code> are both a language-neutral, platform-neutral way of serializing structured data,
+our aim with <a href="https://github.com/higherkindness/mu">Mu</a> is to keep the compatibility and generate the Scala definitions (needed for working internally) from these IDL files.
+Before going into implementation details let’s see how to create the Scala files with our definitions.</p>
 
-<p>IDL files are language-agnostic, more concise than Scala code, easily shared
-with 3rd parties, and supported by a lot of existing tools.</p>
-
-<p>Mu can generate code from a number of different IDL formats:</p>
-
-<ul>
-  <li>message classes, gRPC server and client from Protobuf <code class="highlighter-rouge">.proto</code> files (see the
-<a href="generate-sources-from-proto">Protobuf section</a> for detailed instructions)</li>
-  <li>message classes, gRPC server and client from Avro <code class="highlighter-rouge">.avpr</code> or <code class="highlighter-rouge">.avdl</code> files (see the
-<a href="generate-sources-from-avro">Avro section</a>)</li>
-  <li>message classes and REST client from OpenAPI <code class="highlighter-rouge">.yaml</code> files (see the
-<a href="generate-sources-from-openapi">OpenAPI section</a>)</li>
-</ul>
+<p>Currently, <code class="highlighter-rouge">Avro</code> is supported in both <code class="highlighter-rouge">.avpr</code> (JSON) and <code class="highlighter-rouge">.avdl</code> (Avro IDL) formats, along with <code class="highlighter-rouge">Protobuf</code> (<code class="highlighter-rouge">.proto</code>).
+The plugin’s implementation basically wraps the <a href="https://github.com/julianpeeters/avrohugger">avrohugger</a> library for <code class="highlighter-rouge">Avro</code>
+and uses <a href="https://github.com/higherkindness/skeuomorph/">skeuomorph</a> for <code class="highlighter-rouge">Protobuf</code> adding some Mu specific extensions.
+In the future, both (<code class="highlighter-rouge">Avro</code> and <code class="highlighter-rouge">Protobuf</code>) will be generated by <em>skeuomorph</em>.</p>
 
 <h2 id="plugin-installation">Plugin Installation</h2>
 
 <p>Add the following line to <em>project/plugins.sbt</em>:</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">addSbtPlugin</span><span class="o">(</span><span class="s">"io.higherkindness"</span> <span class="o">%</span> <span class="s">"sbt-mu-srcgen"</span> <span class="o">%</span> <span class="s">"0.20.1"</span><span class="o">)</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">addSbtPlugin</span><span class="o">(</span><span class="s">"io.higherkindness"</span> <span class="o">%</span> <span class="s">"sbt-mu-idlgen"</span> <span class="o">%</span> <span class="s">"0.20.1"</span><span class="o">)</span>
 </code></pre></div></div>
 
-<h2 id="how-to-use-the-plugin">How to use the plugin</h2>
+<p>Note that the plugin is only available for Scala 2.12.</p>
 
-<p>The <code class="highlighter-rouge">srcGen</code> sbt task generates Scala source code from IDL files.</p>
+<h3 id="plugin-settings">Plugin Settings</h3>
 
-<p>The easiest way to use the plugin is by integrating the source generation in
-your compile process by adding this line to your <code class="highlighter-rouge">build.sbt</code> file:</p>
+<p>For generating <code class="highlighter-rouge">Scala</code> definitions we use <code class="highlighter-rouge">srcGen</code>. The easiest way to use the plugin is by integrating the source generation in your compile process adding this import to your <code class="highlighter-rouge">build.sbt</code> file:</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sourceGenerators</span> <span class="n">in</span> <span class="nc">Compile</span> <span class="o">+=</span> <span class="o">(</span><span class="n">srcGen</span> <span class="n">in</span> <span class="nc">Compile</span><span class="o">).</span><span class="py">taskValue</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">higherkindness.mu.rpc.idlgen.IdlGenPlugin.autoImport._</span>
+</code></pre></div></div>
+<p>and the setting,</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">idlType</span> <span class="o">:=</span> <span class="s">"proto"</span> <span class="c1">// or "avro"
+</span><span class="n">sourceGenerators</span> <span class="n">in</span> <span class="nc">Compile</span> <span class="o">+=</span> <span class="o">(</span><span class="n">srcGen</span> <span class="n">in</span> <span class="nc">Compile</span><span class="o">).</span><span class="py">taskValue</span>
 </code></pre></div></div>
 
-<p>Otherwise, you can run the sbt task manually:</p>
+<p>Otherwise, you can run the following sbt task (with the settings above in your <code class="highlighter-rouge">build.sbt</code>):</p>
 
-<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>sbt srcGen
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sbt
+project foo
+srcGen
 </code></pre></div></div>
 
-<h2 id="settings">Settings</h2>
+<p>Note that <code class="highlighter-rouge">project foo</code> is only needed for multi-module projects.</p>
 
-<h3 id="idltype">idlType</h3>
+<p>There are a couple of key settings that can be configured according to various needs. In that case, you can add them like in the following example:</p>
 
-<p>The most important sbt setting is <code class="highlighter-rouge">idlType</code>, which tells the plugin what kind of
-IDL files (Avro/Protobuf/OpenAPI) to look for.</p>
-
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">idlType</span> <span class="o">:=</span> <span class="s">"proto"</span> <span class="c1">// or "avro" or "openapi"</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">idlType</span> <span class="o">:=</span> <span class="s">"proto"</span>
+<span class="n">srcGenTargetDir</span> <span class="o">:=</span> <span class="o">(</span><span class="nc">Compile</span> <span class="o">/</span> <span class="n">sourceManaged</span><span class="o">).</span><span class="py">value</span> <span class="o">/</span> <span class="s">"mu_proto"</span>
+<span class="n">srcGenSerializationType</span> <span class="o">:=</span> <span class="s">"Protobuf"</span>
+<span class="n">sourceGenerators</span> <span class="n">in</span> <span class="nc">Compile</span> <span class="o">+=</span> <span class="o">(</span><span class="n">srcGen</span> <span class="n">in</span> <span class="nc">Compile</span><span class="o">).</span><span class="py">taskValue</span>
 </code></pre></div></div>
 
-<h3 id="srcgenserializationtype">srcGenSerializationType</h3>
+<p>In the example above we are using <code class="highlighter-rouge">proto</code> files with <code class="highlighter-rouge">Protobuf</code> serialization.
+The plugin generates them in <code class="highlighter-rouge">target/scala-2.12/src_managed/main/mu_proto</code>.</p>
 
-<p>Another important setting is <code class="highlighter-rouge">srcGenSerializationType</code>, which specifies how
-messages should be encoded on the wire. This should match the format you chose
-for the <code class="highlighter-rouge">idlType</code> setting:</p>
+<p>Basic settings:</p>
 
 <ul>
-  <li>For Protobuf, choose <code class="highlighter-rouge">"Protobuf"</code></li>
-  <li>For Avro, choose either <code class="highlighter-rouge">"Avro"</code> or <code class="highlighter-rouge">"AvroWithSchema"</code>.
+  <li><strong><code class="highlighter-rouge">idlType</code></strong>: the type of IDL to be generated, either <code class="highlighter-rouge">proto</code> or <code class="highlighter-rouge">avro</code>.</li>
+  <li><strong><code class="highlighter-rouge">srcGenSerializationType</code></strong>: the serialization type when generating Scala sources from the IDL definitions. <code class="highlighter-rouge">Protobuf</code>, <code class="highlighter-rouge">Avro</code> or <code class="highlighter-rouge">AvroWithSchema</code>(see <a href="schema-evolution/avro">Schema evolution/Avro</a>) are the current supported serialization types. By default, the serialization type is ‘Avro’.</li>
+  <li><strong><code class="highlighter-rouge">srcGenSourceDirs</code></strong>: the list of directories where your IDL files are placed. By default: <code class="highlighter-rouge">Compile / resourceDirectory</code>, typically <code class="highlighter-rouge">src/main/resources/</code>.</li>
+  <li><strong><code class="highlighter-rouge">srcGenIDLTargetDir</code></strong>: the target directory where all the IDL files specified in <code class="highlighter-rouge">srcGenSourceDirs</code> will be copied. Given this configuration, the plugin will automatically copy the following to this target directory:
     <ul>
-      <li>If you choose <code class="highlighter-rouge">"Avro"</code>, it means your client and server must always use
-exactly the same version of the schema.</li>
-      <li>If you choose <code class="highlighter-rouge">"AvroWithSchema"</code>, the writer schema will be included in
-every message sent, which introduces a bandwidth overhead but allows
-schema evolution. In other words, the server and client can use different
-versions of a schema, as long as they are compatible with each other.  See
-the <a href="schema-evolution/avro">schema evolution</a> section for more details on
-schema evolution.</li>
+      <li>All the definitions extracted from the different <code class="highlighter-rouge">jar</code> or <code class="highlighter-rouge">sbt</code> modules, and also,</li>
+      <li>All the source folders specified in the <code class="highlighter-rouge">srcGenSourceDirs</code> setting.</li>
     </ul>
   </li>
-  <li>For OpenAPI, this setting is ignored, so you don’t need to set it.</li>
+  <li><strong><code class="highlighter-rouge">srcGenTargetDir</code></strong>: the Scala target directory, where the <code class="highlighter-rouge">srcGen</code> task will write the generated files in subpackages based on the namespaces declared in the IDL files. By default, <code class="highlighter-rouge">Compile / sourceManaged</code>, tipically  <code class="highlighter-rouge">target/scala-2.12/src_managed/main/</code>.</li>
 </ul>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">srcGenSerializationType</span> <span class="o">:=</span> <span class="s">"Protobuf"</span> <span class="c1">// or "Avro" or "AvroWithSchema"</span>
-</code></pre></div></div>
+<p><strong>Note</strong>: The source directory must exist. Target directories will be created upon generation.</p>
 
-<h3 id="other-basic-settings">Other basic settings</h3>
+<p>Extra settings:</p>
 
-<table>
-  <thead>
-    <tr>
-      <th>Setting</th>
-      <th>Description</th>
-      <th>Default value</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code class="highlighter-rouge">srcGenSourceDirs</code></td>
-      <td>The list of directories where your IDL files can be found.<br /><br />Note: all the directories configured as sources will be distributed in the resulting jar artifact preserving the same folder structure as in the source.</td>
-      <td><code class="highlighter-rouge">Compile / resourceDirectory</code>, typically <code class="highlighter-rouge">src/main/resources/</code></td>
-    </tr>
-    <tr>
-      <td><code class="highlighter-rouge">srcGenIDLTargetDir</code></td>
-      <td>The directory where all discovered IDL files will be copied in preparation for Scala code generation. The plugin will automatically copy the following to the target directory:<br /> * All the IDL files and directories in the directory specified by <code class="highlighter-rouge">srcGenSourceDirs</code><br /> * All the IDL files extracted from the JAR files or sbt modules specified by <code class="highlighter-rouge">srcGenJarNames</code> (see the “Advanced settings” section below)</td>
-      <td><code class="highlighter-rouge">Compile / resourceManaged</code>, typically <code class="highlighter-rouge">target/scala-2.12/resource_managed/main</code></td>
-    </tr>
-    <tr>
-      <td><code class="highlighter-rouge">srcGenTargetDir</code></td>
-      <td>The directory where the <code class="highlighter-rouge">srcGen</code> task will write the generated files. The files will be placed in subdirectories based on the namespaces declared in the IDL files.</td>
-      <td><code class="highlighter-rouge">Compile / sourceManaged</code>, typically <code class="highlighter-rouge">target/scala-2.12/src_managed/main/</code></td>
-    </tr>
-  </tbody>
-</table>
-
-<p><strong>Note</strong>: The directories referenced in <code class="highlighter-rouge">srcGenSourceDirs</code> must exist. Target directories will be created upon generation.</p>
-
-<h3 id="advanced-settings">Advanced settings</h3>
-
-<table>
-  <thead>
-    <tr>
-      <th>Setting</th>
-      <th>Description</th>
-      <th>Default value</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code class="highlighter-rouge">srcGenJarNames</code></td>
-      <td>A list of JAR file or sbt module names where extra IDL files can be found. See the <a href="#srcgenjarnames">srcGenJarNames section</a> section below for more details.</td>
-      <td><code class="highlighter-rouge">Nil</code></td>
-    </tr>
-    <tr>
-      <td><code class="highlighter-rouge">idlExtension</code></td>
-      <td>The extension of IDL files to extract from JAR files or sbt</td>
-      <td> </td>
-    </tr>
-    <tr>
-      <td>modules.</td>
-      <td>* <code class="highlighter-rouge">avdl</code> if <code class="highlighter-rouge">idlType</code> is <code class="highlighter-rouge">avro</code><br /> * <code class="highlighter-rouge">proto</code> if <code class="highlighter-rouge">idlType</code> is</td>
-      <td> </td>
-    </tr>
-    <tr>
-      <td><code class="highlighter-rouge">proto</code></td>
-      <td> </td>
-      <td> </td>
-    </tr>
-    <tr>
-      <td><code class="highlighter-rouge">idlGenBigDecimal</code></td>
-      <td>Specifies how Avro <code class="highlighter-rouge">decimal</code> types will be represented in the generated Scala. <code class="highlighter-rouge">ScalaBigDecimalGen</code> produces <code class="highlighter-rouge">scala.math.BigDecimal</code>. <code class="highlighter-rouge">ScalaBigDecimalTaggedGen</code> produces <code class="highlighter-rouge">scala.math.BigDecimal</code> tagged with the ‘precision’ and ‘scale’ using a Shapeless tag, e.g. <code class="highlighter-rouge">scala.math.BigDecimal @@ (Nat._8, Nat._2)</code>.</td>
-      <td><code class="highlighter-rouge">ScalaBigDecimalTaggedGen</code></td>
-    </tr>
-    <tr>
-      <td><code class="highlighter-rouge">idlGenCompressionType</code></td>
-      <td>The compression type that will be used by generated RPC services. Set to <code class="highlighter-rouge">higherkindness.mu.rpc.srcgen.Model.GzipGen</code> for Gzip compression.</td>
-      <td><code class="highlighter-rouge">higherkindness.mu.rpc.idlgen.Model.NoCompressionGen</code></td>
-    </tr>
-    <tr>
-      <td><code class="highlighter-rouge">idlGenIdiomaticEndpoints</code></td>
-      <td>Flag indicating if idiomatic gRPC endpoints should be used. If <code class="highlighter-rouge">true</code>, the service operations will be prefixed by the namespace and the methods will be capitalized.</td>
-      <td><code class="highlighter-rouge">false</code></td>
-    </tr>
-    <tr>
-      <td><code class="highlighter-rouge">srcGenStreamingImplementation</code></td>
-      <td>Specifies whether generated Scala code will use FS2 <code class="highlighter-rouge">Stream[F, A]</code> or Monix <code class="highlighter-rouge">Observable[A]</code> as its streaming implementation. FS2 is the default. This setting is only relevant if you have any RPC endpoint definitions that involve streaming.</td>
-      <td><code class="highlighter-rouge">higherkindness.mu.rpc.srcgen.Model.Fs2Stream</code></td>
-    </tr>
-    <tr>
-      <td><code class="highlighter-rouge">idlGenMarshallerImports</code></td>
-      <td>see explanation below</td>
-      <td>see explanation below</td>
-    </tr>
-  </tbody>
-</table>
-
-<h3 id="idlgenmarshallerimports">idlGenMarshallerImports</h3>
-
-<p>This setting specifies additional imports to add on top to the generated service files. This property can be used for importing extra codecs for your services.</p>
-
-<p>By default:</p>
 <ul>
-  <li><code class="highlighter-rouge">List(BigDecimalAvroMarshallers, JavaTimeDateAvroMarshallers)</code> if <code class="highlighter-rouge">srcGenSerializationType</code> is <code class="highlighter-rouge">Avro</code> or <code class="highlighter-rouge">AvroWithSchema</code> and <code class="highlighter-rouge">idlGenBigDecimal</code> is <code class="highlighter-rouge">ScalaBigDecimalGen</code></li>
-  <li><code class="highlighter-rouge">List(BigDecimalTaggedAvroMarshallers, JavaTimeDateAvroMarshallers)</code> if <code class="highlighter-rouge">srcGenSerializationType</code> is <code class="highlighter-rouge">Avro</code> or <code class="highlighter-rouge">AvroWithSchema</code> and <code class="highlighter-rouge">idlGenBigDecimal</code> is <code class="highlighter-rouge">ScalaBigDecimalTaggedGen</code></li>
-  <li><code class="highlighter-rouge">List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)</code> if <code class="highlighter-rouge">srcGenSerializationType</code> is <code class="highlighter-rouge">Protobuf</code>.</li>
+  <li><strong><code class="highlighter-rouge">srcGenJarNames</code></strong>: the list of jar names or sbt modules containing the IDL definitions that will be used at compilation time by <code class="highlighter-rouge">srcGen</code> to generate the Scala sources. By default, this sequence is empty.</li>
+  <li><strong><code class="highlighter-rouge">idlGenBigDecimal</code></strong>: specifies how the <code class="highlighter-rouge">decimal</code> types will be generated. <code class="highlighter-rouge">ScalaBigDecimalGen</code> produces <code class="highlighter-rouge">scala.math.BigDecimal</code> and <code class="highlighter-rouge">ScalaBigDecimalTaggedGen</code> produces <code class="highlighter-rouge">scala.math.BigDecimal</code> but tagged with the ‘precision’ and ‘scale’. i.e. <code class="highlighter-rouge">scala.math.BigDecimal @@ (Nat._8, Nat._2)</code>. By default <code class="highlighter-rouge">ScalaBigDecimalTaggedGen</code>.</li>
+  <li><strong><code class="highlighter-rouge">idlGenMarshallerImports</code></strong>: additional imports to add on top to the generated service files. This property can be used for importing extra codecs for your services. By default:
+    <ul>
+      <li><code class="highlighter-rouge">List(BigDecimalAvroMarshallers, JavaTimeDateAvroMarshallers)</code> if <code class="highlighter-rouge">srcGenSerializationType</code> is <code class="highlighter-rouge">Avro</code> or <code class="highlighter-rouge">AvroWithSchema</code> and <code class="highlighter-rouge">idlGenBigDecimal</code> is <code class="highlighter-rouge">ScalaBigDecimalGen</code></li>
+      <li><code class="highlighter-rouge">List(BigDecimalTaggedAvroMarshallers, JavaTimeDateAvroMarshallers)</code> if <code class="highlighter-rouge">srcGenSerializationType</code> is <code class="highlighter-rouge">Avro</code> or <code class="highlighter-rouge">AvroWithSchema</code> and <code class="highlighter-rouge">idlGenBigDecimal</code> is <code class="highlighter-rouge">ScalaBigDecimalTaggedGen</code></li>
+      <li><code class="highlighter-rouge">List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)</code> if <code class="highlighter-rouge">srcGenSerializationType</code> is <code class="highlighter-rouge">Protobuf</code>.</li>
+    </ul>
+  </li>
+  <li><strong><code class="highlighter-rouge">idlGenCompressionType</code></strong>: Specifies the compression type that will be used by the IDL generated services. Set to <code class="highlighter-rouge">higherkindness.mu.rpc.idlgen.Model.GzipGen</code> for compressed communications with Gzip. <code class="highlighter-rouge">higherkindness.mu.rpc.idlgen.Model.NoCompressionGen</code> by default.</li>
+  <li><strong><code class="highlighter-rouge">idlGenIdiomaticEndpoints</code></strong>: Flag indicating if idiomatic gRPC endpoints should be used. If <code class="highlighter-rouge">true</code>, the service operations will be prefixed by the namespace and the methods will be capitalized. <code class="highlighter-rouge">false</code> by default.</li>
+  <li><strong><code class="highlighter-rouge">srcGenStreamingImplementation</code></strong>: Specifies whether generated Scala code will use FS2 <code class="highlighter-rouge">Stream[F, A]</code> or Monix <code class="highlighter-rouge">Observable[A]</code> as its streaming implementation. FS2 is the default. This setting is only relevant if you have any RPC endpoint definitions that involve streaming.</li>
 </ul>
 
-<p>The <code class="highlighter-rouge">JodaDateTimeAvroMarshallers</code> and <code class="highlighter-rouge">JodaDateTimeProtobufMarshallers</code> are also available, but they need the dependency <code class="highlighter-rouge">mu-rpc-marshallers-jodatime</code>.</p>
+<p>The <code class="highlighter-rouge">JodaDateTimeAvroMarshallers</code> and <code class="highlighter-rouge">JodaDateTimeProtobufMarshallers</code> are also available, but they need the dependency <code class="highlighter-rouge">mu-rpc-marshallers-jodatime</code>.
+You can also specify custom imports with the following:</p>
+<ul>
+  <li><code class="highlighter-rouge">idlGenMarshallerImports := List(higherkindness.mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))</code></li>
+  <li>See the <a href="core-concepts#custom-codecs">Custom codecs section in core concepts</a> for more information.</li>
+</ul>
 
-<p>You can also specify custom imports with the following:</p>
-
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">`idlGenMarshallerImports := List(higherkindness.mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))`</span>
-</code></pre></div></div>
-
-<p>See the <a href="core-concepts#custom-codecs">Custom codecs section in core concepts</a> for more information.</p>
-
-<h3 id="srcgenjarnames">srcGenJarNames</h3>
-
-<p>You can use IDL files packaged into artifacts within your classpath, e.g. JAR
-files added to the classpath via <code class="highlighter-rouge">libraryDependencies</code>, or other sbt modules.</p>
+<p>You can even use <code class="highlighter-rouge">IDL</code> definitions packaged into artifacts within your classpath.
+In that particular situation, you need to setup <code class="highlighter-rouge">srcGenJarNames</code>,
+specifying the artifact names (or sbt module names) that will be unzipped/used to extract the <code class="highlighter-rouge">IDL</code> files.</p>
 
 <p><code class="highlighter-rouge">srcGenJarNames</code> can be very useful when you want to distribute your <code class="highlighter-rouge">IDL</code> files
 without binary code (to prevent binary conflicts in clients).</p>
 
-<p>The following example shows how to set up a dependency with another artifact or
-sbt module containing the IDL definitions (<code class="highlighter-rouge">foo-domain</code>):</p>
+<p><em>Note</em>: regarding <code class="highlighter-rouge">srcGenSourceDirs</code>, all the directories configured as sources
+will be distributed in the resulting jar artifact preserving the same folder structure as in the source.</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//...</span>
-<span class="o">.</span><span class="py">settings</span><span class="o">(</span>
+<p>The following example shows how to set up a dependency with another artifact or sbt module containing the IDL definitions (<code class="highlighter-rouge">foo-domain</code>):</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//...
+</span><span class="o">.</span><span class="py">settings</span><span class="o">(</span>
   <span class="nc">Seq</span><span class="o">(</span>
       <span class="n">idlType</span> <span class="o">:=</span> <span class="s">"avro"</span><span class="o">,</span>
       <span class="n">srcGenSerializationType</span> <span class="o">:=</span> <span class="s">"AvroWithSchema"</span><span class="o">,</span>
@@ -210,112 +116,183 @@ sbt module containing the IDL definitions (<code class="highlighter-rouge">foo-d
       <span class="o">)</span>
   <span class="o">)</span>
 <span class="o">)</span>
-<span class="c1">//...</span>
-</code></pre></div></div>
+<span class="c1">//...
+</span></code></pre></div></div>
 
-<h2 id="implementation-note-two-stage-code-generation">Implementation note: two-stage code generation</h2>
+<h2 id="generating-sources">Generating sources</h2>
 
-<p>For gRPC services generated from an Avro or Protobuf definition, there are
-actually two stages of code generation at work.</p>
-
-<ol>
-  <li>
-    <p>The <code class="highlighter-rouge">sbt-mu-srcgen</code> plugin will parse your IDL files and transform them into
-Scala code. It writes this code to <code class="highlighter-rouge">.scala</code> files under
-<code class="highlighter-rouge">target/scala-2.12/src_managed</code>.</p>
-  </li>
-  <li>
-    <p>The generated Scala code contains <code class="highlighter-rouge">@service</code> macro annotations. When these
-files are compiled, the compiler will expand these annotations by executing a
-macro, which generates a load of boilerplate code to help with building a
-gRPC server or client.</p>
-  </li>
-</ol>
-
-<p>For example, the following <code class="highlighter-rouge">.proto</code> file:</p>
+<p>Let’s suppose a <code class="highlighter-rouge">proto</code> file like</p>
 
 <div class="language-proto highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">syntax</span> <span class="o">=</span> <span class="s">"proto3"</span><span class="p">;</span>
 
 <span class="kn">package</span> <span class="nn">foo</span><span class="o">.</span><span class="n">bar</span><span class="p">;</span>
 
-<span class="kd">message</span> <span class="nc">MyRequest</span> <span class="p">{</span>
-  <span class="kt">string</span> <span class="na">a</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="kd">message</span> <span class="nc">HelloRequest</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">arg1</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">arg2</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="k">repeated</span> <span class="kt">string</span> <span class="na">arg3</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="kd">message</span> <span class="nc">MyResponse</span> <span class="p">{</span>
-  <span class="kt">string</span> <span class="na">a</span><span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="kd">message</span> <span class="nc">HelloResponse</span> <span class="p">{</span>
+  <span class="kt">string</span> <span class="na">arg1</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="kt">string</span> <span class="na">arg2</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+  <span class="k">repeated</span> <span class="kt">string</span> <span class="na">arg3</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
 <span class="p">}</span>
 
-<span class="kd">service</span> <span class="n">MyService</span> <span class="p">{</span>
-  <span class="k">rpc</span> <span class="n">MyEndpoint</span> <span class="p">(</span><span class="n">MyRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">MyResponse</span><span class="p">);</span>
+<span class="kd">service</span> <span class="n">ProtoGreeter</span> <span class="p">{</span>
+  <span class="k">rpc</span> <span class="n">SayHelloProto</span> <span class="p">(</span><span class="n">HelloRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">HelloResponse</span><span class="p">);</span>
+  <span class="k">rpc</span> <span class="n">LotsOfRepliesProto</span> <span class="p">(</span><span class="n">HelloRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">stream</span> <span class="n">HelloResponse</span><span class="p">);</span>
+  <span class="k">rpc</span> <span class="n">LotsOfGreetingsProto</span> <span class="p">(</span><span class="n">stream</span> <span class="n">HelloRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">HelloResponse</span><span class="p">);</span>
+  <span class="k">rpc</span> <span class="n">BidiHelloProto</span> <span class="p">(</span><span class="n">stream</span> <span class="n">HelloRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">stream</span> <span class="n">HelloResponse</span><span class="p">);</span>
+  <span class="k">rpc</span> <span class="n">BidiHelloFs2Proto</span> <span class="p">(</span><span class="n">stream</span> <span class="n">HelloRequest</span><span class="p">)</span> <span class="k">returns</span> <span class="p">(</span><span class="n">stream</span> <span class="n">HelloResponse</span><span class="p">);</span>
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>would result in a <code class="highlighter-rouge">.scala</code> file that looks like (slightly simplified):</p>
+<p>As you can see, we are defining two case classes, <code class="highlighter-rouge">HelloRequest</code> and <code class="highlighter-rouge">HelloResponse</code>, and a service, <code class="highlighter-rouge">ProtoGreeter</code>.
+Therefore, the generated scala definition is</p>
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="nn">foo.bar</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.protocol._</span>
+<span class="k">import</span> <span class="nn">fs2.Stream</span>
+<span class="k">import</span> <span class="nn">shapeless.</span><span class="o">{:+:,</span> <span class="nc">CNil</span><span class="o">}</span>
 
-<span class="k">object</span> <span class="nc">myproto</span> <span class="o">{</span>
-  <span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">MyRequest</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
-  <span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">MyResponse</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
+<span class="k">object</span> <span class="nc">GreeterService</span> <span class="o">{</span>
 
-  <span class="nd">@service</span><span class="o">(</span><span class="nc">Protobuf</span><span class="o">)</span> <span class="k">trait</span> <span class="nc">MyService</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
-    <span class="k">def</span> <span class="nf">MyEndpoint</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">MyReqeust</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">MyResponse</span><span class="o">]</span>
-  <span class="o">}</span>
-<span class="o">}</span>
-</code></pre></div></div>
+<span class="nd">@message</span> <span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloRequest</span><span class="o">(</span><span class="n">arg1</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">arg2</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">arg3</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span>
 
-<p>After the <code class="highlighter-rouge">@service</code> annotation is expanded at compile time, the entire
-generated code would look something like:</p>
+<span class="nd">@message</span> <span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloResponse</span><span class="o">(</span><span class="n">arg1</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">arg2</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">arg3</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="nn">foo.bar</span>
-
-<span class="k">object</span> <span class="nc">myproto</span> <span class="o">{</span>
-  <span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">MyRequest</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
-  <span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">MyResponse</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
-
-  <span class="nd">@service</span><span class="o">(</span><span class="nc">Protobuf</span><span class="o">)</span> <span class="k">trait</span> <span class="nc">MyService</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
-    <span class="k">def</span> <span class="nf">MyEndpoint</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">MyReqeust</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">MyResponse</span><span class="o">]</span>
-  <span class="o">}</span>
-
-  <span class="k">object</span> <span class="nc">MyService</span> <span class="o">{</span>
-
-    <span class="k">def</span> <span class="nf">bindService</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span><span class="kt">:</span> <span class="kt">ConcurrentEffect</span><span class="o">](</span>
-      <span class="k">implicit</span> <span class="n">algebra</span><span class="k">:</span> <span class="kt">MyService</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span>
-    <span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">io.grpc.ServerServiceDefinition</span><span class="o">]</span> <span class="k">=</span> <span class="o">...</span>
-
-    <span class="k">def</span> <span class="nf">client</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span><span class="kt">:</span> <span class="kt">ConcurrentEffect:</span> <span class="kt">ContextShift</span><span class="o">](</span>
-      <span class="n">channelFor</span><span class="k">:</span> <span class="kt">higherkindness.mu.rpc.ChannelFor</span><span class="o">,</span>
-      <span class="n">channelConfigList</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">higherkindness.mu.rpc.channel.ManagedChannelConfig</span><span class="o">]</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="nc">UsePlaintext</span><span class="o">),</span>
-      <span class="n">options</span><span class="k">:</span> <span class="kt">io.grpc.CallOptions</span> <span class="o">=</span> <span class="nv">io</span><span class="o">.</span><span class="py">grpc</span><span class="o">.</span><span class="py">CallOptions</span><span class="o">.</span><span class="py">DEFAULT</span>
-    <span class="o">)</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">MyService</span><span class="o">[</span><span class="kt">F</span><span class="o">]]</span> <span class="k">=</span> <span class="o">...</span>
-
-    <span class="k">def</span> <span class="nf">clientFromChannel</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span><span class="kt">:</span> <span class="kt">ConcurrentEffect:</span> <span class="kt">ContextShift</span><span class="o">](</span>
-      <span class="n">channel</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">io.grpc.ManagedChannel</span><span class="o">],</span>
-      <span class="n">options</span><span class="k">:</span> <span class="kt">io.grpc.CallOptions</span> <span class="o">=</span> <span class="nv">io</span><span class="o">.</span><span class="py">grpc</span><span class="o">.</span><span class="py">CallOptions</span><span class="o">.</span><span class="py">DEFAULT</span>
-    <span class="o">)</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">MyService</span><span class="o">[</span><span class="kt">F</span><span class="o">]]</span>
-
-    <span class="k">def</span> <span class="nf">unsafeClient</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span><span class="kt">:</span> <span class="kt">ConcurrentEffect:</span> <span class="kt">ContextShift</span><span class="o">](</span>
-      <span class="n">channelFor</span><span class="k">:</span> <span class="kt">higherkindness.mu.rpc.ChannelFor</span><span class="o">,</span>
-      <span class="n">channelConfigList</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">higherkindness.mu.rpc.channel.ManagedChannelConfig</span><span class="o">]</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="nc">UsePlaintext</span><span class="o">),</span>
-      <span class="n">options</span><span class="k">:</span> <span class="kt">io.grpc.CallOptions</span> <span class="o">=</span> <span class="nv">io</span><span class="o">.</span><span class="py">grpc</span><span class="o">.</span><span class="py">CallOptions</span><span class="o">.</span><span class="py">DEFAULT</span>
-    <span class="o">)</span><span class="k">:</span> <span class="kt">MyService</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span> <span class="k">=</span> <span class="o">...</span>
-
-    <span class="k">def</span> <span class="nf">unsafeClientFromChannel</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span><span class="kt">:</span> <span class="kt">ConcurrentEffect:</span> <span class="kt">ContextShift</span><span class="o">](</span>
-      <span class="n">channel</span><span class="k">:</span> <span class="kt">io.grpc.ManagedChannel</span><span class="o">,</span>
-      <span class="n">options</span><span class="k">:</span> <span class="kt">io.grpc.CallOptions</span> <span class="o">=</span> <span class="nv">io</span><span class="o">.</span><span class="py">grpc</span><span class="o">.</span><span class="py">CallOptions</span><span class="o">.</span><span class="py">DEFAULT</span>
-    <span class="o">)</span><span class="k">:</span> <span class="kt">MyService</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span>
-
+  <span class="nd">@service</span><span class="o">(</span><span class="nc">Protobuf</span><span class="o">)</span> <span class="k">trait</span> <span class="nc">ProtoGreeter</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
+    <span class="k">def</span> <span class="nf">SayHelloProto</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">LotsOfRepliesProto</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">LotsOfGreetingsProto</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">BidiHelloProto</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloResponse</span><span class="o">]</span>
+    <span class="k">def</span> <span class="nf">BidiHelloFs2Proto</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloRequest</span><span class="o">])</span><span class="k">:</span> <span class="kt">Stream</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">HelloResponse</span><span class="o">]</span>
   <span class="o">}</span>
 
 <span class="o">}</span>
 </code></pre></div></div>
 
-<p>You can see that the macro has generated a <code class="highlighter-rouge">MyService</code> companion object
-containing a number of helper methods for building gRPC servers and clients.</p>
+<p>Note that Scala case class is preceded by the <code class="highlighter-rouge">@message</code> annotation. It’s generated by <code class="highlighter-rouge">srcGen</code> but not necessary for <a href="https://github.com/higherkindness/mu">Mu</a>. It’s only used for <a href="idl-generation">generating IDL from Scala source files</a>, which is a deprecated feature.</p>
 
-<p>We will make use of these helper methods when we wire everything together to
-build a working server and client in the <a href="patterns">patterns</a> section.</p>
+<p>Also, we can use <code class="highlighter-rouge">avro</code>. From an <code class="highlighter-rouge">.avpr</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+  "namespace" : "foo.bar",
+  "protocol" : "MyGreeterService",
+  "types" : [
+    {
+      "name" : "HelloRequest",
+      "type" : "record",
+      "fields" : [
+        {
+          "name" : "arg1",
+          "type" : "string"
+        },
+        {
+          "name" : "arg2",
+          "type" : [
+            "null",
+            "string"
+          ]
+        },
+        {
+          "name" : "arg3",
+          "type" : {
+            "type" : "array",
+            "items" : "string"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "HelloResponse",
+      "type" : "record",
+      "fields" : [
+        {
+          "name" : "arg1",
+          "type" : "string"
+        },
+        {
+          "name" : "arg2",
+          "type" : [
+            "null",
+            "string"
+          ]
+        },
+        {
+          "name" : "arg3",
+          "type" : {
+            "type" : "array",
+            "items" : "string"
+          }
+        }
+      ]
+    }
+  ],
+  "messages" : {
+    "sayHelloAvro" : {
+      "request" : [
+        {
+          "name" : "arg",
+          "type" : "HelloRequest"
+        }
+      ],
+      "response" : "HelloResponse"
+    },
+    "sayNothingAvro" : {
+      "request" : [
+      ],
+      "response" : "null"
+    }
+  }
+}
+
+</code></pre></div></div>
+
+<p>or <code class="highlighter-rouge">.avdl</code>:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@namespace("foo.bar")
+protocol MyGreeterService{
+
+    record HelloRequest {
+        string arg1;
+        union { null, string } arg2;
+        array&lt;string&gt; arg3;
+    }
+
+    record HelloResponse {
+        string arg1;
+        union { null, string } arg2;
+        array&lt;string&gt;  arg3;
+    }
+
+    foo.bar.HelloResponse sayHelloAvro(foo.bar.HelloRequest arg);
+
+    void sayNothingAvro();
+}
+</code></pre></div></div>
+
+<p>We’ll get the same service:</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="nn">foo.bar</span>
+
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.internal.encoders.avro.javatime._</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.protocol._</span>
+
+<span class="nd">@message</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloRequest</span><span class="o">(</span><span class="n">arg1</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">arg2</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">],</span> <span class="n">arg3</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span>
+
+<span class="nd">@message</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloResponse</span><span class="o">(</span><span class="n">arg1</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">arg2</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">],</span> <span class="n">arg3</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span>
+
+<span class="nd">@service</span><span class="o">(</span><span class="nc">Avro</span><span class="o">)</span> <span class="k">trait</span> <span class="nc">MyGreeterService</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
+
+  <span class="k">def</span> <span class="nf">sayHelloAvro</span><span class="o">(</span><span class="n">arg</span><span class="k">:</span> <span class="kt">foo.bar.HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">foo.bar.HelloResponse</span><span class="o">]</span>
+
+  <span class="k">def</span> <span class="nf">sayNothingAvro</span><span class="o">(</span><span class="n">arg</span><span class="k">:</span> <span class="kt">Empty.</span><span class="k">type</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">Empty.</span><span class="k">type</span><span class="o">]</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
 
 </section></div></div></div></div><script src="/mu-scala/highlight/highlight.pack.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/protobuf.min.js"></script><script>
 // For all code blocks, copy the language from the containing div

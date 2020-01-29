@@ -1,33 +1,36 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="svg3631"
+   version="1.1"
+   inkscape:version="0.91 r13725"
    width="36"
    height="36"
-   viewBox="0 0 36.000001 35.999999"
-   version="1.1"
-   id="svg2"
-   inkscape:version="0.91 r13725"
+   viewBox="0 0 36 36"
    sodipodi:docname="light-sidebar-brand.svg">
   <metadata
-     id="metadata16">
+     id="metadata3637">
     <rdf:RDF>
       <cc:Work
          rdf:about="">
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title>mu-scala</dc:title>
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <defs
-     id="defs14" />
+     id="defs3635" />
   <sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
@@ -37,39 +40,29 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1684"
-     inkscape:window-height="970"
-     id="namedview12"
+     inkscape:window-width="1368"
+     inkscape:window-height="879"
+     id="namedview3633"
      showgrid="false"
+     inkscape:zoom="9.4166667"
+     inkscape:cx="18"
+     inkscape:cy="18"
+     inkscape:window-x="296"
+     inkscape:window-y="93"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg3631"
+     inkscape:snap-page="true"
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
-     fit-margin-bottom="0"
-     inkscape:zoom="12.173272"
-     inkscape:cx="21.032149"
-     inkscape:cy="11.578643"
-     inkscape:window-x="2945"
-     inkscape:window-y="168"
-     inkscape:window-maximized="0"
-     inkscape:current-layer="svg2" />
-  <title
-     id="title4">mu-scala</title>
-  <g
-     id="mu-scala"
-     style="fill:none;fill-rule:evenodd;stroke:none;stroke-width:1"
-     transform="matrix(0.2157423,0,0,0.2157423,3.5685154,-0.24470605)">
-    <path
-       d="M 128.50244,38.134279 65.996,2 l 0,0 -62.498583,36.134252 c -0.4781246,0.276433 -0.6416279,0.888123 -0.3651948,1.366247 0.087659,0.151617 0.2135991,0.277554 0.3652183,0.365209 L 66,76 l 0,0 62.50247,-36.134238 c 0.47813,-0.27642 0.64165,-0.888106 0.36523,-1.366238 -0.0877,-0.151635 -0.21362,-0.277585 -0.36526,-0.365245 z"
-       id="path"
-       inkscape:connector-curvature="0"
-       style="stroke:#f44336;stroke-width:2" />
-    <polygon
-       id="polygon8"
-       points="66,113 130,76.004005 130,71.386014 129.976,39.104135 65.996,76 2,39 2.0039995,76 "
-       style="fill:#f44336" />
-    <polygon
-       id="polygon10"
-       points="66,168 130,131.00401 130,126.38601 129.976,94.104135 65.996,131 2,94 2.0039995,131 "
-       style="fill:#f44336" />
-  </g>
+     fit-margin-bottom="0" />
+  <image
+     width="36"
+     height="36"
+     preserveAspectRatio="none"
+     style="image-rendering:optimizeQuality"
+     xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAYAAABV7bNHAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4wwUCzE4pIW+iAAABCZJREFUeNrtnF+IlFUYxn/PupYo ohbeeCGCuLIJWmgSIUqSGHlhEHljFF2UEpFRLF4k/TEWulChJSEwiIIgWFhoUdoLg/CmDGJhUbxw RQP/xC4iLbYug+7TxZ6BiWbX+Wbn+zMz54HvZua87/uc35zvnPm+78xAVFRUVBPI9hnb61ugH+tt n0kjsW2XbJ+wvbwJwSwP3ku2nRagssZtH7S9oAnALAhexys7kDagskZs7ywwnJ3B4/+UFaCyBmyv LRCYtcHTrMoakG1P2f7c9tIcwSwNHqYeZjYPQGXdsv2G7Y4MwXSEmn/VajJPQGX9YXtbBnC2hVqJ VARAZf1ge3UKflaH3HWpSIBse9L2p7YXN8DH4pBrcj6GigaorOu299tWHfUVYq83wkiWgAZsn0/o 71fbWxPU3hpikuj8XEt9loA+CZ/ua7ZvJOjAtO1vba+ao+aq0GY6Qd4bwYuCt/wBVbRZYrvX9r0E Hbpr+0PbiyryLAqv3U2Q516ovaQiT7EAVbRdY7s/4Slx1fYr4biaMLbf9poqPooJqCJmu+1hp6dh 29vnqD9vQKl+25V0DtgMvAWMNTD1WMi5OdRITalfDkialnQKWAccA0rzSFcKOdZJOiVpOm3/mV0v SZqQ1ANsAAbrSDEIbJDUI2kiK9+ZAaoANSppL7ALuFhDyEVgl6S9kkaz9ps5oApQZ4FNwDvA7SpN bof3NoW2uSg3QAHSA0knw/zUB9wPR1+YZ05KepCnx1QB2d5dI6g7kg4BG4GNkg5JutPIGkUdQUO2 T9vuqhHUJUmXagTTZfs0MNTsp9ge4ILt47aXNWBULrN9HLgQcrfEHLQQeB+4bPtAPbdjw23VA8Dl kGthK07SK4GvgMN1xB4OsSvbYRV7pI6YR9tumW8GRUARUAQUAUVAEVAEFAFFQO2lgQioukaA5yS9 HAH9V+PAQeApSb8kCexscTAl4ARwVNLfqVaq88nqbBq1/WKC2ntsX0n6lDTTbcoNBlTWT7a754jv tj2U+V6fAs1BLwAjtr+wvaICzArbfWFS3Z2nwSLMQZ3Au8B+2x+H144Cj9UYf7/VAZX1OPBlwpiz wHvtAiiJRoEPJA2mXajZvgdNAD3MbGIYzKJgXoD+BJJsXZkGvmbmcfQxSaWsjOYF6BtgC1DL5qdz wBZJb0oay9ponrs7hiXtAPYB16o0uQbsk7RD0nDbXs1L6ge6gSPAP+E4AnSH95rmdsd3gFOCNCWp F+gCuiT1SpoqwqrQkaATrwPPAL+lOJpuSrpZpGWzI2EHfgeeBV4FbrTDfZKOOj5lS/o+nA6fAZOt DKhzHqfDJPBRPb/caekRVG1ERUBtrLQBlSKgufUE8GMENPv8dEXSS8DzzGy6jIBmAfUz8CTwNtV3 1UeVFf6F5elIIioqKurh+hcNl2BqoQ07jAAAAABJRU5ErkJggg== "
+     id="image3639"
+     x="0"
+     y="0" />
 </svg>
