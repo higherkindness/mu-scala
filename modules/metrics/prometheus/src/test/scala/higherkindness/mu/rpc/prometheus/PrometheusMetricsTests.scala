@@ -169,8 +169,9 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
         (for {
           metrics <- PrometheusMetrics.build[IO](registry, prefix)
           op1 <- (1 to numberOfCalls).toList
-            .map(_ => metrics.recordTotalTime(methodInfo, status, elapsed.toLong, Some(classifier)))
-            .sequence_
+            .traverse_(_ =>
+              metrics.recordTotalTime(methodInfo, status, elapsed.toLong, Some(classifier))
+            )
             .map { _ =>
               checkMetrics(
                 registry,
@@ -195,8 +196,9 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
         (for {
           metrics <- PrometheusMetrics.buildFullTotal[IO](registry, prefix)
           op1 <- (1 to numberOfCalls).toList
-            .map(_ => metrics.recordTotalTime(methodInfo, status, elapsed.toLong, Some(classifier)))
-            .sequence_
+            .traverse_(_ =>
+              metrics.recordTotalTime(methodInfo, status, elapsed.toLong, Some(classifier))
+            )
             .map { _ =>
               checkMetrics(
                 registry,
