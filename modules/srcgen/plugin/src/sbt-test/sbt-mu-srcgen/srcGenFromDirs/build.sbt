@@ -1,3 +1,5 @@
+import higherkindness.mu.rpc.srcgen.Model.IdlType
+
 lazy val root = project
   .in(file("."))
   .settings(name := "root")
@@ -5,7 +7,7 @@ lazy val root = project
   .settings(Seq(
     publishMavenStyle := true,
     mappings in (Compile, packageBin) ~= { _.filter(!_._1.getName.endsWith(".class")) },
-    muSrcGenIdlType := "avro",
+    muSrcGenIdlType := IdlType.Avro,
     muSrcGenSourceDirs := Seq(
       (Compile / resourceDirectory).value / "domain",
       (Compile / resourceDirectory).value / "protocol"),

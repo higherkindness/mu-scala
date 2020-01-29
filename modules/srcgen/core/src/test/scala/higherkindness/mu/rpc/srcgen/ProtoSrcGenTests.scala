@@ -24,6 +24,7 @@ import higherkindness.mu.rpc.srcgen.Model.{
   Fs2Stream,
   MonixObservable,
   NoCompressionGen,
+  SerializationType,
   UseIdiomaticEndpoints
 }
 import org.scalatest.OptionValues
@@ -40,7 +41,10 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
       val result: Option[(String, String)] =
         ProtoSrcGenerator
           .build(NoCompressionGen, UseIdiomaticEndpoints(false), Fs2Stream, new java.io.File("."))
-          .generateFrom(files = Set(protoFile("book")), serializationType = "")
+          .generateFrom(
+            files = Set(protoFile("book")),
+            serializationType = SerializationType.Protobuf
+          )
           .map(t => (t._2, t._3.mkString("\n").clean))
           .headOption
 
@@ -57,7 +61,10 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
             MonixObservable,
             new java.io.File(".")
           )
-          .generateFrom(files = Set(protoFile("book")), serializationType = "")
+          .generateFrom(
+            files = Set(protoFile("book")),
+            serializationType = SerializationType.Protobuf
+          )
           .map(t => (t._2, t._3.mkString("\n").clean))
           .headOption
 

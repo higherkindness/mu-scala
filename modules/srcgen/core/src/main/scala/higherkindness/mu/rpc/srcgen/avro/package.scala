@@ -17,7 +17,6 @@
 package higherkindness.mu.rpc.srcgen
 
 package object avro {
-  val IdlType       = "avro"
   val AvprExtension = ".avpr"
   val AvdlExtension = ".avdl"
 }

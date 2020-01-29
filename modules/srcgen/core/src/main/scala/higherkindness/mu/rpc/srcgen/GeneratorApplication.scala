@@ -19,8 +19,9 @@ package higherkindness.mu.rpc.srcgen
 import higherkindness.mu.rpc.internal.util.FileUtil._
 import java.io.File
 import org.log4s.getLogger
+import higherkindness.mu.rpc.srcgen.Model.{IdlType, SerializationType}
 
-abstract class GeneratorApplication[T <: Generator](generators: T*) {
+class GeneratorApplication[T <: Generator](generators: T*) {
   // Code covered by plugin tests
   // $COVERAGE-OFF$
 
@@ -29,33 +30,9 @@ abstract class GeneratorApplication[T <: Generator](generators: T*) {
   private lazy val generatorsByType = generators.map(gen => gen.idlType -> gen).toMap
   private lazy val idlTypes         = generatorsByType.keySet
 
-  def generateFrom(args: Array[String]): Seq[File] = {
-    validate(
-      args.length >= 4,
-      s"Usage: ${getClass.getName.dropRight(1)} idlType serializationType inputPath outputPath [option1 option2 ...]"
-    )
-
-    val idlType           = args(0)
-    val serializationType = args(1)
-
-    validate(
-      serializationTypes.contains(serializationType),
-      s"Unknown Serialization type '$serializationType'. Valid values: ${serializationTypes.mkString(", ")}"
-    )
-
-    val inputPath = new File(args(2))
-    validate(
-      inputPath.exists,
-      s"Input path '$inputPath' doesn't exist"
-    )
-    val outputDir = new File(args(3))
-    val options   = args.drop(4)
-    generateFrom(idlType, serializationType, inputPath.allFiles.toSet, outputDir)
-  }
-
   def generateFrom(
-      idlType: String,
-      serializationType: String,
+      idlType: IdlType,
+      serializationType: SerializationType,
       inputFiles: Set[File],
       outputDir: File
   ): Seq[File] = {

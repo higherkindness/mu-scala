@@ -21,8 +21,10 @@ addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "0.20.1")
 Then configure the plugin by adding a few lines to `build.sbt`:
 
 ```scala
+import higherkindness.mu.rpc.srcgen.Model._
+
 // Look for Avro IDL files
-muSrcGenIdlType := "avro"
+muSrcGenIdlType := IdlType.Avro
 
 // Make it easy for 3rd-party clients to communicate with our gRPC server
 muSrcGenIdiomaticEndpoints := true

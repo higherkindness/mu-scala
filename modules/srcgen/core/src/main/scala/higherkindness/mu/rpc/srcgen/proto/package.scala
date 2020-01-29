@@ -17,7 +17,6 @@
 package higherkindness.mu.rpc.srcgen
 
 package object proto {
-  val IdlType        = "proto"
   val ProtoExtension = ".proto"
   val ProtoEmpty     = "google.protobuf.Empty"
 }

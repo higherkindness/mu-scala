@@ -20,11 +20,11 @@ import java.io.File
 
 trait Generator {
 
-  def idlType: String
+  def idlType: Model.IdlType
 
   def generateFrom(
       files: Set[File],
-      serializationType: String
+      serializationType: Model.SerializationType
   ): Seq[(File, String, Seq[String])] =
     inputFiles(files).flatMap(inputFile =>
       generateFrom(inputFile, serializationType).map {
@@ -37,6 +37,6 @@ trait Generator {
 
   protected def generateFrom(
       inputFile: File,
-      serializationType: String
+      serializationType: Model.SerializationType
   ): Option[(String, Seq[String])]
 }

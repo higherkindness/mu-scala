@@ -32,7 +32,7 @@ class OpenApiSrcGenTests extends AnyFlatSpec with OptionValues {
 
   it should "generate correct Scala" in {
     val (_, path, code) = OpenApiSrcGenerator(HttpImpl.Http4sV20, resourcesFiles.toPath())
-      .generateFrom(Set(openApiFile), "")
+      .generateFrom(Set(openApiFile), Model.SerializationType.Custom)
       .headOption
       .value
     path should ===("bookstore/book.scala")

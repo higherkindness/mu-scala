@@ -21,8 +21,10 @@ addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "0.20.1")
 Then configure the plugin by adding a few lines to `build.sbt`:
 
 ```scala
+import higherkindness.mu.rpc.srcgen.Model._
+
 // Look for .proto files
-muSrcGenIdlType := "proto"
+muSrcGenIdlType := IdlType.Proto
 
 // Make it easy for 3rd-party clients to communicate with our gRPC server
 muSrcGenIdlGenIdiomaticEndpoints := true

@@ -28,14 +28,12 @@ import higherkindness.mu.rpc.srcgen.Model.{
   UseIdiomaticEndpoints
 }
 import higherkindness.mu.rpc.srcgen._
+import higherkindness.mu.rpc.srcgen.Model._
 import higherkindness.skeuomorph.mu.{CompressionType, MuF}
 import higherkindness.skeuomorph.protobuf.ParseProto.{parseProto, ProtoSource}
 import higherkindness.skeuomorph.protobuf.{ProtobufF, Protocol}
 import higherkindness.droste.data.Mu
 import higherkindness.droste.data.Mu._
-
-import higherkindness.mu.rpc.srcgen.Model.Fs2Stream
-import higherkindness.mu.rpc.srcgen.Model.MonixObservable
 
 import scala.meta._
 import scala.util.control.NoStackTrace
@@ -51,14 +49,14 @@ object ProtoSrcGenerator {
       idlTargetDir: File
   ): SrcGenerator = new SrcGenerator {
 
-    val idlType: String = proto.IdlType
+    val idlType: IdlType = IdlType.Proto
 
     def inputFiles(files: Set[File]): Seq[File] =
       files.filter(_.getName.endsWith(ProtoExtension)).toSeq
 
     def generateFrom(
         inputFile: File,
-        serializationType: String
+        serializationType: SerializationType
     ): Option[(String, Seq[String])] =
       getCode[IO](inputFile).map(Some(_)).unsafeRunSync
 

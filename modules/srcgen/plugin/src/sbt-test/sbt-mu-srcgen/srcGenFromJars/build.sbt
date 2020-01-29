@@ -1,3 +1,5 @@
+import higherkindness.mu.rpc.srcgen.Model.IdlType
+
 lazy val domain = project
   .in(file("domain"))
   .settings(name := "domain")
@@ -11,7 +13,7 @@ lazy val domain = project
   .settings(Seq(
     publishMavenStyle := true,
     mappings in (Compile, packageBin) ~= { _.filter(!_._1.getName.endsWith(".class")) },
-    muSrcGenIdlType := "avro",
+    muSrcGenIdlType := IdlType.Avro,
     muSrcGenSourceDirs := Seq((Compile / resourceDirectory).value),
     muSrcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
     sourceGenerators in Compile += (Compile / muSrcGen).taskValue,
@@ -26,7 +28,7 @@ lazy val root = project
   .settings(name := "root")
   .settings(Seq(
     version := sys.props("version"),
-    muSrcGenIdlType := "avro",
+    muSrcGenIdlType := IdlType.Avro,
     muSrcGenJarNames := Seq("domain"),
     muSrcGenIdlTargetDir := (Compile / sourceManaged).value / "avro",
     muSrcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",

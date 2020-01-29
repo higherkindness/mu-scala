@@ -17,7 +17,6 @@
 package higherkindness.mu.rpc.srcgen
 
 package object openapi {
-  val IdlType       = "openapi"
   val JsonExtension = ".json"
   val YamlExtension = ".yaml"
 }

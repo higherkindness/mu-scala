@@ -1,9 +1,10 @@
 import higherkindness.mu.rpc.srcgen.Model.MonixObservable
+import higherkindness.mu.rpc.srcgen.Model.IdlType
 
 lazy val root = project
   .in(file("."))
   .settings(
-    muSrcGenIdlType := "proto",
+    muSrcGenIdlType := IdlType.Proto,
     muSrcGenTargetDir := (Compile / sourceManaged).value / "compiled_proto",
     sourceGenerators in Compile += (Compile / muSrcGen).taskValue,
     muSrcGenStreamingImplementation := MonixObservable,
