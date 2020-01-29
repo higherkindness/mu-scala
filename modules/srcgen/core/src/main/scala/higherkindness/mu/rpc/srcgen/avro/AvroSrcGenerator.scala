@@ -48,7 +48,7 @@ case class AvroSrcGenerator(
     Some(mainGenerator.avroScalaTypes.copy(protocol = ScalaADT))
   ) // ScalaADT: sealed trait hierarchies
 
-  val idlType: String = avro.IdlType
+  val idlType: IdlType = IdlType.Avro
 
   def inputFiles(files: Set[File]): Seq[File] = {
     val avprFiles = files.filter(_.getName.endsWith(AvprExtension))
@@ -62,15 +62,15 @@ case class AvroSrcGenerator(
   // so we then reduce our output to that based on this fileset
   override def generateFrom(
       files: Set[File],
-      serializationType: String
+      serializationType: SerializationType
   ): Seq[(File, String, Seq[String])] =
     super
-      .generateFrom(files, serializationType: String)
+      .generateFrom(files, serializationType)
       .filter(output => files.contains(output._1))
 
   def generateFrom(
       inputFile: File,
-      serializationType: String
+      serializationType: SerializationType
   ): Option[(String, Seq[String])] =
     generateFromSchemaProtocols(
       mainGenerator.fileParser
@@ -85,7 +85,7 @@ case class AvroSrcGenerator(
 
   def generateFrom(
       input: String,
-      serializationType: String
+      serializationType: SerializationType
   ): Option[(String, Seq[String])] =
     generateFromSchemaProtocols(
       mainGenerator.stringParser
@@ -95,7 +95,7 @@ case class AvroSrcGenerator(
 
   private def generateFromSchemaProtocols(
       schemasOrProtocols: List[Either[Schema, Protocol]],
-      serializationType: String
+      serializationType: SerializationType
   ): Option[(String, Seq[String])] =
     Some(schemasOrProtocols)
       .filter(_.nonEmpty)
@@ -107,7 +107,7 @@ case class AvroSrcGenerator(
 
   def generateFrom(
       protocol: Protocol,
-      serializationType: String
+      serializationType: SerializationType
   ): (String, Seq[String]) = {
 
     val outputPath =
@@ -153,7 +153,7 @@ case class AvroSrcGenerator(
            )
          } else Nil)
 
-    val serviceParams: String = (serializationType +: extraParams).mkString(",")
+    val serviceParams: String = (serializationType.toString +: extraParams).mkString(",")
 
     val serviceLines =
       if (requestLines.isEmpty) Seq.empty

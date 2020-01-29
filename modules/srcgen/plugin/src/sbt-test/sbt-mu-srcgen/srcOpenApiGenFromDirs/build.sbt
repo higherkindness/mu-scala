@@ -1,3 +1,5 @@
+import higherkindness.mu.rpc.srcgen.Model.IdlType
+
 val V = new {
   val circe          = "0.12.3"
   val http4s         = "0.21.0-M6"
@@ -15,7 +17,7 @@ lazy val root = project
   .settings(Seq(
     publishMavenStyle := true,
     mappings in (Compile, packageBin) ~= { _.filter(!_._1.getName.endsWith(".class")) },
-    muSrcGenIdlType := "openapi",
+    muSrcGenIdlType := IdlType.OpenAPI,
     muSrcGenSourceDirs := Seq((Compile / resourceDirectory).value),
     muSrcGenTargetDir := (Compile / sourceManaged).value / "compiled_openapi",
     sourceGenerators in Compile += (Compile / muSrcGen).taskValue,
