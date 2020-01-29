@@ -21,8 +21,10 @@ addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "0.20.1")
 Then configure the plugin by adding a few lines to `build.sbt`:
 
 ```scala
+import higherkindness.mu.rpc.srcgen.Model._
+
 // Look for OpenAPI IDL files
-muSrcGenIdlType := "openapi"
+muSrcGenIdlType := IdlType.OpenAPI
 
 // Generate code that is compatible with http4s v0.20.x
 muSrcGenOpenApiHttpImpl := higherkindness.mu.rpc.idlgen.openapi.OpenApiSrcGenerator.HttpImpl.Http4sV20
