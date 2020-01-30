@@ -7,7 +7,7 @@ val V = new {
   val logbackClassic = "1.2.3"
   val cats           = "2.0.0"
   val catsEffect     = "2.0.0"
-  val fs2            = "2.2.1"
+  val fs2            = "2.2.2"
 }
 
 lazy val root = project
