@@ -30,7 +30,7 @@ object ProjectPlugin extends AutoPlugin {
       val avrohugger: String          = "1.0.0-RC22"
       val betterMonadicFor: String    = "0.3.1"
       val catsEffect: String          = "2.1.0"
-      val circe: String               = "0.12.3"
+      val circe: String               = "0.13.0"
       val dropwizard: String          = "4.1.2"
       val embeddedKafka: String       = "2.4.0"
       val enumeratum: String          = "1.5.15"
