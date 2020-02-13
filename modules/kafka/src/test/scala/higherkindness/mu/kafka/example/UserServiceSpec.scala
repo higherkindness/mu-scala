@@ -19,7 +19,6 @@ package higherkindness.mu.kafka.example
 import cats.effect.{ContextShift, IO, Timer}
 import fs2.Stream
 import higherkindness.mu.format.AvroWithSchema._
-import higherkindness.mu.kafka.KafkaBrokers
 import higherkindness.mu.kafka.config.{KafkaBroker, KafkaBrokers}
 import higherkindness.mu.kafka.consumer.Consumer
 import higherkindness.mu.kafka.producer.ProducerStream
@@ -39,7 +38,8 @@ class UserServiceSpec extends AnyFlatSpec with Matchers with Futures with ScalaF
   implicit val cs: ContextShift[IO] = IO.contextShift(global)
   implicit val timer: Timer[IO]     = IO.timer(global)
 
-  val userAddedStream: Stream[IO, Option[UserAdded]] = Stream(Option(UserAdded("n")), None)
+  private val testUserAdded: UserAdded               = UserAdded("n")
+  val userAddedStream: Stream[IO, Option[UserAdded]] = Stream(Option(testUserAdded), None)
 
   it should "produce and consume UserAdded" in {
     val userAddedConsumerStream: Stream[IO, UserAdded] =
@@ -64,6 +64,6 @@ class UserServiceSpec extends AnyFlatSpec with Matchers with Futures with ScalaF
       .drain
       .unsafeRunSync()
 
-    whenReady(consumedOne, Timeout(Span(60, Seconds)))(_ shouldBe List(UserAdded("n")))
+    whenReady(consumedOne, Timeout(Span(60, Seconds)))(_ shouldBe List(testUserAdded))
   }
 }
