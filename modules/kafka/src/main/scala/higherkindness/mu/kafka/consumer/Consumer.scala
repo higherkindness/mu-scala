@@ -28,19 +28,25 @@ import scala.language.higherKinds
 
 object Consumer {
 
-  def apply[F[_]: Logger, A](groupId: String, topic: String, brokers: KafkaBrokers)(
+  def consume[F[_], A](
+      topic: String,
+      groupId: String,
+      messageProcessingPipe: Pipe[F, A, A]
+  )(
       implicit contextShift: ContextShift[F],
       concurrentEffect: ConcurrentEffect[F],
       timer: Timer[F],
-      decoder: Decoder[A]
+      decoder: Decoder[A],
+      brokers: KafkaBrokers
   ): F[List[A]] =
-    stream(brokers, topic, groupId).compile.toList
+    stream(topic, groupId).through(messageProcessingPipe).take(1).compile.toList // todo fix me
 
-  def stream[F[_], A](brokers: KafkaBrokers, topic: String, groupId: String)(
+  def stream[F[_], A](topic: String, groupId: String)(
       implicit contextShift: ContextShift[F],
       concurrentEffect: ConcurrentEffect[F],
       timer: Timer[F],
-      decoder: Decoder[A]
+      decoder: Decoder[A],
+      brokers: KafkaBrokers
   ): Stream[F, A] =
     for {
       implicit0(logger: Logger[F]) <- Stream.eval(Slf4jLogger.create[F])

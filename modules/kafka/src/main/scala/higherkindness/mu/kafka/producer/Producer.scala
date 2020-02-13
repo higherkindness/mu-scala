@@ -14,20 +14,26 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.kafka.example
+package higherkindness.mu.kafka.producer
 
-import higherkindness.mu.kafka.config.{KafkaBroker, KafkaBrokers}
+import cats.effect.{ConcurrentEffect, ContextShift, Timer}
+import fs2.Stream
+import higherkindness.mu.format.Encoder
+import higherkindness.mu.kafka.config.KafkaBrokers
 
-object TestConfig {
-
-  val itTestKafkaBrokers = KafkaBrokers(
-    List(
-      KafkaBroker("localhost", 9092)
-    )
-  )
-
-  object kafka {
-    val topic         = "test-topic"
-    val consumerGroup = "test-group"
-  }
+object Producer {
+  def produce[F[_], A](
+      topic: String,
+      messageStream: Stream[F, Option[A]]
+  )(
+      implicit contextShift: ContextShift[F],
+      concurrentEffect: ConcurrentEffect[F],
+      timer: Timer[F],
+      encoder: Encoder[A],
+      brokers: KafkaBrokers
+  ): F[Unit] =
+    messageStream
+      .through(ProducerStream.pipe(brokers.urls, topic))
+      .compile
+      .drain
 }
