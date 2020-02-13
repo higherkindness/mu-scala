@@ -3,7 +3,7 @@ import microsites.MicrositesPlugin.autoImport._
 import microsites._
 import sbt.Keys._
 import sbt.ScriptedPlugin.autoImport._
-import sbt._
+import sbt.{compilerPlugin, _}
 import sbtorgpolicies.OrgPoliciesPlugin
 import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
 import sbtorgpolicies.model._
@@ -220,7 +220,12 @@ object ProjectPlugin extends AutoPlugin {
     lazy val kafkaSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "com.ovoenergy"           %% "fs2-kafka"      % V.fs2Kafka,
-        "io.github.embeddedkafka" %% "embedded-kafka" % V.embeddedKafka % Test
+        "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
+        "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
+        "com.sksamuel.avro4s" %% "avro4s-core" % V.avro4s,
+        "ch.qos.logback" % "logback-classic" % V.logback,
+        "io.github.embeddedkafka" %% "embedded-kafka" % V.embeddedKafka % Test,
+        compilerPlugin("com.olegpy" %% "better-monadic-for" % V.betterMonadicFor)
       )
     )
 
