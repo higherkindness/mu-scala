@@ -49,7 +49,7 @@ class UserAddedServiceSpec extends AnyFlatSpec with Matchers with Futures with S
 
   it should "produce and consume UserAdded" in {
     val consumedOne = Consumer
-      .consume[IO, UserAdded](topic, consumerGroup, userAddedMessageProcessor)
+      .consumeN(1, topic, consumerGroup, userAddedMessageProcessor)
       .unsafeToFuture
 
     Producer

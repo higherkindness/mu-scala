@@ -27,7 +27,6 @@ import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import scala.language.higherKinds
 
 object Consumer {
-
   def consume[F[_], A](
       topic: String,
       groupId: String,
@@ -39,7 +38,21 @@ object Consumer {
       decoder: Decoder[A],
       brokers: KafkaBrokers
   ): F[List[A]] =
-    stream(topic, groupId).through(messageProcessingPipe).take(1).compile.toList // todo fix me
+    stream(topic, groupId).through(messageProcessingPipe).compile.toList
+
+  def consumeN[F[_], A](
+      messageNum: Int,
+      topic: String,
+      groupId: String,
+      messageProcessingPipe: Pipe[F, A, A]
+  )(
+      implicit contextShift: ContextShift[F],
+      concurrentEffect: ConcurrentEffect[F],
+      timer: Timer[F],
+      decoder: Decoder[A],
+      brokers: KafkaBrokers
+  ): F[List[A]] =
+    stream(topic, groupId).through(messageProcessingPipe).take(messageNum).compile.toList
 
   def stream[F[_], A](topic: String, groupId: String)(
       implicit contextShift: ContextShift[F],
