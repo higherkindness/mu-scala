@@ -19,7 +19,8 @@ package higherkindness.mu.kafka.example
 import cats.effect.{ContextShift, IO, Timer}
 import fs2.Stream
 import higherkindness.mu.format.AvroWithSchema._
-import higherkindness.mu.kafka.{KafkaBroker, KafkaBrokers}
+import higherkindness.mu.kafka.KafkaBrokers
+import higherkindness.mu.kafka.config.{KafkaBroker, KafkaBrokers}
 import higherkindness.mu.kafka.consumer.Consumer
 import higherkindness.mu.kafka.producer.ProducerStream
 import org.scalatest.concurrent.PatienceConfiguration.Timeout

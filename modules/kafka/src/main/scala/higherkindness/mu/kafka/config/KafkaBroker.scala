@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.kafka
+package higherkindness.mu.kafka.config
 
 case class KafkaBroker(server: String, port: Int) {
-  def url: String = s"$server:$port"
+  lazy val url: String = s"$server:$port"
 }

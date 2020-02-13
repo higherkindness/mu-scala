@@ -18,7 +18,7 @@ package higherkindness.mu.kafka.consumer
 
 import cats.effect.Sync
 import fs2.kafka.{AutoOffsetReset, ConsumerSettings}
-import higherkindness.mu.kafka.KafkaBrokers
+import higherkindness.mu.kafka.config.KafkaBrokers
 
 object Settings {
   def apply[F[_]](groupId: String, brokers: KafkaBrokers)(

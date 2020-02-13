@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.kafka
+package higherkindness.mu.kafka.config
 
 case class KafkaBrokers(list: List[KafkaBroker]) {
-  def urls: String = list.map(_.url).mkString(",")
+  lazy val urls: String = list.map(_.url).mkString(",")
 }

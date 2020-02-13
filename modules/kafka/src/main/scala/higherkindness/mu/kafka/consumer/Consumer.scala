@@ -20,7 +20,7 @@ import cats.effect._
 import fs2._
 import fs2.kafka._
 import higherkindness.mu.format.Decoder
-import higherkindness.mu.kafka.KafkaBrokers
+import higherkindness.mu.kafka.config.KafkaBrokers
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
