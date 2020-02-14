@@ -21,7 +21,7 @@ import com.typesafe.scalalogging.LazyLogging
 import fs2.{Pipe, Stream}
 import higherkindness.mu.kafka
 import higherkindness.mu.kafka.config.KafkaBrokers
-import net.manub.embeddedkafka.EmbeddedKafka
+import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.flatspec.AnyFlatSpec
@@ -47,9 +47,8 @@ class MuKafkaServiceSpec
   behavior of "mu Kafka consumer And producer. Kafka is expected to be running."
 
   // dependencies for mu kafka consumer & producer
-  implicit val cs: ContextShift[IO]       = IO.contextShift(global)
-  implicit val timer: Timer[IO]           = IO.timer(global)
-  implicit val kafkaBrokers: KafkaBrokers = IntegrationTestConfig.kafkaBrokers
+  implicit val cs: ContextShift[IO] = IO.contextShift(global)
+  implicit val timer: Timer[IO]     = IO.timer(global)
   import higherkindness.mu.format.AvroWithSchema._
 
   // messages
@@ -60,9 +59,17 @@ class MuKafkaServiceSpec
   import IntegrationTestConfig.kafka._
 
   it should "produce and consume UserAdded" in {
-    withRunningKafka {
+    val userDefinedConfig = EmbeddedKafkaConfig(kafkaPort = 0, zooKeeperPort = 0)
+
+    withRunningKafkaOnFoundPort(userDefinedConfig) { implicit actualConfig =>
+      implicit val actualBrokers: KafkaBrokers = IntegrationTestConfig.kafkaBrokers.copy(list =
+        IntegrationTestConfig.kafkaBrokers.list.map(broker =>
+          broker.copy(port = actualConfig.kafkaPort)
+        )
+      )
+
       // message processing logic - used here to make the message available for assertion via promise
-      val (consumed, verifyConsumedMessage): (Promise[UserAdded], Pipe[IO, UserAdded, UserAdded]) = {
+      val (consumed, putConsumeMessageIntoFuture): (Promise[UserAdded], Pipe[IO, UserAdded, UserAdded]) = {
         val consumed: Promise[UserAdded] = Promise()
 
         val processor: Pipe[IO, UserAdded, UserAdded] = _.map { userAdded =>
@@ -77,7 +84,7 @@ class MuKafkaServiceSpec
       }
 
       kafka
-        .consumer(topic, consumerGroup, verifyConsumedMessage)
+        .consumer(topic, consumerGroup, putConsumeMessageIntoFuture)
         .unsafeRunAsyncAndForget()
 
       kafka
