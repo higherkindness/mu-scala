@@ -6,4 +6,4 @@ pull_request_rules:
       - body~=labels:.*semver-patch
     actions:
       merge:
-        method: merge
+        method: squash
