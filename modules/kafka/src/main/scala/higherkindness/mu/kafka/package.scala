@@ -20,7 +20,6 @@ import cats.effect.{ConcurrentEffect, ContextShift, Timer}
 import fs2.{Pipe, Stream}
 import fs2.kafka.{ProducerRecords, ProducerResult}
 import higherkindness.mu.format.{Decoder, Encoder}
-import higherkindness.mu.kafka.{ConsumerStream, ProducerStream}
 import higherkindness.mu.kafka.config.KafkaBrokers
 
 package object kafka {

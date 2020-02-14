@@ -27,21 +27,6 @@ import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import scala.language.higherKinds
 
 object ProducerStream {
-  def withLogger[F[_], A](
-      broker: String,
-      topic: String,
-      queue: Queue[F, Option[A]]
-  )(
-      implicit contextShift: ContextShift[F],
-      concurrentEffect: ConcurrentEffect[F],
-      timer: Timer[F],
-      encoder: Encoder[A]
-  ): Stream[F, Queue[F, Option[A]]] =
-    for {
-      implicit0(logger: Logger[F]) <- fs2.Stream.eval(Slf4jLogger.create[F])
-      _                            <- apply(broker, topic, queue)
-    } yield queue
-
   def pipe[F[_], A](broker: String, topic: String)(
       implicit contextShift: ContextShift[F],
       concurrentEffect: ConcurrentEffect[F],

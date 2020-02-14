@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.kafka.example
+package higherkindness.mu.kafka.it.example
 
 import higherkindness.mu.kafka.config.{KafkaBroker, KafkaBrokers}
 

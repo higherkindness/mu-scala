@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.kafka.example
+package higherkindness.mu.kafka.it.example
 
 import cats.effect.{ContextShift, IO, Timer}
 import fs2.{Pipe, Stream}
@@ -33,11 +33,13 @@ case class UserAdded(name: String)
 class MuKafkaServiceSpec extends AnyFlatSpec with Matchers with Futures with ScalaFutures {
   behavior of "mu Kafka consumer And producer. Kafka is expected to be running." //TODO use embedded kafka for now
 
+  // mu kafka consumer & producer dependencies
   implicit val cs: ContextShift[IO]       = IO.contextShift(global)
   implicit val timer: Timer[IO]           = IO.timer(global)
   implicit val kafkaBrokers: KafkaBrokers = TestConfig.itTestKafkaBrokers
   import higherkindness.mu.format.AvroWithSchema._
 
+  // messages and message processing logic
   val userAddedMessage: UserAdded                           = UserAdded("n")
   val userAddedMessageStream: Stream[IO, Option[UserAdded]] = Stream(Option(userAddedMessage), None)
   val userAddedMessageProcessor: Pipe[IO, UserAdded, UserAdded] = _.map { userAdded =>
