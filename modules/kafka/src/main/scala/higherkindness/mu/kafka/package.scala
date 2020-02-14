@@ -38,22 +38,8 @@ package object kafka {
       timer: Timer[F],
       decoder: Decoder[A],
       brokers: KafkaBrokers
-  ): F[List[A]] =
-    ConsumerStream(topic, groupId).through(messageProcessingPipe).compile.toList
-
-  def consumer[F[_], A](
-      messageNum: Long,
-      topic: String,
-      groupId: String,
-      messageProcessingPipe: Pipe[F, A, A]
-  )(
-      implicit contextShift: ContextShift[F],
-      concurrentEffect: ConcurrentEffect[F],
-      timer: Timer[F],
-      decoder: Decoder[A],
-      brokers: KafkaBrokers
-  ): F[List[A]] =
-    ConsumerStream(topic, groupId).through(messageProcessingPipe).take(messageNum).compile.toList
+  ): F[Unit] =
+    ConsumerStream(topic, groupId).through(messageProcessingPipe).compile.drain
 
   def producer[F[_], A](
       topic: String,

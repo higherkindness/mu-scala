@@ -18,15 +18,16 @@ package higherkindness.mu.kafka.it.example
 
 import cats.effect.{ContextShift, IO, Timer}
 import fs2.{Pipe, Stream}
-import higherkindness.mu.kafka.config.KafkaBrokers
 import higherkindness.mu.kafka
-import org.scalatest.concurrent.PatienceConfiguration.Timeout
+import higherkindness.mu.kafka.config.KafkaBrokers
 import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.time.{Seconds, Span}
 
 import scala.concurrent.ExecutionContext.global
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Promise}
+import scala.util.Success
 
 case class UserAdded(name: String)
 
@@ -42,22 +43,26 @@ class MuKafkaServiceSpec extends AnyFlatSpec with Matchers with Futures with Sca
   // messages and message processing logic
   val userAddedMessage: UserAdded                           = UserAdded("n")
   val userAddedMessageStream: Stream[IO, Option[UserAdded]] = Stream(Option(userAddedMessage), None)
-  val userAddedMessageProcessor: Pipe[IO, UserAdded, UserAdded] = _.map { userAdded =>
-    println(s"Processing $userAdded")
-    userAdded
-  }
+
+  // kafka config
   import TestConfig.kafka._
 
   it should "produce and consume UserAdded" in {
+    val consumed: Promise[Unit] = Promise()
 
-    // TODO send shutdown signal?
-    val consumedOne =
-      kafka.consumer(1, topic, consumerGroup, userAddedMessageProcessor).unsafeToFuture
+    val userAddedMessageProcessor: Pipe[IO, UserAdded, UserAdded] = _.map { userAdded =>
+      println(s"Processing $userAdded")
+      userAdded shouldBe userAddedMessage //todo deal with the failure case
+      consumed.complete(Success(()))
+      userAdded
+    }
+
+    kafka.consumer(topic, consumerGroup, userAddedMessageProcessor).unsafeRunAsyncAndForget()
 
     kafka
       .producer(topic, userAddedMessageStream)
       .unsafeRunSync()
 
-    whenReady(consumedOne, Timeout(Span(60, Seconds)))(_ shouldBe List(userAddedMessage))
+    Await.ready(consumed.future, 1 minute)
   }
 }
