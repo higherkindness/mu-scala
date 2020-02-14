@@ -37,10 +37,10 @@ object ProducerStream {
     as =>
       for {
         implicit0(logger: Logger[F]) <- fs2.Stream.eval(Slf4jLogger.create[F])
-        result                       <- apply(fs2.kafka.produce(ProducerSettings(broker)))(topic, as)
-      } yield result
+        s                            <- apply(fs2.kafka.produce(ProducerSettings(broker)))(topic, as)
+      } yield s
 
-  def apply[F[_]: Logger, A](
+  def apply[F[_], A](
       broker: String,
       topic: String,
       queue: Queue[F, Option[A]]
@@ -51,7 +51,10 @@ object ProducerStream {
       sync: Sync[F],
       encoder: Encoder[A]
   ): Stream[F, ByteArrayProducerResult] =
-    apply(fs2.kafka.produce(ProducerSettings(broker)))(topic, queue.dequeue)
+    for {
+      implicit0(logger: Logger[F]) <- fs2.Stream.eval(Slf4jLogger.create[F])
+      s                            <- apply(fs2.kafka.produce(ProducerSettings(broker)))(topic, queue.dequeue)
+    } yield s
 
   private[kafka] def apply[F[_]: Logger, A](
       publishToKafka: PublishToKafka[F]
