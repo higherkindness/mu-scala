@@ -37,26 +37,7 @@ object ProducerStream {
     as =>
       for {
         implicit0(logger: Logger[F]) <- fs2.Stream.eval(Slf4jLogger.create[F])
-        result <- as
-          .flatMap(a => fs2.Stream.eval(Logger[F].info(s"Dequeued $a")).map(_ => a))
-          .unNoneTerminate // idiomatic way to terminate a fs2 stream
-          .evalMap(a =>
-            concurrentEffect.delay(
-              ProducerRecords.one(ProducerRecord(topic, "dummy-key", encoder.encode(a)))
-            )
-          )
-          .covary[F]
-          .through(fs2.kafka.produce(ProducerSettings(broker)))
-          .flatMap(result =>
-            fs2.Stream
-              .eval(
-                Logger[F].info(
-                  result.records.head
-                    .fold("Error: ProducerResult contained empty records.")(a => s"Published $a")
-                )
-              )
-              .flatMap(_ => Stream.eval(sync.delay(result)))
-          )
+        result                       <- apply(fs2.kafka.produce(ProducerSettings(broker)))(topic, as)
       } yield result
 
   def apply[F[_]: Logger, A](
@@ -70,18 +51,18 @@ object ProducerStream {
       sync: Sync[F],
       encoder: Encoder[A]
   ): Stream[F, ByteArrayProducerResult] =
-    apply(fs2.kafka.produce(ProducerSettings(broker)))(topic, queue)
+    apply(fs2.kafka.produce(ProducerSettings(broker)))(topic, queue.dequeue)
 
-  def apply[F[_]: Logger, A](
+  private[kafka] def apply[F[_]: Logger, A](
       publishToKafka: PublishToKafka[F]
-  )(topic: String, queue: Queue[F, Option[A]])(
+  )(topic: String, stream: Stream[F, Option[A]])(
       implicit contextShift: ContextShift[F],
       concurrentEffect: ConcurrentEffect[F],
       timer: Timer[F],
       sync: Sync[F],
       encoder: Encoder[A]
   ): Stream[F, ByteArrayProducerResult] =
-    queue.dequeue
+    stream
       .flatMap(a => Stream.eval(Logger[F].info(s"Dequeued $a")).map(_ => a))
       .unNoneTerminate // idiomatic way to terminate a fs2 stream
       .evalMap(a =>

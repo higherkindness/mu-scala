@@ -69,7 +69,10 @@ class MuKafkaServiceSpec
       )
 
       // message processing logic - used here to make the message available for assertion via promise
-      val (consumed, putConsumeMessageIntoFuture): (Promise[UserAdded], Pipe[IO, UserAdded, UserAdded]) = {
+      val (consumed, putConsumeMessageIntoFuture): (
+          Promise[UserAdded],
+          Pipe[IO, UserAdded, UserAdded]
+      ) = {
         val consumed: Promise[UserAdded] = Promise()
 
         val processor: Pipe[IO, UserAdded, UserAdded] = _.map { userAdded =>
