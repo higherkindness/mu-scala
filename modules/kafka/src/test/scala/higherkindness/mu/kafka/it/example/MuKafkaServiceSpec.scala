@@ -61,7 +61,7 @@ class MuKafkaServiceSpec
 
   it should "produce and consume UserAdded" in {
     withRunningKafka {
-      // message processing logic - used here to verify the consumed message
+      // message processing logic - used here to make the message available for assertion via promise
       val (consumed, verifyConsumedMessage): (Promise[UserAdded], Pipe[IO, UserAdded, UserAdded]) = {
         val consumed: Promise[UserAdded] = Promise()
 
