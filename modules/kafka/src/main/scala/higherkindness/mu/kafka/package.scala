@@ -16,12 +16,59 @@
 
 package higherkindness.mu
 
-import fs2.Pipe
+import cats.effect.{ConcurrentEffect, ContextShift, Timer}
+import fs2.{Pipe, Stream}
 import fs2.kafka.{ProducerRecords, ProducerResult}
+import higherkindness.mu.format.{Decoder, Encoder}
+import higherkindness.mu.kafka.{ConsumerStream, ProducerStream}
+import higherkindness.mu.kafka.config.KafkaBrokers
 
 package object kafka {
   type ByteArrayProducerResult  = ProducerResult[String, Array[Byte], Unit]
   type ByteArrayProducerRecords = ProducerRecords[String, Array[Byte], Unit]
   type PublishToKafka[F[_]] =
     Pipe[F, ByteArrayProducerRecords, ByteArrayProducerResult]
+
+  def consumer[F[_], A](
+      topic: String,
+      groupId: String,
+      messageProcessingPipe: Pipe[F, A, A]
+  )(
+      implicit contextShift: ContextShift[F],
+      concurrentEffect: ConcurrentEffect[F],
+      timer: Timer[F],
+      decoder: Decoder[A],
+      brokers: KafkaBrokers
+  ): F[List[A]] =
+    ConsumerStream(topic, groupId).through(messageProcessingPipe).compile.toList
+
+  def consumer[F[_], A](
+      messageNum: Long,
+      topic: String,
+      groupId: String,
+      messageProcessingPipe: Pipe[F, A, A]
+  )(
+      implicit contextShift: ContextShift[F],
+      concurrentEffect: ConcurrentEffect[F],
+      timer: Timer[F],
+      decoder: Decoder[A],
+      brokers: KafkaBrokers
+  ): F[List[A]] =
+    ConsumerStream(topic, groupId).through(messageProcessingPipe).take(messageNum).compile.toList
+
+  def producer[F[_], A](
+      topic: String,
+      messageStream: Stream[F, Option[A]]
+  )(
+      implicit contextShift: ContextShift[F],
+      concurrentEffect: ConcurrentEffect[F],
+      timer: Timer[F],
+      encoder: Encoder[A],
+      brokers: KafkaBrokers
+  ): F[Unit] =
+    messageStream
+      .through(ProducerStream.pipe(brokers.urls, topic))
+      .compile
+      .drain
+
 }

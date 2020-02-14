@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.kafka.producer
+package higherkindness.mu.kafka
 
 import cats.effect.Sync
-import fs2.kafka.ProducerSettings
 
-object Settings {
+object ProducerSettings {
   def apply[F[_]](
       broker: String
-  )(implicit sync: Sync[F]): ProducerSettings[F, String, Array[Byte]] =
-    ProducerSettings[F, String, Array[Byte]]
+  )(implicit sync: Sync[F]): fs2.kafka.ProducerSettings[F, String, Array[Byte]] =
+    fs2.kafka
+      .ProducerSettings[F, String, Array[Byte]]
       .withBootstrapServers(broker)
 }

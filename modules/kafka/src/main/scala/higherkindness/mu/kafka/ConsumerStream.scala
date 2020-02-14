@@ -14,47 +14,32 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.kafka.consumer
+package higherkindness.mu.kafka
 
-import cats.effect._
-import fs2._
-import fs2.kafka._
+import cats.effect.{ConcurrentEffect, ContextShift, Timer}
+import fs2.Stream
+import fs2.kafka.KafkaConsumer
 import higherkindness.mu.format.Decoder
 import higherkindness.mu.kafka.config.KafkaBrokers
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
-import scala.language.higherKinds
+object ConsumerStream {
 
-object Consumer {
-  def consume[F[_], A](
-      topic: String,
-      groupId: String,
-      messageProcessingPipe: Pipe[F, A, A]
-  )(
-      implicit contextShift: ContextShift[F],
-      concurrentEffect: ConcurrentEffect[F],
-      timer: Timer[F],
-      decoder: Decoder[A],
-      brokers: KafkaBrokers
-  ): F[List[A]] =
-    stream(topic, groupId).through(messageProcessingPipe).compile.toList
-
-  def consumeN[F[_], A](
-      messageNum: Int,
-      topic: String,
-      groupId: String,
-      messageProcessingPipe: Pipe[F, A, A]
-  )(
-      implicit contextShift: ContextShift[F],
-      concurrentEffect: ConcurrentEffect[F],
-      timer: Timer[F],
-      decoder: Decoder[A],
-      brokers: KafkaBrokers
-  ): F[List[A]] =
-    stream(topic, groupId).through(messageProcessingPipe).take(messageNum).compile.toList
-
-  def stream[F[_], A](topic: String, groupId: String)(
+  /**
+   * The API method for creating a consumer stream specialised with the fs2 Kafka consumer stream implementation
+   * @param topic
+   * @param groupId
+   * @param contextShift
+   * @param concurrentEffect
+   * @param timer
+   * @param decoder
+   * @param brokers
+   * @tparam F
+   * @tparam A
+   * @return
+   */
+  def apply[F[_], A](topic: String, groupId: String)(
       implicit contextShift: ContextShift[F],
       concurrentEffect: ConcurrentEffect[F],
       timer: Timer[F],
@@ -62,25 +47,43 @@ object Consumer {
       brokers: KafkaBrokers
   ): Stream[F, A] =
     for {
-      implicit0(logger: Logger[F]) <- Stream.eval(Slf4jLogger.create[F])
-      s                            <- stream(fs2.kafka.consumerStream(Settings(groupId, brokers)))(topic)
+      implicit0(logger: Logger[F]) <- fs2.Stream.eval(Slf4jLogger.create[F])
+      s                            <- apply(fs2.kafka.consumerStream(ConsumerSettings(groupId, brokers)))(topic)
     } yield s
 
-  def stream[F[_], A](cs: Stream[F, KafkaConsumer[F, String, Array[Byte]]])(topic: String)(
+  /**
+   * A package private method for creating a consumer stream that has not been specialised with an implementation.
+   * This enables unit testing without a running Kafka instead
+   * @param kafkaConsumerStream
+   * @param topic
+   * @param contextShift
+   * @param concurrentEffect
+   * @param timer
+   * @param decoder
+   * @param logger
+   * @tparam F
+   * @tparam A
+   * @return
+   */
+  private[kafka] def apply[F[_], A](
+      kafkaConsumerStream: Stream[F, KafkaConsumer[F, String, Array[Byte]]]
+  )(topic: String)(
       implicit contextShift: ContextShift[F],
       concurrentEffect: ConcurrentEffect[F],
       timer: Timer[F],
       decoder: Decoder[A],
       logger: Logger[F]
   ): Stream[F, A] =
-    cs.evalTap(_.subscribeTo(topic))
+    kafkaConsumerStream
+      .evalTap(_.subscribeTo(topic))
       .flatMap(
         _.stream
           .flatMap { message =>
             val a = decoder.decode(message.record.value)
             for {
-              _ <- Stream.eval(logger.info(a.toString))
+              _ <- fs2.Stream.eval(logger.info(a.toString))
             } yield a
           }
       )
+
 }

@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.kafka.consumer
+package higherkindness.mu.kafka
 
 import cats.effect.Sync
-import fs2.kafka.{AutoOffsetReset, ConsumerSettings}
+import fs2.kafka.AutoOffsetReset
 import higherkindness.mu.kafka.config.KafkaBrokers
 
-object Settings {
+object ConsumerSettings {
   def apply[F[_]](groupId: String, brokers: KafkaBrokers)(
       implicit sync: Sync[F]
-  ): ConsumerSettings[F, String, Array[Byte]] =
-    ConsumerSettings[F, String, Array[Byte]]
+  ): fs2.kafka.ConsumerSettings[F, String, Array[Byte]] =
+    fs2.kafka
+      .ConsumerSettings[F, String, Array[Byte]]
       .withGroupId(groupId)
       .withBootstrapServers(brokers.urls)
       .withAutoOffsetReset(AutoOffsetReset.Earliest)

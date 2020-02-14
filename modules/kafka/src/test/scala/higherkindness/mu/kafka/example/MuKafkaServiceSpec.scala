@@ -19,8 +19,7 @@ package higherkindness.mu.kafka.example
 import cats.effect.{ContextShift, IO, Timer}
 import fs2.{Pipe, Stream}
 import higherkindness.mu.kafka.config.KafkaBrokers
-import higherkindness.mu.kafka.consumer.Consumer
-import higherkindness.mu.kafka.producer.Producer
+import higherkindness.mu.kafka
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.flatspec.AnyFlatSpec
@@ -31,8 +30,8 @@ import scala.concurrent.ExecutionContext.global
 
 case class UserAdded(name: String)
 
-class UserAddedServiceSpec extends AnyFlatSpec with Matchers with Futures with ScalaFutures {
-  behavior of "Consumer And Producer. Kafka is expected to be running."
+class MuKafkaServiceSpec extends AnyFlatSpec with Matchers with Futures with ScalaFutures {
+  behavior of "mu Kafka consumer And producer. Kafka is expected to be running." //TODO use embedded kafka for now
 
   implicit val cs: ContextShift[IO]       = IO.contextShift(global)
   implicit val timer: Timer[IO]           = IO.timer(global)
@@ -48,12 +47,13 @@ class UserAddedServiceSpec extends AnyFlatSpec with Matchers with Futures with S
   import TestConfig.kafka._
 
   it should "produce and consume UserAdded" in {
-    val consumedOne = Consumer
-      .consumeN(1, topic, consumerGroup, userAddedMessageProcessor)
-      .unsafeToFuture
 
-    Producer
-      .produce(topic, userAddedMessageStream)
+    // TODO send shutdown signal?
+    val consumedOne =
+      kafka.consumer(1, topic, consumerGroup, userAddedMessageProcessor).unsafeToFuture
+
+    kafka
+      .producer(topic, userAddedMessageStream)
       .unsafeRunSync()
 
     whenReady(consumedOne, Timeout(Span(60, Seconds)))(_ shouldBe List(userAddedMessage))

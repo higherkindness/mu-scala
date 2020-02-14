@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.kafka.producer
+package higherkindness.mu.kafka
 
 import cats.effect._
 import fs2._
 import fs2.concurrent.Queue
-import fs2.kafka.{produce, _}
+import fs2.kafka._
 import higherkindness.mu.format.Encoder
-import higherkindness.mu.kafka.{ByteArrayProducerResult, PublishToKafka}
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
@@ -39,8 +38,8 @@ object ProducerStream {
       encoder: Encoder[A]
   ): Stream[F, Queue[F, Option[A]]] =
     for {
-      implicit0(logger: Logger[F]) <- Stream.eval(Slf4jLogger.create[F])
-      _                            <- stream(broker, topic, queue)
+      implicit0(logger: Logger[F]) <- fs2.Stream.eval(Slf4jLogger.create[F])
+      _                            <- apply(broker, topic, queue)
     } yield queue
 
   def pipe[F[_], A](broker: String, topic: String)(
@@ -49,12 +48,12 @@ object ProducerStream {
       timer: Timer[F],
       sync: Sync[F],
       encoder: Encoder[A]
-  ): Stream[F, Option[A]] => Stream[F, ByteArrayProducerResult] =
+  ): fs2.Stream[F, Option[A]] => fs2.Stream[F, ByteArrayProducerResult] =
     as =>
       for {
-        implicit0(logger: Logger[F]) <- Stream.eval(Slf4jLogger.create[F])
+        implicit0(logger: Logger[F]) <- fs2.Stream.eval(Slf4jLogger.create[F])
         result <- as
-          .flatMap(a => Stream.eval(Logger[F].info(s"Dequeued $a")).map(_ => a))
+          .flatMap(a => fs2.Stream.eval(Logger[F].info(s"Dequeued $a")).map(_ => a))
           .unNoneTerminate // idiomatic way to terminate a fs2 stream
           .evalMap(a =>
             concurrentEffect.delay(
@@ -62,9 +61,9 @@ object ProducerStream {
             )
           )
           .covary[F]
-          .through(produce(higherkindness.mu.kafka.producer.Settings(broker)))
+          .through(fs2.kafka.produce(ProducerSettings(broker)))
           .flatMap(result =>
-            Stream
+            fs2.Stream
               .eval(
                 Logger[F].info(
                   result.records.head
@@ -75,7 +74,7 @@ object ProducerStream {
           )
       } yield result
 
-  def stream[F[_]: Logger, A](
+  def apply[F[_]: Logger, A](
       broker: String,
       topic: String,
       queue: Queue[F, Option[A]]
@@ -86,9 +85,9 @@ object ProducerStream {
       sync: Sync[F],
       encoder: Encoder[A]
   ): Stream[F, ByteArrayProducerResult] =
-    stream(produce(higherkindness.mu.kafka.producer.Settings(broker)))(topic, queue)
+    apply(fs2.kafka.produce(ProducerSettings(broker)))(topic, queue)
 
-  def stream[F[_]: Logger, A](
+  def apply[F[_]: Logger, A](
       publishToKafka: PublishToKafka[F]
   )(topic: String, queue: Queue[F, Option[A]])(
       implicit contextShift: ContextShift[F],
@@ -102,7 +101,8 @@ object ProducerStream {
       .unNoneTerminate // idiomatic way to terminate a fs2 stream
       .evalMap(a =>
         concurrentEffect.delay(
-          ProducerRecords.one(ProducerRecord(topic, "dummy-key", encoder.encode(a)))
+          ProducerRecords
+            .one(ProducerRecord(topic, "dummy-key", encoder.encode(a))) // TODO key generation and propagation
         )
       )
       .covary[F]
