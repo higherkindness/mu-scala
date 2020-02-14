@@ -53,7 +53,7 @@ object ConsumerStream {
 
   /**
    * A package private method for creating a consumer stream that has not been specialised with an implementation.
-   * This enables unit testing without a running Kafka instead
+   * This enables unit testing of the stream logic without a running Kafka
    * @param kafkaConsumerStream
    * @param topic
    * @param contextShift

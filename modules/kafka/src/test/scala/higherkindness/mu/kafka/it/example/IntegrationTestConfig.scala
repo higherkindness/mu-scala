@@ -18,11 +18,11 @@ package higherkindness.mu.kafka.it.example
 
 import higherkindness.mu.kafka.config.{KafkaBroker, KafkaBrokers}
 
-object TestConfig {
+object IntegrationTestConfig {
 
-  val itTestKafkaBrokers = KafkaBrokers(
+  val kafkaBrokers = KafkaBrokers(
     List(
-      KafkaBroker("localhost", 9092)
+      KafkaBroker("localhost", 6001)
     )
   )
 

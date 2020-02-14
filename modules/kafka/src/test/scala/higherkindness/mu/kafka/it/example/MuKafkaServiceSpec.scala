@@ -17,52 +17,76 @@
 package higherkindness.mu.kafka.it.example
 
 import cats.effect.{ContextShift, IO, Timer}
+import com.typesafe.scalalogging.LazyLogging
 import fs2.{Pipe, Stream}
 import higherkindness.mu.kafka
 import higherkindness.mu.kafka.config.KafkaBrokers
+import net.manub.embeddedkafka.EmbeddedKafka
+import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.{Futures, ScalaFutures}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.time.Seconds
+import org.scalatest.{time, OneInstancePerTest}
 
 import scala.concurrent.ExecutionContext.global
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Promise}
-import scala.util.Success
+import scala.concurrent.Promise
+import scala.util.Try
 
 case class UserAdded(name: String)
 
-class MuKafkaServiceSpec extends AnyFlatSpec with Matchers with Futures with ScalaFutures {
-  behavior of "mu Kafka consumer And producer. Kafka is expected to be running." //TODO use embedded kafka for now
+class MuKafkaServiceSpec
+    extends AnyFlatSpec
+    with Matchers
+    with Futures
+    with ScalaFutures
+    with LazyLogging
+    with OneInstancePerTest
+    with EmbeddedKafka {
 
-  // mu kafka consumer & producer dependencies
+  behavior of "mu Kafka consumer And producer. Kafka is expected to be running."
+
+  // dependencies for mu kafka consumer & producer
   implicit val cs: ContextShift[IO]       = IO.contextShift(global)
   implicit val timer: Timer[IO]           = IO.timer(global)
-  implicit val kafkaBrokers: KafkaBrokers = TestConfig.itTestKafkaBrokers
+  implicit val kafkaBrokers: KafkaBrokers = IntegrationTestConfig.kafkaBrokers
   import higherkindness.mu.format.AvroWithSchema._
 
-  // messages and message processing logic
+  // messages
   val userAddedMessage: UserAdded                           = UserAdded("n")
   val userAddedMessageStream: Stream[IO, Option[UserAdded]] = Stream(Option(userAddedMessage), None)
 
   // kafka config
-  import TestConfig.kafka._
+  import IntegrationTestConfig.kafka._
 
   it should "produce and consume UserAdded" in {
-    val consumed: Promise[Unit] = Promise()
+    withRunningKafka {
+      // message processing logic - used here to verify the consumed message
+      val (consumed, verifyConsumedMessage): (Promise[UserAdded], Pipe[IO, UserAdded, UserAdded]) = {
+        val consumed: Promise[UserAdded] = Promise()
 
-    val userAddedMessageProcessor: Pipe[IO, UserAdded, UserAdded] = _.map { userAdded =>
-      println(s"Processing $userAdded")
-      userAdded shouldBe userAddedMessage //todo deal with the failure case
-      consumed.complete(Success(()))
-      userAdded
+        val processor: Pipe[IO, UserAdded, UserAdded] = _.map { userAdded =>
+          logger.info(s"Processing $userAdded")
+          if (consumed.isCompleted)
+            logger.warn(s"UserAdded message was received more than once")
+          else
+            consumed.complete(Try(UserAdded("n")))
+          userAdded
+        }
+        (consumed, processor)
+      }
+
+      kafka
+        .consumer(topic, consumerGroup, verifyConsumedMessage)
+        .unsafeRunAsyncAndForget()
+
+      kafka
+        .producer(topic, userAddedMessageStream)
+        .unsafeRunSync()
+
+      whenReady(consumed.future, Timeout(time.Span(5, Seconds)))(userAdded =>
+        userAdded shouldBe userAddedMessage
+      )
     }
-
-    kafka.consumer(topic, consumerGroup, userAddedMessageProcessor).unsafeRunAsyncAndForget()
-
-    kafka
-      .producer(topic, userAddedMessageStream)
-      .unsafeRunSync()
-
-    Await.ready(consumed.future, 1 minute)
   }
 }
