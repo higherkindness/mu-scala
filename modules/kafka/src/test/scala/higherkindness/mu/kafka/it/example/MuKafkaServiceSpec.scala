@@ -33,8 +33,6 @@ import scala.concurrent.ExecutionContext.global
 import scala.concurrent.Promise
 import scala.util.Try
 
-case class UserAdded(name: String)
-
 class MuKafkaServiceSpec
     extends AnyFlatSpec
     with Matchers
@@ -44,16 +42,12 @@ class MuKafkaServiceSpec
     with OneInstancePerTest
     with EmbeddedKafka {
 
-  behavior of "mu Kafka consumer And producer. Kafka is expected to be running."
+  behavior of "mu Kafka consumer And producer."
 
   // dependencies for mu kafka consumer & producer
   implicit val cs: ContextShift[IO] = IO.contextShift(global)
   implicit val timer: Timer[IO]     = IO.timer(global)
   import higherkindness.mu.format.AvroWithSchema._
-
-  // messages
-  val userAddedMessage: UserAdded                           = UserAdded("n")
-  val userAddedMessageStream: Stream[IO, Option[UserAdded]] = Stream(Option(userAddedMessage), None)
 
   // kafka config
   import IntegrationTestConfig.kafka._
@@ -67,6 +61,11 @@ class MuKafkaServiceSpec
           broker.copy(port = actualConfig.kafkaPort)
         )
       )
+
+      // messages
+      val userAddedMessage: UserAdded = UserAdded("n")
+      val userAddedMessageStream: Stream[IO, Option[UserAdded]] =
+        Stream(Option(userAddedMessage), None)
 
       // message processing logic - used here to make the message available for assertion via promise
       val (consumed, putConsumeMessageIntoFuture): (
