@@ -19,15 +19,13 @@ package higherkindness.mu.kafka.it.example
 import higherkindness.mu.kafka.config.{KafkaBroker, KafkaBrokers}
 
 object IntegrationTestConfig {
-
-  val kafkaBrokers = KafkaBrokers(
-    List(
-      KafkaBroker("localhost", 6001)
-    )
-  )
-
   object kafka {
     val topic         = "test-topic"
     val consumerGroup = "test-group"
+    val brokers = KafkaBrokers(
+      List(
+        KafkaBroker("localhost", 6001)
+      )
+    )
   }
 }

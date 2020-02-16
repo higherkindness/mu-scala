@@ -56,8 +56,8 @@ class MuKafkaServiceSpec
     val userDefinedConfig = EmbeddedKafkaConfig(kafkaPort = 0, zooKeeperPort = 0)
 
     withRunningKafkaOnFoundPort(userDefinedConfig) { implicit actualConfig =>
-      implicit val actualBrokers: KafkaBrokers = IntegrationTestConfig.kafkaBrokers.copy(list =
-        IntegrationTestConfig.kafkaBrokers.list.map(broker =>
+      implicit val actualBrokers: KafkaBrokers = brokers.copy(list =
+        brokers.list.map(broker =>
           broker.copy(port = actualConfig.kafkaPort)
         )
       )

@@ -57,6 +57,11 @@ package object kafka {
       .compile
       .drain
 
+  object producerSettings {
+    def apply[F[_]: Sync](brokers: KafkaBrokers): ProducerSettings[F, String, Array[Byte]] =
+      ProducerSettings[F, String, Array[Byte]]
+        .withBootstrapServers(brokers.urls)
+  }
   def producer[F[_], A](
       topic: String,
       messageStream: Stream[F, Option[A]]
@@ -71,8 +76,7 @@ package object kafka {
       .through(
         ProducerStream.pipe(
           topic,
-          ProducerSettings[F, String, Array[Byte]]
-            .withBootstrapServers(brokers.urls)
+          producerSettings(brokers)
         )
       )
       .compile
