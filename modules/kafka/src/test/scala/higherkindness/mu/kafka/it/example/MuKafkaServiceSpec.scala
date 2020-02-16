@@ -87,12 +87,12 @@ class MuKafkaServiceSpec
       }
 
       kafka
-        .consumer(topic, consumerGroup, putConsumeMessageIntoFuture)
+        .producer(topic, userAddedMessageStream)
         .unsafeRunAsyncAndForget()
 
       kafka
-        .producer(topic, userAddedMessageStream)
-        .unsafeRunSync()
+        .consumer(topic, consumerGroup, putConsumeMessageIntoFuture)
+        .unsafeRunAsyncAndForget()
 
       whenReady(consumed.future, Timeout(time.Span(5, Seconds)))(userAdded =>
         userAdded shouldBe userAddedMessage

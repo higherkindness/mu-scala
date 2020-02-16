@@ -16,9 +16,9 @@
 
 package higherkindness.mu
 
-import cats.effect.{ConcurrentEffect, ContextShift, Timer}
+import cats.effect.{ConcurrentEffect, ContextShift, Sync, Timer}
 import fs2.{Pipe, Stream}
-import fs2.kafka.{ProducerRecords, ProducerResult}
+import fs2.kafka.{AutoOffsetReset, ProducerRecords, ProducerResult, ProducerSettings}
 import higherkindness.mu.format.{Decoder, Encoder}
 import higherkindness.mu.kafka.config.KafkaBrokers
 
@@ -27,6 +27,19 @@ package object kafka {
   type ByteArrayProducerRecords = ProducerRecords[String, Array[Byte], Unit]
   type PublishToKafka[F[_]] =
     Pipe[F, ByteArrayProducerRecords, ByteArrayProducerResult]
+
+  object consumerSettings {
+    def atLeastOnceFromEarliest[F[_]: Sync](
+        groupId: String,
+        brokers: KafkaBrokers
+    ): fs2.kafka.ConsumerSettings[F, String, Array[Byte]] =
+      fs2.kafka
+        .ConsumerSettings[F, String, Array[Byte]]
+        .withGroupId(groupId)
+        .withBootstrapServers(brokers.urls)
+        .withAutoOffsetReset(AutoOffsetReset.Earliest)
+        .withEnableAutoCommit(true)
+  }
 
   def consumer[F[_], A](
       topic: String,
@@ -39,7 +52,10 @@ package object kafka {
       decoder: Decoder[A],
       brokers: KafkaBrokers
   ): F[Unit] =
-    ConsumerStream(topic, groupId).through(messageProcessingPipe).compile.drain
+    ConsumerStream(topic, consumerSettings.atLeastOnceFromEarliest(groupId, brokers))
+      .through(messageProcessingPipe)
+      .compile
+      .drain
 
   def producer[F[_], A](
       topic: String,
@@ -52,7 +68,13 @@ package object kafka {
       brokers: KafkaBrokers
   ): F[Unit] =
     messageStream
-      .through(ProducerStream.pipe(brokers.urls, topic))
+      .through(
+        ProducerStream.pipe(
+          topic,
+          ProducerSettings[F, String, Array[Byte]]
+            .withBootstrapServers(brokers.urls)
+        )
+      )
       .compile
       .drain
 

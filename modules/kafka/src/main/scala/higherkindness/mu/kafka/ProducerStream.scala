@@ -27,7 +27,10 @@ import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import scala.language.higherKinds
 
 object ProducerStream {
-  def pipe[F[_], A](broker: String, topic: String)(
+  def pipe[F[_], A](
+      topic: String,
+      settings: fs2.kafka.ProducerSettings[F, String, Array[Byte]]
+  )(
       implicit contextShift: ContextShift[F],
       concurrentEffect: ConcurrentEffect[F],
       timer: Timer[F],
@@ -37,13 +40,13 @@ object ProducerStream {
     as =>
       for {
         implicit0(logger: Logger[F]) <- fs2.Stream.eval(Slf4jLogger.create[F])
-        s                            <- apply(fs2.kafka.produce(ProducerSettings(broker)))(topic, as)
+        s                            <- apply(fs2.kafka.produce(settings))(topic, as)
       } yield s
 
   def apply[F[_], A](
-      broker: String,
       topic: String,
-      queue: Queue[F, Option[A]]
+      queue: Queue[F, Option[A]],
+      settings: fs2.kafka.ProducerSettings[F, String, Array[Byte]]
   )(
       implicit contextShift: ContextShift[F],
       concurrentEffect: ConcurrentEffect[F],
@@ -53,7 +56,7 @@ object ProducerStream {
   ): Stream[F, ByteArrayProducerResult] =
     for {
       implicit0(logger: Logger[F]) <- fs2.Stream.eval(Slf4jLogger.create[F])
-      s                            <- apply(fs2.kafka.produce(ProducerSettings(broker)))(topic, queue.dequeue)
+      s                            <- apply(fs2.kafka.produce(settings))(topic, queue.dequeue)
     } yield s
 
   private[kafka] def apply[F[_]: Logger, A](

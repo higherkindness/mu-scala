@@ -16,55 +16,27 @@
 
 package higherkindness.mu.kafka
 
-import cats.effect.{ConcurrentEffect, ContextShift, Timer}
+import cats.effect.{ConcurrentEffect, ContextShift, Sync, Timer}
 import fs2.Stream
-import fs2.kafka.KafkaConsumer
+import fs2.kafka.{ConsumerSettings, KafkaConsumer}
 import higherkindness.mu.format.Decoder
-import higherkindness.mu.kafka.config.KafkaBrokers
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 object ConsumerStream {
 
-  /**
-   * The API method for creating a consumer stream specialised with the fs2 Kafka consumer stream implementation
-   * @param topic
-   * @param groupId
-   * @param contextShift
-   * @param concurrentEffect
-   * @param timer
-   * @param decoder
-   * @param brokers
-   * @tparam F
-   * @tparam A
-   * @return
-   */
-  def apply[F[_], A](topic: String, groupId: String)(
+  def apply[F[_]: Sync, A](topic: String, settings: ConsumerSettings[F, String, Array[Byte]])(
       implicit contextShift: ContextShift[F],
       concurrentEffect: ConcurrentEffect[F],
       timer: Timer[F],
       decoder: Decoder[A],
-      brokers: KafkaBrokers
+      sync: Sync[F]
   ): Stream[F, A] =
     for {
       implicit0(logger: Logger[F]) <- fs2.Stream.eval(Slf4jLogger.create[F])
-      s                            <- apply(fs2.kafka.consumerStream(ConsumerSettings(groupId, brokers)))(topic)
+      s                            <- apply(fs2.kafka.consumerStream(settings))(topic)
     } yield s
 
-  /**
-   * A package private method for creating a consumer stream that has not been specialised with an implementation.
-   * This enables unit testing of the stream logic without a running Kafka
-   * @param kafkaConsumerStream
-   * @param topic
-   * @param contextShift
-   * @param concurrentEffect
-   * @param timer
-   * @param decoder
-   * @param logger
-   * @tparam F
-   * @tparam A
-   * @return
-   */
   private[kafka] def apply[F[_], A](
       kafkaConsumerStream: Stream[F, KafkaConsumer[F, String, Array[Byte]]]
   )(topic: String)(
