@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import io.grpc._
 
 class ManagedChannelInterpreter[F[_]](
     initConfig: ChannelFor,
-    configList: List[ManagedChannelConfig])(implicit F: Sync[F]) {
+    configList: List[ManagedChannelConfig]
+)(implicit F: Sync[F]) {
 
   def apply[A](fa: ManagedChannelOps[F, A]): F[A] =
     fa(build)

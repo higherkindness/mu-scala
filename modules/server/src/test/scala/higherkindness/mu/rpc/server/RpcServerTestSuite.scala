@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ trait RpcServerTestSuite extends RpcBaseTestSuite {
 
     val serverMock: Server                                  = stub[Server]
     val serverCopyMock: Server                              = stub[Server]
-    val timeout: Long                                       = 1l
+    val timeout: Long                                       = 1L
     val timeoutUnit: TimeUnit                               = TimeUnit.MINUTES
     val b: Boolean                                          = true
     val unit: Unit                                          = ()

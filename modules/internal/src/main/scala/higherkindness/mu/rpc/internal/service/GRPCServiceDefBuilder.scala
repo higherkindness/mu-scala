@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,15 @@ object GRPCServiceDefBuilder {
 
     def addMethod(
         builder: ServerServiceDefinition.Builder,
-        call: MethodCall): F[ServerServiceDefinition.Builder] = Sync[F].delay {
+        call: MethodCall
+    ): F[ServerServiceDefinition.Builder] = Sync[F].delay {
       val (descriptor, callHandler) = call
       builder.addMethod(
         ServerMethodDefinition.create(
           descriptor.asInstanceOf[MethodDescriptor[Any, Any]],
-          callHandler.asInstanceOf[ServerCallHandler[Any, Any]]))
+          callHandler.asInstanceOf[ServerCallHandler[Any, Any]]
+        )
+      )
     }
 
     val builder: ServerServiceDefinition.Builder = io.grpc.ServerServiceDefinition.builder(name)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,13 @@ object ConfigService {
   def apply[F[_]: Effect]: ConfigService[F] = new ConfigService[F] {
 
     override def serviceConfig[Config](
-        implicit reader: Derivation[ConfigReader[Config]]): F[Config] =
+        implicit reader: Derivation[ConfigReader[Config]]
+    ): F[Config] =
       Effect[F].fromEither(
         pureconfig
           .loadConfig[Config]
-          .leftMap(e => new IllegalStateException(s"Error loading configuration: $e")))
+          .leftMap(e => new IllegalStateException(s"Error loading configuration: $e"))
+      )
 
   }
 }

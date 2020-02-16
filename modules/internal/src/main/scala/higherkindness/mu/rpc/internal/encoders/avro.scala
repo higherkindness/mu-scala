@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,7 @@ object avro extends AvroMarshallers {
     new Marshaller[A] {
 
       override def parse(stream: InputStream): A = {
-        val bytes: Array[Byte] =
-          Iterator.continually(stream.read).takeWhile(_ != -1).map(_.toByte).toArray
-        val in: ByteArrayInputStream        = new ByteArrayInputStream(bytes)
-        val input: AvroBinaryInputStream[A] = AvroInputStream.binary[A](in)
+        val input: AvroBinaryInputStream[A] = AvroInputStream.binary[A](stream)
         input.iterator.toList.head
       }
 
@@ -90,6 +87,12 @@ object avro extends AvroMarshallers {
         ByteBuffer.wrap(BigDecimalUtil.bigDecimalToByte(value))
     }
 
+    /*
+     * These marshallers are only used when the entire gRPC request/response is
+     * a BigDecimal. When a BigDecimal is a field of a larger message, the
+     * polymorphic marshaller defined in the `avro` or `avrowithschema` object
+     * is used.
+     */
     object marshallers {
 
       implicit val bigDecimalMarshaller: Marshaller[BigDecimal] = new Marshaller[BigDecimal] {
@@ -110,14 +113,16 @@ object avro extends AvroMarshallers {
     private[this] def avro4sPrecisionAndScale[A <: Nat, B <: Nat](
         implicit toIntNA: ToInt[A],
         toIntNB: ToInt[B],
-        RM: RoundingMode.RoundingMode) =
+        RM: RoundingMode.RoundingMode
+    ) =
       ScaleAndPrecisionAndRoundingMode(Nat.toInt[B], Nat.toInt[A], RM)
 
     private[this] def avro4sPrecisionAndScale[A <: Nat, B <: Nat, C <: Nat](
         implicit toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
-        RM: RoundingMode.RoundingMode) =
+        RM: RoundingMode.RoundingMode
+    ) =
       ScaleAndPrecisionAndRoundingMode(Nat.toInt[C], Nat.toInt[A] * 10 + Nat.toInt[B], RM)
 
     private[this] def avro4sPrecisionAndScale[A <: Nat, B <: Nat, C <: Nat, D <: Nat](
@@ -125,11 +130,13 @@ object avro extends AvroMarshallers {
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
         toIntND: ToInt[D],
-        RM: RoundingMode.RoundingMode) =
+        RM: RoundingMode.RoundingMode
+    ) =
       ScaleAndPrecisionAndRoundingMode(
         Nat.toInt[C] * 10 + Nat.toInt[D],
         Nat.toInt[A] * 10 + Nat.toInt[B],
-        RM)
+        RM
+      )
 
     private[this] case class BDSerializer(sp: ScaleAndPrecisionAndRoundingMode) {
 
@@ -146,7 +153,8 @@ object avro extends AvroMarshallers {
     }
 
     private[this] def bigDecimalToSchema[A, B](
-        sp: ScaleAndPrecisionAndRoundingMode): ToSchema[BigDecimal @@ (A, B)] = {
+        sp: ScaleAndPrecisionAndRoundingMode
+    ): ToSchema[BigDecimal @@ (A, B)] = {
       new ToSchema[BigDecimal @@ (A, B)] {
         protected val schema = {
           val schema = Schema.create(Schema.Type.BYTES)
@@ -157,7 +165,8 @@ object avro extends AvroMarshallers {
     }
 
     private[this] def bigDecimalFromValue[A, B](
-        sp: ScaleAndPrecisionAndRoundingMode): FromValue[BigDecimal @@ (A, B)] = {
+        sp: ScaleAndPrecisionAndRoundingMode
+    ): FromValue[BigDecimal @@ (A, B)] = {
       new FromValue[BigDecimal @@ (A, B)] {
         val inner = BDSerializer(sp)
         override def apply(value: Any, field: Field): BigDecimal @@ (A, B) =
@@ -166,7 +175,8 @@ object avro extends AvroMarshallers {
     }
 
     private[this] def bigDecimalToValue[A, B](
-        sp: ScaleAndPrecisionAndRoundingMode): ToValue[BigDecimal @@ (A, B)] = {
+        sp: ScaleAndPrecisionAndRoundingMode
+    ): ToValue[BigDecimal @@ (A, B)] = {
       new ToValue[BigDecimal @@ (A, B)] {
         val inner = BDSerializer(sp)
         override def apply(value: BigDecimal @@ (A, B)): ByteBuffer =
@@ -177,15 +187,16 @@ object avro extends AvroMarshallers {
     implicit def bigDecimalToSchemaSimple[A <: Nat, B <: Nat](
         implicit toIntNA: ToInt[A],
         toIntNB: ToInt[B],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): ToSchema[BigDecimal @@ (A, B)] =
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
+    ): ToSchema[BigDecimal @@ (A, B)] =
       bigDecimalToSchema[A, B](avro4sPrecisionAndScale[A, B])
 
     implicit def bigDecimalToSchemaBigPrecision[A <: Nat, B <: Nat, C <: Nat](
         implicit toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): ToSchema[
-      BigDecimal @@ ((A, B), C)] =
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
+    ): ToSchema[BigDecimal @@ ((A, B), C)] =
       bigDecimalToSchema[(A, B), C](avro4sPrecisionAndScale[A, B, C])
 
     implicit def bigDecimalToSchemaBigPrecisionScale[A <: Nat, B <: Nat, C <: Nat, D <: Nat](
@@ -193,22 +204,23 @@ object avro extends AvroMarshallers {
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
         toIntND: ToInt[D],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): ToSchema[
-      BigDecimal @@ ((A, B), (C, D))] =
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
+    ): ToSchema[BigDecimal @@ ((A, B), (C, D))] =
       bigDecimalToSchema[(A, B), (C, D)](avro4sPrecisionAndScale[A, B, C, D])
 
     implicit def bigDecimalFromValueSimple[A <: Nat, B <: Nat](
         implicit toIntNA: ToInt[A],
         toIntNB: ToInt[B],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): FromValue[BigDecimal @@ (A, B)] =
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
+    ): FromValue[BigDecimal @@ (A, B)] =
       bigDecimalFromValue[A, B](avro4sPrecisionAndScale[A, B])
 
     implicit def bigDecimalFromValueBigPrecision[A <: Nat, B <: Nat, C <: Nat](
         implicit toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): FromValue[
-      BigDecimal @@ ((A, B), C)] =
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
+    ): FromValue[BigDecimal @@ ((A, B), C)] =
       bigDecimalFromValue[(A, B), C](avro4sPrecisionAndScale[A, B, C])
 
     implicit def bigDecimalFromValueBigPrecisionScale[A <: Nat, B <: Nat, C <: Nat, D <: Nat](
@@ -216,22 +228,23 @@ object avro extends AvroMarshallers {
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
         toIntND: ToInt[D],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): FromValue[
-      BigDecimal @@ ((A, B), (C, D))] =
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
+    ): FromValue[BigDecimal @@ ((A, B), (C, D))] =
       bigDecimalFromValue[(A, B), (C, D)](avro4sPrecisionAndScale[A, B, C, D])
 
     implicit def bigDecimalToValueSimple[A <: Nat, B <: Nat](
         implicit toIntNA: ToInt[A],
         toIntNB: ToInt[B],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): ToValue[BigDecimal @@ (A, B)] =
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
+    ): ToValue[BigDecimal @@ (A, B)] =
       bigDecimalToValue[A, B](avro4sPrecisionAndScale[A, B])
 
     implicit def bigDecimalToValueBigPrecision[A <: Nat, B <: Nat, C <: Nat](
         implicit toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): ToValue[
-      BigDecimal @@ ((A, B), C)] =
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
+    ): ToValue[BigDecimal @@ ((A, B), C)] =
       bigDecimalToValue[(A, B), C](avro4sPrecisionAndScale[A, B, C])
 
     implicit def bigDecimalToValueBigPrecisionScale[A <: Nat, B <: Nat, C <: Nat, D <: Nat](
@@ -239,17 +252,23 @@ object avro extends AvroMarshallers {
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
         toIntND: ToInt[D],
-        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): ToValue[
-      BigDecimal @@ ((A, B), (C, D))] =
+        RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
+    ): ToValue[BigDecimal @@ ((A, B), (C, D))] =
       bigDecimalToValue[(A, B), (C, D)](avro4sPrecisionAndScale[A, B, C, D])
 
+    /*
+     * These marshallers are only used when the entire gRPC request/response is
+     * a tagged BigDecimal. When a tagged BigDecimal is a field of a larger
+     * message, the polymorphic marshaller defined in the `avro` or
+     * `avrowithschema` object is used.
+     */
     object marshallers {
 
       implicit def bigDecimalMarshaller2[A <: Nat, B <: Nat](
           implicit toIntNA: ToInt[A],
           toIntNB: ToInt[B],
-          RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): Marshaller[
-        BigDecimal @@ (A, B)] =
+          RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
+      ): Marshaller[BigDecimal @@ (A, B)] =
         new Marshaller[BigDecimal @@ (A, B)] {
           val inner: BDSerializer = BDSerializer(avro4sPrecisionAndScale[A, B])
 
@@ -258,15 +277,16 @@ object avro extends AvroMarshallers {
 
           override def parse(stream: InputStream): BigDecimal @@ (A, B) =
             toDecimalTag[(A, B)](
-              inner.fromByteBuffer(ByteBuffer.wrap(ByteStreams.toByteArray(stream))))
+              inner.fromByteBuffer(ByteBuffer.wrap(ByteStreams.toByteArray(stream)))
+            )
         }
 
       implicit def bigDecimalMarshaller3[A <: Nat, B <: Nat, C <: Nat](
           implicit toIntNA: ToInt[A],
           toIntNB: ToInt[B],
           toIntNC: ToInt[C],
-          RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): Marshaller[
-        BigDecimal @@ ((A, B), C)] = new Marshaller[BigDecimal @@ ((A, B), C)] {
+          RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
+      ): Marshaller[BigDecimal @@ ((A, B), C)] = new Marshaller[BigDecimal @@ ((A, B), C)] {
         val inner: BDSerializer = BDSerializer(avro4sPrecisionAndScale[A, B, C])
 
         override def stream(value: BigDecimal @@ ((A, B), C)): InputStream =
@@ -274,7 +294,8 @@ object avro extends AvroMarshallers {
 
         override def parse(stream: InputStream): BigDecimal @@ ((A, B), C) =
           toDecimalTag[((A, B), C)](
-            inner.fromByteBuffer(ByteBuffer.wrap(ByteStreams.toByteArray(stream))))
+            inner.fromByteBuffer(ByteBuffer.wrap(ByteStreams.toByteArray(stream)))
+          )
       }
 
       implicit def bigDecimalMarshaller4[A <: Nat, B <: Nat, C <: Nat, D <: Nat](
@@ -282,17 +303,19 @@ object avro extends AvroMarshallers {
           toIntNB: ToInt[B],
           toIntNC: ToInt[C],
           toIntND: ToInt[D],
-          RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY): Marshaller[
-        BigDecimal @@ ((A, B), (C, D))] = new Marshaller[BigDecimal @@ ((A, B), (C, D))] {
-        val inner: BDSerializer = BDSerializer(avro4sPrecisionAndScale[A, B, C, D])
+          RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
+      ): Marshaller[BigDecimal @@ ((A, B), (C, D))] =
+        new Marshaller[BigDecimal @@ ((A, B), (C, D))] {
+          val inner: BDSerializer = BDSerializer(avro4sPrecisionAndScale[A, B, C, D])
 
-        override def stream(value: BigDecimal @@ ((A, B), (C, D))): InputStream =
-          new ByteArrayInputStream(inner.toByteBuffer(value).array())
+          override def stream(value: BigDecimal @@ ((A, B), (C, D))): InputStream =
+            new ByteArrayInputStream(inner.toByteBuffer(value).array())
 
-        override def parse(stream: InputStream): BigDecimal @@ ((A, B), (C, D)) =
-          toDecimalTag[((A, B), (C, D))](
-            inner.fromByteBuffer(ByteBuffer.wrap(ByteStreams.toByteArray(stream))))
-      }
+          override def parse(stream: InputStream): BigDecimal @@ ((A, B), (C, D)) =
+            toDecimalTag[((A, B), (C, D))](
+              inner.fromByteBuffer(ByteBuffer.wrap(ByteStreams.toByteArray(stream)))
+            )
+        }
     }
   }
 
@@ -340,6 +363,12 @@ object avro extends AvroMarshallers {
         JavaTimeUtil.instantToLong(value)
     }
 
+    /*
+     * These marshallers are only used when the entire gRPC request/response
+     * is a LocalDate/LocalDateTime/Instant. When a LocalDate/LocalDateTime/Instant
+     * is a field of a larger message, the polymorphic marshaller defined in
+     * the `avro` or `avrowithschema` object is used.
+     */
     object marshallers {
 
       implicit val localDateMarshaller: Marshaller[LocalDate] = new Marshaller[LocalDate] {
@@ -355,11 +384,13 @@ object avro extends AvroMarshallers {
         new Marshaller[LocalDateTime] {
           override def stream(value: LocalDateTime): InputStream =
             new ByteArrayInputStream(
-              EncoderUtil.longToByteArray(JavaTimeUtil.localDateTimeToLong(value)))
+              EncoderUtil.longToByteArray(JavaTimeUtil.localDateTimeToLong(value))
+            )
 
           override def parse(stream: InputStream): LocalDateTime =
             JavaTimeUtil.longToLocalDateTime(
-              EncoderUtil.byteArrayToLong(ByteStreams.toByteArray(stream)))
+              EncoderUtil.byteArrayToLong(ByteStreams.toByteArray(stream))
+            )
         }
 
       implicit val instantMarshaller: Marshaller[Instant] =
@@ -383,7 +414,8 @@ object avrowithschema extends AvroMarshallers {
 
   implicit def avroWithSchemaMarshallers[A: ToRecord](
       implicit schemaFor: SchemaFor[A],
-      fromRecord: FromRecord[A]): Marshaller[A] = new Marshaller[A] {
+      fromRecord: FromRecord[A]
+  ): Marshaller[A] = new Marshaller[A] {
 
     override def parse(stream: InputStream): A = {
       val dfs = new DataFileStream(stream, new GenericDatumReader[GenericRecord](schemaFor()))

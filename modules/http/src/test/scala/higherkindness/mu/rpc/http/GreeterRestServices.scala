@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.http4s.dsl.Http4sDsl
 class UnaryGreeterRestService[F[_]: Sync](
     implicit handler: UnaryGreeter[F],
     decoderHelloRequest: io.circe.Decoder[HelloRequest],
-    encoderHelloResponse: io.circe.Encoder[HelloResponse])
-    extends Http4sDsl[F] {
+    encoderHelloResponse: io.circe.Encoder[HelloResponse]
+) extends Http4sDsl[F] {
 
   import higherkindness.mu.rpc.protocol.Empty
 
@@ -50,8 +50,8 @@ class UnaryGreeterRestService[F[_]: Sync](
 class Fs2GreeterRestService[F[_]: Sync](
     implicit handler: Fs2Greeter[F],
     decoderHelloRequest: io.circe.Decoder[HelloRequest],
-    encoderHelloResponse: io.circe.Encoder[HelloResponse])
-    extends Http4sDsl[F] {
+    encoderHelloResponse: io.circe.Encoder[HelloResponse]
+) extends Http4sDsl[F] {
 
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
 

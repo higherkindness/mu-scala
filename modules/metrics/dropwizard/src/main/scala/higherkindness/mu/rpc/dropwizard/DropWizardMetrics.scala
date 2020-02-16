@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,42 +65,50 @@ object DropWizardMetrics {
   case object Counter extends GaugeType
 
   def apply[F[_]](registry: MetricRegistry, prefix: String = "higherkinderness.mu")(
-      implicit F: Sync[F]): MetricsOps[F] = new MetricsOps[F] {
+      implicit F: Sync[F]
+  ): MetricsOps[F] = new MetricsOps[F] {
 
     override def increaseActiveCalls(
         methodInfo: GrpcMethodInfo,
-        classifier: Option[String]): F[Unit] = F.delay {
+        classifier: Option[String]
+    ): F[Unit] = F.delay {
       registry.counter(s"${prefixDefinition(prefix, classifier)}.active.calls").inc()
     }
 
     override def decreaseActiveCalls(
         methodInfo: GrpcMethodInfo,
-        classifier: Option[String]): F[Unit] = F.delay {
+        classifier: Option[String]
+    ): F[Unit] = F.delay {
       registry.counter(s"${prefixDefinition(prefix, classifier)}.active.calls").dec()
     }
 
     override def recordMessageSent(
         methodInfo: GrpcMethodInfo,
-        classifier: Option[String]): F[Unit] = F.delay {
+        classifier: Option[String]
+    ): F[Unit] = F.delay {
       registry
         .counter(
-          s"${prefixDefinition(prefix, classifier)}.${methodInfo.serviceName}.${methodInfo.methodName}.messages.sent")
+          s"${prefixDefinition(prefix, classifier)}.${methodInfo.serviceName}.${methodInfo.methodName}.messages.sent"
+        )
         .inc()
     }
 
     override def recordMessageReceived(
         methodInfo: GrpcMethodInfo,
-        classifier: Option[String]): F[Unit] = F.delay {
+        classifier: Option[String]
+    ): F[Unit] = F.delay {
       registry
         .counter(
-          s"${prefixDefinition(prefix, classifier)}.${methodInfo.serviceName}.${methodInfo.methodName}.messages.received")
+          s"${prefixDefinition(prefix, classifier)}.${methodInfo.serviceName}.${methodInfo.methodName}.messages.received"
+        )
         .inc()
     }
 
     override def recordHeadersTime(
         methodInfo: GrpcMethodInfo,
         elapsed: Long,
-        classifier: Option[String]): F[Unit] = F.delay {
+        classifier: Option[String]
+    ): F[Unit] = F.delay {
       registry
         .timer(s"${prefixDefinition(prefix, classifier)}.calls.header")
         .update(elapsed, TimeUnit.NANOSECONDS)
@@ -110,7 +118,8 @@ object DropWizardMetrics {
         methodInfo: GrpcMethodInfo,
         status: Status,
         elapsed: Long,
-        classifier: Option[String]): F[Unit] = F.delay {
+        classifier: Option[String]
+    ): F[Unit] = F.delay {
       registry
         .timer(s"${prefixDefinition(prefix, classifier)}.calls.total")
         .update(elapsed, TimeUnit.NANOSECONDS)
@@ -121,7 +130,8 @@ object DropWizardMetrics {
 
       registry
         .timer(
-          s"${prefixDefinition(prefix, classifier)}.${statusDescription(grpcStatusFromRawStatus(status))}")
+          s"${prefixDefinition(prefix, classifier)}.${statusDescription(grpcStatusFromRawStatus(status))}"
+        )
         .update(elapsed, TimeUnit.NANOSECONDS)
     }
 

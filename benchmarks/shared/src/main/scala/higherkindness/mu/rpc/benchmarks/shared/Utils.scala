@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ object Utils {
       street = "1494 avenue du fort-caire",
       city = "orléans",
       state = "aveyron",
-      postCode = 91831),
+      postCode = 91831
+    ),
     email = "valentine.lacroix@example.com",
     picture = None
   )

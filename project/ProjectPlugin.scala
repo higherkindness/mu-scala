@@ -1,5 +1,6 @@
 import com.typesafe.sbt.site.jekyll.JekyllPlugin.autoImport._
-import microsites.MicrositeKeys._
+import microsites.MicrositesPlugin.autoImport._
+import microsites._
 import sbt.Keys._
 import sbt.ScriptedPlugin.autoImport._
 import sbt._
@@ -10,6 +11,7 @@ import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
 import sbtorgpolicies.runnable.syntax._
 import sbtrelease.ReleasePlugin.autoImport._
+import sbtrelease.ReleaseStateTransformations._
 import scoverage.ScoverageKeys._
 
 import scala.language.reflectiveCalls
@@ -24,46 +26,50 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String            = "1.8.4"
-      val avrohugger: String        = "1.0.0-RC19"
-      val betterMonadicFor: String  = "0.3.1"
-      val catsEffect: String        = "2.0.0"
-      val circe: String             = "0.12.1"
-      val frees: String             = "0.8.2"
-      val fs2: String               = "2.0.1"
-      val fs2Grpc: String           = "0.5.2"
-      val grpc: String              = "1.23.0"
-      val jodaTime: String          = "2.10.3"
-      val http4s: String            = "0.21.0-M5"
-      val kindProjector: String     = "0.10.3"
-      val log4cats: String          = "1.0.0"
-      val logbackClassic: String    = "1.2.3"
-      val log4s: String             = "1.8.2"
-      val logback: String           = "1.2.3"
-      val monix: String             = "3.0.0"
-      val monocle: String           = "1.6.0"
-      val nettySSL: String          = "2.0.26.Final"
-      val paradise: String          = "2.1.1"
-      val pbdirect: String          = "0.2.3"
-      val prometheus: String        = "0.6.0"
-      val pureconfig: String        = "0.12.0"
-      val reactiveStreams: String   = "1.0.3"
-      val scala: String             = "2.12.10"
-      val scopt: String             = "3.7.1"
-      val scalacheck: String        = "1.14.1"
-      val scalacheckToolbox: String = "0.3.1"
-      val scalamock: String         = "4.4.0"
-      val scalatest: String         = "3.0.8"
-      val skeuomorph: String        = "0.0.13"
-      val slf4j: String             = "1.7.28"
-      val dropwizard: String        = "4.1.0"
+      val avro4s: String              = "1.8.4"
+      val avrohugger: String          = "1.0.0-RC22"
+      val betterMonadicFor: String    = "0.3.1"
+      val catsEffect: String          = "2.1.1"
+      val circe: String               = "0.13.0"
+      val dropwizard: String          = "4.1.2"
+      val embeddedKafka: String       = "2.4.0"
+      val enumeratum: String          = "1.5.15"
+      val frees: String               = "0.8.2"
+      val fs2: String                 = "2.2.2"
+      val fs2Grpc: String             = "0.6.0"
+      val fs2Kafka: String            = "0.20.2"
+      val grpc: String                = "1.24.2"
+      val jodaTime: String            = "2.10.5"
+      val http4s: String              = "0.21.0-M6"
+      val kindProjector: String       = "0.10.3"
+      val log4cats: String            = "1.0.1"
+      val log4s: String               = "1.8.2"
+      val logback: String             = "1.2.3"
+      val monix: String               = "3.1.0"
+      val monocle: String             = "2.0.1"
+      val nettySSL: String            = "2.0.26.Final"
+      val paradise: String            = "2.1.1"
+      val pbdirect: String            = "0.4.1"
+      val prometheus: String          = "0.8.1"
+      val pureconfig: String          = "0.12.2"
+      val reactiveStreams: String     = "1.0.3"
+      val scala: String               = "2.12.10"
+      val scopt: String               = "3.7.1"
+      val scalacheck: String          = "1.14.3"
+      val scalacheckToolbox: String   = "0.3.2"
+      val scalamock: String           = "4.4.0"
+      val scalatest: String           = "3.1.0"
+      val scalatestplusScheck: String = "3.1.0.0-RC2"
+      val skeuomorph: String          = "0.0.20"
+      val slf4j: String               = "1.7.30"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect)                  % Test,
         %%("scalamock", V.scalamock)                     % Test,
-        %%("scheckToolboxDatetime", V.scalacheckToolbox) % Test
+        %%("scheckToolboxDatetime", V.scalacheckToolbox) % Test,
+        "org.scalatestplus"                              %% "scalatestplus-scalacheck" % V.scalatestplusScheck % Test
       )
     )
 
@@ -71,7 +77,8 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %%("cats-effect", V.catsEffect),
         %("grpc-stub", V.grpc),
-        "com.47deg" %% "pbdirect" % V.pbdirect,
+        "com.47deg"    %% "pbdirect"   % V.pbdirect,
+        "com.beachape" %% "enumeratum" % V.enumeratum,
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
         "org.scala-lang"             % "scala-compiler" % scalaVersion.value,
@@ -133,7 +140,6 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val healthCheckSettingsFS2: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "ch.qos.logback"    % "logback-classic" % V.logbackClassic,
         "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
         "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
         %%("fs2-core", V.fs2),
@@ -143,7 +149,6 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val healthCheckSettingsMonix: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "ch.qos.logback"    % "logback-classic" % V.logbackClassic,
         "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
         "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
         %%("monix", V.monix),
@@ -192,7 +197,8 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %("grpc-testing", V.grpc),
         %%("cats-effect", V.catsEffect),
-        %%("scalacheck", V.scalacheck) % Test
+        %%("scalacheck", V.scalacheck) % Test,
+        "org.scalatestplus"            %% "scalatestplus-scalacheck" % V.scalatestplusScheck % Test
       )
     )
 
@@ -202,12 +208,19 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val idlGenSettings: Seq[Def.Setting[_]] = Seq(
+    lazy val srcGenSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("monocle-core", V.monocle),
         "io.higherkindness" %% "skeuomorph"      % V.skeuomorph,
         "com.julianpeeters" %% "avrohugger-core" % V.avrohugger,
         %%("circe-generic", V.circe)
+      )
+    )
+
+    lazy val kafkaSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        "com.ovoenergy"           %% "fs2-kafka"      % V.fs2Kafka,
+        "io.github.embeddedkafka" %% "embedded-kafka" % V.embeddedKafka % Test
       )
     )
 
@@ -273,7 +286,7 @@ object ProjectPlugin extends AutoPlugin {
       // Custom release process for the plugin:
       releaseProcess := Seq[ReleaseStep](
         releaseStepCommandAndRemaining("^ publishSigned"),
-        ReleaseStep(action = "sonatypeReleaseAll" :: _)
+        releaseStepCommand("sonatypeBundleRelease")
       )
     )
 
@@ -287,30 +300,30 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
-      micrositeName := "Mu",
-      micrositeBaseUrl := "/mu",
+      micrositeName := "Mu-Scala",
+      micrositeBaseUrl := "mu-scala",
       micrositeDescription := "A purely functional library for building RPC endpoint-based services",
       micrositeGithubOwner := "higherkindness",
-      micrositeGithubRepo := "mu",
+      micrositeGithubRepo := "mu-scala",
       micrositeGitterChannelUrl := "47deg/mu",
-      micrositeOrganizationHomepage := "http://www.47deg.com",
-      includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
+      micrositeOrganizationHomepage := "https://www.47deg.com",
+      micrositeCompilingDocsTool := WithTut,
       micrositePushSiteWith := GitHub4s,
       micrositeGithubToken := sys.env.get(orgGithubTokenSetting.value),
       micrositePalette := Map(
-        "brand-primary"   -> "#de3423",
-        "brand-secondary" -> "#852319",
-        "brand-tertiary"  -> "#381C19",
-        "gray-dark"       -> "#333333",
-        "gray"            -> "#666666",
-        "gray-light"      -> "#EDEDED",
-        "gray-lighter"    -> "#F4F5F9",
+        "brand-primary"   -> "#001e38",
+        "brand-secondary" -> "#F44336",
         "white-color"     -> "#E6E7EC"
-      )
+      ),
+      micrositeHighlightTheme := "github-gist",
+      micrositeHighlightLanguages += "protobuf"
     )
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies += %%("scalatest", V.scalatest),
+      libraryDependencies ++= Seq(
+        %%("scalatest", V.scalatest),
+        "org.scalatestplus" %% "scalatestplus-scalacheck" % V.scalatestplusScheck
+      ),
       scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
     )
 
@@ -329,11 +342,11 @@ object ProjectPlugin extends AutoPlugin {
   }
 
   override def projectSettings: Seq[Def.Setting[_]] =
-    sharedReleaseProcess ++ warnUnusedImport ++ Seq(
+    warnUnusedImport ++ Seq(
       description := "mu RPC is a purely functional library for " +
         "building RPC endpoint based services with support for RPC and HTTP/2",
       startYear := Some(2017),
-      orgProjectName := "mu",
+      orgProjectName := "mu-scala",
       orgGithubSetting := GitHubSettings(
         organization = "higherkindness",
         project = (name in LocalRootProject).value,
@@ -355,6 +368,18 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %%("scalatest", V.scalatest) % "test",
         %("slf4j-nop", V.slf4j)      % Test
+      ),
+      releaseProcess := Seq[ReleaseStep](
+        orgInitialVcsChecks,
+        checkSnapshotDependencies,
+        orgInquireVersions,
+        orgTagRelease,
+        orgUpdateChangeLog,
+        releaseStepCommandAndRemaining("publishSigned"),
+        releaseStepCommand("sonatypeBundleRelease"),
+        setNextVersion,
+        orgCommitNextVersion,
+        orgPostRelease
       )
     ) ++ Seq(
       // sbt-org-policies settings:
@@ -363,7 +388,7 @@ object ProjectPlugin extends AutoPlugin {
       orgBadgeListSetting := List(
         TravisBadge.apply,
         FixedCodecovBadge.apply,
-        { info => MavenCentralBadge.apply(info.copy(libName = "mu")) },
+        { info => MavenCentralBadge.apply(info.copy(libName = "mu-scala")) },
         ScalaLangBadge.apply,
         LicenseBadge.apply,
         // Gitter badge (owner field) can be configured with default value if we migrate it to the higherkindness organization
@@ -375,7 +400,7 @@ object ProjectPlugin extends AutoPlugin {
         ContributingFileType(
           orgProjectName.value,
           // Organization field can be configured with default value if we migrate it to the higherkindness organization
-          orgGithubSetting.value.copy(organization = "47deg", project = "mu")
+          orgGithubSetting.value.copy(organization = "47deg", project = "mu-scala")
         ),
         AuthorsFileType(
           name.value,

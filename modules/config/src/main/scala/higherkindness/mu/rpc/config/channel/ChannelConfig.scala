@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,8 @@ class ChannelConfig[F[_]](implicit S: Sync[F], C: ConfigM[F]) {
       config <- C.load
       host <- S.pure(
         Either
-          .catchOnly[Missing](config.getString(hostPath)))
+          .catchOnly[Missing](config.getString(hostPath))
+      )
       port <- S.pure(Either.catchOnly[Missing](config.getInt(portPath)))
     } yield ChannelForAddress(host.getOrElse(defaultHost), port.getOrElse(defaultPort))
 

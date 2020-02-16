@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,8 @@ package object server {
   val defaultPort = 50051
 
   private[server] def SBuilder[SB <: ServerBuilder[SB]](
-      sb: ServerBuilder[SB]): PartialFunction[GrpcConfig, SB] = {
+      sb: ServerBuilder[SB]
+  ): PartialFunction[GrpcConfig, SB] = {
     case DirectExecutor                  => sb.directExecutor()
     case SetExecutor(ex)                 => sb.executor(ex)
     case AddService(srv)                 => sb.addService(srv)
@@ -42,7 +43,8 @@ package object server {
   }
 
   private[server] def NettySBuilder(
-      nsb: NettyServerBuilder): PartialFunction[GrpcConfig, NettyServerBuilder] = {
+      nsb: NettyServerBuilder
+  ): PartialFunction[GrpcConfig, NettyServerBuilder] = {
     case ChannelType(channelType)             => nsb.channelType(channelType)
     case WithChildOption(option, value)       => nsb.withChildOption(option, value)
     case BossEventLoopGroup(group)            => nsb.bossEventLoopGroup(group)

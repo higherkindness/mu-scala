@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ sealed trait SerializationType extends Product with Serializable
 case object Protobuf           extends SerializationType
 case object Avro               extends SerializationType
 case object AvroWithSchema     extends SerializationType
+case object Custom             extends SerializationType
 
 sealed abstract class CompressionType extends Product with Serializable
 case object Identity                  extends CompressionType

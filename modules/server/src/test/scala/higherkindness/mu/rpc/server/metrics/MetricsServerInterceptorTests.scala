@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,8 +70,8 @@ class MetricsServerInterceptorTests extends RpcBaseTestSuite {
   }
 
   private[this] def makeProtoCalls[A](metricsOps: MetricsOps[IO], clock: FakeClock[IO])(
-      f: ProtoRPCService[IO] => IO[A])(
-      implicit H: ProtoRPCService[IO]): IO[Either[Throwable, A]] = {
+      f: ProtoRPCService[IO] => IO[A]
+  )(implicit H: ProtoRPCService[IO]): IO[Either[Throwable, A]] = {
     implicit val _: Clock[IO] = clock
     withServerChannel[IO](
       service = ProtoRPCService
@@ -84,7 +84,8 @@ class MetricsServerInterceptorTests extends RpcBaseTestSuite {
   private[this] def checkCalls(
       metricsOps: MetricsOpsRegister,
       methodCalls: List[GrpcMethodInfo],
-      serverError: Boolean = false): IO[Assertion] = {
+      serverError: Boolean = false
+  ): IO[Assertion] = {
     for {
       decArgs   <- metricsOps.decreaseActiveCallsReg.get
       incArgs   <- metricsOps.increaseActiveCallsReg.get

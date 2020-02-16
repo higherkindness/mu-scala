@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,9 @@ object HealthServiceMonix {
 
     val (observer, observable): (Observer.Sync[HealthStatus], Observable[HealthStatus]) =
       Pipe(
-        MulticastStrategy.behavior(
-          HealthStatus(new HealthCheck("FirstStatus"), ServerStatus("UNKNOWN"))))
-        .concurrent(s)
+        MulticastStrategy
+          .behavior(HealthStatus(new HealthCheck("FirstStatus"), ServerStatus("UNKNOWN")))
+      ).concurrent(s)
 
     checkRef.map(c => new HealthCheckServiceMonixImpl[F](c, observer, observable))
   }
@@ -45,7 +45,8 @@ object HealthServiceMonix {
 class HealthCheckServiceMonixImpl[F[_]: Sync](
     checkStatus: Ref[F, Map[String, ServerStatus]],
     observer: Observer.Sync[HealthStatus],
-    observable: Observable[HealthStatus])(implicit s: Scheduler)
+    observable: Observable[HealthStatus]
+)(implicit s: Scheduler)
     extends AbstractHealthService[F](checkStatus)
     with HealthCheckServiceMonix[F] {
 

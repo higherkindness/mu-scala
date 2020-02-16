@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,8 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
       labelNames: List[String],
       labelValues: List[String],
       op: IO[Unit],
-      status: Option[Status] = None)(
-      checkSamples: List[MetricFamilySamples.Sample] => Boolean): IO[Boolean] =
+      status: Option[Status] = None
+  )(checkSamples: List[MetricFamilySamples.Sample] => Boolean): IO[Boolean] =
     (1 to numberOfCalls).toList
       .map(_ => op)
       .sequence_
@@ -52,14 +52,17 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
 
   def findRecordedMetric(
       metricName: String,
-      registry: CollectorRegistry): Option[Collector.MetricFamilySamples] =
+      registry: CollectorRegistry
+  ): Option[Collector.MetricFamilySamples] =
     registry.metricFamilySamples.asScala.find(_.name == metricName)
 
   def findRecordedMetricOrThrow(
       metricName: String,
-      registry: CollectorRegistry): Collector.MetricFamilySamples =
+      registry: CollectorRegistry
+  ): Collector.MetricFamilySamples =
     findRecordedMetric(metricName, registry).getOrElse(
-      throw new IllegalArgumentException(s"Could not find metric with name: $metricName"))
+      throw new IllegalArgumentException(s"Could not find metric with name: $metricName")
+    )
 
   def checkMetrics(
       registry: CollectorRegistry,
@@ -70,7 +73,8 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
     checkSamples(findRecordedMetricOrThrow(metricName, registry).samples.asScala.toList)
 
   def checkSingleSamples(metricName: String, value: Double)(
-      samples: List[MetricFamilySamples.Sample]): Boolean =
+      samples: List[MetricFamilySamples.Sample]
+  ): Boolean =
     samples.find(_.name == metricName).exists(_.value == value)
 
   // Prometheus can return the value with a difference of 0.0000000001
@@ -78,7 +82,8 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
     Math.abs(v1 - v2) < Math.pow(10, -10)
 
   def checkSeriesSamples(metricName: String, numberOfCalls: Int, elapsed: Int)(
-      samples: List[MetricFamilySamples.Sample]): Boolean = {
+      samples: List[MetricFamilySamples.Sample]
+  ): Boolean = {
     samples.find(_.name == metricName + "_count").exists(_.value == numberOfCalls.toDouble) &&
     samples
       .find(_.name == metricName + "_sum")
@@ -111,7 +116,7 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
             List("classifier"),
             List(classifier),
             metrics.decreaseActiveCalls(methodInfo, Some(classifier))
-          )(checkSingleSamples(metricName, 0l))
+          )(checkSingleSamples(metricName, 0L))
         } yield op1 && op2).unsafeRunSync()
     }
 
@@ -155,7 +160,7 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
         } yield op1).unsafeRunSync()
     }
 
-  property("creates and updates timer for total time") =
+  property("creates and updates timer for total time metrics") =
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10), statusGen, Gen.chooseNum(100, 1000)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int, status: Status, elapsed: Int) =>
         val registry   = new CollectorRegistry()
@@ -164,8 +169,9 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
         (for {
           metrics <- PrometheusMetrics.build[IO](registry, prefix)
           op1 <- (1 to numberOfCalls).toList
-            .map(_ => metrics.recordTotalTime(methodInfo, status, elapsed.toLong, Some(classifier)))
-            .sequence_
+            .traverse_(_ =>
+              metrics.recordTotalTime(methodInfo, status, elapsed.toLong, Some(classifier))
+            )
             .map { _ =>
               checkMetrics(
                 registry,
@@ -174,7 +180,36 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
                 List(
                   classifier,
                   methodTypeDescription(methodInfo),
-                  statusDescription(MetricsOps.grpcStatusFromRawStatus(status)))
+                  statusDescription(MetricsOps.grpcStatusFromRawStatus(status))
+                )
+              )(checkSeriesSamples(metricName, numberOfCalls, elapsed))
+            }
+        } yield op1).unsafeRunSync()
+    }
+
+  property("creates and updates timer for full total time metrics") =
+    forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10), statusGen, Gen.chooseNum(100, 1000)) {
+      (methodInfo: GrpcMethodInfo, numberOfCalls: Int, status: Status, elapsed: Int) =>
+        val registry   = new CollectorRegistry()
+        val metricName = s"${prefix}_calls_total"
+
+        (for {
+          metrics <- PrometheusMetrics.buildFullTotal[IO](registry, prefix)
+          op1 <- (1 to numberOfCalls).toList
+            .traverse_(_ =>
+              metrics.recordTotalTime(methodInfo, status, elapsed.toLong, Some(classifier))
+            )
+            .map { _ =>
+              checkMetrics(
+                registry,
+                metricName,
+                List("classifier", "service", "method", "status"),
+                List(
+                  classifier,
+                  methodInfo.serviceName,
+                  methodInfo.methodName,
+                  statusDescription(MetricsOps.grpcStatusFromRawStatus(status))
+                )
               )(checkSeriesSamples(metricName, numberOfCalls, elapsed))
             }
         } yield op1).unsafeRunSync()

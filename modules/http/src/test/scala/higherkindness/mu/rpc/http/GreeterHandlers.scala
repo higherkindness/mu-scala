@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,8 @@ class Fs2GreeterHandler[F[_]: Sync] extends Fs2Greeter[F] {
     requests.compile.fold(HelloResponse("")) {
       case (response, request) =>
         HelloResponse(
-          if (response.hello.isEmpty) request.hello else s"${response.hello}, ${request.hello}")
+          if (response.hello.isEmpty) request.hello else s"${response.hello}, ${request.hello}"
+        )
     }
 
   def sayHelloAll(request: HelloRequest): Stream[F, HelloResponse] =

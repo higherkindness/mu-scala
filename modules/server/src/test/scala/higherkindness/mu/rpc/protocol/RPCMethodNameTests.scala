@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,8 @@ class RPCMethodNameTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
       withClient(
         ProtoRPCServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll { s: String =>
             client.proto(Request(s)).map(_.length).unsafeRunSync() == s.length
@@ -79,7 +80,8 @@ class RPCMethodNameTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
       withClient(
         AvroRPCServiceDef.bindService[ConcurrentMonad],
-        AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll { s: String =>
             client.avro(Request(s)).map(_.length).unsafeRunSync() == s.length
@@ -93,7 +95,8 @@ class RPCMethodNameTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
 
       withClient(
         AvroWithSchemaRPCServiceDef.bindService[ConcurrentMonad],
-        AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll { s: String =>
             client.avroWithSchema(Request(s)).map(_.length).unsafeRunSync() == s.length

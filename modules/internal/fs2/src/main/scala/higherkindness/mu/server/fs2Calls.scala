@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,22 +27,26 @@ object fs2Calls {
 
   def unaryMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Req => F[Res],
-      maybeCompression: Option[String]): ServerCallHandler[Req, Res] =
+      maybeCompression: Option[String]
+  ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F].unaryToUnaryCall[Req, Res]((req, _) => f(req))
 
   def clientStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Stream[F, Req] => F[Res],
-      maybeCompression: Option[String]): ServerCallHandler[Req, Res] =
+      maybeCompression: Option[String]
+  ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F].streamingToUnaryCall[Req, Res]((stream, _) => f(stream))
 
   def serverStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Req => Stream[F, Res],
-      maybeCompression: Option[String]): ServerCallHandler[Req, Res] =
+      maybeCompression: Option[String]
+  ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F].unaryToStreamingCall[Req, Res]((req, _) => f(req))
 
   def bidiStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Stream[F, Req] => Stream[F, Res],
-      maybeCompression: Option[String]): ServerCallHandler[Req, Res] =
+      maybeCompression: Option[String]
+  ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F].streamingToStreamingCall[Req, Res]((stream, _) => f(stream))
 
 }

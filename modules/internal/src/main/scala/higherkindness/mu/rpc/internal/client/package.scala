@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import com.google.common.util.concurrent.{FutureCallback, Futures, ListenableFut
 package object client {
 
   private[internal] def listenableFuture2Async[F[_], A](
-      fa: => ListenableFuture[A])(implicit E: Effect[F], CS: ContextShift[F]): F[A] =
+      fa: => ListenableFuture[A]
+  )(implicit E: Effect[F], CS: ContextShift[F]): F[A] =
     E.async { cb =>
       Futures.addCallback(
         fa,

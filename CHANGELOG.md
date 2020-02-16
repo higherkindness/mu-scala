@@ -1,5 +1,176 @@
 # Changelog
 
+## 01/16/2020 - Version 0.20.1
+
+Release changes:
+
+* Bumps avrohugger to 1.0.0-RC22 ([#718](https://github.com/higherkindness/mu-scala/pull/718))
+* Add a dependency on Enumeratum ([#719](https://github.com/higherkindness/mu-scala/pull/719))
+* Micro-optimisation: use IOUtils to copy InputStream to byte array ([#720](https://github.com/higherkindness/mu-scala/pull/720))
+* Update sbt, scripted-plugin to 1.3.5 ([#721](https://github.com/higherkindness/mu-scala/pull/721))
+* Update scalacheck to 1.14.3 ([#722](https://github.com/higherkindness/mu-scala/pull/722))
+* Update slf4j-nop to 1.7.30 ([#725](https://github.com/higherkindness/mu-scala/pull/725))
+* Update embedded-kafka to 2.4.0 ([#724](https://github.com/higherkindness/mu-scala/pull/724))
+* Update enumeratum to 1.5.14 ([#723](https://github.com/higherkindness/mu-scala/pull/723))
+* Update microsite using sbt-microsites 1.0.2 ([#728](https://github.com/higherkindness/mu-scala/pull/728))
+* Update pureconfig to 0.12.2 ([#729](https://github.com/higherkindness/mu-scala/pull/729))
+* Make the streaming implementation configurable ([#731](https://github.com/higherkindness/mu-scala/pull/731))
+* Update sbt to 1.3.6 ([#732](https://github.com/higherkindness/mu-scala/pull/732))
+* Update enumeratum to 1.5.15 ([#733](https://github.com/higherkindness/mu-scala/pull/733))
+* Happy new year! ([#734](https://github.com/higherkindness/mu-scala/pull/734))
+* Upgrade to pbdirect 0.4.0 and skeuomorph 0.0.19 ([#735](https://github.com/higherkindness/mu-scala/pull/735))
+* Release v0.20.0 ([#736](https://github.com/higherkindness/mu-scala/pull/736))
+* Fixes project name ([#737](https://github.com/higherkindness/mu-scala/pull/737))
+* Name the scripts in Travis ([#738](https://github.com/higherkindness/mu-scala/pull/738))
+* Add release notes for v0.20.0 ([#739](https://github.com/higherkindness/mu-scala/pull/739))
+* Simplify Avro marshaller ([#740](https://github.com/higherkindness/mu-scala/pull/740))
+* Update monocle-core to 2.0.1 ([#741](https://github.com/higherkindness/mu-scala/pull/741))
+* Fix gitter channel badge ([#743](https://github.com/higherkindness/mu-scala/pull/743))
+* Update sbt-microsites to 1.1.0 ([#745](https://github.com/higherkindness/mu-scala/pull/745))
+* Update pbdirect to 0.4.1 ([#744](https://github.com/higherkindness/mu-scala/pull/744))
+* Scalameta codegen ([#746](https://github.com/higherkindness/mu-scala/pull/746))
+* Update sbt, scripted-plugin to 1.3.7 ([#747](https://github.com/higherkindness/mu-scala/pull/747))
+* Release 0.20.1 ([#748](https://github.com/higherkindness/mu-scala/pull/748))
+
+
+## 01/03/2020 - Version 0.20.0
+
+This release focussed on improving Protobuf support, introducing a number of new
+features and bug fixes but also some breaking changes.
+
+New features/improvements/bug fixes:
+
+* Scala reserved words are now escaped properly in generated code, so you can
+  safely use words such as `type` or `private` in your Protobuf definitions.
+
+* Type names in generated code are now fully qualified, so use of words such as
+  `Option` or `Either` in your Protobuf definitions will not cause name clashes
+  with other Scala types.
+
+* The sbt plugin no longer includes unnecessary imports in generated code. For
+  example, if your RPC endpoints do not make use of streaming, the generated
+  code will not include any FS2 or Monix imports.
+
+* Protobuf enums are now supported. They are encoded as [enumeratum](https://github.com/lloydmeta/enumeratum)
+  `IntEnum`s in the generated code.
+
+* Protobuf `oneof` fields are now supported. They are encoded as
+  [Shapeless](https://github.com/milessabin/shapeless) Coproduct types in the
+  generated code.
+
+* Field numbers are now respected when encoding/decoding Protobuf messages. This
+  is important if you want your Mu server or client to communicate correctly
+  with 3rd parties using Protobuf.
+
+* Default values for Protobuf scalar fields are now supported correctly. When
+  reading a message with a missing field, the field is correctly instantiated
+  with the default value for its type. When writing a message, a field is
+  skipped if it has the default value. See [this
+  table](https://github.com/47deg/pbdirect/blob/a9eee69a90d424889fd3eb421babb07f87f9495b/README.md#default-values-and-missing-fields)
+  for more details about default values for various types.
+
+* Repeated Protobuf fields with primitive types are now encoded using the
+  [packed
+  encoding](https://developers.google.com/protocol-buffers/docs/encoding#packed)
+  by default, for compliance with the `proto3` spec.
+
+* A new `srcGenStreamingImplementation` setting has been added to the sbt
+  plugin, allowing you to choose which streaming implementation (FS2 or Monix)
+  to use when generating code.  Previously this was hardcoded to FS2 and not
+  configurable. See [the
+  docs](https://higherkindness.io/mu-scala/generate-sources-from-idl#plugin-settings)
+  for more details.
+
+Breaking changes:
+
+* We have fixed a number of bugs in Protobuf encoding/decoding, and we now have
+  a test suite to check that Mu's Protobuf encoding matches that of `protoc`,
+  the official Protobuf CLI tool. However, this means that clients and servers
+  using Mu v0.20.0 or newer will not be able to communicate with older versions
+  of Mu via Protobuf.
+
+* The Protobuf encoders and decoders for `java.time` classes (`LocalDate`,
+  `LocalDateTime` and `Instant`) and joda-time classes (`LocalDate` and
+  `LocalDateTime`) have been simplified. They now encode values as `int32` or
+  `int64` instead of converting them to byte arrays. This is consistent with the
+  equivalent Avro encoders/decoders.
+
+* If you define any Protobuf codecs for custom types, you now need to define
+  instances of `PBScalarValueReader` and/or `PBScalarValueWriter` instead of
+  `PBReader`/`PBWriter`. See [the
+  docs](https://higherkindness.io/mu-scala/core-concepts#custom-codecs) for an
+  example.
+
+* Using a simple type (e.g. `Boolean`, `String`, `LocalDate`) as an RPC request
+  or response is no longer supported for Protobuf services. Only proper message
+  types (i.e. case classes) are allowed.
+
+Release changes:
+
+* Update skeuomorph to 0.0.17 ([#713](https://github.com/higherkindness/mu-scala/pull/713))
+* Update metrics-core to 4.1.2 ([#715](https://github.com/higherkindness/mu-scala/pull/715))
+* Various documentation fixes ([#714](https://github.com/higherkindness/mu-scala/pull/714))
+* Avoid adding unnecessary imports to generated source files ([#717](https://github.com/higherkindness/mu-scala/pull/717))
+* Bumps avrohugger to 1.0.0-RC22 ([#718](https://github.com/higherkindness/mu-scala/pull/718))
+* Add a dependency on Enumeratum ([#719](https://github.com/higherkindness/mu-scala/pull/719))
+* Micro-optimisation: use IOUtils to copy InputStream to byte array ([#720](https://github.com/higherkindness/mu-scala/pull/720))
+* Update sbt, scripted-plugin to 1.3.5 ([#721](https://github.com/higherkindness/mu-scala/pull/721))
+* Update scalacheck to 1.14.3 ([#722](https://github.com/higherkindness/mu-scala/pull/722))
+* Update slf4j-nop to 1.7.30 ([#725](https://github.com/higherkindness/mu-scala/pull/725))
+* Update embedded-kafka to 2.4.0 ([#724](https://github.com/higherkindness/mu-scala/pull/724))
+* Update enumeratum to 1.5.14 ([#723](https://github.com/higherkindness/mu-scala/pull/723))
+* Update microsite using sbt-microsites 1.0.2 ([#728](https://github.com/higherkindness/mu-scala/pull/728))
+* Update pureconfig to 0.12.2 ([#729](https://github.com/higherkindness/mu-scala/pull/729))
+* Make the streaming implementation configurable ([#731](https://github.com/higherkindness/mu-scala/pull/731))
+* Update sbt to 1.3.6 ([#732](https://github.com/higherkindness/mu-scala/pull/732))
+* Update enumeratum to 1.5.15 ([#733](https://github.com/higherkindness/mu-scala/pull/733))
+* Happy new year! ([#734](https://github.com/higherkindness/mu-scala/pull/734))
+* Upgrade to pbdirect 0.4.0 and skeuomorph 0.0.19 ([#735](https://github.com/higherkindness/mu-scala/pull/735))
+* Release v0.20.0 ([#736](https://github.com/higherkindness/mu-scala/pull/736))
+* Fixes project name ([#737](https://github.com/higherkindness/mu-scala/pull/737))
+* Name the scripts in Travis ([#738](https://github.com/higherkindness/mu-scala/pull/738))
+
+
+## 10/29/2019 - Version 0.19.1
+
+Release changes:
+
+* Allow specifying custom serialization mechanism ([#683](https://github.com/higherkindness/mu/pull/683))
+* Update metrics-core to 4.1.1 ([#684](https://github.com/higherkindness/mu/pull/684))
+* Update circe-core, circe-generic, ... to 0.12.3 ([#685](https://github.com/higherkindness/mu/pull/685))
+* Update grpc-netty, grpc-okhttp, grpc-stub, ... to 1.24.1 ([#686](https://github.com/higherkindness/mu/pull/686))
+* Update joda-time to 2.10.5 ([#688](https://github.com/higherkindness/mu/pull/688))
+* Update embedded-kafka to 2.3.1 ([#689](https://github.com/higherkindness/mu/pull/689))
+* Update simpleclient to 0.8.0 ([#687](https://github.com/higherkindness/mu/pull/687))
+* Releases 0.19.1 ([#690](https://github.com/higherkindness/mu/pull/690))
+
+
+## 10/17/2019 - Version 0.19.0
+
+Release changes:
+
+* Upgrades Project ([#642](https://github.com/higherkindness/mu/pull/642))
+* Update fs2-core to 2.0.1 ([#660](https://github.com/higherkindness/mu/pull/660))
+* Update monocle-core to 1.6.0 ([#661](https://github.com/higherkindness/mu/pull/661))
+* Update monocle-core to 2.0.0 ([#663](https://github.com/higherkindness/mu/pull/663))
+* Add import root to protobuf source generator ([#627](https://github.com/higherkindness/mu/pull/627))
+* Update simpleclient to 0.7.0 ([#667](https://github.com/higherkindness/mu/pull/667))
+* Mmm/605 docs ([#625](https://github.com/higherkindness/mu/pull/625))
+* Update scalacheck to 1.14.2 ([#670](https://github.com/higherkindness/mu/pull/670))
+* Update sbt-microsites to 0.9.6 ([#668](https://github.com/higherkindness/mu/pull/668))
+* Open api generation ([#659](https://github.com/higherkindness/mu/pull/659))
+* Update pureconfig to 0.12.1 ([#671](https://github.com/higherkindness/mu/pull/671))
+* Update grpc-netty, grpc-okhttp, grpc-stub, ... to 1.24.0 ([#669](https://github.com/higherkindness/mu/pull/669))
+* Update sbt-microsites to 0.9.7 ([#672](https://github.com/higherkindness/mu/pull/672))
+* Mu kafka management service ([#638](https://github.com/higherkindness/mu/pull/638))
+* Update sbt-updates to 0.4.3 ([#675](https://github.com/higherkindness/mu/pull/675))
+* Update circe-core, circe-generic, ... to 0.12.2 ([#676](https://github.com/higherkindness/mu/pull/676))
+* Update sbt-updates to 0.5.0 ([#679](https://github.com/higherkindness/mu/pull/679))
+* Update log4cats-core, log4cats-slf4j to 1.0.1 ([#681](https://github.com/higherkindness/mu/pull/681))
+* Releases 0.19.0 ([#680](https://github.com/higherkindness/mu/pull/680))
+* Update sbt, scripted-plugin to 1.3.3 ([#678](https://github.com/higherkindness/mu/pull/678))
+
+
 ## 07/08/2019 - Version 0.18.4
 
 Release changes:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ package higherkindness.mu.rpc.healthcheck.fs2
 import cats.effect.IO
 import higherkindness.mu.rpc.healthcheck.fs2.handler.HealthServiceFS2
 import higherkindness.mu.rpc.healthcheck.unary.handler.{HealthCheck, HealthStatus, ServerStatus}
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class HealthCheckFS2Test extends WordSpec with Matchers {
+class HealthCheckFS2Test extends AnyWordSpec with Matchers {
 
   "FS2 health check service" should {
 

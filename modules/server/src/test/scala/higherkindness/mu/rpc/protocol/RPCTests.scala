@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ package protocol
 import cats.{Monad, MonadError}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import com.google.protobuf.InvalidProtocolBufferException
 import org.scalatest._
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.protocol.Utils.handlers.client._
@@ -67,7 +66,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       new MuRPCServiceClientHandler[ConcurrentMonad](
         protoRPCServiceClient,
         avroRPCServiceClient,
-        awsRPCServiceClient)
+        awsRPCServiceClient
+      )
 
     "be able to run unary services" in {
 
@@ -81,7 +81,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "handle errors in unary services" in {
 
       def clientProgram[F[_]](
-          errorCode: String)(implicit APP: MyRPCClient[F], M: MonadError[F, Throwable]): F[C] =
+          errorCode: String
+      )(implicit APP: MyRPCClient[F], M: MonadError[F, Throwable]): F[C] =
         M.handleError(APP.uwe(a1, errorCode))(ex => C(ex.getMessage, a1))
 
       clientProgram[ConcurrentMonad]("SE")
@@ -114,9 +115,9 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "handle errors in server streaming services" in {
 
-      def clientProgram[F[_]](errorCode: String)(
-          implicit APP: MyRPCClient[F],
-          M: MonadError[F, Throwable]): F[List[C]] =
+      def clientProgram[F[_]](
+          errorCode: String
+      )(implicit APP: MyRPCClient[F], M: MonadError[F, Throwable]): F[List[C]] =
         M.handleError(APP.sswe(a1, errorCode))(ex => List(C(ex.getMessage, a1)))
 
       clientProgram[ConcurrentMonad]("SE")
@@ -171,15 +172,6 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       }
 
       clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe ((c1, c1, cList, dResult, e1, e1))
-
-    }
-
-    "#67 issue - booleans as request are not allowed" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[C] =
-        APP.notAllowed(true)
-
-      assertThrows[InvalidProtocolBufferException](clientProgram[ConcurrentMonad].unsafeRunSync())
 
     }
 
@@ -267,7 +259,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       new MuRPCServiceClientCompressedHandler[ConcurrentMonad](
         compressedprotoRPCServiceClient,
         compressedavroRPCServiceClient,
-        compressedawsRPCServiceClient)
+        compressedawsRPCServiceClient
+      )
 
     "be able to run unary services" in {
 
@@ -338,15 +331,6 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       }
 
       clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe ((c1, c1, cList, dResult, e1, e1))
-
-    }
-
-    "#67 issue - booleans as request are not allowed" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[C] =
-        APP.notAllowed(true)
-
-      assertThrows[InvalidProtocolBufferException](clientProgram[ConcurrentMonad].unsafeRunSync())
 
     }
 

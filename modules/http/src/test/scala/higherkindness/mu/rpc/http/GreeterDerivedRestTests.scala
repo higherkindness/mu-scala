@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,8 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
 
       the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
         Status.BadRequest,
-        Some("INVALID_ARGUMENT: SRE"))
+        Some("INVALID_ARGUMENT: SRE")
+      )
     }
 
     "handle a raised non-gRPC exception in a unary POST request" in {
@@ -81,7 +82,8 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
 
       the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
         Status.InternalServerError,
-        Some("RTE"))
+        Some("RTE")
+      )
     }
 
     "handle a thrown exception in a unary POST request" in {
@@ -89,7 +91,8 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
         BlazeClientBuilder[IO](ec).resource.use(unaryClient.sayHello(HelloRequest("TR"))(_))
 
       the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
-        Status.InternalServerError)
+        Status.InternalServerError
+      )
     }
 
     "serve a POST request with fs2 streaming request" in {

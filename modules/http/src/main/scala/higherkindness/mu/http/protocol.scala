@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ object HttpServer {
   def bind[F[_]: ConcurrentEffect: Timer](
       port: Int,
       host: String,
-      routes: RouteMap[F]*): BlazeServerBuilder[F] =
+      routes: RouteMap[F]*
+  ): BlazeServerBuilder[F] =
     BlazeServerBuilder[F]
       .bindHttp(port, host)
       .withHttpApp(Router(routes.map(r => (s"/${r.prefix}", r.route)): _*).orNotFound)

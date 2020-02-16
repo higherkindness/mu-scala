@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,10 @@ import io.chrisdavenport.log4cats.Logger
 
 object ClientProgramMonix {
 
-  def clientProgramIO(who: String, mode: String)(
-      implicit handler: HealthCheckClientHandlerMonix[IO],
-      logger: Logger[IO]) =
+  def clientProgramIO(
+      who: String,
+      mode: String
+  )(implicit handler: HealthCheckClientHandlerMonix[IO], logger: Logger[IO]) =
     mode match {
       case "watch" =>
         for {
@@ -38,7 +39,8 @@ object ClientProgramMonix {
           _ <- logger.info("///////////////////////Starting program")
           _ <- handler.settingAndCheck("example", ServerStatus("SERVING"))
           _ <- handler.settingAndFullClean(
-            List(("example1", ServerStatus("SERVING")), ("example2", ServerStatus("SERVING"))))
+            List(("example1", ServerStatus("SERVING")), ("example2", ServerStatus("SERVING")))
+          )
           _ <- logger.info("///////////////////////Exiting program")
         } yield ()
 

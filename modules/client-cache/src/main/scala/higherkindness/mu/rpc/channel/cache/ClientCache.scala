@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,8 @@ object ClientCache {
   )(
       implicit CE: ConcurrentEffect[F],
       cs: ContextShift[F],
-      timer: Timer[F]): Stream[F, ClientCache[Client, F]] =
+      timer: Timer[F]
+  ): Stream[F, ClientCache[Client, F]] =
     impl(getKey, (h: H) => createClient(h).allocated, tryToRemoveUnusedEvery, removeUnusedAfter)
 
   def impl[Client[_[_]], F[_], H](
@@ -53,7 +54,8 @@ object ClientCache {
   )(
       implicit CE: ConcurrentEffect[F],
       cs: ContextShift[F],
-      timer: Timer[F]): Stream[F, ClientCache[Client, F]] = {
+      timer: Timer[F]
+  ): Stream[F, ClientCache[Client, F]] = {
 
     type UnixMillis = Duration
     final case class ClientMeta(client: Client[F], close: F[Unit], lastAccessed: UnixMillis)
@@ -77,12 +79,12 @@ object ClientCache {
                     .update(_.leftMap(_ + (key -> ClientMeta(client, close, now))))
                     .as(client)
             }
-          }(
-            clientMeta =>
-              CE.delay(logger.debug(s"Reuse existing RPC client for $key")) *>
-                ref
-                  .update(_.leftMap(_.updated(key, clientMeta.copy(lastAccessed = now))))
-                  .as(clientMeta.client))
+          }(clientMeta =>
+            CE.delay(logger.debug(s"Reuse existing RPC client for $key")) *>
+              ref
+                .update(_.leftMap(_.updated(key, clientMeta.copy(lastAccessed = now))))
+                .as(clientMeta.client)
+          )
 
         (_, lastClean) <- ref.get
         _ <- if (lastClean < (now - tryToRemoveUnusedEvery))

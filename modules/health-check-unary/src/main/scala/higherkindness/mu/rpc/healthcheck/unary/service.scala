@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package higherkindness.mu.rpc.healthcheck.unary
 
 import higherkindness.mu.rpc.healthcheck.unary.handler._
-import higherkindness.mu.rpc.protocol.{service, Empty, Protobuf}
+import higherkindness.mu.rpc.protocol.{service, Empty}
 
 object serviceUnary {
 

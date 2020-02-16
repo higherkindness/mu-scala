@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,13 @@ import cats.Functor
 package object channel {
 
   def ConfigForAddress[F[_]: Functor](hostPath: String, portPath: String)(
-      implicit CC: ChannelConfig[F]): F[ChannelForAddress] =
+      implicit CC: ChannelConfig[F]
+  ): F[ChannelForAddress] =
     CC.loadChannelAddress(hostPath, portPath)
 
-  def ConfigForTarget[F[_]: Functor](target: String)(
-      implicit CC: ChannelConfig[F]): F[ChannelForTarget] =
+  def ConfigForTarget[F[_]: Functor](
+      target: String
+  )(implicit CC: ChannelConfig[F]): F[ChannelForTarget] =
     CC.loadChannelTarget(target)
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ object Utils extends CommonUtils {
   case class RequestCoproduct[A](a: A :+: Int :+: String :+: CNil)
   case class RequestSuperCoproduct[A](a: A :+: Int :+: String :+: Boolean :+: CNil)
   case class RequestCoproductNoInt[A](
-      b: A :+: String :+: CNil = Coproduct[A :+: String :+: CNil](""))
+      b: A :+: String :+: CNil = Coproduct[A :+: String :+: CNil]("")
+  )
   case class RequestCoproductReplaced[A](a: A :+: Int :+: Boolean :+: CNil)
 
   case class Response(a: String, b: Int = 123)
@@ -45,7 +46,8 @@ object Utils extends CommonUtils {
   case class ResponseCoproduct[A](a: A :+: Int :+: String :+: CNil)
   case class ResponseSuperCoproduct[A](
       a: A :+: Int :+: String :+: CNil = Coproduct[A :+: Int :+: String :+: CNil](0),
-      b: A :+: Int :+: String :+: Boolean :+: CNil)
+      b: A :+: Int :+: String :+: Boolean :+: CNil
+  )
   case class ResponseCoproductNoInt[A](a: A :+: String :+: CNil)
   case class ResponseCoproductReplaced[A](a: A :+: Int :+: Boolean :+: CNil)
 
@@ -53,7 +55,8 @@ object Utils extends CommonUtils {
   def requestCoproduct[A](a: A) = RequestCoproduct(Coproduct[A :+: Int :+: String :+: CNil](a))
   val requestCoproductInt       = RequestCoproduct(Coproduct[Request :+: Int :+: String :+: CNil](1))
   val requestCoproductString = RequestCoproduct(
-    Coproduct[Request :+: Int :+: String :+: CNil]("hi"))
+    Coproduct[Request :+: Int :+: String :+: CNil]("hi")
+  )
 
   val response                        = Response("foo", 123)
   val responseAddedBoolean            = ResponseAddedBoolean(response.a, response.b, true)
@@ -93,7 +96,8 @@ object Utils extends CommonUtils {
       def get(a: RequestAddedOptionalBoolean): F[Response]
 
       def getCoproduct(
-          a: RequestCoproduct[RequestAddedOptionalBoolean]): F[ResponseCoproduct[Response]]
+          a: RequestCoproduct[RequestAddedOptionalBoolean]
+      ): F[ResponseCoproduct[Response]]
     }
   }
 
@@ -210,7 +214,8 @@ object Utils extends CommonUtils {
       def get(a: Request): F[Response] = Effect[F].delay(response)
       def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproduct[Response]] =
         Effect[F].delay(
-          ResponseCoproduct(Coproduct[Response :+: Int :+: String :+: CNil](response)))
+          ResponseCoproduct(Coproduct[Response :+: Int :+: String :+: CNil](response))
+        )
     }
 
     class RequestAddedBooleanRPCServiceHandler[F[_]: ConcurrentEffect]
@@ -224,7 +229,8 @@ object Utils extends CommonUtils {
         extends serviceRequestAddedOptionalBoolean.RPCService[F] {
       def get(a: RequestAddedOptionalBoolean): F[Response] = Effect[F].delay(response)
       def getCoproduct(
-          a: RequestCoproduct[RequestAddedOptionalBoolean]): F[ResponseCoproduct[Response]] =
+          a: RequestCoproduct[RequestAddedOptionalBoolean]
+      ): F[ResponseCoproduct[Response]] =
         Effect[F].delay(responseCoproduct(response))
     }
 
@@ -279,7 +285,9 @@ object Utils extends CommonUtils {
       def getCoproduct(a: RequestCoproduct[Request]): F[ResponseSuperCoproduct[Response]] =
         Effect[F].delay(
           ResponseSuperCoproduct(
-            b = Coproduct[Response :+: Int :+: String :+: Boolean :+: CNil](true)))
+            b = Coproduct[Response :+: Int :+: String :+: Boolean :+: CNil](true)
+          )
+        )
     }
 
     class ResponseRemovedIntCoproductRPCServiceHandler[F[_]: ConcurrentEffect]
@@ -330,72 +338,87 @@ object Utils extends CommonUtils {
       new RPCServiceHandler[ConcurrentMonad]
 
     implicit val requestAddedBooleanRPCServiceHandler: serviceRequestAddedBoolean.RPCService[
-      ConcurrentMonad] =
+      ConcurrentMonad
+    ] =
       new RequestAddedBooleanRPCServiceHandler[ConcurrentMonad]
 
     implicit val requestAddedOptionalBooleanRPCServiceHandler: serviceRequestAddedOptionalBoolean.RPCService[
-      ConcurrentMonad] =
+      ConcurrentMonad
+    ] =
       new RequestAddedOptionalBooleanRPCServiceHandler[ConcurrentMonad]
 
     implicit val requestAddedCoproductItemRPCServiceHandler: serviceRequestAddedCoproductItem.RPCService[
-      ConcurrentMonad] =
+      ConcurrentMonad
+    ] =
       new RequestAddedCoproductItemRPCServiceHandler[ConcurrentMonad]
 
     implicit val requestRemovedCoproductItemRPCServiceHandler: serviceRequestRemovedCoproductItem.RPCService[
-      ConcurrentMonad] =
+      ConcurrentMonad
+    ] =
       new RequestRemovedCoproductItemRPCServiceHandler[ConcurrentMonad]
 
     implicit val requestReplacedCoproductItemRPCServiceHandler: serviceRequestReplacedCoproductItem.RPCService[
-      ConcurrentMonad] =
+      ConcurrentMonad
+    ] =
       new RequestReplacedCoproductItemRPCServiceHandler[ConcurrentMonad]
 
     implicit val requestDroppedFieldRPCServiceHandler: serviceRequestDroppedField.RPCService[
-      ConcurrentMonad] =
+      ConcurrentMonad
+    ] =
       new RequestDroppedFieldRPCServiceHandler[ConcurrentMonad]
 
     implicit val requestReplacedTypeRPCServiceHandler: serviceRequestReplacedType.RPCService[
-      ConcurrentMonad] =
+      ConcurrentMonad
+    ] =
       new RequestReplacedTypeRPCServiceHandler[ConcurrentMonad]
 
     implicit val requestRenamedFieldRPCServiceHandler: serviceRequestRenamedField.RPCService[
-      ConcurrentMonad] =
+      ConcurrentMonad
+    ] =
       new RequestRenamedFieldRPCServiceHandler[ConcurrentMonad]
 
     implicit val responseAddedBooleanRPCServiceHandler: serviceResponseAddedBoolean.RPCService[
-      ConcurrentMonad] =
+      ConcurrentMonad
+    ] =
       new ResponseAddedBooleanRPCServiceHandler[ConcurrentMonad]
 
     implicit val responseAddedBooleanCoproductRPCServiceHandler: serviceResponseAddedBooleanCoproduct.RPCService[
-      ConcurrentMonad] =
+      ConcurrentMonad
+    ] =
       new ResponseAddedBooleanCoproductRPCServiceHandler[ConcurrentMonad]
 
     implicit val responseRemovedIntCoproductRPCServiceHandler: serviceResponseRemovedIntCoproduct.RPCService[
-      ConcurrentMonad] =
+      ConcurrentMonad
+    ] =
       new ResponseRemovedIntCoproductRPCServiceHandler[ConcurrentMonad]
 
     implicit val responseReplacedCoproductRPCServiceHandler: serviceResponseReplacedCoproduct.RPCService[
-      ConcurrentMonad] =
+      ConcurrentMonad
+    ] =
       new ResponseReplacedCoproductRPCServiceHandler[ConcurrentMonad]
 
     implicit val responseReplacedTypeRPCServiceHandler: serviceResponseReplacedType.RPCService[
-      ConcurrentMonad] =
+      ConcurrentMonad
+    ] =
       new ResponseReplacedTypeRPCServiceHandler[ConcurrentMonad]
 
     implicit val responseRenamedFieldRPCServiceHandler: serviceResponseRenamedField.RPCService[
-      ConcurrentMonad] =
+      ConcurrentMonad
+    ] =
       new ResponseRenamedFieldRPCServiceHandler[ConcurrentMonad]
 
     implicit val responseDroppedFieldRPCServiceHandler: serviceResponseDroppedField.RPCService[
-      ConcurrentMonad] =
+      ConcurrentMonad
+    ] =
       new ResponseDroppedFieldRPCServiceHandler[ConcurrentMonad]
 
     //////////////////////////////////
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    implicit val muRPCServiceClient: Resource[
-      ConcurrentMonad,
-      service.RPCService[ConcurrentMonad]] =
+    implicit val muRPCServiceClient: Resource[ConcurrentMonad, service.RPCService[
+      ConcurrentMonad
+    ]] =
       service.RPCService.client[ConcurrentMonad](createChannelFor)
 
   }

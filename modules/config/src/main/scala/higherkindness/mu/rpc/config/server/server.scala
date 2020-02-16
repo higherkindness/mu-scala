@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,14 @@ import higherkindness.mu.rpc.server.{GrpcConfig, GrpcServer}
 package object server {
 
   def BuildServerFromConfig[F[_]: Functor](portPath: String, configList: List[GrpcConfig] = Nil)(
-      implicit SC: ServerConfig[F]): F[GrpcServer[F]] =
+      implicit SC: ServerConfig[F]
+  ): F[GrpcServer[F]] =
     SC.buildServer(portPath, configList)
 
   def BuildNettyServerFromConfig[F[_]: Functor](
       portPath: String,
-      configList: List[GrpcConfig] = Nil)(implicit SC: ServerConfig[F]): F[GrpcServer[F]] =
+      configList: List[GrpcConfig] = Nil
+  )(implicit SC: ServerConfig[F]): F[GrpcServer[F]] =
     SC.buildNettyServer(portPath, configList)
 
 }

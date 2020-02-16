@@ -22,39 +22,35 @@ cache:
 before_install:
   - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then openssl aes-256-cbc -K $encrypted_95edac5cb8ef_key -iv $encrypted_95edac5cb8ef_iv -in secring.gpg.enc -out secring.gpg -d; fi
 install:
-  - rvm use 2.3.0 --install --fuzzy
-  - gem install sass
-  - gem install jekyll -v 3.2.1
-script:
-  - if [ $TRAVIS_SCALA_VERSION = "2.12.10" ]; then sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut; fi
-  - if [ $TRAVIS_SCALA_VERSION = "2.11.12" ]; then sbt ++$TRAVIS_SCALA_VERSION clean test; fi
-  - bash <(curl -s https://codecov.io/bash)
+  - rvm use 2.6.5 --install --fuzzy
+  - gem install jekyll -v 4
 stages:
-- test
-- plugin
-- deployPlugin
-- deploy
-- microsite
+  - test
+  - deploy
+  - microsite
 jobs:
   include:
-    - stage: plugin
-      scala: 2.12.10
+    - name: "Tests, coverage and docs compilation"
       script:
-        - sbt ++$TRAVIS_SCALA_VERSION idlgen-core/test
-        - sbt ++$TRAVIS_SCALA_VERSION idlgen-sbt/test
-        - sbt ++$TRAVIS_SCALA_VERSION publishLocal idlgen-sbt/publishLocal idlgen-sbt/scripted
-    - stage: deployPlugin
-      scala: 2.12.10
+        - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut
+        - bash <(curl -s https://codecov.io/bash)
+    - name: "sbt plugin tests"
+      script:
+        - sbt ++$TRAVIS_SCALA_VERSION srcgen-core/test
+        - sbt ++$TRAVIS_SCALA_VERSION srcgen-sbt/test
+        - sbt ++$TRAVIS_SCALA_VERSION publishLocal srcgen-sbt/publishLocal srcgen-sbt/scripted
+    - stage: deploy
       if: branch = master AND type != pull_request AND env(SKIP_SBT_DEPLOY) = false
+      name: "Publish sbt plugin"
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
-            sbt idlgen-sbt/publish;
+            sbt srcgen-sbt/publish;
           else
-            sbt ";project idlgen-sbt; release";
+            sbt ";project srcgen-sbt; release";
           fi
     - stage: deploy
-      scala: 2.12.10
       if: branch = master AND type != pull_request
+      name: "Publish all other artifacts"
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
             sbt +publish;
@@ -67,8 +63,8 @@ jobs:
             sbt release;
           fi
     - stage: microsite
-      scala: 2.12.10
       if: branch = master AND type != pull_request
+      name: "Publish microsite"
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
             echo "Skipping microsite publication, snapshot version";

@@ -117,9 +117,10 @@ lazy val server = project
   .settings(moduleName := "mu-rpc-server")
   .settings(serverSettings)
 
-//////////////////////////////
-//// HEALTHCHECK   ////
-//////////////////////////////
+/////////////////////
+//// HEALTHCHECK ////
+/////////////////////
+
 lazy val `health-check-unary` = project
   .in(file("modules/health-check-unary"))
   .dependsOn(channel)
@@ -134,6 +135,7 @@ lazy val `health-server-monix` = project
   .dependsOn(server)
   .settings(healthCheckSettingsMonix)
   .settings(coverageEnabled := false)
+  .settings(noPublishSettings)
   .settings(moduleName := "mu-rpc-example-health-check-server-monix")
 
 /////////HealthCheck Server FS2 Example
@@ -144,6 +146,7 @@ lazy val `health-server-fs2` = project
   .dependsOn(server)
   .settings(healthCheckSettingsFS2)
   .settings(coverageEnabled := false)
+  .settings(noPublishSettings)
   .settings(moduleName := "mu-rpc-example-health-check-server-fs2")
 
 /////////HealthCheck Client Example
@@ -156,6 +159,7 @@ lazy val `health-client` = project
   .settings(healthCheckSettingsMonix)
   .settings(healthCheckSettingsFS2)
   .settings(coverageEnabled := false)
+  .settings(noPublishSettings)
   .settings(moduleName := "mu-rpc-example-health-check-client")
 
 ////////////////////
@@ -191,26 +195,38 @@ lazy val http = project
   .settings(moduleName := "mu-rpc-http")
   .settings(httpSettings)
 
+///////////////
+//// KAFKA ////
+///////////////
+
+lazy val kafka = project
+  .in(file("modules/kafka"))
+  .dependsOn(channel)
+  .dependsOn(server % "test->test")
+  .dependsOn(testing % "test->test")
+  .settings(moduleName := "mu-rpc-kafka")
+  .settings(kafkaSettings)
+
 ////////////////
 //// IDLGEN ////
 ////////////////
 
-lazy val `idlgen-core` = project
-  .in(file("modules/idlgen/core"))
+lazy val `srcgen-core` = project
+  .in(file("modules/srcgen/core"))
   .dependsOn(`internal-core` % "compile->compile;test->test")
   .dependsOn(channel % "test->test")
-  .settings(moduleName := "mu-idlgen-core")
-  .settings(idlGenSettings)
+  .settings(moduleName := "mu-srcgen-core")
+  .settings(srcGenSettings)
 
-lazy val `idlgen-sbt` = project
-  .in(file("modules/idlgen/plugin"))
-  .dependsOn(`idlgen-core`)
-  .settings(moduleName := "sbt-mu-idlgen")
+lazy val `srcgen-sbt` = project
+  .in(file("modules/srcgen/plugin"))
+  .dependsOn(`srcgen-core`)
+  .settings(moduleName := "sbt-mu-srcgen")
   .settings(crossScalaVersions := Seq(V.scala))
   .settings(sbtPluginSettings: _*)
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
-  .settings(buildInfoPackage := "mu.rpc.idlgen")
+  .settings(buildInfoPackage := "mu.rpc.srcgen")
   // See https://github.com/sbt/sbt/issues/3248
   .settings(publishLocal := publishLocal
     .dependsOn(
@@ -221,7 +237,7 @@ lazy val `idlgen-sbt` = project
       `internal-fs2` / publishLocal,
       fs2 / publishLocal,
       `marshallers-jodatime` / publishLocal,
-      `idlgen-core` / publishLocal
+      `srcgen-core` / publishLocal
     )
     .value)
   .enablePlugins(SbtPlugin)
@@ -418,7 +434,12 @@ lazy val `seed-client-process` = project
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
   .settings(exampleSeedLogSettings)
-  .dependsOn(netty, fs2, `seed-client-common`, `seed-server-protocol-avro`, `seed-server-protocol-proto`)
+  .dependsOn(
+    netty,
+    fs2,
+    `seed-client-common`,
+    `seed-server-protocol-avro`,
+    `seed-server-protocol-proto`)
 
 lazy val `seed-client-app` = project
   .in(file("modules/examples/seed/client/modules/app"))
@@ -562,8 +583,9 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   prometheus,
   testing,
   ssl,
-  `idlgen-core`,
+  `srcgen-core`,
   http,
+  kafka,
   `marshallers-jodatime`,
   `example-routeguide-protocol`,
   `example-routeguide-common`,
@@ -584,7 +606,6 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `health-client`,
   `health-server-monix`,
   `health-server-fs2`
-
 )
 
 lazy val allModulesDeps: Seq[ClasspathDependency] =
@@ -592,7 +613,7 @@ lazy val allModulesDeps: Seq[ClasspathDependency] =
 
 lazy val root = project
   .in(file("."))
-  .settings(name := "mu")
+  .settings(name := "mu-scala")
   .settings(noPublishSettings)
   .aggregate(allModules: _*)
   .dependsOn(allModulesDeps: _*)

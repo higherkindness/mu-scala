@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,8 +90,8 @@ trait CommonUtils {
 
   def withClient[Client, A](
       serviceDef: ConcurrentMonad[ServerServiceDefinition],
-      resourceBuilder: ConcurrentMonad[ManagedChannel] => Resource[ConcurrentMonad, Client])(
-      f: Client => A): A =
+      resourceBuilder: ConcurrentMonad[ManagedChannel] => Resource[ConcurrentMonad, Client]
+  )(f: Client => A): A =
     withServerChannel(serviceDef)
       .flatMap(sc => resourceBuilder(suspendM(sc.channel)))
       .use(client => suspendM(f(client)))

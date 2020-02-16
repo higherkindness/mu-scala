@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,8 @@ object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
       gaugeName: String,
       gaugeType: GaugeType,
       op: IO[Unit],
-      status: Option[Status] = None): IO[Boolean] =
+      status: Option[Status] = None
+  ): IO[Boolean] =
     (1 to numberOfCalls).toList
       .map(_ => op)
       .sequence_
@@ -167,7 +168,8 @@ object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
               numberOfCalls,
               registry,
               s"$prefix.$classifier.${methodTypeDescription(methodInfo)}",
-              Timer) &&
+              Timer
+            ) &&
             checkMetrics(
               numberOfCalls,
               registry,

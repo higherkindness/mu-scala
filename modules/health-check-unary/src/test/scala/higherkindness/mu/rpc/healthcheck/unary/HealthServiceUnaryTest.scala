@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ package higherkindness.mu.rpc.healthcheck.unary
 import cats.effect.IO
 import higherkindness.mu.rpc.healthcheck.unary.handler._
 import higherkindness.mu.rpc.protocol.Empty
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class HealthServiceUnaryTest extends WordSpec with Matchers {
+class HealthServiceUnaryTest extends AnyWordSpec with Matchers {
 
   "Unary health check service" should {
 
@@ -104,7 +105,8 @@ class HealthServiceUnaryTest extends WordSpec with Matchers {
         AllStatus(
           List(
             HealthStatus(hc1, ServerStatus("SERVING")),
-            HealthStatus(hc2, ServerStatus("SERVING")))
+            HealthStatus(hc2, ServerStatus("SERVING"))
+          )
         ),
         AllStatus(
           List.empty

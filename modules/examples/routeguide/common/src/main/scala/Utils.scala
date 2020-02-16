@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,8 @@ object Utils {
     io.circe.parser.decode[FeatureDatabase](
       Source
         .fromInputStream(getClass.getClassLoader.getResourceAsStream("route_guide_db.json"))
-        .mkString) match {
+        .mkString
+    ) match {
       case Right(fList) => fList.feature
       case Left(e) =>
         logger.info(s"Decoding failure: $e")
@@ -66,7 +67,8 @@ object Utils {
     def findFeatureIn(features: List[Feature]): Feature =
       features
         .find(f =>
-          f.location.latitude == location.latitude && f.location.longitude == location.longitude)
+          f.location.latitude == location.latitude && f.location.longitude == location.longitude
+        )
         .getOrElse(Feature(name = "", location = location))
 
     def pretty: String = s"[$getLatitude, $getLongitude]"

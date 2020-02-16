@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,14 +92,16 @@ object GrpcServer {
   }
 
   def default[F[_]](port: Int, configList: List[GrpcConfig])(
-      implicit F: Sync[F]): F[GrpcServer[F]] =
+      implicit F: Sync[F]
+  ): F[GrpcServer[F]] =
     F.delay(buildServer(ServerBuilder.forPort(port), configList)).map(fromServer[F])
 
   def netty[F[_]](port: Int, configList: List[GrpcConfig])(implicit F: Sync[F]): F[GrpcServer[F]] =
     netty(ChannelForPort(port), configList)
 
   def netty[F[_]](channelFor: ChannelFor, configList: List[GrpcConfig])(
-      implicit F: Sync[F]): F[GrpcServer[F]] =
+      implicit F: Sync[F]
+  ): F[GrpcServer[F]] =
     for {
       builder <- F.delay(nettyBuilder(channelFor))
       server  <- F.delay(buildNettyServer(builder, configList))
@@ -118,7 +120,8 @@ object GrpcServer {
 
   private[this] def buildNettyServer(
       bldr: NettyServerBuilder,
-      configList: List[GrpcConfig]): Server = {
+      configList: List[GrpcConfig]
+  ): Server = {
     configList
       .foldLeft(bldr) { (bldr, cfg) =>
         (SBuilder(bldr) orElse NettySBuilder(bldr))(cfg)

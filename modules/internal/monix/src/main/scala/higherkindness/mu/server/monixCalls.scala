@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ object monixCalls {
 
   def clientStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Observable[Req] => F[Res],
-      maybeCompression: Option[String])(implicit S: Scheduler): ClientStreamingMethod[Req, Res] =
+      maybeCompression: Option[String]
+  )(implicit S: Scheduler): ClientStreamingMethod[Req, Res] =
     new ClientStreamingMethod[Req, Res] {
 
       override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
@@ -47,7 +48,8 @@ object monixCalls {
 
   def serverStreamingMethod[F[_]: Effect, Req, Res](
       f: Req => Observable[Res],
-      maybeCompression: Option[String])(implicit S: Scheduler): ServerStreamingMethod[Req, Res] =
+      maybeCompression: Option[String]
+  )(implicit S: Scheduler): ServerStreamingMethod[Req, Res] =
     new ServerStreamingMethod[Req, Res] {
 
       override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
@@ -59,7 +61,8 @@ object monixCalls {
 
   def bidiStreamingMethod[F[_]: Effect, Req, Res](
       f: Observable[Req] => Observable[Res],
-      maybeCompression: Option[String])(implicit S: Scheduler): BidiStreamingMethod[Req, Res] =
+      maybeCompression: Option[String]
+  )(implicit S: Scheduler): BidiStreamingMethod[Req, Res] =
     new BidiStreamingMethod[Req, Res] {
 
       override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
@@ -70,7 +73,8 @@ object monixCalls {
 
   private[this] def transform[Req, Res](
       transformer: Observable[Req] => Observable[Res],
-      subscriber: Subscriber[Res]): Subscriber[Req] =
+      subscriber: Subscriber[Res]
+  ): Subscriber[Req] =
     new Subscriber[Req] {
 
       val pipe: Pipe[Req, Res]                      = Pipe.publish[Req].transform[Res](transformer)

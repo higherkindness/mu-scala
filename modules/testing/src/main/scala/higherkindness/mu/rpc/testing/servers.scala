@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,14 @@ object servers {
   def serverCallHandler[Req, Res]: ServerCallHandler[Req, Res] = new ServerCallHandler[Req, Res] {
     override def startCall(
         call: ServerCall[Req, Res],
-        headers: Metadata): ServerCall.Listener[Req] = new NoopServerCallListener[Req]
+        headers: Metadata
+    ): ServerCall.Listener[Req] = new NoopServerCallListener[Req]
   }
 
   def serverServiceDefinition(
       serviceName: String,
-      methodList: List[String]): ServerServiceDefinition = {
+      methodList: List[String]
+  ): ServerServiceDefinition = {
     val ssdBuilder = ServerServiceDefinition.builder(serviceName)
     methodList.foreach { methodName =>
       ssdBuilder.addMethod(methods.voidMethod(Some(methodName)), serverCallHandler[Void, Void])
@@ -47,12 +49,14 @@ object servers {
 
   def withServerChannel[F[_]: Sync](
       service: F[ServerServiceDefinition],
-      clientInterceptor: Option[ClientInterceptor] = None): Resource[F, ServerChannel] =
+      clientInterceptor: Option[ClientInterceptor] = None
+  ): Resource[F, ServerChannel] =
     withServerChannelList(service.map(List(_)), clientInterceptor)
 
   def withServerChannelList[F[_]: Sync](
       services: F[List[ServerServiceDefinition]],
-      clientInterceptor: Option[ClientInterceptor] = None): Resource[F, ServerChannel] =
+      clientInterceptor: Option[ClientInterceptor] = None
+  ): Resource[F, ServerChannel] =
     Resource.liftF(services).flatMap(ServerChannel.fromList(_, clientInterceptor))
 
   final case class ServerChannel(server: Server, channel: ManagedChannel)
@@ -61,12 +65,14 @@ object servers {
 
     def apply[F[_]: Sync](
         serverServiceDefinition: ServerServiceDefinition,
-        clientInterceptor: Option[ClientInterceptor] = None): Resource[F, ServerChannel] =
+        clientInterceptor: Option[ClientInterceptor] = None
+    ): Resource[F, ServerChannel] =
       ServerChannel.fromList[F](List(serverServiceDefinition), clientInterceptor)
 
     def fromList[F[_]: Sync](
         serverServiceDefinitions: List[ServerServiceDefinition],
-        clientInterceptor: Option[ClientInterceptor] = None): Resource[F, ServerChannel] = {
+        clientInterceptor: Option[ClientInterceptor] = None
+    ): Resource[F, ServerChannel] = {
       val serviceRegistry =
         new MutableHandlerRegistry
       val serverName: String =
@@ -88,7 +94,8 @@ object servers {
       Resource.make {
         (
           Sync[F].delay(serverBuilder.build().start()),
-          Sync[F].delay(channelBuilder.directExecutor.build)).mapN(ServerChannel(_, _))
+          Sync[F].delay(channelBuilder.directExecutor.build)
+        ).mapN(ServerChannel(_, _))
       }(sc => Sync[F].delay(sc.server.shutdown()).void)
     }
 

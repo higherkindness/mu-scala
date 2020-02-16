@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,12 @@ import cats.effect.concurrent.Ref
 import cats.implicits._
 import fs2.Stream
 import higherkindness.mu.rpc.common.util.FakeClock
-import org.scalatest.{Matchers, WordSpec}
 
 import scala.concurrent.duration._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class ClientCacheTests extends WordSpec with Matchers {
+class ClientCacheTests extends AnyWordSpec with Matchers {
 
   val EC: scala.concurrent.ExecutionContext =
     scala.concurrent.ExecutionContext.Implicits.global
@@ -51,7 +52,8 @@ class ClientCacheTests extends WordSpec with Matchers {
       ref1: Ref[IO, Int],
       ref2: Ref[IO, Int],
       keys: List[H],
-      cleanUp: Int): IO[Unit] =
+      cleanUp: Int
+  ): IO[Unit] =
     (for {
       keyRef <- Stream.eval(Ref.of[IO, List[H]](keys))
       timer  <- Stream.eval(buildTimer)

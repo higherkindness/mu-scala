@@ -38,5 +38,10 @@ benchmarks/results
 .metals/
 project/.bloop/
 
-*.iml
+# Visual Studio Code Specific
+.vscode/
 
+# Microsite
+/_site
+
+.jekyll-cache/

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,8 @@ class GrpcServerTests extends RpcServerTestSuite {
         Boolean,
         Boolean,
         Boolean,
-        Unit)
+        Unit
+    )
 
     "behaves as expected" in {
 
@@ -78,7 +79,8 @@ class GrpcServerTests extends RpcServerTestSuite {
         b,
         b,
         b,
-        unit): Result)
+        unit
+      ): Result)
 
       (serverMock.start _: () => Server).verify().once()
       (serverMock.getPort _: () => Int).verify().once()

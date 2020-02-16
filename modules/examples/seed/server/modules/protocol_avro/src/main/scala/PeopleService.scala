@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import higherkindness.mu.rpc.protocol._
 
 @service(AvroWithSchema) trait PeopleService[F[_]] {
 
-  def getPerson(request: example.seed.server.protocol.avro.PeopleRequest): F[
-    example.seed.server.protocol.avro.PeopleResponse]
+  def getPerson(
+      request: example.seed.server.protocol.avro.PeopleRequest
+  ): F[example.seed.server.protocol.avro.PeopleResponse]
 
 }

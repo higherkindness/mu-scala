@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,9 @@ class RPCNamespaceTests extends RpcBaseTestSuite with BeforeAndAfterAll with Che
     @service(Avro, namespace = Some("my.namespace")) trait AvroRPCServiceDef[F[_]] {
       def avro(req: Request): F[Response]
     }
-    @service(AvroWithSchema, namespace = Some("my.namespace")) trait AvroWithSchemaRPCServiceDef[
-        F[_]] {
+    @service(AvroWithSchema, namespace = Some("my.namespace")) trait AvroWithSchemaRPCServiceDef[F[
+        _
+    ]] {
       def avroWithSchema(req: Request): F[Response]
     }
 
@@ -66,7 +67,8 @@ class RPCNamespaceTests extends RpcBaseTestSuite with BeforeAndAfterAll with Che
 
       withClient(
         ProtoRPCServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll { s: String =>
             client.proto1(Request(s)).map(_.length).unsafeRunSync() == s.length
@@ -80,7 +82,8 @@ class RPCNamespaceTests extends RpcBaseTestSuite with BeforeAndAfterAll with Che
 
       withClient(
         AvroRPCServiceDef.bindService[ConcurrentMonad],
-        AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll { s: String =>
             client.avro(Request(s)).map(_.length).unsafeRunSync() == s.length
@@ -94,7 +97,8 @@ class RPCNamespaceTests extends RpcBaseTestSuite with BeforeAndAfterAll with Che
 
       withClient(
         AvroWithSchemaRPCServiceDef.bindService[ConcurrentMonad],
-        AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](_)) { client =>
+        AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
+      ) { client =>
         check {
           forAll { s: String =>
             client.avroWithSchema(Request(s)).map(_.length).unsafeRunSync() == s.length

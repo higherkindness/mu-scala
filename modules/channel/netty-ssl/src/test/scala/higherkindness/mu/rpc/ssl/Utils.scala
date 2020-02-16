@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,8 @@ object Utils extends CommonUtils {
       GrpcSslContexts
         .configure(
           GrpcSslContexts.forServer(serverCertFile, serverPrivateKeyFile),
-          SslProvider.OPENSSL)
+          SslProvider.OPENSSL
+        )
         .trustManager(serverTrustedCaCerts: _*)
         .clientAuth(ClientAuth.REQUIRE)
         .build()
@@ -98,7 +99,8 @@ object Utils extends CommonUtils {
     val grpcConfigs: ConcurrentMonad[List[GrpcConfig]] =
       List(
         AvroRPCService.bindService[ConcurrentMonad],
-        AvroWithSchemaRPCService.bindService[ConcurrentMonad]).sequence
+        AvroWithSchemaRPCService.bindService[ConcurrentMonad]
+      ).sequence
         .map(_.map(AddService))
         .map(services => SetSslContext(serverSslContext) :: services)
 
