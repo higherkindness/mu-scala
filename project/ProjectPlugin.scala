@@ -322,10 +322,7 @@ object ProjectPlugin extends AutoPlugin {
     lazy val customScalacOptions: Seq[String] =
       scalacAdvancedOptions.filterNot(Set("-Yliteral-types", "-Xlint").contains)
     lazy val docsExclusions: Seq[String] => Seq[String] = (current: Seq[String]) =>
-      current.filterNot(Set(
-        "-Xfatal-warnings",
-        "-Ywarn-unused-import",
-        "-Xlint").contains)
+      current.filterNot(Set("-Xfatal-warnings", "-Ywarn-unused-import", "-Xlint").contains)
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(

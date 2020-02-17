@@ -190,7 +190,7 @@ import org.scalacheck.Gen
 import org.scalacheck.Prop.forAll
 import service._
 
-class ServiceSpec extends AnyFunSuite with Matchers with Checkers with OneInstancePerTest with CommonRuntime {
+class ServiceSpec extends AnyFunSuite with Matchers with Checkers with CommonRuntime {
 
   implicit val greeterServiceHandler: Greeter[IO] = new ServiceHandler[IO]
 
