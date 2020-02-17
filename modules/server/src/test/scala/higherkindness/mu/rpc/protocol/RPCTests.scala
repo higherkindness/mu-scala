@@ -125,7 +125,9 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       clientProgram[ConcurrentMonad]("SRE")
         .unsafeRunSync() shouldBe List(C("INVALID_ARGUMENT: SRE", a1))
       clientProgram[ConcurrentMonad]("RTE")
-        .unsafeRunSync() shouldBe List(C("UNKNOWN", a1)) //todo: consider preserving the exception as is done for unary
+        .unsafeRunSync() shouldBe List(
+        C("UNKNOWN", a1)
+      ) //todo: consider preserving the exception as is done for unary
       clientProgram[ConcurrentMonad]("Thrown")
         .unsafeRunSync() shouldBe List(C("UNKNOWN", a1))
     }

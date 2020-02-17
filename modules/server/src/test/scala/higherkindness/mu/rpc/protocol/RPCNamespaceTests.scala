@@ -85,9 +85,7 @@ class RPCNamespaceTests extends RpcBaseTestSuite with BeforeAndAfterAll with Che
         AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
       ) { client =>
         check {
-          forAll { s: String =>
-            client.avro(Request(s)).map(_.length).unsafeRunSync() == s.length
-          }
+          forAll { s: String => client.avro(Request(s)).map(_.length).unsafeRunSync() == s.length }
         }
       }
 
