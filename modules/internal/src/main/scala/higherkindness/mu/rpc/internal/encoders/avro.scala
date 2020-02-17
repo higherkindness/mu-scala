@@ -26,14 +26,11 @@ import higherkindness.mu.rpc.internal.util.{BigDecimalUtil, EncoderUtil, JavaTim
 import higherkindness.mu.rpc.protocol.Empty
 import io.grpc.MethodDescriptor.Marshaller
 import org.apache.avro.{Conversions, LogicalTypes, Schema}
-import org.apache.avro.LogicalTypes.{TimestampMicros, TimestampMillis}
-import com.sksamuel.avro4s.SchemaFor.TimestampNanosLogicalType
 import shapeless.Nat
 import shapeless.ops.nat.ToInt
 import shapeless.tag.@@
 
 import scala.math.BigDecimal.RoundingMode
-import java.time.ZoneOffset
 
 object avro {
 
@@ -389,6 +386,8 @@ object avrowithschema {
   }
 
   import com.sksamuel.avro4s._
+  import org.apache.avro.file.DataFileStream
+  import org.apache.avro.generic.{GenericDatumReader, GenericRecord}
 
   /*
    * Marshaller for Avro record types.
@@ -401,8 +400,8 @@ object avrowithschema {
       val schema = AvroSchema[A]
 
       override def parse(stream: InputStream): A = {
-        val input: AvroInputStream[A] = AvroInputStream.data[A].from(stream).build
-        input.iterator.toList.head
+        val dfs = new DataFileStream(stream, new GenericDatumReader[GenericRecord](schema))
+        FromRecord[A](schema).from(dfs.next())
       }
 
       override def stream(value: A): InputStream = {
