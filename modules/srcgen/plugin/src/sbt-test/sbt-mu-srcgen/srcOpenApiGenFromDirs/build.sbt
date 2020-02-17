@@ -1,11 +1,13 @@
+import higherkindness.mu.rpc.srcgen.Model.IdlType
+
 val V = new {
-  val circe          = "0.12.3"
+  val circe          = "0.13.0"
   val http4s         = "0.21.0-M6"
   val scalatest      = "3.0.8"
   val logbackClassic = "1.2.3"
   val cats           = "2.0.0"
-  val catsEffect     = "2.0.0"
-  val fs2            = "2.2.1"
+  val catsEffect     = "2.1.1"
+  val fs2            = "2.2.2"
 }
 
 lazy val root = project
@@ -15,7 +17,7 @@ lazy val root = project
   .settings(Seq(
     publishMavenStyle := true,
     mappings in (Compile, packageBin) ~= { _.filter(!_._1.getName.endsWith(".class")) },
-    muSrcGenIdlType := "openapi",
+    muSrcGenIdlType := IdlType.OpenAPI,
     muSrcGenSourceDirs := Seq((Compile / resourceDirectory).value),
     muSrcGenTargetDir := (Compile / sourceManaged).value / "compiled_openapi",
     sourceGenerators in Compile += (Compile / muSrcGen).taskValue,

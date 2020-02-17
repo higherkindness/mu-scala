@@ -52,10 +52,5 @@ object SrcGenApplication {
         useIdiomaticEndpoints
       ),
       OpenApiSrcGenerator(httpImpl, resourcesBasePath)
-    ) {
-      def main(args: Array[String]): Unit = {
-        generateFrom(args)
-        (): Unit
-      }
-    }
+    )
 }

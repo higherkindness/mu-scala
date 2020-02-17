@@ -19,6 +19,7 @@ package higherkindness.mu.rpc.srcgen.openapi
 import java.io.File
 import java.nio.file.{Path, Paths}
 import higherkindness.mu.rpc.srcgen._
+import higherkindness.mu.rpc.srcgen.Model.IdlType
 import higherkindness.skeuomorph.openapi._
 import schema.OpenApi
 import ParseOpenApi._
@@ -43,7 +44,7 @@ object OpenApiSrcGenerator {
   }
 
   def apply(httpImpl: HttpImpl, resourcesBasePath: Path): SrcGenerator = new SrcGenerator {
-    def idlType: String = IdlType
+    def idlType: IdlType = IdlType.OpenAPI
 
     implicit def http4sSpecifics: Http4sSpecifics = httpImpl match {
       case HttpImpl.Http4sV18 => client.http4s.print.v18.v18Http4sSpecifics
@@ -54,8 +55,7 @@ object OpenApiSrcGenerator {
 
     protected def generateFrom(
         inputFile: File,
-        serializationType: String,
-        options: String*
+        serializationType: Model.SerializationType
     ): Option[(String, Seq[String])] =
       getCode[IO](inputFile).value.unsafeRunSync()
 
@@ -66,7 +66,9 @@ object OpenApiSrcGenerator {
         .map { openApi =>
           val (_, paths) =
             file.getParentFile.toPath.asScala
-              .splitAt(resourcesBasePath.iterator().asScala.size + 1) //we need to add one because it is changing the resource path, adding open api
+              .splitAt(
+                resourcesBasePath.iterator().asScala.size + 1
+              ) //we need to add one because it is changing the resource path, adding open api
           val path: Path = Paths.get(paths.map(_.toString()).mkString("/"))
           val pkg        = packageName(path)
           pathFrom(path, file).toString ->

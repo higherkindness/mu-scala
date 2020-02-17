@@ -184,11 +184,13 @@ import higherkindness.mu.rpc.testing.servers.withServerChannel
 import io.grpc.{ManagedChannel, ServerServiceDefinition}
 import org.scalatestplus.scalacheck.Checkers
 import org.scalatest._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funsuite.AnyFunSuite
 import org.scalacheck.Gen
 import org.scalacheck.Prop.forAll
 import service._
 
-class ServiceSpec extends FunSuite with Matchers with Checkers with OneInstancePerTest with CommonRuntime {
+class ServiceSpec extends AnyFunSuite with Matchers with Checkers with OneInstancePerTest with CommonRuntime {
 
   implicit val greeterServiceHandler: Greeter[IO] = new ServiceHandler[IO]
 

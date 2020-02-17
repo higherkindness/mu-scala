@@ -33,19 +33,19 @@ object SrcGenPlugin extends AutoPlugin {
     lazy val muSrcGen: TaskKey[Seq[File]] =
       taskKey[Seq[File]]("Generates mu Scala files from IDL definitions")
 
-    lazy val muSrcGenIdlType: SettingKey[String] =
-      settingKey[String]("The IDL type to work with, such as avro or proto")
+    lazy val muSrcGenIdlType: SettingKey[IdlType] =
+      settingKey[IdlType]("The IDL type to work with, such as avro or proto")
 
     lazy val muSrcGenIdlExtension: SettingKey[String] =
       settingKey[String](
         "The IDL extension to work with, files with a different extension will be omitted. By default 'avdl' for avro and 'proto' for proto"
       )
 
-    lazy val muSrcGenSerializationType: SettingKey[String] =
-      settingKey[String](
+    lazy val muSrcGenSerializationType: SettingKey[SerializationType] =
+      settingKey[SerializationType](
         "The serialization type when generating Scala sources from the IDL definitions." +
           "Protobuf, Avro or AvroWithSchema are the current supported serialization types. " +
-          "By default, the serialization type is 'Avro'."
+          "By default, the serialization type is Avro."
       )
 
     lazy val muSrcGenSourceDirs: SettingKey[Seq[File]] =
@@ -66,15 +66,6 @@ object SrcGenPlugin extends AutoPlugin {
       settingKey[File](
         "The Scala target directory, where the `srcGen` task will write the generated files " +
           "in subpackages based on the namespaces declared in the IDL files."
-      )
-
-    @deprecated(
-      "Use the specific settings like `muSrcGenCompressionType` or `muSrcGenIdiomaticEndpoints`",
-      "0.18.4"
-    )
-    lazy val genOptions: SettingKey[Seq[String]] =
-      settingKey[Seq[String]](
-        "Options for the generator, such as additional @service annotation parameters in srcGen."
       )
 
     lazy val muSrcGenBigDecimal: SettingKey[BigDecimalTypeGen] =
@@ -115,29 +106,36 @@ object SrcGenPlugin extends AutoPlugin {
 
   }
 
-  import higherkindness.mu.rpc.srcgen.SrcGenPlugin.autoImport._
+  import autoImport._
 
   lazy val defaultSettings: Seq[Def.Setting[_]] = Seq(
-    muSrcGenIdlType := "(missing arg)",
-    muSrcGenIdlExtension := (if (muSrcGenIdlType.value == "avro") "avdl"
-                             else if (muSrcGenIdlType.value == "proto") "proto"
-                             else "unknown"),
-    muSrcGenSerializationType := "Avro",
+    muSrcGenIdlType := IdlType.Unknown,
+    muSrcGenIdlExtension := {
+      muSrcGenIdlType.value match {
+        case IdlType.Avro  => "avdl"
+        case IdlType.Proto => "proto"
+        case _             => "unknown"
+      }
+    },
+    muSrcGenSerializationType := SerializationType.Avro,
     muSrcGenJarNames := Seq.empty,
     muSrcGenSourceDirs := Seq((Compile / resourceDirectory).value),
-    muSrcGenIdlTargetDir := (Compile / resourceManaged).value / muSrcGenIdlType.value,
+    muSrcGenIdlTargetDir := (Compile / resourceManaged).value / muSrcGenIdlType.value.toString.toLowerCase,
     muSrcGenTargetDir := (Compile / sourceManaged).value,
-    genOptions := Seq.empty,
     muSrcGenBigDecimal := ScalaBigDecimalTaggedGen,
     muSrcGenMarshallerImports := {
-      if (muSrcGenSerializationType.value == "Avro" || muSrcGenSerializationType.value == "AvroWithSchema")
-        (muSrcGenBigDecimal.value match {
-          case ScalaBigDecimalGen       => BigDecimalAvroMarshallers
-          case ScalaBigDecimalTaggedGen => BigDecimalTaggedAvroMarshallers
-        }) :: JavaTimeDateAvroMarshallers :: List.empty[MarshallersImport]
-      else if (muSrcGenSerializationType.value == "Protobuf")
-        List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)
-      else Nil
+      muSrcGenSerializationType.value match {
+        case SerializationType.Avro | SerializationType.AvroWithSchema =>
+          val bigDecimal = muSrcGenBigDecimal.value match {
+            case ScalaBigDecimalGen       => BigDecimalAvroMarshallers
+            case ScalaBigDecimalTaggedGen => BigDecimalTaggedAvroMarshallers
+          }
+          List(bigDecimal, JavaTimeDateAvroMarshallers)
+        case SerializationType.Protobuf =>
+          List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)
+        case _ =>
+          Nil
+      }
     },
     muSrcGenCompressionType := NoCompressionGen,
     muSrcGenIdiomaticEndpoints := false,
@@ -187,7 +185,6 @@ object SrcGenPlugin extends AutoPlugin {
               ),
               muSrcGenIdlType.value,
               muSrcGenSerializationType.value,
-              genOptions.value,
               muSrcGenTargetDir.value,
               target.value / "srcGen"
             )(muSrcGenIdlTargetDir.value.allPaths.get.toSet).toSeq
@@ -210,15 +207,14 @@ object SrcGenPlugin extends AutoPlugin {
 
   private def srcGenTask(
       generator: GeneratorApplication[_],
-      idlType: String,
-      serializationType: String,
-      options: Seq[String],
+      idlType: IdlType,
+      serializationType: SerializationType,
       targetDir: File,
       cacheDir: File
   ): Set[File] => Set[File] =
     FileFunction.cached(cacheDir, FilesInfo.lastModified, FilesInfo.exists) {
       inputFiles: Set[File] =>
-        generator.generateFrom(idlType, serializationType, inputFiles, targetDir, options: _*).toSet
+        generator.generateFrom(idlType, serializationType, inputFiles, targetDir).toSet
     }
 
   private def extractIDLDefinitionsFromJar(

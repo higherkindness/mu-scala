@@ -18,7 +18,7 @@ package higherkindness.mu.rpc.srcgen
 
 import higherkindness.mu.rpc.srcgen.util.Toolbox
 import higherkindness.mu.rpc.internal.util.StringUtil._
-import higherkindness.mu.rpc.protocol._
+import higherkindness.mu.rpc.protocol.{SerializationType => SerType, _}
 import shapeless.tag
 import shapeless.tag.@@
 
@@ -48,7 +48,7 @@ object Model {
   }
 
   case class RpcService(
-      serializationType: SerializationType,
+      serializationType: SerType,
       name: String,
       requests: Seq[RpcRequest]
   )
@@ -70,11 +70,27 @@ object Model {
     }
   }
 
+  sealed trait IdlType extends Product with Serializable
+  object IdlType {
+    case object Proto   extends IdlType
+    case object Avro    extends IdlType
+    case object OpenAPI extends IdlType
+    case object Unknown extends IdlType
+  }
+
+  sealed trait SerializationType extends Product with Serializable
+  object SerializationType {
+    case object Protobuf       extends SerializationType
+    case object Avro           extends SerializationType
+    case object AvroWithSchema extends SerializationType
+    case object Custom         extends SerializationType
+  }
+
   sealed abstract class MarshallersImport(val marshallersImport: String)
       extends Product
       with Serializable
 
-  final case class CustomMarshallersImport(mi: String) extends MarshallersImport(mi)
+  case class CustomMarshallersImport(mi: String) extends MarshallersImport(mi)
   case object BigDecimalAvroMarshallers
       extends MarshallersImport("higherkindness.mu.rpc.internal.encoders.avro.bigdecimal._")
   case object BigDecimalTaggedAvroMarshallers

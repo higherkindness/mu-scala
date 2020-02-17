@@ -29,8 +29,10 @@ import org.scalatest._
 import scala.concurrent.ExecutionContext
 
 import kafkaManagementService._
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers
 
-class ServiceSpec extends FunSuite with Matchers with OneInstancePerTest with EmbeddedKafka {
+class ServiceSpec extends AnyFunSuite with Matchers with OneInstancePerTest with EmbeddedKafka {
   implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.Implicits.global)
 
   def adminClientSettings[F[_]: Sync](config: EmbeddedKafkaConfig): AdminClientSettings[F] =

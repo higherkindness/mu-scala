@@ -236,7 +236,7 @@ import higherkindness.mu.rpc._
 import higherkindness.mu.rpc.config._
 import higherkindness.mu.rpc.config.channel._
 import io.grpc.CallOptions
-import service._
+import service1._
 
 trait ChannelImplicits extends CommonRuntime {
 

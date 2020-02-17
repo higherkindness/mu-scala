@@ -17,6 +17,7 @@
 package higherkindness.mu.rpc.srcgen
 
 import higherkindness.mu.rpc.srcgen.Model._
+import higherkindness.mu.rpc.srcgen.Model.SerializationType._
 import org.scalacheck.{Arbitrary, Gen}
 
 trait AvroScalaGeneratorArbitrary {
@@ -25,17 +26,15 @@ trait AvroScalaGeneratorArbitrary {
       inputResourcePath: String,
       expectedOutput: List[String],
       expectedOutputFilePath: String,
-      serializationType: String,
+      serializationType: SerializationType,
       marshallersImports: List[MarshallersImport],
-      options: Seq[String],
       compressionTypeGen: CompressionTypeGen,
       useIdiomaticEndpoints: UseIdiomaticEndpoints
   )
 
   def generateOutput(
-      serializationType: String,
+      serializationType: SerializationType,
       marshallersImports: List[MarshallersImport],
-      options: Option[String],
       compressionTypeGen: CompressionTypeGen,
       useIdiomaticEndpoints: UseIdiomaticEndpoints
   ): List[String] = {
@@ -46,13 +45,11 @@ trait AvroScalaGeneratorArbitrary {
       .mkString("\n")
 
     val serviceParams: Seq[String] =
-      if (options.isEmpty) {
-        serializationType ::
-          s"compressionType = ${compressionTypeGen.value}" ::
-          List(s"""namespace = Some("foo.bar")""", "methodNameStyle = Capitalize").filter(_ =>
-            useIdiomaticEndpoints
-          )
-      } else serializationType +: options.toSeq
+      serializationType.toString ::
+        s"compressionType = ${compressionTypeGen.value}" ::
+        List(s"""namespace = Some("foo.bar")""", "methodNameStyle = Capitalize").filter(_ =>
+          useIdiomaticEndpoints
+        )
 
     s"""
          |package foo.bar
@@ -82,15 +79,15 @@ trait AvroScalaGeneratorArbitrary {
         Gen.listOfN(_, importSliceGen).map(_.mkString(".") + "._").map(CustomMarshallersImport)
       )
 
-  def marshallersImportGen(serializationType: String): Gen[MarshallersImport] =
+  def marshallersImportGen(serializationType: SerializationType): Gen[MarshallersImport] =
     serializationType match {
-      case "Avro" | "AvroWithSchema" =>
+      case Avro | AvroWithSchema =>
         Gen.oneOf(
           Gen.const(BigDecimalAvroMarshallers),
           Gen.const(JodaDateTimeAvroMarshallers),
           customMarshallersImportsGen
         )
-      case "Protobuf" =>
+      case Protobuf =>
         Gen.oneOf(
           Gen.const(BigDecimalProtobufMarshallers),
           Gen.const(JavaTimeDateAvroMarshallers),
@@ -104,9 +101,8 @@ trait AvroScalaGeneratorArbitrary {
   implicit val scenarioArb: Arbitrary[Scenario] = Arbitrary {
     for {
       inputResourcePath     <- Gen.oneOf("/avro/GreeterService.avpr", "/avro/GreeterService.avdl")
-      serializationType     <- Gen.oneOf("Avro", "AvroWithSchema", "Protobuf")
+      serializationType     <- Gen.oneOf(Avro, AvroWithSchema, Protobuf, Custom)
       marshallersImports    <- Gen.listOf(marshallersImportGen(serializationType))
-      options               <- Gen.option("Gzip")
       compressionTypeGen    <- Gen.oneOf(GzipGen, NoCompressionGen)
       useIdiomaticEndpoints <- Arbitrary.arbBool.arbitrary.map(UseIdiomaticEndpoints(_))
     } yield Scenario(
@@ -114,14 +110,12 @@ trait AvroScalaGeneratorArbitrary {
       generateOutput(
         serializationType,
         marshallersImports,
-        options,
         compressionTypeGen,
         useIdiomaticEndpoints
       ),
       "foo/bar/MyGreeterService.scala",
       serializationType,
       marshallersImports,
-      options.toSeq,
       compressionTypeGen,
       useIdiomaticEndpoints
     )

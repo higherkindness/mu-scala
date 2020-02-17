@@ -27,7 +27,7 @@ package object config {
   }
 
   implicit def syncConfigM[F[_]](implicit F: Sync[F]): ConfigM[F] = new ConfigM[F] {
-    def load: F[Config] = F.delay(loadConfigOrThrow[Config](ConfigFactory.load()))
+    def load: F[Config] = F.delay(ConfigSource.fromConfig(ConfigFactory.load()).loadOrThrow[Config])
   }
 
 }

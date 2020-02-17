@@ -16,21 +16,23 @@
 
 package higherkindness.mu.rpc.srcgen
 
-import org.scalatest.{FlatSpec, Matchers, OptionValues}
-import Matchers._
+import org.scalatest.OptionValues
 import java.io.File
 
 import higherkindness.mu.rpc.srcgen.openapi.OpenApiSrcGenerator
 import higherkindness.mu.rpc.srcgen.openapi.OpenApiSrcGenerator.HttpImpl
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import Matchers._
 
-class OpenApiSrcGenTests extends FlatSpec with OptionValues {
+class OpenApiSrcGenTests extends AnyFlatSpec with OptionValues {
   val module: String       = new java.io.File(".").getCanonicalPath
   val resourcesFiles: File = new File(module + "/src/test/resources/")
   val openApiFile          = new File(resourcesFiles.getPath() ++ "/openapi/bookstore/book.yaml")
 
   it should "generate correct Scala" in {
     val (_, path, code) = OpenApiSrcGenerator(HttpImpl.Http4sV20, resourcesFiles.toPath())
-      .generateFrom(Set(openApiFile), "", "")
+      .generateFrom(Set(openApiFile), Model.SerializationType.Custom)
       .headOption
       .value
     path should ===("bookstore/book.scala")

@@ -112,9 +112,7 @@ object GrpcServer {
 
   private[this] def buildServer(bldr: ServerBuilder[SB] forSome { type SB <: ServerBuilder[SB] }, configList: List[GrpcConfig]): Server = {
     configList
-      .foldLeft(bldr) { (bldr, cfg) =>
-        SBuilder(bldr)(cfg)
-      }
+      .foldLeft(bldr)((bldr, cfg) => SBuilder(bldr)(cfg))
       .build()
   }
 
@@ -123,9 +121,7 @@ object GrpcServer {
       configList: List[GrpcConfig]
   ): Server = {
     configList
-      .foldLeft(bldr) { (bldr, cfg) =>
-        (SBuilder(bldr) orElse NettySBuilder(bldr))(cfg)
-      }
+      .foldLeft(bldr)((bldr, cfg) => (SBuilder(bldr) orElse NettySBuilder(bldr))(cfg))
       .build()
   }
 

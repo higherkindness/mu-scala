@@ -51,6 +51,14 @@ Otherwise, you can run the sbt task manually:
 $ sbt muSrcGen
 ```
 
+## Import
+
+You will need to add this import at the top of your `build.sbt`:
+
+```scala
+import higherkindness.mu.rpc.srcgen.Model._
+```
+
 ## Settings
 
 ### muSrcGenIdlType
@@ -59,7 +67,7 @@ The most important sbt setting is `muSrcGenIdlType`, which tells the plugin what
 IDL files (Avro/Protobuf/OpenAPI) to look for.
 
 ```scala
-muSrcGenIdlType := "proto" // or "avro" or "openapi"
+muSrcGenIdlType := IdlType.Proto // or IdlType.Avro or IdlType.OpenAPI
 ```
 
 ### muSrcGenSerializationType
@@ -68,11 +76,11 @@ Another important setting is `muSrcGenSerializationType`, which specifies how
 messages should be encoded on the wire. This should match the format you chose
 for the `muSrcGenIdlType` setting:
 
-* For Protobuf, choose `"Protobuf"`
-* For Avro, choose either `"Avro"` or `"AvroWithSchema"`.
-    * If you choose `"Avro"`, it means your client and server must always use
+* For Protobuf, choose `SerializationType.Protobuf`
+* For Avro, choose either `SerializationType.Avro` or `SerializationType.AvroWithSchema`.
+    * If you choose `Avro`, it means your client and server must always use
       exactly the same version of the schema.
-    * If you choose `"AvroWithSchema"`, the writer schema will be included in
+    * If you choose `AvroWithSchema`, the writer schema will be included in
       every message sent, which introduces a bandwidth overhead but allows
       schema evolution. In other words, the server and client can use different
       versions of a schema, as long as they are compatible with each other.  See
@@ -81,7 +89,7 @@ for the `muSrcGenIdlType` setting:
 * For OpenAPI, this setting is ignored, so you don't need to set it.
 
 ```scala
-muSrcGenSerializationType := "Protobuf" // or "Avro" or "AvroWithSchema"
+muSrcGenSerializationType := SerializationType.Protobuf // or SerializationType.Avro or SerializationType.AvroWithSchema
 ```
 
 ### Other basic settings
@@ -120,7 +128,7 @@ The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also
 You can also specify custom imports with the following:
 
 ```scala
-`muSrcGenMarshallerImports := List(higherkindness.mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))`
+muSrcGenMarshallerImports := List(higherkindness.mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))
 ```
 
 See the [Custom codecs section in core concepts](core-concepts#custom-codecs) for more information.
@@ -140,8 +148,8 @@ sbt module containing the IDL definitions (`foo-domain`):
 //...
 .settings(
   Seq(
-      muSrcGenIdlType := "avro",
-      muSrcGenSerializationType := "AvroWithSchema",
+      muSrcGenIdlType := IdlType.Avro,
+      muSrcGenSerializationType := SerializationType.AvroWithSchema,
       muSrcGenJarNames := Seq("foo-domain"),
       muSrcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
       sourceGenerators in Compile += (Compile / muSrcGen).taskValue,

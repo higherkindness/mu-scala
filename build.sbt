@@ -434,7 +434,12 @@ lazy val `seed-client-process` = project
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
   .settings(exampleSeedLogSettings)
-  .dependsOn(netty, fs2, `seed-client-common`, `seed-server-protocol-avro`, `seed-server-protocol-proto`)
+  .dependsOn(
+    netty,
+    fs2,
+    `seed-client-common`,
+    `seed-server-protocol-avro`,
+    `seed-server-protocol-proto`)
 
 lazy val `seed-client-app` = project
   .in(file("modules/examples/seed/client/modules/app"))

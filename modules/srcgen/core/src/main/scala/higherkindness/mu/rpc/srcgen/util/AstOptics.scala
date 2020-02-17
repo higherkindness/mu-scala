@@ -117,9 +117,7 @@ trait AstOptics {
     case ast._AppliedTypeTree(AppliedTypeTree(x, List(tpe)))    => Some(tpe)
     case ast._AppliedTypeTree(AppliedTypeTree(x, List(_, tpe))) => Some(tpe)
     case _                                                      => None
-  } { name =>
-    identity
-  }
+  }(name => identity)
 
   val _StreamingConstructor: Prism[Ident, String] = Prism.partial[Ident, String] {
     case Ident(TypeName("Observable")) => "Observable"
@@ -132,7 +130,8 @@ trait AstOptics {
   val appliedTypeTreeTpt: Lens[AppliedTypeTree, Tree] =
     Lens[AppliedTypeTree, Tree](_.tpt)(tpt => att => AppliedTypeTree(tpt, att.args))
 
-  val streamingTypeFromConstructor: Optional[Tree, String] = ast._AppliedTypeTree ^|-> appliedTypeTreeTpt ^<-? ast._Ident ^<-? _StreamingConstructor
+  val streamingTypeFromConstructor: Optional[Tree, String] =
+    ast._AppliedTypeTree ^|-> appliedTypeTreeTpt ^<-? ast._Ident ^<-? _StreamingConstructor
 
   val returnType: Lens[DefDef, Tree] = Lens[DefDef, Tree](_.tpt)(tpt =>
     defdef => DefDef(defdef.mods, defdef.name, defdef.tparams, defdef.vparamss, tpt, defdef.rhs)
@@ -166,17 +165,20 @@ trait AstOptics {
       Some(m.impl.collect { case x: ValDef if x.mods hasFlag Flag.CASEACCESSOR => x })
     case ast._DefDef(m) => Some(m.vparamss.flatten)
     case _              => None
-  } { κ(identity) }
+  }(κ(identity))
 
   val valDefTpt = Lens[ValDef, Tree](_.tpt)(t => v => ValDef(v.mods, v.name, t, v.rhs))
 
-  val firstParamForRpc: Optional[Tree, Tree] = params ^|-? headOption ^|-> valDefTpt ^|-? rpcTypeNameFromTypeConstructor
+  val firstParamForRpc: Optional[Tree, Tree] =
+    params ^|-? headOption ^|-> valDefTpt ^|-? rpcTypeNameFromTypeConstructor
 
-  val annotationName: Optional[Tree, String] = ast._Select ^|-> qualifier ^<-? ast._New ^|-> newTpt ^|-? name
+  val annotationName: Optional[Tree, String] =
+    ast._Select ^|-> qualifier ^<-? ast._New ^|-> newTpt ^|-? name
 
   val responseStreaming: Optional[DefDef, String] = returnType ^|-? streamingTypeFromConstructor
 
-  val requestStreaming: Optional[Tree, String] = params ^|-? headOption ^|-> valDefTpt ^|-? streamingTypeFromConstructor
+  val requestStreaming: Optional[Tree, String] =
+    params ^|-? headOption ^|-> valDefTpt ^|-? streamingTypeFromConstructor
 
   val toAnnotation: Optional[Tree, Annotation] = Optional[Tree, Annotation] {
     case ast._Apply(Apply(fun, Nil)) =>
@@ -195,16 +197,15 @@ trait AstOptics {
       }
 
     case _ => None
-  } { ann =>
-    identity
-  }
+  }(ann => identity)
 
   val annotations: Lens[Modifiers, List[Tree]] =
     Lens[Modifiers, List[Tree]](_.annotations)(anns =>
       mod => Modifiers(mod.flags, mod.privateWithin, anns)
     )
 
-  val parsedAnnotations: Traversal[Tree, Annotation] = modifiers ^|-> annotations ^|->> each ^|-? toAnnotation
+  val parsedAnnotations: Traversal[Tree, Annotation] =
+    modifiers ^|-> annotations ^|->> each ^|-? toAnnotation
 
   val _AsIdlType: Prism[Ident, SerializationType] = Prism.partial[Ident, SerializationType] {
     case Ident(TermName("Protobuf"))       => Protobuf
@@ -231,9 +232,7 @@ trait AstOptics {
     Optional[Annotation, Annotation] {
       case x if x.name == name => Some(x)
       case _                   => None
-    } { n =>
-      identity
-    }
+    }(n => identity)
 
   sealed trait Annotation {
     def name: String
