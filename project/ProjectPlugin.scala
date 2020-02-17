@@ -332,7 +332,6 @@ object ProjectPlugin extends AutoPlugin {
         %%("scalatest", V.scalatest),
         "org.scalatestplus" %% "scalatestplus-scalacheck" % V.scalatestplusScheck
       ),
-      mdocExtraArguments ++= Seq("--no-link-hygiene"),
       scalacOptions ~= docsExclusions
     )
 
