@@ -95,6 +95,8 @@ class RPCTests extends RpcBaseTestSuite {
 
     "remove an item in coproduct, and" should {
       "be able to respond to an outdated request with the previous coproduct" in {
+        pending // waiting for https://github.com/sksamuel/avro4s/pull/439
+
         runSucceedAssertion(
           serviceRequestRemovedCoproductItem.RPCService.bindService[ConcurrentMonad],
           responseCoproduct(response)
@@ -102,6 +104,8 @@ class RPCTests extends RpcBaseTestSuite {
       }
 
       "be able to respond to an outdated request with the removed valued of the previous coproduct" in {
+        pending // waiting for https://github.com/sksamuel/avro4s/pull/439
+
         runSucceedAssertion(
           serviceRequestRemovedCoproductItem.RPCService.bindService[ConcurrentMonad],
           responseCoproduct(response)
@@ -192,6 +196,8 @@ class RPCTests extends RpcBaseTestSuite {
 
     "add a new item in a coproduct, and" should {
       "be able to provide a compatible response within a coproduct" in {
+        pending // waiting for https://github.com/sksamuel/avro4s/pull/439
+
         runSucceedAssertion(
           serviceResponseAddedBooleanCoproduct.RPCService.bindService[ConcurrentMonad],
           ResponseCoproduct(Coproduct[Int :+: String :+: Response :+: CNil](0))
