@@ -194,7 +194,7 @@ class RPCTests extends RpcBaseTestSuite {
       "be able to provide a compatible response within a coproduct" in {
         runSucceedAssertion(
           serviceResponseAddedBooleanCoproduct.RPCService.bindService[ConcurrentMonad],
-          ResponseCoproduct(Coproduct[Response :+: Int :+: String :+: CNil](0))
+          ResponseCoproduct(Coproduct[Int :+: String :+: Response :+: CNil](0))
         )(_.getCoproduct(requestCoproduct(request)))
       }
     }
