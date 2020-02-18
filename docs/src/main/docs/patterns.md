@@ -228,7 +228,7 @@ class ServiceSpec extends AnyFunSuite with Matchers with Checkers with CommonRun
 Running the test:
 
 ```scala mdoc
-run(new ServiceSpec)
+nocolor.run(new ServiceSpec)
 ```
 
 
