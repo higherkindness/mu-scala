@@ -85,9 +85,7 @@ object servers {
       val channelBuilder: InProcessChannelBuilder =
         InProcessChannelBuilder.forName(serverName)
 
-      clientInterceptor.foreach { interceptor =>
-        channelBuilder.intercept(interceptor)
-      }
+      clientInterceptor.foreach(interceptor => channelBuilder.intercept(interceptor))
 
       serverServiceDefinitions.map(serverBuilder.addService)
 

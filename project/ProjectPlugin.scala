@@ -15,7 +15,7 @@ import sbtrelease.ReleaseStateTransformations._
 import scoverage.ScoverageKeys._
 
 import scala.language.reflectiveCalls
-import tut.TutPlugin.autoImport._
+import mdoc.MdocPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
 
@@ -81,7 +81,6 @@ object ProjectPlugin extends AutoPlugin {
         "com.beachape" %% "enumeratum" % V.enumeratum,
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
-        "org.scala-lang"             % "scala-compiler" % scalaVersion.value,
         %%("scalamock", V.scalamock) % Test
       )
     )
@@ -307,8 +306,9 @@ object ProjectPlugin extends AutoPlugin {
       micrositeGithubRepo := "mu-scala",
       micrositeGitterChannelUrl := "47deg/mu",
       micrositeOrganizationHomepage := "https://www.47deg.com",
-      micrositeCompilingDocsTool := WithTut,
+      micrositeCompilingDocsTool := WithMdoc,
       micrositePushSiteWith := GitHub4s,
+      mdocIn := (sourceDirectory in Compile).value / "docs",
       micrositeGithubToken := sys.env.get(orgGithubTokenSetting.value),
       micrositePalette := Map(
         "brand-primary"   -> "#001e38",
@@ -319,12 +319,17 @@ object ProjectPlugin extends AutoPlugin {
       micrositeHighlightLanguages += "protobuf"
     )
 
+    lazy val customScalacOptions: Seq[String] =
+      scalacAdvancedOptions.filterNot(Set("-Yliteral-types", "-Xlint").contains)
+    lazy val docsExclusions: Seq[String] => Seq[String] = (current: Seq[String]) =>
+      current.filterNot(Set("-Xfatal-warnings", "-Ywarn-unused-import", "-Xlint").contains)
+
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("scalatest", V.scalatest),
         "org.scalatestplus" %% "scalatestplus-scalacheck" % V.scalatestplusScheck
       ),
-      scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
+      scalacOptions ~= docsExclusions
     )
 
   }
@@ -357,16 +362,14 @@ object ProjectPlugin extends AutoPlugin {
       ),
       scalaVersion := V.scala,
       crossScalaVersions := Seq(V.scala),
-      scalacOptions ++= scalacAdvancedOptions,
-      scalacOptions ~= (_ filterNot Set("-Yliteral-types", "-Xlint").contains),
+      scalacOptions ++= customScalacOptions,
       Test / fork := true,
-      Tut / scalacOptions -= "-Ywarn-unused-import",
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
       addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
       addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
       libraryDependencies ++= Seq(
-        %%("scalatest", V.scalatest) % "test",
+        %%("scalatest", V.scalatest) % Test,
         %("slf4j-nop", V.slf4j)      % Test
       ),
       releaseProcess := Seq[ReleaseStep](
@@ -426,11 +429,7 @@ object ProjectPlugin extends AutoPlugin {
         ),
         ScalafmtFileType,
         TravisFileType(crossScalaVersions.value, orgScriptCICommandKey, orgAfterCISuccessCommandKey)
-      ),
-      orgAfterCISuccessTaskListSetting := List(
-        orgPublishReleaseTask.asRunnableItem(allModules = true, aggregated = false, crossScalaVersions = true),
-        orgUpdateDocFiles.asRunnableItem
-      ) ++ guard(!version.value.endsWith("-SNAPSHOT"))(defaultPublishMicrosite)
+      )
     )
   // format: ON
 }

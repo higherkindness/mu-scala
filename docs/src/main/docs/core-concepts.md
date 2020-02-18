@@ -74,13 +74,13 @@ We'll check out this feature further in [this section](generate-sources-from-idl
 Let’s start looking at how to define the `Person` message that we saw previously.
 Before starting, this is the Scala import we need:
 
-```tut:silent
+```scala mdoc:silent
 import higherkindness.mu.rpc.protocol._
 ```
 
 `Person` would be defined as follows:
 
-```tut:silent
+```scala mdoc:silent
 /**
  * Message Example.
  *
@@ -93,8 +93,8 @@ case class Person(name: String, id: Int, has_ponycopter: Boolean)
 
 As we can see, this is quite simple. By the same token, let’s see now how the `Greeter` service would be translated to the [Mu] style (in your `.scala` file):
 
-```tut:silent
-object protocol {
+```scala mdoc:silent
+object protocol1 {
 
   /**
     * The request message containing the user's name.
@@ -136,8 +136,8 @@ In the above example, we can see that `sayHello` returns an `F[HelloReply]`. How
 
 For instance:
 
-```tut:silent
-object protocol {
+```scala mdoc:silent
+object protocol2 {
 
   /**
    * The request message containing the user's name.
@@ -187,8 +187,8 @@ For server side compression, we just have to add the annotation `Gzip` in our de
 
 Let's see an example of a unary service:
 
-```tut:silent
-object service {
+```scala mdoc:silent
+object service1 {
 
   @service(Protobuf, Gzip)
   trait Greeter[F[_]] {
@@ -218,7 +218,7 @@ For executing `IO` we need a `ContextShift[IO]` used for running `IO` instances 
 
 *Note:* You'd need an implicit `monix.execution.Scheduler` in the case you're using Monix observables.
 
-```tut:silent
+```scala mdoc:silent
 trait CommonRuntime {
 
   val EC: scala.concurrent.ExecutionContext =
@@ -230,13 +230,13 @@ trait CommonRuntime {
 }
 ```
 
-```tut:silent
+```scala mdoc:silent
 import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc._
 import higherkindness.mu.rpc.config._
 import higherkindness.mu.rpc.config.channel._
 import io.grpc.CallOptions
-import service._
+import service1._
 
 trait ChannelImplicits extends CommonRuntime {
 
@@ -259,8 +259,8 @@ As [gRPC], [Mu] allows you to define two main kinds of service methods:
 
 Let's complete our protocol's example with an unary service method:
 
-```tut:silent
-object service {
+```scala mdoc:silent
+object service2 {
 
   case class HelloRequest(greeting: String)
 
@@ -297,8 +297,8 @@ If you're using `Protobuf`, [Mu] uses instances of [PBDirect] for creating the `
 
 Let's see a couple of samples, one per each type of serialization. Suppose you want to serialize `java.time.LocalDate` as part of your messages in `String` format. With `Protobuf`, as we've mentioned, you need to provide the instances of [PBDirect] for that type. Specifically, you need to provide a `PBScalarValueWriter` and a `PBScalarValueReader`.
 
-```tut:silent
-object protocol {
+```scala mdoc:silent
+object protocol3 {
 
   import java.time._
   import java.time.format._
@@ -329,8 +329,8 @@ object protocol {
 
 For `Avro` the process is quite similar, but in this case we need to provide three instances of [Avro4s]. `ToSchema`, `FromValue`, and `ToValue`.
 
-```tut:silent
-object protocol {
+```scala mdoc:silent
+object protocol4 {
 
   import java.time._
   import java.time.format._

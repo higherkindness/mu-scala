@@ -230,7 +230,7 @@ record Person {
 
 ***muSrcGen =>***
 
-```tut:silent
+```scala mdoc:silent
 final case class Person(name: String, age: Int, crossfitter: Boolean)
 ```
 
@@ -246,7 +246,7 @@ enum Errors {
 
 ***muSrcGen =>***
 
-```tut:silent
+```scala mdoc:silent
 final object Errors extends Enumeration {
   type Errors = Value
   val NotFound, Duplicated, None = Value
@@ -272,7 +272,7 @@ record PeopleRequest {
 
 ***muSrcGen =>***
 
-```tut:silent
+```scala mdoc:silent
 final case class PeopleRequest(name: Option[String])
 ```
 
@@ -288,7 +288,7 @@ record PeopleResponse {
 
 ***muSrcGen =>***
 
-```tut:silent
+```scala mdoc:silent
 final case class PeopleResponse(result: Either[Errors.Value, Person])
 ```
 
@@ -305,7 +305,7 @@ record PeopleResponse {
 
 ***muSrcGen =>***
 
-```tut:silent
+```scala mdoc:silent:nest
 import shapeless.{:+:, CNil}
 
 final case class PeopleResponse(result: String :+: Int :+: Errors.Value :+: CNil)

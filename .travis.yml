@@ -32,7 +32,7 @@ jobs:
   include:
     - name: "Tests, coverage and docs compilation"
       script:
-        - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut
+        - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/mdoc
         - bash <(curl -s https://codecov.io/bash)
     - name: "sbt plugin tests"
       script:

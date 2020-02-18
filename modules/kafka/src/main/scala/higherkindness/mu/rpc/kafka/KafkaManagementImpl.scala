@@ -31,9 +31,7 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
   override def alterConfigs(acr: AlterConfigsRequest): F[Unit] =
     for {
       configs <- acr.configs
-        .map { c =>
-          ConfigResource.toJava(c.resource) -> c.ops.map(AlterConfigOp.toJava)
-        }
+        .map(c => ConfigResource.toJava(c.resource) -> c.ops.map(AlterConfigOp.toJava))
         .toMap
         .pure[F]
       alterConfigs <- adminClient.alterConfigs(configs)
