@@ -129,9 +129,7 @@ case class AvroSrcGenerator(
         .map(_.marshallersImport)
         .map("import " + _)).sorted
 
-    val messageLines = schemaLines.tail.map(line =>
-      if (line.contains("case class")) s"@message $line" else line
-    ) :+ "" // note: can be "final case class"
+    val messageLines = schemaLines.tail :+ ""
 
     val requestLines = protocol.getMessages.asScala.toSeq.flatMap {
       case (name, message) =>
