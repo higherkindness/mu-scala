@@ -327,7 +327,7 @@ object protocol3 {
 }
 ```
 
-For `Avro` the process is quite similar, but in this case we need to provide three instances of [Avro4s]. `ToSchema`, `FromValue`, and `ToValue`.
+For `Avro` the process is quite similar, but in this case we need to provide three instances of three [Avro4s] type classes: `SchemaFor`, `Encoder`, and `Decoder`.
 
 ```scala mdoc:silent
 object protocol4 {
@@ -339,18 +339,18 @@ object protocol4 {
   import org.apache.avro.Schema
   import org.apache.avro.Schema.Field
 
-  implicit object LocalDateToSchema extends ToSchema[LocalDate] {
-    override val schema: Schema =
+  implicit object LocalDateSchemaFor extends SchemaFor[LocalDate] {
+    override def schema(fm: com.sksamuel.avro4s.FieldMapper): Schema =
       Schema.create(Schema.Type.STRING)
   }
 
-  implicit object LocalDateToValue extends ToValue[LocalDate] {
-    override def apply(value: LocalDate): String =
+  implicit object LocalDateEncoder extends Encoder[LocalDate] {
+    override def encode(value: LocalDate, schema: Schema, fm: FieldMapper): String =
       value.format(DateTimeFormatter.ISO_LOCAL_DATE)
   }
 
-  implicit object LocalDateFromValue extends FromValue[LocalDate] {
-    override def apply(value: Any, field: Field): LocalDate =
+  implicit object LocalDateDecoder extends Decoder[LocalDate] {
+    override def decode(value: Any, schema: Schema, fm: FieldMapper): LocalDate =
       LocalDate.parse(value.toString(), DateTimeFormatter.ISO_LOCAL_DATE)
   }
 
@@ -370,13 +370,13 @@ object protocol4 {
 
 * `BigDecimal` in `Protobuf`
   * `import higherkindness.mu.rpc.internal.encoders.pbd.bigDecimal._`
-* `java.time.LocalDate` and `java.time.LocalDateTime` in `Protobuf`
+* `java.time.LocalDate`, `java.time.LocalDateTime` and `java.time.Instant` in `Protobuf`
   * `import higherkindness.mu.rpc.internal.encoders.pbd.javatime._`
 * `BigDecimal` in `Avro` (**note**: this encoder is not avro spec compliant)
   * `import higherkindness.mu.rpc.internal.encoders.avro.bigdecimal._`
 * Tagged `BigDecimal` in `Avro`
   * `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._`
-* `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
+* `java.time.LocalDateTime` in `Avro`
   * `import higherkindness.mu.rpc.internal.encoders.avro.javatime._`
 
 Mu also provides instances for `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime`, but you need the `mu-rpc-marshallers-jodatime` extra dependency. See the [main section](/mu/scala/) for the SBT instructions.
@@ -386,12 +386,12 @@ Mu also provides instances for `org.joda.time.LocalDate` and `org.joda.time.Loca
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
   * `import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.avro._`
 
-**Note**: If you want to send one of these instances directly as a request or response through Avro, you need to provide an instance of `Marshaller`. [Mu] provides the marshallers for `BigDecimal`, `java.time.LocalDate`, `java.time.LocalDateTime`, `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in a separate package:
+**Note**: If you want to send one of these instances directly as a request or response through Avro, you need to provide an instance of `Marshaller`. [Mu] provides the marshallers for `BigDecimal`, `java.time.LocalDate`, `java.time.LocalDateTime`, `java.time.Instant`, `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in a separate package:
 * `BigDecimal` in `Avro`
   * `import higherkindness.mu.rpc.internal.encoders.avro.bigdecimal.marshallers._`
 * Tagged `BigDecimal` in `Avro` (**note**: this encoder is not avro spec compliant)
   * `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._`
-* `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
+* `java.time.LocalDate`, `java.time.LocalDateTime` and `java.time.Instant` in `Avro`
   * `import higherkindness.mu.rpc.internal.encoders.avro.javatime.marshallers._`
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
   * `import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.avro.marshallers._`
