@@ -620,7 +620,7 @@ lazy val root = project
 
 lazy val docs = project
   .in(file("docs"))
-  .dependsOn(allModulesDeps: _*)
+  .dependsOn(allModulesDeps.filterNot(_.project == LocalProject("benchmarks-vprev")): _*)
   .settings(name := "mu-docs")
   .settings(docsSettings: _*)
   .settings(micrositeSettings: _*)
