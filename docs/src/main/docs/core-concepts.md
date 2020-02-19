@@ -327,7 +327,7 @@ object protocol3 {
 }
 ```
 
-For `Avro` the process is quite similar, but in this case we need to provide three instances of [Avro4s]. `ToSchema`, `FromValue`, and `ToValue`.
+For `Avro` the process is quite similar, but in this case we need to provide three instances of three [Avro4s] type classes: `SchemaFor`, `Encoder`, and `Decoder`.
 
 ```scala mdoc:silent
 object protocol4 {
@@ -339,18 +339,18 @@ object protocol4 {
   import org.apache.avro.Schema
   import org.apache.avro.Schema.Field
 
-  implicit object LocalDateToSchema extends ToSchema[LocalDate] {
-    override val schema: Schema =
+  implicit object LocalDateSchemaFor extends SchemaFor[LocalDate] {
+    override def schema(fm: com.sksamuel.avro4s.FieldMapper): Schema =
       Schema.create(Schema.Type.STRING)
   }
 
-  implicit object LocalDateToValue extends ToValue[LocalDate] {
-    override def apply(value: LocalDate): String =
+  implicit object LocalDateEncoder extends Encoder[LocalDate] {
+    override def encode(value: LocalDate, schema: Schema, fm: FieldMapper): String =
       value.format(DateTimeFormatter.ISO_LOCAL_DATE)
   }
 
-  implicit object LocalDateFromValue extends FromValue[LocalDate] {
-    override def apply(value: Any, field: Field): LocalDate =
+  implicit object LocalDateDecoder extends Decoder[LocalDate] {
+    override def decode(value: Any, schema: Schema, fm: FieldMapper): LocalDate =
       LocalDate.parse(value.toString(), DateTimeFormatter.ISO_LOCAL_DATE)
   }
 
