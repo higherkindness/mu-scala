@@ -36,7 +36,6 @@ object Protocols {
    * @param latitude Latitude.
    * @param longitude Longitude.
    */
-  @message
   case class Point(latitude: Int, longitude: Int)
 
   /**
@@ -46,7 +45,6 @@ object Protocols {
    * @param lo One corner of the rectangle.
    * @param hi The other corner of the rectangle.
    */
-  @message
   case class Rectangle(lo: Point, hi: Point)
 
   /**
@@ -56,14 +54,12 @@ object Protocols {
    * @param name The name of the feature.
    * @param location The point where the feature is detected.
    */
-  @message
   case class Feature(name: String, location: Point)
 
   /**
    * Not used in the RPC. Instead, this is here for the form serialized to disk.
    * @param feature Feature.
    */
-  @message
   case class FeatureDatabase(feature: List[Feature])
 
   /**
@@ -72,7 +68,6 @@ object Protocols {
    * @param location The location from which the message is sent.
    * @param message The message to be sent.
    */
-  @message
   case class RouteNote(location: Point, message: String)
 
   /**
@@ -86,7 +81,6 @@ object Protocols {
    * @param distance The distance covered in metres.
    * @param elapsed_time The duration of the traversal in seconds.
    */
-  @message
   case class RouteSummary(point_count: Int, feature_count: Int, distance: Int, elapsed_time: Int)
 
   @service(Protobuf)

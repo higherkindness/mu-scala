@@ -19,9 +19,9 @@ package higherkindness.mu.rpc.http
 import higherkindness.mu.rpc.protocol._
 import higherkindness.mu.http.protocol._
 
-@message final case class HelloRequest(hello: String)
+final case class HelloRequest(hello: String)
 
-@message final case class HelloResponse(hello: String)
+final case class HelloResponse(hello: String)
 
 // We don't actually need to split the various streaming types into their own services,
 // but this allows for more specific dependencies and type constraints (Sync, Async, Effect...) in their implementations.

@@ -38,10 +38,8 @@ sealed abstract class MethodNameStyle extends Product with Serializable
 case object Unchanged                 extends MethodNameStyle
 case object Capitalize                extends MethodNameStyle
 
-class message                          extends StaticAnnotation
 class option(name: String, value: Any) extends StaticAnnotation
 class outputPackage(value: String)     extends StaticAnnotation
 class outputName(value: String)        extends StaticAnnotation
 
-@message
 object Empty

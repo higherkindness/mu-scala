@@ -49,10 +49,8 @@ import higherkindness.mu.rpc.protocol._
 
 object service {
 
-  @message
   case class HelloRequest(greeting: String)
 
-  @message
   case class HelloResponse(reply: String)
 
   @service(Protobuf)

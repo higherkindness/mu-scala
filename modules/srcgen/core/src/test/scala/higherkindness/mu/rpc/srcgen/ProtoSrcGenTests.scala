@@ -83,19 +83,19 @@ class ProtoSrcGenTests extends RpcBaseTestSuite with OptionValues {
       |
       |object book {
       |
-      |@message final case class Book(
+      |final case class Book(
       |  @_root_.pbdirect.pbIndex(1) isbn: _root_.scala.Long,
       |  @_root_.pbdirect.pbIndex(2) title: _root_.java.lang.String,
       |  @_root_.pbdirect.pbIndex(3) author: _root_.scala.List[_root_.com.proto.author.Author],
       |  @_root_.pbdirect.pbIndex(9) binding_type: _root_.scala.Option[_root_.com.proto.book.BindingType]
       |)
-      |@message final case class GetBookRequest(
+      |final case class GetBookRequest(
       |  @_root_.pbdirect.pbIndex(1) isbn: _root_.scala.Long
       |)
-      |@message final case class GetBookViaAuthor(
+      |final case class GetBookViaAuthor(
       |  @_root_.pbdirect.pbIndex(1) author: _root_.scala.Option[_root_.com.proto.author.Author]
       |)
-      |@message final case class BookStore(
+      |final case class BookStore(
       |  @_root_.pbdirect.pbIndex(1) name: _root_.java.lang.String,
       |  @_root_.pbdirect.pbIndex(2) books: _root_.scala.Predef.Map[_root_.scala.Long, _root_.java.lang.String],
       |  @_root_.pbdirect.pbIndex(3) genres: _root_.scala.List[_root_.com.proto.book.Genre],

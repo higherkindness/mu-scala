@@ -69,9 +69,9 @@ import higherkindness.mu.rpc.internal.encoders.avro.bigdecimal._
 import higherkindness.mu.rpc.internal.encoders.avro.javatime._
 import higherkindness.mu.rpc.protocol._
 
-@message case class StockInfoRequest(stockId: String)
+case class StockInfoRequest(stockId: String)
 
-@message case class StockInfoResponse(stockId: String, price: BigDecimal, rate: BigDecimal)
+case class StockInfoResponse(stockId: String, price: BigDecimal, rate: BigDecimal)
 
 @service(AvroWithSchema) trait StockInfoService[F[_]] {
 
@@ -92,9 +92,9 @@ import higherkindness.mu.rpc.internal.encoders.avro.javatime._
 import higherkindness.mu.rpc.protocol._
 import shapeless.{@@, Nat}
 
-@message case class StockInfoRequest(stockId: String)
+case class StockInfoRequest(stockId: String)
 
-@message case class StockInfoResponse(stockId: String, price: BigDecimal @@ (Nat._10, Nat._2), rate: BigDecimal @@ (Nat._5, Nat._4))
+case class StockInfoResponse(stockId: String, price: BigDecimal @@ (Nat._10, Nat._2), rate: BigDecimal @@ (Nat._5, Nat._4))
 
 @service(AvroWithSchema) trait StockInfoService[F[_]] {
 
