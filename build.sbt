@@ -215,48 +215,50 @@ lazy val `srcgen-core` = project
   .dependsOn(channel % "test->test")
   .settings(moduleName := "mu-srcgen-core")
   .settings(srcGenSettings)
+  .settings(compatSettings)
 
 lazy val `srcgen-sbt` = project
   .in(file("modules/srcgen/plugin"))
   .dependsOn(`srcgen-core`)
   .settings(moduleName := "sbt-mu-srcgen")
-  .settings(crossScalaVersions := Seq(V.scala))
+  .settings(crossScalaVersions := Seq(V.scala212))
   .settings(sbtPluginSettings: _*)
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
   .settings(buildInfoPackage := "mu.rpc.srcgen")
   // See https://github.com/sbt/sbt/issues/3248
-  .settings(publishLocal := publishLocal
-    .dependsOn(
-      common / publishLocal,
-      `internal-core` / publishLocal,
-      channel / publishLocal,
-      server / publishLocal,
-      `internal-fs2` / publishLocal,
-      fs2 / publishLocal,
-      `marshallers-jodatime` / publishLocal,
-      `srcgen-core` / publishLocal
-    )
-    .value)
+  .settings(
+    publishLocal := publishLocal
+      .dependsOn(
+        common / publishLocal,
+        `internal-core` / publishLocal,
+        channel / publishLocal,
+        server / publishLocal,
+        `internal-fs2` / publishLocal,
+        fs2 / publishLocal,
+        `marshallers-jodatime` / publishLocal,
+        `srcgen-core` / publishLocal
+      )
+      .value
+  )
   .enablePlugins(SbtPlugin)
 
 ////////////////////
 //// BENCHMARKS ////
 ////////////////////
 
-lazy val lastReleasedV = "0.18.4"
-
 lazy val `benchmarks-vprev` = project
   .in(file("benchmarks/vprev"))
   .settings(
     libraryDependencies ++= Seq(
-      "io.higherkindness" %% "mu-rpc-channel" % lastReleasedV,
-      "io.higherkindness" %% "mu-rpc-server"  % lastReleasedV,
-      "io.higherkindness" %% "mu-rpc-testing" % lastReleasedV
+      "io.higherkindness" %% "mu-rpc-channel" % V.lastReleasedV,
+      "io.higherkindness" %% "mu-rpc-server"  % V.lastReleasedV,
+      "io.higherkindness" %% "mu-rpc-testing" % V.lastReleasedV
     )
   )
   .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vprev")
+  .settings(noCrossCompilationLastScala)
   .settings(crossSettings)
   .settings(noPublishSettings)
   .enablePlugins(JmhPlugin)
@@ -328,7 +330,8 @@ lazy val `example-routeguide-client` = project
   )
   .settings(addCommandAlias("runClientIO", "runMain example.routeguide.client.io.ClientAppIO"))
   .settings(
-    addCommandAlias("runClientTask", "runMain example.routeguide.client.task.ClientAppTask"))
+    addCommandAlias("runClientTask", "runMain example.routeguide.client.task.ClientAppTask")
+  )
 
 ////////////////////
 /////   SEED   /////
@@ -437,7 +440,8 @@ lazy val `seed-client-process` = project
     fs2,
     `seed-client-common`,
     `seed-server-protocol-avro`,
-    `seed-server-protocol-proto`)
+    `seed-server-protocol-proto`
+  )
 
 lazy val `seed-client-app` = project
   .in(file("modules/examples/seed/client/modules/app"))
@@ -514,6 +518,7 @@ lazy val `example-todolist-server` = project
   .dependsOn(config)
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
+  .settings(noCrossCompilationLastScala)
   .settings(moduleName := "mu-rpc-example-todolist-server")
   .settings(exampleTodolistCommonSettings)
 
@@ -525,6 +530,7 @@ lazy val `example-todolist-client` = project
   .dependsOn(config)
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
+  .settings(noCrossCompilationLastScala)
   .settings(moduleName := "mu-rpc-example-todolist-client")
   .settings(exampleTodolistCommonSettings)
 
@@ -613,6 +619,7 @@ lazy val root = project
   .in(file("."))
   .settings(name := "mu-scala")
   .settings(noPublishSettings)
+  .settings(noCrossCompilationLastScala)
   .aggregate(allModules: _*)
   .dependsOn(allModulesDeps: _*)
 
@@ -623,5 +630,6 @@ lazy val docs = project
   .settings(docsSettings: _*)
   .settings(micrositeSettings: _*)
   .settings(noPublishSettings: _*)
+  .settings(noCrossCompilationLastScala)
   .enablePlugins(MicrositesPlugin)
   .enablePlugins(MdocPlugin)

@@ -61,7 +61,7 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
     )
 
   var serverTask: Fiber[IO, Nothing] = _
-  before(serverTask = server.resource.use(_ => IO.never).start.unsafeRunSync())
+  before(server.resource.use(_ => IO.never).start.unsafeRunSync())
   after(serverTask.cancel)
 
   "REST Server" should {

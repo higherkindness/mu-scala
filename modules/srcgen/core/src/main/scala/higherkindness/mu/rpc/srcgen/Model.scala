@@ -16,7 +16,6 @@
 
 package higherkindness.mu.rpc.srcgen
 
-import higherkindness.mu.rpc.srcgen.util.Toolbox
 import higherkindness.mu.rpc.internal.util.StringUtil._
 import higherkindness.mu.rpc.protocol.{SerializationType => SerType, _}
 import shapeless.tag

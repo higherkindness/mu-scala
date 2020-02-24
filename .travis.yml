@@ -4,6 +4,7 @@ jdk:
 dist: xenial
 scala:
   - 2.12.10
+  - 2.13.1
 before_cache:
   - du -h -d 1 $HOME/.ivy2/
   - du -h -d 2 $HOME/.sbt/
@@ -27,22 +28,25 @@ before_install:
 install:
   - rvm use 2.6.5 --install --fuzzy
   - gem install jekyll -v 4
+
+script:
+  - curl -s https://codecov.io/bash > .codecov
+  - sed -i -e 's/TRAVIS_.*_VERSION/^TRAVIS_.*_VERSION=/' .codecov
+  - chmod +x .codecov
+  - sbt ++$TRAVIS_SCALA_VERSION clean test coverageReport coverageAggregate docs/makeMicrosite
+  - if [ $TRAVIS_SCALA_VERSION = "2.13.1" ]; then ./.codecov -X gcov; fi
+  # Sbt Plugin:
+  - sbt ++$TRAVIS_SCALA_VERSION srcgen-core/test srcgen-sbt/test
+  - sbt ++$TRAVIS_SCALA_VERSION publishLocal srcgen-sbt/publishLocal srcgen-sbt/scripted
+
 stages:
   - test
   - deploy
   - microsite
 jobs:
   include:
-    - name: "Tests, coverage and docs compilation"
-      script:
-        - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/mdoc
-        - bash <(curl -s https://codecov.io/bash)
-    - name: "sbt plugin tests"
-      script:
-        - sbt ++$TRAVIS_SCALA_VERSION srcgen-core/test
-        - sbt ++$TRAVIS_SCALA_VERSION srcgen-sbt/test
-        - sbt ++$TRAVIS_SCALA_VERSION publishLocal srcgen-sbt/publishLocal srcgen-sbt/scripted
     - stage: deploy
+      scala: 2.13.1
       if: branch = master AND type != pull_request AND env(SKIP_SBT_DEPLOY) = false
       name: "Publish sbt plugin"
       script:
@@ -52,6 +56,7 @@ jobs:
             sbt ";project srcgen-sbt; release";
           fi
     - stage: deploy
+      scala: 2.13.1
       if: branch = master AND type != pull_request
       name: "Publish all other artifacts"
       script:
@@ -66,6 +71,7 @@ jobs:
             sbt release;
           fi
     - stage: microsite
+      scala: 2.13.1
       if: branch = master AND type != pull_request
       name: "Publish microsite"
       script:
