@@ -74,13 +74,13 @@ We'll check out this feature further in [this section](generate-sources-from-idl
 Let’s start looking at how to define the `Person` message that we saw previously.
 Before starting, this is the Scala import we need:
 
-```tut:silent
+```scala mdoc:silent
 import higherkindness.mu.rpc.protocol._
 ```
 
 `Person` would be defined as follows:
 
-```tut:silent
+```scala mdoc:silent
 /**
  * Message Example.
  *
@@ -93,8 +93,8 @@ case class Person(name: String, id: Int, has_ponycopter: Boolean)
 
 As we can see, this is quite simple. By the same token, let’s see now how the `Greeter` service would be translated to the [Mu] style (in your `.scala` file):
 
-```tut:silent
-object protocol {
+```scala mdoc:silent
+object protocol1 {
 
   /**
     * The request message containing the user's name.
@@ -136,8 +136,8 @@ In the above example, we can see that `sayHello` returns an `F[HelloReply]`. How
 
 For instance:
 
-```tut:silent
-object protocol {
+```scala mdoc:silent
+object protocol2 {
 
   /**
    * The request message containing the user's name.
@@ -187,8 +187,8 @@ For server side compression, we just have to add the annotation `Gzip` in our de
 
 Let's see an example of a unary service:
 
-```tut:silent
-object service {
+```scala mdoc:silent
+object service1 {
 
   @service(Protobuf, Gzip)
   trait Greeter[F[_]] {
@@ -218,7 +218,7 @@ For executing `IO` we need a `ContextShift[IO]` used for running `IO` instances 
 
 *Note:* You'd need an implicit `monix.execution.Scheduler` in the case you're using Monix observables.
 
-```tut:silent
+```scala mdoc:silent
 trait CommonRuntime {
 
   val EC: scala.concurrent.ExecutionContext =
@@ -230,13 +230,13 @@ trait CommonRuntime {
 }
 ```
 
-```tut:silent
+```scala mdoc:silent
 import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc._
 import higherkindness.mu.rpc.config._
 import higherkindness.mu.rpc.config.channel._
 import io.grpc.CallOptions
-import service._
+import service1._
 
 trait ChannelImplicits extends CommonRuntime {
 
@@ -259,8 +259,8 @@ As [gRPC], [Mu] allows you to define two main kinds of service methods:
 
 Let's complete our protocol's example with an unary service method:
 
-```tut:silent
-object service {
+```scala mdoc:silent
+object service2 {
 
   case class HelloRequest(greeting: String)
 
@@ -297,8 +297,8 @@ If you're using `Protobuf`, [Mu] uses instances of [PBDirect] for creating the `
 
 Let's see a couple of samples, one per each type of serialization. Suppose you want to serialize `java.time.LocalDate` as part of your messages in `String` format. With `Protobuf`, as we've mentioned, you need to provide the instances of [PBDirect] for that type. Specifically, you need to provide a `PBScalarValueWriter` and a `PBScalarValueReader`.
 
-```tut:silent
-object protocol {
+```scala mdoc:silent
+object protocol3 {
 
   import java.time._
   import java.time.format._
@@ -327,10 +327,10 @@ object protocol {
 }
 ```
 
-For `Avro` the process is quite similar, but in this case we need to provide three instances of [Avro4s]. `ToSchema`, `FromValue`, and `ToValue`.
+For `Avro` the process is quite similar, but in this case we need to provide three instances of three [Avro4s] type classes: `SchemaFor`, `Encoder`, and `Decoder`.
 
-```tut:silent
-object protocol {
+```scala mdoc:silent
+object protocol4 {
 
   import java.time._
   import java.time.format._
@@ -339,18 +339,18 @@ object protocol {
   import org.apache.avro.Schema
   import org.apache.avro.Schema.Field
 
-  implicit object LocalDateToSchema extends ToSchema[LocalDate] {
-    override val schema: Schema =
+  implicit object LocalDateSchemaFor extends SchemaFor[LocalDate] {
+    override def schema(fm: com.sksamuel.avro4s.FieldMapper): Schema =
       Schema.create(Schema.Type.STRING)
   }
 
-  implicit object LocalDateToValue extends ToValue[LocalDate] {
-    override def apply(value: LocalDate): String =
+  implicit object LocalDateEncoder extends Encoder[LocalDate] {
+    override def encode(value: LocalDate, schema: Schema, fm: FieldMapper): String =
       value.format(DateTimeFormatter.ISO_LOCAL_DATE)
   }
 
-  implicit object LocalDateFromValue extends FromValue[LocalDate] {
-    override def apply(value: Any, field: Field): LocalDate =
+  implicit object LocalDateDecoder extends Decoder[LocalDate] {
+    override def decode(value: Any, schema: Schema, fm: FieldMapper): LocalDate =
       LocalDate.parse(value.toString(), DateTimeFormatter.ISO_LOCAL_DATE)
   }
 
@@ -370,13 +370,13 @@ object protocol {
 
 * `BigDecimal` in `Protobuf`
   * `import higherkindness.mu.rpc.internal.encoders.pbd.bigDecimal._`
-* `java.time.LocalDate` and `java.time.LocalDateTime` in `Protobuf`
+* `java.time.LocalDate`, `java.time.LocalDateTime` and `java.time.Instant` in `Protobuf`
   * `import higherkindness.mu.rpc.internal.encoders.pbd.javatime._`
 * `BigDecimal` in `Avro` (**note**: this encoder is not avro spec compliant)
   * `import higherkindness.mu.rpc.internal.encoders.avro.bigdecimal._`
 * Tagged `BigDecimal` in `Avro`
   * `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._`
-* `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
+* `java.time.LocalDateTime` in `Avro`
   * `import higherkindness.mu.rpc.internal.encoders.avro.javatime._`
 
 Mu also provides instances for `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime`, but you need the `mu-rpc-marshallers-jodatime` extra dependency. See the [main section](/mu/scala/) for the SBT instructions.
@@ -386,12 +386,12 @@ Mu also provides instances for `org.joda.time.LocalDate` and `org.joda.time.Loca
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
   * `import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.avro._`
 
-**Note**: If you want to send one of these instances directly as a request or response through Avro, you need to provide an instance of `Marshaller`. [Mu] provides the marshallers for `BigDecimal`, `java.time.LocalDate`, `java.time.LocalDateTime`, `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in a separate package:
+**Note**: If you want to send one of these instances directly as a request or response through Avro, you need to provide an instance of `Marshaller`. [Mu] provides the marshallers for `BigDecimal`, `java.time.LocalDate`, `java.time.LocalDateTime`, `java.time.Instant`, `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in a separate package:
 * `BigDecimal` in `Avro`
   * `import higherkindness.mu.rpc.internal.encoders.avro.bigdecimal.marshallers._`
 * Tagged `BigDecimal` in `Avro` (**note**: this encoder is not avro spec compliant)
   * `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._`
-* `java.time.LocalDate` and `java.time.LocalDateTime` in `Avro`
+* `java.time.LocalDate`, `java.time.LocalDateTime` and `java.time.Instant` in `Avro`
   * `import higherkindness.mu.rpc.internal.encoders.avro.javatime.marshallers._`
 * `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime` in `Avro`
   * `import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.avro.marshallers._`

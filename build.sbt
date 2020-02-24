@@ -1,8 +1,6 @@
 import sbtorgpolicies.model.scalac
 
 pgpPassphrase := Some(getEnvVar("PGP_PASSPHRASE").getOrElse("").toCharArray)
-pgpPublicRing := file(s"$gpgFolder/pubring.gpg")
-pgpSecretRing := file(s"$gpgFolder/secring.gpg")
 
 ////////////////
 //// COMMON ////
@@ -620,9 +618,10 @@ lazy val root = project
 
 lazy val docs = project
   .in(file("docs"))
-  .dependsOn(allModulesDeps: _*)
+  .dependsOn(allModulesDeps.filterNot(_.project == LocalProject("benchmarks-vprev")): _*)
   .settings(name := "mu-docs")
   .settings(docsSettings: _*)
   .settings(micrositeSettings: _*)
   .settings(noPublishSettings: _*)
   .enablePlugins(MicrositesPlugin)
+  .enablePlugins(MdocPlugin)

@@ -20,8 +20,8 @@ import higherkindness.mu.rpc.protocol._
 
 object people {
 
-  @message final case class Person(name: String, age: Int)
-  @message final case class PeopleRequest(name: String)
-  @message final case class PeopleResponse(person: Person)
+  final case class Person(name: String, age: Int)
+  final case class PeopleRequest(name: String)
+  final case class PeopleResponse(person: Person)
 
 }

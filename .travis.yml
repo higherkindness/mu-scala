@@ -20,7 +20,10 @@ cache:
   - "$HOME/.ivy2/cache"
   - "$HOME/.ivy2"
 before_install:
-  - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then openssl aes-256-cbc -K $encrypted_95edac5cb8ef_key -iv $encrypted_95edac5cb8ef_iv -in secring.gpg.enc -out secring.gpg -d; fi
+  - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
+      openssl aes-256-cbc -K $encrypted_95edac5cb8ef_key -iv $encrypted_95edac5cb8ef_iv -in secret_key.asc.enc -out secret_key.asc -d;
+      gpg --import --batch --passphrase "$PGP_PASSPHRASE" secret_key.asc;
+    fi
 install:
   - rvm use 2.6.5 --install --fuzzy
   - gem install jekyll -v 4
@@ -32,7 +35,7 @@ jobs:
   include:
     - name: "Tests, coverage and docs compilation"
       script:
-        - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/tut
+        - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate docs/mdoc
         - bash <(curl -s https://codecov.io/bash)
     - name: "sbt plugin tests"
       script:

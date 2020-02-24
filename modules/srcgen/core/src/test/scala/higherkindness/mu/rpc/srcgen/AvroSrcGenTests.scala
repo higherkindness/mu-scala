@@ -29,9 +29,7 @@ class AvroSrcGenTests extends RpcBaseTestSuite with Checkers {
 
     "generate correct Scala classes" in {
       check {
-        forAll { scenario: Scenario =>
-          test(scenario)
-        }
+        forAll { scenario: Scenario => test(scenario) }
       }
     }
   }

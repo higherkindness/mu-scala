@@ -32,7 +32,7 @@ Thirdly, let's see a piece of code where we will explain line by line, what we a
 
 We won't cover the details regarding creation of `RPCService`, `ServerRPCService` and runtime implicits. You can find more information about these in the [Patterns](patterns) section.
 
-```tut:invisible
+```scala mdoc:invisible
 trait CommonRuntime {
 
   val EC: scala.concurrent.ExecutionContext =
@@ -44,15 +44,13 @@ trait CommonRuntime {
 }
 ```
 
-```tut:invisible
+```scala mdoc:invisible
 import higherkindness.mu.rpc.protocol._
 
 object service {
 
-  @message
   case class HelloRequest(greeting: String)
 
-  @message
   case class HelloResponse(reply: String)
 
   @service(Protobuf)
@@ -62,7 +60,7 @@ object service {
 }
 ```
 
-```tut:invisible
+```scala mdoc:invisible
 import cats.Applicative
 import cats.syntax.applicative._
 import service._
@@ -75,7 +73,7 @@ class ServiceHandler[F[_]: Applicative] extends Greeter[F] {
 }
 ```
 
-```tut:silent
+```scala mdoc:silent
 import java.io.File
 import java.security.cert.X509Certificate
 
@@ -128,7 +126,7 @@ object implicits extends Runtime
 
 Lastly, as we did before with the server side, let's see what happens on the client side.
 
-```tut:silent
+```scala mdoc:silent
 import cats.syntax.either._
 import higherkindness.mu.rpc.ChannelForAddress
 import higherkindness.mu.rpc.channel.OverrideAuthority

@@ -15,7 +15,7 @@ import sbtrelease.ReleaseStateTransformations._
 import scoverage.ScoverageKeys._
 
 import scala.language.reflectiveCalls
-import tut.TutPlugin.autoImport._
+import mdoc.MdocPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
 
@@ -26,12 +26,12 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String              = "1.8.4"
+      val avro4s: String              = "3.0.8"
       val avrohugger: String          = "1.0.0-RC22"
       val betterMonadicFor: String    = "0.3.1"
       val catsEffect: String          = "2.1.1"
       val circe: String               = "0.13.0"
-      val dropwizard: String          = "4.1.2"
+      val dropwizard: String          = "4.1.3"
       val embeddedKafka: String       = "2.4.0"
       val enumeratum: String          = "1.5.15"
       val frees: String               = "0.8.2"
@@ -46,10 +46,10 @@ object ProjectPlugin extends AutoPlugin {
       val log4s: String               = "1.8.2"
       val logback: String             = "1.2.3"
       val monix: String               = "3.1.0"
-      val monocle: String             = "2.0.1"
-      val nettySSL: String            = "2.0.29.Final"
+      val monocle: String             = "2.0.2"
+      val nettySSL: String            = "2.0.25.Final"
       val paradise: String            = "2.1.1"
-      val pbdirect: String            = "0.4.1"
+      val pbdirect: String            = "0.5.0"
       val prometheus: String          = "0.8.1"
       val pureconfig: String          = "0.12.2"
       val reactiveStreams: String     = "1.0.3"
@@ -58,9 +58,9 @@ object ProjectPlugin extends AutoPlugin {
       val scalacheck: String          = "1.14.3"
       val scalacheckToolbox: String   = "0.3.2"
       val scalamock: String           = "4.4.0"
-      val scalatest: String           = "3.1.0"
+      val scalatest: String           = "3.1.1"
       val scalatestplusScheck: String = "3.1.0.0-RC2"
-      val skeuomorph: String          = "0.0.20"
+      val skeuomorph: String          = "0.0.22"
       val slf4j: String               = "1.7.30"
     }
 
@@ -81,7 +81,6 @@ object ProjectPlugin extends AutoPlugin {
         "com.beachape" %% "enumeratum" % V.enumeratum,
         %%("avro4s", V.avro4s),
         %%("log4s", V.log4s),
-        "org.scala-lang"             % "scala-compiler" % scalaVersion.value,
         %%("scalamock", V.scalamock) % Test
       )
     )
@@ -307,8 +306,9 @@ object ProjectPlugin extends AutoPlugin {
       micrositeGithubRepo := "mu-scala",
       micrositeGitterChannelUrl := "47deg/mu",
       micrositeOrganizationHomepage := "https://www.47deg.com",
-      micrositeCompilingDocsTool := WithTut,
+      micrositeCompilingDocsTool := WithMdoc,
       micrositePushSiteWith := GitHub4s,
+      mdocIn := (sourceDirectory in Compile).value / "docs",
       micrositeGithubToken := sys.env.get(orgGithubTokenSetting.value),
       micrositePalette := Map(
         "brand-primary"   -> "#001e38",
@@ -319,12 +319,17 @@ object ProjectPlugin extends AutoPlugin {
       micrositeHighlightLanguages += "protobuf"
     )
 
+    lazy val customScalacOptions: Seq[String] =
+      scalacAdvancedOptions.filterNot(Set("-Yliteral-types", "-Xlint").contains)
+    lazy val docsExclusions: Seq[String] => Seq[String] = (current: Seq[String]) =>
+      current.filterNot(Set("-Xfatal-warnings", "-Ywarn-unused-import", "-Xlint").contains)
+
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("scalatest", V.scalatest),
         "org.scalatestplus" %% "scalatestplus-scalacheck" % V.scalatestplusScheck
       ),
-      scalacOptions in Tut ~= (_ filterNot Set("-Ywarn-unused-import", "-Xlint").contains)
+      scalacOptions ~= docsExclusions
     )
 
   }
@@ -357,16 +362,14 @@ object ProjectPlugin extends AutoPlugin {
       ),
       scalaVersion := V.scala,
       crossScalaVersions := Seq(V.scala),
-      scalacOptions ++= scalacAdvancedOptions,
-      scalacOptions ~= (_ filterNot Set("-Yliteral-types", "-Xlint").contains),
+      scalacOptions ++= customScalacOptions,
       Test / fork := true,
-      Tut / scalacOptions -= "-Ywarn-unused-import",
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
       addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
       addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
       libraryDependencies ++= Seq(
-        %%("scalatest", V.scalatest) % "test",
+        %%("scalatest", V.scalatest) % Test,
         %("slf4j-nop", V.slf4j)      % Test
       ),
       releaseProcess := Seq[ReleaseStep](
@@ -426,11 +429,7 @@ object ProjectPlugin extends AutoPlugin {
         ),
         ScalafmtFileType,
         TravisFileType(crossScalaVersions.value, orgScriptCICommandKey, orgAfterCISuccessCommandKey)
-      ),
-      orgAfterCISuccessTaskListSetting := List(
-        orgPublishReleaseTask.asRunnableItem(allModules = true, aggregated = false, crossScalaVersions = true),
-        orgUpdateDocFiles.asRunnableItem
-      ) ++ guard(!version.value.endsWith("-SNAPSHOT"))(defaultPublishMicrosite)
+      )
     )
   // format: ON
 }

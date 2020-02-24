@@ -30,12 +30,12 @@ object Utils extends CommonUtils {
   case class RequestDroppedField(a: String)
   case class RequestReplacedType(a: String, c: Boolean = true)
   case class RequestRenamedField(a: String, c: Int = 0)
-  case class RequestCoproduct[A](a: A :+: Int :+: String :+: CNil)
-  case class RequestSuperCoproduct[A](a: A :+: Int :+: String :+: Boolean :+: CNil)
+  case class RequestCoproduct[A](a: Int :+: String :+: A :+: CNil)
+  case class RequestSuperCoproduct[A](a: Int :+: String :+: Boolean :+: A :+: CNil)
   case class RequestCoproductNoInt[A](
-      b: A :+: String :+: CNil = Coproduct[A :+: String :+: CNil]("")
+      b: String :+: A :+: CNil = Coproduct[String :+: A :+: CNil]("")
   )
-  case class RequestCoproductReplaced[A](a: A :+: Int :+: Boolean :+: CNil)
+  case class RequestCoproductReplaced[A](a: Int :+: Boolean :+: A :+: CNil)
 
   case class Response(a: String, b: Int = 123)
   case class ResponseAddedBoolean(a: String, b: Int, c: Boolean)
@@ -43,19 +43,19 @@ object Utils extends CommonUtils {
   case class ResponseReplacedType(a: String, b: Int = 123, c: Boolean)
   case class ResponseRenamedField(a: String, b: Int = 123, c: Int)
   case class ResponseDroppedField(a: String)
-  case class ResponseCoproduct[A](a: A :+: Int :+: String :+: CNil)
+  case class ResponseCoproduct[A](a: Int :+: String :+: A :+: CNil)
   case class ResponseSuperCoproduct[A](
-      a: A :+: Int :+: String :+: CNil = Coproduct[A :+: Int :+: String :+: CNil](0),
-      b: A :+: Int :+: String :+: Boolean :+: CNil
+      a: Int :+: String :+: A :+: CNil = Coproduct[Int :+: String :+: A :+: CNil](0),
+      b: Int :+: String :+: Boolean :+: A :+: CNil
   )
-  case class ResponseCoproductNoInt[A](a: A :+: String :+: CNil)
-  case class ResponseCoproductReplaced[A](a: A :+: Int :+: Boolean :+: CNil)
+  case class ResponseCoproductNoInt[A](a: String :+: A :+: CNil)
+  case class ResponseCoproductReplaced[A](a: Int :+: Boolean :+: A :+: CNil)
 
   val request                   = Request("foo", 123)
-  def requestCoproduct[A](a: A) = RequestCoproduct(Coproduct[A :+: Int :+: String :+: CNil](a))
-  val requestCoproductInt       = RequestCoproduct(Coproduct[Request :+: Int :+: String :+: CNil](1))
+  def requestCoproduct[A](a: A) = RequestCoproduct(Coproduct[Int :+: String :+: A :+: CNil](a))
+  val requestCoproductInt       = RequestCoproduct(Coproduct[Int :+: String :+: Request :+: CNil](1))
   val requestCoproductString = RequestCoproduct(
-    Coproduct[Request :+: Int :+: String :+: CNil]("hi")
+    Coproduct[Int :+: String :+: Request :+: CNil]("hi")
   )
 
   val response                        = Response("foo", 123)
@@ -63,10 +63,10 @@ object Utils extends CommonUtils {
   val responseReplacedType            = ResponseReplacedType(a = response.a, c = true)
   val responseRenamedField            = ResponseRenamedField(a = response.a, c = 456)
   val responseDroppedField            = ResponseDroppedField(response.a)
-  def responseCoproduct[A](a: A)      = ResponseCoproduct(Coproduct[A :+: Int :+: String :+: CNil](a))
-  def responseCoproductNoInt[A](a: A) = ResponseCoproductNoInt(Coproduct[A :+: String :+: CNil](a))
+  def responseCoproduct[A](a: A)      = ResponseCoproduct(Coproduct[Int :+: String :+: A :+: CNil](a))
+  def responseCoproductNoInt[A](a: A) = ResponseCoproductNoInt(Coproduct[String :+: A :+: CNil](a))
   def responseCoproductReplaced[A](a: A) =
-    ResponseCoproductReplaced(Coproduct[A :+: Int :+: Boolean :+: CNil](a))
+    ResponseCoproductReplaced(Coproduct[Int :+: Boolean :+: A :+: CNil](a))
 
   //Original Service
 
@@ -214,7 +214,7 @@ object Utils extends CommonUtils {
       def get(a: Request): F[Response] = Effect[F].delay(response)
       def getCoproduct(a: RequestCoproduct[Request]): F[ResponseCoproduct[Response]] =
         Effect[F].delay(
-          ResponseCoproduct(Coproduct[Response :+: Int :+: String :+: CNil](response))
+          ResponseCoproduct(Coproduct[Int :+: String :+: Response :+: CNil](response))
         )
     }
 
@@ -285,7 +285,7 @@ object Utils extends CommonUtils {
       def getCoproduct(a: RequestCoproduct[Request]): F[ResponseSuperCoproduct[Response]] =
         Effect[F].delay(
           ResponseSuperCoproduct(
-            b = Coproduct[Response :+: Int :+: String :+: Boolean :+: CNil](true)
+            b = Coproduct[Int :+: String :+: Boolean :+: Response :+: CNil](true)
           )
         )
     }

@@ -12,18 +12,28 @@ In the previous section, we saw that [Mu] allows you to define unary services. A
 * **Client streaming RPC**: in this case is the client which sends a stream of requests. The server will respond with a single response.
 * **Bidirectional streaming RPC**: a mix of server and client streaming as both sides will be sending a stream of data.
 
-Let's keep going. We'll be completing our protocol's example with the three streaming options:
+Let's keep going. We'll be completing our protocol's example with the three streaming options.
 
-```tut:silent
+Before starting, this is the Scala import we need:
+
+```scala mdoc:silent
 import higherkindness.mu.rpc.protocol._
+```
 
-object service {
+Request/response models that we are going to use in our service implementation:
+
+```scala mdoc:silent
+case class HelloRequest(greeting: String)
+
+case class HelloResponse(reply: String)
+```
+
+Now, let's see the service example:
+
+```scala mdoc:silent
+object service1 {
 
   import monix.reactive.Observable
-
-  case class HelloRequest(greeting: String)
-
-  case class HelloResponse(reply: String)
 
   @service(Protobuf)
   trait Greeter[F[_]] {
@@ -94,16 +104,10 @@ Thanks to this new data type, [Mu] supports `fs2.Stream[F, ?]` for all the types
 
 Let's compare our previous protocols using `fs2.Stream` instead of `Observable`.
 
-```tut:silent
-import higherkindness.mu.rpc.protocol._
-
-object service {
+```scala mdoc:silent
+object servicefs2 {
 
   import fs2.Stream
-
-  case class HelloRequest(greeting: String)
-
-  case class HelloResponse(reply: String)
 
   @service(Protobuf)
   trait Greeter[F[_]] {

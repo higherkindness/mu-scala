@@ -17,7 +17,7 @@ In order to monitor the RPC calls on the server side we need two things:
 
 Let's see how to register server metrics using `Prometheus` in the following fragment.
 
-```tut:invisible
+```scala mdoc:invisible
 trait CommonRuntime {
 
   val EC: scala.concurrent.ExecutionContext =
@@ -29,7 +29,7 @@ trait CommonRuntime {
 }
 ```
 
-```tut:invisible
+```scala mdoc:invisible
 import higherkindness.mu.rpc.protocol._
 
 object service {
@@ -45,7 +45,7 @@ object service {
 }
 ```
 
-```tut:invisible
+```scala mdoc:invisible
 import cats.Applicative
 import cats.syntax.applicative._
 import service._
@@ -58,7 +58,7 @@ class ServiceHandler[F[_]: Applicative] extends Greeter[F] {
 }
 ```
 
-```tut:silent
+```scala mdoc:silent
 import cats.effect.IO
 import higherkindness.mu.rpc.prometheus.PrometheusMetrics
 import higherkindness.mu.rpc.server._
@@ -87,7 +87,7 @@ object InterceptingServerCalls extends CommonRuntime {
 
 In this case, in order to intercept the client calls we need additional configuration settings (by using `AddInterceptor`):
 
-```tut:silent
+```scala mdoc:silent
 import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc._
 import higherkindness.mu.rpc.config._
@@ -118,7 +118,7 @@ That is how we use `Prometheus` to monitor both [gRPC] ends.
 
 The usage the same as before, but in this case we need to create a `Dropwizard` backed `MetricsOps` 
 
-```tut:silent
+```scala mdoc:silent
 import cats.effect.IO
 import com.codahale.metrics.MetricRegistry
 import higherkindness.mu.rpc.dropwizard.DropWizardMetrics

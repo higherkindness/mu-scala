@@ -68,9 +68,7 @@ class RPCMethodNameTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
         ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
       ) { client =>
         check {
-          forAll { s: String =>
-            client.proto(Request(s)).map(_.length).unsafeRunSync() == s.length
-          }
+          forAll { s: String => client.proto(Request(s)).map(_.length).unsafeRunSync() == s.length }
         }
       }
 
@@ -83,9 +81,7 @@ class RPCMethodNameTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
         AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
       ) { client =>
         check {
-          forAll { s: String =>
-            client.avro(Request(s)).map(_.length).unsafeRunSync() == s.length
-          }
+          forAll { s: String => client.avro(Request(s)).map(_.length).unsafeRunSync() == s.length }
         }
       }
 
