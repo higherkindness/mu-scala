@@ -35,9 +35,6 @@ script:
   - chmod +x .codecov
   - sbt ++$TRAVIS_SCALA_VERSION clean test coverageReport coverageAggregate docs/makeMicrosite
   - if [ $TRAVIS_SCALA_VERSION = "2.13.1" ]; then ./.codecov -X gcov; fi
-  # Sbt Plugin:
-  - sbt ++$TRAVIS_SCALA_VERSION srcgen-core/test srcgen-sbt/test
-  - sbt ++$TRAVIS_SCALA_VERSION publishLocal srcgen-sbt/publishLocal srcgen-sbt/scripted
 
 stages:
   - test
@@ -45,6 +42,12 @@ stages:
   - microsite
 jobs:
   include:
+    - name: "sbt plugin tests"
+      scala: 2.12.10
+      script:
+        - sbt ++$TRAVIS_SCALA_VERSION srcgen-core/test
+        - sbt ++$TRAVIS_SCALA_VERSION srcgen-sbt/test
+        - sbt ++$TRAVIS_SCALA_VERSION publishLocal srcgen-sbt/publishLocal srcgen-sbt/scripted
     - stage: deploy
       scala: 2.13.1
       if: branch = master AND type != pull_request AND env(SKIP_SBT_DEPLOY) = false
