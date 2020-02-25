@@ -502,12 +502,14 @@ lazy val `example-todolist-protocol` = project
   .dependsOn(channel)
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
+  .settings(noCrossCompilationLastScala)
   .settings(moduleName := "mu-rpc-example-todolist-protocol")
 
 lazy val `example-todolist-runtime` = project
   .in(file("modules/examples/todolist/runtime"))
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
+  .settings(noCrossCompilationLastScala)
   .settings(moduleName := "mu-rpc-example-todolist-runtime")
 
 lazy val `example-todolist-server` = project
