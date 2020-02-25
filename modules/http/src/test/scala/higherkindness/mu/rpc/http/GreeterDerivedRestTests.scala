@@ -46,7 +46,9 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
   val server: BlazeServerBuilder[IO] = HttpServer.bind(port, host, unaryRoute, fs2Route)
 
   var serverTask: Fiber[IO, Nothing] = _
-  before(server.resource.use(_ => IO.never).start.unsafeRunSync())
+  before {
+    serverTask = server.resource.use(_ => IO.never).start.unsafeRunSync()
+  }
   after(serverTask.cancel)
 
   "REST Service" should {
