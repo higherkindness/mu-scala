@@ -572,7 +572,7 @@ lazy val `legacy-avro-decimal-compat-encoders` = project
 //// MODULES REGISTRY ////
 //////////////////////////
 
-lazy val allModules: Seq[ProjectReference] = Seq(
+lazy val coreModules: Seq[ProjectReference] = Seq(
   common,
   `internal-core`,
   `internal-monix`,
@@ -593,18 +593,6 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   http,
   kafka,
   `marshallers-jodatime`,
-  `example-routeguide-protocol`,
-  `example-routeguide-common`,
-  `example-routeguide-runtime`,
-  `example-routeguide-server`,
-  `example-routeguide-client`,
-  `example-todolist-protocol`,
-  `example-todolist-runtime`,
-  `example-todolist-server`,
-  `example-todolist-client`,
-  seed,
-  `benchmarks-vprev`,
-  `benchmarks-vnext`,
   `legacy-avro-decimal-compat-model`,
   `legacy-avro-decimal-compat-protocol`,
   `legacy-avro-decimal-compat-encoders`,
@@ -614,20 +602,42 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   `health-server-fs2`
 )
 
-lazy val allModulesDeps: Seq[ClasspathDependency] =
-  allModules.map(ClasspathDependency(_, None))
+lazy val otherModules: Seq[ProjectReference] = Seq(
+  `benchmarks-vprev`,
+  `benchmarks-vnext`,
+  `example-routeguide-protocol`,
+  `example-routeguide-common`,
+  `example-routeguide-runtime`,
+  `example-routeguide-server`,
+  `example-routeguide-client`,
+  `example-todolist-protocol`,
+  `example-todolist-runtime`,
+  `example-todolist-server`,
+  `example-todolist-client`,
+  seed
+)
+
+lazy val coreModulesDeps: Seq[ClasspathDependency] =
+  coreModules.map(ClasspathDependency(_, None))
 
 lazy val root = project
   .in(file("."))
   .settings(name := "mu-scala")
   .settings(noPublishSettings)
+  .aggregate(coreModules: _*)
+  .dependsOn(coreModulesDeps: _*)
+
+lazy val examples = project
+  .in(file("examples"))
+  .settings(name := "mu-scala-examples")
+  .settings(noPublishSettings)
   .settings(noCrossCompilationLastScala)
-  .aggregate(allModules: _*)
-  .dependsOn(allModulesDeps: _*)
+  .aggregate(otherModules: _*)
+  .dependsOn(otherModules.map(ClasspathDependency(_, None)): _*)
 
 lazy val docs = project
   .in(file("docs"))
-  .dependsOn(allModulesDeps.filterNot(_.project == LocalProject("benchmarks-vprev")): _*)
+  .dependsOn(coreModulesDeps.filterNot(_.project == LocalProject("benchmarks-vprev")): _*)
   .settings(name := "mu-docs")
   .settings(docsSettings: _*)
   .settings(micrositeSettings: _*)
