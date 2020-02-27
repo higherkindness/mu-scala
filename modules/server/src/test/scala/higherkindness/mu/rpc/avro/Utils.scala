@@ -17,7 +17,7 @@
 package higherkindness.mu.rpc
 package avro
 
-import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.common.{A => _, _}
 import higherkindness.mu.rpc.protocol._
 import cats.effect.{ConcurrentEffect, Effect, Resource}
 import shapeless.{:+:, CNil, Coproduct}

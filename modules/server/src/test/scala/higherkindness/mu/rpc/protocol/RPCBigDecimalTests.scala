@@ -270,7 +270,7 @@ class RPCBigDecimalTests extends RpcBaseTestSuite with BeforeAndAfterAll with Ch
           forAll(bigDecimalGen(12)) { bd =>
             val bdTagged = tag[(Nat._8, Nat._2)][BigDecimal](bd)
             client
-              .bigDecimalAvroWrapper(Request(tag[(Nat._8, Nat._2)][BigDecimal](bd), "label"))
+              .bigDecimalAvroWrapper(Request(bdTagged, "label"))
               .unsafeRunSync() == Response(
               tag[(Nat._8, Nat._2)][BigDecimal](bd.setScale(2, RM)),
               "label",

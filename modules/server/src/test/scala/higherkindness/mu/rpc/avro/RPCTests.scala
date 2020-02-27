@@ -19,7 +19,7 @@ package avro
 
 import cats.effect.{IO, Resource}
 import io.grpc.ServerServiceDefinition
-import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.common.{A => _, _}
 import higherkindness.mu.rpc.testing.servers.{withServerChannel, ServerChannel}
 import org.scalatest._
 import shapeless.{:+:, CNil, Coproduct}
