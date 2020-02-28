@@ -256,8 +256,7 @@ object Utils extends CommonUtils {
           proto: Resource[F, ProtoRPCService[F]],
           avro: Resource[F, AvroRPCService[F]],
           aws: Resource[F, AvroWithSchemaRPCService[F]]
-      )(implicit M: MonadError[F, Throwable])
-          extends MyRPCClient[F] {
+      ) extends MyRPCClient[F] {
 
         import monix.execution.Scheduler.Implicits.global
 
@@ -368,8 +367,7 @@ object Utils extends CommonUtils {
           proto: Resource[F, CompressedProtoRPCService[F]],
           avro: Resource[F, CompressedAvroRPCService[F]],
           aws: Resource[F, CompressedAvroWithSchemaRPCService[F]]
-      )(implicit M: MonadError[F, Throwable])
-          extends MyRPCClient[F] {
+      ) extends MyRPCClient[F] {
 
         import monix.execution.Scheduler.Implicits.global
 

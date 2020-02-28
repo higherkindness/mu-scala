@@ -20,8 +20,8 @@ import cats.effect.IO
 
 package object common {
 
-  type ConcurrentMonad[A] = IO[A]
+  type ConcurrentMonad[T] = IO[T]
 
-  def suspendM[A](a: A): ConcurrentMonad[A] = IO(a)
+  def suspendM[T](value: T): ConcurrentMonad[T] = IO(value)
 
 }
