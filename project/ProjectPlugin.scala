@@ -51,7 +51,7 @@ object ProjectPlugin extends AutoPlugin {
       val paradise: String            = "2.1.1"
       val pbdirect: String            = "0.5.0"
       val prometheus: String          = "0.8.1"
-      val pureconfig: String          = "0.12.2"
+      val pureconfig: String          = "0.12.3"
       val reactiveStreams: String     = "1.0.3"
       val scala: String               = "2.12.10"
       val scopt: String               = "3.7.1"
