@@ -1,5 +1,5 @@
 @namespace("io.higherkindness")
-protocol service {
+protocol MyService {
 
   record Foo {
     string bar;

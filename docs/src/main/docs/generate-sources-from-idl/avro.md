@@ -28,9 +28,6 @@ muSrcGenIdlType := IdlType.Avro
 
 // Make it easy for 3rd-party clients to communicate with our gRPC server
 muSrcGenIdiomaticEndpoints := true
-
-// Run the source generation automatically before compilation
-sourceGenerators in Compile += (muSrcGen in Compile).taskValue
 ```
 
 Finally, make sure you have enabled the scalamacros compiler plugin so that

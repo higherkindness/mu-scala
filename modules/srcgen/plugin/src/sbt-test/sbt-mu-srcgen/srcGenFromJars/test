@@ -1,8 +1,7 @@
 > domain/compile
-$ exists domain/target/scala-2.12/src_managed/main/compiled_avro/foo/bar/Hello.scala
+$ exists domain/target/scala-2.12/src_managed/main/generated_from_avro/foo/bar/Hello.scala
 > domain/publishLocal
 
 > compile
 $ exists target/scala-2.12/src_managed/main/avro/Hello.avdl
-$ exists target/scala-2.12/src_managed/main/compiled_avro/foo/bar/Hello.scala
-$ delete target/scala-2.12/src_managed/main/compiled_avro/foo/bar/Hello.scala
+$ exists target/scala-2.12/src_managed/main/generated_from_avro/foo/bar/Hello.scala

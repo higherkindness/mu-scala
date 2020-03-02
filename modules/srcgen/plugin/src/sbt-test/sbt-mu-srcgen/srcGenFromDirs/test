@@ -1,9 +1,9 @@
 > publishLocal
+$ exists target/scala-2.12/src_managed/main/generated_from_avro/foo/bar/Domain.scala
+$ exists target/scala-2.12/src_managed/main/generated_from_avro/foo/bar/Protocol.scala
+$ exists target/scala-2.12/classes/foo/bar/DomainRequest.class
+$ exists target/scala-2.12/classes/foo/bar/DomainResponse.class
+$ exists target/scala-2.12/classes/foo/bar/ProtocolRequest.class
+$ exists target/scala-2.12/classes/foo/bar/ProtocolResponse.class
 $ exists target/scala-2.12/classes/domain/Domain.avdl
 $ exists target/scala-2.12/classes/protocol/Protocol.avdl
-$ exists target/scala-2.12/src_managed/main/compiled_avro/foo/bar/Domain.scala
-$ exists target/scala-2.12/src_managed/main/compiled_avro/foo/bar/Protocol.scala
-$ delete target/scala-2.12/classes/domain/Domain.avdl
-$ delete target/scala-2.12/classes/protocol/Protocol.avdl
-$ delete target/scala-2.12/src_managed/main/compiled_avro/foo/bar/Domain.scala
-$ delete target/scala-2.12/src_managed/main/compiled_avro/foo/bar/Protocol.scala
