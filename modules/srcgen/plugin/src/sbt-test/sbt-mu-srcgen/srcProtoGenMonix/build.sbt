@@ -5,8 +5,7 @@ lazy val root = project
   .in(file("."))
   .settings(
     muSrcGenIdlType := IdlType.Proto,
-    muSrcGenTargetDir := (Compile / sourceManaged).value / "compiled_proto",
-    sourceGenerators in Compile += (Compile / muSrcGen).taskValue,
+    muSrcGenTargetDir := (Compile / sourceManaged).value / "generated_from_proto",
     muSrcGenStreamingImplementation := MonixObservable,
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch),
     libraryDependencies ++= Seq(

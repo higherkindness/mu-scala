@@ -5,16 +5,13 @@ lazy val root = project
   .settings(name := "root")
   .settings(version := "1.0.0")
   .settings(Seq(
-    publishMavenStyle := true,
-    mappings in (Compile, packageBin) ~= { _.filter(!_._1.getName.endsWith(".class")) },
     muSrcGenIdlType := IdlType.Avro,
     muSrcGenSourceDirs := Seq(
       (Compile / resourceDirectory).value / "domain",
-      (Compile / resourceDirectory).value / "protocol"),
-    muSrcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
-    sourceGenerators in Compile += (Compile / muSrcGen).taskValue,
+      (Compile / resourceDirectory).value / "protocol"
+    ),
+    muSrcGenTargetDir := (Compile / sourceManaged).value / "generated_from_avro",
     libraryDependencies ++= Seq(
-      "io.higherkindness"    %% "mu-rpc-channel" % sys.props("version"),
-      "com.chuusai" %% "shapeless"        % "2.3.2"
+      "io.higherkindness" %% "mu-rpc-channel" % sys.props("version")
     )
   ))
