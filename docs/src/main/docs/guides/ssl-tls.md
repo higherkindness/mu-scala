@@ -1,7 +1,8 @@
 ---
 layout: docs
 title: SSL/TLS
-permalink: /ssl-tls
+section: guides
+permalink: /guides/ssl-tls
 ---
 
 # SSL/TLS Encryption

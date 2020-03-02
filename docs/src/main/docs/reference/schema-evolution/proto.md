@@ -1,7 +1,8 @@
 ---
 layout: docs
 title: Schema Evolution - Protobuf
-permalink: /schema-evolution/proto
+section: reference
+permalink: /reference/schema-evolution/proto
 ---
 
 # Protocol Buffers - Schema Evolution

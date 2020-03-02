@@ -1,7 +1,8 @@
 ---
 layout: docs
 title: Backward/Forward Data Evolution
-permalink: /schema-evolution
+section: reference
+permalink: /reference/schema-evolution
 ---
 
 # Backward/Forward Data Evolution

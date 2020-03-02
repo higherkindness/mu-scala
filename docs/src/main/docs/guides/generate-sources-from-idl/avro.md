@@ -1,7 +1,8 @@
 ---
 layout: docs
 title: Generating sources from Avro
-permalink: /generate-sources-from-avro
+section: guides
+permalink: /guides/generate-sources-from-avro
 ---
 
 # Generating sources from Avro

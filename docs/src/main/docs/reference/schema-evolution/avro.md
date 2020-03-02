@@ -1,7 +1,8 @@
 ---
 layout: docs
 title: Schema Evolution - Avro
-permalink: /schema-evolution/avro
+section: reference
+permalink: /reference/schema-evolution/avro
 ---
 
 # Avro - Schema Evolution

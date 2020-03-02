@@ -1,7 +1,8 @@
 ---
 layout: docs
 title: Metrics Reporting
-permalink: /metrics-reporting
+section: guides
+permalink: /guides/metrics-reporting
 ---
 
 # Metrics Reporting

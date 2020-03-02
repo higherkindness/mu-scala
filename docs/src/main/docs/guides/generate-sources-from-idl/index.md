@@ -1,7 +1,8 @@
 ---
 layout: docs
 title: Generating sources from IDL
-permalink: /generate-sources-from-idl
+section: guides
+permalink: /guides/generate-sources-from-idl
 ---
 
 # Generate sources from IDL

@@ -1,7 +1,8 @@
 ---
 layout: docs
-title: Streaming
-permalink: /streaming
+title: gRPC Streaming
+section: guides
+permalink: /guides/grpc-streaming
 ---
 
 # Streaming

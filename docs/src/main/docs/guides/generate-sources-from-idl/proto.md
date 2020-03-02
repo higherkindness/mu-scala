@@ -1,7 +1,8 @@
 ---
 layout: docs
 title: Generating sources from Protobuf
-permalink: /generate-sources-from-proto
+section: guides
+permalink: /guides/generate-sources-from-proto
 ---
 
 # Generating sources from Protocol Buffers
@@ -27,7 +28,7 @@ import higherkindness.mu.rpc.srcgen.Model._
 muSrcGenIdlType := IdlType.Proto
 
 // Make it easy for 3rd-party clients to communicate with our gRPC server
-muSrcGenIdlGenIdiomaticEndpoints := true
+muSrcGenIdiomaticEndpoints := true
 ```
 
 Finally, make sure you have enabled the scalamacros compiler plugin so that

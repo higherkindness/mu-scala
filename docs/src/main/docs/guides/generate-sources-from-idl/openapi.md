@@ -1,7 +1,8 @@
 ---
 layout: docs
 title: Generating sources from OpenAPI specifications
-permalink: /generate-sources-from-openapi
+section: guides
+permalink: /guides/generate-sources-from-openapi
 ---
 
 # Generating sources from OpenAPI specifications
