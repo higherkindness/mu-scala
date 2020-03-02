@@ -28,9 +28,6 @@ muSrcGenIdlType := IdlType.OpenAPI
 
 // Generate code that is compatible with http4s v0.20.x
 muSrcGenOpenApiHttpImpl := higherkindness.mu.rpc.idlgen.openapi.OpenApiSrcGenerator.HttpImpl.Http4sV20
-
-// Run the source generation automatically before compilation
-sourceGenerators in Compile += (muSrcGen in Compile).taskValue
 ```
 
 Finally add the appropriate Circe and http4s dependencies so the generated code
