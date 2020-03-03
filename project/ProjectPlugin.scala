@@ -273,15 +273,13 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
       sbtPlugin := true,
-      scriptedLaunchOpts := {
-        scriptedLaunchOpts.value ++
-          Seq(
-            "-Xmx2048M",
-            "-XX:ReservedCodeCacheSize=256m",
-            "-XX:+UseConcMarkSweepGC",
-            "-Dversion=" + version.value
-          )
-      },
+      scriptedLaunchOpts ++= Seq(
+        "-Xmx2048M",
+        "-XX:ReservedCodeCacheSize=256m",
+        "-Dversion=" + version.value,
+        // See https://github.com/sbt/sbt/issues/3469#issuecomment-521326813
+        s"-Dsbt.boot.directory=${file(sys.props("user.home")) / ".sbt" / "boot"}"
+      ),
       // Custom release process for the plugin:
       releaseProcess := Seq[ReleaseStep](
         releaseStepCommandAndRemaining("^ publishSigned"),
