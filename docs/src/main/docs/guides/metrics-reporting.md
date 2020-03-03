@@ -5,6 +5,8 @@ section: guides
 permalink: /guides/metrics-reporting
 ---
 
+TODO this page looks fine but needs a review just in case
+
 # Metrics Reporting
 
 Currently, [Mu] provides two different ways to monitor [gRPC] services: `Prometheus` and `Dropwizard`. The usage is quite similar for both.

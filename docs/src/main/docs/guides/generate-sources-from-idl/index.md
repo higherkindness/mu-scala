@@ -5,6 +5,10 @@ section: guides
 permalink: /guides/generate-sources-from-idl
 ---
 
+TODO these pages now have a lot of overlap with the tutorials. Work out what is
+duplicated and can be deleted, and how the remainder of the information should
+be structured.
+
 # Generate sources from IDL
 
 While it is possible to use Mu by hand-writing your service definitions, message

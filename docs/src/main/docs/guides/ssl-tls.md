@@ -7,31 +7,64 @@ permalink: /guides/ssl-tls
 
 # SSL/TLS Encryption
 
-> [gRPC](https://grpc.io/docs/guides/auth.html) has SSL/TLS integration and promotes the use of SSL/TLS to authenticate the server and encrypt all the data exchanged between the client and the server. Optional mechanisms are available for clients to provide certificates for mutual authentication.
+From the [gRPC authentication guide](https://grpc.io/docs/guides/auth/):
 
-[Mu] allows you to encrypt the connection between the server and the client through SSL/TLS. The main goal of using SSL is to protect your sensitive information and to keep your data secure between servers and clients.
+> gRPC has SSL/TLS integration and promotes the use of SSL/TLS to authenticate
+> the server and encrypt all the data exchanged between the client and the
+> server. Optional mechanisms are available for clients to provide certificates
+> for mutual authentication.
 
-As we mentioned in the [Main](/mu/scala/) section, we can choose to configure our client with `OkHttp` or `Netty` but if we want to encrypt our service, it's mandatory to use `Netty`. Currently, [Mu] only supports encryption over *Netty*.
+[Mu] allows you to encrypt the connection between the server and the client
+through SSL/TLS. The main goal of using SSL is to protect your sensitive
+information and to keep your data secure between servers and clients.
 
-## Requirements 
+## Netty transport
 
-On the server and client side, we will need two files to configure the `SslContext` in `gRPC`:
+Mu allows you to choose the underlying transport layer you want to use for your
+gRPC servers and clients:
 
-* Server/Client certificate file: Small data files that digitally bind a cryptographic key to an organization’s details. This file could be generated or obtained from a third company.
+* For the server you can use `Netty`, or the default transport provided by the
+  gRPC Java library.
+* For the client you can use `Netty` or `OkHttp`.
 
-* Server/Client private key file: The private key is a separate file that is used in the encryption of data sent between your server and the clients. All SSL certificates require a private key to work.
+However, SSL/TLS encryption in Mu is currently only supported for servers and
+clients that use the `Netty` transport.
+
+## Requirements
+
+On the server and client side, we will need two files to configure the
+`SslContext` in `gRPC`:
+
+* Server/Client certificate file: Small data files that digitally bind a
+  cryptographic key to an organization’s details. This file could be generated
+  or obtained from a third party.
+
+* Server/Client private key file: The private key is a separate file that is
+  used in the encryption of data sent between your server and the clients. All
+  SSL certificates require a private key to work.
 
 ## Usage
 
-The first step to secure our [Mu] services is to add the library dependencies `mu-rpc-netty-ssl` and `mu-rpc-netty` in our build.
+The first step to secure our [Mu] services is to add the library dependencies
+`mu-rpc-netty-ssl` and `mu-rpc-netty` in our build.
 
-For the second step, we have to move both server/client certificates and private keys to the `resources` folder.
+For the second step, we have to move both server/client certificates and private
+keys to a place where they can be loaded at runtime, either from the filesystem
+or the classpath. However, these files contain secrets, so they should **not**
+be included in the project and committed to git.
 
-If we haven't yet generated or obtained our own certificates, we can test using certificates found [here](https://github.com/grpc/grpc-java/tree/master/testing/src/main/resources/certs).
+If we haven't yet generated or obtained our own certificates, we can test using
+certificates found
+[here](https://github.com/grpc/grpc-java/tree/master/testing/src/main/resources/certs).
 
-Thirdly, let's see a piece of code where we will explain line by line, what we are doing on the server side.
+### Server side
 
-We won't cover the details regarding creation of `RPCService`, `ServerRPCService` and runtime implicits. You can find more information about these in the [Patterns](patterns) section.
+Let's see a piece of code where we will explain line by line how to build a gRPC
+server with SSL encryption enabled.
+
+We won't cover the details regarding creation of `RPCService`,
+`ServerRPCService` and runtime implicits. You can find more information about
+these in the [gRPC server and client tutorial](../tutorials/grpc-server-client).
 
 ```scala mdoc:invisible
 trait CommonRuntime {
@@ -90,14 +123,14 @@ trait Runtime extends CommonRuntime {
   implicit val muRPCHandler: ServiceHandler[IO] =
     new ServiceHandler[IO]
 
-  // First of all, we have to load the certs into files. These files have to be placed in the resources folder.
+  // Load the certicate and private key files.
 
   val serverCertFile: File                         = TestUtils.loadCert("server1.pem")
   val serverPrivateKeyFile: File                   = TestUtils.loadCert("server1.key")
   val serverTrustedCaCerts: Array[X509Certificate] = Array(TestUtils.loadX509Cert("ca.pem"))
 
-  // We have to build the SslContext passing our server certificates, configuring the OpenSSL
-  // and requiring the client auth.
+  // Build the SslContext, passing our server certificate, private key, and trusted certs.
+  // Configure the server to use OpenSSL and require client authentication.
 
   val serverSslContext: SslContext =
     GrpcSslContexts
@@ -108,15 +141,15 @@ trait Runtime extends CommonRuntime {
       .clientAuth(ClientAuth.REQUIRE)
       .build()
 
-  // Adding to the GrpConfig list the SslContext:
+  // Add the SslContext to the list of GrpConfigs.
 
   val grpcConfigs: IO[List[GrpcConfig]] =
      Greeter.bindService[IO]
        .map(AddService)
        .map(c => List(SetSslContext(serverSslContext), c))
 
-  // Important. We have to create the server with Netty. OkHttp is not supported for the SSL
-  // encryption in Mu at this moment.
+  // Important: we have to create the server with Netty.
+  // This is the only server transport that supports SSL encryption.
 
   val server: IO[GrpcServer[IO]] = grpcConfigs.flatMap(GrpcServer.netty[IO](8080, _))
 
@@ -125,7 +158,10 @@ trait Runtime extends CommonRuntime {
 object implicits extends Runtime
 ```
 
-Lastly, as we did before with the server side, let's see what happens on the client side.
+### Client side
+
+Similarly, let's see how to create a gRPC client with encryption and client
+authentication.
 
 ```scala mdoc:silent
 import cats.syntax.either._
@@ -138,31 +174,24 @@ import higherkindness.mu.rpc.channel.netty.{
 }
 import io.grpc.netty.NegotiationType
 
-object client {
+object MainApp extends CommonRuntime {
 
-  // First of all, we have to load the certs files.
+  // Load the certicate and private key files.
 
   val clientCertChainFile: File                    = TestUtils.loadCert("client.pem")
   val clientPrivateKeyFile: File                   = TestUtils.loadCert("client.key")
   val clientTrustedCaCerts: Array[X509Certificate] = Array(TestUtils.loadX509Cert("ca.pem"))
 
-  // We have to create the SslContext for the client like as we did in the server.
+  // We have to create the SslContext for the client, like we did for the server.
 
   val clientSslContext: SslContext =
     GrpcSslContexts.forClient
       .keyManager(clientCertChainFile, clientPrivateKeyFile)
       .trustManager(clientTrustedCaCerts: _*)
       .build()
-}
 
-object MainApp extends CommonRuntime {
-
-  import client._
-
-  // Important, the channel interpreter have to be NettyChannelInterpreter.
-
-  // In this case, we are creating the channel interpreter with a specific ManagedChannelConfig
-  // These configs allow us to encrypt the connection with the server.
+  // Important: the channel interpreter must be NettyChannelInterpreter.
+  // We configure the channel interpreter to enable TLS and to use the SSL context we built.
 
   val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
     ChannelForAddress("localhost", 8080),
@@ -179,8 +208,11 @@ object MainApp extends CommonRuntime {
 }
 ```
 
-## More
-For more details, [here](https://www.47deg.com/blog/mu-rpc-securing-communications-with-mu/) you can check a full explanation and an example about securing communications.
+## Further reading
+
+For more details,
+[here](https://www.47deg.com/blog/mu-rpc-securing-communications-with-mu/) you
+can check a full explanation and an example about securing communications.
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/

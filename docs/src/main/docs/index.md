@@ -7,7 +7,7 @@ permalink: /
 
 # Mu-Scala
 
-[Mu] is a toolkit designed to make it easier to build and maintain
+[Mu] is a suite of libraries and tools that help you build and maintain
 microservices in a functional style.
 
 While you focus on implementing the business logic for your service, let Mu take
@@ -33,7 +33,7 @@ Specifically, Mu helps you to build:
 
 ## Getting Started
 
-If you're new to Mu-Scala, check out the [Getting Started guide](getting-started).
+If you're new to Mu-Scala, check out the [Getting Started guide](getting-started) and the [tutorials](tutorials).
 
 [Avro]: https://avro.apache.org/
 [FS2]: https://github.com/functional-streams-for-scala/fs2

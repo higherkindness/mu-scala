@@ -5,7 +5,9 @@ section: guides
 permalink: /guides/grpc-streaming
 ---
 
-# Streaming
+TODO update this whole page.
+
+# gRPC Streaming
 
 In the previous section, we saw that [Mu] allows you to define unary services. Additionally, it supports the following streaming options:
 

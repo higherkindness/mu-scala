@@ -143,7 +143,7 @@ There's quite a lot going on there, so let's unpack it a bit.
     * As we'll see in a later tutorial, `F[_]` becomes an IO monad such as
       [cats-effect] `IO` when we implement a gRPC server or client.
 * The trait is annotated with `@service`. This is a macro annotation. When we
-  compile the code, it will create a companion object for the trait and add a
+  compile the code, it will create a companion object for the trait containing a
   load of useful helper methods for creating servers and clients. We'll see how
   to make use of them in the next tutorial.
 * The annotation has 4 parameters:
@@ -152,6 +152,9 @@ There's quite a lot going on there, so let's unpack it a bit.
     3. `"hello"` is the namespace in which the RPC endpoint will be exposed
     4. `Capitalize` means the endpoint will be exposed as `SayHello`, not
        `sayHello`.
+
+These parameters can be customised using sbt settings. Take a look at the
+[source generation reference](../reference/source-generation) for more details.
 
 ## Next steps
 
