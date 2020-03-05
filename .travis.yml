@@ -62,9 +62,9 @@ jobs:
       name: "Publish sbt plugin"
       script:
         - if grep -q "SNAPSHOT" version.sbt; then
-            sbt srcgen-sbt/publish;
+            sbt ++$TRAVIS_SCALA_VERSION srcgen-sbt/publish;
           else
-            sbt ";project srcgen-sbt; release";
+            sbt ++$TRAVIS_SCALA_VERSION ";project srcgen-sbt; release";
           fi
     - stage: deploy
       scala: 2.13.1
@@ -74,12 +74,12 @@ jobs:
         - if grep -q "SNAPSHOT" version.sbt; then
             sbt +publish;
           else
-            sbt orgUpdateDocFiles;
+            sbt ++$TRAVIS_SCALA_VERSION orgUpdateDocFiles;
             git reset --hard HEAD;
             git clean -f;
             git checkout master;
             git pull origin master;
-            sbt release;
+            sbt ++$TRAVIS_SCALA_VERSION release;
           fi
     - stage: microsite
       scala: 2.12.10
@@ -89,5 +89,5 @@ jobs:
         - if grep -q "SNAPSHOT" version.sbt; then
             echo "Skipping microsite publication, snapshot version";
           else
-            sbt docs/publishMicrosite;
+            sbt ++$TRAVIS_SCALA_VERSION docs/publishMicrosite;
           fi

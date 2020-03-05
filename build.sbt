@@ -221,7 +221,7 @@ lazy val `srcgen-sbt` = project
   .in(file("modules/srcgen/plugin"))
   .dependsOn(`srcgen-core`)
   .settings(moduleName := "sbt-mu-srcgen")
-  .settings(crossScalaVersions := Seq(V.scala212))
+  .settings(noCrossCompilationLastScala)
   .settings(sbtPluginSettings: _*)
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
