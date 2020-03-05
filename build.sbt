@@ -126,7 +126,7 @@ lazy val `health-check-unary` = project
   .settings(moduleName := "mu-rpc-health-check-unary")
 
 /////////HealthCheck Server Monix Example
-lazy val `health-server-monix` = project
+lazy val `example-health-server-monix` = project
   .in(file("modules/examples/health-check/health-server-monix"))
   .dependsOn(monix)
   .dependsOn(`health-check-unary`)
@@ -137,7 +137,7 @@ lazy val `health-server-monix` = project
   .settings(moduleName := "mu-rpc-example-health-check-server-monix")
 
 /////////HealthCheck Server FS2 Example
-lazy val `health-server-fs2` = project
+lazy val `example-health-server-fs2` = project
   .in(file("modules/examples/health-check/health-server-fs2"))
   .dependsOn(fs2)
   .dependsOn(`health-check-unary`)
@@ -148,10 +148,10 @@ lazy val `health-server-fs2` = project
   .settings(moduleName := "mu-rpc-example-health-check-server-fs2")
 
 /////////HealthCheck Client Example
-lazy val `health-client` = project
+lazy val `example-health-client` = project
   .in(file("modules/examples/health-check/health-client"))
-  .dependsOn(`health-server-monix`)
-  .dependsOn(`health-server-fs2`)
+  .dependsOn(`example-health-server-monix`)
+  .dependsOn(`example-health-server-fs2`)
   .dependsOn(config)
   .dependsOn(netty)
   .settings(healthCheckSettingsMonix)
@@ -215,44 +215,45 @@ lazy val `srcgen-core` = project
   .dependsOn(channel % "test->test")
   .settings(moduleName := "mu-srcgen-core")
   .settings(srcGenSettings)
+  .settings(compatSettings)
 
 lazy val `srcgen-sbt` = project
   .in(file("modules/srcgen/plugin"))
   .dependsOn(`srcgen-core`)
   .settings(moduleName := "sbt-mu-srcgen")
-  .settings(crossScalaVersions := Seq(V.scala))
+  .settings(crossScalaVersions := Seq(V.scala212))
   .settings(sbtPluginSettings: _*)
   .enablePlugins(BuildInfoPlugin)
   .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
   .settings(buildInfoPackage := "mu.rpc.srcgen")
   // See https://github.com/sbt/sbt/issues/3248
-  .settings(publishLocal := publishLocal
-    .dependsOn(
-      common / publishLocal,
-      `internal-core` / publishLocal,
-      channel / publishLocal,
-      server / publishLocal,
-      `internal-fs2` / publishLocal,
-      fs2 / publishLocal,
-      `marshallers-jodatime` / publishLocal,
-      `srcgen-core` / publishLocal
-    )
-    .value)
+  .settings(
+    publishLocal := publishLocal
+      .dependsOn(
+        common / publishLocal,
+        `internal-core` / publishLocal,
+        channel / publishLocal,
+        server / publishLocal,
+        `internal-fs2` / publishLocal,
+        fs2 / publishLocal,
+        `marshallers-jodatime` / publishLocal,
+        `srcgen-core` / publishLocal
+      )
+      .value
+  )
   .enablePlugins(SbtPlugin)
 
 ////////////////////
 //// BENCHMARKS ////
 ////////////////////
 
-lazy val lastReleasedV = "0.18.4"
-
 lazy val `benchmarks-vprev` = project
   .in(file("benchmarks/vprev"))
   .settings(
     libraryDependencies ++= Seq(
-      "io.higherkindness" %% "mu-rpc-channel" % lastReleasedV,
-      "io.higherkindness" %% "mu-rpc-server"  % lastReleasedV,
-      "io.higherkindness" %% "mu-rpc-testing" % lastReleasedV
+      "io.higherkindness" %% "mu-rpc-channel" % V.lastRelease,
+      "io.higherkindness" %% "mu-rpc-server"  % V.lastRelease,
+      "io.higherkindness" %% "mu-rpc-testing" % V.lastRelease
     )
   )
   .settings(coverageEnabled := false)
@@ -328,7 +329,8 @@ lazy val `example-routeguide-client` = project
   )
   .settings(addCommandAlias("runClientIO", "runMain example.routeguide.client.io.ClientAppIO"))
   .settings(
-    addCommandAlias("runClientTask", "runMain example.routeguide.client.task.ClientAppTask"))
+    addCommandAlias("runClientTask", "runMain example.routeguide.client.task.ClientAppTask")
+  )
 
 ////////////////////
 /////   SEED   /////
@@ -437,7 +439,8 @@ lazy val `seed-client-process` = project
     fs2,
     `seed-client-common`,
     `seed-server-protocol-avro`,
-    `seed-server-protocol-proto`)
+    `seed-server-protocol-proto`
+  )
 
 lazy val `seed-client-app` = project
   .in(file("modules/examples/seed/client/modules/app"))
@@ -481,7 +484,7 @@ lazy val allSeedModules: Seq[ProjectReference] = Seq(
 lazy val allSeedModulesDeps: Seq[ClasspathDependency] =
   allSeedModules.map(ClasspathDependency(_, None))
 
-lazy val seed = project
+lazy val `example-seed` = project
   .in(file("modules/examples/seed"))
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
@@ -564,7 +567,7 @@ lazy val `legacy-avro-decimal-compat-encoders` = project
 //// MODULES REGISTRY ////
 //////////////////////////
 
-lazy val allModules: Seq[ProjectReference] = Seq(
+lazy val coreModules: Seq[ProjectReference] = Seq(
   common,
   `internal-core`,
   `internal-monix`,
@@ -585,43 +588,55 @@ lazy val allModules: Seq[ProjectReference] = Seq(
   http,
   kafka,
   `marshallers-jodatime`,
+  `legacy-avro-decimal-compat-model`,
+  `legacy-avro-decimal-compat-protocol`,
+  `legacy-avro-decimal-compat-encoders`,
+  `health-check-unary`,
+  `example-health-client`,
+  `example-health-server-monix`,
+  `example-health-server-fs2`,
   `example-routeguide-protocol`,
   `example-routeguide-common`,
   `example-routeguide-runtime`,
   `example-routeguide-server`,
   `example-routeguide-client`,
+  `example-seed`
+)
+
+lazy val nonCrossedScalaVersionModules: Seq[ProjectReference] = Seq(
+  `benchmarks-vprev`,
+  `benchmarks-vnext`,
   `example-todolist-protocol`,
   `example-todolist-runtime`,
   `example-todolist-server`,
-  `example-todolist-client`,
-  seed,
-  `benchmarks-vprev`,
-  `benchmarks-vnext`,
-  `legacy-avro-decimal-compat-model`,
-  `legacy-avro-decimal-compat-protocol`,
-  `legacy-avro-decimal-compat-encoders`,
-  `health-check-unary`,
-  `health-client`,
-  `health-server-monix`,
-  `health-server-fs2`
+  `example-todolist-client`
 )
 
-lazy val allModulesDeps: Seq[ClasspathDependency] =
-  allModules.map(ClasspathDependency(_, None))
+lazy val coreModulesDeps: Seq[ClasspathDependency] =
+  coreModules.map(ClasspathDependency(_, None))
 
 lazy val root = project
   .in(file("."))
   .settings(name := "mu-scala")
   .settings(noPublishSettings)
-  .aggregate(allModules: _*)
-  .dependsOn(allModulesDeps: _*)
+  .aggregate(coreModules: _*)
+  .dependsOn(coreModulesDeps: _*)
+
+lazy val `root-non-crossed-scala-versions` = project
+  .in(file("examples"))
+  .settings(name := "mu-scala-examples")
+  .settings(noPublishSettings)
+  .settings(noCrossCompilationLastScala)
+  .aggregate(nonCrossedScalaVersionModules: _*)
+  .dependsOn(nonCrossedScalaVersionModules.map(ClasspathDependency(_, None)): _*)
 
 lazy val docs = project
   .in(file("docs"))
-  .dependsOn(allModulesDeps.filterNot(_.project == LocalProject("benchmarks-vprev")): _*)
+  .dependsOn(coreModulesDeps: _*)
   .settings(name := "mu-docs")
   .settings(docsSettings: _*)
   .settings(micrositeSettings: _*)
   .settings(noPublishSettings: _*)
+  .settings(noCrossCompilationLastScala)
   .enablePlugins(MicrositesPlugin)
   .enablePlugins(MdocPlugin)

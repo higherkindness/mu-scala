@@ -16,11 +16,17 @@
 
 package higherkindness.mu.rpc
 
-import higherkindness.mu.rpc.srcgen.util.Toolbox.u._
+import scala.reflect.runtime.universe.runtimeMirror
 import higherkindness.mu.rpc.srcgen.util.AstOptics.ast
 import higherkindness.mu.rpc.protocol.{Avro, AvroWithSchema, Custom, Protobuf, SerializationType}
 
+import scala.tools.reflect.ToolBox
+
 package object srcgen {
+
+  val mirror                                          = runtimeMirror(getClass.getClassLoader)
+  val Toolbox: ToolBox[reflect.runtime.universe.type] = ToolBox(mirror).mkToolBox()
+  import Toolbox.u._
 
   val DefaultRequestParamName = "arg"
   val EmptyType               = "Empty.type"
