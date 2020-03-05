@@ -33,7 +33,7 @@ script:
   - curl -s https://codecov.io/bash > .codecov
   - sed -i -e 's/TRAVIS_.*_VERSION/^TRAVIS_.*_VERSION=/' .codecov
   - chmod +x .codecov
-  - sbt ++$TRAVIS_SCALA_VERSION clean test coverageReport coverageAggregate docs/makeMicrosite
+  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate
   - if [ $TRAVIS_SCALA_VERSION = "2.13.1" ]; then ./.codecov -X gcov; fi
 
 stages:
@@ -42,6 +42,10 @@ stages:
   - microsite
 jobs:
   include:
+    - name: "check docs"
+      scala: 2.12.10
+      script:
+        - sbt ++$TRAVIS_SCALA_VERSION docs/makeMicrosite
     - name: "non-cross-compiled modules check"
       scala: 2.12.10
       script:

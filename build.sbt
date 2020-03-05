@@ -596,7 +596,10 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   `legacy-avro-decimal-compat-model`,
   `legacy-avro-decimal-compat-protocol`,
   `legacy-avro-decimal-compat-encoders`,
-  `health-check-unary`
+  `health-check-unary`,
+  `example-health-client`,
+  `example-health-server-monix`,
+  `example-health-server-fs2`
 )
 
 lazy val otherModules: Seq[ProjectReference] = Seq(
@@ -611,9 +614,6 @@ lazy val otherModules: Seq[ProjectReference] = Seq(
   `example-todolist-runtime`,
   `example-todolist-server`,
   `example-todolist-client`,
-  `example-health-client`,
-  `example-health-server-monix`,
-  `example-health-server-fs2`,
   seed
 )
 
