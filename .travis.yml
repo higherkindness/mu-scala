@@ -49,7 +49,7 @@ jobs:
     - name: "non-cross-compiled modules check"
       scala: 2.12.10
       script:
-        - sbt ++$TRAVIS_SCALA_VERSION examples/test
+        - sbt ++$TRAVIS_SCALA_VERSION root-non-crossed-scala-versions/test
     - name: "sbt plugin tests"
       scala: 2.12.10
       script:

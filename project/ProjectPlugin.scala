@@ -405,7 +405,7 @@ object ProjectPlugin extends AutoPlugin {
       ),
       scalaVersion := V.scala213,
       crossScalaVersions := Seq(V.scala212, V.scala213),
-      scalacOptions ~= (_ filterNot Set("-Xfuture", "-Xfatal-warnings").contains),
+      scalacOptions --= Seq("-Xfuture", "-Xfatal-warnings"),
       Test / fork := true,
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,

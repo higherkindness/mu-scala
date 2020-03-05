@@ -484,7 +484,7 @@ lazy val allSeedModules: Seq[ProjectReference] = Seq(
 lazy val allSeedModulesDeps: Seq[ClasspathDependency] =
   allSeedModules.map(ClasspathDependency(_, None))
 
-lazy val seed = project
+lazy val `example-seed` = project
   .in(file("modules/examples/seed"))
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
@@ -600,10 +600,10 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   `example-routeguide-runtime`,
   `example-routeguide-server`,
   `example-routeguide-client`,
-  seed
+  `example-seed`
 )
 
-lazy val otherModules: Seq[ProjectReference] = Seq(
+lazy val nonCrossedScalaVersionModules: Seq[ProjectReference] = Seq(
   `benchmarks-vprev`,
   `benchmarks-vnext`,
   `example-todolist-protocol`,
@@ -622,17 +622,17 @@ lazy val root = project
   .aggregate(coreModules: _*)
   .dependsOn(coreModulesDeps: _*)
 
-lazy val examples = project
+lazy val `root-non-crossed-scala-versions` = project
   .in(file("examples"))
   .settings(name := "mu-scala-examples")
   .settings(noPublishSettings)
   .settings(noCrossCompilationLastScala)
-  .aggregate(otherModules: _*)
-  .dependsOn(otherModules.map(ClasspathDependency(_, None)): _*)
+  .aggregate(nonCrossedScalaVersionModules: _*)
+  .dependsOn(nonCrossedScalaVersionModules.map(ClasspathDependency(_, None)): _*)
 
 lazy val docs = project
   .in(file("docs"))
-  .dependsOn(coreModulesDeps.filterNot(_.project == LocalProject("benchmarks-vprev")): _*)
+  .dependsOn(coreModulesDeps: _*)
   .settings(name := "mu-docs")
   .settings(docsSettings: _*)
   .settings(micrositeSettings: _*)
