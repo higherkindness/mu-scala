@@ -206,7 +206,7 @@ lazy val kafka = project
   .settings(kafkaSettings)
 
 ////////////////
-//// IDLGEN ////
+//// SRCGEN ////
 ////////////////
 
 lazy val `srcgen-core` = project

@@ -6,7 +6,7 @@ val V = new {
   val scalatest      = "3.0.8"
   val logbackClassic = "1.2.3"
   val cats           = "2.0.0"
-  val catsEffect     = "2.1.1"
+  val catsEffect     = "2.1.2"
   val fs2            = "2.2.2"
 }
 
@@ -15,12 +15,9 @@ lazy val root = project
   .settings(name := "root")
   .settings(version := "1.0.0")
   .settings(Seq(
-    publishMavenStyle := true,
-    mappings in (Compile, packageBin) ~= { _.filter(!_._1.getName.endsWith(".class")) },
     muSrcGenIdlType := IdlType.OpenAPI,
     muSrcGenSourceDirs := Seq((Compile / resourceDirectory).value),
     muSrcGenTargetDir := (Compile / sourceManaged).value / "compiled_openapi",
-    sourceGenerators in Compile += (Compile / muSrcGen).taskValue,
     muSrcGenOpenApiHttpImpl := higherkindness.mu.rpc.srcgen.openapi.OpenApiSrcGenerator.HttpImpl.Http4sV20,
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch),
     libraryDependencies ++= Seq(

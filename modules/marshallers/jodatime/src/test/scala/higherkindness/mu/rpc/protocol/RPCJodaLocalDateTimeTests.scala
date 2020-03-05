@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
-package protocol
+package higherkindness.mu.rpc.protocol
 
 import org.joda.time._
 import cats.Applicative
@@ -23,7 +22,7 @@ import cats.effect.Resource
 import cats.syntax.applicative._
 import com.fortysevendeg.scalacheck.datetime.instances.joda._
 import com.fortysevendeg.scalacheck.datetime.GenDateTime._
-import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.common.{A => _, _}
 import higherkindness.mu.rpc.testing.servers.withServerChannel
 import io.grpc.{ManagedChannel, ServerServiceDefinition}
 import org.scalacheck.Arbitrary
@@ -93,7 +92,7 @@ class RPCJodaLocalDateTimeTests extends RpcBaseTestSuite with BeforeAndAfter wit
 
   "RPCJodaService" should {
 
-    import TestsImplicits._
+    import higherkindness.mu.rpc.TestsImplicits._
     import RPCJodaLocalDateTimeService._
 
     implicit val H: RPCJodaServiceDefHandler[ConcurrentMonad] =

@@ -27,9 +27,9 @@ object ProjectPlugin extends AutoPlugin {
       val avro4s: String              = "3.0.8"
       val avrohugger: String          = "1.0.0-RC22"
       val betterMonadicFor: String    = "0.3.1"
-      val catsEffect: String          = "2.1.1"
+      val catsEffect: String          = "2.1.2"
       val circe: String               = "0.13.0"
-      val dropwizard: String          = "4.1.3"
+      val dropwizard: String          = "4.1.4"
       val embeddedKafka: String       = "2.4.0"
       val enumeratum: String          = "1.5.15"
       val frees: String               = "0.8.2"
@@ -50,7 +50,7 @@ object ProjectPlugin extends AutoPlugin {
       val paradise: String            = "2.1.1"
       val pbdirect: String            = "0.5.0"
       val prometheus: String          = "0.8.1"
-      val pureconfig: String          = "0.12.2"
+      val pureconfig: String          = "0.12.3"
       val reactiveStreams: String     = "1.0.3"
       val scala212: String            = "2.12.10"
       val scala213: String            = "2.13.1"
@@ -300,15 +300,13 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
       sbtPlugin := true,
-      scriptedLaunchOpts := {
-        scriptedLaunchOpts.value ++
-          Seq(
-            "-Xmx2048M",
-            "-XX:ReservedCodeCacheSize=256m",
-            "-XX:+UseConcMarkSweepGC",
-            "-Dversion=" + version.value
-          )
-      },
+      scriptedLaunchOpts ++= Seq(
+        "-Xmx2048M",
+        "-XX:ReservedCodeCacheSize=256m",
+        "-Dversion=" + version.value,
+        // See https://github.com/sbt/sbt/issues/3469#issuecomment-521326813
+        s"-Dsbt.boot.directory=${file(sys.props("user.home")) / ".sbt" / "boot"}"
+      ),
       // Custom release process for the plugin:
       releaseProcess := Seq[ReleaseStep](
         releaseStepCommandAndRemaining("^ publishSigned"),

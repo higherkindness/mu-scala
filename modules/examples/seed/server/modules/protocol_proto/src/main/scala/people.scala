@@ -16,8 +16,6 @@
 
 package example.seed.server.protocol.proto
 
-import higherkindness.mu.rpc.protocol._
-
 object people {
 
   final case class Person(name: String, age: Int)
