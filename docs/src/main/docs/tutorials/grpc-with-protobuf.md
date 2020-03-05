@@ -29,18 +29,23 @@ you use the Mu-Scala giter8 template to create a new skeleton project. This will
 install and configure the `mu-srcgen` sbt plugin, which we will need to generate
 Scala code from a Protobuf `.proto` file.
 
+When you create the project using `sbt new`, make sure to set
+`create_sample_code` to `no`. That way you can start with an empty project, and
+gradually fill in the implementation as you follow the tutorial.
+
 ## Write the Protobuf protocol
 
-We're going to start by writing a `.proto` file containing our request and
-response messages.
+We're going to start by writing a `.proto` file containing a couple of messages.
+These messages will be used as the request and response types for a gRPC
+endpoint later.
 
-Copy the following `Protobuf` protocol and save it as
-`src/main/resources/greeter.proto`:
+Copy the following Protobuf protocol and save it as
+`protocol/src/main/resources/proto/hello.proto`:
 
 ```proto
 syntax = "proto3";
 
-package hello;
+package com.example;
 
 message HelloRequest {
   string name = 1;
@@ -63,23 +68,22 @@ output:
 sbt:hello-mu-protobuf> muSrcGen
 protoc-jar: protoc version: 3.11.1, detected platform: osx-x86_64 (mac os x/x86_64)
 protoc-jar: embedded: bin/3.11.1/protoc-3.11.1-osx-x86_64.exe
-protoc-jar: executing: [/var/folders/33/gbkw7lt97l7b38jnzh49bwvh0000gn/T/protocjar8448157137886915423/bin/protoc.exe, --proto_path=/Users/chris/code/hello-mu-protobuf/target/scala-2.12/resource_managed/main/proto, --proto_path=/Users/chris/code/hello-mu-protobuf/target/scala-2.12/resource_managed/main/proto, --plugin=protoc-gen-proto2_to_proto3, --include_imports, --descriptor_set_out=greeter.proto.desc, greeter.proto]
-[success] Total time: 0 s, completed 03-Mar-2020 11:23:35
+protoc-jar: executing: [/var/folders/33/gbkw7lt97l7b38jnzh49bwvh0000gn/T/protocjar11045051115974206116/bin/protoc.exe, --proto_path=/Users/chris/code/hello-mu-protobuf/protocol/target/scala-2.12/resource_managed/main/proto/proto, --proto_path=/Users/chris/code/hello-mu-protobuf/protocol/target/scala-2.12/resource_managed/main/proto, --plugin=protoc-gen-proto2_to_proto3, --include_imports, --descriptor_set_out=hello.proto.desc, hello.proto]
 ```
 
 Let's have a look at the code that Mu-Scala has generated. Open the file
-`target/scala-2.12/src_managed/main/hello/greeter.scala` in your editor of
-choice.
+`protocol/target/scala-2.12/src_managed/main/com/example/hello.scala` in your
+editor of choice.
 
 It's generated code, so it will look pretty ugly. Here's a version of it tidied
 up a bit to make it more readable:
 
 ```scala
-package hello
+package com.example
 
 import higherkindness.mu.rpc.protocol._
 
-object greeter {
+object hello {
   final case class HelloRequest(@pbIndex(1) name: String)
   final case class HelloResponse(@pbIndex(1) greeting: String, @pbIndex(2) happy: Boolean)
 }
@@ -90,7 +94,7 @@ A few things to note:
 * Mu-Scala has generated one case class for each Protobuf message
 * The package name matches the one specified in the `.proto` file
 * The case classes are inside an object whose name matches the filename of
-  `greeter.proto`
+  `hello.proto`
 
 ## Add an RPC service
 
@@ -98,7 +102,7 @@ We now have some model classes to represent our RPC request and response, but we
 don't have any RPC endpoints. Let's fix that by adding a service to the Protobuf
 protocol.
 
-Add the following lines at the end of `greeter.proto` to define an RPC service
+Add the following lines at the end of `hello.proto` to define an RPC service
 with one endpoint:
 
 ```proto
@@ -110,19 +114,19 @@ service Greeter {
 ## Regenerate the code
 
 If you run the `muSrcGen` sbt task again, and inspect the
-`target/scala-2.12/src_managed/main/hello/greeter.scala` file again, it should
+`protocol/target/scala-2.12/src_managed/main/com/example/hello.scala` file again, it should
 look something like this:
 
 ```scala
-package hello
+package com.example
 
 import higherkindness.mu.rpc.protocol._
 
-object greeter {
+object hello {
   final case class HelloRequest(@pbIndex(1) name: String)
   final case class HelloResponse(@pbIndex(1) greeting: String, @pbIndex(2) happy: Boolean)
 
-  @service(Protobuf, Identity, namespace = Some("hello"), methodNameStyle = Capitalize)
+  @service(Protobuf, Identity, namespace = Some("com.example"), methodNameStyle = Capitalize)
   trait Greeter[F[_]] {
     def SayHello(req: HelloRequest): F[HelloResponse]
   }
@@ -131,7 +135,7 @@ object greeter {
 ```
 
 A trait has been added to the generated code, corresponding to the `service` we
-added to `greeter.proto`.
+added to `hello.proto`.
 
 There's quite a lot going on there, so let's unpack it a bit.
 
@@ -145,11 +149,12 @@ There's quite a lot going on there, so let's unpack it a bit.
 * The trait is annotated with `@service`. This is a macro annotation. When we
   compile the code, it will create a companion object for the trait containing a
   load of useful helper methods for creating servers and clients. We'll see how
-  to make use of them in the next tutorial.
+  to make use of these helpers in the next tutorial.
 * The annotation has 4 parameters:
     1. `Protobuf` describes how gRPC requests and responses are serialized
     2. `Identity` means GZip compression of requests and responses is disabled
-    3. `"hello"` is the namespace in which the RPC endpoint will be exposed
+    3. `"com.example"` is the namespace in which the RPC endpoint will be
+       exposed
     4. `Capitalize` means the endpoint will be exposed as `SayHello`, not
        `sayHello`.
 
@@ -158,7 +163,8 @@ These parameters can be customised using sbt settings. Take a look at the
 
 ## Next steps
 
-To find out how to turn this service definition into a working gRPC client or server, continue to the [gRPC server and client tutorial](grpc-server-client).
+To find out how to turn this service definition into a working gRPC client or
+server, continue to the [gRPC server and client tutorial](grpc-server-client).
 
 [cats-effect]: https://typelevel.org/cats-effect/
 [gRPC]: https://grpc.io/
