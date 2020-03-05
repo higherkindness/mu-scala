@@ -251,14 +251,13 @@ lazy val `benchmarks-vprev` = project
   .in(file("benchmarks/vprev"))
   .settings(
     libraryDependencies ++= Seq(
-      "io.higherkindness" %% "mu-rpc-channel" % V.lastReleasedV,
-      "io.higherkindness" %% "mu-rpc-server"  % V.lastReleasedV,
-      "io.higherkindness" %% "mu-rpc-testing" % V.lastReleasedV
+      "io.higherkindness" %% "mu-rpc-channel" % V.lastRelease,
+      "io.higherkindness" %% "mu-rpc-server"  % V.lastRelease,
+      "io.higherkindness" %% "mu-rpc-testing" % V.lastRelease
     )
   )
   .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vprev")
-  .settings(noCrossCompilationLastScala)
   .settings(crossSettings)
   .settings(noPublishSettings)
   .enablePlugins(JmhPlugin)
@@ -502,14 +501,12 @@ lazy val `example-todolist-protocol` = project
   .dependsOn(channel)
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
-  .settings(noCrossCompilationLastScala)
   .settings(moduleName := "mu-rpc-example-todolist-protocol")
 
 lazy val `example-todolist-runtime` = project
   .in(file("modules/examples/todolist/runtime"))
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
-  .settings(noCrossCompilationLastScala)
   .settings(moduleName := "mu-rpc-example-todolist-runtime")
 
 lazy val `example-todolist-server` = project
@@ -520,7 +517,6 @@ lazy val `example-todolist-server` = project
   .dependsOn(config)
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
-  .settings(noCrossCompilationLastScala)
   .settings(moduleName := "mu-rpc-example-todolist-server")
   .settings(exampleTodolistCommonSettings)
 
@@ -532,7 +528,6 @@ lazy val `example-todolist-client` = project
   .dependsOn(config)
   .settings(coverageEnabled := false)
   .settings(noPublishSettings)
-  .settings(noCrossCompilationLastScala)
   .settings(moduleName := "mu-rpc-example-todolist-client")
   .settings(exampleTodolistCommonSettings)
 
@@ -599,22 +594,22 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   `health-check-unary`,
   `example-health-client`,
   `example-health-server-monix`,
-  `example-health-server-fs2`
-)
-
-lazy val otherModules: Seq[ProjectReference] = Seq(
-  `benchmarks-vprev`,
-  `benchmarks-vnext`,
+  `example-health-server-fs2`,
   `example-routeguide-protocol`,
   `example-routeguide-common`,
   `example-routeguide-runtime`,
   `example-routeguide-server`,
   `example-routeguide-client`,
+  seed
+)
+
+lazy val otherModules: Seq[ProjectReference] = Seq(
+  `benchmarks-vprev`,
+  `benchmarks-vnext`,
   `example-todolist-protocol`,
   `example-todolist-runtime`,
   `example-todolist-server`,
-  `example-todolist-client`,
-  seed
+  `example-todolist-client`
 )
 
 lazy val coreModulesDeps: Seq[ClasspathDependency] =
