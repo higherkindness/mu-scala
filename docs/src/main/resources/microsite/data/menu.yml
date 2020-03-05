@@ -44,10 +44,9 @@ options:
     menu_type: tutorials
     url: tutorials/openapi-client
 
-  - title: Testing gRPC servers and clients
+  - title: Testing gRPC servers
     menu_type: tutorials
-    url: tutorials/grpc-testing
-    # TODO what would this tutorial look like? Is this better as a How-to?
+    url: tutorials/testing-grpc-servers
 
   - title: Deploying a Mu service
     menu_type: tutorials
