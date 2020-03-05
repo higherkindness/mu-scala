@@ -38,14 +38,11 @@ addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "0.20.1")
 
 The `muSrcGen` sbt task generates Scala source code from IDL files.
 
-The easiest way to use the plugin is by integrating the source generation in
-your compile process by adding this line to your `build.sbt` file:
+The plugin will automatically integrate the source generation into your compile
+process, so the sources are generated before compilation when you run the
+`compile` task.
 
-```scala
-sourceGenerators in Compile += (muSrcGen in Compile).taskValue
-```
-
-Otherwise, you can run the sbt task manually:
+You can also run the sbt task manually:
 
 ```sh
 $ sbt muSrcGen
@@ -152,7 +149,6 @@ sbt module containing the IDL definitions (`foo-domain`):
       muSrcGenSerializationType := SerializationType.AvroWithSchema,
       muSrcGenJarNames := Seq("foo-domain"),
       muSrcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
-      sourceGenerators in Compile += (Compile / muSrcGen).taskValue,
       libraryDependencies ++= Seq(
         "io.higherkindness" %% "mu-rpc-channel" % V.muRPC
       )

@@ -205,6 +205,13 @@ object SrcGenPlugin extends AutoPlugin {
     }
   )
 
+  lazy val sourceGeneratorSettings: Seq[Def.Setting[_]] = Seq(
+    // Register the muSrcGen task as a source generator.
+    // If we don't do this, the compile task will not see the
+    // generated files even if the user manually runs the muSrcGen task.
+    sourceGenerators in Compile += (muSrcGen in Compile).taskValue
+  )
+
   private def srcGenTask(
       generator: GeneratorApplication[_],
       idlType: IdlType,
@@ -253,5 +260,5 @@ object SrcGenPlugin extends AutoPlugin {
   }
 
   override def projectSettings: Seq[Def.Setting[_]] =
-    defaultSettings ++ taskSettings ++ packagingSettings
+    defaultSettings ++ taskSettings ++ packagingSettings ++ sourceGeneratorSettings
 }

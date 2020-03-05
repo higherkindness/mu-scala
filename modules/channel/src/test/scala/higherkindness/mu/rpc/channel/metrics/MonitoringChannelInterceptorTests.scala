@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
-package channel.metrics
+package higherkindness.mu.rpc.channel.metrics
 
 import cats.effect.{Clock, IO, Resource}
 import cats.syntax.apply._
-import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.common.{A => _, _}
 import higherkindness.mu.rpc.common.util.FakeClock
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
 import higherkindness.mu.rpc.internal.metrics.{MetricsOps, MetricsOpsRegister}
@@ -41,7 +40,7 @@ class MonitoringChannelInterceptorTests extends RpcBaseTestSuite {
       (for {
         metricsOps <- MetricsOpsRegister.build
         clock      <- FakeClock.build[IO]()
-        _          <- makeProtoCalls(metricsOps, clock)(_.serviceOp1(Request()))(protoRPCServiceImpl)
+        _          <- makeProtoCalls(metricsOps)(_.serviceOp1(Request()))(protoRPCServiceImpl, clock)
         assertion  <- checkCalls(metricsOps, List(serviceOp1Info))
       } yield assertion).unsafeRunSync()
     }
@@ -50,9 +49,9 @@ class MonitoringChannelInterceptorTests extends RpcBaseTestSuite {
       (for {
         metricsOps <- MetricsOpsRegister.build
         clock      <- FakeClock.build[IO]()
-        _ <- makeProtoCalls(metricsOps, clock) { client =>
+        _ <- makeProtoCalls(metricsOps) { client =>
           client.serviceOp1(Request()) *> client.serviceOp2(Request())
-        }(protoRPCServiceImpl)
+        }(protoRPCServiceImpl, clock)
         assertion <- checkCalls(metricsOps, List(serviceOp1Info, serviceOp2Info))
       } yield assertion).unsafeRunSync()
     }
@@ -61,17 +60,17 @@ class MonitoringChannelInterceptorTests extends RpcBaseTestSuite {
       (for {
         metricsOps <- MetricsOpsRegister.build
         clock      <- FakeClock.build[IO]()
-        _          <- makeProtoCalls(metricsOps, clock)(_.serviceOp1(Request()))(protoRPCServiceErrorImpl)
+        _          <- makeProtoCalls(metricsOps)(_.serviceOp1(Request()))(protoRPCServiceErrorImpl, clock)
         assertion  <- checkCalls(metricsOps, List(serviceOp1Info), serverError = true)
       } yield assertion).unsafeRunSync()
     }
 
   }
 
-  private[this] def makeProtoCalls[A](metricsOps: MetricsOps[IO], clock: FakeClock[IO])(
+  private[this] def makeProtoCalls[A](metricsOps: MetricsOps[IO])(
       f: ProtoRPCService[IO] => IO[A]
-  )(implicit H: ProtoRPCService[IO]): IO[Either[Throwable, A]] = {
-    implicit val _: Clock[IO] = clock
+  )(implicit H: ProtoRPCService[IO], clock: FakeClock[IO]): IO[Either[Throwable, A]] = {
+
     withServerChannel[IO](
       service = ProtoRPCService.bindService[IO],
       clientInterceptor = Some(MetricsChannelInterceptor(metricsOps, myClassifier))

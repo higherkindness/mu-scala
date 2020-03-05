@@ -14,25 +14,10 @@
  * limitations under the License.
  */
 
-package higherkindness.mu
-package rpc
+package higherkindness.mu.rpc.config
 
-import higherkindness.mu.rpc.internal.serviceImpl
+import com.typesafe.config.Config
 
-import scala.annotation.{compileTimeOnly, StaticAnnotation}
-
-// $COVERAGE-OFF$
-package object protocol {
-
-  @compileTimeOnly("enable macro paradise to expand @service macro annotations")
-  class service(
-      val serializationType: SerializationType,
-      val compressionType: CompressionType = Identity,
-      val namespace: Option[String] = None,
-      val methodNameStyle: MethodNameStyle = Unchanged
-  ) extends StaticAnnotation {
-    def macroTransform(annottees: Any*): Any = macro serviceImpl.service
-  }
+trait ConfigM[F[_]] {
+  def load: F[Config]
 }
-
-// $COVERAGE-ON$

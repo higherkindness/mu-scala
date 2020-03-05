@@ -14,37 +14,11 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
-package channel
+package higherkindness.mu.rpc.channel
 
-import io.grpc.ManagedChannel
 import io.grpc.netty.NettyChannelBuilder
 
 package object netty {
-
-  class NettyChannelInterpreter(
-      initConfig: ChannelFor,
-      configList: List[ManagedChannelConfig],
-      nettyConfigList: List[NettyChannelConfig]
-  ) {
-
-    def build: ManagedChannel = {
-      val builder: NettyChannelBuilder = initConfig match {
-        case ChannelForAddress(name, port) => NettyChannelBuilder.forAddress(name, port)
-        case ChannelForSocketAddress(sa)   => NettyChannelBuilder.forAddress(sa)
-        case ChannelForTarget(target)      => NettyChannelBuilder.forTarget(target)
-        case e =>
-          throw new IllegalArgumentException(s"ManagedChannel not supported for $e")
-      }
-
-      val baseBuilder: NettyChannelBuilder => NettyChannelBuilder =
-        configList.foldLeft(_)((acc, cfg) => configureChannel(acc, cfg))
-      val nettyBuilder: NettyChannelBuilder => NettyChannelBuilder =
-        nettyConfigList.foldLeft(_)((acc, cfg) => configureNettyChannel(acc)(cfg))
-
-      (baseBuilder andThen nettyBuilder)(builder).build()
-    }
-  }
 
   def configureNettyChannel(mcb: NettyChannelBuilder): NettyChannelConfig => NettyChannelBuilder = {
     case NettyChannelType(channelType)       => mcb.channelType(channelType)
@@ -60,4 +34,5 @@ package object netty {
     case NettyKeepAliveTimeout(kat, tu)      => mcb.keepAliveTimeout(kat, tu)
     case NettyKeepAliveWithoutCalls(enable)  => mcb.keepAliveWithoutCalls(enable)
   }
+
 }

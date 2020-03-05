@@ -23,7 +23,7 @@ import cats.effect.Resource
 import cats.syntax.applicative._
 import com.fortysevendeg.scalacheck.datetime.instances.joda._
 import com.fortysevendeg.scalacheck.datetime.GenDateTime._
-import higherkindness.mu.rpc.common._
+import higherkindness.mu.rpc.common.{A => _, _}
 import higherkindness.mu.rpc.testing.servers.withServerChannel
 import io.grpc.{ManagedChannel, ServerServiceDefinition}
 import org.scalacheck.Arbitrary

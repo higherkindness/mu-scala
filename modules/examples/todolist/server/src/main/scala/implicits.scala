@@ -19,7 +19,6 @@ package examples.todolist.server
 import cats.effect.{ContextShift, IO, Timer}
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import doobie.hikari.HikariTransactor
-import doobie.util.transactor.Transactor
 import examples.todolist.persistence.runtime._
 import examples.todolist.persistence._
 import examples.todolist.protocol.Protocols._
@@ -63,17 +62,13 @@ sealed trait RepositoriesImplicits {
       setProperty("autoCommit", "true")
     })))
 
-  implicit def tagRepositoryHandler(implicit T: Transactor[IO]): TagRepository.Handler[IO] =
+  implicit val tagRepositoryHandler: TagRepository.Handler[IO] =
     new TagRepositoryHandler[IO]
 
-  implicit def todoListRepositoryHandler(
-      implicit T: Transactor[IO]
-  ): TodoListRepository.Handler[IO] =
+  implicit val todoListRepositoryHandler: TodoListRepository.Handler[IO] =
     new TodoListRepositoryHandler[IO]
 
-  implicit def todoItemRespositoryHandler(
-      implicit T: Transactor[IO]
-  ): TodoItemRepository.Handler[IO] =
+  implicit val todoItemRespositoryHandler: TodoItemRepository.Handler[IO] =
     new TodoItemRepositoryHandler[IO]
 }
 

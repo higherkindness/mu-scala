@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.healthcheck
+package higherkindness.mu.rpc
+package srcgen
+package util
+import higherkindness.mu.rpc.srcgen.Toolbox
 
-import cats.kernel.Order
-import cats.instances.string._
-import higherkindness.mu.rpc.healthcheck.unary.handler.HealthCheck
+trait Compat {
+  import Toolbox.u._
 
-object ordering {
-  implicit val orderForHealthCheck: Order[HealthCheck] = new HealthCheckOrder
-
-  class HealthCheckOrder(implicit O: Order[String]) extends Order[HealthCheck] {
-
-    override def eqv(x: HealthCheck, y: HealthCheck): Boolean =
-      O.eqv(x.nameService, y.nameService)
-
-    def compare(x: HealthCheck, y: HealthCheck): Int =
-      O.compare(x.nameService, y.nameService)
-  }
+  def getNamedArgs(args: List[Tree]): List[(String, Toolbox.u.Tree)] =
+    args.collect {
+      case NamedArg(argName, value) => argName.toString -> value
+    }
 }

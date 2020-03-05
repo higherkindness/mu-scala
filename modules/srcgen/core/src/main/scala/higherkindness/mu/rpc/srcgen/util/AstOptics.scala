@@ -24,7 +24,7 @@ import monocle.function.all._
 
 import scala.Function.{const => κ}
 
-trait AstOptics {
+trait AstOptics extends Compat {
 
   import Toolbox.u._
 
@@ -184,9 +184,7 @@ trait AstOptics {
     case ast._Apply(Apply(fun, Nil)) =>
       annotationName.getOption(fun).map(Annotation.NoParamAnnotation)
     case ast._Apply(Apply(fun, args)) =>
-      val namedArgs = args.collect {
-        case AssignOrNamedArg(argName, value) => argName.toString -> value
-      }
+      val namedArgs = getNamedArgs(args)
 
       annotationName.getOption(fun).map { name =>
         if (namedArgs.size == args.size) {

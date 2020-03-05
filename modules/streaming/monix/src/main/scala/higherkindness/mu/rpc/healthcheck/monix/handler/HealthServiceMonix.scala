@@ -46,8 +46,7 @@ class HealthCheckServiceMonixImpl[F[_]: Sync](
     checkStatus: Ref[F, Map[String, ServerStatus]],
     observer: Observer.Sync[HealthStatus],
     observable: Observable[HealthStatus]
-)(implicit s: Scheduler)
-    extends AbstractHealthService[F](checkStatus)
+) extends AbstractHealthService[F](checkStatus)
     with HealthCheckServiceMonix[F] {
 
   override def setStatus(newStatus: HealthStatus): F[Unit] =

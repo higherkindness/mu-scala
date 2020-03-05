@@ -1,6 +1,4 @@
-import com.typesafe.sbt.site.jekyll.JekyllPlugin.autoImport._
 import microsites.MicrositesPlugin.autoImport._
-import microsites._
 import sbt.Keys._
 import sbt.ScriptedPlugin.autoImport._
 import sbt._
@@ -29,9 +27,9 @@ object ProjectPlugin extends AutoPlugin {
       val avro4s: String              = "3.0.8"
       val avrohugger: String          = "1.0.0-RC22"
       val betterMonadicFor: String    = "0.3.1"
-      val catsEffect: String          = "2.1.1"
+      val catsEffect: String          = "2.1.2"
       val circe: String               = "0.13.0"
-      val dropwizard: String          = "4.1.3"
+      val dropwizard: String          = "4.1.4"
       val embeddedKafka: String       = "2.4.0"
       val enumeratum: String          = "1.5.15"
       val frees: String               = "0.8.2"
@@ -47,13 +45,15 @@ object ProjectPlugin extends AutoPlugin {
       val logback: String             = "1.2.3"
       val monix: String               = "3.1.0"
       val monocle: String             = "2.0.2"
-      val nettySSL: String            = "2.0.29.Final"
+      val lastRelease                 = "0.20.1"
+      val nettySSL: String            = "2.0.25.Final"
       val paradise: String            = "2.1.1"
       val pbdirect: String            = "0.5.0"
       val prometheus: String          = "0.8.1"
-      val pureconfig: String          = "0.12.2"
+      val pureconfig: String          = "0.12.3"
       val reactiveStreams: String     = "1.0.3"
-      val scala: String               = "2.12.10"
+      val scala212: String            = "2.12.10"
+      val scala213: String            = "2.13.1"
       val scopt: String               = "3.7.1"
       val scalacheck: String          = "1.14.3"
       val scalacheckToolbox: String   = "0.3.2"
@@ -72,6 +72,29 @@ object ProjectPlugin extends AutoPlugin {
         "org.scalatestplus"                              %% "scalatestplus-scalacheck" % V.scalatestplusScheck % Test
       )
     )
+
+    lazy val macroSettings: Seq[Setting[_]] = {
+
+      def paradiseDependency(sv: String): Seq[ModuleID] =
+        if (isOlderScalaVersion(sv)) {
+          Seq(
+            compilerPlugin(
+              ("org.scalamacros" % "paradise" % V.paradise).cross(CrossVersion.patch)
+            )
+          )
+        } else Seq.empty
+
+      def macroAnnotationScalacOption(sv: String): Seq[String] =
+        if (isOlderScalaVersion(sv)) Seq.empty
+        else Seq("-Ymacro-annotations")
+
+      Seq(
+        libraryDependencies ++= Seq(
+          scalaOrganization.value % "scala-compiler" % scalaVersion.value % Provided
+        ) ++ paradiseDependency(scalaVersion.value),
+        scalacOptions ++= macroAnnotationScalacOption(scalaVersion.value)
+      )
+    }
 
     lazy val internalSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
@@ -251,17 +274,21 @@ object ProjectPlugin extends AutoPlugin {
         %("logback-classic", V.logback),
         "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
         "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats
-      ))
+      )
+    )
 
     lazy val exampleSeedConfigSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "org.typelevel"         %% "cats-effect" % V.catsEffect,
-        "com.github.pureconfig" %% "pureconfig"  % V.pureconfig))
+        "com.github.pureconfig" %% "pureconfig"  % V.pureconfig
+      )
+    )
 
     lazy val exampleSeedClientAppSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "com.github.scopt" %% "scopt" % V.scopt
-      ))
+      )
+    )
 
     lazy val exampleTodolistCommonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
@@ -273,15 +300,13 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
       sbtPlugin := true,
-      scriptedLaunchOpts := {
-        scriptedLaunchOpts.value ++
-          Seq(
-            "-Xmx2048M",
-            "-XX:ReservedCodeCacheSize=256m",
-            "-XX:+UseConcMarkSweepGC",
-            "-Dversion=" + version.value
-          )
-      },
+      scriptedLaunchOpts ++= Seq(
+        "-Xmx2048M",
+        "-XX:ReservedCodeCacheSize=256m",
+        "-Dversion=" + version.value,
+        // See https://github.com/sbt/sbt/issues/3469#issuecomment-521326813
+        s"-Dsbt.boot.directory=${file(sys.props("user.home")) / ".sbt" / "boot"}"
+      ),
       // Custom release process for the plugin:
       releaseProcess := Seq[ReleaseStep](
         releaseStepCommandAndRemaining("^ publishSigned"),
@@ -295,6 +320,20 @@ object ProjectPlugin extends AutoPlugin {
       },
       unmanagedSourceDirectories in Test += {
         baseDirectory.value.getParentFile / "shared" / "src" / "test" / "scala"
+      }
+    )
+
+    lazy val noCrossCompilationLastScala: Seq[Def.Setting[_]] = Seq(
+      scalaVersion := V.scala212,
+      crossScalaVersions := Seq(V.scala212)
+    )
+
+    lazy val compatSettings: Seq[Def.Setting[_]] = Seq(
+      unmanagedSourceDirectories in Compile += {
+        val base = baseDirectory.value / "src" / "main"
+        val dir  = if (isOlderScalaVersion(scalaVersion.value)) "scala-2.13-" else "scala-2.13+"
+
+        base / dir
       }
     )
 
@@ -319,18 +358,22 @@ object ProjectPlugin extends AutoPlugin {
       micrositeHighlightLanguages += "protobuf"
     )
 
-    lazy val customScalacOptions: Seq[String] =
-      scalacAdvancedOptions.filterNot(Set("-Yliteral-types", "-Xlint").contains)
-    lazy val docsExclusions: Seq[String] => Seq[String] = (current: Seq[String]) =>
-      current.filterNot(Set("-Xfatal-warnings", "-Ywarn-unused-import", "-Xlint").contains)
+    lazy val mdocSettings = Seq(
+      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings", "-Ywarn-unused-import", "-Xlint").contains)
+    )
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("scalatest", V.scalatest),
         "org.scalatestplus" %% "scalatestplus-scalacheck" % V.scalatestplusScheck
-      ),
-      scalacOptions ~= docsExclusions
-    )
+      )
+    ) ++ mdocSettings
+
+    def isOlderScalaVersion(sv: String): Boolean =
+      CrossVersion.partialVersion(sv) match {
+        case Some((2, minor)) if minor < 13 => true
+        case _                              => false
+      }
 
   }
 
@@ -347,7 +390,7 @@ object ProjectPlugin extends AutoPlugin {
   }
 
   override def projectSettings: Seq[Def.Setting[_]] =
-    warnUnusedImport ++ Seq(
+    Seq(
       description := "mu RPC is a purely functional library for " +
         "building RPC endpoint based services with support for RPC and HTTP/2",
       startYear := Some(2017),
@@ -360,13 +403,12 @@ object ProjectPlugin extends AutoPlugin {
         organizationHomePage = url("http://47deg.com"),
         organizationEmail = "hello@47deg.com"
       ),
-      scalaVersion := V.scala,
-      crossScalaVersions := Seq(V.scala),
-      scalacOptions ++= customScalacOptions,
+      scalaVersion := V.scala213,
+      crossScalaVersions := Seq(V.scala212, V.scala213),
+      scalacOptions --= Seq("-Xfuture", "-Xfatal-warnings"),
       Test / fork := true,
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
-      addCompilerPlugin(%%("paradise", V.paradise) cross CrossVersion.full),
       addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
       libraryDependencies ++= Seq(
         %%("scalatest", V.scalatest) % Test,
@@ -430,6 +472,6 @@ object ProjectPlugin extends AutoPlugin {
         ScalafmtFileType,
         TravisFileType(crossScalaVersions.value, orgScriptCICommandKey, orgAfterCISuccessCommandKey)
       )
-    )
+    ) ++ macroSettings
   // format: ON
 }

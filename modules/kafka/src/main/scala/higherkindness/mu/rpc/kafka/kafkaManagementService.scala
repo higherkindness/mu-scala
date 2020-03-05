@@ -60,19 +60,22 @@ object kafkaManagementService {
 
   sealed trait ConfigType extends Pos
   object ConfigType {
-    final case object TopicConfigType   extends ConfigType with Pos._0
-    final case object BrokerConfigType  extends ConfigType with Pos._1
-    final case object UnknownConfigType extends ConfigType with Pos._2
+    final case object TopicConfigType        extends ConfigType with Pos._0
+    final case object BrokerConfigType       extends ConfigType with Pos._1
+    final case object UnknownConfigType      extends ConfigType with Pos._2
+    final case object BrokerLoggerConfigType extends ConfigType with Pos._3
 
     def toJava(ct: ConfigType): KConfigResource.Type = ct match {
-      case TopicConfigType   => KConfigResource.Type.TOPIC
-      case BrokerConfigType  => KConfigResource.Type.BROKER
-      case UnknownConfigType => KConfigResource.Type.UNKNOWN
+      case TopicConfigType        => KConfigResource.Type.TOPIC
+      case BrokerConfigType       => KConfigResource.Type.BROKER
+      case UnknownConfigType      => KConfigResource.Type.UNKNOWN
+      case BrokerLoggerConfigType => KConfigResource.Type.BROKER_LOGGER
     }
     def fromJava(kct: KConfigResource.Type): ConfigType = kct match {
-      case KConfigResource.Type.TOPIC   => TopicConfigType
-      case KConfigResource.Type.BROKER  => BrokerConfigType
-      case KConfigResource.Type.UNKNOWN => UnknownConfigType
+      case KConfigResource.Type.TOPIC         => TopicConfigType
+      case KConfigResource.Type.BROKER        => BrokerConfigType
+      case KConfigResource.Type.UNKNOWN       => UnknownConfigType
+      case KConfigResource.Type.BROKER_LOGGER => BrokerLoggerConfigType
     }
   }
   final case class ConfigResource(typ: ConfigType, name: String)
@@ -91,6 +94,7 @@ object kafkaManagementService {
     final case object StaticBrokerConfig         extends ConfigSource with Pos._3
     final case object DefaultConfig              extends ConfigSource with Pos._4
     final case object UnknownConfig              extends ConfigSource with Pos._5
+    final case object DynamicBrokerLoggerConfig  extends ConfigSource with Pos._6
 
     def fromJava(kcs: KConfigEntry.ConfigSource): ConfigSource = kcs match {
       case KConfigEntry.ConfigSource.DYNAMIC_TOPIC_CONFIG          => DynamicTopicConfig
@@ -99,6 +103,7 @@ object kafkaManagementService {
       case KConfigEntry.ConfigSource.STATIC_BROKER_CONFIG          => StaticBrokerConfig
       case KConfigEntry.ConfigSource.DEFAULT_CONFIG                => DefaultConfig
       case KConfigEntry.ConfigSource.UNKNOWN                       => UnknownConfig
+      case KConfigEntry.ConfigSource.DYNAMIC_BROKER_LOGGER_CONFIG  => DynamicBrokerLoggerConfig
     }
   }
   final case class ConfigSynonym(name: String, value: String, source: ConfigSource)

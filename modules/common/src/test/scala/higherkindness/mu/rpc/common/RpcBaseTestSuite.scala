@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
-package common
+package higherkindness.mu.rpc.common
 
 import cats.data.Kleisli
 import org.scalactic.Prettifier
@@ -30,8 +29,8 @@ trait RpcBaseTestSuite extends AnyWordSpec with Matchers with OneInstancePerTest
 
   trait Helpers {
 
-    def runK[F[_], A, B](kleisli: Kleisli[F, A, B], v: A): F[B] =
-      kleisli.run(v)
+    def runK[F[_], T, U](kleisli: Kleisli[F, T, U], value: T): F[U] =
+      kleisli.run(value)
 
   }
 

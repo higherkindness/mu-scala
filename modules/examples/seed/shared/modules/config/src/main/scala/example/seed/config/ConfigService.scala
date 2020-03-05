@@ -19,6 +19,7 @@ package example.seed.config
 import cats.effect.Effect
 import cats.syntax.either._
 import pureconfig.{ConfigReader, Derivation}
+import pureconfig.ConfigSource
 
 trait ConfigService[F[_]] {
 
@@ -33,8 +34,8 @@ object ConfigService {
         implicit reader: Derivation[ConfigReader[Config]]
     ): F[Config] =
       Effect[F].fromEither(
-        pureconfig
-          .loadConfig[Config]
+        ConfigSource.default
+          .load[Config]
           .leftMap(e => new IllegalStateException(s"Error loading configuration: $e"))
       )
 
