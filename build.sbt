@@ -126,7 +126,7 @@ lazy val `health-check-unary` = project
   .settings(moduleName := "mu-rpc-health-check-unary")
 
 /////////HealthCheck Server Monix Example
-lazy val `health-server-monix` = project
+lazy val `example-health-server-monix` = project
   .in(file("modules/examples/health-check/health-server-monix"))
   .dependsOn(monix)
   .dependsOn(`health-check-unary`)
@@ -137,7 +137,7 @@ lazy val `health-server-monix` = project
   .settings(moduleName := "mu-rpc-example-health-check-server-monix")
 
 /////////HealthCheck Server FS2 Example
-lazy val `health-server-fs2` = project
+lazy val `example-health-server-fs2` = project
   .in(file("modules/examples/health-check/health-server-fs2"))
   .dependsOn(fs2)
   .dependsOn(`health-check-unary`)
@@ -148,10 +148,10 @@ lazy val `health-server-fs2` = project
   .settings(moduleName := "mu-rpc-example-health-check-server-fs2")
 
 /////////HealthCheck Client Example
-lazy val `health-client` = project
+lazy val `example-health-client` = project
   .in(file("modules/examples/health-check/health-client"))
-  .dependsOn(`health-server-monix`)
-  .dependsOn(`health-server-fs2`)
+  .dependsOn(`example-health-server-monix`)
+  .dependsOn(`example-health-server-fs2`)
   .dependsOn(config)
   .dependsOn(netty)
   .settings(healthCheckSettingsMonix)
@@ -596,10 +596,7 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   `legacy-avro-decimal-compat-model`,
   `legacy-avro-decimal-compat-protocol`,
   `legacy-avro-decimal-compat-encoders`,
-  `health-check-unary`,
-  `health-client`,
-  `health-server-monix`,
-  `health-server-fs2`
+  `health-check-unary`
 )
 
 lazy val otherModules: Seq[ProjectReference] = Seq(
@@ -614,6 +611,9 @@ lazy val otherModules: Seq[ProjectReference] = Seq(
   `example-todolist-runtime`,
   `example-todolist-server`,
   `example-todolist-client`,
+  `example-health-client`,
+  `example-health-server-monix`,
+  `example-health-server-fs2`,
   seed
 )
 
