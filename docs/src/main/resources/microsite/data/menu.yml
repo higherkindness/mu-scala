@@ -44,9 +44,9 @@ options:
     menu_type: tutorials
     url: tutorials/openapi-client
 
-  - title: Testing gRPC servers
+  - title: Testing a gRPC server
     menu_type: tutorials
-    url: tutorials/testing-grpc-servers
+    url: tutorials/testing-grpc-server
 
   - title: Deploying a Mu service
     menu_type: tutorials

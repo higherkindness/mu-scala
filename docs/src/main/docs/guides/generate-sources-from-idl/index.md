@@ -111,7 +111,7 @@ muSrcGenSerializationType := SerializationType.Protobuf // or SerializationType.
 | `muSrcGenJarNames` | A list of JAR file or sbt module names where extra IDL files can be found. See the [srcGenJarNames section](#musrcgenjarnames) section below for more details. | `Nil` |
 | `muSrcGenIdlExtension` | The extension of IDL files to extract from JAR files or sbt modules. | * `avdl` if `muSrcGenIdlType` is `avro`<br/> * `proto` if `muSrcGenIdlType` is `Proto` |
 | `muSrcGenBigDecimal` | Specifies how Avro `decimal` types will be represented in the generated Scala. `ScalaBigDecimalGen` produces `scala.math.BigDecimal`. `ScalaBigDecimalTaggedGen` produces `scala.math.BigDecimal` tagged with the 'precision' and 'scale' using a Shapeless tag, e.g. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`. | `ScalaBigDecimalTaggedGen`
-| `muSrcGenCompressionType` | The compression type that will be used by generated RPC services. Set to `higherkindness.mu.rpc.srcgen.Model.GzipGen` for Gzip compression. | `higherkindness.mu.rpc.idlgen.Model.NoCompressionGen` |
+| `muSrcGenCompressionType` | The compression type that will be used by generated RPC services. Set to `higherkindness.mu.rpc.srcgen.Model.GzipGen` for Gzip compression. | `higherkindness.mu.rpc.srcgen.Model.NoCompressionGen` |
 | `muSrcGenIdiomaticEndpoints` | Flag indicating if idiomatic gRPC endpoints should be used. If `true`, the service operations will be prefixed by the namespace and the methods will be capitalized. | `false` |
 | `muSrcGenStreamingImplementation` | Specifies whether generated Scala code will use FS2 `Stream[F, A]` or Monix `Observable[A]` as its streaming implementation. FS2 is the default. This setting is only relevant if you have any RPC endpoint definitions that involve streaming. | `higherkindness.mu.rpc.srcgen.Model.Fs2Stream` |
 | `muSrcGenMarshallerImports` | see explanation below | see explanation below |
@@ -130,7 +130,7 @@ The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also
 You can also specify custom imports with the following:
 
 ```scala
-muSrcGenMarshallerImports := List(higherkindness.mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))
+muSrcGenMarshallerImports := List(higherkindness.mu.rpc.srcgen.Model.CustomMarshallersImport("com.sample.marshallers._"))
 ```
 
 See the [Custom codecs section in core concepts](core-concepts#custom-codecs) for more information.
