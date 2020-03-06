@@ -8,6 +8,6 @@ lazy val root = project
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch),
     libraryDependencies ++= Seq(
         "io.higherkindness"    %% "mu-rpc-channel" % sys.props("version"),
-        "io.higherkindness"    %% "mu-rpc-fs2" % sys.props("version")
+        "io.higherkindness"    %% "mu-rpc-internal-fs2" % sys.props("version")
     )
   )

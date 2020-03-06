@@ -55,7 +55,7 @@ jobs:
       script:
         - sbt ++$TRAVIS_SCALA_VERSION srcgen-core/test
         - sbt ++$TRAVIS_SCALA_VERSION srcgen-sbt/test
-        - sbt ++$TRAVIS_SCALA_VERSION publishLocal srcgen-sbt/publishLocal srcgen-sbt/scripted
+        - sbt ++$TRAVIS_SCALA_VERSION srcgen-sbt/scripted
     - stage: deploy
       scala: 2.12.10
       if: branch = master AND type != pull_request AND env(SKIP_SBT_DEPLOY) = false

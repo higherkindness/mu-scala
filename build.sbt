@@ -235,7 +235,7 @@ lazy val `srcgen-sbt` = project
         channel / publishLocal,
         server / publishLocal,
         `internal-fs2` / publishLocal,
-        fs2 / publishLocal,
+        `internal-monix` / publishLocal,
         `marshallers-jodatime` / publishLocal,
         `srcgen-core` / publishLocal
       )
