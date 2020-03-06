@@ -16,7 +16,7 @@ lazy val `internal-core` = project
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-internal-core")
-  .settings(internalSettings)
+  .settings(internalCoreSettings)
 
 lazy val `internal-monix` = project
   .in(file("modules/internal/monix"))

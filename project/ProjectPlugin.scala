@@ -66,10 +66,10 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("cats-effect", V.catsEffect)                  % Test,
-        %%("scalamock", V.scalamock)                     % Test,
-        %%("scheckToolboxDatetime", V.scalacheckToolbox) % Test,
-        "org.scalatestplus"                              %% "scalatestplus-scalacheck" % V.scalatestplusScheck % Test
+        "org.typelevel"     %% "cats-effect"                 % V.catsEffect          % Test,
+        "org.scalamock"     %% "scalamock"                   % V.scalamock           % Test,
+        "com.47deg"         %% "scalacheck-toolbox-datetime" % V.scalacheckToolbox   % Test,
+        "org.scalatestplus" %% "scalatestplus-scalacheck"    % V.scalatestplusScheck % Test
       )
     )
 
@@ -96,67 +96,63 @@ object ProjectPlugin extends AutoPlugin {
       )
     }
 
-    lazy val internalSettings: Seq[Def.Setting[_]] = Seq(
+    lazy val internalCoreSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("cats-effect", V.catsEffect),
-        %("grpc-stub", V.grpc),
-        "com.47deg"    %% "pbdirect"   % V.pbdirect,
-        "com.beachape" %% "enumeratum" % V.enumeratum,
-        %%("avro4s", V.avro4s),
-        %%("log4s", V.log4s),
-        %%("scalamock", V.scalamock) % Test
+        "org.typelevel"       %% "cats-effect" % V.catsEffect,
+        "io.grpc"             % "grpc-stub"    % V.grpc,
+        "com.47deg"           %% "pbdirect"    % V.pbdirect,
+        "com.beachape"        %% "enumeratum"  % V.enumeratum,
+        "com.sksamuel.avro4s" %% "avro4s-core" % V.avro4s,
+        "org.log4s"           %% "log4s"       % V.log4s
       )
     )
 
     lazy val internalMonixSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("monix", V.monix),
-        "org.reactivestreams"        % "reactive-streams" % V.reactiveStreams,
-        %%("scalamock", V.scalamock) % Test
+        "io.monix"            %% "monix"           % V.monix,
+        "org.reactivestreams" % "reactive-streams" % V.reactiveStreams
       )
     )
 
     lazy val internalFs2Settings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("fs2-core", V.fs2),
-        "org.lyranthe.fs2-grpc"      %% "java-runtime" % V.fs2Grpc,
-        %%("scalamock", V.scalamock) % Test
+        "co.fs2"                %% "fs2-core"     % V.fs2,
+        "org.lyranthe.fs2-grpc" %% "java-runtime" % V.fs2Grpc
       )
     )
 
     lazy val clientCoreSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("cats-effect", V.catsEffect),
-        %%("scalamock", V.scalamock) % Test,
-        %("grpc-netty", V.grpc)      % Test
+        "org.typelevel" %% "cats-effect" % V.catsEffect,
+        "io.grpc"       % "grpc-netty"   % V.grpc % Test
       )
     )
 
     lazy val clientNettySettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %("grpc-netty", V.grpc),
+        "io.grpc"  % "grpc-netty"                      % V.grpc,
         "io.netty" % "netty-tcnative-boringssl-static" % V.nettySSL % Test
       )
     )
 
     lazy val clientOkHttpSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %("grpc-okhttp", V.grpc)
+        "io.grpc" % "grpc-okhttp" % V.grpc
       )
     )
 
     lazy val clientCacheSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("log4s", V.log4s),
-        %%("fs2-core", V.fs2),
-        %%("cats-effect", V.catsEffect),
+        "org.log4s"     %% "log4s"       % V.log4s,
+        "co.fs2"        %% "fs2-core"    % V.fs2,
+        "org.typelevel" %% "cats-effect" % V.catsEffect,
         compilerPlugin("com.olegpy" %% "better-monadic-for" % V.betterMonadicFor)
       )
     )
 
     lazy val healthCheckSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("cats-effect", V.catsEffect)
+        "org.typelevel" %% "cats-effect" % V.catsEffect
       )
     )
 
@@ -164,8 +160,8 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
         "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
-        %%("fs2-core", V.fs2),
-        %%("cats-effect", V.catsEffect)
+        "co.fs2"            %% "fs2-core"       % V.fs2,
+        "org.typelevel"     %% "cats-effect"    % V.catsEffect
       )
     )
 
@@ -173,39 +169,38 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
         "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
-        %%("monix", V.monix),
-        %%("cats-effect", V.catsEffect)
+        "io.monix"          %% "monix"          % V.monix,
+        "org.typelevel"     %% "cats-effect"    % V.catsEffect
       )
     )
 
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %("grpc-netty", V.grpc),
-        %%("scalamock", V.scalamock) % Test,
-        "io.netty"                   % "netty-tcnative-boringssl-static" % V.nettySSL % Test
+        "io.grpc"  % "grpc-netty"                      % V.grpc,
+        "io.netty" % "netty-tcnative-boringssl-static" % V.nettySSL % Test
       )
     )
 
     lazy val httpSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("http4s-dsl", V.http4s),
-        %%("http4s-blaze-server", V.http4s),
-        %%("http4s-circe", V.http4s),
-        %%("http4s-blaze-client", V.http4s) % Test,
-        %%("circe-generic", V.circe)        % Test,
-        "ch.qos.logback"                    % "logback-classic" % V.logback % Test
+        "org.http4s"     %% "http4s-dsl"          % V.http4s,
+        "org.http4s"     %% "http4s-blaze-server" % V.http4s,
+        "org.http4s"     %% "http4s-circe"        % V.http4s,
+        "org.http4s"     %% "http4s-blaze-client" % V.http4s % Test,
+        "io.circe"       %% "circe-generic"       % V.circe % Test,
+        "ch.qos.logback" % "logback-classic"      % V.logback % Test
       )
     )
 
     lazy val configSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("pureconfig", V.pureconfig)
+        "com.github.pureconfig" %% "pureconfig" % V.pureconfig
       )
     )
 
     lazy val prometheusMetricsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %("prometheus", V.prometheus)
+        "io.prometheus" % "simpleclient" % V.prometheus
       )
     )
 
@@ -217,10 +212,10 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val testingSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %("grpc-testing", V.grpc),
-        %%("cats-effect", V.catsEffect),
-        %%("scalacheck", V.scalacheck) % Test,
-        "org.scalatestplus"            %% "scalatestplus-scalacheck" % V.scalatestplusScheck % Test
+        "io.grpc"           % "grpc-testing"              % V.grpc,
+        "org.typelevel"     %% "cats-effect"              % V.catsEffect,
+        "org.scalacheck"    %% "scalacheck"               % V.scalacheck % Test,
+        "org.scalatestplus" %% "scalatestplus-scalacheck" % V.scalatestplusScheck % Test
       )
     )
 
@@ -232,10 +227,10 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val srcGenSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("monocle-core", V.monocle),
-        "io.higherkindness" %% "skeuomorph"      % V.skeuomorph,
-        "com.julianpeeters" %% "avrohugger-core" % V.avrohugger,
-        %%("circe-generic", V.circe)
+        "com.github.julien-truffaut" %% "monocle-core"    % V.monocle,
+        "io.higherkindness"          %% "skeuomorph"      % V.skeuomorph,
+        "com.julianpeeters"          %% "avrohugger-core" % V.avrohugger,
+        "io.circe"                   %% "circe-generic"   % V.circe
       )
     )
 
@@ -248,8 +243,8 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val marshallersJodatimeSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %("joda-time", V.jodaTime),
-        %%("scheckToolboxDatetime", V.scalacheckToolbox) % Test
+        "joda-time" % "joda-time"                    % V.jodaTime,
+        "com.47deg" %% "scalacheck-toolbox-datetime" % V.scalacheckToolbox % Test
       )
     )
 
@@ -319,7 +314,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        %%("scalatest", V.scalatest),
+        "org.scalatest"     %% "scalatest"                % V.scalatest,
         "org.scalatestplus" %% "scalatestplus-scalacheck" % V.scalatestplusScheck
       )
     ) ++ mdocSettings
@@ -364,10 +359,12 @@ object ProjectPlugin extends AutoPlugin {
       Test / fork := true,
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
-      addCompilerPlugin(%%("kind-projector", V.kindProjector) cross CrossVersion.binary),
+      addCompilerPlugin(
+        "org.typelevel" % "kind-projector" % V.kindProjector cross CrossVersion.binary
+      ),
       libraryDependencies ++= Seq(
-        %%("scalatest", V.scalatest) % Test,
-        %("slf4j-nop", V.slf4j)      % Test
+        "org.scalatest" %% "scalatest" % V.scalatest % Test,
+        "org.slf4j"     % "slf4j-nop"  % V.slf4j     % Test
       ),
       releaseProcess := Seq[ReleaseStep](
         orgInitialVcsChecks,
