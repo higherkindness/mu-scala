@@ -241,55 +241,10 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val exampleRouteguideRuntimeSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "io.monix" %% "monix" % V.monix
-      )
-    )
-
     lazy val marshallersJodatimeSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "joda-time" % "joda-time"                    % V.jodaTime,
         "com.47deg" %% "scalacheck-toolbox-datetime" % V.scalacheckToolbox % Test
-      )
-    )
-
-    lazy val exampleRouteguideCommonSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "io.circe"       %% "circe-core"     % V.circe,
-        "io.circe"       %% "circe-generic"  % V.circe,
-        "io.circe"       %% "circe-parser"   % V.circe,
-        "org.log4s"      %% "log4s"          % V.log4s,
-        "ch.qos.logback" % "logback-classic" % V.logback
-      )
-    )
-
-    lazy val exampleSeedLogSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "ch.qos.logback"    % "logback-classic" % V.logback,
-        "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
-        "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats
-      )
-    )
-
-    lazy val exampleSeedConfigSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "org.typelevel"         %% "cats-effect" % V.catsEffect,
-        "com.github.pureconfig" %% "pureconfig"  % V.pureconfig
-      )
-    )
-
-    lazy val exampleSeedClientAppSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "com.github.scopt" %% "scopt" % V.scopt
-      )
-    )
-
-    lazy val exampleTodolistCommonSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "io.frees"       %% "frees-todolist-lib" % V.frees,
-        "org.log4s"      %% "log4s"              % V.log4s,
-        "ch.qos.logback" % "logback-classic"     % V.logback
       )
     )
 
