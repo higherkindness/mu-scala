@@ -246,55 +246,10 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val exampleRouteguideRuntimeSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        %%("monix", V.monix)
-      )
-    )
-
     lazy val marshallersJodatimeSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %("joda-time", V.jodaTime),
         %%("scheckToolboxDatetime", V.scalacheckToolbox) % Test
-      )
-    )
-
-    lazy val exampleRouteguideCommonSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        %%("circe-core", V.circe),
-        %%("circe-generic", V.circe),
-        %%("circe-parser", V.circe),
-        %%("log4s", V.log4s),
-        %("logback-classic", V.logback)
-      )
-    )
-
-    lazy val exampleSeedLogSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        %("logback-classic", V.logback),
-        "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
-        "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats
-      )
-    )
-
-    lazy val exampleSeedConfigSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "org.typelevel"         %% "cats-effect" % V.catsEffect,
-        "com.github.pureconfig" %% "pureconfig"  % V.pureconfig
-      )
-    )
-
-    lazy val exampleSeedClientAppSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "com.github.scopt" %% "scopt" % V.scopt
-      )
-    )
-
-    lazy val exampleTodolistCommonSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "io.frees" %% "frees-todolist-lib" % V.frees,
-        %%("log4s", V.log4s),
-        %("logback-classic", V.logback)
       )
     )
 

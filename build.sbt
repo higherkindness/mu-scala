@@ -125,41 +125,6 @@ lazy val `health-check-unary` = project
   .settings(healthCheckSettings)
   .settings(moduleName := "mu-rpc-health-check-unary")
 
-/////////HealthCheck Server Monix Example
-lazy val `example-health-server-monix` = project
-  .in(file("modules/examples/health-check/health-server-monix"))
-  .dependsOn(monix)
-  .dependsOn(`health-check-unary`)
-  .dependsOn(server)
-  .settings(healthCheckSettingsMonix)
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .settings(moduleName := "mu-rpc-example-health-check-server-monix")
-
-/////////HealthCheck Server FS2 Example
-lazy val `example-health-server-fs2` = project
-  .in(file("modules/examples/health-check/health-server-fs2"))
-  .dependsOn(fs2)
-  .dependsOn(`health-check-unary`)
-  .dependsOn(server)
-  .settings(healthCheckSettingsFS2)
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .settings(moduleName := "mu-rpc-example-health-check-server-fs2")
-
-/////////HealthCheck Client Example
-lazy val `example-health-client` = project
-  .in(file("modules/examples/health-check/health-client"))
-  .dependsOn(`example-health-server-monix`)
-  .dependsOn(`example-health-server-fs2`)
-  .dependsOn(config)
-  .dependsOn(netty)
-  .settings(healthCheckSettingsMonix)
-  .settings(healthCheckSettingsFS2)
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .settings(moduleName := "mu-rpc-example-health-check-client")
-
 ////////////////////
 //// PROMETHEUS ////
 ////////////////////
@@ -273,264 +238,6 @@ lazy val `benchmarks-vnext` = project
   .settings(noPublishSettings)
   .enablePlugins(JmhPlugin)
 
-//////////////////
-//// EXAMPLES ////
-//////////////////
-
-////////////////////
-//// ROUTEGUIDE ////
-////////////////////
-
-lazy val `example-routeguide-protocol` = project
-  .in(file("modules/examples/routeguide/protocol"))
-  .dependsOn(monix)
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .settings(moduleName := "mu-rpc-example-routeguide-protocol")
-
-lazy val `example-routeguide-runtime` = project
-  .in(file("modules/examples/routeguide/runtime"))
-  .settings(noPublishSettings)
-  .settings(coverageEnabled := false)
-  .settings(moduleName := "mu-rpc-example-routeguide-runtime")
-  .settings(exampleRouteguideRuntimeSettings)
-
-lazy val `example-routeguide-common` = project
-  .in(file("modules/examples/routeguide/common"))
-  .dependsOn(`example-routeguide-protocol`)
-  .dependsOn(config)
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .settings(moduleName := "mu-rpc-example-routeguide-common")
-  .settings(exampleRouteguideCommonSettings)
-
-lazy val `example-routeguide-server` = project
-  .in(file("modules/examples/routeguide/server"))
-  .dependsOn(`example-routeguide-common`)
-  .dependsOn(`example-routeguide-runtime`)
-  .dependsOn(server)
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .settings(moduleName := "mu-rpc-example-routeguide-server")
-
-lazy val `example-routeguide-client` = project
-  .in(file("modules/examples/routeguide/client"))
-  .dependsOn(`example-routeguide-common`)
-  .dependsOn(`example-routeguide-runtime`)
-  .dependsOn(`netty`)
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .settings(moduleName := "mu-rpc-example-routeguide-client")
-  .settings(
-    Compile / unmanagedSourceDirectories ++= Seq(
-      baseDirectory.value / "src" / "main" / "scala-io",
-      baseDirectory.value / "src" / "main" / "scala-task"
-    )
-  )
-  .settings(addCommandAlias("runClientIO", "runMain example.routeguide.client.io.ClientAppIO"))
-  .settings(
-    addCommandAlias("runClientTask", "runMain example.routeguide.client.task.ClientAppTask")
-  )
-
-////////////////////
-/////   SEED   /////
-////////////////////
-
-////////////////////////
-//// Shared Modules ////
-////////////////////////
-
-lazy val `seed-config` = project
-  .in(file("modules/examples/seed/shared/modules/config"))
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .settings(exampleSeedConfigSettings)
-
-////////////////////////
-////     Shared     ////
-////////////////////////
-
-lazy val allSharedModules: ProjectReference = `seed-config`
-
-lazy val allSharedModulesDeps: ClasspathDependency =
-  ClasspathDependency(allSharedModules, None)
-
-lazy val `seed-shared` = project
-  .in(file("modules/examples/seed/shared"))
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .aggregate(allSharedModules)
-  .dependsOn(allSharedModulesDeps)
-
-//////////////////////////
-////  Server Modules  ////
-//////////////////////////
-
-lazy val `seed-server-common` = project
-  .in(file("modules/examples/seed/server/modules/common"))
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-
-lazy val `seed-server-protocol-avro` = project
-  .in(file("modules/examples/seed/server/modules/protocol_avro"))
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .dependsOn(channel)
-
-lazy val `seed-server-protocol-proto` = project
-  .in(file("modules/examples/seed/server/modules/protocol_proto"))
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .dependsOn(fs2)
-
-lazy val `seed-server-process` = project
-  .in(file("modules/examples/seed/server/modules/process"))
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .settings(exampleSeedLogSettings)
-  .dependsOn(`seed-server-common`, `seed-server-protocol-avro`, `seed-server-protocol-proto`)
-
-lazy val `seed-server-app` = project
-  .in(file("modules/examples/seed/server/modules/app"))
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .dependsOn(server, `seed-server-process`, `seed-config`)
-
-//////////////////////////
-////      Server      ////
-//////////////////////////
-
-lazy val allSeedServerModules: Seq[ProjectReference] = Seq(
-  `seed-server-common`,
-  `seed-server-protocol-avro`,
-  `seed-server-protocol-proto`,
-  `seed-server-process`,
-  `seed-server-app`
-)
-
-lazy val allSeedServerModulesDeps: Seq[ClasspathDependency] =
-  allSeedServerModules.map(ClasspathDependency(_, None))
-
-lazy val `seed-server` = project
-  .in(file("modules/examples/seed/server"))
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .aggregate(allSeedServerModules: _*)
-  .dependsOn(allSeedServerModulesDeps: _*)
-addCommandAlias("runAvroServer", "seed_server/runMain example.seed.server.app.AvroServerApp")
-addCommandAlias("runProtoServer", "seed_server/runMain example.seed.server.app.ProtoServerApp")
-
-//////////////////////////
-////  Client Modules  ////
-//////////////////////////
-
-lazy val `seed-client-common` = project
-  .in(file("modules/examples/seed/client/modules/common"))
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-
-lazy val `seed-client-process` = project
-  .in(file("modules/examples/seed/client/modules/process"))
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .settings(exampleSeedLogSettings)
-  .dependsOn(
-    netty,
-    fs2,
-    `seed-client-common`,
-    `seed-server-protocol-avro`,
-    `seed-server-protocol-proto`
-  )
-
-lazy val `seed-client-app` = project
-  .in(file("modules/examples/seed/client/modules/app"))
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .settings(exampleSeedClientAppSettings)
-  .dependsOn(`seed-client-process`, `seed-config`)
-
-//////////////////////////
-////      Client      ////
-//////////////////////////
-
-lazy val allSeedClientModules: Seq[ProjectReference] = Seq(
-  `seed-client-common`,
-  `seed-client-process`,
-  `seed-client-app`
-)
-
-lazy val allSeedClientModulesDeps: Seq[ClasspathDependency] =
-  allSeedClientModules.map(ClasspathDependency(_, None))
-
-lazy val `seed-client` = project
-  .in(file("modules/examples/seed/client"))
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .aggregate(allSeedClientModules: _*)
-  .dependsOn(allSeedClientModulesDeps: _*)
-addCommandAlias("runAvroClient", "seed_client/runMain example.seed.client.app.AvroClientApp")
-addCommandAlias("runProtoClient", "seed_client/runMain example.seed.client.app.ProtoClientApp")
-
-/////////////////////////
-////       Root       ////
-/////////////////////////
-
-lazy val allSeedModules: Seq[ProjectReference] = Seq(
-  `seed-shared`,
-  `seed-client`,
-  `seed-server`
-)
-
-lazy val allSeedModulesDeps: Seq[ClasspathDependency] =
-  allSeedModules.map(ClasspathDependency(_, None))
-
-lazy val `example-seed` = project
-  .in(file("modules/examples/seed"))
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .settings(moduleName := "mu-rpc-example-seed")
-  .aggregate(allSeedModules: _*)
-  .dependsOn(allSeedModulesDeps: _*)
-
-////////////////////
-////  TODOLIST  ////
-////////////////////
-
-lazy val `example-todolist-protocol` = project
-  .in(file("modules/examples/todolist/protocol"))
-  .dependsOn(channel)
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .settings(moduleName := "mu-rpc-example-todolist-protocol")
-
-lazy val `example-todolist-runtime` = project
-  .in(file("modules/examples/todolist/runtime"))
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .settings(moduleName := "mu-rpc-example-todolist-runtime")
-
-lazy val `example-todolist-server` = project
-  .in(file("modules/examples/todolist/server"))
-  .dependsOn(`example-todolist-protocol`)
-  .dependsOn(`example-todolist-runtime`)
-  .dependsOn(server)
-  .dependsOn(config)
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .settings(moduleName := "mu-rpc-example-todolist-server")
-  .settings(exampleTodolistCommonSettings)
-
-lazy val `example-todolist-client` = project
-  .in(file("modules/examples/todolist/client"))
-  .dependsOn(`example-todolist-protocol`)
-  .dependsOn(`example-todolist-runtime`)
-  .dependsOn(`netty`)
-  .dependsOn(config)
-  .settings(coverageEnabled := false)
-  .settings(noPublishSettings)
-  .settings(moduleName := "mu-rpc-example-todolist-client")
-  .settings(exampleTodolistCommonSettings)
-
 /////////////////////
 //// MARSHALLERS ////
 /////////////////////
@@ -591,25 +298,12 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   `legacy-avro-decimal-compat-model`,
   `legacy-avro-decimal-compat-protocol`,
   `legacy-avro-decimal-compat-encoders`,
-  `health-check-unary`,
-  `example-health-client`,
-  `example-health-server-monix`,
-  `example-health-server-fs2`,
-  `example-routeguide-protocol`,
-  `example-routeguide-common`,
-  `example-routeguide-runtime`,
-  `example-routeguide-server`,
-  `example-routeguide-client`,
-  `example-seed`
+  `health-check-unary`
 )
 
 lazy val nonCrossedScalaVersionModules: Seq[ProjectReference] = Seq(
   `benchmarks-vprev`,
-  `benchmarks-vnext`,
-  `example-todolist-protocol`,
-  `example-todolist-runtime`,
-  `example-todolist-server`,
-  `example-todolist-client`
+  `benchmarks-vnext`
 )
 
 lazy val coreModulesDeps: Seq[ClasspathDependency] =
@@ -623,8 +317,8 @@ lazy val root = project
   .dependsOn(coreModulesDeps: _*)
 
 lazy val `root-non-crossed-scala-versions` = project
-  .in(file("examples"))
-  .settings(name := "mu-scala-examples")
+  .in(file("benchmarks"))
+  .settings(name := "mu-scala-benchmarks")
   .settings(noPublishSettings)
   .settings(noCrossCompilationLastScala)
   .aggregate(nonCrossedScalaVersionModules: _*)

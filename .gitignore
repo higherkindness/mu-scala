@@ -37,6 +37,7 @@ benchmarks/results
 .bloop/
 .metals/
 project/.bloop/
+project/metals.sbt
 
 # Visual Studio Code Specific
 .vscode/
