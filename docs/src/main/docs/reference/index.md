@@ -7,4 +7,4 @@ permalink: reference
 
 # Reference
 
-TODO
+This is a collection of reference material about Mu-Scala.
