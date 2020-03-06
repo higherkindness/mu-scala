@@ -164,7 +164,6 @@ Similarly, let's see how to create a gRPC client with encryption and client
 authentication.
 
 ```scala mdoc:silent
-import cats.syntax.either._
 import higherkindness.mu.rpc.ChannelForAddress
 import higherkindness.mu.rpc.channel.OverrideAuthority
 import higherkindness.mu.rpc.channel.netty.{
@@ -217,7 +216,7 @@ can check a full explanation and an example about securing communications.
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[Mu]: https://github.com/higherkindness/mu
+[Mu]: https://github.com/higherkindness/mu-scala
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

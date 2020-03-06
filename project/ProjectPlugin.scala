@@ -314,8 +314,9 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "org.scalatest"     %% "scalatest"                % V.scalatest,
-        "org.scalatestplus" %% "scalatestplus-scalacheck" % V.scalatestplusScheck
+        "org.scalatest"         %% "scalatest"                % V.scalatest,
+        "org.scalatestplus"     %% "scalatestplus-scalacheck" % V.scalatestplusScheck,
+        "io.dropwizard.metrics" % "metrics-jmx"               % V.dropwizard
       )
     ) ++ mdocSettings
 

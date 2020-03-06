@@ -149,7 +149,7 @@ As you can see, the Fs2 service is very similar to the Observable service.
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[Mu]: https://github.com/higherkindness/mu
+[Mu]: https://github.com/higherkindness/mu-scala
 [Java gRPC]: https://github.com/grpc/grpc-java
 [JSON]: https://en.wikipedia.org/wiki/JSON
 [gRPC guide]: https://grpc.io/docs/guides/

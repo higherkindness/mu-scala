@@ -290,4 +290,4 @@ case class Response(a: String, b: Int = 123)
 case class NewResponse(a: String)
 ```
 
-[Mu]: https://github.com/higherkindness/mu
+[Mu]: https://github.com/higherkindness/mu-scala

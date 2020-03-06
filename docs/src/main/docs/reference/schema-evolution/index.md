@@ -14,4 +14,4 @@ Currently, [Mu] brings the ability to encode data in bytes based on Avro and Pro
 * [Avro](schema-evolution/avro)
 * [Protocol Buffers](schema-evolution/proto)
 
-[Mu]: https://github.com/higherkindness/mu
+[Mu]: https://github.com/higherkindness/mu-scala

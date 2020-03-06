@@ -264,4 +264,4 @@ containing a number of helper methods for building gRPC servers and clients.
 We will make use of these helper methods when we wire everything together to
 build a working server and client in the [patterns](patterns) section.
 
-[Mu]: https://github.com/higherkindness/mu
+[Mu]: https://github.com/higherkindness/mu-scala
