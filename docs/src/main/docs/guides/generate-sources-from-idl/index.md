@@ -99,8 +99,8 @@ muSrcGenSerializationType := SerializationType.Protobuf // or SerializationType.
 | Setting | Description | Default value |
 | --- | --- | --- |
 | `muSrcGenSourceDirs` | The list of directories where your IDL files can be found.<br/><br/>Note: all the directories configured as sources will be distributed in the resulting jar artifact preserving the same folder structure as in the source. | `Compile / resourceDirectory`, typically `src/main/resources/` |
-| `muSrcGenIdlTargetDir` | The directory where all discovered IDL files will be copied in preparation for Scala code generation. The plugin will automatically copy the following to the target directory:<br/> * All the IDL files and directories in the directory specified by `muSrcGenSourceDirs`<br/> * All the IDL files extracted from the JAR files or sbt modules specified by `muSrcGenJarNames` (see the "Advanced settings" section below) | `Compile / resourceManaged`, typically `target/scala-2.12/resource_managed/main` |
-| `muSrcGenTargetDir` | The directory where the `muSrcGen` task will write the generated files. The files will be placed in subdirectories based on the namespaces declared in the IDL files. | `Compile / sourceManaged`, typically `target/scala-2.12/src_managed/main/` |
+| `muSrcGenIdlTargetDir` | The directory where all discovered IDL files will be copied in preparation for Scala code generation. The plugin will automatically copy the following to the target directory:<br/> * All the IDL files and directories in the directory specified by `muSrcGenSourceDirs`<br/> * All the IDL files extracted from the JAR files or sbt modules specified by `muSrcGenJarNames` (see the "Advanced settings" section below) | `Compile / resourceManaged`, typically `target/scala-2.13/resource_managed/main` |
+| `muSrcGenTargetDir` | The directory where the `muSrcGen` task will write the generated files. The files will be placed in subdirectories based on the namespaces declared in the IDL files. | `Compile / sourceManaged`, typically `target/scala-2.13/src_managed/main/` |
 
 **Note**: The directories referenced in `muSrcGenSourceDirs` must exist. Target directories will be created upon generation.
 
@@ -169,7 +169,7 @@ actually two stages of code generation at work.
 
 1. The `sbt-mu-srcgen` plugin will parse your IDL files and transform them into
    Scala code. It writes this code to `.scala` files under
-   `target/scala-2.12/src_managed`.
+   `target/scala-2.13/src_managed`.
 
 2. The generated Scala code contains `@service` macro annotations. When these
    files are compiled, the compiler will expand these annotations by executing a

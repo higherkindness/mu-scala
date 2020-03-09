@@ -68,11 +68,11 @@ output:
 sbt:hello-mu-protobuf> muSrcGen
 protoc-jar: protoc version: 3.11.1, detected platform: osx-x86_64 (mac os x/x86_64)
 protoc-jar: embedded: bin/3.11.1/protoc-3.11.1-osx-x86_64.exe
-protoc-jar: executing: [/var/folders/33/gbkw7lt97l7b38jnzh49bwvh0000gn/T/protocjar11045051115974206116/bin/protoc.exe, --proto_path=/Users/chris/code/hello-mu-protobuf/protocol/target/scala-2.12/resource_managed/main/proto/proto, --proto_path=/Users/chris/code/hello-mu-protobuf/protocol/target/scala-2.12/resource_managed/main/proto, --plugin=protoc-gen-proto2_to_proto3, --include_imports, --descriptor_set_out=hello.proto.desc, hello.proto]
+protoc-jar: executing: [/var/folders/33/gbkw7lt97l7b38jnzh49bwvh0000gn/T/protocjar11045051115974206116/bin/protoc.exe, --proto_path=/Users/chris/code/hello-mu-protobuf/protocol/target/scala-2.13/resource_managed/main/proto/proto, --proto_path=/Users/chris/code/hello-mu-protobuf/protocol/target/scala-2.13/resource_managed/main/proto, --plugin=protoc-gen-proto2_to_proto3, --include_imports, --descriptor_set_out=hello.proto.desc, hello.proto]
 ```
 
 Let's have a look at the code that Mu-Scala has generated. Open the file
-`protocol/target/scala-2.12/src_managed/main/com/example/hello.scala` in your
+`protocol/target/scala-2.13/src_managed/main/com/example/hello.scala` in your
 editor of choice.
 
 It's generated code, so it will look pretty ugly. Here's a version of it tidied
@@ -114,7 +114,7 @@ service Greeter {
 ## Regenerate the code
 
 If you run the `muSrcGen` sbt task again, and inspect the
-`protocol/target/scala-2.12/src_managed/main/com/example/hello.scala` file again, it should
+`protocol/target/scala-2.13/src_managed/main/com/example/hello.scala` file again, it should
 look something like this:
 
 ```scala

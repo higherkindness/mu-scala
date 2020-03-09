@@ -82,7 +82,7 @@ $ sbt compile
 ```
 
 Once the source generator has run, there should be a generated Scala file at
-`target/scala-2.12/src_managed/main/petstore/petstore.scala`.
+`target/scala-2.13/src_managed/main/petstore/petstore.scala`.
 
 The file is very large so we won't show it here, but it contains:
 

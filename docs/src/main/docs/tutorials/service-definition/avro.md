@@ -74,7 +74,7 @@ Start sbt and run the `muSrcGen` task. This will discover the `.avdl` file,
 parse it and generate corresponding Scala code.
 
 Let's have a look at the code that Mu-Scala has generated. Open the file
-`protocol/target/scala-2.12/src_managed/main/com/example/Greeter.scala` in your
+`protocol/target/scala-2.13/src_managed/main/com/example/Greeter.scala` in your
 editor of choice.
 
 It should look something like this:
@@ -114,7 +114,7 @@ curly brace.
 ## Regenerate the code
 
 If you run the `muSrcGen` sbt task again, and inspect the
-`protocol/target/scala-2.12/src_managed/main/com/example/Greeter.scala` file
+`protocol/target/scala-2.13/src_managed/main/com/example/Greeter.scala` file
 again, it should look something like this:
 
 ```scala
