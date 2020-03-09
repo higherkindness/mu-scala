@@ -68,11 +68,11 @@ We need to provide a couple of implicits to make that work:
 
 ```scala mdoc:silent
 import cats.effect.{IO, ContextShift, Timer}
-import scala.concurrent.ExecutionContext.Implicits
+import scala.concurrent.ExecutionContext
 
 trait CatsEffectImplicits {
 
-  val EC: scala.concurrent.ExecutionContext = Implicits.global
+  val EC: ExecutionContext = ExecutionContext.global
 
   implicit val timer: Timer[IO]     = IO.timer(EC)
   implicit val cs: ContextShift[IO] = IO.contextShift(EC)
