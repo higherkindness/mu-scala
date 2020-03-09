@@ -5,25 +5,51 @@ section: guides
 permalink: /guides/grpc-streaming
 ---
 
-TODO update this whole page.
-
 # gRPC Streaming
 
-In the previous section, we saw that [Mu] allows you to define unary services. Additionally, it supports the following streaming options:
+In the [tutorials](../tutorials), we only defined gRPC services with so-called
+"unary" endpoints. This is an endpoint that does not involve streaming. The
+client sends a single request and receives a single response.
 
-* **Server streaming RPC**: similar to the unary service, but in this case the server will send back a stream of responses for a client request.
-* **Client streaming RPC**: in this case is the client which sends a stream of requests. The server will respond with a single response.
-* **Bidirectional streaming RPC**: a mix of server and client streaming as both sides will be sending a stream of data.
+[gRPC] also defines the following kinds of streaming, all of which are supported
+by Mu.
 
-Let's keep going. We'll be completing our protocol's example with the three streaming options.
+* **Server streaming RPC**: similar to the unary service, but in this case the
+  server will send back a stream of responses for a client request.
+* **Client streaming RPC**: in this case is the client which sends a stream of
+  requests. The server will respond with a single response.
+* **Bidirectional streaming RPC**: a mix of server and client streaming as both
+  sides will be sending a stream of data.
 
-Before starting, this is the Scala import we need:
+## Protobuf
+
+Mu only officially supports streaming for Protobuf, not Avro. This is because
+Avro does not (yet) have support for streaming RPC endpoints in its protocol
+specification.
+
+The relevant Avro issue is
+[AVRO-406](https://issues.apache.org/jira/browse/AVRO-406).
+
+## Stream implementation
+
+Mu supports both [Monix
+Observable](https://monix.io/docs/2x/reactive/observable.html) and [FS2
+Stream](https://github.com/functional-streams-for-scala/fs2) for streaming of
+RPC requests and responses. You can choose whichever data type fits your
+application's needs best.
+
+## Service definition with streaming endpoints
+
+Let's see what a Mu RPC service definition looks like when we introduce
+streaming endpoints.
+
+Before starting, here is one import we'll need:
 
 ```scala mdoc:silent
 import higherkindness.mu.rpc.protocol._
 ```
 
-Request/response models that we are going to use in our service implementation:
+And here are the equest/response models for our service:
 
 ```scala mdoc:silent
 case class HelloRequest(greeting: String)
@@ -31,10 +57,12 @@ case class HelloRequest(greeting: String)
 case class HelloResponse(reply: String)
 ```
 
-Now, let's see the service example:
+We'll write the service definition using both Monix and FS2 so we can compare.
+
+### Using Monix Observable
 
 ```scala mdoc:silent
-object service1 {
+object MonixService {
 
   import monix.reactive.Observable
 
@@ -83,29 +111,18 @@ object service1 {
 }
 ```
 
-This code might be self-explanatory but let's review the different services one by one:
+Let's review the different endpoints one by one:
 
-* `lotsOfReplies `: Server streaming RPC.
-* `lotsOfGreetings `: Client streaming RPC.
-* `bidiHello `: Bidirectional streaming RPC.
+* `lotsOfReplies `: Server streaming RPC. The server receives a single `HelloRequest` from the client, and responds with an `Observable[HelloResponse]`, i.e. a stream.
+* `lotsOfGreetings `: Client streaming RPC. The client sends an
+  `Observable[HelloRequest]`, i.e. a stream of requests, and receives a single
+  `HelloResponse`.
+* `bidiHello `: Bidirectional streaming RPC. The client sends a stream of
+  requests and the server sends a stream of responses.
 
-## Integrations
+### Using FS2
 
-In [Mu], the streaming features have been implemented based on two data types. You can choose whichever data type fits your application's needs best.
-
-### Observable
-
-The first data type is `monix.reactive.Observable`, see the [Monix Docs](https://monix.io/docs/2x/reactive/observable.html) for a more detailed explanation. These monix extensions have been implemented on top of the [gRPC Java API](https://grpc.io/grpc-java/javadoc/) and the `StreamObserver` interface.
-
-The example above shows a basic implementation of how to use this data type for streaming.
-
-### FS2: Functional Streams
-
-The second data type available for implementing streaming protocols is `fs2.Stream`, see the [FS2 Docs](https://github.com/functional-streams-for-scala/fs2) for more details. 
-
-Thanks to this new data type, [Mu] supports `fs2.Stream[F, ?]` for all the types of streaming mentioned before.
-
-Let's compare our previous protocols using `fs2.Stream` instead of `Observable`.
+Let's write the same service definition using `fs2.Stream` instead of `Observable`.
 
 ```scala mdoc:silent
 object servicefs2 {
@@ -116,7 +133,7 @@ object servicefs2 {
   trait Greeter[F[_]] {
 
     /**
-     * Server streaming RPC 
+     * Server streaming RPC
      *
      * @param request Single client request.
      * @return Stream of server responses.
@@ -124,7 +141,7 @@ object servicefs2 {
     def lotsOfReplies(request: HelloRequest): Stream[F, HelloResponse]
 
     /**
-     * Client streaming RPC 
+     * Client streaming RPC
      *
      * @param request Stream of client requests.
      * @return Single server response.
@@ -132,7 +149,7 @@ object servicefs2 {
     def lotsOfGreetings(request: Stream[F, HelloRequest]): F[HelloResponse]
 
     /**
-     * Bidirectional streaming RPC 
+     * Bidirectional streaming RPC
      *
      * @param request Stream of client requests.
      * @return Stream of server responses.
@@ -144,18 +161,6 @@ object servicefs2 {
 }
 ```
 
-As you can see, the Fs2 service is very similar to the Observable service.
-
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/
 [gRPC]: https://grpc.io/
-[Mu]: https://github.com/higherkindness/mu-scala
-[Java gRPC]: https://github.com/grpc/grpc-java
-[JSON]: https://en.wikipedia.org/wiki/JSON
-[gRPC guide]: https://grpc.io/docs/guides/
-[PBDirect]: https://github.com/47deg/pbdirect
-[scalamacros]: https://github.com/scalamacros/paradise
-[Monix]: https://monix.io/
-[cats-effect]: https://github.com/typelevel/cats-effect
-[Metrifier]: https://github.com/47deg/metrifier
-
