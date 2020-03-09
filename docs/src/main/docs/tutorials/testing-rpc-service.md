@@ -124,7 +124,7 @@ trait ServiceAndClient extends CatsEffectImplicits {
 }
 ```
 
-The import part here is the use of `withServerChannel`. This is a helper method
+The important part here is the use of `withServerChannel`. This is a helper method
 provided by the `mu-rpc-testing` module that connects the service to an
 in-memory channel so we don't need to start a real gRPC server.
 
