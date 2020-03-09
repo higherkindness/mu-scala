@@ -165,8 +165,8 @@ The happy server says 'Hello, Chris!'
 
 ## Next steps
 
-If you want to write tests for your gRPC server, take a look at the [Testing
-a gRPC server tutorial](testing-grpc-server).
+If you want to write tests for your RPC service, take a look at the [Testing an
+RPC service tutorial](testing-rpc-service).
 
 [cats-effect]: https://typelevel.org/cats-effect/
 [gRPC]: https://grpc.io/

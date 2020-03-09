@@ -43,13 +43,13 @@ options:
     menu_type: tutorials
     url: tutorials/grpc-server-client
 
+  - title: Testing an RPC service
+    menu_type: tutorials
+    url: tutorials/testing-rpc-service
+
   - title: OpenAPI REST client
     menu_type: tutorials
     url: tutorials/openapi-client
-
-  - title: Testing a gRPC server
-    menu_type: tutorials
-    url: tutorials/testing-grpc-server
 
   - title: Deploying a Mu service
     menu_type: tutorials

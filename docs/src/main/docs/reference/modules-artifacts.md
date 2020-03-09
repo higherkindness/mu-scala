@@ -60,7 +60,7 @@ You can install any of these dependencies in your build as follows:
 [comment]: # (Start Replace)
 
 ```scala
-// required for the RPC server
+// required for the RPC server
 libraryDependencies += "io.higherkindness" %% "mu-rpc-server" % "0.20.1"
 
 // required for a protocol definition:
@@ -93,6 +93,9 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-marshallers-jodatime" % "0
 
 // optional - to add caching support to RPC clients.
 libraryDependencies += "io.higherkindness" %% "mu-rpc-client-cache" % "0.20.1"
+
+// optional - for testing RPC services
+libraryDependencies += "io.higherkindness" %% "mu-rpc-testing" % "0.20.1" % Test
 ```
 
 ### sbt plugin
