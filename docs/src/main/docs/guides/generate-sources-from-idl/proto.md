@@ -110,6 +110,3 @@ object hello {
   }
 }
 ```
-
-Next, take a look at the [Patterns section](patterns) to see how you can
-implement the `ProtoGreeter` trait and turn it into a gRPC server and client.

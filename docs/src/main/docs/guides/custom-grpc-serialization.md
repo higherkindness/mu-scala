@@ -88,7 +88,6 @@ object ProtobufCustomCodecExample {
   import java.time._
   import java.time.format._
 
-  import com.google.protobuf.{CodedInputStream, CodedOutputStream}
   import pbdirect._
 
   import cats.syntax.contravariant._
@@ -128,7 +127,6 @@ object AvroCustomCodecExample {
 
   import com.sksamuel.avro4s._
   import org.apache.avro.Schema
-  import org.apache.avro.Schema.Field
 
   implicit object LocalDateSchemaFor extends SchemaFor[LocalDate] {
     override def schema(fm: com.sksamuel.avro4s.FieldMapper): Schema =

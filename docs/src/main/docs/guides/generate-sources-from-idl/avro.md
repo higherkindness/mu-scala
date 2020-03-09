@@ -238,7 +238,7 @@ record Person {
 ***muSrcGen =>***
 
 ```scala mdoc:silent
-final case class Person(name: String, age: Int, crossfitter: Boolean)
+case class Person(name: String, age: Int, crossfitter: Boolean)
 ```
 
 ### Enums
@@ -254,7 +254,7 @@ enum Errors {
 ***muSrcGen =>***
 
 ```scala mdoc:silent
-final object Errors extends Enumeration {
+object Errors extends Enumeration {
   type Errors = Value
   val NotFound, Duplicated, None = Value
 }
@@ -280,7 +280,7 @@ record PeopleRequest {
 ***muSrcGen =>***
 
 ```scala mdoc:silent
-final case class PeopleRequest(name: Option[String])
+case class PeopleRequest(name: Option[String])
 ```
 
 ### Eithers
@@ -296,7 +296,7 @@ record PeopleResponse {
 ***muSrcGen =>***
 
 ```scala mdoc:silent
-final case class PeopleResponse(result: Either[Errors.Value, Person])
+case class PeopleResponse(result: Either[Errors.Value, Person])
 ```
 
 ### Coproducts
@@ -315,7 +315,7 @@ record PeopleResponse {
 ```scala mdoc:silent:nest
 import shapeless.{:+:, CNil}
 
-final case class PeopleResponse(result: String :+: Int :+: Errors.Value :+: CNil)
+case class PeopleResponse(result: String :+: Int :+: Errors.Value :+: CNil)
 ```
 
 ### Services

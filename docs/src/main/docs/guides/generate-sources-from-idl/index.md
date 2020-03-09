@@ -16,12 +16,12 @@ with 3rd parties, and supported by a lot of existing tools.
 
 Mu can generate code from a number of different IDL formats:
 
-* message classes, gRPC server and client from Protobuf `.proto` files (see the
-  [Protobuf section](generate-sources-from-proto) for detailed instructions)
-* message classes, gRPC server and client from Avro `.avpr` or `.avdl` files (see the
-  [Avro section](generate-sources-from-avro))
+* message classes, gRPC server and client from Protobuf `.proto` files (see
+  [Generating sources from Protocol Buffers](generate-sources-from-proto) for detailed instructions)
+* message classes, gRPC server and client from Avro `.avpr` or `.avdl` files (see
+  [Generating sources from Avro](generate-sources-from-avro))
 * message classes and REST client from OpenAPI `.yaml` files (see the
-  [OpenAPI section](generate-sources-from-openapi))
+  [OpenAPI REST client tutorial](../tutorials/openapi-client))
 
 ## Plugin Installation
 

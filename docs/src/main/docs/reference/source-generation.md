@@ -84,7 +84,7 @@ You can also specify custom imports with the following:
 muSrcGenMarshallerImports := List(higherkindness.mu.rpc.srcgen.Model.CustomMarshallersImport("com.sample.marshallers._"))
 ```
 
-See the [Custom codecs section in core concepts](core-concepts#custom-codecs) for more information.
+See the [custom gRPC serialization guide](../guides/custom-grpc-serialization) for more information.
 
 ### muSrcGenJarNames
 
