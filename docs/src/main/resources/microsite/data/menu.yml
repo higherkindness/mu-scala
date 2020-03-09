@@ -89,9 +89,6 @@ options:
       - title: Protocol Buffers
         url: guides/generate-sources-from-proto
 
-      - title: OpenAPI
-        url: guides/generate-sources-from-openapi
-
   # Menu displayed on Reference pages
 
   - title: Reference

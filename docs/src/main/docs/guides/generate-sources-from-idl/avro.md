@@ -31,11 +31,20 @@ muSrcGenIdlType := IdlType.Avro
 muSrcGenIdiomaticEndpoints := true
 ```
 
-Finally, make sure you have enabled the scalamacros compiler plugin so that
-macro annotations work properly. Also in `build.sbt`:
+Finally, make sure you have Scala macro annotations enabled, to ensure the
+generated code compiles. How you do this depends on which Scala version you are
+using.
+
+For Scala 2.12, add this to `build.sbt`:
 
 ```scala
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch)
+```
+
+For Scala 2.13, add this:
+
+```scala
+scalacOptions += "-Ymacro-annotations"
 ```
 
 Suppose you want to generate Scala code for a gRPC service based on the
@@ -180,7 +189,7 @@ Scala file as before.
 
 ## Avro code generation details
 
-In this section we are going to explain how we can generate the different Scala structures using the Avro IDL.
+This section explains the different Scala structures that are generated from Avro IDL.
 
 To achieve this generation Mu's source generator uses [avrohugger](https://github.com/julianpeeters/avrohugger) behind the scenes.
 
