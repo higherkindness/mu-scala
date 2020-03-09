@@ -70,5 +70,7 @@ You can also run the unit test with `sbt server/test`.
 
 Learn more about Mu-Scala concepts by following a [tutorial](tutorials).
 
-The [gRPC with Protobuf](tutorials/grpc-with-protobuf) tutorial, or [gRPC with
-Avro](tutorials/grpc-with-avro) if you prefer Avro, is a good place to start.
+The [RPC service definition with
+Protobuf](tutorials/service-definition/protobuf) tutorial, or [RPC service
+definition with Avro](tutorials/service-definition/avro) if you prefer Avro, is
+a good place to start.

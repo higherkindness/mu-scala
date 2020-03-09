@@ -28,13 +28,16 @@ options:
     menu_type: tutorials
     url: tutorials
 
-  - title: gRPC with Protobuf
+  - title: RPC service definition
     menu_type: tutorials
-    url: tutorials/grpc-with-protobuf
 
-  - title: gRPC with Avro
-    menu_type: tutorials
-    url: tutorials/grpc-with-avro
+    nested_options:
+
+      - title: Protobuf
+        url: tutorials/service-definition/protobuf
+
+      - title: Avro
+        url: tutorials/service-definition/avro
 
   - title: gRPC server and client
     menu_type: tutorials

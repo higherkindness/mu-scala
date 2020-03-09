@@ -1,34 +1,34 @@
 ---
 layout: docs
-title: gRPC with Avro
+title: RPC service definition with Avro
 section: tutorials
-permalink: tutorials/grpc-with-avro
+permalink: tutorials/service-definition/avro
 ---
 
-# Tutorial: gRPC with Avro
+# Tutorial: RPC service definition with Avro
 
-[gRPC] supports [Protobuf] by default for serialization of requests and
+[gRPC] supports [Protocol Buffers] by default for serialization of requests and
 responses, but it also allows you to use other serialization mechanisms,
 including [Avro].
 
 This tutorial will show you how to generate a Mu RPC service definition from an
 [Avro] IDL file.
 
-Then a [follow-up tutorial](grpc-server-client) will guide you through using
+Then a [follow-up tutorial](../grpc-server-client) will guide you through using
 this service definition to create a fully working gRPC server or client.
 
 This tutorial is aimed at developers who:
 
 * are new to Mu-Scala
 * have some understanding of Avro and `.avdl` file syntax
-* have read the [Getting Started guide](../getting-started)
+* have read the [Getting Started guide](../../getting-started)
 
 This document will focus on Avro. If you would like to use gRPC with Protobuf,
-see the [gRPC with Protobuf tutorial](grpc-with-protobuf).
+see the [RPC service definition with Protobuf tutorial](protobuf).
 
 ## Create a new Mu project
 
-As described in the [Getting Started guide](../getting-started), we recommend
+As described in the [Getting Started guide](../../getting-started), we recommend
 you use the Mu-Scala giter8 template to create a new skeleton project. This will
 install and configure the `mu-srcgen` sbt plugin, which we will need to generate
 Scala code from an Avro `.avdl` file.
@@ -161,12 +161,14 @@ There's quite a lot going on there, so let's unpack it a bit.
        `sayHello`.
 
 These parameters can be customised using sbt settings. Take a look at the
-[source generation reference](../reference/source-generation) for more details.
+[source generation reference](../../reference/source-generation) for more
+details.
 
 ## Next steps
 
 To find out how to turn this service definition into a working gRPC client or
-server, continue to the [gRPC server and client tutorial](grpc-server-client).
+server, continue to the [gRPC server and client
+tutorial](../grpc-server-client).
 
 [Avro]: https://avro.apache.org/docs/current/
 [cats-effect]: https://typelevel.org/cats-effect/

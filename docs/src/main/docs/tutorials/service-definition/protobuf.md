@@ -2,29 +2,29 @@
 layout: docs
 title: gRPC with Protobuf
 section: tutorials
-permalink: tutorials/grpc-with-protobuf
+permalink: tutorials/service-definition/protobuf
 ---
 
-# Tutorial: gRPC with Protobuf
+# Tutorial: RPC service definition with Protobuf
 
 This tutorial will show you how to generate a Mu RPC service definition from a
 [Protocol Buffers] protocol file.
 
-Then a [follow-up tutorial](grpc-server-client) will guide you through using
+Then a [follow-up tutorial](../grpc-server-client) will guide you through using
 this service definition to create a fully working gRPC server or client.
 
 This tutorial is aimed at developers who:
 
 * are new to Mu-Scala
 * have some understanding of Protobuf and `.proto` file syntax
-* have read the [Getting Started guide](../getting-started)
+* have read the [Getting Started guide](../../getting-started)
 
 This document will focus on Protobuf. If you would like to use gRPC with Avro,
-see the [gRPC with Avro tutorial](grpc-with-avro).
+see the [RPC service definition with Avro tutorial](avro).
 
 ## Create a new Mu project
 
-As described in the [Getting Started guide](../getting-started), we recommend
+As described in the [Getting Started guide](../../getting-started), we recommend
 you use the Mu-Scala giter8 template to create a new skeleton project. This will
 install and configure the `mu-srcgen` sbt plugin, which we will need to generate
 Scala code from a Protobuf `.proto` file.
@@ -159,12 +159,14 @@ There's quite a lot going on there, so let's unpack it a bit.
        `sayHello`.
 
 These parameters can be customised using sbt settings. Take a look at the
-[source generation reference](../reference/source-generation) for more details.
+[source generation reference](../../reference/source-generation) for more
+details.
 
 ## Next steps
 
 To find out how to turn this service definition into a working gRPC client or
-server, continue to the [gRPC server and client tutorial](grpc-server-client).
+server, continue to the [gRPC server and client
+tutorial](../grpc-server-client).
 
 [cats-effect]: https://typelevel.org/cats-effect/
 [gRPC]: https://grpc.io/

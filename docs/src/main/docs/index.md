@@ -8,10 +8,17 @@ permalink: /
 # Mu-Scala
 
 [Mu] is a suite of libraries and tools that help you build and maintain
-microservices in a functional style.
+microservices and clients in a functional style.
+
+## Getting Started
+
+If you're new to Mu-Scala, check out the [Getting Started
+guide](getting-started) and the [tutorials](tutorials).
+
+## Features
 
 While you focus on implementing the business logic for your service, let Mu take
-care of the boilerplate, including:
+care of the boilerplate and non-functional requirements, including:
 
 * generation of model classes, service interfaces and clients from [Avro],
   [Protobuf] or [OpenAPI] <abbr title="Interface definition language">IDL</abbr>
@@ -30,10 +37,6 @@ Specifically, Mu helps you to build:
 * [gRPC] servers and clients based on either [Avro] or [Protobuf] protocol
   definitions
 * REST servers and clients based on [OpenAPI] definitions
-
-## Getting Started
-
-If you're new to Mu-Scala, check out the [Getting Started guide](getting-started) and the [tutorials](tutorials).
 
 [Avro]: https://avro.apache.org/
 [FS2]: https://github.com/functional-streams-for-scala/fs2

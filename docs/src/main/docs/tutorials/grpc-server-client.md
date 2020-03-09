@@ -15,8 +15,9 @@ This tutorial is aimed at developers who:
 * are new to Mu-Scala
 * have some understanding of [cats-effect]
 * have read the [Getting Started guide](../getting-started)
-* have followed either the [gRPC with Protobuf](grpc-with-protobuf) or [gRPC
-  with Protobuf](grpc-with-protobuf) tutorial
+* have followed either the [RPC service definition with
+  Protobuf](service-definition/protobuf) or [RPC service definition with
+  Avro](service-definition/avro) tutorial
 
 Mu supports both Protobuf and Avro. For the purposes of this tutorial we will
 assume you are using Protobuf, but it's possible to follow the tutorial even if
