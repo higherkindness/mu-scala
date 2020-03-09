@@ -20,7 +20,8 @@ this service definition to create a fully working gRPC server or client.
 This tutorial is aimed at developers who:
 
 * are new to Mu-Scala
-* have some understanding of Avro and `.avdl` file syntax
+* have some understanding of [Avro] and `.avdl` ([Avro
+  IDL](https://avro.apache.org/docs/current/idl.html)) syntax
 * have read the [Getting Started guide](../../getting-started)
 
 This document will focus on Avro. If you would like to use gRPC with Protobuf,
@@ -29,9 +30,10 @@ see the [RPC service definition with Protobuf tutorial](protobuf).
 ## Create a new Mu project
 
 As described in the [Getting Started guide](../../getting-started), we recommend
-you use the Mu-Scala giter8 template to create a new skeleton project. This will
-install and configure the `mu-srcgen` sbt plugin, which we will need to generate
-Scala code from an Avro `.avdl` file.
+you use the Mu-Scala [giter8
+template](https://github.com/higherkindness/mu-scala.g8) to create a new
+skeleton project. This will install and configure the `mu-srcgen` sbt plugin,
+which we will need to generate Scala code from an Avro `.avdl` file.
 
 When you create the project using `sbt new`, make sure to set
 `create_sample_code` to `no`. That way you can start with an empty project, and

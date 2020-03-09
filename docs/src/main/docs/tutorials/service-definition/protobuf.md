@@ -25,9 +25,10 @@ see the [RPC service definition with Avro tutorial](avro).
 ## Create a new Mu project
 
 As described in the [Getting Started guide](../../getting-started), we recommend
-you use the Mu-Scala giter8 template to create a new skeleton project. This will
-install and configure the `mu-srcgen` sbt plugin, which we will need to generate
-Scala code from a Protobuf `.proto` file.
+you use the Mu-Scala [giter8
+template](https://github.com/higherkindness/mu-scala.g8) to create a new
+skeleton project. This will install and configure the `mu-srcgen` sbt plugin,
+which we will need to generate Scala code from a Protobuf `.proto` file.
 
 When you create the project using `sbt new`, make sure to set
 `create_sample_code` to `no`. That way you can start with an empty project, and

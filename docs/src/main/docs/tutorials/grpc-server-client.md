@@ -35,6 +35,8 @@ object hello {
   case class HelloRequest(@pbdirect.pbIndex(1) name: String)
   case class HelloResponse(@pbdirect.pbIndex(1) greeting: String, @pbdirect.pbIndex(2) happy: Boolean)
 
+  // Note: the @service annotation in your code might reference Avro
+  // instead of Protobuf
   @service(Protobuf, Identity, namespace = Some("com.example"), methodNameStyle = Capitalize)
   trait Greeter[F[_]] {
     def SayHello(req: HelloRequest): F[HelloResponse]

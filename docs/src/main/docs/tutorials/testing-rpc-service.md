@@ -13,9 +13,12 @@ in-memory channel and client.
 This tutorial is aimed at developers who:
 
 * are new to Mu-Scala
-* have some understanding of Protobuf and `.proto` file syntax
 * have read the [Getting Started guide](../getting-started)
 * have followed the [gRPC server and client tutorial](grpc-server-client)
+
+Mu supports both Protobuf and Avro. For the purposes of this tutorial we will
+assume you are using Protobuf, but it's possible to follow the tutorial even if
+you are using Avro.
 
 ## Service definition
 
@@ -33,6 +36,8 @@ object hello {
   case class HelloRequest(@pbdirect.pbIndex(1) name: String)
   case class HelloResponse(@pbdirect.pbIndex(1) greeting: String, @pbdirect.pbIndex(2) happy: Boolean)
 
+  // Note: the @service annotation in your code might reference Avro
+  // instead of Protobuf
   @service(Protobuf, Identity, namespace = Some("com.example"), methodNameStyle = Capitalize)
   trait Greeter[F[_]] {
     def SayHello(req: HelloRequest): F[HelloResponse]
@@ -105,7 +110,6 @@ can make requests to the service.
 ```scala mdoc:silent
 import hello._
 import cats.effect.Resource
-import higherkindness.mu.rpc.server._
 import higherkindness.mu.rpc.testing.servers.withServerChannel
 
 trait ServiceAndClient extends CatsEffectImplicits {
@@ -184,9 +188,7 @@ class PropertyBasedServiceSpec extends AnyFlatSpec with ServiceAndClient with Ch
       IO {
         check {
           forAll(requestGen) { request =>
-            val response: HelloResponse = client
-              .SayHello(HelloRequest("somebody"))
-              .unsafeRunSync()
+            val response: HelloResponse = client.SayHello(request).unsafeRunSync()
             response.happy :| "response should be happy"
           }
         }
