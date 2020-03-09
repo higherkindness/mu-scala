@@ -1,62 +1,18 @@
 ---
 layout: docs
-title: Generating sources from IDL
-permalink: /generate-sources-from-idl
+title: Source generation
+section: reference
+permalink: /reference/source-generation
 ---
 
-# Generate sources from IDL
+# Source generation reference
 
-While it is possible to use Mu by hand-writing your service definitions, message
-classes and clients in Scala, we recommend you use `sbt-mu-srcgen` to generate
-this code from Protobuf/Avro/OpenAPI IDL files.
-
-IDL files are language-agnostic, more concise than Scala code, easily shared
-with 3rd parties, and supported by a lot of existing tools.
-
-Mu can generate code from a number of different IDL formats:
-
-* message classes, gRPC server and client from Protobuf `.proto` files (see the
-  [Protobuf section](generate-sources-from-proto) for detailed instructions)
-* message classes, gRPC server and client from Avro `.avpr` or `.avdl` files (see the
-  [Avro section](generate-sources-from-avro))
-* message classes and REST client from OpenAPI `.yaml` files (see the
-  [OpenAPI section](generate-sources-from-openapi))
-
-## Plugin Installation
-
-Add the following line to _project/plugins.sbt_:
-
-[comment]: # (Start Replace)
-
-```scala
-addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "0.20.1")
-```
-
-[comment]: # (End Replace)
-
-## How to use the plugin
-
-The `muSrcGen` sbt task generates Scala source code from IDL files.
-
-The plugin will automatically integrate the source generation into your compile
-process, so the sources are generated before compilation when you run the
-`compile` task.
-
-You can also run the sbt task manually:
-
-```sh
-$ sbt muSrcGen
-```
-
-## Import
-
-You will need to add this import at the top of your `build.sbt`:
-
-```scala
-import higherkindness.mu.rpc.srcgen.Model._
-```
+This is a reference page for the `sbt-mu-srcgen` sbt plugin, which generates
+Scala source code from Avro/Protobuf/OpenAPI IDL files.
 
 ## Settings
+
+This section explains each of the sbt plugin's settings.
 
 ### muSrcGenIdlType
 
@@ -94,8 +50,8 @@ muSrcGenSerializationType := SerializationType.Protobuf // or SerializationType.
 | Setting | Description | Default value |
 | --- | --- | --- |
 | `muSrcGenSourceDirs` | The list of directories where your IDL files can be found.<br/><br/>Note: all the directories configured as sources will be distributed in the resulting jar artifact preserving the same folder structure as in the source. | `Compile / resourceDirectory`, typically `src/main/resources/` |
-| `muSrcGenIdlTargetDir` | The directory where all discovered IDL files will be copied in preparation for Scala code generation. The plugin will automatically copy the following to the target directory:<br/> * All the IDL files and directories in the directory specified by `muSrcGenSourceDirs`<br/> * All the IDL files extracted from the JAR files or sbt modules specified by `muSrcGenJarNames` (see the "Advanced settings" section below) | `Compile / resourceManaged`, typically `target/scala-2.12/resource_managed/main` |
-| `muSrcGenTargetDir` | The directory where the `muSrcGen` task will write the generated files. The files will be placed in subdirectories based on the namespaces declared in the IDL files. | `Compile / sourceManaged`, typically `target/scala-2.12/src_managed/main/` |
+| `muSrcGenIdlTargetDir` | The directory where all discovered IDL files will be copied in preparation for Scala code generation. The plugin will automatically copy the following to the target directory:<br/> * All the IDL files and directories in the directory specified by `muSrcGenSourceDirs`<br/> * All the IDL files extracted from the JAR files or sbt modules specified by `muSrcGenJarNames` (see the "Advanced settings" section below) | `Compile / resourceManaged`, typically `target/scala-2.13/resource_managed/main` |
+| `muSrcGenTargetDir` | The directory where the `muSrcGen` task will write the generated files. The files will be placed in subdirectories based on the namespaces declared in the IDL files. | `Compile / sourceManaged`, typically `target/scala-2.13/src_managed/main/` |
 
 **Note**: The directories referenced in `muSrcGenSourceDirs` must exist. Target directories will be created upon generation.
 
@@ -106,7 +62,7 @@ muSrcGenSerializationType := SerializationType.Protobuf // or SerializationType.
 | `muSrcGenJarNames` | A list of JAR file or sbt module names where extra IDL files can be found. See the [srcGenJarNames section](#musrcgenjarnames) section below for more details. | `Nil` |
 | `muSrcGenIdlExtension` | The extension of IDL files to extract from JAR files or sbt modules. | * `avdl` if `muSrcGenIdlType` is `avro`<br/> * `proto` if `muSrcGenIdlType` is `Proto` |
 | `muSrcGenBigDecimal` | Specifies how Avro `decimal` types will be represented in the generated Scala. `ScalaBigDecimalGen` produces `scala.math.BigDecimal`. `ScalaBigDecimalTaggedGen` produces `scala.math.BigDecimal` tagged with the 'precision' and 'scale' using a Shapeless tag, e.g. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`. | `ScalaBigDecimalTaggedGen`
-| `muSrcGenCompressionType` | The compression type that will be used by generated RPC services. Set to `higherkindness.mu.rpc.srcgen.Model.GzipGen` for Gzip compression. | `higherkindness.mu.rpc.idlgen.Model.NoCompressionGen` |
+| `muSrcGenCompressionType` | The compression type that will be used by generated RPC services. Set to `higherkindness.mu.rpc.srcgen.Model.GzipGen` for Gzip compression. | `higherkindness.mu.rpc.srcgen.Model.NoCompressionGen` |
 | `muSrcGenIdiomaticEndpoints` | Flag indicating if idiomatic gRPC endpoints should be used. If `true`, the service operations will be prefixed by the namespace and the methods will be capitalized. | `false` |
 | `muSrcGenStreamingImplementation` | Specifies whether generated Scala code will use FS2 `Stream[F, A]` or Monix `Observable[A]` as its streaming implementation. FS2 is the default. This setting is only relevant if you have any RPC endpoint definitions that involve streaming. | `higherkindness.mu.rpc.srcgen.Model.Fs2Stream` |
 | `muSrcGenMarshallerImports` | see explanation below | see explanation below |
@@ -125,10 +81,10 @@ The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also
 You can also specify custom imports with the following:
 
 ```scala
-muSrcGenMarshallerImports := List(higherkindness.mu.rpc.idlgen.Model.CustomMarshallersImport("com.sample.marshallers._"))
+muSrcGenMarshallerImports := List(higherkindness.mu.rpc.srcgen.Model.CustomMarshallersImport("com.sample.marshallers._"))
 ```
 
-See the [Custom codecs section in core concepts](core-concepts#custom-codecs) for more information.
+See the [custom gRPC serialization guide](../guides/custom-grpc-serialization) for more information.
 
 ### muSrcGenJarNames
 
@@ -164,7 +120,7 @@ actually two stages of code generation at work.
 
 1. The `sbt-mu-srcgen` plugin will parse your IDL files and transform them into
    Scala code. It writes this code to `.scala` files under
-   `target/scala-2.12/src_managed`.
+   `target/scala-2.13/src_managed`.
 
 2. The generated Scala code contains `@service` macro annotations. When these
    files are compiled, the compiler will expand these annotations by executing a
@@ -256,7 +212,4 @@ object myproto {
 You can see that the macro has generated a `MyService` companion object
 containing a number of helper methods for building gRPC servers and clients.
 
-We will make use of these helper methods when we wire everything together to
-build a working server and client in the [patterns](patterns) section.
-
-[Mu]: https://github.com/higherkindness/mu
+[Mu]: https://github.com/higherkindness/mu-scala

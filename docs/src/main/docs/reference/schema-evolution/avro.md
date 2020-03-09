@@ -1,7 +1,8 @@
 ---
 layout: docs
 title: Schema Evolution - Avro
-permalink: /schema-evolution/avro
+section: reference
+permalink: /reference/schema-evolution/avro
 ---
 
 # Avro - Schema Evolution
@@ -289,4 +290,4 @@ case class Response(a: String, b: Int = 123)
 case class NewResponse(a: String)
 ```
 
-[Mu]: https://github.com/higherkindness/mu
+[Mu]: https://github.com/higherkindness/mu-scala

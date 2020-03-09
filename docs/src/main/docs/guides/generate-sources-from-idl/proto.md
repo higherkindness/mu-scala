@@ -1,7 +1,8 @@
 ---
 layout: docs
 title: Generating sources from Protobuf
-permalink: /generate-sources-from-proto
+section: guides
+permalink: /guides/generate-sources-from-proto
 ---
 
 # Generating sources from Protocol Buffers
@@ -27,14 +28,23 @@ import higherkindness.mu.rpc.srcgen.Model._
 muSrcGenIdlType := IdlType.Proto
 
 // Make it easy for 3rd-party clients to communicate with our gRPC server
-muSrcGenIdlGenIdiomaticEndpoints := true
+muSrcGenIdiomaticEndpoints := true
 ```
 
-Finally, make sure you have enabled the scalamacros compiler plugin so that
-macro annotations work properly. Also in `build.sbt`:
+Finally, make sure you have Scala macro annotations enabled, to ensure the
+generated code compiles. How you do this depends on which Scala version you are
+using.
+
+For Scala 2.12, add this to `build.sbt`:
 
 ```scala
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch)
+```
+
+For Scala 2.13, add this:
+
+```scala
+scalacOptions += "-Ymacro-annotations"
 ```
 
 Suppose you want to generate Scala code for a gRPC service based on the following Protobuf IDL file, `src/main/resources/hello.proto`:
@@ -74,7 +84,7 @@ $ sbt compile
 ```
 
 Once the source generator has run, there should be a generated Scala file at
-`target/scala-2.12/src_managed/main/foo/hello.scala`.
+`target/scala-2.13/src_managed/main/foo/hello.scala`.
 
 It will look roughly like this (tidied up and simplified for readability):
 
@@ -100,6 +110,3 @@ object hello {
   }
 }
 ```
-
-Next, take a look at the [Patterns section](patterns) to see how you can
-implement the `ProtoGreeter` trait and turn it into a gRPC server and client.

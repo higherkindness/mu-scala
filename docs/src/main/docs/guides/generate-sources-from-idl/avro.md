@@ -1,7 +1,8 @@
 ---
 layout: docs
 title: Generating sources from Avro
-permalink: /generate-sources-from-avro
+section: guides
+permalink: /guides/generate-sources-from-avro
 ---
 
 # Generating sources from Avro
@@ -30,11 +31,20 @@ muSrcGenIdlType := IdlType.Avro
 muSrcGenIdiomaticEndpoints := true
 ```
 
-Finally, make sure you have enabled the scalamacros compiler plugin so that
-macro annotations work properly. Also in `build.sbt`:
+Finally, make sure you have Scala macro annotations enabled, to ensure the
+generated code compiles. How you do this depends on which Scala version you are
+using.
+
+For Scala 2.12, add this to `build.sbt`:
 
 ```scala
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch)
+```
+
+For Scala 2.13, add this:
+
+```scala
+scalacOptions += "-Ymacro-annotations"
 ```
 
 Suppose you want to generate Scala code for a gRPC service based on the
@@ -74,7 +84,7 @@ $ sbt compile
 ```
 
 Once the source generator has run, there should be a generated Scala file at
-`target/scala-2.12/src_managed/main/foo/AvroGreeter.scala`.
+`target/scala-2.13/src_managed/main/foo/AvroGreeter.scala`.
 
 It will look like this (tidied up and simplified for readability):
 
@@ -179,7 +189,7 @@ Scala file as before.
 
 ## Avro code generation details
 
-In this section we are going to explain how we can generate the different Scala structures using the Avro IDL.
+This section explains the different Scala structures that are generated from Avro IDL.
 
 To achieve this generation Mu's source generator uses [avrohugger](https://github.com/julianpeeters/avrohugger) behind the scenes.
 
@@ -228,7 +238,7 @@ record Person {
 ***muSrcGen =>***
 
 ```scala mdoc:silent
-final case class Person(name: String, age: Int, crossfitter: Boolean)
+case class Person(name: String, age: Int, crossfitter: Boolean)
 ```
 
 ### Enums
@@ -244,7 +254,7 @@ enum Errors {
 ***muSrcGen =>***
 
 ```scala mdoc:silent
-final object Errors extends Enumeration {
+object Errors extends Enumeration {
   type Errors = Value
   val NotFound, Duplicated, None = Value
 }
@@ -270,7 +280,7 @@ record PeopleRequest {
 ***muSrcGen =>***
 
 ```scala mdoc:silent
-final case class PeopleRequest(name: Option[String])
+case class PeopleRequest(name: Option[String])
 ```
 
 ### Eithers
@@ -286,7 +296,7 @@ record PeopleResponse {
 ***muSrcGen =>***
 
 ```scala mdoc:silent
-final case class PeopleResponse(result: Either[Errors.Value, Person])
+case class PeopleResponse(result: Either[Errors.Value, Person])
 ```
 
 ### Coproducts
@@ -305,7 +315,7 @@ record PeopleResponse {
 ```scala mdoc:silent:nest
 import shapeless.{:+:, CNil}
 
-final case class PeopleResponse(result: String :+: Int :+: Errors.Value :+: CNil)
+case class PeopleResponse(result: String :+: Int :+: Errors.Value :+: CNil)
 ```
 
 ### Services
