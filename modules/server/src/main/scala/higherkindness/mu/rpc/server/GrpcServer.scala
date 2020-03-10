@@ -18,9 +18,7 @@ package higherkindness.mu.rpc
 package server
 
 import cats.~>
-import cats.effect.{Effect, IO, Sync}
-import cats.instances.either._
-import cats.syntax.apply._
+import cats.effect.{Async, Effect, Resource, Sync}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import io.grpc.{Server, ServerBuilder, ServerServiceDefinition}
@@ -79,17 +77,11 @@ trait GrpcServer[F[_]] { self =>
 
 object GrpcServer {
 
-  def server[F[_]](S: GrpcServer[F])(implicit F: Effect[F]): F[Unit] = {
+  def server[F[_]](S: GrpcServer[F])(implicit F: Effect[F]): F[Unit] =
+    F.bracket(S.start)(_ => F.never[Unit])(_ => S.shutdown >> S.awaitTermination)
 
-    def shutdownEventually(endProcess: Either[Throwable, Unit] => Unit): Unit = {
-      Runtime.getRuntime.addShutdownHook(new Thread() {
-        override def run(): Unit =
-          F.runAsync(S.shutdown *> S.awaitTermination)(cb => IO(endProcess(cb.void))).unsafeRunSync
-      })
-    }
-
-    S.start() *> F.async[Unit](cb => shutdownEventually(cb))
-  }
+  def serverResource[F[_]](S: GrpcServer[F])(implicit F: Async[F]): Resource[F, Unit] =
+    Resource.make(S.start >> F.never[Unit])(_ => S.shutdown >> S.awaitTermination)
 
   def default[F[_]](port: Int, configList: List[GrpcConfig])(
       implicit F: Sync[F]
