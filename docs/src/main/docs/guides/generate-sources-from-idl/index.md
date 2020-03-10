@@ -30,7 +30,7 @@ Add the following line to _project/plugins.sbt_:
 [comment]: # (Start Replace)
 
 ```scala
-addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "0.20.1")
+addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "0.21.0")
 ```
 
 [comment]: # (End Replace)
