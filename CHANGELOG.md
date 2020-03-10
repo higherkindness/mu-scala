@@ -1,5 +1,14 @@
 # Changelog
 
+## 03/10/2020 - Version 0.21.1
+
+Release changes:
+
+* Update sbt-microsites to 1.1.3 ([#832](https://github.com/higherkindness/mu-scala/pull/832))
+* Fix release step to enable cross-publishing ([#833](https://github.com/higherkindness/mu-scala/pull/833))
+* Release 0.21.1 ([#834](https://github.com/higherkindness/mu-scala/pull/834))
+
+
 ## 03/10/2020 - Version 0.21.0
 
 Release changes:
