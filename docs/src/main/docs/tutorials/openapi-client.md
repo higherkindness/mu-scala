@@ -27,7 +27,7 @@ file and generate corresponding Scala code.
 [comment]: # (Start Replace)
 
 ```scala
-addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "0.21.0")
+addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "0.21.1")
 ```
 
 [comment]: # (End Replace)
