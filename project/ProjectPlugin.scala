@@ -104,7 +104,9 @@ object ProjectPlugin extends AutoPlugin {
         "com.beachape"        %% "enumeratum"  % V.enumeratum,
         "com.sksamuel.avro4s" %% "avro4s-core" % V.avro4s,
         "org.log4s"           %% "log4s"       % V.log4s
-      )
+      ),
+      // Disable this flag because quasiquotes trigger a lot of false positive warnings
+      scalacOptions -= "-Wunused:patvars"
     )
 
     lazy val internalMonixSettings: Seq[Def.Setting[_]] = Seq(

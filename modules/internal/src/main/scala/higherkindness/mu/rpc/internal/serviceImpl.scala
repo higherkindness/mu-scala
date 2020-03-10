@@ -33,8 +33,8 @@ object serviceImpl {
       def getInner: Option[Tree] = inner
       def safeInner: Tree        = inner.getOrElse(tpe)
       def safeType: Tree = tpe match {
-        case tq"$s[..$tpts]" if isStreaming => tpts.last
-        case other                          => other
+        case tq"${s @ _}[..$tpts]" if isStreaming => tpts.last
+        case other                                => other
       }
       def flatName: String = safeInner.toString
 
@@ -51,12 +51,12 @@ object serviceImpl {
     }
     object TypeTypology {
       def apply(t: Tree): TypeTypology = t match {
-        case tq"Observable[..$tpts]"                       => MonixObservableTpe(t, tpts.headOption)
-        case tq"_root_.monix.reactive.Observable[..$tpts]" => MonixObservableTpe(t, tpts.headOption)
-        case tq"Stream[$carrier, ..$tpts]"                 => Fs2StreamTpe(t, tpts.headOption)
-        case tq"_root_.fs2.Stream[$carrier, ..$tpts]"      => Fs2StreamTpe(t, tpts.headOption)
-        case tq"Empty.type"                                => EmptyTpe(t)
-        case tq"$carrier[..$tpts]"                         => UnaryTpe(t, tpts.headOption)
+        case tq"Observable[..$tpts]"                        => MonixObservableTpe(t, tpts.headOption)
+        case tq"_root_.monix.reactive.Observable[..$tpts]"  => MonixObservableTpe(t, tpts.headOption)
+        case tq"Stream[${carrier @ _}, ..$tpts]"            => Fs2StreamTpe(t, tpts.headOption)
+        case tq"_root_.fs2.Stream[${carrier @ _}, ..$tpts]" => Fs2StreamTpe(t, tpts.headOption)
+        case tq"Empty.type"                                 => EmptyTpe(t)
+        case tq"${carrier @ _}[..$tpts]"                    => UnaryTpe(t, tpts.headOption)
       }
     }
     case class EmptyTpe(tpe: Tree)                                extends TypeTypology(tpe, None)
@@ -565,8 +565,9 @@ object serviceImpl {
       }
 
       val operations: List[HttpOperation] = for {
-        d      <- rpcDefs.collect { case x if findAnnotation(x.mods, "http").isDefined => x }
-        args   <- findAnnotation(d.mods, "http").collect({ case Apply(_, args) => args }).toList
+        d <- rpcDefs.collect { case x if findAnnotation(x.mods, "http").isDefined => x }
+        // TODO not sure what the following line is doing, as the result is not used. Is it needed?
+        _      <- findAnnotation(d.mods, "http").collect({ case Apply(_, args) => args }).toList
         params <- d.vparamss
         _ = require(params.length == 1, s"RPC call ${d.name} has more than one request parameter")
         p <- params.headOption.toList
