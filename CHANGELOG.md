@@ -1,5 +1,31 @@
 # Changelog
 
+## 03/10/2020 - Version 0.21.0
+
+Release changes:
+
+* Update avro4s-core to 3.0.8 ([#806](https://github.com/higherkindness/mu-scala/pull/806))
+* Update monocle-core to 2.0.2 ([#805](https://github.com/higherkindness/mu-scala/pull/805))
+* Update metrics-core to 4.1.4 ([#810](https://github.com/higherkindness/mu-scala/pull/810))
+* Fix nearly all the compiler warnings in production code and tests ([#809](https://github.com/higherkindness/mu-scala/pull/809))
+* Update pureconfig to 0.12.3 ([#811](https://github.com/higherkindness/mu-scala/pull/811))
+* Update cats-effect to 2.1.2 ([#812](https://github.com/higherkindness/mu-scala/pull/812))
+* Automatically register muSrcGen as a sourceGenerator ([#813](https://github.com/higherkindness/mu-scala/pull/813))
+* Speed up the sbt plugin scripted tests ([#814](https://github.com/higherkindness/mu-scala/pull/814))
+* Cross compile code with Scala 2.13.x ([#807](https://github.com/higherkindness/mu-scala/pull/807))
+* Fixes sbt Plugin Publish ([#818](https://github.com/higherkindness/mu-scala/pull/818))
+* Explicit scala version in Travis Script ([#819](https://github.com/higherkindness/mu-scala/pull/819))
+* Update monocle-core to 2.0.4 ([#821](https://github.com/higherkindness/mu-scala/pull/821))
+* Remove sbt-org-policies dependency syntax ([#822](https://github.com/higherkindness/mu-scala/pull/822))
+* Remove unnecessary publishLocal before running scripted tests ([#823](https://github.com/higherkindness/mu-scala/pull/823))
+* Removes Examples from this Repository ([#824](https://github.com/higherkindness/mu-scala/pull/824))
+* Update avro4s-core to 3.0.9 ([#828](https://github.com/higherkindness/mu-scala/pull/828))
+* Update metrics-core to 4.1.5 ([#829](https://github.com/higherkindness/mu-scala/pull/829))
+* Docs refresh ([#820](https://github.com/higherkindness/mu-scala/pull/820))
+* Add methods with Resource to GrpcServer and ManagedChannelInterpreter ([#830](https://github.com/higherkindness/mu-scala/pull/830))
+* Release 0.21.0 ([#831](https://github.com/higherkindness/mu-scala/pull/831))
+
+
 ## 01/16/2020 - Version 0.20.1
 
 Release changes:
