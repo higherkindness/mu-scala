@@ -16,7 +16,6 @@
 
 package higherkindness.mu.rpc.srcgen
 
-import higherkindness.mu.rpc.internal.util.StringUtil._
 import higherkindness.mu.rpc.protocol.{SerializationType => SerType, _}
 import shapeless.tag
 import shapeless.tag.@@
@@ -24,6 +23,10 @@ import shapeless.tag.@@
 object Model {
 
   import Toolbox.u._
+
+  private implicit class StringOps(val s: String) extends AnyVal {
+    def trimAll: String = s.replaceAll("\\s", "")
+  }
 
   case class RpcDefinitions(
       outputName: String,
