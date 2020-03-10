@@ -18,9 +18,7 @@ package higherkindness.mu.rpc
 package server
 
 import cats.~>
-import cats.effect.{Async, Effect, IO, Resource, Sync}
-import cats.instances.either._
-import cats.syntax.apply._
+import cats.effect.{Async, Effect, Resource, Sync}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import io.grpc.{Server, ServerBuilder, ServerServiceDefinition}
@@ -83,7 +81,7 @@ object GrpcServer {
     F.bracket(S.start)(_ => F.never[Unit])(_ => S.shutdown >> S.awaitTermination)
 
   def serverResource[F[_]](S: GrpcServer[F])(implicit F: Async[F]): Resource[F, Unit] =
-    Resource.make(S.start >> F.never)(_ => S.shutdown >> S.awaitTermination)
+    Resource.make(S.start >> F.never[Unit])(_ => S.shutdown >> S.awaitTermination)
 
   def default[F[_]](port: Int, configList: List[GrpcConfig])(
       implicit F: Sync[F]
