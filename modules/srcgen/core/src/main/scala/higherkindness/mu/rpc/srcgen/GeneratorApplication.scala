@@ -44,10 +44,12 @@ class GeneratorApplication[T <: Generator](generators: T*) {
           Option(outputFile.getParentFile).foreach(_.mkdirs())
           outputFile.write(output)
           outputFile
-      } else {
+      }
+    else {
       System.out.println(
         s"Unknown IDL type '$idlType', skipping code generation in this module. " +
-          s"Valid values: ${idlTypes.mkString(", ")}")
+          s"Valid values: ${idlTypes.mkString(", ")}"
+      )
       Seq.empty[File]
     }
 
