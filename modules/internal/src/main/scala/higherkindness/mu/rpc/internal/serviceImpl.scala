@@ -244,7 +244,7 @@ object serviceImpl {
           List.empty
       }
 
-      val methodDescriptors: List[Tree] = rpcRequests.map(_.methodDescriptor)
+      val methodDescriptors: List[Tree] = rpcRequests.map(_.methodDescriptorObj)
 
       private val serverCallDescriptorsAndHandlers: List[Tree] =
         rpcRequests.map(_.descriptorAndHandler)
@@ -384,14 +384,18 @@ object serviceImpl {
           case Capitalize => name.toString.capitalize
         }
 
-        private val methodDescriptorName = TermName(updatedName + "MethodDescriptor")
+        private val methodDescriptorName = TermName(s"${updatedName}MethodDescriptor")
+
+        private val methodDescriptorDefName = TermName("methodDescriptor")
+
+        private val methodDescriptorValName = TermName("_methodDescriptor")
 
         private val reqType = request.safeType
 
         private val respType = response.safeInner
 
-        val methodDescriptor: DefDef = q"""
-          def $methodDescriptorName(implicit
+        val methodDescriptorDef: DefDef = q"""
+          def $methodDescriptorDefName(implicit
             ReqM: _root_.io.grpc.MethodDescriptor.Marshaller[$reqType],
             RespM: _root_.io.grpc.MethodDescriptor.Marshaller[$respType]
           ): _root_.io.grpc.MethodDescriptor[$reqType, $respType] = {
@@ -407,8 +411,20 @@ object serviceImpl {
           }
         """.supressWarts("Null", "ExplicitImplicitTypes")
 
+        val methodDescriptorVal: ValDef = q"""
+          val $methodDescriptorValName: _root_.io.grpc.MethodDescriptor[$reqType, $respType] =
+            $methodDescriptorDefName
+        """
+
+        val methodDescriptorObj: ModuleDef = q"""
+          object $methodDescriptorName {
+            $methodDescriptorDef
+            $methodDescriptorVal
+          }
+        """
+
         private def clientCallMethodFor(clientMethodName: String) =
-          q"$clientCallsImpl.${TermName(clientMethodName)}(input, $methodDescriptorName, channel, options)"
+          q"$clientCallsImpl.${TermName(clientMethodName)}(input, $methodDescriptorName.$methodDescriptorValName, channel, options)"
 
         val clientDef: Tree = streamingType match {
           case Some(RequestStreaming) =>
@@ -455,7 +471,7 @@ object serviceImpl {
                 s"Unable to define a handler for the streaming type $streamingType and $prevalentStreamingTarget for the method $name in the service $serviceName"
               )
           }
-          q"($methodDescriptorName, $handler)"
+          q"($methodDescriptorName.$methodDescriptorValName, $handler)"
         }
       }
 
@@ -664,7 +680,7 @@ object serviceImpl {
           Template(
             companion.impl.parents,
             companion.impl.self,
-            companion.impl.body ++ service.imports ++ service.methodDescriptors ++ service.encodersImport ++ List(
+            companion.impl.body ++ service.imports ++ service.encodersImport ++ service.methodDescriptors ++ List(
               service.bindService,
               service.clientClass,
               service.client,
@@ -678,6 +694,9 @@ object serviceImpl {
         List(serviceDef, enrichedCompanion)
       case _ => sys.error("@service-annotated definition must be a trait or abstract class")
     }
+
+    //println(show(result))
+
     c.Expr(Block(result, Literal(Constant(()))))
   }
 }
