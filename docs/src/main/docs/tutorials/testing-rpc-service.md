@@ -93,7 +93,7 @@ some helpers for setting up an in-memory service for testing.
 [comment]: # (Start Replace)
 
 ```
-libraryDependencies += "io.higherkindness" %% "mu-rpc-testing" % "0.21.2" % Test
+libraryDependencies += "io.higherkindness" %% "mu-rpc-testing" % "0.21.3" % Test
 ```
 
 [comment]: # (End Replace)

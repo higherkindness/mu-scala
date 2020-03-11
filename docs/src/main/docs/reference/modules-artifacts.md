@@ -61,41 +61,41 @@ You can install any of these dependencies in your build as follows:
 
 ```scala
 // required for the RPC server
-libraryDependencies += "io.higherkindness" %% "mu-rpc-server" % "0.21.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-server" % "0.21.3"
 
 // required for a protocol definition:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-channel" % "0.21.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-channel" % "0.21.3"
 
 // required for a protocol definition with streaming operations:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-monix" % "0.21.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-monix" % "0.21.3"
 // or:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-fs2" % "0.21.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-fs2" % "0.21.3"
 
 // required for the use of generated RPC clients, using either Netty or OkHttp as transport layer:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-netty" % "0.21.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-netty" % "0.21.3"
 // or:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-okhttp" % "0.21.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-okhttp" % "0.21.3"
 
 // optional - for easy RPC server/client configuration.
-libraryDependencies += "io.higherkindness" %% "mu-config" % "0.21.2"
+libraryDependencies += "io.higherkindness" %% "mu-config" % "0.21.3"
 
 // optional - for RPC server/client metrics reporting, using Prometheus.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus" % "0.21.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-prometheus" % "0.21.3"
 
 // optional - for RPC server/client metrics reporting, using Dropwizard.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-dropwizard" % "0.21.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-dropwizard" % "0.21.3"
 
 // optional - for communication between RPC server and client using SSL/TLS.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-netty-ssl" % "0.21.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-netty-ssl" % "0.21.3"
 
 // optional - for RPC marshallers for jodatime types.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-marshallers-jodatime" % "0.21.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-marshallers-jodatime" % "0.21.3"
 
 // optional - to add caching support to RPC clients.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-client-cache" % "0.21.2"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-client-cache" % "0.21.3"
 
 // optional - for testing RPC services
-libraryDependencies += "io.higherkindness" %% "mu-rpc-testing" % "0.21.2" % Test
+libraryDependencies += "io.higherkindness" %% "mu-rpc-testing" % "0.21.3" % Test
 ```
 
 ### sbt plugin
@@ -104,7 +104,7 @@ To generate Scala code from IDL files (`.proto`, `.avdl`, OpenAPI `.yaml`,
 etc.), you will need the `sbt-mu-srcgen` plugin:
 
 ```
-addSbtPlugin("io.higherkindness" %% "sbt-mu-srcgen" % "0.21.2")
+addSbtPlugin("io.higherkindness" %% "sbt-mu-srcgen" % "0.21.3")
 ```
 
 [comment]: # (End Replace)
