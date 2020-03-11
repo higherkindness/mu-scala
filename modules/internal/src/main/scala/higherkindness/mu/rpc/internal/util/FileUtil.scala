@@ -32,7 +32,7 @@ object FileUtil {
     def allFiles: Seq[File] = allMatching(_ => true)
 
     def allMatching(f: File => Boolean): Seq[File] =
-      if (file.isDirectory) file.listFiles.flatMap(_.allMatching(f))
+      if (file.isDirectory) file.listFiles.toIndexedSeq.flatMap(_.allMatching(f))
       else Seq(file).filter(f)
 
     def write(lines: Seq[String]): Unit = {

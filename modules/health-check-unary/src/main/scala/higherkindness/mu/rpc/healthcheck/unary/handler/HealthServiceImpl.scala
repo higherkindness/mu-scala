@@ -42,13 +42,17 @@ abstract class AbstractHealthService[F[_]: Functor](
   def clearStatus(service: HealthCheck): F[Unit] =
     checkStatus.update(_ - service.nameService)
 
-  def checkAll(empty: Empty.type): F[AllStatus] =
+  def checkAll(empty: Empty.type): F[AllStatus] = {
+    val _ = empty // just to suppress compiler warning about unused parameter
     checkStatus.get
       .map(_.map(p => HealthStatus(new HealthCheck(p._1), p._2)).toList)
       .map(AllStatus)
+  }
 
-  def cleanAll(empty: Empty.type): F[Unit] =
+  def cleanAll(empty: Empty.type): F[Unit] = {
+    val _ = empty // just to suppress compiler warning about unused parameter
     checkStatus.set(Map.empty[String, ServerStatus])
+  }
 
 }
 
