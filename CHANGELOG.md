@@ -1,5 +1,13 @@
 # Changelog
 
+## 03/11/2020 - Version 0.21.3
+
+Release changes:
+
+* muSrcGenIdlType Tweak ([#839](https://github.com/higherkindness/mu-scala/pull/839))
+* Releases 0.21.3 ([#840](https://github.com/higherkindness/mu-scala/pull/840))
+
+
 ## 03/11/2020 - Version 0.21.2
 
 Release changes:
