@@ -250,9 +250,8 @@ trait AstOptics extends Compat {
 
   object Annotation {
 
-    val firstArg: Optional[Annotation, Tree] = Optional[Annotation, Tree](_.firstArg) { x =>
-      identity
-    }
+    val firstArg: Optional[Annotation, Tree] =
+      Optional[Annotation, Tree](_.firstArg)(_ => identity)
 
     case class NoParamAnnotation(name: String)                               extends Annotation
     case class UnnamedArgsAnnotation(name: String, args: Seq[Tree])          extends Annotation

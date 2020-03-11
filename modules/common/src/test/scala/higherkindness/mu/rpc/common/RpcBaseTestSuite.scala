@@ -20,7 +20,6 @@ import cats.data.Kleisli
 import org.scalactic.Prettifier
 import org.scalamock.scalatest.MockFactory
 import org.scalatest._
-import scala.compat.Platform
 import scala.io._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -36,9 +35,8 @@ trait RpcBaseTestSuite extends AnyWordSpec with Matchers with OneInstancePerTest
 
   implicit val prettifier: Prettifier = Prettifier {
     case x => // includes null
-      Platform.EOL + Prettifier.default(
-        x
-      ) // initial linebreak makes expected/actual results line up nicely
+      // initial linebreak makes expected/actual results line up nicely
+      System.lineSeparator + Prettifier.default(x)
   }
 
   // delegating the check to a def gets its name used in the cancellation message (cleaner than the boolean comparison result)

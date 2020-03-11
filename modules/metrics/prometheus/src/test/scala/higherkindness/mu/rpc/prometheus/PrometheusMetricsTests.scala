@@ -19,8 +19,6 @@ package higherkindness.mu.rpc.prometheus
 import cats.effect.IO
 import cats.implicits._
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
-import higherkindness.mu.rpc.internal.metrics.MetricsOps
-import higherkindness.mu.rpc.internal.metrics.MetricsOps._
 import higherkindness.mu.rpc.internal.metrics.MetricsOpsGenerators.{methodInfoGen, statusGen}
 import io.grpc.Status
 import io.prometheus.client.Collector.MetricFamilySamples
@@ -36,19 +34,15 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
   val classifier = "classifier"
 
   def performAndCheckMetrics(
-      methodInfo: GrpcMethodInfo,
       numberOfCalls: Int,
       registry: CollectorRegistry,
       metricName: String,
-      labelNames: List[String],
-      labelValues: List[String],
-      op: IO[Unit],
-      status: Option[Status] = None
+      op: IO[Unit]
   )(checkSamples: List[MetricFamilySamples.Sample] => Boolean): IO[Boolean] =
     (1 to numberOfCalls).toList
       .map(_ => op)
       .sequence_
-      .map(_ => checkMetrics(registry, metricName, labelNames, labelValues)(checkSamples))
+      .map(_ => checkMetrics(registry, metricName)(checkSamples))
 
   def findRecordedMetric(
       metricName: String,
@@ -66,9 +60,7 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
 
   def checkMetrics(
       registry: CollectorRegistry,
-      metricName: String,
-      labelNames: List[String],
-      labelValues: List[String]
+      metricName: String
   )(checkSamples: List[MetricFamilySamples.Sample] => Boolean): Boolean =
     checkSamples(findRecordedMetricOrThrow(metricName, registry).samples.asScala.toList)
 
@@ -100,21 +92,15 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
         (for {
           metrics <- PrometheusMetrics.build[IO](registry, prefix)
           op1 <- performAndCheckMetrics(
-            methodInfo,
             numberOfCalls,
             registry,
             metricName,
-            List("classifier"),
-            List(classifier),
             metrics.increaseActiveCalls(methodInfo, Some(classifier))
           )(checkSingleSamples(metricName, numberOfCalls.toDouble))
           op2 <- performAndCheckMetrics(
-            methodInfo,
             numberOfCalls,
             registry,
             metricName,
-            List("classifier"),
-            List(classifier),
             metrics.decreaseActiveCalls(methodInfo, Some(classifier))
           )(checkSingleSamples(metricName, 0L))
         } yield op1 && op2).unsafeRunSync()
@@ -129,12 +115,9 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
         (for {
           metrics <- PrometheusMetrics.build[IO](registry, prefix)
           op1 <- performAndCheckMetrics(
-            methodInfo,
             numberOfCalls,
             registry,
             metricName,
-            List("classifier", "service", "method"),
-            List(classifier, methodInfo.serviceName, methodInfo.methodName),
             metrics.recordMessageReceived(methodInfo, Some(classifier))
           )(checkSingleSamples(metricName, numberOfCalls.toDouble))
         } yield op1).unsafeRunSync()
@@ -149,12 +132,9 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
         (for {
           metrics <- PrometheusMetrics.build[IO](registry, prefix)
           op1 <- performAndCheckMetrics(
-            methodInfo,
             numberOfCalls,
             registry,
             metricName,
-            List("classifier"),
-            List(classifier),
             metrics.recordHeadersTime(methodInfo, elapsed.toLong, Some(classifier))
           )(checkSeriesSamples(metricName, numberOfCalls, elapsed))
         } yield op1).unsafeRunSync()
@@ -175,13 +155,7 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
             .map { _ =>
               checkMetrics(
                 registry,
-                metricName,
-                List("classifier", "method", "status"),
-                List(
-                  classifier,
-                  methodTypeDescription(methodInfo),
-                  statusDescription(MetricsOps.grpcStatusFromRawStatus(status))
-                )
+                metricName
               )(checkSeriesSamples(metricName, numberOfCalls, elapsed))
             }
         } yield op1).unsafeRunSync()
@@ -202,14 +176,7 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
             .map { _ =>
               checkMetrics(
                 registry,
-                metricName,
-                List("classifier", "service", "method", "status"),
-                List(
-                  classifier,
-                  methodInfo.serviceName,
-                  methodInfo.methodName,
-                  statusDescription(MetricsOps.grpcStatusFromRawStatus(status))
-                )
+                metricName
               )(checkSeriesSamples(metricName, numberOfCalls, elapsed))
             }
         } yield op1).unsafeRunSync()
