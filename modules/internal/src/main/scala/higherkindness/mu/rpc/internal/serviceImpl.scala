@@ -695,8 +695,6 @@ object serviceImpl {
       case _ => sys.error("@service-annotated definition must be a trait or abstract class")
     }
 
-    //println(show(result))
-
     c.Expr(Block(result, Literal(Constant(()))))
   }
 }
