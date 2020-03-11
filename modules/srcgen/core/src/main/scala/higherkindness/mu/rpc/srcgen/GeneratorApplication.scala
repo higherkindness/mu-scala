@@ -35,25 +35,22 @@ class GeneratorApplication[T <: Generator](generators: T*) {
       serializationType: SerializationType,
       inputFiles: Set[File],
       outputDir: File
-  ): Seq[File] = {
-    validate(
-      idlTypes.contains(idlType),
-      s"Unknown IDL type '$idlType'. Valid values: ${idlTypes.mkString(", ")}"
-    )
-    generatorsByType(idlType).generateFrom(inputFiles, serializationType).map {
-      case (inputFile, outputFilePath, output) =>
-        val outputFile = new File(outputDir, outputFilePath)
-        logger.info(s"$inputFile -> $outputFile")
-        Option(outputFile.getParentFile).foreach(_.mkdirs())
-        outputFile.write(output)
-        outputFile
-    }
-  }
-
-  private def validate(requirement: Boolean, message: => Any): Unit =
-    if (!requirement) {
-      System.err.println(message)
-      System.exit(1)
+  ): Seq[File] =
+    if (idlTypes.contains(idlType))
+      generatorsByType(idlType).generateFrom(inputFiles, serializationType).map {
+        case (inputFile, outputFilePath, output) =>
+          val outputFile = new File(outputDir, outputFilePath)
+          logger.info(s"$inputFile -> $outputFile")
+          Option(outputFile.getParentFile).foreach(_.mkdirs())
+          outputFile.write(output)
+          outputFile
+      }
+    else {
+      System.out.println(
+        s"Unknown IDL type '$idlType', skipping code generation in this module. " +
+          s"Valid values: ${idlTypes.mkString(", ")}"
+      )
+      Seq.empty[File]
     }
 
   // $COVERAGE-ON$
