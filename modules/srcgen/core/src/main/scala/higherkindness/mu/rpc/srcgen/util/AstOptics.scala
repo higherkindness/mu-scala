@@ -96,7 +96,7 @@ trait AstOptics extends Compat {
   val qualifier: Lens[Select, Tree] =
     Lens[Select, Tree](_.qualifier)(qualifier => select => Select(qualifier, select.name))
 
-  val newTpt: Lens[New, Tree] = Lens[New, Tree](_.tpt)(tpt => n => New(tpt))
+  val newTpt: Lens[New, Tree] = Lens[New, Tree](_.tpt)(tpt => _ => New(tpt))
 
   val name: Optional[Tree, String] =
     Optional[Tree, String] {
@@ -114,10 +114,10 @@ trait AstOptics extends Compat {
   val rpcTypeNameFromTypeConstructor: Optional[Tree, Tree] = Optional[Tree, Tree] {
     case ast._Ident(x)                                          => Some(x)
     case ast._SingletonTypeTree(x)                              => Some(x)
-    case ast._AppliedTypeTree(AppliedTypeTree(x, List(tpe)))    => Some(tpe)
-    case ast._AppliedTypeTree(AppliedTypeTree(x, List(_, tpe))) => Some(tpe)
+    case ast._AppliedTypeTree(AppliedTypeTree(_, List(tpe)))    => Some(tpe)
+    case ast._AppliedTypeTree(AppliedTypeTree(_, List(_, tpe))) => Some(tpe)
     case _                                                      => None
-  }(name => identity)
+  }(_ => identity)
 
   val _StreamingConstructor: Prism[Ident, String] = Prism.partial[Ident, String] {
     case Ident(TypeName("Observable")) => "Observable"
@@ -195,7 +195,7 @@ trait AstOptics extends Compat {
       }
 
     case _ => None
-  }(ann => identity)
+  }(_ => identity)
 
   val annotations: Lens[Modifiers, List[Tree]] =
     Lens[Modifiers, List[Tree]](_.annotations)(anns =>
@@ -230,7 +230,7 @@ trait AstOptics extends Compat {
     Optional[Annotation, Annotation] {
       case x if x.name == name => Some(x)
       case _                   => None
-    }(n => identity)
+    }(_ => identity)
 
   sealed trait Annotation {
     def name: String
@@ -250,9 +250,8 @@ trait AstOptics extends Compat {
 
   object Annotation {
 
-    val firstArg: Optional[Annotation, Tree] = Optional[Annotation, Tree](_.firstArg) { x =>
-      identity
-    }
+    val firstArg: Optional[Annotation, Tree] =
+      Optional[Annotation, Tree](_.firstArg)(_ => identity)
 
     case class NoParamAnnotation(name: String)                               extends Annotation
     case class UnnamedArgsAnnotation(name: String, args: Seq[Tree])          extends Annotation

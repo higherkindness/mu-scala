@@ -33,8 +33,8 @@ object serviceImpl {
       def getInner: Option[Tree] = inner
       def safeInner: Tree        = inner.getOrElse(tpe)
       def safeType: Tree = tpe match {
-        case tq"$s[..$tpts]" if isStreaming => tpts.last
-        case other                          => other
+        case tq"${s @ _}[..$tpts]" if isStreaming => tpts.last
+        case other                                => other
       }
       def flatName: String = safeInner.toString
 
@@ -51,12 +51,12 @@ object serviceImpl {
     }
     object TypeTypology {
       def apply(t: Tree): TypeTypology = t match {
-        case tq"Observable[..$tpts]"                       => MonixObservableTpe(t, tpts.headOption)
-        case tq"_root_.monix.reactive.Observable[..$tpts]" => MonixObservableTpe(t, tpts.headOption)
-        case tq"Stream[$carrier, ..$tpts]"                 => Fs2StreamTpe(t, tpts.headOption)
-        case tq"_root_.fs2.Stream[$carrier, ..$tpts]"      => Fs2StreamTpe(t, tpts.headOption)
-        case tq"Empty.type"                                => EmptyTpe(t)
-        case tq"$carrier[..$tpts]"                         => UnaryTpe(t, tpts.headOption)
+        case tq"Observable[..$tpts]"                        => MonixObservableTpe(t, tpts.headOption)
+        case tq"_root_.monix.reactive.Observable[..$tpts]"  => MonixObservableTpe(t, tpts.headOption)
+        case tq"Stream[${carrier @ _}, ..$tpts]"            => Fs2StreamTpe(t, tpts.headOption)
+        case tq"_root_.fs2.Stream[${carrier @ _}, ..$tpts]" => Fs2StreamTpe(t, tpts.headOption)
+        case tq"Empty.type"                                 => EmptyTpe(t)
+        case tq"${carrier @ _}[..$tpts]"                    => UnaryTpe(t, tpts.headOption)
       }
     }
     case class EmptyTpe(tpe: Tree)                                extends TypeTypology(tpe, None)
@@ -285,6 +285,34 @@ object serviceImpl {
           ..$nonRpcDefs
         }""".supressWarts("DefaultArguments")
 
+      /*
+       * When you write an anonymous parameter in an anonymous function that
+       * ignores the parameter, e.g. `List(1, 2, 3).map(_ => "hello")` the
+       * -Wunused:params scalac flag does not warn you about it.  That's
+       *  because the compiler attaches a `NoWarnAttachment` to the tree for
+       *  the parameter.
+       *
+       * But if you write the same thing in a quasiquote inside a macro, the
+       * attachment does not get added, so you get false-positive compiler
+       * warnings at the macro use site like: "parameter value x$2 in anonymous
+       * function is never used".
+       *
+       * (The parameter needs a name, even though the function doesn't
+       * reference it, so `_` gets turned into a fresh name e.g. `x$2`.  The
+       * same thing happens even if you're not in a macro.)
+       *
+       * I'd say this is a bug in Scala. We work around it by manually adding
+       * the attachment.
+       */
+      private def anonymousParam: ValDef = {
+        val tree: ValDef = q"{(_) => 1}".vparams.head
+        c.universe.internal.updateAttachment(
+          tree,
+          c.universe.asInstanceOf[scala.reflect.internal.StdAttachments].NoWarnAttachment
+        )
+        tree
+      }
+
       val client: DefDef =
         q"""
         def client[$F_](
@@ -296,7 +324,7 @@ object serviceImpl {
           _root_.cats.effect.Resource.make {
             new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
           }(channel => CE.void(CE.delay(channel.shutdown()))).flatMap(ch =>
-          _root_.cats.effect.Resource.make[F, $serviceName[$F]](CE.delay(new $Client[$F](ch, options)))(_ => CE.unit))
+          _root_.cats.effect.Resource.make[F, $serviceName[$F]](CE.delay(new $Client[$F](ch, options)))($anonymousParam=> CE.unit))
         """.supressWarts("DefaultArguments")
 
       val clientFromChannel: DefDef =
@@ -306,7 +334,7 @@ object serviceImpl {
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit ..$classImplicits): _root_.cats.effect.Resource[$F, $serviceName[$F]] = _root_.cats.effect.Resource.make(channel)(channel =>
         CE.void(CE.delay(channel.shutdown()))).flatMap(ch =>
-        _root_.cats.effect.Resource.make[$F, $serviceName[$F]](CE.delay(new $Client[$F](ch, options)))(_ => CE.unit))
+        _root_.cats.effect.Resource.make[$F, $serviceName[$F]](CE.delay(new $Client[$F](ch, options)))($anonymousParam => CE.unit))
         """.supressWarts("DefaultArguments")
 
       val unsafeClient: DefDef =
@@ -565,8 +593,9 @@ object serviceImpl {
       }
 
       val operations: List[HttpOperation] = for {
-        d      <- rpcDefs.collect { case x if findAnnotation(x.mods, "http").isDefined => x }
-        args   <- findAnnotation(d.mods, "http").collect({ case Apply(_, args) => args }).toList
+        d <- rpcDefs.collect { case x if findAnnotation(x.mods, "http").isDefined => x }
+        // TODO not sure what the following line is doing, as the result is not used. Is it needed?
+        _      <- findAnnotation(d.mods, "http").collect({ case Apply(_, args) => args }).toList
         params <- d.vparamss
         _ = require(params.length == 1, s"RPC call ${d.name} has more than one request parameter")
         p <- params.headOption.toList

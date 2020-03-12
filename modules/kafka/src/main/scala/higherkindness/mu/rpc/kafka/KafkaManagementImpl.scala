@@ -82,7 +82,7 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
   override def describeTopics(dtr: DescribeTopicsRequest): F[Topics] =
     for {
       kTopics <- adminClient.describeTopics(dtr.names)
-      topics = kTopics.map { case (topic, desc) => TopicDescription.fromJava(desc) }.toList
+      topics = kTopics.map { case (_, desc) => TopicDescription.fromJava(desc) }.toList
     } yield Topics(topics)
 
   override def listConsumerGroupOffsets(

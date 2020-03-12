@@ -132,5 +132,5 @@ final case class UnexpectedError(className: String, msg: Option[String])
     with NoStackTrace
 
 final case class ResponseError(status: Status, msg: Option[String] = None)
-    extends RuntimeException(status + msg.fold("")(": " + _))
+    extends RuntimeException(status.toString + msg.fold("")(": " + _))
     with NoStackTrace

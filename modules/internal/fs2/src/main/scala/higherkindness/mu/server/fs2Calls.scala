@@ -25,6 +25,9 @@ import org.lyranthe.fs2_grpc.java_runtime.server.Fs2ServerCallHandler
 
 object fs2Calls {
 
+  // TODO Support compression. It wasn't supported in fs2-grpc
+  // at the time this code was added (#477), but it is now.
+
   def unaryMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Req => F[Res],
       maybeCompression: Option[String]

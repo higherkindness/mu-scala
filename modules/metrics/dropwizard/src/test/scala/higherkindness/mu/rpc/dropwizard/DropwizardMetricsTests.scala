@@ -36,14 +36,12 @@ object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
   val classifier = "classifier"
 
   def performAndCheckMetrics(
-      methodInfo: GrpcMethodInfo,
       numberOfCalls: Int,
       expectedCount: Int,
       registry: MetricRegistry,
       gaugeName: String,
       gaugeType: GaugeType,
-      op: IO[Unit],
-      status: Option[Status] = None
+      op: IO[Unit]
   ): IO[Boolean] =
     (1 to numberOfCalls).toList
       .map(_ => op)
@@ -77,7 +75,6 @@ object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
 
         (for {
           op1 <- performAndCheckMetrics(
-            methodInfo,
             numberOfCalls,
             numberOfCalls,
             registry,
@@ -86,7 +83,6 @@ object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
             metrics.increaseActiveCalls(methodInfo, Some(classifier))
           )
           op2 <- performAndCheckMetrics(
-            methodInfo,
             numberOfCalls,
             expectedCount = 0,
             registry,
@@ -106,7 +102,6 @@ object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
           s"$prefix.$classifier.${methodInfo.serviceName}.${methodInfo.methodName}.messages.sent"
 
         performAndCheckMetrics(
-          methodInfo,
           numberOfCalls,
           numberOfCalls,
           registry,
@@ -125,7 +120,6 @@ object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
           s"$prefix.$classifier.${methodInfo.serviceName}.${methodInfo.methodName}.messages.received"
 
         performAndCheckMetrics(
-          methodInfo,
           numberOfCalls,
           numberOfCalls,
           registry,
@@ -143,7 +137,6 @@ object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
         val headersName = s"$prefix.$classifier.calls.header"
 
         performAndCheckMetrics(
-          methodInfo,
           numberOfCalls,
           numberOfCalls,
           registry,
