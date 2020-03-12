@@ -106,7 +106,8 @@ object ProjectPlugin extends AutoPlugin {
         "org.log4s"           %% "log4s"       % V.log4s
       ),
       // Disable this flag because quasiquotes trigger a lot of false positive warnings
-      scalacOptions -= "-Wunused:patvars"
+      scalacOptions -= "-Wunused:patvars",    // for Scala 2.13
+      scalacOptions -= "-Ywarn-unused:params" // for Scala 2.12
     )
 
     lazy val internalMonixSettings: Seq[Def.Setting[_]] = Seq(
