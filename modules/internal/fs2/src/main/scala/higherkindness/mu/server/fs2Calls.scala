@@ -19,36 +19,55 @@ package higherkindness.mu.rpc.internal.server
 import fs2.Stream
 import cats.effect.ConcurrentEffect
 import io.grpc.ServerCallHandler
-import org.lyranthe.fs2_grpc.java_runtime.server.Fs2ServerCallHandler
-import higherkindness.mu.rpc.protocol.CompressionType
+import org.lyranthe.fs2_grpc.java_runtime.server.{
+  Fs2ServerCallHandler,
+  GzipCompressor,
+  ServerCallOptions
+}
+import higherkindness.mu.rpc.protocol.{CompressionType, Gzip}
 
 object fs2Calls {
 
-  // TODO Support compression. It wasn't supported in fs2-grpc
-  // at the time this code was added (#477), but it is now.
+  private def serverCallOptions(compressionType: CompressionType): ServerCallOptions =
+    compressionType match {
+      case Gzip => ServerCallOptions.default.withServerCompressor(Some(GzipCompressor))
+      case _    => ServerCallOptions.default
+    }
 
   def unaryMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Req => F[Res],
       compressionType: CompressionType
   ): ServerCallHandler[Req, Res] =
-    Fs2ServerCallHandler[F].unaryToUnaryCall[Req, Res]((req, _) => f(req))
+    Fs2ServerCallHandler[F].unaryToUnaryCall[Req, Res](
+      (req, _) => f(req),
+      serverCallOptions(compressionType)
+    )
 
   def clientStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Stream[F, Req] => F[Res],
       compressionType: CompressionType
   ): ServerCallHandler[Req, Res] =
-    Fs2ServerCallHandler[F].streamingToUnaryCall[Req, Res]((stream, _) => f(stream))
+    Fs2ServerCallHandler[F].streamingToUnaryCall[Req, Res](
+      (stream, _) => f(stream),
+      serverCallOptions(compressionType)
+    )
 
   def serverStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Req => Stream[F, Res],
       compressionType: CompressionType
   ): ServerCallHandler[Req, Res] =
-    Fs2ServerCallHandler[F].unaryToStreamingCall[Req, Res]((req, _) => f(req))
+    Fs2ServerCallHandler[F].unaryToStreamingCall[Req, Res](
+      (req, _) => f(req),
+      serverCallOptions(compressionType)
+    )
 
   def bidiStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Stream[F, Req] => Stream[F, Res],
       compressionType: CompressionType
   ): ServerCallHandler[Req, Res] =
-    Fs2ServerCallHandler[F].streamingToStreamingCall[Req, Res]((stream, _) => f(stream))
+    Fs2ServerCallHandler[F].streamingToStreamingCall[Req, Res](
+      (stream, _) => f(stream),
+      serverCallOptions(compressionType)
+    )
 
 }
