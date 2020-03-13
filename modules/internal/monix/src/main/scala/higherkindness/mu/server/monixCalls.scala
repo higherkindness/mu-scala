@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
-package internal
-package server
+package higherkindness.mu.rpc.internal.server
 
 import cats.effect.{ConcurrentEffect, Effect}
 import io.grpc.stub.ServerCalls.{BidiStreamingMethod, ClientStreamingMethod, ServerStreamingMethod}
 import io.grpc.stub.StreamObserver
 import monix.execution.{Ack, Scheduler}
+import monix.reactive.{Observable, Observer, Pipe}
 import monix.reactive.observers.Subscriber
+import higherkindness.mu.rpc.protocol.CompressionType
 
 import scala.concurrent.Future
-import monix.reactive.{Observable, Observer, Pipe}
 
 object monixCalls {
 
@@ -33,12 +32,12 @@ object monixCalls {
 
   def clientStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Observable[Req] => F[Res],
-      maybeCompression: Option[String]
+      compressionType: CompressionType
   )(implicit S: Scheduler): ClientStreamingMethod[Req, Res] =
     new ClientStreamingMethod[Req, Res] {
 
       override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
-        addCompression(responseObserver, maybeCompression)
+        addCompression(responseObserver, compressionType)
         transformStreamObserver[Req, Res](
           inputObservable => Observable.from(f(inputObservable)),
           responseObserver
@@ -48,12 +47,12 @@ object monixCalls {
 
   def serverStreamingMethod[F[_]: Effect, Req, Res](
       f: Req => Observable[Res],
-      maybeCompression: Option[String]
+      compressionType: CompressionType
   )(implicit S: Scheduler): ServerStreamingMethod[Req, Res] =
     new ServerStreamingMethod[Req, Res] {
 
       override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
-        addCompression(responseObserver, maybeCompression)
+        addCompression(responseObserver, compressionType)
         f(request).subscribe(responseObserver.toSubscriber)
         ()
       }
@@ -61,12 +60,12 @@ object monixCalls {
 
   def bidiStreamingMethod[F[_]: Effect, Req, Res](
       f: Observable[Req] => Observable[Res],
-      maybeCompression: Option[String]
+      compressionType: CompressionType
   )(implicit S: Scheduler): BidiStreamingMethod[Req, Res] =
     new BidiStreamingMethod[Req, Res] {
 
       override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
-        addCompression(responseObserver, maybeCompression)
+        addCompression(responseObserver, compressionType)
         transformStreamObserver(inputObservable => f(inputObservable), responseObserver)
       }
     }
