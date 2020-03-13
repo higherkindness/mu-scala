@@ -17,6 +17,7 @@
 package higherkindness.mu.rpc
 package fs2
 
+import cats.effect.IO
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.server._
 import _root_.fs2.Stream
@@ -29,10 +30,10 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
   import higherkindness.mu.rpc.fs2.Utils.implicits._
 
   override protected def beforeAll(): Unit =
-    serverStart[ConcurrentMonad].unsafeRunSync()
+    serverStart[IO].unsafeRunSync()
 
   override protected def afterAll(): Unit =
-    serverStop[ConcurrentMonad].unsafeRunSync()
+    serverStop[IO].unsafeRunSync()
 
   "mu-rpc server" should {
 
@@ -41,7 +42,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       def check[F[_]](implicit S: GrpcServer[F]): F[Boolean] =
         S.isShutdown
 
-      check[ConcurrentMonad].unsafeRunSync() shouldBe false
+      check[IO].unsafeRunSync() shouldBe false
 
     }
 
@@ -50,7 +51,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
       def check[F[_]](implicit S: GrpcServer[F]): F[Int] =
         S.getPort
 
-      check[ConcurrentMonad].unsafeRunSync() shouldBe SC.port
+      check[IO].unsafeRunSync() shouldBe SC.port
 
     }
 
@@ -80,7 +81,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
     "handle errors in server streaming services" in {
 
-      def clientProgram(errorCode: String): ConcurrentMonad[List[C]] =
+      def clientProgram(errorCode: String): IO[List[C]] =
         muProtoRPCServiceClient
           .use(
             _.serverStreamingWithError(E(a1, errorCode))
@@ -102,14 +103,14 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run client streaming services" in {
 
       muProtoRPCServiceClient
-        .use(_.clientStreaming(Stream.fromIterator[ConcurrentMonad](aList.iterator)))
+        .use(_.clientStreaming(Stream.fromIterator[IO](aList.iterator)))
         .unsafeRunSync() shouldBe dResult33
     }
 
     "be able to run client bidirectional streaming services" in {
 
       muAvroRPCServiceClient
-        .use(_.biStreaming(Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList)
+        .use(_.biStreaming(Stream.fromIterator[IO](eList.iterator)).compile.toList)
         .unsafeRunSync()
         .distinct shouldBe eList
 
@@ -119,7 +120,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       muAvroWithSchemaRPCServiceClient
         .use(
-          _.biStreamingWithSchema(Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList
+          _.biStreamingWithSchema(Stream.fromIterator[IO](eList.iterator)).compile.toList
         )
         .unsafeRunSync()
         .distinct shouldBe eList
@@ -134,13 +135,13 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
           muAvroWithSchemaRPCServiceClient.use(_.unaryWithSchema(a1)),
           muProtoRPCServiceClient.use(_.serverStreaming(b1).compile.toList),
           muProtoRPCServiceClient.use(
-            _.clientStreaming(Stream.fromIterator[ConcurrentMonad](aList.iterator))
+            _.clientStreaming(Stream.fromIterator[IO](aList.iterator))
           ),
           muAvroRPCServiceClient.use(
-            _.biStreaming(Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList
+            _.biStreaming(Stream.fromIterator[IO](eList.iterator)).compile.toList
           ),
           muAvroWithSchemaRPCServiceClient.use(
-            _.biStreamingWithSchema(Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList
+            _.biStreamingWithSchema(Stream.fromIterator[IO](eList.iterator)).compile.toList
           )
         )
 
@@ -182,7 +183,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
     "be able to run client streaming services" in {
 
       muCompressedProtoRPCServiceClient
-        .use(_.clientStreamingCompressed(Stream.fromIterator[ConcurrentMonad](aList.iterator)))
+        .use(_.clientStreamingCompressed(Stream.fromIterator[IO](aList.iterator)))
         .unsafeRunSync() shouldBe dResult33
     }
 
@@ -190,7 +191,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       muCompressedAvroRPCServiceClient
         .use(
-          _.biStreamingCompressed(Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList
+          _.biStreamingCompressed(Stream.fromIterator[IO](eList.iterator)).compile.toList
         )
         .unsafeRunSync()
         .distinct shouldBe eList
@@ -201,7 +202,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       muCompressedAvroWithSchemaRPCServiceClient
         .use(
-          _.biStreamingCompressedWithSchema(Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList
+          _.biStreamingCompressedWithSchema(Stream.fromIterator[IO](eList.iterator)).compile.toList
         )
         .unsafeRunSync()
         .distinct shouldBe eList
@@ -216,15 +217,15 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
           muCompressedAvroWithSchemaRPCServiceClient.use(_.unaryCompressedWithSchema(a1)),
           muCompressedProtoRPCServiceClient.use(_.serverStreamingCompressed(b1).compile.toList),
           muCompressedProtoRPCServiceClient.use(
-            _.clientStreamingCompressed(Stream.fromIterator[ConcurrentMonad](aList.iterator))
+            _.clientStreamingCompressed(Stream.fromIterator[IO](aList.iterator))
           ),
           muCompressedAvroRPCServiceClient.use(
-            _.biStreamingCompressed(Stream.fromIterator[ConcurrentMonad](eList.iterator)).compile.toList
+            _.biStreamingCompressed(Stream.fromIterator[IO](eList.iterator)).compile.toList
           ),
           muCompressedAvroWithSchemaRPCServiceClient
             .use(
               _.biStreamingCompressedWithSchema(
-                Stream.fromIterator[ConcurrentMonad](eList.iterator)
+                Stream.fromIterator[IO](eList.iterator)
               ).compile.toList
             )
         )
