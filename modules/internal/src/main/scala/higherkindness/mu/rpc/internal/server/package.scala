@@ -19,16 +19,17 @@ package higherkindness.mu.rpc.internal
 import cats.effect.Sync
 import io.grpc.{Status, StatusException, StatusRuntimeException}
 import io.grpc.stub.{ServerCallStreamObserver, StreamObserver}
+import higherkindness.mu.rpc.protocol._
 
 package object server {
 
   private[internal] def addCompression[F[_]: Sync, A](
       observer: StreamObserver[A],
-      algorithm: Option[String]
+      compressionType: CompressionType
   ): F[Unit] =
-    (observer, algorithm) match {
-      case (o: ServerCallStreamObserver[_], Some(alg)) => Sync[F].delay(o.setCompression(alg))
-      case _                                           => Sync[F].unit
+    (observer, compressionType) match {
+      case (o: ServerCallStreamObserver[_], Gzip) => Sync[F].delay(o.setCompression("gzip"))
+      case _                                      => Sync[F].unit
     }
 
   private[internal] def completeObserver[F[_]: Sync, A](

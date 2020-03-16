@@ -20,8 +20,8 @@ package fs2
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.protocol._
 import _root_.fs2._
-import cats.effect.{Effect, Resource}
-import io.grpc.Status
+import cats.effect.{Effect, IO, Resource}
+import io.grpc.{CallOptions, Status}
 
 object Utils extends CommonUtils {
 
@@ -150,46 +150,53 @@ object Utils extends CommonUtils {
     // Server Runtime Configuration //
     //////////////////////////////////
 
-    implicit val muRPCHandler: ServerRPCService[ConcurrentMonad] =
-      new ServerRPCService[ConcurrentMonad]
+    implicit val muRPCHandler: ServerRPCService[IO] =
+      new ServerRPCService[IO]
 
-    val grpcConfigs: ConcurrentMonad[List[GrpcConfig]] = List(
-      ProtoRPCService.bindService[ConcurrentMonad],
-      AvroRPCService.bindService[ConcurrentMonad],
-      AvroWithSchemaRPCService.bindService[ConcurrentMonad],
-      CompressedProtoRPCService.bindService[ConcurrentMonad],
-      CompressedAvroRPCService.bindService[ConcurrentMonad],
-      CompressedAvroWithSchemaRPCService.bindService[ConcurrentMonad]
+    val grpcConfigs: IO[List[GrpcConfig]] = List(
+      ProtoRPCService.bindService[IO],
+      AvroRPCService.bindService[IO],
+      AvroWithSchemaRPCService.bindService[IO],
+      CompressedProtoRPCService.bindService[IO],
+      CompressedAvroRPCService.bindService[IO],
+      CompressedAvroWithSchemaRPCService.bindService[IO]
     ).sequence.map(_.map(AddService))
 
-    implicit val grpcServer: GrpcServer[ConcurrentMonad] =
-      grpcConfigs.flatMap(createServerConf[ConcurrentMonad]).unsafeRunSync
+    implicit val grpcServer: GrpcServer[IO] =
+      grpcConfigs.flatMap(createServerConf[IO]).unsafeRunSync
 
     //////////////////////////////////
     // Client Runtime Configuration //
     //////////////////////////////////
 
-    val muProtoRPCServiceClient: Resource[ConcurrentMonad, ProtoRPCService[ConcurrentMonad]] =
-      ProtoRPCService.client[ConcurrentMonad](createChannelFor)
-    val muAvroRPCServiceClient: Resource[ConcurrentMonad, AvroRPCService[ConcurrentMonad]] =
-      AvroRPCService.client[ConcurrentMonad](createChannelFor)
-    val muAvroWithSchemaRPCServiceClient: Resource[ConcurrentMonad, AvroWithSchemaRPCService[
-      ConcurrentMonad
+    val muProtoRPCServiceClient: Resource[IO, ProtoRPCService[IO]] =
+      ProtoRPCService.client[IO](createChannelFor)
+
+    val muAvroRPCServiceClient: Resource[IO, AvroRPCService[IO]] =
+      AvroRPCService.client[IO](createChannelFor)
+
+    val muAvroWithSchemaRPCServiceClient: Resource[IO, AvroWithSchemaRPCService[IO]] =
+      AvroWithSchemaRPCService.client[IO](createChannelFor)
+
+    val muCompressedProtoRPCServiceClient: Resource[IO, CompressedProtoRPCService[IO]] =
+      CompressedProtoRPCService.client[IO](
+        createChannelFor,
+        options = CallOptions.DEFAULT.withCompression("gzip")
+      )
+
+    val muCompressedAvroRPCServiceClient: Resource[IO, CompressedAvroRPCService[IO]] =
+      CompressedAvroRPCService.client[IO](
+        createChannelFor,
+        options = CallOptions.DEFAULT.withCompression("gzip")
+      )
+
+    val muCompressedAvroWithSchemaRPCServiceClient: Resource[IO, CompressedAvroWithSchemaRPCService[
+      IO
     ]] =
-      AvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
-    val muCompressedProtoRPCServiceClient: Resource[ConcurrentMonad, CompressedProtoRPCService[
-      ConcurrentMonad
-    ]] =
-      CompressedProtoRPCService.client[ConcurrentMonad](createChannelFor)
-    val muCompressedAvroRPCServiceClient: Resource[ConcurrentMonad, CompressedAvroRPCService[
-      ConcurrentMonad
-    ]] =
-      CompressedAvroRPCService.client[ConcurrentMonad](createChannelFor)
-    val muCompressedAvroWithSchemaRPCServiceClient: Resource[
-      ConcurrentMonad,
-      CompressedAvroWithSchemaRPCService[ConcurrentMonad]
-    ] =
-      CompressedAvroWithSchemaRPCService.client[ConcurrentMonad](createChannelFor)
+      CompressedAvroWithSchemaRPCService.client[IO](
+        createChannelFor,
+        options = CallOptions.DEFAULT.withCompression("gzip")
+      )
 
   }
 

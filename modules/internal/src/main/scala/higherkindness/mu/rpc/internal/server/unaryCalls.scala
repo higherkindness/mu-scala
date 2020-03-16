@@ -20,17 +20,18 @@ import cats.effect.{Effect, IO}
 import cats.syntax.apply._
 import io.grpc.stub.ServerCalls.UnaryMethod
 import io.grpc.stub.StreamObserver
+import higherkindness.mu.rpc.protocol.CompressionType
 
 object unaryCalls {
 
   def unaryMethod[F[_]: Effect, Req, Res](
       f: Req => F[Res],
-      maybeCompression: Option[String]
+      compressionType: CompressionType
   ): UnaryMethod[Req, Res] =
     new UnaryMethod[Req, Res] {
       override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
         Effect[F]
-          .runAsync(addCompression(responseObserver, maybeCompression) *> f(request)) {
+          .runAsync(addCompression(responseObserver, compressionType) *> f(request)) {
             completeObserver[IO, Res](responseObserver)
           }
           .toIO

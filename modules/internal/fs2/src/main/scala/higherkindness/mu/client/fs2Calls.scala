@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
-package internal
-package client
+package higherkindness.mu.rpc.internal.client
 
 import cats.effect.ConcurrentEffect
 import cats.syntax.flatMap._
