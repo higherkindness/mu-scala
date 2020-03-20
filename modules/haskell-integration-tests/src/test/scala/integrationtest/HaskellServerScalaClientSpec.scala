@@ -1,0 +1,66 @@
+/*
+ * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package integrationtest
+
+import weather._
+import higherkindness.mu.rpc._
+
+import io.grpc.CallOptions
+import cats.effect.{ContextShift, IO, Resource}
+
+import org.scalatest.flatspec.AnyFlatSpec
+import com.whisk.docker.DockerContainer
+import com.whisk.docker.impl.spotify.DockerKitSpotify
+import com.whisk.docker.scalatest.DockerTestKit
+
+import scala.concurrent.ExecutionContext
+
+class HaskellServerScalaClientSpec extends AnyFlatSpec with DockerTestKit with DockerKitSpotify {
+
+  override def dockerContainers: List[DockerContainer] = List(
+    DockerContainer("mu-haskell-protobuf:latest")
+      .withPorts(9123 -> Some(9123))
+      .withCommand("/opt/mu-haskell-protobuf/server")
+  )
+
+  override def startAllOrFail(): Unit = {
+    println("Starting Docker containers...")
+    super.startAllOrFail()
+    println("Started Docker containers.")
+    Thread.sleep(2000) // give the Haskell server a chance to start up properly
+  }
+
+  implicit val CS: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
+
+  val channelFor: ChannelFor = ChannelForAddress("localhost", 9123)
+
+  val clientResource: Resource[IO, WeatherService[IO]] = WeatherService.client[IO](
+    channelFor,
+    options = CallOptions.DEFAULT.withCompression("gzip")
+  )
+
+  behavior of "Mu-Haskell server and Mu-Scala client"
+
+  it should "work with Protobuf" in {
+    val request = GetForecastRequest("London", 3)
+    val response = clientResource
+      .use(client => client.GetForecast(request))
+      .unsafeRunSync()
+    println(response)
+  }
+
+}

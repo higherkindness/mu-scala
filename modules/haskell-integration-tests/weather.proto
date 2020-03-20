@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package integrationtest;
+
+message GetForecastRequest {
+  string city = 1;
+  int32 days_required = 5;
+}
+
+enum Weather {
+  SUNNY = 0;
+  CLOUDY = 1;
+  RAINY = 2;
+}
+
+message GetForecastResponse {
+  string last_updated = 1;
+  repeated Weather daily_forecasts = 2;
+}
+
+enum RainEventType {
+  RAIN_STARTED = 0;
+  RAIN_STOPPED = 1;
+}
+
+message RainEvent {
+  string city = 1;
+  RainEventType event_type = 2;
+}
+
+message SubscribeToRainEventsRequest {
+  string city = 1;
+}
+
+service WeatherService {
+
+  rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty);
+
+  rpc GetForecast(GetForecastRequest) returns (GetForecastResponse);
+
+  // TODO streaming
+  //rpc PublishRainEvents(stream RainEvent) returns (google.protobuf.Empty);
+
+  //rpc SubscribeToRainEvents(SubscribeToRainEventsRequest) returns (stream RainEvent);
+
+}
