@@ -29,7 +29,9 @@ object weather {
 
   final case class GetForecastResponse(
       @pbIndex(1) last_updated: String,
-      @pbIndex(2) daily_forecasts: List[GetForecastResponse.Weather]
+      // Note: Mu-Haskell does not understand packed repeated fields
+      // (https://github.com/higherkindness/mu-haskell/issues/163)
+      @pbIndex(2) @pbUnpacked daily_forecasts: List[GetForecastResponse.Weather]
   )
   object GetForecastResponse {
 
