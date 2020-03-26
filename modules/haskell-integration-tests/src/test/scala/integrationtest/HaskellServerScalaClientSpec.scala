@@ -17,7 +17,9 @@
 package integrationtest
 
 import weather._
+import weather.GetForecastResponse.Weather.SUNNY
 import higherkindness.mu.rpc._
+import higherkindness.mu.rpc.protocol.Empty
 
 import io.grpc.CallOptions
 import cats.effect.{ContextShift, IO, Resource}
@@ -53,14 +55,33 @@ class HaskellServerScalaClientSpec extends AnyFlatSpec with DockerTestKit with D
     options = CallOptions.DEFAULT.withCompression("gzip")
   )
 
-  behavior of "Mu-Haskell server and Mu-Scala client"
+  behavior of "Mu-Haskell server and Mu-Scala client communication using Protobuf"
 
-  it should "work with Protobuf" in {
-    val request = GetForecastRequest("London", 3)
+  it should "work for a trivial unary call" in {
+    pending
+    // until we upgrade to a version of Mu-Haskell that contains this fix:
+    // https://github.com/haskell-grpc-native/http2-grpc-haskell/pull/20
+
     val response = clientResource
-      .use(client => client.GetForecast(request))
+      .use(client => client.ping(Empty))
       .unsafeRunSync()
-    println(response)
+    assert(response == Empty)
+  }
+
+  it should "work for a unary call" in {
+    pending
+    // until we upgrade to a version of Mu-Haskell that contains this fix:
+    // https://github.com/haskell-grpc-native/http2-grpc-haskell/pull/20
+
+    val request = GetForecastRequest("London", 3)
+    val expectedResponse = GetForecastResponse(
+      last_updated = "2020-03-20T12:00:00Z",
+      daily_forecasts = List(SUNNY, SUNNY, SUNNY)
+    )
+    val response = clientResource
+      .use(client => client.getForecast(request))
+      .unsafeRunSync()
+    assert(response == expectedResponse)
   }
 
 }

@@ -20,7 +20,6 @@ import higherkindness.mu.rpc.protocol._
 import pbdirect._
 import enumeratum.values.{IntEnum, IntEnumEntry}
 
-// TODO can we set up srcgen for this project? Would make it a better test
 object weather {
 
   final case class GetForecastRequest(
@@ -28,26 +27,29 @@ object weather {
       @pbIndex(5) days_required: Int
   )
 
-  sealed abstract class Weather(val value: Int) extends IntEnumEntry
-  object Weather extends IntEnum[Weather] {
-    case object SUNNY  extends Weather(0)
-    case object CLOUDY extends Weather(1)
-    case object RAINY  extends Weather(2)
-
-    val values = findValues
-  }
-
   final case class GetForecastResponse(
       @pbIndex(1) last_updated: String,
-      @pbIndex(2) daily_forecasts: List[Weather]
+      @pbIndex(2) daily_forecasts: List[GetForecastResponse.Weather]
   )
+  object GetForecastResponse {
 
-  @service(Protobuf, Gzip, namespace = Some("integrationtest"), idiomaticEndpoints = true)
+    sealed abstract class Weather(val value: Int) extends IntEnumEntry
+    object Weather extends IntEnum[Weather] {
+      case object SUNNY  extends Weather(0)
+      case object CLOUDY extends Weather(1)
+      case object RAINY  extends Weather(2)
+
+      val values = findValues
+    }
+
+  }
+
+  @service(Protobuf, Gzip, namespace = Some("integrationtest"))
   trait WeatherService[F[_]] {
 
-    // TODO Ping
+    def ping(req: Empty.type): F[Empty.type]
 
-    def GetForecast(req: GetForecastRequest): F[GetForecastResponse]
+    def getForecast(req: GetForecastRequest): F[GetForecastResponse]
 
     // TODO streaming endpoints
 

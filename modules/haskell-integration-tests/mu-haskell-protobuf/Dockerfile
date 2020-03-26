@@ -10,5 +10,5 @@ RUN apt-get update && apt-get install -y \
   ca-certificates \
   libgmp-dev
 COPY --from=build /opt/build/bin .
-RUN chmod a+x /opt/mu-haskell-protobuf/server
+RUN chmod a+x /opt/mu-haskell-protobuf/*
 EXPOSE 9123
