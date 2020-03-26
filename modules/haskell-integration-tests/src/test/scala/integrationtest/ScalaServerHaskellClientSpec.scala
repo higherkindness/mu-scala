@@ -44,6 +44,7 @@ trait DockerClientStuff { self: Suite =>
       "hostname -I".!!.trim
     }
   }
+  println(s"The host machine's external IP is $hostExternalIpAddress")
 
   def containerConfig(clientArgs: List[String]) =
     ContainerConfig
@@ -56,11 +57,15 @@ trait DockerClientStuff { self: Suite =>
     val containerCreation = docker.createContainer(containerConfig(clientArgs))
     val id                = containerCreation.id()
     docker.startContainer(id)
-    val exit = docker.waitContainer(id)
-    assert(exit.statusCode() == 0)
+    val exit      = docker.waitContainer(id)
     val logstream = docker.logs(id, LogsParam.stdout(), LogsParam.stderr())
     try {
-      logstream.readFully().trim()
+      val output = logstream.readFully().trim()
+      assert(
+        exit.statusCode == 0,
+        s"Client exited with code ${exit.statusCode} and output: $output"
+      )
+      output
     } finally {
       logstream.close()
     }
