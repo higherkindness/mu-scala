@@ -41,7 +41,7 @@ trait DockerClientStuff { self: Suite =>
     if (sys.props("os.name").contains("Mac")) {
       "ipconfig getifaddr en0".!!.trim
     } else {
-      "hostname -I".!!.trim
+      "hostname -I".!!.trim.split(" ").head
     }
   }
   println(s"The host machine's external IP is $hostExternalIpAddress")
