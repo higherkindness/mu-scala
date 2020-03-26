@@ -10,7 +10,7 @@
 {-# language TypeFamilies          #-}
 {-# language TypeOperators         #-}
 
-module Schema where
+module Protocol where
 
 import Data.Text as T
 import GHC.Generics

@@ -9,12 +9,10 @@ copyright:           2020 Chris Birchall
 category:            Web
 build-type:          Simple
 cabal-version:       >=1.10
-extra-source-files:  README.md
 
-executable server
-  hs-source-dirs:      server
-  main-is:             Main.hs
-  other-modules:       Schema
+library
+  hs-source-dirs:      protocol
+  exposed-modules:     Protocol
   default-language:    Haskell2010
   build-depends:       base >= 4.12 && < 5
                      , text
@@ -23,3 +21,28 @@ executable server
                      , mu-rpc >= 0.2.0
                      , mu-protobuf >= 0.2.0
                      , mu-grpc-server >= 0.2.0
+executable server
+  hs-source-dirs:      server
+  main-is:             Main.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.12 && < 5
+                     , text
+                     , mu-schema >= 0.2.0
+                     , mu-optics >= 0.2.0
+                     , mu-rpc >= 0.2.0
+                     , mu-protobuf >= 0.2.0
+                     , mu-grpc-server >= 0.2.0
+                     , mu-haskell-protobuf
+
+executable client
+  hs-source-dirs:      client
+  main-is:             Main.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.12 && < 5
+                     , text
+                     , mu-schema >= 0.2.0
+                     , mu-optics >= 0.2.0
+                     , mu-rpc >= 0.2.0
+                     , mu-protobuf >= 0.2.0
+                     , mu-grpc-client >= 0.2.0
+                     , mu-haskell-protobuf

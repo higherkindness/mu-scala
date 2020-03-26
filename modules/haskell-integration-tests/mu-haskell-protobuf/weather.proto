@@ -6,26 +6,27 @@ package integrationtest;
 
 message GetForecastRequest {
   string city = 1;
+  reserved 2 to 4;
   int32 days_required = 5;
 }
 
-enum Weather {
-  SUNNY = 0;
-  CLOUDY = 1;
-  RAINY = 2;
-}
-
 message GetForecastResponse {
+  enum Weather {
+    SUNNY = 0;
+    CLOUDY = 1;
+    RAINY = 2;
+  }
+
   string last_updated = 1;
   repeated Weather daily_forecasts = 2;
 }
 
-enum RainEventType {
-  RAIN_STARTED = 0;
-  RAIN_STOPPED = 1;
-}
-
 message RainEvent {
+  enum RainEventType {
+    RAIN_STARTED = 0;
+    RAIN_STOPPED = 1;
+  }
+
   string city = 1;
   RainEventType event_type = 2;
 }
@@ -36,9 +37,9 @@ message SubscribeToRainEventsRequest {
 
 service WeatherService {
 
-  rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc ping(google.protobuf.Empty) returns (google.protobuf.Empty);
 
-  rpc GetForecast(GetForecastRequest) returns (GetForecastResponse);
+  rpc getForecast(GetForecastRequest) returns (GetForecastResponse);
 
   // TODO streaming
   //rpc PublishRainEvents(stream RainEvent) returns (google.protobuf.Empty);
