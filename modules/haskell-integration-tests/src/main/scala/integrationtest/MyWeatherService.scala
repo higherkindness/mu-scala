@@ -27,7 +27,7 @@ class MyWeatherService[F[_]: Applicative] extends WeatherService[F] {
     Empty.pure[F]
 
   def getForecast(req: weather.GetForecastRequest): F[GetForecastResponse] = {
-    val lastUpdated    = "2020-03-26T10:00:00Z"
+    val lastUpdated    = "2020-03-20T12:00:00Z"
     val days           = if (req.days_required <= 0) 5 else req.days_required
     val dailyForecasts = List.fill(days)(GetForecastResponse.Weather.SUNNY)
     GetForecastResponse(lastUpdated, dailyForecasts).pure[F]

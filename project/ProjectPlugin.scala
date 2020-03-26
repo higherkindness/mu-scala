@@ -326,6 +326,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val haskellIntegrationTestSettings = Seq(
       publishArtifact := false,
+      Test / parallelExecution := false,
       libraryDependencies ++= Seq(
         "org.scalatest" %% "scalatest"                   % V.scalatest % Test,
         "com.whisk"     %% "docker-testkit-scalatest"    % V.dockerItScala % Test,

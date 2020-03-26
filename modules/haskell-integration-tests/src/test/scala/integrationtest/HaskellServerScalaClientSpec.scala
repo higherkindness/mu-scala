@@ -34,7 +34,7 @@ import scala.concurrent.ExecutionContext
 class HaskellServerScalaClientSpec extends AnyFlatSpec with DockerTestKit with DockerKitSpotify {
 
   override def dockerContainers: List[DockerContainer] = List(
-    DockerContainer("mu-haskell-protobuf:latest")
+    DockerContainer("cb372/mu-scala-haskell-integration-tests-protobuf:latest")
       .withPorts(9123 -> Some(9123))
       .withCommand("/opt/mu-haskell-protobuf/server")
   )

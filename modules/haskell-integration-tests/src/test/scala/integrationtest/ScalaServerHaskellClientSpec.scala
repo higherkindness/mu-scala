@@ -35,12 +35,20 @@ trait DockerClientStuff { self: Suite =>
 
   val docker = DefaultDockerClient.fromEnv().build()
 
-  val hostExternalIpAddress = "192.168.0.89" // TODO
+  // An address for the RPC server that can be reached from inside a docker container
+  val hostExternalIpAddress = {
+    import sys.process._
+    if (sys.props("os.name").contains("Mac")) {
+      "ipconfig getifaddr en0".!!.trim
+    } else {
+      "hostname -I".!!.trim
+    }
+  }
 
   def containerConfig(clientArgs: List[String]) =
     ContainerConfig
       .builder()
-      .image("mu-haskell-protobuf:latest")
+      .image("cb372/mu-scala-haskell-integration-tests-protobuf:latest")
       .cmd(("/opt/mu-haskell-protobuf/client" :: hostExternalIpAddress :: clientArgs): _*)
       .build()
 
@@ -100,7 +108,9 @@ class ScalaServerHaskellClientSpec
 
   it should "work for a unary call" in {
     val clientOutput = runHaskellClient(List("get-forecast", "London", "3"))
-    assert(clientOutput == "TODO")
+    assert(
+      clientOutput == "2020-03-20T12:00:00Z enum Weather { SUNNY }, enum Weather { SUNNY }, enum Weather { SUNNY }"
+    )
   }
 
 }
