@@ -42,20 +42,20 @@ stages:
   - microsite
 jobs:
   include:
-    #- name: "check docs"
-      #scala: 2.12.10
-      #script:
-        #- sbt ++$TRAVIS_SCALA_VERSION docs/makeMicrosite
-    #- name: "non-cross-compiled modules check"
-      #scala: 2.12.10
-      #script:
-        #- sbt ++$TRAVIS_SCALA_VERSION root-non-crossed-scala-versions/test
-    #- name: "sbt plugin tests"
-      #scala: 2.12.10
-      #script:
-        #- sbt ++$TRAVIS_SCALA_VERSION srcgen-core/test
-        #- sbt ++$TRAVIS_SCALA_VERSION srcgen-sbt/test
-        #- sbt ++$TRAVIS_SCALA_VERSION srcgen-sbt/scripted
+    - name: "check docs"
+      scala: 2.12.10
+      script:
+        - sbt ++$TRAVIS_SCALA_VERSION docs/makeMicrosite
+    - name: "non-cross-compiled modules check"
+      scala: 2.12.10
+      script:
+        - sbt ++$TRAVIS_SCALA_VERSION root-non-crossed-scala-versions/test
+    - name: "sbt plugin tests"
+      scala: 2.12.10
+      script:
+        - sbt ++$TRAVIS_SCALA_VERSION srcgen-core/test
+        - sbt ++$TRAVIS_SCALA_VERSION srcgen-sbt/test
+        - sbt ++$TRAVIS_SCALA_VERSION srcgen-sbt/scripted
     - name: "Mu-Haskell integration tests"
       scala: 2.13.1
       script: sbt haskell-integration-tests/test

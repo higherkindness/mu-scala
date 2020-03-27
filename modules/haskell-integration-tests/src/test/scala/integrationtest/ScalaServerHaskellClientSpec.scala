@@ -49,7 +49,7 @@ trait DockerClientStuff { self: Suite =>
   def containerConfig(clientArgs: List[String]) =
     ContainerConfig
       .builder()
-      .image("cb372/mu-scala-haskell-integration-tests-protobuf:latest")
+      .image(DockerUtil.ImageName)
       .cmd(("/opt/mu-haskell-protobuf/client" :: hostExternalIpAddress :: clientArgs): _*)
       .build()
 
