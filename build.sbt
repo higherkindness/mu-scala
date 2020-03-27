@@ -278,7 +278,7 @@ lazy val `haskell-integration-tests` = project
   .in(file("modules/haskell-integration-tests"))
   .settings(noPublishSettings)
   .settings(haskellIntegrationTestSettings)
-  .dependsOn(server, netty, channel, `srcgen-core`)
+  .dependsOn(server, netty, channel)
 
 //////////////////////////
 //// MODULES REGISTRY ////
