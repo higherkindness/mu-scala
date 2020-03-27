@@ -116,7 +116,7 @@ class ScalaServerHaskellClientSpec
   it should "work for a unary call" in {
     val clientOutput = runHaskellClient(List("get-forecast", "London", "3"))
     assert(
-      clientOutput == "2020-03-20T12:00:00Z enum Weather { SUNNY }, enum Weather { SUNNY }, enum Weather { SUNNY }"
+      clientOutput == """2020-03-20T12:00:00Z ["SUNNY","SUNNY","SUNNY"]"""
     )
   }
 

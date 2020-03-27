@@ -8,14 +8,19 @@
 
 module Main where
 
-import Data.Maybe (fromMaybe)
+import Data.Aeson as A (encode)
+import Data.ByteString.Char8 as BS (unpack)
+import Data.ByteString.Lazy as LBS (toStrict)
 import Data.List (intercalate)
+import Data.Maybe (fromMaybe)
 import Data.Text as T (Text, pack, unpack)
 import System.Environment (getArgs)
 import Text.Read (readMaybe)
 
+import Mu.Adapter.Json
 import Mu.GRpc.Client.Optics
 import Mu.Schema.Optics
+
 
 import Protocol
 
@@ -45,8 +50,7 @@ getForecast client city days = do
 
 showGetForecastResponse :: GetForecastResponse -> String
 showGetForecastResponse resp =
-  lastUpdated ++ " " ++ (intercalate ", " dailyForecasts)
+  lastUpdated ++ " " ++ dailyForecasts
     where
-      lastUpdated = unpack(fromMaybe "" (resp ^. #last_updated))
-      -- TODO actually I want to print just "SUNNY" here, but it's too hard
-      dailyForecasts = show <$> (fromMaybe [] (resp ^. #daily_forecasts))
+      lastUpdated = T.unpack(fromMaybe "" (resp ^. #last_updated))
+      dailyForecasts = (BS.unpack . LBS.toStrict . A.encode) (fromMaybe [] (resp ^. #daily_forecasts))

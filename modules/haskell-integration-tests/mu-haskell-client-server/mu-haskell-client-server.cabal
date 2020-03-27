@@ -40,6 +40,8 @@ executable protobuf-client
   default-language:    Haskell2010
   build-depends:       base >= 4.12 && < 5
                      , text
+                     , aeson >= 1.4.6.0
+                     , bytestring >= 0.10.8.2
                      , mu-schema >= 0.2.0
                      , mu-optics >= 0.2.0
                      , mu-rpc >= 0.2.0
