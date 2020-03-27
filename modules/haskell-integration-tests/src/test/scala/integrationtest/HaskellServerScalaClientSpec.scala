@@ -36,7 +36,7 @@ class HaskellServerScalaClientSpec extends AnyFlatSpec with DockerTestKit with D
   override def dockerContainers: List[DockerContainer] = List(
     DockerContainer(DockerUtil.ImageName)
       .withPorts(9123 -> Some(9123))
-      .withCommand("/opt/mu-haskell-protobuf/server")
+      .withCommand("/opt/mu-haskell-client-server/protobuf-server")
   )
 
   override def startAllOrFail(): Unit = {

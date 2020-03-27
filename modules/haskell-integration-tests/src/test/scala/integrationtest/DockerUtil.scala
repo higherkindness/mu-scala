@@ -18,6 +18,6 @@ package integrationtest
 
 object DockerUtil {
 
-  val ImageName = "cb372/mu-scala-haskell-integration-tests-protobuf:latest"
+  val ImageName = "cb372/mu-scala-haskell-integration-tests:latest"
 
 }

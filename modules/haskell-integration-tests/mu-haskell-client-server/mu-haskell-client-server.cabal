@@ -1,8 +1,8 @@
-name:                mu-haskell-protobuf
+name:                mu-haskell-client-server
 version:             0.1.0.0
 -- synopsis:
 -- description:
-homepage:            https://github.com/githubuser/mu-haskell-protobuf#readme
+homepage:            https://github.com/higherkindness/mu-scala
 author:              Chris Birchall
 maintainer:          chris.birchall@47deg.com
 copyright:           2020 Chris Birchall
@@ -21,8 +21,8 @@ library
                      , mu-rpc >= 0.2.0
                      , mu-protobuf >= 0.2.0
                      , mu-grpc-server >= 0.2.0
-executable server
-  hs-source-dirs:      server
+executable protobuf-server
+  hs-source-dirs:      protobuf-server
   main-is:             Main.hs
   default-language:    Haskell2010
   build-depends:       base >= 4.12 && < 5
@@ -32,10 +32,10 @@ executable server
                      , mu-rpc >= 0.2.0
                      , mu-protobuf >= 0.2.0
                      , mu-grpc-server >= 0.2.0
-                     , mu-haskell-protobuf
+                     , mu-haskell-client-server
 
-executable client
-  hs-source-dirs:      client
+executable protobuf-client
+  hs-source-dirs:      protobuf-client
   main-is:             Main.hs
   default-language:    Haskell2010
   build-depends:       base >= 4.12 && < 5
@@ -45,4 +45,4 @@ executable client
                      , mu-rpc >= 0.2.0
                      , mu-protobuf >= 0.2.0
                      , mu-grpc-client >= 0.2.0
-                     , mu-haskell-protobuf
+                     , mu-haskell-client-server

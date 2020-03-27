@@ -7,4 +7,4 @@ if [ -z "$(docker images -q mu_haskell_warm_dot_stack)" ]; then
   docker build -t mu_haskell_warm_dot_stack -f Dockerfile.warm_dot_stack .
 fi
 
-docker build -t cb372/mu-scala-haskell-integration-tests-protobuf .
+docker build -t cb372/mu-scala-haskell-integration-tests .

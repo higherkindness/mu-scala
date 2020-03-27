@@ -28,7 +28,7 @@ This relies on the test knowing what responses the Mu-Haskell server will send.
 
 ## Haskell server and client
 
-The Haskell code is managed as a Stack project in the `mu-haskell-protobuf`
+The Haskell code is managed as a Stack project in the `mu-haskell-client-server`
 directory.
 
 The Stack project is made up of 3 modules:
@@ -56,7 +56,7 @@ much faster.
 
 ## How to make a change
 
-1. Make any necessary changes to the Haskell code in `mu-haskell-protobuf`.
+1. Make any necessary changes to the Haskell code in `mu-haskell-cliient-server`.
 2. Rebuild the Haskell Docker image.
 3. Make any necessary changes to the Scala code.
 4. Run the tests to check they work: `sbt haskell-integration-tests/test`

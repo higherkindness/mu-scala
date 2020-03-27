@@ -50,7 +50,9 @@ trait DockerClientStuff { self: Suite =>
     ContainerConfig
       .builder()
       .image(DockerUtil.ImageName)
-      .cmd(("/opt/mu-haskell-protobuf/client" :: hostExternalIpAddress :: clientArgs): _*)
+      .cmd(
+        ("/opt/mu-haskell-client-server/protobuf-client" :: hostExternalIpAddress :: clientArgs): _*
+      )
       .build()
 
   def runHaskellClient(clientArgs: List[String]) = {
