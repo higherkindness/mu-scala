@@ -15,12 +15,16 @@ This serialization can be customised in a few different ways.
 
 ## Compression
 
-Mu supports compression of RPC requests and responses. We can enable this compression either on the server or the client side.
+Mu supports compression of RPC requests and responses. We can enable this
+compression either on the server or the client side.
 
 Mu supports `Gzip` as the compression format.
 
-For server side compression, set the compression type argument to `Gzip` in the
-`@service` annotation when defining the service.
+The server will automatically handle compressed requests from clients,
+decompressing them appropriately.
+
+To make the server compress its responses, set the compression type argument to
+`Gzip` in the `@service` annotation when defining the service.
 
 For example:
 
@@ -42,9 +46,13 @@ object CompressionExample {
 }
 ```
 
-To enable compression on the client side, you need to add an option to the client in the channel builder.
+The client will automatically handle compressed responses from servers,
+decompressing them appropriately.
 
-Let's see an example of a client with the compression enabled.
+To make the client compress its requests, you need to add the appropriate "call
+option" when constructing the client.
+
+Here is an example of a client with request compression enabled.
 
 ```scala mdoc:silent
 import cats.effect.{ConcurrentEffect, ContextShift, Resource}
@@ -61,6 +69,18 @@ object CompressionExampleClient {
 
 }
 ```
+
+### Technical details
+
+To be strictly accurate, when you enable compression on the client or server
+side, the requests and responses are not compressed, but the messages inside
+them are.
+
+For example, if you enable compression on the client side, the client will
+compress the message when constructing a request. It will set the `compression`
+flag on the message to indicate that it is compressed, and it will set the
+`grpc-encoding: gzip` request header so that the server knows how to decompress
+the message.
 
 ## Custom codecs
 
