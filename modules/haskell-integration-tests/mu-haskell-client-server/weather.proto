@@ -23,12 +23,16 @@ message GetForecastResponse {
 
 message RainEvent {
   enum RainEventType {
-    RAIN_STARTED = 0;
-    RAIN_STOPPED = 1;
+    STARTED = 0;
+    STOPPED = 1;
   }
 
   string city = 1;
   RainEventType event_type = 2;
+}
+
+message RainSummaryResponse {
+  int32 rained_count = 1;
 }
 
 message SubscribeToRainEventsRequest {
@@ -41,9 +45,8 @@ service WeatherService {
 
   rpc getForecast(GetForecastRequest) returns (GetForecastResponse);
 
-  // TODO streaming
-  //rpc PublishRainEvents(stream RainEvent) returns (google.protobuf.Empty);
+  rpc publishRainEvents(stream RainEvent) returns (RainSummaryResponse);
 
-  //rpc SubscribeToRainEvents(SubscribeToRainEventsRequest) returns (stream RainEvent);
+  rpc subscribeToRainEvents(SubscribeToRainEventsRequest) returns (stream RainEvent);
 
 }
