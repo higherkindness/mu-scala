@@ -8,9 +8,11 @@
 
 module Main where
 
-import Data.Aeson as A (encode)
+import Data.Aeson as A (ToJSON, encode)
 import Data.ByteString.Char8 as BS (unpack)
 import Data.ByteString.Lazy as LBS (toStrict)
+import Data.Conduit
+import qualified Data.Conduit.Combinators as C
 import Data.List (intercalate)
 import Data.Maybe (fromMaybe)
 import Data.Text as T (Text, pack, unpack)
@@ -21,6 +23,7 @@ import Mu.Adapter.Json
 import Mu.GRpc.Client.Optics
 import Mu.Schema.Optics
 
+import Network.GRPC.Client
 
 import Protocol
 
@@ -32,6 +35,8 @@ main = do
   case (tail args) of
     ["ping"] -> ping conn
     ["get-forecast", city, days] -> getForecast conn city days
+    ["publish-rain-events", city] -> publishRainEvents conn city
+    ["subscribe-to-rain-events", city] -> subscribeToRainEvents conn city
     _ -> putStrLn "Invalid args"
 
 ping :: GRpcConnection WeatherService 'MsgProtoBuf -> IO ()
@@ -53,4 +58,26 @@ showGetForecastResponse resp =
   lastUpdated ++ " " ++ dailyForecasts
     where
       lastUpdated = T.unpack(fromMaybe "" (resp ^. #last_updated))
-      dailyForecasts = (BS.unpack . LBS.toStrict . A.encode) (fromMaybe [] (resp ^. #daily_forecasts))
+      dailyForecasts = toJsonString (fromMaybe [] (resp ^. #daily_forecasts))
+
+publishRainEvents :: GRpcConnection WeatherService 'MsgProtoBuf -> String -> IO ()
+publishRainEvents client city = do
+  sink        <- (client ^. #publishRainEvents) Compressed
+  GRpcOk resp <- runConduit $ stream .| sink
+  putStrLn $ showResponse (resp ^. #rained_count)
+    where
+      stream = C.yieldMany events
+      events = toRainEvent <$> [started, stopped, started, stopped, started]
+      toRainEvent x = record (Just $ T.pack city, Just x)
+      showResponse rainedCount = "It started raining " ++ show(fromMaybe 0 rainedCount) ++ " times"
+
+subscribeToRainEvents :: GRpcConnection WeatherService 'MsgProtoBuf -> String -> IO ()
+subscribeToRainEvents client city = do
+  source <- (client ^. #subscribeToRainEvents) req
+  runConduit $ source .| C.map (toJsonString . extractEventType) .| C.mapM_ putStrLn
+    where
+      req = record1 $ Just(T.pack city)
+      extractEventType (GRpcOk reply) = reply ^. #event_type
+
+toJsonString :: A.ToJSON a => a -> String
+toJsonString = BS.unpack . LBS.toStrict . A.encode

@@ -48,4 +48,6 @@ executable protobuf-client
                      , mu-rpc >= 0.2.0
                      , mu-protobuf >= 0.2.0
                      , mu-grpc-client >= 0.2.0
+                     , conduit >= 1.3.1.2
+                     , http2-client-grpc >= 0.8.0.0
                      , mu-haskell-client-server
