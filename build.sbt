@@ -270,6 +270,16 @@ lazy val `legacy-avro-decimal-compat-encoders` = project
   .dependsOn(`legacy-avro-decimal-compat-model` % "provided")
   .dependsOn(`internal-core`)
 
+//////////////////////////////////////
+//// MU-HASKELL INTEGRATION TESTS ////
+//////////////////////////////////////
+
+lazy val `haskell-integration-tests` = project
+  .in(file("modules/haskell-integration-tests"))
+  .settings(noPublishSettings)
+  .settings(haskellIntegrationTestSettings)
+  .dependsOn(server, netty, channel, fs2)
+
 //////////////////////////
 //// MODULES REGISTRY ////
 //////////////////////////

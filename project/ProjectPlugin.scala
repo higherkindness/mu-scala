@@ -29,6 +29,7 @@ object ProjectPlugin extends AutoPlugin {
       val betterMonadicFor: String    = "0.3.1"
       val catsEffect: String          = "2.1.2"
       val circe: String               = "0.13.0"
+      val dockerItScala               = "0.9.9"
       val dropwizard: String          = "4.1.5"
       val embeddedKafka: String       = "2.4.1"
       val enumeratum: String          = "1.5.15"
@@ -322,6 +323,16 @@ object ProjectPlugin extends AutoPlugin {
         "io.dropwizard.metrics" % "metrics-jmx"               % V.dropwizard
       )
     ) ++ mdocSettings
+
+    lazy val haskellIntegrationTestSettings = Seq(
+      publishArtifact := false,
+      Test / parallelExecution := false,
+      libraryDependencies ++= Seq(
+        "org.scalatest" %% "scalatest"                   % V.scalatest % Test,
+        "com.whisk"     %% "docker-testkit-scalatest"    % V.dockerItScala % Test,
+        "com.whisk"     %% "docker-testkit-impl-spotify" % V.dockerItScala % Test
+      )
+    )
 
     def isOlderScalaVersion(sv: String): Boolean =
       CrossVersion.partialVersion(sv) match {
