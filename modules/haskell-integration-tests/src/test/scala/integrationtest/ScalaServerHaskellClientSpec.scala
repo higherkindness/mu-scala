@@ -120,4 +120,21 @@ class ScalaServerHaskellClientSpec
     )
   }
 
+  it should "work for a client-streaming call" in {
+    val clientOutput = runHaskellClient(List("publish-rain-events", "London"))
+    assert(clientOutput == "It started raining 3 times")
+  }
+
+  it should "work for a server-streaming call" in {
+    val clientOutput = runHaskellClient(List("subscribe-to-rain-events", "London"))
+    assert(
+      clientOutput ==
+        """|"STARTED"
+         |"STOPPED"
+         |"STARTED"
+         |"STOPPED"
+         |"STARTED"""".stripMargin
+    )
+  }
+
 }

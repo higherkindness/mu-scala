@@ -19,6 +19,7 @@ package integrationtest
 import higherkindness.mu.rpc.protocol._
 import pbdirect._
 import enumeratum.values.{IntEnum, IntEnumEntry}
+import fs2.Stream
 
 object weather {
 
@@ -33,6 +34,7 @@ object weather {
       // (https://github.com/higherkindness/mu-haskell/issues/163)
       @pbIndex(2) @pbUnpacked daily_forecasts: List[GetForecastResponse.Weather]
   )
+
   object GetForecastResponse {
 
     sealed abstract class Weather(val value: Int) extends IntEnumEntry
@@ -46,6 +48,33 @@ object weather {
 
   }
 
+  final case class RainEvent(
+      @pbIndex(1) city: String,
+      // Note: Mu-Haskell does not understand packed repeated fields
+      // (https://github.com/higherkindness/mu-haskell/issues/163)
+      @pbIndex(2) event_type: RainEvent.EventType
+  )
+
+  object RainEvent {
+
+    sealed abstract class EventType(val value: Int) extends IntEnumEntry
+    object EventType extends IntEnum[EventType] {
+      case object STARTED extends EventType(0)
+      case object STOPPED extends EventType(1)
+
+      val values = findValues
+    }
+
+  }
+
+  final case class RainSummaryResponse(
+      @pbIndex(1) rained_count: Int
+  )
+
+  final case class SubscribeToRainEventsRequest(
+      @pbIndex(1) city: String
+  )
+
   @service(Protobuf, Gzip, namespace = Some("integrationtest"))
   trait WeatherService[F[_]] {
 
@@ -53,7 +82,9 @@ object weather {
 
     def getForecast(req: GetForecastRequest): F[GetForecastResponse]
 
-    // TODO streaming endpoints
+    def publishRainEvents(req: Stream[F, RainEvent]): F[RainSummaryResponse]
+
+    def subscribeToRainEvents(req: SubscribeToRainEventsRequest): Stream[F, RainEvent]
 
   }
 

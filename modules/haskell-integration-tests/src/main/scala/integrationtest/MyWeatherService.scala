@@ -18,10 +18,16 @@ package integrationtest
 
 import cats.Applicative
 import cats.syntax.applicative._
+import cats.syntax.functor._
+import cats.instances.int._
 import weather._
+import weather.RainEvent.EventType._
 import higherkindness.mu.rpc.protocol.Empty
+import fs2._
+import fs2.Stream.Compiler
 
-class MyWeatherService[F[_]: Applicative] extends WeatherService[F] {
+class MyWeatherService[F[_]: Applicative](implicit compiler: Compiler[F, F])
+    extends WeatherService[F] {
 
   def ping(req: Empty.type): F[Empty.type] =
     Empty.pure[F]
@@ -32,5 +38,24 @@ class MyWeatherService[F[_]: Applicative] extends WeatherService[F] {
     val dailyForecasts = List.fill(days)(GetForecastResponse.Weather.SUNNY)
     GetForecastResponse(lastUpdated, dailyForecasts).pure[F]
   }
+
+  def publishRainEvents(req: Stream[F, RainEvent]): F[RainSummaryResponse] = {
+    val rainStartedCount: F[Int] = req
+      .map { event =>
+        event.event_type match {
+          case RainEvent.EventType.STARTED => 1
+          case _                           => 0
+        }
+      }
+      .compile[F, F, Int]
+      .foldMonoid
+
+    rainStartedCount.map(RainSummaryResponse)
+  }
+
+  def subscribeToRainEvents(req: SubscribeToRainEventsRequest): Stream[F, RainEvent] =
+    Stream(STARTED, STOPPED, STARTED, STOPPED, STARTED)
+      .map(RainEvent(req.city, _))
+      .covary[F]
 
 }

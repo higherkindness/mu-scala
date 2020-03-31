@@ -18,11 +18,13 @@ package integrationtest
 
 import weather._
 import weather.GetForecastResponse.Weather.SUNNY
+import weather.RainEvent.EventType._
 import higherkindness.mu.rpc._
 import higherkindness.mu.rpc.protocol.Empty
 
 import io.grpc.CallOptions
 import cats.effect.{ContextShift, IO, Resource}
+import fs2._
 
 import org.scalatest.flatspec.AnyFlatSpec
 import com.whisk.docker.DockerContainer
@@ -82,6 +84,38 @@ class HaskellServerScalaClientSpec extends AnyFlatSpec with DockerTestKit with D
       .use(client => client.getForecast(request))
       .unsafeRunSync()
     assert(response == expectedResponse)
+  }
+
+  it should "work for a client-streaming call" in {
+    pending
+    // until we upgrade to a version of Mu-Haskell that contains this fix:
+    // https://github.com/haskell-grpc-native/http2-grpc-haskell/pull/20
+
+    val stream =
+      Stream(STARTED, STOPPED, STARTED, STOPPED, STARTED)
+        .map(RainEvent("London", _))
+        .covary[IO]
+    val expectedResponse = RainSummaryResponse(3)
+    val response = clientResource
+      .use(client => client.publishRainEvents(stream))
+      .unsafeRunSync()
+    assert(response == expectedResponse)
+  }
+
+  it should "work for a server-streaming call" in {
+    pending
+    // until we upgrade to a version of Mu-Haskell that contains this fix:
+    // https://github.com/haskell-grpc-native/http2-grpc-haskell/pull/20
+
+    val request = SubscribeToRainEventsRequest("London")
+    val stream: Stream[IO, RainEvent] = clientResource
+      .use(client => IO(client.subscribeToRainEvents(request)))
+      .unsafeRunSync()
+    val events = stream.compile.toList.unsafeRunSync()
+    val expectedEvents =
+      List(STARTED, STOPPED, STARTED, STOPPED, STARTED)
+        .map(RainEvent("London", _))
+    assert(events == expectedEvents)
   }
 
 }
