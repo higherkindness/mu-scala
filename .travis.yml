@@ -50,25 +50,9 @@ jobs:
       scala: 2.12.10
       script:
         - sbt ++$TRAVIS_SCALA_VERSION root-non-crossed-scala-versions/test
-    - name: "sbt plugin tests"
-      scala: 2.12.10
-      script:
-        - sbt ++$TRAVIS_SCALA_VERSION srcgen-core/test
-        - sbt ++$TRAVIS_SCALA_VERSION srcgen-sbt/test
-        - sbt ++$TRAVIS_SCALA_VERSION srcgen-sbt/scripted
     - name: "Mu-Haskell integration tests"
       scala: 2.13.1
       script: sbt haskell-integration-tests/test
-    - stage: deploy
-      scala: 2.12.10
-      if: branch = master AND type != pull_request AND env(SKIP_SBT_DEPLOY) = false
-      name: "Publish sbt plugin"
-      script:
-        - if grep -q "SNAPSHOT" version.sbt; then
-            sbt ++$TRAVIS_SCALA_VERSION srcgen-sbt/publish;
-          else
-            sbt ++$TRAVIS_SCALA_VERSION ";project srcgen-sbt; release";
-          fi
     - stage: deploy
       scala: 2.13.1
       if: branch = master AND type != pull_request

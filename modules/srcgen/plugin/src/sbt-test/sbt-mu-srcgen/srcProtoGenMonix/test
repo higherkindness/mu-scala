@@ -1,3 +1,0 @@
-> compile
-$ exists target/scala-2.12/src_managed/main/generated_from_proto/com/proto/author.scala
-$ exists target/scala-2.12/src_managed/main/generated_from_proto/com/proto/book.scala
