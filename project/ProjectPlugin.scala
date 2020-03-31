@@ -25,7 +25,6 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String              = "3.0.9"
-      val avrohugger: String          = "1.0.0-RC22"
       val betterMonadicFor: String    = "0.3.1"
       val catsEffect: String          = "2.1.2"
       val circe: String               = "0.13.0"
@@ -45,7 +44,6 @@ object ProjectPlugin extends AutoPlugin {
       val log4s: String               = "1.8.2"
       val logback: String             = "1.2.3"
       val monix: String               = "3.1.0"
-      val monocle: String             = "2.0.4"
       val lastRelease                 = "0.20.1"
       val nettySSL: String            = "2.0.28.Final"
       val paradise: String            = "2.1.1"
@@ -61,7 +59,6 @@ object ProjectPlugin extends AutoPlugin {
       val scalamock: String           = "4.4.0"
       val scalatest: String           = "3.1.1"
       val scalatestplusScheck: String = "3.1.0.0-RC2"
-      val skeuomorph: String          = "0.0.22"
       val slf4j: String               = "1.7.30"
     }
 
@@ -229,14 +226,6 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val srcGenSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "com.github.julien-truffaut" %% "monocle-core"    % V.monocle,
-        "io.higherkindness"          %% "skeuomorph"      % V.skeuomorph,
-        "com.julianpeeters"          %% "avrohugger-core" % V.avrohugger,
-        "io.circe"                   %% "circe-generic"   % V.circe
-      )
-    )
 
     lazy val kafkaSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
@@ -249,22 +238,6 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         "joda-time" % "joda-time"                    % V.jodaTime,
         "com.47deg" %% "scalacheck-toolbox-datetime" % V.scalacheckToolbox % Test
-      )
-    )
-
-    lazy val sbtPluginSettings: Seq[Def.Setting[_]] = Seq(
-      sbtPlugin := true,
-      scriptedLaunchOpts ++= Seq(
-        "-Xmx2048M",
-        "-XX:ReservedCodeCacheSize=256m",
-        "-Dversion=" + version.value,
-        // See https://github.com/sbt/sbt/issues/3469#issuecomment-521326813
-        s"-Dsbt.boot.directory=${file(sys.props("user.home")) / ".sbt" / "boot"}"
-      ),
-      // Custom release process for the plugin:
-      releaseProcess := Seq[ReleaseStep](
-        releaseStepCommandAndRemaining("^ publishSigned"),
-        releaseStepCommand("sonatypeBundleRelease")
       )
     )
 

@@ -1,5 +1,3 @@
-import sbtorgpolicies.model.scalac
-
 pgpPassphrase := Some(getEnvVar("PGP_PASSPHRASE").getOrElse("").toCharArray)
 
 ////////////////
@@ -170,44 +168,6 @@ lazy val kafka = project
   .settings(moduleName := "mu-rpc-kafka")
   .settings(kafkaSettings)
 
-////////////////
-//// SRCGEN ////
-////////////////
-
-lazy val `srcgen-core` = project
-  .in(file("modules/srcgen/core"))
-  .dependsOn(`internal-core` % "compile->compile;test->test")
-  .dependsOn(channel % "test->test")
-  .settings(moduleName := "mu-srcgen-core")
-  .settings(srcGenSettings)
-  .settings(compatSettings)
-
-lazy val `srcgen-sbt` = project
-  .in(file("modules/srcgen/plugin"))
-  .dependsOn(`srcgen-core`)
-  .settings(moduleName := "sbt-mu-srcgen")
-  .settings(noCrossCompilationLastScala)
-  .settings(sbtPluginSettings: _*)
-  .enablePlugins(BuildInfoPlugin)
-  .settings(buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion))
-  .settings(buildInfoPackage := "mu.rpc.srcgen")
-  // See https://github.com/sbt/sbt/issues/3248
-  .settings(
-    publishLocal := publishLocal
-      .dependsOn(
-        common / publishLocal,
-        `internal-core` / publishLocal,
-        channel / publishLocal,
-        server / publishLocal,
-        `internal-fs2` / publishLocal,
-        `internal-monix` / publishLocal,
-        `marshallers-jodatime` / publishLocal,
-        `srcgen-core` / publishLocal
-      )
-      .value
-  )
-  .enablePlugins(SbtPlugin)
-
 ////////////////////
 //// BENCHMARKS ////
 ////////////////////
@@ -301,7 +261,6 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   prometheus,
   testing,
   ssl,
-  `srcgen-core`,
   http,
   kafka,
   `marshallers-jodatime`,
