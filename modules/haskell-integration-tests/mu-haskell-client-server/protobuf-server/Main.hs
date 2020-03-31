@@ -18,7 +18,7 @@ import Mu.GRpc.Server
 import Mu.Server
 import Mu.Schema.Optics
 
-import Protocol
+import ProtobufProtocol
 
 main :: IO ()
 main = runGRpcApp msgProtoBuf 9123 server

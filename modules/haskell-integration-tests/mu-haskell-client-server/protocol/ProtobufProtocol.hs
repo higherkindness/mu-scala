@@ -11,7 +11,7 @@
 {-# language TypeFamilies          #-}
 {-# language TypeOperators         #-}
 
-module Protocol where
+module ProtobufProtocol where
 
 import Data.Text as T
 import GHC.Generics

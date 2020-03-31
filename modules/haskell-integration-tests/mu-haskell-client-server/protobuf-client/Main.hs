@@ -25,7 +25,7 @@ import Mu.Schema.Optics
 
 import Network.GRPC.Client
 
-import Protocol
+import ProtobufProtocol
 
 main :: IO ()
 main = do
