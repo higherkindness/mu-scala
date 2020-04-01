@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package integrationtest
+package integrationtest.protobuf
 
+import integrationtest._
 import weather._
 import weather.GetForecastResponse.Weather.SUNNY
 import weather.RainEvent.EventType._
@@ -27,30 +28,17 @@ import cats.effect.{ContextShift, IO, Resource}
 import fs2._
 
 import org.scalatest.flatspec.AnyFlatSpec
-import com.whisk.docker.DockerContainer
-import com.whisk.docker.impl.spotify.DockerKitSpotify
-import com.whisk.docker.scalatest.DockerTestKit
 
 import scala.concurrent.ExecutionContext
 
-class HaskellServerScalaClientSpec extends AnyFlatSpec with DockerTestKit with DockerKitSpotify {
+class HaskellServerScalaClientSpec extends AnyFlatSpec with HaskellServerRunningInDocker {
 
-  override def dockerContainers: List[DockerContainer] = List(
-    DockerContainer(DockerUtil.ImageName)
-      .withPorts(9123 -> Some(9123))
-      .withCommand("/opt/mu-haskell-client-server/protobuf-server")
-  )
-
-  override def startAllOrFail(): Unit = {
-    println("Starting Docker containers...")
-    super.startAllOrFail()
-    println("Started Docker containers.")
-    Thread.sleep(2000) // give the Haskell server a chance to start up properly
-  }
+  def serverPort: Int              = Constants.AvroPort
+  def serverExecutableName: String = "protobuf-server"
 
   implicit val CS: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
-  val channelFor: ChannelFor = ChannelForAddress("localhost", 9123)
+  val channelFor: ChannelFor = ChannelForAddress("localhost", serverPort)
 
   val clientResource: Resource[IO, WeatherService[IO]] = WeatherService.client[IO](
     channelFor,

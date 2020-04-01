@@ -14,10 +14,23 @@
  * limitations under the License.
  */
 
-package integrationtest
+package integrationtest.avro
 
-object DockerUtil {
+import cats.Applicative
+import cats.syntax.applicative._
+import weather._
+import higherkindness.mu.rpc.protocol.Empty
 
-  val ImageName = "cb372/mu-scala-haskell-integration-tests:latest"
+class MyWeatherService[F[_]: Applicative] extends WeatherService[F] {
+
+  def ping(req: Empty.type): F[Empty.type] =
+    Empty.pure[F]
+
+  def getForecast(req: weather.GetForecastRequest): F[GetForecastResponse] = {
+    val lastUpdated    = "2020-03-20T12:00:00Z"
+    val days           = if (req.days_required <= 0) 5 else req.days_required
+    val dailyForecasts = List.fill(days)(GetForecastResponse.Weather.SUNNY)
+    GetForecastResponse(lastUpdated, dailyForecasts).pure[F]
+  }
 
 }
