@@ -14,71 +14,25 @@
  * limitations under the License.
  */
 
-package integrationtest
+package integrationtest.protobuf
 
+import integrationtest._
 import weather._
 import higherkindness.mu.rpc.server.{AddService, GrpcServer}
 
-import com.spotify.docker.client._
-import com.spotify.docker.client.messages.ContainerConfig
-import com.spotify.docker.client.DockerClient._
-
 import cats.effect.{ContextShift, IO}
 
-import org.scalatest.Suite
 import org.scalatest.flatspec.AnyFlatSpec
 
 import scala.concurrent.ExecutionContext
 import org.scalatest.BeforeAndAfterAll
 
-trait DockerClientStuff { self: Suite =>
-
-  val docker = DefaultDockerClient.fromEnv().build()
-
-  // An address for the RPC server that can be reached from inside a docker container
-  val hostExternalIpAddress = {
-    import sys.process._
-    if (sys.props("os.name").contains("Mac")) {
-      "ipconfig getifaddr en0".!!.trim
-    } else {
-      "hostname -I".!!.trim.split(" ").head
-    }
-  }
-  println(s"The host machine's external IP is $hostExternalIpAddress")
-
-  def containerConfig(clientArgs: List[String]) =
-    ContainerConfig
-      .builder()
-      .image(DockerUtil.ImageName)
-      .cmd(
-        ("/opt/mu-haskell-client-server/protobuf-client" :: hostExternalIpAddress :: clientArgs): _*
-      )
-      .build()
-
-  def runHaskellClient(clientArgs: List[String]) = {
-    val containerCreation = docker.createContainer(containerConfig(clientArgs))
-    val id                = containerCreation.id()
-    docker.startContainer(id)
-    val exit      = docker.waitContainer(id)
-    val logstream = docker.logs(id, LogsParam.stdout(), LogsParam.stderr())
-    try {
-      val output = logstream.readFully().trim()
-      assert(
-        exit.statusCode == 0,
-        s"Client exited with code ${exit.statusCode} and output: $output"
-      )
-      output
-    } finally {
-      logstream.close()
-    }
-  }
-
-}
-
 class ScalaServerHaskellClientSpec
     extends AnyFlatSpec
-    with DockerClientStuff
+    with RunHaskellClientInDocker
     with BeforeAndAfterAll {
+
+  def clientExecutableName: String = "protobuf-client"
 
   implicit val CS: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
@@ -86,7 +40,7 @@ class ScalaServerHaskellClientSpec
 
   private val startServer: IO[Unit] = for {
     serviceDef <- WeatherService.bindService[IO]
-    serverDef  <- GrpcServer.default[IO](9123, List(AddService(serviceDef)))
+    serverDef  <- GrpcServer.default[IO](Constants.ProtobufPort, List(AddService(serviceDef)))
     _          <- GrpcServer.server[IO](serverDef)
   } yield ()
 

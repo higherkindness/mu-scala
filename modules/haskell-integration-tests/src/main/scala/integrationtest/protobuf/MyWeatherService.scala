@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package integrationtest
+package integrationtest.protobuf
 
 import cats.Applicative
 import cats.syntax.applicative._

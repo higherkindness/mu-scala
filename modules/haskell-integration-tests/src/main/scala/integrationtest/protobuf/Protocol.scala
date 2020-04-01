@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package integrationtest
+package integrationtest.protobuf
 
 import higherkindness.mu.rpc.protocol._
 import pbdirect._
