@@ -8,14 +8,15 @@
 
 module Main where
 
-import Data.Functor.Identity
-import Data.Maybe (fromMaybe)
-import Data.Text as T (Text)
-import Mu.GRpc.Server
-import Mu.Server
-import Mu.Schema.Optics
+import           Data.Functor.Identity
+import           Data.Maybe                     ( fromMaybe )
+import           Data.Text                     as T
+                                                ( Text )
+import           Mu.GRpc.Server
+import           Mu.Server
+import           Mu.Schema.Optics
 
-import AvroProtocol
+import           AvroProtocol
 
 main :: IO ()
 main = runGRpcApp msgAvro 9124 server
@@ -24,12 +25,11 @@ ping :: (MonadServer m) => m ()
 ping = return ()
 
 getForecast :: (MonadServer m) => GetForecastRequest -> m GetForecastResponse
-getForecast req =
-  return resp
-    where
-      days      = fromIntegral (req ^. #days_required)
-      forecasts = sunnyDays days
-      resp      = record (lastUpdated, forecasts)
+getForecast req = return resp
+ where
+  days      = fromIntegral (req ^. #days_required)
+  forecasts = sunnyDays days
+  resp      = record (lastUpdated, forecasts)
 
 lastUpdated :: T.Text
 lastUpdated = "2020-03-20T12:00:00Z"
