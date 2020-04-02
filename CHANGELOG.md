@@ -12,7 +12,7 @@ Release changes:
 
 Release changes:
 
-* Update scalacheck-toolbox-datetime to 0.3.3 ([#836](https://github.com/higherkindness/mu-scala/pull/836))
+* Update scalacheck-toolbox-datetime to 0.3.4 ([#836](https://github.com/higherkindness/mu-scala/pull/836))
 * Fix "method too large" error ([#837](https://github.com/higherkindness/mu-scala/pull/837))
 * Release 0.21.2 ([#838](https://github.com/higherkindness/mu-scala/pull/838))
 
