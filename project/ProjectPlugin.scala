@@ -24,43 +24,43 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String              = "3.0.9"
-      val betterMonadicFor: String    = "0.3.1"
-      val catsEffect: String          = "2.1.2"
-      val circe: String               = "0.13.0"
-      val dockerItScala               = "0.9.9"
-      val dropwizard: String          = "4.1.5"
-      val embeddedKafka: String       = "2.4.1"
-      val enumeratum: String          = "1.5.15"
-      val frees: String               = "0.8.2"
-      val fs2: String                 = "2.3.0"
-      val fs2Grpc: String             = "0.7.0"
-      val fs2Kafka: String            = "0.20.2"
-      val grpc: String                = "1.28.0"
-      val jodaTime: String            = "2.10.5"
-      val http4s: String              = "0.21.0-M6"
-      val kindProjector: String       = "0.10.3"
-      val lastRelease                 = "0.20.1"
-      val log4cats: String            = "1.0.1"
-      val log4s: String               = "1.8.2"
-      val logback: String             = "1.2.3"
-      val monix: String               = "3.1.0"
-      val natchez: String             = "0.0.11"
-      val nettySSL: String            = "2.0.28.Final"
-      val paradise: String            = "2.1.1"
-      val pbdirect: String            = "0.5.1"
-      val prometheus: String          = "0.8.1"
-      val pureconfig: String          = "0.12.3"
-      val reactiveStreams: String     = "1.0.3"
-      val scala212: String            = "2.12.10"
-      val scala213: String            = "2.13.1"
-      val scalaCollectionCompat: String          = "2.1.4"
-      val scalacheck: String          = "1.14.3"
-      val scalacheckToolbox: String   = "0.3.3"
-      val scalamock: String           = "4.4.0"
-      val scalatest: String           = "3.1.1"
-      val scalatestplusScheck: String = "3.1.0.0-RC2"
-      val slf4j: String               = "1.7.30"
+      val avro4s: String                = "3.0.9"
+      val betterMonadicFor: String      = "0.3.1"
+      val catsEffect: String            = "2.1.2"
+      val circe: String                 = "0.13.0"
+      val dockerItScala                 = "0.9.9"
+      val dropwizard: String            = "4.1.5"
+      val embeddedKafka: String         = "2.4.1"
+      val enumeratum: String            = "1.5.15"
+      val frees: String                 = "0.8.2"
+      val fs2: String                   = "2.3.0"
+      val fs2Grpc: String               = "0.7.0"
+      val fs2Kafka: String              = "0.20.2"
+      val grpc: String                  = "1.28.0"
+      val jodaTime: String              = "2.10.5"
+      val http4s: String                = "0.21.0-M6"
+      val kindProjector: String         = "0.10.3"
+      val lastRelease                   = "0.20.1"
+      val log4cats: String              = "1.0.1"
+      val log4s: String                 = "1.8.2"
+      val logback: String               = "1.2.3"
+      val monix: String                 = "3.1.0"
+      val natchez: String               = "0.0.11"
+      val nettySSL: String              = "2.0.28.Final"
+      val paradise: String              = "2.1.1"
+      val pbdirect: String              = "0.5.1"
+      val prometheus: String            = "0.8.1"
+      val pureconfig: String            = "0.12.3"
+      val reactiveStreams: String       = "1.0.3"
+      val scala212: String              = "2.12.10"
+      val scala213: String              = "2.13.1"
+      val scalaCollectionCompat: String = "2.1.4"
+      val scalacheck: String            = "1.14.3"
+      val scalacheckToolbox: String     = "0.3.3"
+      val scalamock: String             = "4.4.0"
+      val scalatest: String             = "3.1.1"
+      val scalatestplusScheck: String   = "3.1.0.0-RC2"
+      val slf4j: String                 = "1.7.30"
     }
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
@@ -97,13 +97,13 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val internalCoreSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "org.typelevel"       %% "cats-effect"  % V.catsEffect,
-        "io.grpc"             % "grpc-stub"     % V.grpc,
-        "com.47deg"           %% "pbdirect"     % V.pbdirect,
-        "com.beachape"        %% "enumeratum"   % V.enumeratum,
-        "com.sksamuel.avro4s" %% "avro4s-core"  % V.avro4s,
-        "org.log4s"           %% "log4s"        % V.log4s,
-        "org.tpolecat"        %% "natchez-core" % V.natchez,
+        "org.typelevel"          %% "cats-effect"             % V.catsEffect,
+        "io.grpc"                % "grpc-stub"                % V.grpc,
+        "com.47deg"              %% "pbdirect"                % V.pbdirect,
+        "com.beachape"           %% "enumeratum"              % V.enumeratum,
+        "com.sksamuel.avro4s"    %% "avro4s-core"             % V.avro4s,
+        "org.log4s"              %% "log4s"                   % V.log4s,
+        "org.tpolecat"           %% "natchez-core"            % V.natchez,
         "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat
       ),
       // Disable this flag because quasiquotes trigger a lot of false positive warnings
@@ -229,7 +229,6 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-
     lazy val kafkaSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "com.ovoenergy"           %% "fs2-kafka"      % V.fs2Kafka,
@@ -304,7 +303,7 @@ object ProjectPlugin extends AutoPlugin {
       publishArtifact := false,
       Test / parallelExecution := false,
       libraryDependencies ++= Seq(
-        "org.scalatest" %% "scalatest"                   % V.scalatest % Test,
+        "org.scalatest" %% "scalatest"                   % V.scalatest     % Test,
         "com.whisk"     %% "docker-testkit-scalatest"    % V.dockerItScala % Test,
         "com.whisk"     %% "docker-testkit-impl-spotify" % V.dockerItScala % Test
       )
