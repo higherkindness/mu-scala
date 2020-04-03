@@ -197,7 +197,7 @@ object serviceImpl {
           case "None"          => ""
         }.getOrElse("")
 
-      private val fullyServiceName = namespacePrefix + serviceName.toString
+      private val fullServiceName = namespacePrefix + serviceName.toString
 
       private val methodNameStyle: MethodNameStyle =
         annotationParam(3, "methodNameStyle") {
@@ -264,9 +264,32 @@ object serviceImpl {
 
       val bindService: DefDef = q"""
         def bindService[$F_](implicit ..$bindImplicits): $F[_root_.io.grpc.ServerServiceDefinition] =
-          _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](${lit(
-        fullyServiceName
-      )}, ..$serverCallDescriptorsAndHandlers)
+          _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](
+            ${lit(fullServiceName)},
+            ..$serverCallDescriptorsAndHandlers
+          )
+        """
+
+      private val serverCallDescriptorsAndTracingHandlers: List[Tree] =
+        rpcRequests.map(_.descriptorAndTracingHandler)
+
+      // Type lambda for Kleisli[F, Span[F], *]
+      val kleisliFSpanF =
+        tq"({ type T[A] = _root_.cats.data.Kleisli[$F, _root_.natchez.Span[$F], A] })#T"
+
+      val tracingAlgebra = q"algebra: $serviceName[$kleisliFSpanF]"
+      val bindWithTracingImplicits: List[Tree] = ceImplicit :: tracingAlgebra :: rpcRequests
+        .find(_.operation.isMonixObservable)
+        .map(_ => schedulerImplicit)
+        .toList
+
+      val bindServiceWithTracing: DefDef = q"""
+        def bindServiceWithTracing[$F_](entrypoint: _root_.natchez.EntryPoint[$F])
+                                       (implicit ..$bindWithTracingImplicits): $F[_root_.io.grpc.ServerServiceDefinition] =
+          _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](
+            ${lit(fullServiceName)},
+            ..$serverCallDescriptorsAndTracingHandlers
+          )
         """
 
       private val clientCallMethods: List[Tree] = rpcRequests.map(_.clientDef)
@@ -436,7 +459,7 @@ object serviceImpl {
               .setType($streamingMethodType)
               .setFullMethodName(
                 _root_.io.grpc.MethodDescriptor.generateFullMethodName(
-          ${lit(fullyServiceName)}, ${lit(updatedName)}))
+          ${lit(fullServiceName)}, ${lit(updatedName)}))
               .build()
           }
         """.supressWarts("Null", "ExplicitImplicitTypes")
@@ -480,32 +503,55 @@ object serviceImpl {
         private def monixServerCallMethodFor(serverMethodName: String) =
           q"_root_.higherkindness.mu.rpc.internal.server.monixCalls.${TermName(serverMethodName)}(algebra.$name, $compressionTypeTree)"
 
-        val descriptorAndHandler: Tree = {
-          val handler = (streamingType, prevalentStreamingTarget) match {
-            case (Some(RequestStreaming), Fs2StreamTpe(_, _)) =>
-              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.clientStreamingMethod(algebra.$name, $compressionTypeTree)"
-            case (Some(RequestStreaming), MonixObservableTpe(_, _)) =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(${monixServerCallMethodFor("clientStreamingMethod")})"
+        val serverCallHandler: Tree = (streamingType, prevalentStreamingTarget) match {
+          case (Some(RequestStreaming), Fs2StreamTpe(_, _)) =>
+            q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.clientStreamingMethod(algebra.$name, $compressionTypeTree)"
+          case (Some(RequestStreaming), MonixObservableTpe(_, _)) =>
+            q"_root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(${monixServerCallMethodFor("clientStreamingMethod")})"
 
-            case (Some(ResponseStreaming), Fs2StreamTpe(_, _)) =>
-              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.serverStreamingMethod(algebra.$name, $compressionTypeTree)"
-            case (Some(ResponseStreaming), MonixObservableTpe(_, _)) =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(${monixServerCallMethodFor("serverStreamingMethod")})"
+          case (Some(ResponseStreaming), Fs2StreamTpe(_, _)) =>
+            q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.serverStreamingMethod(algebra.$name, $compressionTypeTree)"
+          case (Some(ResponseStreaming), MonixObservableTpe(_, _)) =>
+            q"_root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(${monixServerCallMethodFor("serverStreamingMethod")})"
 
-            case (Some(BidirectionalStreaming), Fs2StreamTpe(_, _)) =>
-              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.bidiStreamingMethod(algebra.$name, $compressionTypeTree)"
-            case (Some(BidirectionalStreaming), MonixObservableTpe(_, _)) =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(${monixServerCallMethodFor("bidiStreamingMethod")})"
+          case (Some(BidirectionalStreaming), Fs2StreamTpe(_, _)) =>
+            q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.bidiStreamingMethod(algebra.$name, $compressionTypeTree)"
+          case (Some(BidirectionalStreaming), MonixObservableTpe(_, _)) =>
+            q"_root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(${monixServerCallMethodFor("bidiStreamingMethod")})"
 
-            case (None, _) =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.higherkindness.mu.rpc.internal.server.unaryCalls.unaryMethod(algebra.$name, $compressionTypeTree))"
-            case _ =>
-              sys.error(
-                s"Unable to define a handler for the streaming type $streamingType and $prevalentStreamingTarget for the method $name in the service $serviceName"
-              )
-          }
-          q"($methodDescriptorName.$methodDescriptorValName, $handler)"
+          case (None, _) =>
+            q"_root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.higherkindness.mu.rpc.internal.server.unaryCalls.unaryMethod(algebra.$name, $compressionTypeTree))"
+          case _ =>
+            sys.error(
+              s"Unable to define a handler for the streaming type $streamingType and $prevalentStreamingTarget for the method $name in the service $serviceName"
+            )
         }
+
+        val descriptorAndHandler: Tree = {
+          q"($methodDescriptorName.$methodDescriptorValName, $serverCallHandler)"
+        }
+
+        val tracingServerCallHandler: Tree = (streamingType, prevalentStreamingTarget) match {
+          case (None, _) =>
+            q"""
+            new _root_.higherkindness.mu.rpc.internal.server.TracingUnaryServerCallHandler[$F, $reqType, $respType](
+              algebra.$name,
+              $compressionTypeTree,
+              $methodDescriptorName.$methodDescriptorValName,
+              entrypoint
+            )
+            """
+          case _ =>
+            // TODO work out what to do about tracing of streaming endpoints
+            q"""
+              throw new _root_.java.lang.UnsupportedOperationException("Tracing of streaming endpoints is not supported")
+            """
+        }
+
+        val descriptorAndTracingHandler: Tree = {
+          q"($methodDescriptorName.$methodDescriptorValName, $tracingServerCallHandler)"
+        }
+
       }
 
       case class HttpOperation(operation: Operation) {
@@ -716,6 +762,7 @@ object serviceImpl {
             companion.impl.self,
             companion.impl.body ++ service.imports ++ service.encodersImport ++ service.methodDescriptors ++ List(
               service.bindService,
+              service.bindServiceWithTracing,
               service.clientClass,
               service.client,
               service.clientFromChannel,
