@@ -40,11 +40,12 @@ object ProjectPlugin extends AutoPlugin {
       val jodaTime: String            = "2.10.5"
       val http4s: String              = "0.21.0-M6"
       val kindProjector: String       = "0.10.3"
+      val lastRelease                 = "0.20.1"
       val log4cats: String            = "1.0.1"
       val log4s: String               = "1.8.2"
       val logback: String             = "1.2.3"
       val monix: String               = "3.1.0"
-      val lastRelease                 = "0.20.1"
+      val natchez: String             = "0.0.11"
       val nettySSL: String            = "2.0.28.Final"
       val paradise: String            = "2.1.1"
       val pbdirect: String            = "0.5.1"
@@ -53,7 +54,6 @@ object ProjectPlugin extends AutoPlugin {
       val reactiveStreams: String     = "1.0.3"
       val scala212: String            = "2.12.10"
       val scala213: String            = "2.13.1"
-      val scopt: String               = "3.7.1"
       val scalacheck: String          = "1.14.3"
       val scalacheckToolbox: String   = "0.3.3"
       val scalamock: String           = "4.4.0"
@@ -96,12 +96,13 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val internalCoreSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "org.typelevel"       %% "cats-effect" % V.catsEffect,
-        "io.grpc"             % "grpc-stub"    % V.grpc,
-        "com.47deg"           %% "pbdirect"    % V.pbdirect,
-        "com.beachape"        %% "enumeratum"  % V.enumeratum,
-        "com.sksamuel.avro4s" %% "avro4s-core" % V.avro4s,
-        "org.log4s"           %% "log4s"       % V.log4s
+        "org.typelevel"       %% "cats-effect"  % V.catsEffect,
+        "io.grpc"             % "grpc-stub"     % V.grpc,
+        "com.47deg"           %% "pbdirect"     % V.pbdirect,
+        "com.beachape"        %% "enumeratum"   % V.enumeratum,
+        "com.sksamuel.avro4s" %% "avro4s-core"  % V.avro4s,
+        "org.log4s"           %% "log4s"        % V.log4s,
+        "org.tpolecat"        %% "natchez-core" % V.natchez
       ),
       // Disable this flag because quasiquotes trigger a lot of false positive warnings
       scalacOptions -= "-Wunused:patvars",    // for Scala 2.13
