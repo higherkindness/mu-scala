@@ -54,6 +54,7 @@ object ProjectPlugin extends AutoPlugin {
       val reactiveStreams: String     = "1.0.3"
       val scala212: String            = "2.12.10"
       val scala213: String            = "2.13.1"
+      val scalaCollectionCompat: String          = "2.1.4"
       val scalacheck: String          = "1.14.3"
       val scalacheckToolbox: String   = "0.3.3"
       val scalamock: String           = "4.4.0"
@@ -102,7 +103,8 @@ object ProjectPlugin extends AutoPlugin {
         "com.beachape"        %% "enumeratum"   % V.enumeratum,
         "com.sksamuel.avro4s" %% "avro4s-core"  % V.avro4s,
         "org.log4s"           %% "log4s"        % V.log4s,
-        "org.tpolecat"        %% "natchez-core" % V.natchez
+        "org.tpolecat"        %% "natchez-core" % V.natchez,
+        "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat
       ),
       // Disable this flag because quasiquotes trigger a lot of false positive warnings
       scalacOptions -= "-Wunused:patvars",    // for Scala 2.13
