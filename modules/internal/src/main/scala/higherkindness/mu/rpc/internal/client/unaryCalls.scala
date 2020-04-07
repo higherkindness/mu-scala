@@ -16,12 +16,12 @@
 
 package higherkindness.mu.rpc.internal.client
 
+import cats.data.Kleisli
+import cats.syntax.flatMap._
 import cats.effect.{ContextShift, Effect}
 import io.grpc.stub.ClientCalls
 import io.grpc.{CallOptions, Channel, Metadata, MethodDescriptor}
 import natchez.Span
-import cats.data.Kleisli
-import cats.syntax.flatMap._
 
 object unaryCalls {
 

@@ -16,11 +16,13 @@
 
 package higherkindness.mu.rpc.internal.client
 
-import cats.effect.ConcurrentEffect
+import cats.data.Kleisli
 import cats.syntax.flatMap._
+import cats.effect.ConcurrentEffect
 import fs2.Stream
 import io.grpc.{CallOptions, Channel, Metadata, MethodDescriptor}
 import org.lyranthe.fs2_grpc.java_runtime.client.Fs2ClientCall
+import natchez.Span
 
 object fs2Calls {
 
@@ -65,4 +67,32 @@ object fs2Calls {
     Stream
       .eval(Fs2ClientCall[F](channel, descriptor, options))
       .flatMap(_.streamingToStreamingCall(input, headers))
+
+  // TODO tracingServerStreaming
+
+  def tracingClientStreaming[F[_]: ConcurrentEffect, Req, Res](
+      input: Stream[Kleisli[F, Span[F], *], Req],
+      descriptor: MethodDescriptor[Req, Res],
+      channel: Channel,
+      options: CallOptions
+  ): Kleisli[F, Span[F], Res] =
+    Kleisli[F, Span[F], Res] { parentSpan =>
+      parentSpan.span(descriptor.getFullMethodName()).use { span =>
+        span.kernel.flatMap { kernel =>
+          val headers = tracingKernelToHeaders(kernel)
+          val streamF: Stream[F, Req] =
+            input.translateInterruptible(Kleisli.applyK[F, Span[F]](span))
+          clientStreaming[F, Req, Res](
+            streamF,
+            descriptor,
+            channel,
+            options,
+            headers
+          )
+        }
+      }
+    }
+
+  // TODO tracingBidiStreaming
+
 }

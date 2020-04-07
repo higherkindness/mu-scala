@@ -540,8 +540,10 @@ object serviceImpl {
             """
           case (Some(RequestStreaming), Fs2StreamTpe(_, _)) =>
             q"""
-            def $name(input: _root_.fs2.Stream[$kleisliFSpanF, ${request.safeInner}]): ${kleisliFSpanFB(response.safeInner)} =
-              throw new _root_.java.lang.UnsupportedOperationException("TODO tracing of streaming endpoints")
+            def $name(input: _root_.fs2.Stream[$kleisliFSpanF, ${request.safeInner}]): ${kleisliFSpanFB(
+              response.safeInner
+            )} =
+              ${clientCallMethodFor("tracingClientStreaming")}
             """
           case _ =>
             q"""
@@ -581,6 +583,15 @@ object serviceImpl {
         }
 
         val tracingServerCallHandler: Tree = (streamingType, prevalentStreamingTarget) match {
+          case (Some(RequestStreaming), Fs2StreamTpe(_, _)) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.fs2Calls.tracingClientStreamingMethod(
+              algebra.$name _,
+              entrypoint,
+              $methodDescriptorName.$methodDescriptorValName,
+              $compressionTypeTree
+            )
+            """
           case (None, _) =>
             q"""
             new _root_.higherkindness.mu.rpc.internal.server.TracingUnaryServerCallHandler[$F, $reqType, $respType](
