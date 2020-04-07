@@ -505,17 +505,17 @@ object serviceImpl {
 
         val serverCallHandler: Tree = (streamingType, prevalentStreamingTarget) match {
           case (Some(RequestStreaming), Fs2StreamTpe(_, _)) =>
-            q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.clientStreamingMethod(algebra.$name, $compressionTypeTree)"
+            q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.clientStreamingMethod({ (req: _root_.fs2.Stream[$F, $reqType], _) => algebra.$name(req) }, $compressionTypeTree)"
           case (Some(RequestStreaming), MonixObservableTpe(_, _)) =>
             q"_root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(${monixServerCallMethodFor("clientStreamingMethod")})"
 
           case (Some(ResponseStreaming), Fs2StreamTpe(_, _)) =>
-            q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.serverStreamingMethod(algebra.$name, $compressionTypeTree)"
+            q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.serverStreamingMethod({ (req: $reqType, _) => algebra.$name(req) }, $compressionTypeTree)"
           case (Some(ResponseStreaming), MonixObservableTpe(_, _)) =>
             q"_root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(${monixServerCallMethodFor("serverStreamingMethod")})"
 
           case (Some(BidirectionalStreaming), Fs2StreamTpe(_, _)) =>
-            q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.bidiStreamingMethod(algebra.$name, $compressionTypeTree)"
+            q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.bidiStreamingMethod({ (req: _root_.fs2.Stream[$F, $reqType], _) => algebra.$name(req) }, $compressionTypeTree)"
           case (Some(BidirectionalStreaming), MonixObservableTpe(_, _)) =>
             q"_root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(${monixServerCallMethodFor("bidiStreamingMethod")})"
 

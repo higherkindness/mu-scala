@@ -18,7 +18,7 @@ package higherkindness.mu.rpc.internal.server
 
 import fs2.Stream
 import cats.effect.ConcurrentEffect
-import io.grpc.ServerCallHandler
+import io.grpc.{Metadata, ServerCallHandler}
 import org.lyranthe.fs2_grpc.java_runtime.server.{
   Fs2ServerCallHandler,
   GzipCompressor,
@@ -35,38 +35,38 @@ object fs2Calls {
     }
 
   def unaryMethod[F[_]: ConcurrentEffect, Req, Res](
-      f: Req => F[Res],
+      f: (Req, Metadata) => F[Res],
       compressionType: CompressionType
   ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F].unaryToUnaryCall[Req, Res](
-      (req, _) => f(req),
+      f,
       serverCallOptions(compressionType)
     )
 
   def clientStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
-      f: Stream[F, Req] => F[Res],
+      f: (Stream[F, Req], Metadata) => F[Res],
       compressionType: CompressionType
   ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F].streamingToUnaryCall[Req, Res](
-      (stream, _) => f(stream),
+      f,
       serverCallOptions(compressionType)
     )
 
   def serverStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
-      f: Req => Stream[F, Res],
+      f: (Req, Metadata) => Stream[F, Res],
       compressionType: CompressionType
   ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F].unaryToStreamingCall[Req, Res](
-      (req, _) => f(req),
+      f,
       serverCallOptions(compressionType)
     )
 
   def bidiStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
-      f: Stream[F, Req] => Stream[F, Res],
+      f: (Stream[F, Req], Metadata) => Stream[F, Res],
       compressionType: CompressionType
   ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F].streamingToStreamingCall[Req, Res](
-      (stream, _) => f(stream),
+      f,
       serverCallOptions(compressionType)
     )
 
