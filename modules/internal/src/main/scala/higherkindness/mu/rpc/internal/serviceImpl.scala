@@ -168,6 +168,13 @@ object serviceImpl {
       val F_ : TypeDef = serviceDef.tparams.head
       val F: TypeName  = F_.name
 
+      // Type lambda for Kleisli[F, Span[F], *]
+      private val kleisliFSpanF =
+        tq"({ type T[A] = _root_.cats.data.Kleisli[$F, _root_.natchez.Span[$F], A] })#T"
+
+      private def kleisliFSpanFB(B: Tree) =
+        tq"_root_.cats.data.Kleisli[$F, _root_.natchez.Span[$F], $B]"
+
       private val defs: List[Tree] = serviceDef.impl.body
 
       private val (rpcDefs, nonRpcDefs) = defs.collect {
@@ -273,19 +280,15 @@ object serviceImpl {
       private val serverCallDescriptorsAndTracingHandlers: List[Tree] =
         rpcRequests.map(_.descriptorAndTracingHandler)
 
-      // Type lambda for Kleisli[F, Span[F], *]
-      val kleisliFSpanF =
-        tq"({ type T[A] = _root_.cats.data.Kleisli[$F, _root_.natchez.Span[$F], A] })#T"
-
       val tracingAlgebra = q"algebra: $serviceName[$kleisliFSpanF]"
-      val bindWithTracingImplicits: List[Tree] = ceImplicit :: tracingAlgebra :: rpcRequests
+      val bindTracingServiceImplicits: List[Tree] = ceImplicit :: tracingAlgebra :: rpcRequests
         .find(_.operation.isMonixObservable)
         .map(_ => schedulerImplicit)
         .toList
 
-      val bindServiceWithTracing: DefDef = q"""
-        def bindServiceWithTracing[$F_](entrypoint: _root_.natchez.EntryPoint[$F])
-                                       (implicit ..$bindWithTracingImplicits): $F[_root_.io.grpc.ServerServiceDefinition] =
+      val bindTracingService: DefDef = q"""
+        def bindTracingService[$F_](entrypoint: _root_.natchez.EntryPoint[$F])
+                                   (implicit ..$bindTracingServiceImplicits): $F[_root_.io.grpc.ServerServiceDefinition] =
           _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](
             ${lit(fullServiceName)},
             ..$serverCallDescriptorsAndTracingHandlers
@@ -339,14 +342,14 @@ object serviceImpl {
         q"""
         def client[$F_](
           channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
-          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] = List(
-            _root_.higherkindness.mu.rpc.channel.UsePlaintext()),
-            options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-          )(implicit ..$classImplicits): _root_.cats.effect.Resource[F, $serviceName[$F]] =
+          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
+            List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): _root_.cats.effect.Resource[F, $serviceName[$F]] =
           _root_.cats.effect.Resource.make {
             new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
           }(channel => CE.void(CE.delay(channel.shutdown()))).flatMap(ch =>
-          _root_.cats.effect.Resource.make[F, $serviceName[$F]](CE.delay(new $Client[$F](ch, options)))($anonymousParam=> CE.unit))
+          _root_.cats.effect.Resource.make[F, $serviceName[$F]](CE.delay(new $Client[$F](ch, options)))($anonymousParam => CE.unit))
         """.supressWarts("DefaultArguments")
 
       val clientFromChannel: DefDef =
@@ -363,10 +366,10 @@ object serviceImpl {
         q"""
         def unsafeClient[$F_](
           channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
-          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] = List(
-            _root_.higherkindness.mu.rpc.channel.UsePlaintext()),
-            options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-          )(implicit ..$classImplicits): $serviceName[$F] = {
+          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
+            List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): $serviceName[$F] = {
           val managedChannelInterpreter =
             new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).unsafeBuild
           new $Client[$F](managedChannelInterpreter, options)
@@ -379,6 +382,37 @@ object serviceImpl {
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit ..$classImplicits): $serviceName[$F] = new $Client[$F](channel, options)
         """.supressWarts("DefaultArguments")
+
+      private val tracingClientCallMethods: List[Tree] = rpcRequests.map(_.tracingClientDef)
+      private val TracingClient                        = TypeName("TracingClient")
+      val tracingClientClass: ClassDef =
+        q"""
+        class $TracingClient[$F_](
+          channel: _root_.io.grpc.Channel,
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits) extends _root_.io.grpc.stub.AbstractStub[$TracingClient[$F]](channel, options) with $serviceName[$kleisliFSpanF] {
+          override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $TracingClient[$F] =
+              new $TracingClient[$F](channel, options)
+
+          ..$tracingClientCallMethods
+          ..$nonRpcDefs
+        }""".supressWarts("DefaultArguments")
+
+      val tracingClient: DefDef =
+        q"""
+        def tracingClient[$F_](
+          channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
+          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
+            List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): _root_.cats.effect.Resource[F, $serviceName[$kleisliFSpanF]] =
+          _root_.cats.effect.Resource.make {
+            new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
+          }(channel => CE.void(CE.delay(channel.shutdown()))).flatMap(ch =>
+          _root_.cats.effect.Resource.make[F, $serviceName[$kleisliFSpanF]](CE.delay(new $TracingClient[$F](ch, options)))($anonymousParam => CE.unit))
+        """.supressWarts("DefaultArguments")
+
+      // TODO tracingClientFromChannel, unsafeTracingClient, unsafeTracingClientFromChannel
 
       private def lit(x: Any): Literal = Literal(Constant(x.toString))
 
@@ -482,22 +516,37 @@ object serviceImpl {
         val clientDef: Tree = streamingType match {
           case Some(RequestStreaming) =>
             q"""
-            def $name(input: ${request.getTpe}): ${response.getTpe} = ${clientCallMethodFor(
-              "clientStreaming"
-            )}"""
+            def $name(input: ${request.getTpe}): ${response.getTpe} =
+              ${clientCallMethodFor("clientStreaming")}"""
           case Some(ResponseStreaming) =>
             q"""
-            def $name(input: ${request.getTpe}): ${response.getTpe} = ${clientCallMethodFor(
-              "serverStreaming"
-            )}"""
+            def $name(input: ${request.getTpe}): ${response.getTpe} =
+              ${clientCallMethodFor("serverStreaming")}"""
           case Some(BidirectionalStreaming) =>
             q"""
-            def $name(input: ${request.getTpe}): ${response.getTpe} = ${clientCallMethodFor(
-              "bidiStreaming"
-            )}"""
+            def $name(input: ${request.getTpe}): ${response.getTpe} =
+              ${clientCallMethodFor("bidiStreaming")}"""
           case None =>
             q"""
-            def $name(input: ${request.getTpe}): ${response.getTpe} = ${clientCallMethodFor("unary")}"""
+            def $name(input: ${request.getTpe}): ${response.getTpe} =
+              ${clientCallMethodFor("unary")}"""
+        }
+
+        val tracingClientDef: Tree = (streamingType, prevalentStreamingTarget) match {
+          case (None, _) =>
+            q"""
+            def $name(input: ${request.getTpe}): ${kleisliFSpanFB(response.safeInner)} =
+              ${clientCallMethodFor("tracingUnary")}
+            """
+          case (Some(RequestStreaming), Fs2StreamTpe(_, _)) =>
+            q"""
+            def $name(input: _root_.fs2.Stream[$kleisliFSpanF, ${request.safeInner}]): ${kleisliFSpanFB(response.safeInner)} =
+              throw new _root_.java.lang.UnsupportedOperationException("TODO tracing of streaming endpoints")
+            """
+          case _ =>
+            q"""
+            throw new _root_.java.lang.UnsupportedOperationException("TODO tracing of streaming endpoints")
+            """
         }
 
         private def monixServerCallMethodFor(serverMethodName: String) =
@@ -542,9 +591,9 @@ object serviceImpl {
             )
             """
           case _ =>
-            // TODO work out what to do about tracing of streaming endpoints
+            // TODO implement tracing of streaming endpoints
             q"""
-              throw new _root_.java.lang.UnsupportedOperationException("Tracing of streaming endpoints is not supported")
+              throw new _root_.java.lang.UnsupportedOperationException("TODO tracing of streaming endpoints")
             """
         }
 
@@ -762,12 +811,14 @@ object serviceImpl {
             companion.impl.self,
             companion.impl.body ++ service.imports ++ service.encodersImport ++ service.methodDescriptors ++ List(
               service.bindService,
-              service.bindServiceWithTracing,
+              service.bindTracingService,
               service.clientClass,
               service.client,
               service.clientFromChannel,
               service.unsafeClient,
-              service.unsafeClientFromChannel
+              service.unsafeClientFromChannel,
+              service.tracingClientClass,
+              service.tracingClient
             ) ++ service.http
           )
         )
