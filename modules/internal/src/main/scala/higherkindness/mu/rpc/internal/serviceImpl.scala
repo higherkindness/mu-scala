@@ -170,7 +170,7 @@ object serviceImpl {
 
       // Type lambda for Kleisli[F, Span[F], *]
       private val kleisliFSpanF =
-        tq"({ type T[A] = _root_.cats.data.Kleisli[$F, _root_.natchez.Span[$F], A] })#T"
+        tq"({ type T[α] = _root_.cats.data.Kleisli[$F, _root_.natchez.Span[$F], α] })#T"
 
       private def kleisliFSpanFB(B: Tree) =
         tq"_root_.cats.data.Kleisli[$F, _root_.natchez.Span[$F], $B]"
@@ -534,21 +534,54 @@ object serviceImpl {
 
         val tracingClientDef: Tree = (streamingType, prevalentStreamingTarget) match {
           case (None, _) =>
+            // def foo(input: Req): Kleisli[F, Span[F], Resp]
             q"""
             def $name(input: ${request.getTpe}): ${kleisliFSpanFB(response.safeInner)} =
               ${clientCallMethodFor("tracingUnary")}
             """
           case (Some(RequestStreaming), Fs2StreamTpe(_, _)) =>
+            // def foo(input: Stream[Kleisli[F, Span[F], *], Req]): Kleisli[F, Span[F], Resp]
             q"""
             def $name(input: _root_.fs2.Stream[$kleisliFSpanF, ${request.safeInner}]): ${kleisliFSpanFB(
               response.safeInner
             )} =
               ${clientCallMethodFor("tracingClientStreaming")}
             """
-          case _ =>
+          case (Some(RequestStreaming), MonixObservableTpe(_, _)) =>
+            // def foo(input: Observable[Req]): Kleisli[F, Span[F], Resp]
             q"""
-            throw new _root_.java.lang.UnsupportedOperationException("TODO tracing of streaming endpoints")
+            def $name(input: ${request.getTpe}): ${kleisliFSpanFB(response.safeInner)} =
+              throw new _root_.java.lang.UnsupportedOperationException("TODO tracing of Monix streaming endpoints")
             """
+          case (Some(ResponseStreaming), Fs2StreamTpe(_, _)) =>
+            // def foo(input: Req): Stream[Kleisli[F, Span[F], *], Resp]
+            q"""
+            def $name(input: ${request.getTpe}): _root_.fs2.Stream[$kleisliFSpanF, ${response.safeInner}] =
+              throw new _root_.java.lang.UnsupportedOperationException("TODO tracing of FS2 response-streaming endpoints")
+            """
+          case (Some(ResponseStreaming), MonixObservableTpe(_, _)) =>
+            // def foo(input: Req): Observable[Resp]
+            q"""
+            def $name(input: ${request.getTpe}): ${response.getTpe} =
+              throw new _root_.java.lang.UnsupportedOperationException("TODO tracing of Monix streaming endpoints")
+            """
+          case (Some(BidirectionalStreaming), Fs2StreamTpe(_, _)) =>
+            // def foo(input: Stream[Kleisli[F, Span[F], *], Req]): Stream[Kleisli[F, Span[F], *], Resp]
+            q"""
+            def $name(input: _root_.fs2.Stream[$kleisliFSpanF, ${request.safeInner}]): _root_.fs2.Stream[$kleisliFSpanF, ${response.safeInner}] =
+              throw new _root_.java.lang.UnsupportedOperationException("TODO tracing of FS2 bidirectional-streaming endpoints")
+            """
+          case (Some(BidirectionalStreaming), MonixObservableTpe(_, _)) =>
+            // def foo(input: Observable[Req]): Observable[Resp]
+            q"""
+            def $name(input: ${request.getTpe}): ${response.getTpe} =
+              throw new _root_.java.lang.UnsupportedOperationException("TODO tracing of Monix streaming endpoints")
+            """
+          case _ =>
+            c.abort(
+              c.enclosingPosition,
+              s"Unable to define a tracing client method for the streaming type $streamingType and $prevalentStreamingTarget for the method $name in the service $serviceName"
+            )
         }
 
         private def monixServerCallMethodFor(serverMethodName: String) =
@@ -573,7 +606,8 @@ object serviceImpl {
           case (None, _) =>
             q"_root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.higherkindness.mu.rpc.internal.server.unaryCalls.unaryMethod(algebra.$name, $compressionTypeTree))"
           case _ =>
-            sys.error(
+            c.abort(
+              c.enclosingPosition,
               s"Unable to define a handler for the streaming type $streamingType and $prevalentStreamingTarget for the method $name in the service $serviceName"
             )
         }
