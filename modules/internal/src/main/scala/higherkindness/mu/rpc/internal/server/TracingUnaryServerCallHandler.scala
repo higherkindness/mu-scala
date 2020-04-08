@@ -21,10 +21,8 @@ import cats.data.Kleisli
 import cats.effect.Effect
 import io.grpc._
 import io.grpc.ServerCall.Listener
-import io.grpc.Metadata.Key
 import io.grpc.stub.ServerCalls
-import natchez.{EntryPoint, Kernel, Span}
-import scala.jdk.CollectionConverters._
+import natchez.{EntryPoint, Span}
 
 class TracingUnaryServerCallHandler[F[_]: Effect, Req, Res](
     f: Req => Kleisli[F, Span[F], Res],
@@ -37,15 +35,7 @@ class TracingUnaryServerCallHandler[F[_]: Effect, Req, Res](
       call: ServerCall[Req, Res],
       metadata: Metadata
   ): Listener[Req] = {
-    val asciiHeaders = metadata
-      .keys()
-      .asScala
-      .collect {
-        case k if !k.endsWith(Metadata.BINARY_HEADER_SUFFIX) =>
-          k -> metadata.get(Key.of(k, Metadata.ASCII_STRING_MARSHALLER))
-      }
-      .toMap
-    val kernel       = Kernel(asciiHeaders)
+    val kernel       = extractTracingKernel(metadata)
     val spanResource = entrypoint.continueOrElseRoot(methodDescriptor.getFullMethodName(), kernel)
 
     val unaryMethod = unaryCalls.unaryMethod[F, Req, Res](
