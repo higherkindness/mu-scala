@@ -54,7 +54,7 @@ class HealthCheckServiceMonixImpl[F[_]: Sync](
       .update(_ + (newStatus.hc.nameService -> newStatus.status)) <*
       Sync[F].delay(observer.onNext(newStatus))
 
-  override def watch(service: HealthCheck): Observable[HealthStatus] =
-    observable.filter(_.hc === service)
+  override def watch(service: HealthCheck): F[Observable[HealthStatus]] =
+    observable.filter(_.hc === service).pure[F]
 
 }

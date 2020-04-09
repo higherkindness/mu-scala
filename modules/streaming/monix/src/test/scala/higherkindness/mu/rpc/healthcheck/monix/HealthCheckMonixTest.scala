@@ -36,9 +36,11 @@ class HealthCheckMonixTest extends AnyWordSpec with Matchers {
       {
         for {
           hand <- handler
-          v1   <- hand.watch(hc0).take(1).toListL.toAsync[IO]
+          obs1 <- hand.watch(hc0)
+          v1   <- obs1.take(1).toListL.toAsync[IO]
           _    <- hand.setStatus(HealthStatus(hc, ServerStatus("NOT_SERVING")))
-          v2   <- hand.watch(hc).take(1).toListL.toAsync[IO]
+          obs2 <- hand.watch(hc)
+          v2   <- obs2.take(1).toListL.toAsync[IO]
         } yield (v1, v2)
       }.unsafeRunSync() shouldBe Tuple2(
         List(HealthStatus(hc0, ServerStatus("UNKNOWN"))),

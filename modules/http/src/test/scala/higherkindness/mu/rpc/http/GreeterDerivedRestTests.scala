@@ -53,8 +53,8 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
 
   "REST Service" should {
 
-    val unaryClient = UnaryGreeter.httpClient[IO](serviceUri)
-    val fs2Client   = Fs2Greeter.httpClient[IO](serviceUri)
+    val unaryClient: UnaryGreeter.HttpClient[IO] = UnaryGreeter.httpClient[IO](serviceUri)
+    val fs2Client: Fs2Greeter.HttpClient[IO]     = Fs2Greeter.httpClient[IO](serviceUri)
 
     "serve a GET request" in {
       val response: IO[HelloResponse] =
@@ -116,7 +116,9 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
     "serve a POST request with fs2 streaming response" in {
       val request = HelloRequest("hey")
       val responses =
-        BlazeClientBuilder[IO](ec).stream.flatMap(fs2Client.sayHelloAll(request)(_))
+        BlazeClientBuilder[IO](ec).stream.flatMap(client =>
+          Stream.eval(fs2Client.sayHelloAll(request)(client)).flatten
+        )
       responses.compile.toList
         .unsafeRunSync() shouldBe List(HelloResponse("hey"), HelloResponse("hey"))
     }
@@ -124,7 +126,9 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
     "handle errors with fs2 streaming response" in {
       val request = HelloRequest("")
       val responses =
-        BlazeClientBuilder[IO](ec).stream.flatMap(fs2Client.sayHelloAll(request)(_))
+        BlazeClientBuilder[IO](ec).stream.flatMap(client =>
+          Stream.eval(fs2Client.sayHelloAll(request)(client)).flatten
+        )
       the[UnexpectedError] thrownBy responses.compile.toList
         .unsafeRunSync() should have message "java.lang.IllegalArgumentException: empty greeting"
     }
@@ -132,7 +136,9 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
     "serve a POST request with bidirectional fs2 streaming" in {
       val requests = Stream(HelloRequest("hey"), HelloRequest("there"))
       val responses =
-        BlazeClientBuilder[IO](ec).stream.flatMap(fs2Client.sayHellosAll(requests)(_))
+        BlazeClientBuilder[IO](ec).stream.flatMap(client =>
+          Stream.eval(fs2Client.sayHellosAll(requests)(client)).flatten
+        )
       responses.compile.toList
         .unsafeRunSync() shouldBe List(HelloResponse("hey"), HelloResponse("there"))
     }
@@ -140,7 +146,9 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
     "serve an empty POST request with bidirectional fs2 streaming" in {
       val requests = Stream.empty
       val responses =
-        BlazeClientBuilder[IO](ec).stream.flatMap(fs2Client.sayHellosAll(requests)(_))
+        BlazeClientBuilder[IO](ec).stream.flatMap(client =>
+          Stream.eval(fs2Client.sayHellosAll(requests)(client)).flatten
+        )
       responses.compile.toList.unsafeRunSync() shouldBe Nil
     }
 
