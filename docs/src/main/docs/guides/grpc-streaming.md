@@ -78,7 +78,7 @@ object MonixService {
      * @param request Single client request.
      * @return Stream of server responses.
      */
-    def lotsOfReplies(request: HelloRequest): Observable[HelloResponse]
+    def lotsOfReplies(request: HelloRequest): F[Observable[HelloResponse]]
 
     /**
      * Client streaming RPC where the client writes a sequence of messages and sends them to the server,
@@ -104,7 +104,7 @@ object MonixService {
      * @param request Stream of client requests.
      * @return Stream of server responses.
      */
-    def bidiHello(request: Observable[HelloRequest]): Observable[HelloResponse]
+    def bidiHello(request: Observable[HelloRequest]): F[Observable[HelloResponse]]
 
   }
 
@@ -138,7 +138,7 @@ object servicefs2 {
      * @param request Single client request.
      * @return Stream of server responses.
      */
-    def lotsOfReplies(request: HelloRequest): Stream[F, HelloResponse]
+    def lotsOfReplies(request: HelloRequest): F[Stream[F, HelloResponse]]
 
     /**
      * Client streaming RPC
@@ -154,7 +154,7 @@ object servicefs2 {
      * @param request Stream of client requests.
      * @return Stream of server responses.
      */
-    def bidiHello(request: Stream[F, HelloRequest]): Stream[F, HelloResponse]
+    def bidiHello(request: Stream[F, HelloRequest]): F[Stream[F, HelloResponse]]
 
   }
 
