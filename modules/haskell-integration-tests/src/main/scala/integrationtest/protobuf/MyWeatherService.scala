@@ -53,9 +53,10 @@ class MyWeatherService[F[_]: Applicative](implicit compiler: Compiler[F, F])
     rainStartedCount.map(RainSummaryResponse)
   }
 
-  def subscribeToRainEvents(req: SubscribeToRainEventsRequest): Stream[F, RainEvent] =
+  def subscribeToRainEvents(req: SubscribeToRainEventsRequest): F[Stream[F, RainEvent]] =
     Stream(STARTED, STOPPED, STARTED, STOPPED, STARTED)
       .map(RainEvent(req.city, _))
       .covary[F]
+      .pure[F]
 
 }

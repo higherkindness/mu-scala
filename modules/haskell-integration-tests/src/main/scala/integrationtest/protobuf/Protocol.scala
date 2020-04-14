@@ -84,7 +84,7 @@ object weather {
 
     def publishRainEvents(req: Stream[F, RainEvent]): F[RainSummaryResponse]
 
-    def subscribeToRainEvents(req: SubscribeToRainEventsRequest): Stream[F, RainEvent]
+    def subscribeToRainEvents(req: SubscribeToRainEventsRequest): F[Stream[F, RainEvent]]
 
   }
 
