@@ -669,7 +669,7 @@ object serviceImpl {
             val returnType = kleisliFSpanFB(tq"_root_.fs2.Stream[$kleisliFSpanF, $respElemType]")
             q"""
             def $name(input: _root_.fs2.Stream[$kleisliFSpanF, $reqElemType]): $returnType =
-              throw new _root_.java.lang.UnsupportedOperationException("TODO tracing of FS2 bidirectional-streaming endpoints")
+              ${clientCallMethodFor("tracingBidiStreaming")}
             """
           case (Some(BidirectionalStreaming), _: MonixObservableTpe) =>
             // def foo(input: Observable[Req]): Kleisli[F, Span[F], Observable[Resp]]
@@ -691,7 +691,7 @@ object serviceImpl {
           case (Some(RequestStreaming), _: Fs2StreamTpe) =>
             q"""
             _root_.higherkindness.mu.rpc.internal.server.fs2Calls.clientStreamingMethod[$F, $reqElemType, $respElemType](
-              { (req: _root_.fs2.Stream[$F, $reqElemType], _) => algebra.$name(req) },
+              { (req: _root_.fs2.Stream[$F, $reqElemType], $anonymousParam) => algebra.$name(req) },
               $compressionTypeTree
             )
             """
@@ -705,7 +705,7 @@ object serviceImpl {
           case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
             q"""
             _root_.higherkindness.mu.rpc.internal.server.fs2Calls.serverStreamingMethod[$F, $reqElemType, $respElemType](
-              { (req: $reqType, _) => algebra.$name(req) },
+              { (req: $reqType, $anonymousParam) => algebra.$name(req) },
               $compressionTypeTree
             )
             """
@@ -719,7 +719,7 @@ object serviceImpl {
           case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
             q"""
             _root_.higherkindness.mu.rpc.internal.server.fs2Calls.bidiStreamingMethod[$F, $reqElemType, $respElemType](
-              { (req: _root_.fs2.Stream[$F, $reqElemType], _) => algebra.$name(req) },
+              { (req: _root_.fs2.Stream[$F, $reqElemType], $anonymousParam) => algebra.$name(req) },
               $compressionTypeTree
             )
             """
@@ -762,6 +762,15 @@ object serviceImpl {
           case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
             q"""
             _root_.higherkindness.mu.rpc.internal.server.fs2Calls.tracingServerStreamingMethod(
+              algebra.$name _,
+              entrypoint,
+              $methodDescriptorName.$methodDescriptorValName,
+              $compressionTypeTree
+            )
+            """
+          case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.fs2Calls.tracingBidiStreamingMethod(
               algebra.$name _,
               entrypoint,
               $methodDescriptorName.$methodDescriptorValName,

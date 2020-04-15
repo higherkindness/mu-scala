@@ -114,6 +114,24 @@ object fs2Calls {
       }
     }
 
-  // TODO tracingBidiStreaming
+  def tracingBidiStreaming[F[_]: ConcurrentEffect, Req, Res](
+      input: Stream[Kleisli[F, Span[F], *], Req],
+      descriptor: MethodDescriptor[Req, Res],
+      channel: Channel,
+      options: CallOptions
+  ): Kleisli[F, Span[F], Stream[Kleisli[F, Span[F], *], Res]] =
+    Kleisli[F, Span[F], Stream[Kleisli[F, Span[F], *], Res]] { parentSpan =>
+      parentSpan.span(descriptor.getFullMethodName()).use { span =>
+        span.kernel.map { kernel =>
+          val headers = tracingKernelToHeaders(kernel)
+          val streamF: Stream[F, Req] =
+            input.translateInterruptible(Kleisli.applyK[F, Span[F]](span))
+          Stream
+            .eval(Fs2ClientCall[F](channel, descriptor, options))
+            .flatMap(_.streamingToStreamingCall(streamF, headers))
+            .translateInterruptible(Kleisli.liftK[F, Span[F]])
+        }
+      }
+    }
 
 }
