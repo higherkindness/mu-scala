@@ -18,6 +18,7 @@ package higherkindness.mu.rpc.internal.server
 
 import fs2.Stream
 import cats.data.Kleisli
+import cats.syntax.functor._
 import cats.effect.ConcurrentEffect
 import io.grpc.{Metadata, MethodDescriptor, ServerCallHandler}
 import org.lyranthe.fs2_grpc.java_runtime.server.{
@@ -85,6 +86,26 @@ object fs2Calls {
         entrypoint.continueOrElseRoot(descriptor.getFullMethodName(), kernel).use[F, Res] { span =>
           f(streamK).run(span)
         }
+      },
+      compressionType
+    )
+
+  def tracingServerStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
+      f: Req => Kleisli[F, Span[F], Stream[Kleisli[F, Span[F], *], Res]],
+      entrypoint: EntryPoint[F],
+      descriptor: MethodDescriptor[Req, Res],
+      compressionType: CompressionType
+  ): ServerCallHandler[Req, Res] =
+    serverStreamingMethod[F, Req, Res](
+      { (req: Req, metadata: Metadata) =>
+        val kernel = extractTracingKernel(metadata)
+        entrypoint
+          .continueOrElseRoot(descriptor.getFullMethodName(), kernel)
+          .use[F, Stream[F, Res]] { span =>
+            val kleisli: Kleisli[F, Span[F], Stream[Kleisli[F, Span[F], *], Res]] = f(req)
+            val fStreamK: F[Stream[Kleisli[F, Span[F], *], Res]]                  = kleisli.run(span)
+            fStreamK.map(_.translateInterruptible(Kleisli.applyK[F, Span[F]](span)))
+          }
       },
       compressionType
     )

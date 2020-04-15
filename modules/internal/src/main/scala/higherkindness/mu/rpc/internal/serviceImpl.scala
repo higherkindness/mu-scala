@@ -656,7 +656,7 @@ object serviceImpl {
             val returnType = kleisliFSpanFB(tq"_root_.fs2.Stream[$kleisliFSpanF, $respElemType]")
             q"""
             def $name(input: $reqType): $returnType =
-              throw new _root_.java.lang.UnsupportedOperationException("TODO tracing of FS2 response-streaming endpoints")
+              ${clientCallMethodFor("tracingServerStreaming")}
             """
           case (Some(ResponseStreaming), _: MonixObservableTpe) =>
             // def foo(input: Req): Kleisli[F, Span[F], Observable[Resp]]
@@ -753,6 +753,15 @@ object serviceImpl {
           case (Some(RequestStreaming), _: Fs2StreamTpe) =>
             q"""
             _root_.higherkindness.mu.rpc.internal.server.fs2Calls.tracingClientStreamingMethod(
+              algebra.$name _,
+              entrypoint,
+              $methodDescriptorName.$methodDescriptorValName,
+              $compressionTypeTree
+            )
+            """
+          case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.fs2Calls.tracingServerStreamingMethod(
               algebra.$name _,
               entrypoint,
               $methodDescriptorName.$methodDescriptorValName,
