@@ -17,12 +17,13 @@
 package higherkindness.mu.rpc.http
 
 import cats.{Applicative, MonadError}
+import cats.syntax.applicative._
+import cats.syntax.functor._
 import cats.effect._
 
 class UnaryGreeterHandler[F[_]: Applicative](implicit F: MonadError[F, Throwable])
     extends UnaryGreeter[F] {
 
-  import cats.syntax.applicative._
   import higherkindness.mu.rpc.protocol.Empty
   import io.grpc.Status._
 
@@ -41,7 +42,6 @@ class UnaryGreeterHandler[F[_]: Applicative](implicit F: MonadError[F, Throwable
 class Fs2GreeterHandler[F[_]: Sync] extends Fs2Greeter[F] {
 
   import fs2.Stream
-  import cats.syntax.functor._
   import higherkindness.mu.rpc.protocol.Empty
 
   def sayHellos(requests: Stream[F, HelloRequest]): F[HelloResponse] =
@@ -55,19 +55,17 @@ class Fs2GreeterHandler[F[_]: Sync] extends Fs2Greeter[F] {
   def rudelyIgnoreStreamOfHellos(requests: Stream[F, HelloRequest]): F[Empty.type] =
     requests.compile.drain.as(Empty)
 
-  def sayHelloAll(request: HelloRequest): F[Stream[F, HelloResponse]] =
-    Applicative[F].pure(
+  def sayHelloAll(request: HelloRequest): F[Stream[F, HelloResponse]] = {
+    val stream = {
       if (request.hello.isEmpty) Stream.raiseError(new IllegalArgumentException("empty greeting"))
       else Stream(HelloResponse(request.hello), HelloResponse(request.hello))
-    )
+    }
+    stream.pure[F]
+  }
 
   def sayHelloAllEmptyRequest(request: Empty.type): F[Stream[F, HelloResponse]] =
-    Applicative[F].pure(
-      Stream(HelloResponse("hey"), HelloResponse("hi again"))
-    )
+    Stream(HelloResponse("hey"), HelloResponse("hi again")).covary[F].pure[F]
 
   def sayHellosAll(requests: Stream[F, HelloRequest]): F[Stream[F, HelloResponse]] =
-    Applicative[F].pure(
-      requests.map(request => HelloResponse(request.hello))
-    )
+    requests.map(request => HelloResponse(request.hello)).pure[F]
 }

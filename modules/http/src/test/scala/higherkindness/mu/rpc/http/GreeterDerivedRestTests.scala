@@ -116,9 +116,9 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
     "serve a POST request with fs2 streaming response" in {
       val request = HelloRequest("hey")
       val responses =
-        BlazeClientBuilder[IO](ec).stream.flatMap(client =>
-          Stream.eval(fs2Client.sayHelloAll(request)(client)).flatten
-        )
+        BlazeClientBuilder[IO](ec).stream
+          .evalMap(client => fs2Client.sayHelloAll(request)(client))
+          .flatten
       responses.compile.toList
         .unsafeRunSync() shouldBe List(HelloResponse("hey"), HelloResponse("hey"))
     }
