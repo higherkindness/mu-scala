@@ -64,10 +64,43 @@ object serviceImpl {
     }
     object TypeTypology {
 
-      private def identOrSelect(tree: Tree, name: String): Boolean = tree match {
-        case Ident(TypeName(`name`)) | Select(_, TypeName(`name`)) => true
-        case _                                                     => false
+      /**
+       * Extract the parts of a possibly-qualified type name or term name.
+       *
+       * {{{
+       * extractName(tq"Observable") == List("Observable")
+       * extractName(tq"monix.reactive.Observable") == List("monix", "reactive", "Observable")
+       * }}}
+       */
+      private def extractName(tree: Tree): List[String] = tree match {
+        case Ident(TermName(name))             => List(name)
+        case Ident(TypeName(name))             => List(name)
+        case Select(qualifier, TypeName(name)) => extractName(qualifier) :+ name
+        case Select(qualifier, TermName(name)) => extractName(qualifier) :+ name
+        case _                                 => Nil
       }
+
+      /**
+       * Is the given tree a type name or term name that matches the given
+       * fully-qualified name?
+       *
+       * {{{
+       * val fqn = List("_root_", "monix", "reactive", "Observable")
+       *
+       * possiblyQualifiedName(tq"Observable", fqn) == true
+       * possiblyQualifiedName(tq"reactive.Observable", fqn) == true
+       * possiblyQualifiedName(tq"monix.reactive.Observable", fqn) == true
+       * possiblyQualifiedName(tq"_root_.monix.reactive.Observable", fqn) == true
+       * possiblyQualifiedName(tq"com.mylibrary.Observable", fqn) == false
+       * }}}
+       */
+      private def possiblyQualifiedName(tree: Tree, fqn: List[String]): Boolean = {
+        val name = extractName(tree)
+        name.nonEmpty && fqn.endsWith(name)
+      }
+
+      private val monixObservableFQN = List("_root_", "monix", "reactive", "Observable")
+      private val fs2StreamFQN       = List("_root_", "fs2", "Stream")
 
       def apply(t: Tree, responseType: Boolean, F: TypeName): TypeTypology = {
         val unwrappedType: Tree = {
@@ -88,10 +121,10 @@ object serviceImpl {
         }
 
         unwrappedType match {
-          case tq"$tpe[$elemType]" if identOrSelect(tpe, "Observable") =>
+          case tq"$tpe[$elemType]" if possiblyQualifiedName(tpe, monixObservableFQN) =>
             MonixObservableTpe(t, unwrappedType, elemType)
           case tq"$tpe[$effectType, $elemType]"
-              if identOrSelect(tpe, "Stream") && effectType.toString == F.decodedName.toString =>
+              if possiblyQualifiedName(tpe, fs2StreamFQN) && effectType.toString == F.decodedName.toString =>
             Fs2StreamTpe(t, unwrappedType, elemType)
           case tq"Empty.type" => EmptyTpe(t, unwrappedType, unwrappedType)
           case other          => UnaryTpe(t, unwrappedType, unwrappedType)
