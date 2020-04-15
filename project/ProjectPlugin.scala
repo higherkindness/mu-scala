@@ -1,6 +1,5 @@
 import microsites.MicrositesPlugin.autoImport._
 import sbt.Keys._
-import sbt.ScriptedPlugin.autoImport._
 import sbt._
 import sbtorgpolicies.OrgPoliciesPlugin
 import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
@@ -29,18 +28,18 @@ object ProjectPlugin extends AutoPlugin {
       val catsEffect: String            = "2.1.2"
       val circe: String                 = "0.13.0"
       val dockerItScala                 = "0.9.9"
-      val dropwizard: String            = "4.1.5"
+      val dropwizard: String            = "4.1.6"
       val embeddedKafka: String         = "2.4.1"
       val enumeratum: String            = "1.5.15"
       val frees: String                 = "0.8.2"
       val fs2: String                   = "2.3.0"
       val fs2Grpc: String               = "0.7.0"
       val fs2Kafka: String              = "0.20.2"
-      val grpc: String                  = "1.28.0"
+      val grpc: String                  = "1.28.1"
       val jodaTime: String              = "2.10.5"
       val http4s: String                = "0.21.0-M6"
       val kindProjector: String         = "0.10.3"
-      val lastRelease                   = "0.20.1"
+      val lastRelease                   = "0.21.3"
       val log4cats: String              = "1.0.1"
       val log4s: String                 = "1.8.2"
       val logback: String               = "1.2.3"
