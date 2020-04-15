@@ -32,6 +32,6 @@ object serviceMonix {
     def checkAll(empty: Empty.type): F[AllStatus]
     def cleanAll(empty: Empty.type): F[Unit]
 
-    def watch(service: HealthCheck): Observable[HealthStatus]
+    def watch(service: HealthCheck): F[Observable[HealthStatus]]
   }
 }

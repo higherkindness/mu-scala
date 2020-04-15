@@ -32,6 +32,6 @@ object serviceFS2 {
     def checkAll(empty: Empty.type): F[AllStatus]
     def cleanAll(empty: Empty.type): F[Unit]
 
-    def watch(service: HealthCheck): Stream[F, HealthStatus]
+    def watch(service: HealthCheck): F[Stream[F, HealthStatus]]
   }
 }

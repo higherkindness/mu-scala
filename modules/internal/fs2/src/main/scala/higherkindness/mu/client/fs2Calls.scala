@@ -17,6 +17,7 @@
 package higherkindness.mu.rpc.internal.client
 
 import cats.effect.ConcurrentEffect
+import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import fs2.Stream
 import io.grpc.{CallOptions, Channel, Metadata, MethodDescriptor}
@@ -38,10 +39,11 @@ object fs2Calls {
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
       options: CallOptions
-  ): Stream[F, Res] =
+  ): F[Stream[F, Res]] =
     Stream
       .eval(Fs2ClientCall[F](channel, descriptor, options))
       .flatMap(_.unaryToStreamingCall(request, new Metadata()))
+      .pure[F]
 
   def clientStreaming[F[_]: ConcurrentEffect, Req, Res](
       input: Stream[F, Req],
@@ -57,8 +59,9 @@ object fs2Calls {
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
       options: CallOptions
-  ): Stream[F, Res] =
+  ): F[Stream[F, Res]] =
     Stream
       .eval(Fs2ClientCall[F](channel, descriptor, options))
       .flatMap(_.streamingToStreamingCall(input, new Metadata()))
+      .pure[F]
 }

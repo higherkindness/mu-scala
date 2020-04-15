@@ -38,7 +38,12 @@ import fs2.Stream
 
   @http def sayHellos(requests: Stream[F, HelloRequest]): F[HelloResponse]
 
-  @http def sayHelloAll(request: HelloRequest): Stream[F, HelloResponse]
+  @http def rudelyIgnoreStreamOfHellos(requests: Stream[F, HelloRequest]): F[Empty.type]
 
-  @http def sayHellosAll(requests: Stream[F, HelloRequest]): Stream[F, HelloResponse]
+  @http def sayHelloAll(request: HelloRequest): F[Stream[F, HelloResponse]]
+
+  @http def sayHelloAllEmptyRequest(request: Empty.type): F[Stream[F, HelloResponse]]
+
+  @http def sayHellosAll(requests: Stream[F, HelloRequest]): F[Stream[F, HelloResponse]]
+
 }

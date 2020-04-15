@@ -19,6 +19,8 @@ package internal
 package client
 
 import cats.effect.Async
+import cats.Applicative
+import cats.syntax.applicative._
 import io.grpc.stub.{ClientCalls, StreamObserver}
 import io.grpc.{CallOptions, Channel, MethodDescriptor}
 import monix.reactive.Observable
@@ -30,14 +32,15 @@ object monixCalls {
 
   import higherkindness.mu.rpc.internal.converters._
 
-  def serverStreaming[Req, Res](
+  def serverStreaming[F[_]: Applicative, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
       options: CallOptions
-  ): Observable[Res] =
+  ): F[Observable[Res]] =
     Observable
       .fromReactivePublisher(createPublisher(request, descriptor, channel, options))
+      .pure[F]
 
   def clientStreaming[F[_]: Async, Req, Res](
       input: Observable[Req],
@@ -57,20 +60,22 @@ object monixCalls {
       .firstL
       .toAsync[F]
 
-  def bidiStreaming[Req, Res](
+  def bidiStreaming[F[_]: Applicative, Req, Res](
       input: Observable[Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
       options: CallOptions
-  ): Observable[Res] =
-    input.liftByOperator(
-      StreamObserver2MonixOperator((outputObserver: StreamObserver[Res]) =>
-        ClientCalls.asyncBidiStreamingCall(
-          channel.newCall(descriptor, options),
-          outputObserver
+  ): F[Observable[Res]] =
+    input
+      .liftByOperator(
+        StreamObserver2MonixOperator((outputObserver: StreamObserver[Res]) =>
+          ClientCalls.asyncBidiStreamingCall(
+            channel.newCall(descriptor, options),
+            outputObserver
+          )
         )
       )
-    )
+      .pure[F]
 
   private[this] def createPublisher[Res, Req](
       request: Req,

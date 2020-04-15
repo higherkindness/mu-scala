@@ -39,10 +39,12 @@ class HealthCheckFS2Test extends AnyWordSpec with Matchers {
     "work with setStatus and watch" in {
       {
         for {
-          hand <- handler
-          v1   <- hand.watch(hc0).take(1).compile.toList
-          _    <- hand.setStatus(HealthStatus(hc, ServerStatus("NOT_SERVING")))
-          v2   <- hand.watch(hc).take(1).compile.toList
+          hand    <- handler
+          stream1 <- hand.watch(hc0)
+          v1      <- stream1.take(1).compile.toList
+          _       <- hand.setStatus(HealthStatus(hc, ServerStatus("NOT_SERVING")))
+          stream2 <- hand.watch(hc)
+          v2      <- stream2.take(1).compile.toList
         } yield (v1, v2)
       }.unsafeRunSync() shouldBe Tuple2(
         List(HealthStatus(hc0, ServerStatus("UNKNOWN"))),

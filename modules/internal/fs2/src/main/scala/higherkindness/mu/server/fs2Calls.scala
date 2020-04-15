@@ -53,20 +53,20 @@ object fs2Calls {
     )
 
   def serverStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
-      f: Req => Stream[F, Res],
+      f: Req => F[Stream[F, Res]],
       compressionType: CompressionType
   ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F].unaryToStreamingCall[Req, Res](
-      (req, _) => f(req),
+      (req, _) => Stream.eval(f(req)).flatten,
       serverCallOptions(compressionType)
     )
 
   def bidiStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
-      f: Stream[F, Req] => Stream[F, Res],
+      f: Stream[F, Req] => F[Stream[F, Res]],
       compressionType: CompressionType
   ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F].streamingToStreamingCall[Req, Res](
-      (stream, _) => f(stream),
+      (stream, _) => Stream.eval(f(stream)).flatten,
       serverCallOptions(compressionType)
     )
 

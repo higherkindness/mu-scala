@@ -46,27 +46,30 @@ object monixCalls {
     }
 
   def serverStreamingMethod[F[_]: Effect, Req, Res](
-      f: Req => Observable[Res],
+      f: Req => F[Observable[Res]],
       compressionType: CompressionType
   )(implicit S: Scheduler): ServerStreamingMethod[Req, Res] =
     new ServerStreamingMethod[Req, Res] {
 
       override def invoke(request: Req, responseObserver: StreamObserver[Res]): Unit = {
         addCompression(responseObserver, compressionType)
-        f(request).subscribe(responseObserver.toSubscriber)
+        val obs: Observable[Res] = Observable.from(f(request)).flatten
+        obs.subscribe(responseObserver.toSubscriber)
         ()
       }
     }
 
   def bidiStreamingMethod[F[_]: Effect, Req, Res](
-      f: Observable[Req] => Observable[Res],
+      f: Observable[Req] => F[Observable[Res]],
       compressionType: CompressionType
   )(implicit S: Scheduler): BidiStreamingMethod[Req, Res] =
     new BidiStreamingMethod[Req, Res] {
 
       override def invoke(responseObserver: StreamObserver[Res]): StreamObserver[Req] = {
         addCompression(responseObserver, compressionType)
-        transformStreamObserver(inputObservable => f(inputObservable), responseObserver)
+        val transformer: Observable[Req] => Observable[Res] = inputObs =>
+          Observable.from(f(inputObs)).flatten
+        transformStreamObserver(transformer, responseObserver)
       }
     }
 

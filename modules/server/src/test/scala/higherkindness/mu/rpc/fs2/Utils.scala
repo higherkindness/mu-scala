@@ -22,40 +22,41 @@ import higherkindness.mu.rpc.protocol._
 import _root_.fs2._
 import cats.effect.{Effect, IO, Resource}
 import io.grpc.{CallOptions, Status}
+import cats.syntax.applicative._
 
 object Utils extends CommonUtils {
 
   object service {
 
     @service(Protobuf) trait ProtoRPCService[F[_]] {
-      def serverStreamingWithError(e: E): Stream[F, C]
+      def serverStreamingWithError(e: E): F[Stream[F, C]]
       def clientStreaming(oa: Stream[F, A]): F[D]
-      def serverStreaming(b: B): Stream[F, C]
+      def serverStreaming(b: B): F[Stream[F, C]]
     }
 
     @service(Protobuf, Gzip) trait CompressedProtoRPCService[F[_]] {
-      def serverStreamingCompressed(b: B): Stream[F, C]
+      def serverStreamingCompressed(b: B): F[Stream[F, C]]
       def clientStreamingCompressed(oa: Stream[F, A]): F[D]
     }
 
     @service(Avro) trait AvroRPCService[F[_]] {
       def unary(a: A): F[C]
-      def biStreaming(oe: Stream[F, E]): Stream[F, E]
+      def biStreaming(oe: Stream[F, E]): F[Stream[F, E]]
     }
 
     @service(Avro, Gzip) trait CompressedAvroRPCService[F[_]] {
       def unaryCompressed(a: A): F[C]
-      def biStreamingCompressed(oe: Stream[F, E]): Stream[F, E]
+      def biStreamingCompressed(oe: Stream[F, E]): F[Stream[F, E]]
     }
 
     @service(AvroWithSchema) trait AvroWithSchemaRPCService[F[_]] {
       def unaryWithSchema(a: A): F[C]
-      def biStreamingWithSchema(oe: Stream[F, E]): Stream[F, E]
+      def biStreamingWithSchema(oe: Stream[F, E]): F[Stream[F, E]]
     }
 
     @service(AvroWithSchema, Gzip) trait CompressedAvroWithSchemaRPCService[F[_]] {
       def unaryCompressedWithSchema(a: A): F[C]
-      def biStreamingCompressedWithSchema(oe: Stream[F, E]): Stream[F, E]
+      def biStreamingCompressedWithSchema(oe: Stream[F, E]): F[Stream[F, E]]
     }
 
     // this companion objects are here to make sure @service supports
@@ -89,23 +90,26 @@ object Utils extends CommonUtils {
 
         def unaryCompressedWithSchema(a: A): F[C] = unaryCompressed(a)
 
-        def serverStreaming(b: B): Stream[F, C] = {
+        def serverStreaming(b: B): F[Stream[F, C]] = {
           debug(s"[fs2 - SERVER] b -> $b")
-          Stream.fromIterator(cList.iterator)
+          Stream.fromIterator(cList.iterator).pure[F]
         }
 
-        def serverStreamingWithError(e: E): Stream[F, C] = e.foo match {
-          case "SE" =>
-            Stream.raiseError(Status.INVALID_ARGUMENT.withDescription(e.foo).asException)
-          case "SRE" =>
-            Stream.raiseError(Status.INVALID_ARGUMENT.withDescription(e.foo).asRuntimeException)
-          case "RTE" =>
-            Stream.raiseError(new IllegalArgumentException(e.foo))
-          case _ =>
-            sys.error(e.foo)
+        def serverStreamingWithError(e: E): F[Stream[F, C]] = {
+          val stream: Stream[F, C] = e.foo match {
+            case "SE" =>
+              Stream.raiseError(Status.INVALID_ARGUMENT.withDescription(e.foo).asException)
+            case "SRE" =>
+              Stream.raiseError(Status.INVALID_ARGUMENT.withDescription(e.foo).asRuntimeException)
+            case "RTE" =>
+              Stream.raiseError(new IllegalArgumentException(e.foo))
+            case _ =>
+              sys.error(e.foo)
+          }
+          stream.pure[F]
         }
 
-        def serverStreamingCompressed(b: B): Stream[F, C] = serverStreaming(b)
+        def serverStreamingCompressed(b: B): F[Stream[F, C]] = serverStreaming(b)
 
         def clientStreaming(oa: Stream[F, A]): F[D] =
           oa.compile.fold(D(0)) {
@@ -116,17 +120,18 @@ object Utils extends CommonUtils {
 
         def clientStreamingCompressed(oa: Stream[F, A]): F[D] = clientStreaming(oa)
 
-        def biStreaming(oe: Stream[F, E]): Stream[F, E] =
+        def biStreaming(oe: Stream[F, E]): F[Stream[F, E]] =
           oe.flatMap { e: E =>
-            save(e)
-            Stream.fromIterator(eList.iterator)
-          }
+              save(e)
+              Stream.fromIterator(eList.iterator)
+            }
+            .pure[F]
 
-        def biStreamingWithSchema(oe: Stream[F, E]): Stream[F, E] = biStreaming(oe)
+        def biStreamingWithSchema(oe: Stream[F, E]): F[Stream[F, E]] = biStreaming(oe)
 
-        def biStreamingCompressed(oe: Stream[F, E]): Stream[F, E] = biStreaming(oe)
+        def biStreamingCompressed(oe: Stream[F, E]): F[Stream[F, E]] = biStreaming(oe)
 
-        def biStreamingCompressedWithSchema(oe: Stream[F, E]): Stream[F, E] =
+        def biStreamingCompressedWithSchema(oe: Stream[F, E]): F[Stream[F, E]] =
           biStreamingCompressed(oe)
 
         def save(e: E): E = e // do something else with e?
