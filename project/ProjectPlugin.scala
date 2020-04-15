@@ -1,6 +1,5 @@
 import microsites.MicrositesPlugin.autoImport._
 import sbt.Keys._
-import sbt.ScriptedPlugin.autoImport._
 import sbt._
 import sbtorgpolicies.OrgPoliciesPlugin
 import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
