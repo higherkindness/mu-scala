@@ -20,7 +20,7 @@ import monix.execution.Scheduler
 import monix.reactive.Observable
 
 import cats.data.Kleisli
-import cats.effect.{ConcurrentEffect, Effect}
+import cats.effect.Effect
 import higherkindness.mu.rpc.internal.server._
 import higherkindness.mu.rpc.protocol.CompressionType
 import io.grpc._
@@ -30,9 +30,7 @@ import natchez.{EntryPoint, Span}
 
 object handlers {
 
-  // TODO check whether these context bounds are correct
-
-  def clientStreaming[F[_]: ConcurrentEffect, Req, Res](
+  def clientStreaming[F[_]: Effect, Req, Res](
       f: Observable[Req] => F[Res],
       compressionType: CompressionType
   )(implicit S: Scheduler): ServerCallHandler[Req, Res] =
@@ -56,7 +54,7 @@ object handlers {
       methods.bidiStreamingMethod[F, Req, Res](f, compressionType)
     )
 
-  def tracingClientStreaming[F[_]: ConcurrentEffect, Req, Res](
+  def tracingClientStreaming[F[_]: Effect, Req, Res](
       f: Observable[Req] => Kleisli[F, Span[F], Res],
       descriptor: MethodDescriptor[Req, Res],
       entrypoint: EntryPoint[F],

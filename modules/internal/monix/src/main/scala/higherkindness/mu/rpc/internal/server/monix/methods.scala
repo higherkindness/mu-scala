@@ -20,7 +20,7 @@ import monix.execution.{Ack, Scheduler}
 import monix.reactive.{Observable, Observer, Pipe}
 import monix.reactive.observers.Subscriber
 
-import cats.effect.{ConcurrentEffect, Effect}
+import cats.effect.Effect
 import higherkindness.mu.rpc.internal.server._
 import higherkindness.mu.rpc.protocol.CompressionType
 import io.grpc.stub.ServerCalls.{BidiStreamingMethod, ClientStreamingMethod, ServerStreamingMethod}
@@ -32,7 +32,7 @@ object methods {
 
   import higherkindness.mu.rpc.internal.converters._
 
-  def clientStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
+  def clientStreamingMethod[F[_]: Effect, Req, Res](
       f: Observable[Req] => F[Res],
       compressionType: CompressionType
   )(implicit S: Scheduler): ClientStreamingMethod[Req, Res] =
