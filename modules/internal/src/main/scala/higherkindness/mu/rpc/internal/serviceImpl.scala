@@ -437,10 +437,17 @@ object serviceImpl {
             List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit ..$classImplicits): _root_.cats.effect.Resource[F, $serviceName[$F]] =
-          _root_.cats.effect.Resource.make {
+          _root_.cats.effect.Resource.make(
             new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
-          }(channel => CE.void(CE.delay(channel.shutdown()))).flatMap(ch =>
-          _root_.cats.effect.Resource.make[F, $serviceName[$F]](CE.delay(new $Client[$F](ch, options)))($anonymousParam => CE.unit))
+          )(channel =>
+            CE.void(CE.delay(channel.shutdown()))
+          ).flatMap(ch =>
+            _root_.cats.effect.Resource.make[F, $serviceName[$F]](
+              CE.delay(new $Client[$F](ch, options))
+            )($anonymousParam =>
+              CE.unit
+            )
+          )
         """.supressWarts("DefaultArguments")
 
       val clientFromChannel: DefDef =
@@ -448,9 +455,16 @@ object serviceImpl {
         def clientFromChannel[$F_](
           channel: $F[_root_.io.grpc.ManagedChannel],
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-        )(implicit ..$classImplicits): _root_.cats.effect.Resource[$F, $serviceName[$F]] = _root_.cats.effect.Resource.make(channel)(channel =>
-        CE.void(CE.delay(channel.shutdown()))).flatMap(ch =>
-        _root_.cats.effect.Resource.make[$F, $serviceName[$F]](CE.delay(new $Client[$F](ch, options)))($anonymousParam => CE.unit))
+        )(implicit ..$classImplicits): _root_.cats.effect.Resource[$F, $serviceName[$F]] =
+          _root_.cats.effect.Resource.make(channel)(channel =>
+            CE.void(CE.delay(channel.shutdown()))
+          ).flatMap(ch =>
+            _root_.cats.effect.Resource.make[$F, $serviceName[$F]](
+              CE.delay(new $Client[$F](ch, options))
+            )($anonymousParam =>
+              CE.unit
+            )
+          )
         """.supressWarts("DefaultArguments")
 
       val unsafeClient: DefDef =
@@ -497,13 +511,56 @@ object serviceImpl {
             List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit ..$classImplicits): _root_.cats.effect.Resource[F, $serviceName[$kleisliFSpanF]] =
-          _root_.cats.effect.Resource.make {
+          _root_.cats.effect.Resource.make(
             new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
-          }(channel => CE.void(CE.delay(channel.shutdown()))).flatMap(ch =>
-          _root_.cats.effect.Resource.make[F, $serviceName[$kleisliFSpanF]](CE.delay(new $TracingClient[$F](ch, options)))($anonymousParam => CE.unit))
+          )(channel =>
+            CE.void(CE.delay(channel.shutdown()))
+          ).flatMap(ch =>
+            _root_.cats.effect.Resource.make[F, $serviceName[$kleisliFSpanF]](
+              CE.delay(new $TracingClient[$F](ch, options))
+            )($anonymousParam =>
+              CE.unit
+            )
+          )
         """.supressWarts("DefaultArguments")
 
-      // TODO tracingClientFromChannel, unsafeTracingClient, unsafeTracingClientFromChannel
+      val tracingClientFromChannel: DefDef =
+        q"""
+        def tracingClientFromChannel[$F_](
+          channel: $F[_root_.io.grpc.ManagedChannel],
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): _root_.cats.effect.Resource[$F, $serviceName[$kleisliFSpanF]] =
+          _root_.cats.effect.Resource.make(channel)(channel =>
+            CE.void(CE.delay(channel.shutdown()))
+          ).flatMap(ch =>
+            _root_.cats.effect.Resource.make[$F, $serviceName[$kleisliFSpanF]](
+              CE.delay(new $TracingClient[$F](ch, options))
+            )($anonymousParam =>
+              CE.unit
+            )
+          )
+        """.supressWarts("DefaultArguments")
+
+      val unsafeTracingClient: DefDef =
+        q"""
+        def unsafeTracingClient[$F_](
+          channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
+          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
+            List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): $serviceName[$kleisliFSpanF] = {
+          val managedChannelInterpreter =
+            new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).unsafeBuild
+          new $TracingClient[$F](managedChannelInterpreter, options)
+        }""".supressWarts("DefaultArguments")
+
+      val unsafeTracingClientFromChannel: DefDef =
+        q"""
+        def unsafeTracingClientFromChannel[$F_](
+          channel: _root_.io.grpc.Channel,
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): $serviceName[$kleisliFSpanF] = new $TracingClient[$F](channel, options)
+        """.supressWarts("DefaultArguments")
 
       private def lit(x: Any): Literal = Literal(Constant(x.toString))
 
@@ -1075,7 +1132,10 @@ object serviceImpl {
               service.unsafeClient,
               service.unsafeClientFromChannel,
               service.tracingClientClass,
-              service.tracingClient
+              service.tracingClient,
+              service.tracingClientFromChannel,
+              service.unsafeTracingClient,
+              service.unsafeTracingClientFromChannel
             ) ++ service.http
           )
         )
