@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.internal.client
+package higherkindness.mu.rpc.internal.client.monix
+
+import monix.reactive.Observable
+import monix.execution.Scheduler
+import monix.execution.rstreams.Subscription
 
 import cats.effect.{Async, Sync}
 import cats.Applicative
@@ -22,15 +26,13 @@ import cats.data.Kleisli
 import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import higherkindness.mu.rpc.internal.client._
 import io.grpc.stub.{ClientCalls, StreamObserver}
 import io.grpc.{CallOptions, Channel, Metadata, MethodDescriptor}
-import monix.reactive.Observable
-import monix.execution.Scheduler
-import monix.execution.rstreams.Subscription
-import org.reactivestreams.{Publisher, Subscriber}
 import natchez.Span
+import org.reactivestreams.{Publisher, Subscriber}
 
-object monixCalls {
+object calls {
 
   import higherkindness.mu.rpc.internal.converters._
 

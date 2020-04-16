@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.internal.client
+package higherkindness.mu.rpc.internal.client.fs2
 
+import fs2.Stream
+
+import cats.effect.ConcurrentEffect
 import cats.data.Kleisli
 import cats.effect.ConcurrentEffect
 import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
-import cats.effect.ConcurrentEffect
-import fs2.Stream
+import higherkindness.mu.rpc.internal.client.tracingKernelToHeaders
 import io.grpc.{CallOptions, Channel, Metadata, MethodDescriptor}
 import org.lyranthe.fs2_grpc.java_runtime.client.Fs2ClientCall
 import natchez.Span
 
-object fs2Calls {
+object calls {
 
   def unary[F[_]: ConcurrentEffect, Req, Res](
       request: Req,

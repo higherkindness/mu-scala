@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.internal.server
+package higherkindness.mu.rpc.internal.server.monix
 
-import higherkindness.mu.rpc.protocol.CompressionType
+import monix.execution.Scheduler
+import monix.reactive.Observable
+
 import cats.data.Kleisli
 import cats.effect.{ConcurrentEffect, Effect}
+import higherkindness.mu.rpc.internal.server._
+import higherkindness.mu.rpc.protocol.CompressionType
 import io.grpc._
 import io.grpc.ServerCall.Listener
 import io.grpc.stub.ServerCalls
-import monix.execution.Scheduler
-import monix.reactive.Observable
 import natchez.{EntryPoint, Span}
 
-object monixHandlers {
+object handlers {
 
   // TODO check whether these context bounds are correct
 
@@ -35,7 +37,7 @@ object monixHandlers {
       compressionType: CompressionType
   )(implicit S: Scheduler): ServerCallHandler[Req, Res] =
     ServerCalls.asyncClientStreamingCall(
-      monixMethods.clientStreamingMethod[F, Req, Res](f, compressionType)
+      methods.clientStreamingMethod[F, Req, Res](f, compressionType)
     )
 
   def serverStreaming[F[_]: Effect, Req, Res](
@@ -43,7 +45,7 @@ object monixHandlers {
       compressionType: CompressionType
   )(implicit S: Scheduler): ServerCallHandler[Req, Res] =
     ServerCalls.asyncServerStreamingCall(
-      monixMethods.serverStreamingMethod[F, Req, Res](f, compressionType)
+      methods.serverStreamingMethod[F, Req, Res](f, compressionType)
     )
 
   def bidiStreaming[F[_]: Effect, Req, Res](
@@ -51,7 +53,7 @@ object monixHandlers {
       compressionType: CompressionType
   )(implicit S: Scheduler): ServerCallHandler[Req, Res] =
     ServerCalls.asyncBidiStreamingCall(
-      monixMethods.bidiStreamingMethod[F, Req, Res](f, compressionType)
+      methods.bidiStreamingMethod[F, Req, Res](f, compressionType)
     )
 
   def tracingClientStreaming[F[_]: ConcurrentEffect, Req, Res](
@@ -69,7 +71,7 @@ object monixHandlers {
         val spanResource =
           entrypoint.continueOrElseRoot(descriptor.getFullMethodName(), kernel)
 
-        val method = monixMethods.clientStreamingMethod[F, Req, Res](
+        val method = methods.clientStreamingMethod[F, Req, Res](
           req => spanResource.use(span => f(req).run(span)),
           compressionType
         )
@@ -93,7 +95,7 @@ object monixHandlers {
         val spanResource =
           entrypoint.continueOrElseRoot(descriptor.getFullMethodName(), kernel)
 
-        val method = monixMethods.serverStreamingMethod[F, Req, Res](
+        val method = methods.serverStreamingMethod[F, Req, Res](
           req => spanResource.use(span => f(req).run(span)),
           compressionType
         )
@@ -117,7 +119,7 @@ object monixHandlers {
         val spanResource =
           entrypoint.continueOrElseRoot(descriptor.getFullMethodName(), kernel)
 
-        val method = monixMethods.bidiStreamingMethod[F, Req, Res](
+        val method = methods.bidiStreamingMethod[F, Req, Res](
           req => spanResource.use(span => f(req).run(span)),
           compressionType
         )

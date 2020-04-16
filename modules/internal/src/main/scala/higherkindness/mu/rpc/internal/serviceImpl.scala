@@ -542,9 +542,9 @@ object serviceImpl {
           q"_root_.higherkindness.mu.rpc.protocol.${TermName(compressionType.toString)}"
 
         private val clientCallsImpl = prevalentStreamingTarget match {
-          case _: Fs2StreamTpe       => q"_root_.higherkindness.mu.rpc.internal.client.fs2Calls"
-          case _: MonixObservableTpe => q"_root_.higherkindness.mu.rpc.internal.client.monixCalls"
-          case _                     => q"_root_.higherkindness.mu.rpc.internal.client.unaryCalls"
+          case _: Fs2StreamTpe       => q"_root_.higherkindness.mu.rpc.internal.client.fs2.calls"
+          case _: MonixObservableTpe => q"_root_.higherkindness.mu.rpc.internal.client.monix.calls"
+          case _                     => q"_root_.higherkindness.mu.rpc.internal.client.calls"
         }
 
         private val streamingMethodType = {
@@ -687,14 +687,14 @@ object serviceImpl {
         val serverCallHandler: Tree = (streamingType, prevalentStreamingTarget) match {
           case (Some(RequestStreaming), _: Fs2StreamTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.fs2Handlers.clientStreaming[$F, $reqElemType, $respElemType](
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.clientStreaming[$F, $reqElemType, $respElemType](
               { (req: _root_.fs2.Stream[$F, $reqElemType], $anonymousParam) => algebra.$name(req) },
               $compressionTypeTree
             )
             """
           case (Some(RequestStreaming), _: MonixObservableTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.monixHandlers.clientStreaming[$F, $reqElemType, $respElemType](
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.clientStreaming[$F, $reqElemType, $respElemType](
               algebra.$name,
               $compressionTypeTree
             )
@@ -702,14 +702,14 @@ object serviceImpl {
 
           case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.fs2Handlers.serverStreaming[$F, $reqElemType, $respElemType](
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.serverStreaming[$F, $reqElemType, $respElemType](
               { (req: $reqType, $anonymousParam) => algebra.$name(req) },
               $compressionTypeTree
             )
             """
           case (Some(ResponseStreaming), _: MonixObservableTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.monixHandlers.serverStreaming[$F, $reqElemType, $respElemType](
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.serverStreaming[$F, $reqElemType, $respElemType](
               algebra.$name,
               $compressionTypeTree
             )
@@ -717,21 +717,20 @@ object serviceImpl {
 
           case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.fs2Handlers.bidiStreaming[$F, $reqElemType, $respElemType](
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.bidiStreaming[$F, $reqElemType, $respElemType](
               { (req: _root_.fs2.Stream[$F, $reqElemType], $anonymousParam) => algebra.$name(req) },
               $compressionTypeTree
             )
             """
           case (Some(BidirectionalStreaming), _: MonixObservableTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.monixHandlers.bidiStreaming[$F, $reqElemType, $respElemType](
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.bidiStreaming[$F, $reqElemType, $respElemType](
               algebra.$name,
               $compressionTypeTree
             )
             """
 
           case (None, _) =>
-            // TODO update this to be a handler
             q"""
             _root_.higherkindness.mu.rpc.internal.server.handlers.unary[$F, $reqElemType, $respElemType](
               algebra.$name,
@@ -751,7 +750,7 @@ object serviceImpl {
         val tracingServerCallHandler: Tree = (streamingType, prevalentStreamingTarget) match {
           case (Some(RequestStreaming), _: Fs2StreamTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.fs2Handlers.tracingClientStreaming(
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.tracingClientStreaming(
               algebra.$name _,
               $methodDescriptorName.$methodDescriptorValName,
               entrypoint,
@@ -760,7 +759,7 @@ object serviceImpl {
             """
           case (Some(RequestStreaming), _: MonixObservableTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.monixHandlers.tracingClientStreaming(
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.tracingClientStreaming(
               algebra.$name _,
               $methodDescriptorName.$methodDescriptorValName,
               entrypoint,
@@ -769,7 +768,7 @@ object serviceImpl {
             """
           case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.fs2Handlers.tracingServerStreaming(
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.tracingServerStreaming(
               algebra.$name _,
               $methodDescriptorName.$methodDescriptorValName,
               entrypoint,
@@ -778,7 +777,7 @@ object serviceImpl {
             """
           case (Some(ResponseStreaming), _: MonixObservableTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.monixHandlers.tracingServerStreaming(
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.tracingServerStreaming(
               algebra.$name _,
               $methodDescriptorName.$methodDescriptorValName,
               entrypoint,
@@ -787,7 +786,7 @@ object serviceImpl {
             """
           case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.fs2Handlers.tracingBidiStreaming(
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.tracingBidiStreaming(
               algebra.$name _,
               $methodDescriptorName.$methodDescriptorValName,
               entrypoint,
@@ -796,7 +795,7 @@ object serviceImpl {
             """
           case (Some(BidirectionalStreaming), _: MonixObservableTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.monixHandlers.tracingBidiStreaming(
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.tracingBidiStreaming(
               algebra.$name _,
               $methodDescriptorName.$methodDescriptorValName,
               entrypoint,

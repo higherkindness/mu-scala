@@ -23,7 +23,7 @@ import io.grpc.stub.ClientCalls
 import io.grpc.{CallOptions, Channel, Metadata, MethodDescriptor}
 import natchez.Span
 
-object unaryCalls {
+object calls {
 
   def unary[F[_]: Effect: ContextShift, Req, Res](
       request: Req,

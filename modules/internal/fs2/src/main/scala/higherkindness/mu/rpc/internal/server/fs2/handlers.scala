@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.internal.server
+package higherkindness.mu.rpc.internal.server.fs2
 
 import fs2.Stream
+
 import cats.data.Kleisli
 import cats.syntax.functor._
 import cats.effect.ConcurrentEffect
 import io.grpc.{Metadata, MethodDescriptor, ServerCallHandler}
+import higherkindness.mu.rpc.internal.server.extractTracingKernel
+import higherkindness.mu.rpc.protocol.{CompressionType, Gzip}
+import natchez.{EntryPoint, Span}
 import org.lyranthe.fs2_grpc.java_runtime.server.{
   Fs2ServerCallHandler,
   GzipCompressor,
   ServerCallOptions
 }
-import higherkindness.mu.rpc.protocol.{CompressionType, Gzip}
-import natchez.{EntryPoint, Span}
 
-object fs2Handlers {
+object handlers {
 
   private def serverCallOptions(compressionType: CompressionType): ServerCallOptions =
     compressionType match {
