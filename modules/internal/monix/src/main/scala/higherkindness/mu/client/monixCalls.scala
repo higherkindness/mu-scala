@@ -14,45 +14,38 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
-package internal
-package client
+package higherkindness.mu.rpc.internal.client
 
-import cats.effect.Async
+import cats.effect.{Async, Sync}
 import cats.Applicative
+import cats.data.Kleisli
 import cats.syntax.applicative._
+import cats.syntax.flatMap._
+import cats.syntax.functor._
 import io.grpc.stub.{ClientCalls, StreamObserver}
-import io.grpc.{CallOptions, Channel, MethodDescriptor}
+import io.grpc.{CallOptions, Channel, Metadata, MethodDescriptor}
 import monix.reactive.Observable
 import monix.execution.Scheduler
 import monix.execution.rstreams.Subscription
 import org.reactivestreams.{Publisher, Subscriber}
+import natchez.Span
 
 object monixCalls {
 
   import higherkindness.mu.rpc.internal.converters._
 
-  def serverStreaming[F[_]: Applicative, Req, Res](
-      request: Req,
-      descriptor: MethodDescriptor[Req, Res],
-      channel: Channel,
-      options: CallOptions
-  ): F[Observable[Res]] =
-    Observable
-      .fromReactivePublisher(createPublisher(request, descriptor, channel, options))
-      .pure[F]
-
   def clientStreaming[F[_]: Async, Req, Res](
       input: Observable[Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions
+      options: CallOptions,
+      extraHeaders: Metadata = new Metadata()
   )(implicit S: Scheduler): F[Res] =
     input
       .liftByOperator(
         StreamObserver2MonixOperator((outputObserver: StreamObserver[Res]) =>
           ClientCalls.asyncClientStreamingCall(
-            channel.newCall(descriptor, options),
+            new HeaderAttachingClientCall(channel.newCall(descriptor, options), extraHeaders),
             outputObserver
           )
         )
@@ -60,39 +53,116 @@ object monixCalls {
       .firstL
       .toAsync[F]
 
+  def serverStreaming[F[_]: Applicative, Req, Res](
+      request: Req,
+      descriptor: MethodDescriptor[Req, Res],
+      channel: Channel,
+      options: CallOptions,
+      extraHeaders: Metadata = new Metadata()
+  ): F[Observable[Res]] =
+    _serverStreaming[Req, Res](request, descriptor, channel, options, extraHeaders)
+      .pure[F]
+
   def bidiStreaming[F[_]: Applicative, Req, Res](
       input: Observable[Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions
+      options: CallOptions,
+      extraHeaders: Metadata = new Metadata()
   ): F[Observable[Res]] =
-    input
-      .liftByOperator(
-        StreamObserver2MonixOperator((outputObserver: StreamObserver[Res]) =>
-          ClientCalls.asyncBidiStreamingCall(
-            channel.newCall(descriptor, options),
-            outputObserver
-          )
+    _bidiStreaming[Req, Res](input, descriptor, channel, options, extraHeaders)
+      .pure[F]
+
+  def tracingClientStreaming[F[_]: Async, Req, Res](
+      input: Observable[Req],
+      descriptor: MethodDescriptor[Req, Res],
+      channel: Channel,
+      options: CallOptions
+  )(implicit S: Scheduler): Kleisli[F, Span[F], Res] =
+    Kleisli[F, Span[F], Res] { parentSpan =>
+      parentSpan.span(descriptor.getFullMethodName()).use { span =>
+        span.kernel.flatMap { kernel =>
+          val headers = tracingKernelToHeaders(kernel)
+          clientStreaming[F, Req, Res](input, descriptor, channel, options, headers)
+        }
+      }
+    }
+
+  def tracingServerStreaming[F[_]: Sync, Req, Res](
+      request: Req,
+      descriptor: MethodDescriptor[Req, Res],
+      channel: Channel,
+      options: CallOptions
+  ): Kleisli[F, Span[F], Observable[Res]] =
+    Kleisli[F, Span[F], Observable[Res]] { parentSpan =>
+      parentSpan.span(descriptor.getFullMethodName()).use { span =>
+        span.kernel.map { kernel =>
+          val headers = tracingKernelToHeaders(kernel)
+          _serverStreaming[Req, Res](request, descriptor, channel, options, headers)
+        }
+      }
+    }
+
+  def tracingBidiStreaming[F[_]: Sync, Req, Res](
+      input: Observable[Req],
+      descriptor: MethodDescriptor[Req, Res],
+      channel: Channel,
+      options: CallOptions
+  ): Kleisli[F, Span[F], Observable[Res]] =
+    Kleisli[F, Span[F], Observable[Res]] { parentSpan =>
+      parentSpan.span(descriptor.getFullMethodName()).use { span =>
+        span.kernel.map { kernel =>
+          val headers = tracingKernelToHeaders(kernel)
+          _bidiStreaming[Req, Res](input, descriptor, channel, options, headers)
+        }
+      }
+    }
+
+  private def _serverStreaming[Req, Res](
+      request: Req,
+      descriptor: MethodDescriptor[Req, Res],
+      channel: Channel,
+      options: CallOptions,
+      extraHeaders: Metadata
+  ): Observable[Res] =
+    Observable.fromReactivePublisher(
+      createPublisher(request, descriptor, channel, options, extraHeaders)
+    )
+
+  private def _bidiStreaming[Req, Res](
+      input: Observable[Req],
+      descriptor: MethodDescriptor[Req, Res],
+      channel: Channel,
+      options: CallOptions,
+      extraHeaders: Metadata
+  ): Observable[Res] =
+    input.liftByOperator(
+      StreamObserver2MonixOperator((outputObserver: StreamObserver[Res]) =>
+        ClientCalls.asyncBidiStreamingCall(
+          new HeaderAttachingClientCall(channel.newCall(descriptor, options), extraHeaders),
+          outputObserver
         )
       )
-      .pure[F]
+    )
 
   private[this] def createPublisher[Res, Req](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
-      options: CallOptions
+      options: CallOptions,
+      extraHeaders: Metadata
   ): Publisher[Res] = {
     new Publisher[Res] {
       override def subscribe(s: Subscriber[_ >: Res]): Unit = {
         val subscriber: Subscriber[Res] = s.asInstanceOf[Subscriber[Res]]
         s.onSubscribe(Subscription.empty)
         ClientCalls.asyncServerStreamingCall(
-          channel.newCall[Req, Res](descriptor, options),
+          new HeaderAttachingClientCall(channel.newCall(descriptor, options), extraHeaders),
           request,
           subscriber.toStreamObserver
         )
       }
     }
   }
+
 }

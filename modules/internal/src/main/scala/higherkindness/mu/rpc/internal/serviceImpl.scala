@@ -649,7 +649,7 @@ object serviceImpl {
             // def foo(input: Observable[Req]): Kleisli[F, Span[F], Resp]
             q"""
             def $name(input: $reqType): $kleisliFSpanFResp =
-              throw new _root_.java.lang.UnsupportedOperationException("TODO tracing of Monix streaming endpoints")
+              ${clientCallMethodFor("tracingClientStreaming")}
             """
           case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
             // def foo(input: Req): Kleisli[F, Span[F], Stream[Kleisli[F, Span[F], *], Resp]]
@@ -662,7 +662,7 @@ object serviceImpl {
             // def foo(input: Req): Kleisli[F, Span[F], Observable[Resp]]
             q"""
             def $name(input: $reqType): ${kleisliFSpanFB(unwrappedRespType)} =
-              throw new _root_.java.lang.UnsupportedOperationException("TODO tracing of Monix streaming endpoints")
+              ${clientCallMethodFor("tracingServerStreaming")}
             """
           case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
             // def foo(input: Stream[Kleisli[F, Span[F], *], Req]): Stream[Kleisli[F, Span[F], *], Resp]
@@ -675,7 +675,7 @@ object serviceImpl {
             // def foo(input: Observable[Req]): Kleisli[F, Span[F], Observable[Resp]]
             q"""
             def $name(input: $reqType): ${kleisliFSpanFB(unwrappedRespType)} =
-              throw new _root_.java.lang.UnsupportedOperationException("TODO tracing of Monix streaming endpoints")
+              ${clientCallMethodFor("tracingBidiStreaming")}
             """
           case _ =>
             c.abort(
