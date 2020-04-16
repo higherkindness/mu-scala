@@ -687,7 +687,7 @@ object serviceImpl {
         val serverCallHandler: Tree = (streamingType, prevalentStreamingTarget) match {
           case (Some(RequestStreaming), _: Fs2StreamTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.fs2Calls.clientStreamingMethod[$F, $reqElemType, $respElemType](
+            _root_.higherkindness.mu.rpc.internal.server.fs2Handlers.clientStreaming[$F, $reqElemType, $respElemType](
               { (req: _root_.fs2.Stream[$F, $reqElemType], $anonymousParam) => algebra.$name(req) },
               $compressionTypeTree
             )
@@ -702,7 +702,7 @@ object serviceImpl {
 
           case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.fs2Calls.serverStreamingMethod[$F, $reqElemType, $respElemType](
+            _root_.higherkindness.mu.rpc.internal.server.fs2Handlers.serverStreaming[$F, $reqElemType, $respElemType](
               { (req: $reqType, $anonymousParam) => algebra.$name(req) },
               $compressionTypeTree
             )
@@ -717,7 +717,7 @@ object serviceImpl {
 
           case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.fs2Calls.bidiStreamingMethod[$F, $reqElemType, $respElemType](
+            _root_.higherkindness.mu.rpc.internal.server.fs2Handlers.bidiStreaming[$F, $reqElemType, $respElemType](
               { (req: _root_.fs2.Stream[$F, $reqElemType], $anonymousParam) => algebra.$name(req) },
               $compressionTypeTree
             )
@@ -733,11 +733,9 @@ object serviceImpl {
           case (None, _) =>
             // TODO update this to be a handler
             q"""
-            _root_.io.grpc.stub.ServerCalls.asyncUnaryCall(
-              _root_.higherkindness.mu.rpc.internal.server.unaryCalls.unaryMethod[$F, $reqElemType, $respElemType](
-                algebra.$name,
-                $compressionTypeTree
-              )
+            _root_.higherkindness.mu.rpc.internal.server.handlers.unary[$F, $reqElemType, $respElemType](
+              algebra.$name,
+              $compressionTypeTree
             )
             """
           case _ =>
@@ -753,7 +751,7 @@ object serviceImpl {
         val tracingServerCallHandler: Tree = (streamingType, prevalentStreamingTarget) match {
           case (Some(RequestStreaming), _: Fs2StreamTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.fs2Calls.tracingClientStreamingMethod(
+            _root_.higherkindness.mu.rpc.internal.server.fs2Handlers.tracingClientStreaming(
               algebra.$name _,
               $methodDescriptorName.$methodDescriptorValName,
               entrypoint,
@@ -771,7 +769,7 @@ object serviceImpl {
             """
           case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.fs2Calls.tracingServerStreamingMethod(
+            _root_.higherkindness.mu.rpc.internal.server.fs2Handlers.tracingServerStreaming(
               algebra.$name _,
               $methodDescriptorName.$methodDescriptorValName,
               entrypoint,
@@ -789,7 +787,7 @@ object serviceImpl {
             """
           case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
             q"""
-            _root_.higherkindness.mu.rpc.internal.server.fs2Calls.tracingBidiStreamingMethod(
+            _root_.higherkindness.mu.rpc.internal.server.fs2Handlers.tracingBidiStreaming(
               algebra.$name _,
               $methodDescriptorName.$methodDescriptorValName,
               entrypoint,
@@ -807,7 +805,7 @@ object serviceImpl {
             """
           case (None, _) =>
             q"""
-            new _root_.higherkindness.mu.rpc.internal.server.TracingUnaryServerCallHandler[$F, $reqElemType, $respElemType](
+            _root_.higherkindness.mu.rpc.internal.server.handlers.tracingUnary[$F, $reqElemType, $respElemType](
               algebra.$name,
               $methodDescriptorName.$methodDescriptorValName,
               entrypoint,
