@@ -26,9 +26,9 @@ import natchez.{EntryPoint, Span}
 
 class TracingUnaryServerCallHandler[F[_]: Effect, Req, Res](
     f: Req => Kleisli[F, Span[F], Res],
-    compressionType: CompressionType,
     methodDescriptor: MethodDescriptor[Req, Res],
-    entrypoint: EntryPoint[F]
+    entrypoint: EntryPoint[F],
+    compressionType: CompressionType
 ) extends ServerCallHandler[Req, Res] {
 
   def startCall(

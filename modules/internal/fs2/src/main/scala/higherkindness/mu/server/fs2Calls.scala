@@ -78,8 +78,8 @@ object fs2Calls {
 
   def tracingClientStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: StreamOfTraced[F, Req] => Traced[F, Res],
-      entrypoint: EntryPoint[F],
       descriptor: MethodDescriptor[Req, Res],
+      entrypoint: EntryPoint[F],
       compressionType: CompressionType
   ): ServerCallHandler[Req, Res] =
     clientStreamingMethod[F, Req, Res](
@@ -95,8 +95,8 @@ object fs2Calls {
 
   def tracingServerStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: Req => Traced[F, StreamOfTraced[F, Res]],
-      entrypoint: EntryPoint[F],
       descriptor: MethodDescriptor[Req, Res],
+      entrypoint: EntryPoint[F],
       compressionType: CompressionType
   ): ServerCallHandler[Req, Res] =
     serverStreamingMethod[F, Req, Res](
@@ -115,8 +115,8 @@ object fs2Calls {
 
   def tracingBidiStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
       f: StreamOfTraced[F, Req] => Traced[F, StreamOfTraced[F, Res]],
-      entrypoint: EntryPoint[F],
       descriptor: MethodDescriptor[Req, Res],
+      entrypoint: EntryPoint[F],
       compressionType: CompressionType
   ): ServerCallHandler[Req, Res] =
     bidiStreamingMethod[F, Req, Res](

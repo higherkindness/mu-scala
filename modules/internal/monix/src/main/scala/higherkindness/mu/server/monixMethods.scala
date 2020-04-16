@@ -26,7 +26,7 @@ import higherkindness.mu.rpc.protocol.CompressionType
 
 import scala.concurrent.Future
 
-object monixCalls {
+object monixMethods {
 
   import higherkindness.mu.rpc.internal.converters._
 
