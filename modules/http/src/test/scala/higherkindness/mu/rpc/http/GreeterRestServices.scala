@@ -63,12 +63,17 @@ class Fs2GreeterRestService[F[_]: Sync](
 
     case msg @ POST -> Root / "sayHelloAll" =>
       for {
-        request   <- msg.as[HelloRequest]
-        responses <- Ok(handler.sayHelloAll(request).asJsonEither)
+        request    <- msg.as[HelloRequest]
+        respStream <- handler.sayHelloAll(request)
+        responses  <- Ok(respStream.asJsonEither)
       } yield responses
 
     case msg @ POST -> Root / "sayHellosAll" =>
       val requests = msg.asStream[HelloRequest]
-      Ok(handler.sayHellosAll(requests).asJsonEither)
+      for {
+        respStream <- handler.sayHellosAll(requests)
+        responses  <- Ok(respStream.asJsonEither)
+      } yield responses
+
   }
 }

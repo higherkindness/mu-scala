@@ -28,15 +28,28 @@ object serviceImpl {
     import c.universe._
     import Flag._
 
-    abstract class TypeTypology(tpe: Tree, inner: Option[Tree]) extends Product with Serializable {
-      def getTpe: Tree           = tpe
-      def getInner: Option[Tree] = inner
-      def safeInner: Tree        = inner.getOrElse(tpe)
-      def safeType: Tree = tpe match {
-        case tq"${s @ _}[..$tpts]" if isStreaming => tpts.last
-        case other                                => other
-      }
-      def flatName: String = safeInner.toString
+    /**
+     * @originalType The original type written by the user.
+     *               For a request type, this will be e.g. `MyRequest` or `Stream[F, MyRequest]`
+     *               or `Observable[MyRequest]`.
+     *               For a response type, it will be inside an effect type,
+     *               e.g. `F[MyResponse]` or `F[Stream[F, MyResponse]]` or `F[Observable[MyResponse]]`
+     *
+     * @unwrappedType The type, with any surrounding effect type stripped.
+     *                e.g. `MyRequest` or `Stream[F, MyRequest]` or `Observable[MyRequest]`
+     *                For a request type, `unwrappedType` == `originalType`.
+     *
+     * @messageType The type of the message in a request/response.
+     *              For non-streaming request/responses, `messageType` == `unwrappedType`.
+     *              For streaming request/responses, `messageType` is the type of the stream elements.
+     *              e.g. if `originalType` is `F[Stream[F, MyResponse]]` then `messageType` is `MyResponse`.
+     */
+    abstract class TypeTypology(
+        val originalType: Tree,
+        val unwrappedType: Tree,
+        val messageType: Tree
+    ) extends Product
+        with Serializable {
 
       def isEmpty: Boolean = this match {
         case _: EmptyTpe => true
@@ -50,19 +63,88 @@ object serviceImpl {
       }
     }
     object TypeTypology {
-      def apply(t: Tree): TypeTypology = t match {
-        case tq"Observable[..$tpts]"                        => MonixObservableTpe(t, tpts.headOption)
-        case tq"_root_.monix.reactive.Observable[..$tpts]"  => MonixObservableTpe(t, tpts.headOption)
-        case tq"Stream[${carrier @ _}, ..$tpts]"            => Fs2StreamTpe(t, tpts.headOption)
-        case tq"_root_.fs2.Stream[${carrier @ _}, ..$tpts]" => Fs2StreamTpe(t, tpts.headOption)
-        case tq"Empty.type"                                 => EmptyTpe(t)
-        case tq"${carrier @ _}[..$tpts]"                    => UnaryTpe(t, tpts.headOption)
+
+      /**
+       * Extract the parts of a possibly-qualified type name or term name.
+       *
+       * {{{
+       * extractName(tq"Observable") == List("Observable")
+       * extractName(tq"monix.reactive.Observable") == List("monix", "reactive", "Observable")
+       * }}}
+       */
+      private def extractName(tree: Tree): List[String] = tree match {
+        case Ident(TermName(name))             => List(name)
+        case Ident(TypeName(name))             => List(name)
+        case Select(qualifier, TypeName(name)) => extractName(qualifier) :+ name
+        case Select(qualifier, TermName(name)) => extractName(qualifier) :+ name
+        case _                                 => Nil
       }
+
+      /**
+       * Is the given tree a type name or term name that matches the given
+       * fully-qualified name?
+       *
+       * {{{
+       * val fqn = List("_root_", "monix", "reactive", "Observable")
+       *
+       * possiblyQualifiedName(tq"Observable", fqn) == true
+       * possiblyQualifiedName(tq"reactive.Observable", fqn) == true
+       * possiblyQualifiedName(tq"monix.reactive.Observable", fqn) == true
+       * possiblyQualifiedName(tq"_root_.monix.reactive.Observable", fqn) == true
+       * possiblyQualifiedName(tq"com.mylibrary.Observable", fqn) == false
+       * }}}
+       */
+      private def possiblyQualifiedName(tree: Tree, fqn: List[String]): Boolean = {
+        val name = extractName(tree)
+        name.nonEmpty && fqn.endsWith(name)
+      }
+
+      private val monixObservableFQN = List("_root_", "monix", "reactive", "Observable")
+      private val fs2StreamFQN       = List("_root_", "fs2", "Stream")
+
+      def apply(t: Tree, responseType: Boolean, F: TypeName): TypeTypology = {
+        val unwrappedType: Tree = {
+          if (responseType) {
+            // Check that the type is wrapped in F as it should be, and unwrap it
+            t match {
+              case tq"$f[$tparam]" if f.toString == F.decodedName.toString => tparam
+              case _ =>
+                c.abort(
+                  t.pos,
+                  "Invalid RPC response type. All response types should have the shape F[...], where F[_] is the service's type parameter."
+                )
+            }
+          } else {
+            // Request type is not wrapped in F[...], so return it as-is
+            t
+          }
+        }
+
+        unwrappedType match {
+          case tq"$tpe[$elemType]" if possiblyQualifiedName(tpe, monixObservableFQN) =>
+            MonixObservableTpe(t, unwrappedType, elemType)
+          case tq"$tpe[$effectType, $elemType]"
+              if possiblyQualifiedName(tpe, fs2StreamFQN) && effectType.toString == F.decodedName.toString =>
+            Fs2StreamTpe(t, unwrappedType, elemType)
+          case tq"Empty.type" => EmptyTpe(t, unwrappedType, unwrappedType)
+          case other          => UnaryTpe(t, unwrappedType, unwrappedType)
+        }
+
+      }
+
     }
-    case class EmptyTpe(tpe: Tree)                                extends TypeTypology(tpe, None)
-    case class UnaryTpe(tpe: Tree, inner: Option[Tree])           extends TypeTypology(tpe, inner)
-    case class Fs2StreamTpe(tpe: Tree, inner: Option[Tree])       extends TypeTypology(tpe, inner)
-    case class MonixObservableTpe(tpe: Tree, inner: Option[Tree]) extends TypeTypology(tpe, inner)
+
+    case class EmptyTpe(orig: Tree, unwrapped: Tree, message: Tree)
+        extends TypeTypology(orig, unwrapped, message)
+
+    case class UnaryTpe(orig: Tree, unwrapped: Tree, message: Tree)
+        extends TypeTypology(orig, unwrapped, message)
+
+    case class Fs2StreamTpe(orig: Tree, unwrapped: Tree, streamElem: Tree)
+        extends TypeTypology(orig, unwrapped, streamElem)
+
+    case class MonixObservableTpe(orig: Tree, unwrapped: Tree, streamElem: Tree)
+        extends TypeTypology(orig, unwrapped, streamElem)
 
     case class Operation(name: TermName, request: TypeTypology, response: TypeTypology) {
 
@@ -76,9 +158,9 @@ object serviceImpl {
       }
 
       val validStreamingComb: Boolean = (request, response) match {
-        case (Fs2StreamTpe(_, _), MonixObservableTpe(_, _)) => false
-        case (MonixObservableTpe(_, _), Fs2StreamTpe(_, _)) => false
-        case _                                              => true
+        case (_: Fs2StreamTpe, _: MonixObservableTpe) => false
+        case (_: MonixObservableTpe, _: Fs2StreamTpe) => false
+        case _                                        => true
       }
 
       require(
@@ -168,6 +250,18 @@ object serviceImpl {
       val F_ : TypeDef = serviceDef.tparams.head
       val F: TypeName  = F_.name
 
+      require(
+        F_.tparams.length == 1,
+        s"@service-annotated class $serviceName's type parameter must be higher-kinded"
+      )
+
+      // Type lambda for Kleisli[F, Span[F], *]
+      private val kleisliFSpanF =
+        tq"({ type T[α] = _root_.cats.data.Kleisli[$F, _root_.natchez.Span[$F], α] })#T"
+
+      private def kleisliFSpanFB(B: Tree) =
+        tq"_root_.cats.data.Kleisli[$F, _root_.natchez.Span[$F], $B]"
+
       private val defs: List[Tree] = serviceDef.impl.body
 
       private val (rpcDefs, nonRpcDefs) = defs.collect {
@@ -197,7 +291,7 @@ object serviceImpl {
           case "None"          => ""
         }.getOrElse("")
 
-      private val fullyServiceName = namespacePrefix + serviceName.toString
+      private val fullServiceName = namespacePrefix + serviceName.toString
 
       private val methodNameStyle: MethodNameStyle =
         annotationParam(3, "methodNameStyle") {
@@ -210,11 +304,15 @@ object serviceImpl {
         params <- d.vparamss
         _ = require(params.length == 1, s"RPC call ${d.name} has more than one request parameter")
         p <- params.headOption.toList
-      } yield RpcRequest(
-        Operation(d.name, TypeTypology(p.tpt), TypeTypology(d.tpt)),
-        compressionType,
-        methodNameStyle
-      )
+      } yield {
+        val requestType  = TypeTypology(p.tpt, false, F)
+        val responseType = TypeTypology(d.tpt, true, F)
+        RpcRequest(
+          Operation(d.name, requestType, responseType),
+          compressionType,
+          methodNameStyle
+        )
+      }
 
       val imports: List[Tree] = defs.collect {
         case imp: Import => imp
@@ -264,9 +362,28 @@ object serviceImpl {
 
       val bindService: DefDef = q"""
         def bindService[$F_](implicit ..$bindImplicits): $F[_root_.io.grpc.ServerServiceDefinition] =
-          _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](${lit(
-        fullyServiceName
-      )}, ..$serverCallDescriptorsAndHandlers)
+          _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](
+            ${lit(fullServiceName)},
+            ..$serverCallDescriptorsAndHandlers
+          )
+        """
+
+      private val serverCallDescriptorsAndTracingHandlers: List[Tree] =
+        rpcRequests.map(_.descriptorAndTracingHandler)
+
+      val tracingAlgebra = q"algebra: $serviceName[$kleisliFSpanF]"
+      val bindTracingServiceImplicits: List[Tree] = ceImplicit :: tracingAlgebra :: rpcRequests
+        .find(_.operation.isMonixObservable)
+        .map(_ => schedulerImplicit)
+        .toList
+
+      val bindTracingService: DefDef = q"""
+        def bindTracingService[$F_](entrypoint: _root_.natchez.EntryPoint[$F])
+                                   (implicit ..$bindTracingServiceImplicits): $F[_root_.io.grpc.ServerServiceDefinition] =
+          _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](
+            ${lit(fullServiceName)},
+            ..$serverCallDescriptorsAndTracingHandlers
+          )
         """
 
       private val clientCallMethods: List[Tree] = rpcRequests.map(_.clientDef)
@@ -316,14 +433,21 @@ object serviceImpl {
         q"""
         def client[$F_](
           channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
-          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] = List(
-            _root_.higherkindness.mu.rpc.channel.UsePlaintext()),
-            options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-          )(implicit ..$classImplicits): _root_.cats.effect.Resource[F, $serviceName[$F]] =
-          _root_.cats.effect.Resource.make {
+          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
+            List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): _root_.cats.effect.Resource[F, $serviceName[$F]] =
+          _root_.cats.effect.Resource.make(
             new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
-          }(channel => CE.void(CE.delay(channel.shutdown()))).flatMap(ch =>
-          _root_.cats.effect.Resource.make[F, $serviceName[$F]](CE.delay(new $Client[$F](ch, options)))($anonymousParam=> CE.unit))
+          )(channel =>
+            CE.void(CE.delay(channel.shutdown()))
+          ).flatMap(ch =>
+            _root_.cats.effect.Resource.make[F, $serviceName[$F]](
+              CE.delay(new $Client[$F](ch, options))
+            )($anonymousParam =>
+              CE.unit
+            )
+          )
         """.supressWarts("DefaultArguments")
 
       val clientFromChannel: DefDef =
@@ -331,19 +455,26 @@ object serviceImpl {
         def clientFromChannel[$F_](
           channel: $F[_root_.io.grpc.ManagedChannel],
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-        )(implicit ..$classImplicits): _root_.cats.effect.Resource[$F, $serviceName[$F]] = _root_.cats.effect.Resource.make(channel)(channel =>
-        CE.void(CE.delay(channel.shutdown()))).flatMap(ch =>
-        _root_.cats.effect.Resource.make[$F, $serviceName[$F]](CE.delay(new $Client[$F](ch, options)))($anonymousParam => CE.unit))
+        )(implicit ..$classImplicits): _root_.cats.effect.Resource[$F, $serviceName[$F]] =
+          _root_.cats.effect.Resource.make(channel)(channel =>
+            CE.void(CE.delay(channel.shutdown()))
+          ).flatMap(ch =>
+            _root_.cats.effect.Resource.make[$F, $serviceName[$F]](
+              CE.delay(new $Client[$F](ch, options))
+            )($anonymousParam =>
+              CE.unit
+            )
+          )
         """.supressWarts("DefaultArguments")
 
       val unsafeClient: DefDef =
         q"""
         def unsafeClient[$F_](
           channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
-          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] = List(
-            _root_.higherkindness.mu.rpc.channel.UsePlaintext()),
-            options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-          )(implicit ..$classImplicits): $serviceName[$F] = {
+          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
+            List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): $serviceName[$F] = {
           val managedChannelInterpreter =
             new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).unsafeBuild
           new $Client[$F](managedChannelInterpreter, options)
@@ -355,6 +486,80 @@ object serviceImpl {
           channel: _root_.io.grpc.Channel,
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit ..$classImplicits): $serviceName[$F] = new $Client[$F](channel, options)
+        """.supressWarts("DefaultArguments")
+
+      private val tracingClientCallMethods: List[Tree] = rpcRequests.map(_.tracingClientDef)
+      private val TracingClient                        = TypeName("TracingClient")
+      val tracingClientClass: ClassDef =
+        q"""
+        class $TracingClient[$F_](
+          channel: _root_.io.grpc.Channel,
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits) extends _root_.io.grpc.stub.AbstractStub[$TracingClient[$F]](channel, options) with $serviceName[$kleisliFSpanF] {
+          override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $TracingClient[$F] =
+              new $TracingClient[$F](channel, options)
+
+          ..$tracingClientCallMethods
+          ..$nonRpcDefs
+        }""".supressWarts("DefaultArguments")
+
+      val tracingClient: DefDef =
+        q"""
+        def tracingClient[$F_](
+          channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
+          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
+            List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): _root_.cats.effect.Resource[F, $serviceName[$kleisliFSpanF]] =
+          _root_.cats.effect.Resource.make(
+            new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
+          )(channel =>
+            CE.void(CE.delay(channel.shutdown()))
+          ).flatMap(ch =>
+            _root_.cats.effect.Resource.make[F, $serviceName[$kleisliFSpanF]](
+              CE.delay(new $TracingClient[$F](ch, options))
+            )($anonymousParam =>
+              CE.unit
+            )
+          )
+        """.supressWarts("DefaultArguments")
+
+      val tracingClientFromChannel: DefDef =
+        q"""
+        def tracingClientFromChannel[$F_](
+          channel: $F[_root_.io.grpc.ManagedChannel],
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): _root_.cats.effect.Resource[$F, $serviceName[$kleisliFSpanF]] =
+          _root_.cats.effect.Resource.make(channel)(channel =>
+            CE.void(CE.delay(channel.shutdown()))
+          ).flatMap(ch =>
+            _root_.cats.effect.Resource.make[$F, $serviceName[$kleisliFSpanF]](
+              CE.delay(new $TracingClient[$F](ch, options))
+            )($anonymousParam =>
+              CE.unit
+            )
+          )
+        """.supressWarts("DefaultArguments")
+
+      val unsafeTracingClient: DefDef =
+        q"""
+        def unsafeTracingClient[$F_](
+          channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
+          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
+            List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): $serviceName[$kleisliFSpanF] = {
+          val managedChannelInterpreter =
+            new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).unsafeBuild
+          new $TracingClient[$F](managedChannelInterpreter, options)
+        }""".supressWarts("DefaultArguments")
+
+      val unsafeTracingClientFromChannel: DefDef =
+        q"""
+        def unsafeTracingClientFromChannel[$F_](
+          channel: _root_.io.grpc.Channel,
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): $serviceName[$kleisliFSpanF] = new $TracingClient[$F](channel, options)
         """.supressWarts("DefaultArguments")
 
       private def lit(x: Any): Literal = Literal(Constant(x.toString))
@@ -394,9 +599,9 @@ object serviceImpl {
           q"_root_.higherkindness.mu.rpc.protocol.${TermName(compressionType.toString)}"
 
         private val clientCallsImpl = prevalentStreamingTarget match {
-          case _: Fs2StreamTpe       => q"_root_.higherkindness.mu.rpc.internal.client.fs2Calls"
-          case _: MonixObservableTpe => q"_root_.higherkindness.mu.rpc.internal.client.monixCalls"
-          case _                     => q"_root_.higherkindness.mu.rpc.internal.client.unaryCalls"
+          case _: Fs2StreamTpe       => q"_root_.higherkindness.mu.rpc.internal.client.fs2.calls"
+          case _: MonixObservableTpe => q"_root_.higherkindness.mu.rpc.internal.client.monix.calls"
+          case _                     => q"_root_.higherkindness.mu.rpc.internal.client.calls"
         }
 
         private val streamingMethodType = {
@@ -420,15 +625,17 @@ object serviceImpl {
 
         private val methodDescriptorValName = TermName("_methodDescriptor")
 
-        private val reqType = request.safeType
-
-        private val respType = response.safeInner
+        private val reqType           = request.originalType
+        private val reqElemType       = request.messageType
+        private val wrappedRespType   = response.originalType
+        private val unwrappedRespType = response.unwrappedType
+        private val respElemType      = response.messageType
 
         val methodDescriptorDef: DefDef = q"""
           def $methodDescriptorDefName(implicit
-            ReqM: _root_.io.grpc.MethodDescriptor.Marshaller[$reqType],
-            RespM: _root_.io.grpc.MethodDescriptor.Marshaller[$respType]
-          ): _root_.io.grpc.MethodDescriptor[$reqType, $respType] = {
+            ReqM: _root_.io.grpc.MethodDescriptor.Marshaller[$reqElemType],
+            RespM: _root_.io.grpc.MethodDescriptor.Marshaller[$respElemType]
+          ): _root_.io.grpc.MethodDescriptor[$reqElemType, $respElemType] = {
             _root_.io.grpc.MethodDescriptor
               .newBuilder(
                 ReqM,
@@ -436,13 +643,13 @@ object serviceImpl {
               .setType($streamingMethodType)
               .setFullMethodName(
                 _root_.io.grpc.MethodDescriptor.generateFullMethodName(
-          ${lit(fullyServiceName)}, ${lit(updatedName)}))
+          ${lit(fullServiceName)}, ${lit(updatedName)}))
               .build()
           }
         """.supressWarts("Null", "ExplicitImplicitTypes")
 
         val methodDescriptorVal: ValDef = q"""
-          val $methodDescriptorValName: _root_.io.grpc.MethodDescriptor[$reqType, $respType] =
+          val $methodDescriptorValName: _root_.io.grpc.MethodDescriptor[$reqElemType, $respElemType] =
             $methodDescriptorDefName
         """
 
@@ -454,58 +661,224 @@ object serviceImpl {
         """
 
         private def clientCallMethodFor(clientMethodName: String) =
-          q"$clientCallsImpl.${TermName(clientMethodName)}(input, $methodDescriptorName.$methodDescriptorValName, channel, options)"
+          q"$clientCallsImpl.${TermName(clientMethodName)}[$F, $reqElemType, $respElemType](input, $methodDescriptorName.$methodDescriptorValName, channel, options)"
 
         val clientDef: Tree = streamingType match {
           case Some(RequestStreaming) =>
             q"""
-            def $name(input: ${request.getTpe}): ${response.getTpe} = ${clientCallMethodFor(
-              "clientStreaming"
-            )}"""
+            def $name(input: $reqType): $wrappedRespType =
+              ${clientCallMethodFor("clientStreaming")}
+            """
           case Some(ResponseStreaming) =>
             q"""
-            def $name(input: ${request.getTpe}): ${response.getTpe} = ${clientCallMethodFor(
-              "serverStreaming"
-            )}"""
+            def $name(input: $reqType): $wrappedRespType =
+              ${clientCallMethodFor("serverStreaming")}
+            """
           case Some(BidirectionalStreaming) =>
             q"""
-            def $name(input: ${request.getTpe}): ${response.getTpe} = ${clientCallMethodFor(
-              "bidiStreaming"
-            )}"""
+            def $name(input: $reqType): $wrappedRespType =
+              ${clientCallMethodFor("bidiStreaming")}
+            """
           case None =>
             q"""
-            def $name(input: ${request.getTpe}): ${response.getTpe} = ${clientCallMethodFor("unary")}"""
+            def $name(input: $reqType): $wrappedRespType =
+              ${clientCallMethodFor("unary")}
+            """
         }
 
-        private def monixServerCallMethodFor(serverMethodName: String) =
-          q"_root_.higherkindness.mu.rpc.internal.server.monixCalls.${TermName(serverMethodName)}(algebra.$name, $compressionTypeTree)"
+        // Kleisli[F, Span[F], Resp]
+        private val kleisliFSpanFResp = kleisliFSpanFB(respElemType)
 
-        val descriptorAndHandler: Tree = {
-          val handler = (streamingType, prevalentStreamingTarget) match {
-            case (Some(RequestStreaming), Fs2StreamTpe(_, _)) =>
-              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.clientStreamingMethod(algebra.$name, $compressionTypeTree)"
-            case (Some(RequestStreaming), MonixObservableTpe(_, _)) =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(${monixServerCallMethodFor("clientStreamingMethod")})"
-
-            case (Some(ResponseStreaming), Fs2StreamTpe(_, _)) =>
-              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.serverStreamingMethod(algebra.$name, $compressionTypeTree)"
-            case (Some(ResponseStreaming), MonixObservableTpe(_, _)) =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(${monixServerCallMethodFor("serverStreamingMethod")})"
-
-            case (Some(BidirectionalStreaming), Fs2StreamTpe(_, _)) =>
-              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.bidiStreamingMethod(algebra.$name, $compressionTypeTree)"
-            case (Some(BidirectionalStreaming), MonixObservableTpe(_, _)) =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(${monixServerCallMethodFor("bidiStreamingMethod")})"
-
-            case (None, _) =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.higherkindness.mu.rpc.internal.server.unaryCalls.unaryMethod(algebra.$name, $compressionTypeTree))"
-            case _ =>
-              sys.error(
-                s"Unable to define a handler for the streaming type $streamingType and $prevalentStreamingTarget for the method $name in the service $serviceName"
-              )
-          }
-          q"($methodDescriptorName.$methodDescriptorValName, $handler)"
+        val tracingClientDef: Tree = (streamingType, prevalentStreamingTarget) match {
+          case (None, _) =>
+            // def foo(input: Req): Kleisli[F, Span[F], Resp]
+            q"""
+            def $name(input: $reqType): $kleisliFSpanFResp =
+              ${clientCallMethodFor("tracingUnary")}
+            """
+          case (Some(RequestStreaming), _: Fs2StreamTpe) =>
+            // def foo(input: Stream[Kleisli[F, Span[F], *], Req]): Kleisli[F, Span[F], Resp]
+            q"""
+            def $name(input: _root_.fs2.Stream[$kleisliFSpanF, $reqElemType]): $kleisliFSpanFResp =
+              ${clientCallMethodFor("tracingClientStreaming")}
+            """
+          case (Some(RequestStreaming), _: MonixObservableTpe) =>
+            // def foo(input: Observable[Req]): Kleisli[F, Span[F], Resp]
+            q"""
+            def $name(input: $reqType): $kleisliFSpanFResp =
+              ${clientCallMethodFor("tracingClientStreaming")}
+            """
+          case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
+            // def foo(input: Req): Kleisli[F, Span[F], Stream[Kleisli[F, Span[F], *], Resp]]
+            val returnType = kleisliFSpanFB(tq"_root_.fs2.Stream[$kleisliFSpanF, $respElemType]")
+            q"""
+            def $name(input: $reqType): $returnType =
+              ${clientCallMethodFor("tracingServerStreaming")}
+            """
+          case (Some(ResponseStreaming), _: MonixObservableTpe) =>
+            // def foo(input: Req): Kleisli[F, Span[F], Observable[Resp]]
+            q"""
+            def $name(input: $reqType): ${kleisliFSpanFB(unwrappedRespType)} =
+              ${clientCallMethodFor("tracingServerStreaming")}
+            """
+          case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
+            // def foo(input: Stream[Kleisli[F, Span[F], *], Req]): Stream[Kleisli[F, Span[F], *], Resp]
+            val returnType = kleisliFSpanFB(tq"_root_.fs2.Stream[$kleisliFSpanF, $respElemType]")
+            q"""
+            def $name(input: _root_.fs2.Stream[$kleisliFSpanF, $reqElemType]): $returnType =
+              ${clientCallMethodFor("tracingBidiStreaming")}
+            """
+          case (Some(BidirectionalStreaming), _: MonixObservableTpe) =>
+            // def foo(input: Observable[Req]): Kleisli[F, Span[F], Observable[Resp]]
+            q"""
+            def $name(input: $reqType): ${kleisliFSpanFB(unwrappedRespType)} =
+              ${clientCallMethodFor("tracingBidiStreaming")}
+            """
+          case _ =>
+            c.abort(
+              c.enclosingPosition,
+              s"Unable to define a tracing client method for the streaming type $streamingType and $prevalentStreamingTarget for the method $name in the service $serviceName"
+            )
         }
+
+        val serverCallHandler: Tree = (streamingType, prevalentStreamingTarget) match {
+          case (Some(RequestStreaming), _: Fs2StreamTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.clientStreaming[$F, $reqElemType, $respElemType](
+              { (req: _root_.fs2.Stream[$F, $reqElemType], $anonymousParam) => algebra.$name(req) },
+              $compressionTypeTree
+            )
+            """
+          case (Some(RequestStreaming), _: MonixObservableTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.clientStreaming[$F, $reqElemType, $respElemType](
+              algebra.$name,
+              $compressionTypeTree
+            )
+            """
+
+          case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.serverStreaming[$F, $reqElemType, $respElemType](
+              { (req: $reqType, $anonymousParam) => algebra.$name(req) },
+              $compressionTypeTree
+            )
+            """
+          case (Some(ResponseStreaming), _: MonixObservableTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.serverStreaming[$F, $reqElemType, $respElemType](
+              algebra.$name,
+              $compressionTypeTree
+            )
+            """
+
+          case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.bidiStreaming[$F, $reqElemType, $respElemType](
+              { (req: _root_.fs2.Stream[$F, $reqElemType], $anonymousParam) => algebra.$name(req) },
+              $compressionTypeTree
+            )
+            """
+          case (Some(BidirectionalStreaming), _: MonixObservableTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.bidiStreaming[$F, $reqElemType, $respElemType](
+              algebra.$name,
+              $compressionTypeTree
+            )
+            """
+
+          case (None, _) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.handlers.unary[$F, $reqElemType, $respElemType](
+              algebra.$name,
+              $compressionTypeTree
+            )
+            """
+          case _ =>
+            c.abort(
+              c.enclosingPosition,
+              s"Unable to define a handler for the streaming type $streamingType and $prevalentStreamingTarget for the method $name in the service $serviceName"
+            )
+        }
+
+        val descriptorAndHandler: Tree =
+          q"($methodDescriptorName.$methodDescriptorValName, $serverCallHandler)"
+
+        val tracingServerCallHandler: Tree = (streamingType, prevalentStreamingTarget) match {
+          case (Some(RequestStreaming), _: Fs2StreamTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.tracingClientStreaming(
+              algebra.$name _,
+              $methodDescriptorName.$methodDescriptorValName,
+              entrypoint,
+              $compressionTypeTree
+            )
+            """
+          case (Some(RequestStreaming), _: MonixObservableTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.tracingClientStreaming(
+              algebra.$name _,
+              $methodDescriptorName.$methodDescriptorValName,
+              entrypoint,
+              $compressionTypeTree
+            )
+            """
+          case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.tracingServerStreaming(
+              algebra.$name _,
+              $methodDescriptorName.$methodDescriptorValName,
+              entrypoint,
+              $compressionTypeTree
+            )
+            """
+          case (Some(ResponseStreaming), _: MonixObservableTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.tracingServerStreaming(
+              algebra.$name _,
+              $methodDescriptorName.$methodDescriptorValName,
+              entrypoint,
+              $compressionTypeTree
+            )
+            """
+          case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.tracingBidiStreaming(
+              algebra.$name _,
+              $methodDescriptorName.$methodDescriptorValName,
+              entrypoint,
+              $compressionTypeTree
+            )
+            """
+          case (Some(BidirectionalStreaming), _: MonixObservableTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.tracingBidiStreaming(
+              algebra.$name _,
+              $methodDescriptorName.$methodDescriptorValName,
+              entrypoint,
+              $compressionTypeTree
+            )
+            """
+          case (None, _) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.handlers.tracingUnary[$F, $reqElemType, $respElemType](
+              algebra.$name,
+              $methodDescriptorName.$methodDescriptorValName,
+              entrypoint,
+              $compressionTypeTree
+            )
+            """
+          case _ =>
+            c.abort(
+              c.enclosingPosition,
+              s"Unable to define a tracing handler for the streaming type $streamingType and $prevalentStreamingTarget for the method $name in the service $serviceName"
+            )
+        }
+
+        val descriptorAndTracingHandler: Tree = {
+          q"($methodDescriptorName.$methodDescriptorValName, $tracingServerCallHandler)"
+        }
+
       }
 
       case class HttpOperation(operation: Operation) {
@@ -517,13 +890,6 @@ object serviceImpl {
         val method: TermName = request match {
           case _: EmptyTpe => TermName("GET")
           case _           => TermName("POST")
-        }
-
-        val executionClient: Tree = response match {
-          case Fs2StreamTpe(_, _) =>
-            q"client.stream(request).flatMap(_.asStream[${response.safeInner}])"
-          case _ =>
-            q"""client.expectOr[${response.safeInner}](request)(handleResponseError)(jsonOf[F, ${response.safeInner}])"""
         }
 
         val requestTypology: Tree = request match {
@@ -538,51 +904,85 @@ object serviceImpl {
               .replace("\"", "")})"
         }
 
-        val responseEncoder =
-          q"""implicit val responseEntityDecoder: _root_.org.http4s.EntityDecoder[F, ${response.safeInner}] = jsonOf[F, ${response.safeInner}]"""
+        val executionClient: Tree = response match {
+          case _: Fs2StreamTpe =>
+            q"_root_.cats.Applicative[F].pure(client.stream(request).flatMap(_.asStream[${response.messageType}]))"
+          case _ =>
+            q"""client.expectOr[${response.messageType}](request)(handleResponseError)(_root_.org.http4s.circe.jsonOf[F, ${response.messageType}])"""
+        }
 
         def toRequestTree: Tree = request match {
           case _: EmptyTpe =>
             q"""def $name(client: _root_.org.http4s.client.Client[F])(
-               implicit responseDecoder: _root_.io.circe.Decoder[${response.safeInner}]): ${response.getTpe} = {
-		                  $responseEncoder
-		                  $requestTypology
-		                  $executionClient
-		                 }"""
+                 implicit responseDecoder: _root_.io.circe.Decoder[${response.messageType}]): ${response.originalType} = {
+                   $requestTypology
+                   $executionClient
+                 }"""
           case _ =>
-            q"""def $name(req: ${request.getTpe})(client: _root_.org.http4s.client.Client[F])(
-               implicit requestEncoder: _root_.io.circe.Encoder[${request.safeInner}],
-               responseDecoder: _root_.io.circe.Decoder[${response.safeInner}]
-            ): ${response.getTpe} = {
-		                  $responseEncoder
-		                  $requestTypology
-		                  $executionClient
-		                 }"""
+            q"""def $name(req: ${request.originalType})(client: _root_.org.http4s.client.Client[F])(
+                 implicit requestEncoder: _root_.io.circe.Encoder[${request.messageType}],
+                 responseDecoder: _root_.io.circe.Decoder[${response.messageType}]
+              ): ${response.originalType} = {
+                $requestTypology
+                $executionClient
+              }"""
         }
 
         val routeTypology: Tree = (request, response) match {
-          case (_: Fs2StreamTpe, _: UnaryTpe) =>
-            q"""val requests = msg.asStream[${operation.request.safeInner}]
-              _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(requests).map(_.asJson))"""
-
-          case (_: UnaryTpe, _: Fs2StreamTpe) =>
-            q"""for {
-              request   <- msg.as[${operation.request.safeInner}]
-              responses <- _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(request).asJsonEither)
-            } yield responses"""
-
+          // Stream -> Stream
           case (_: Fs2StreamTpe, _: Fs2StreamTpe) =>
-            q"""val requests = msg.asStream[${operation.request.safeInner}]
-             _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(requests).asJsonEither)"""
+            q"""val requests = msg.asStream[${operation.request.messageType}]
+                for {
+                  respStream <- handler.${operation.name}(requests)
+                  responses  <- _root_.org.http4s.Status.Ok.apply(respStream.asJsonEither)
+                } yield responses"""
 
-          case (_: EmptyTpe, _) =>
+          // Stream -> Empty
+          case (_: Fs2StreamTpe, _: EmptyTpe) =>
+            q"""val requests = msg.asStream[${operation.request.messageType}]
+                _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(requests).as(()))"""
+
+          // Stream -> Unary
+          case (_: Fs2StreamTpe, _: UnaryTpe) =>
+            q"""val requests = msg.asStream[${operation.request.messageType}]
+                _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(requests).map(_.asJson))"""
+
+          // Empty -> Stream
+          case (_: EmptyTpe, _: Fs2StreamTpe) =>
+            q"""for {
+                  respStream <- handler.${operation.name}(_root_.higherkindness.mu.rpc.protocol.Empty)
+                  responses  <- _root_.org.http4s.Status.Ok.apply(respStream.asJsonEither)
+                } yield responses"""
+
+          // Empty -> Empty
+          case (_: EmptyTpe, _: EmptyTpe) =>
+            q"""_root_.org.http4s.Status.Ok.apply(handler.${operation.name}(_root_.higherkindness.mu.rpc.protocol.Empty).as(()))"""
+
+          // Empty -> Unary
+          case (_: EmptyTpe, _: UnaryTpe) =>
             q"""_root_.org.http4s.Status.Ok.apply(handler.${operation.name}(_root_.higherkindness.mu.rpc.protocol.Empty).map(_.asJson))"""
 
+          // Unary -> Stream
+          case (_: UnaryTpe, _: Fs2StreamTpe) =>
+            q"""for {
+                request    <- msg.as[${operation.request.messageType}]
+                respStream <- handler.${operation.name}(request)
+                responses  <- _root_.org.http4s.Status.Ok.apply(respStream.asJsonEither)
+              } yield responses"""
+
+          // Unary -> Empty
+          case (_: UnaryTpe, _: EmptyTpe) =>
+            q"""for {
+                request  <- msg.as[${operation.request.messageType}]
+                response <- _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(request).as(())).adaptErrors
+              } yield response"""
+
+          // Unary -> Unary
           case _ =>
             q"""for {
-              request  <- msg.as[${operation.request.safeInner}]
-              response <- _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(request).map(_.asJson)).adaptErrors
-            } yield response"""
+                request  <- msg.as[${operation.request.messageType}]
+                response <- _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(request).map(_.asJson)).adaptErrors
+              } yield response"""
         }
 
         val getPattern =
@@ -604,7 +1004,9 @@ object serviceImpl {
         params <- d.vparamss
         _ = require(params.length == 1, s"RPC call ${d.name} has more than one request parameter")
         p <- params.headOption.toList
-        op = Operation(d.name, TypeTypology(p.tpt), TypeTypology(d.tpt))
+        reqType  = TypeTypology(p.tpt, false, F)
+        respType = TypeTypology(d.tpt, true, F)
+        op       = Operation(d.name, reqType, respType)
         _ = if (op.isMonixObservable)
           sys.error(
             "Monix.Observable is not compatible with streaming services. Please consider using Fs2.Stream instead."
@@ -617,15 +1019,15 @@ object serviceImpl {
 
       val HttpClient      = TypeName("HttpClient")
       val httpClientClass = q"""
-        class $HttpClient[$F_](uri: _root_.org.http4s.Uri)(implicit ..$streamConstraints) {
-          ..$httpRequests
-      }"""
+          class $HttpClient[$F_](uri: _root_.org.http4s.Uri)(implicit ..$streamConstraints) {
+            ..$httpRequests
+        }"""
 
       val httpClient = q"""
-        def httpClient[$F_](uri: _root_.org.http4s.Uri)
-          (implicit ..$streamConstraints): $HttpClient[$F] = {
-          new $HttpClient[$F](uri / ${serviceDef.name.toString})
-      }"""
+          def httpClient[$F_](uri: _root_.org.http4s.Uri)
+            (implicit ..$streamConstraints): $HttpClient[$F] = {
+            new $HttpClient[$F](uri / ${serviceDef.name.toString})
+        }"""
 
       val httpImports: List[Tree] = List(
         q"import _root_.higherkindness.mu.http.implicits._",
@@ -640,10 +1042,16 @@ object serviceImpl {
       val routesPF: Tree = q"{ case ..$httpRoutesCases }"
 
       val requestTypes: Set[String] =
-        operations.filterNot(_.operation.request.isEmpty).map(_.operation.request.flatName).toSet
+        operations
+          .filterNot(_.operation.request.isEmpty)
+          .map(_.operation.request.messageType.toString)
+          .toSet
 
       val responseTypes: Set[String] =
-        operations.filterNot(_.operation.response.isEmpty).map(_.operation.response.flatName).toSet
+        operations
+          .filterNot(_.operation.response.isEmpty)
+          .map(_.operation.response.messageType.toString)
+          .toSet
 
       val requestDecoders =
         requestTypes.map(n =>
@@ -664,20 +1072,21 @@ object serviceImpl {
         streamConstraints
 
       val httpRestServiceClass: Tree = q"""
-        class $HttpRestService[$F_](implicit ..$arguments) extends _root_.org.http4s.dsl.Http4sDsl[F] {
-         ..$requestDecoders
-         def service = _root_.org.http4s.HttpRoutes.of[F]{$routesPF}
-      }"""
+          class $HttpRestService[$F_](implicit ..$arguments) extends _root_.org.http4s.dsl.Http4sDsl[F] {
+           ..$requestDecoders
+           def service = _root_.org.http4s.HttpRoutes.of[F]{$routesPF}
+        }"""
 
       val httpService = q"""
-        def route[$F_](implicit ..$arguments): _root_.higherkindness.mu.http.protocol.RouteMap[F] = {
-          _root_.higherkindness.mu.http.protocol.RouteMap[F](${serviceDef.name.toString}, new $HttpRestService[$F].service)
-      }"""
+          def route[$F_](implicit ..$arguments): _root_.higherkindness.mu.http.protocol.RouteMap[F] = {
+            _root_.higherkindness.mu.http.protocol.RouteMap[F](${serviceDef.name.toString}, new $HttpRestService[$F].service)
+        }"""
 
       val http =
         if (httpRequests.isEmpty) Nil
         else
           httpImports ++ List(httpClientClass, httpClient, httpRestServiceClass, httpService)
+
     }
 
     val classAndMaybeCompanion = annottees.map(_.tree)
@@ -716,11 +1125,17 @@ object serviceImpl {
             companion.impl.self,
             companion.impl.body ++ service.imports ++ service.encodersImport ++ service.methodDescriptors ++ List(
               service.bindService,
+              service.bindTracingService,
               service.clientClass,
               service.client,
               service.clientFromChannel,
               service.unsafeClient,
-              service.unsafeClientFromChannel
+              service.unsafeClientFromChannel,
+              service.tracingClientClass,
+              service.tracingClient,
+              service.tracingClientFromChannel,
+              service.unsafeTracingClient,
+              service.unsafeTracingClientFromChannel
             ) ++ service.http
           )
         )

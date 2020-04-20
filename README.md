@@ -17,7 +17,7 @@ The full documentation is available at the [mu](https://higherkindness.github.io
 
 ## Demo
 
-See the [examples](/modules/examples) module.
+See the [mu-scala-examples](https://github.com/higherkindness/mu-scala-examples) repository.
 
 [RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
 [HTTP/2]: https://http2.github.io/

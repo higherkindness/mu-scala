@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
-package internal
-package client
+package higherkindness.mu.rpc.internal.client
 
-import cats.effect.{ContextShift, Effect}
-import io.grpc.stub.ClientCalls
-import io.grpc.{CallOptions, Channel, MethodDescriptor}
+import io.grpc._
+import io.grpc.ClientCall.Listener
+import io.grpc.ForwardingClientCall.SimpleForwardingClientCall
 
-object unaryCalls {
+class HeaderAttachingClientCall[Req, Res](
+    call: ClientCall[Req, Res],
+    extraHeaders: Metadata
+) extends SimpleForwardingClientCall[Req, Res](call) {
 
-  def unary[F[_]: Effect: ContextShift, Req, Res](
-      request: Req,
-      descriptor: MethodDescriptor[Req, Res],
-      channel: Channel,
-      options: CallOptions
-  ): F[Res] =
-    listenableFuture2Async[F, Res](
-      ClientCalls
-        .futureUnaryCall(channel.newCall(descriptor, options), request)
-    )
+  override def start(responseListener: Listener[Res], headers: Metadata): Unit = {
+    headers.merge(extraHeaders)
+    super.start(responseListener, headers)
+  }
+
 }
