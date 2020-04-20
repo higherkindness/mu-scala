@@ -17,14 +17,49 @@
 package higherkindness.mu.rpc.internal.server
 
 import cats.effect.{Effect, IO}
+import cats.data.Kleisli
 import cats.syntax.apply._
+import io.grpc._
+import io.grpc.ServerCall.Listener
+import io.grpc.stub.ServerCalls
 import io.grpc.stub.ServerCalls.UnaryMethod
 import io.grpc.stub.StreamObserver
 import higherkindness.mu.rpc.protocol.CompressionType
+import natchez.{EntryPoint, Span}
 
-object unaryCalls {
+object handlers {
 
-  def unaryMethod[F[_]: Effect, Req, Res](
+  def unary[F[_]: Effect, Req, Res](
+      f: Req => F[Res],
+      compressionType: CompressionType
+  ): ServerCallHandler[Req, Res] =
+    ServerCalls.asyncUnaryCall(unaryMethod[F, Req, Res](f, compressionType))
+
+  def tracingUnary[F[_]: Effect, Req, Res](
+      f: Req => Kleisli[F, Span[F], Res],
+      methodDescriptor: MethodDescriptor[Req, Res],
+      entrypoint: EntryPoint[F],
+      compressionType: CompressionType
+  ): ServerCallHandler[Req, Res] =
+    new ServerCallHandler[Req, Res] {
+      def startCall(
+          call: ServerCall[Req, Res],
+          metadata: Metadata
+      ): Listener[Req] = {
+        val kernel = extractTracingKernel(metadata)
+        val spanResource =
+          entrypoint.continueOrElseRoot(methodDescriptor.getFullMethodName(), kernel)
+
+        val method = unaryMethod[F, Req, Res](
+          req => spanResource.use(span => f(req).run(span)),
+          compressionType
+        )
+
+        ServerCalls.asyncUnaryCall(method).startCall(call, metadata)
+      }
+    }
+
+  private def unaryMethod[F[_]: Effect, Req, Res](
       f: Req => F[Res],
       compressionType: CompressionType
   ): UnaryMethod[Req, Res] =
