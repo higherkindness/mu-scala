@@ -293,7 +293,8 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         "org.scalatest"         %% "scalatest"                % V.scalatest,
         "org.scalatestplus"     %% "scalatestplus-scalacheck" % V.scalatestplusScheck,
-        "io.dropwizard.metrics" % "metrics-jmx"               % V.dropwizard
+        "io.dropwizard.metrics" % "metrics-jmx"               % V.dropwizard,
+        "org.tpolecat"          %% "natchez-jaeger"           % V.natchez
       )
     ) ++ mdocSettings
 
