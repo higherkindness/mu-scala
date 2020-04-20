@@ -18,16 +18,20 @@ package higherkindness.mu.rpc.protocol
 
 import cats.data.Kleisli
 import cats.syntax.applicative._
+import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.effect.{Async, IO, Resource}
 import cats.effect.concurrent.Ref
 import cats.instances.int._
 import fs2.Stream
-import higherkindness.mu.rpc.testing.servers.withServerChannel
+import higherkindness.mu.rpc._
+import higherkindness.mu.rpc.server._
+import io.grpc.ServerServiceDefinition
 import monix.reactive.Observable
 import monix.execution.Scheduler
 import natchez._
 import org.scalatest.funspec.AnyFunSpec
+import scala.util.Random
 
 import Tracing._
 
@@ -92,46 +96,37 @@ class RPCTracingTests extends AnyFunSpec {
 
     }
 
-    // TODO this can be deleted after debugging the Monix issue
-    class NonTracingServiceDef[F[_]: Async](s: Scheduler)(
-        implicit
-        c: Stream.Compiler[F, F]
-    ) extends UnaryServiceDef[F]
-        with FS2ServiceDef[F]
-        with MonixServiceDef[F] {
-
-      implicit val scheduler: Scheduler = s
-
-      def measureString(req: Request): F[Response] =
-        Response(req.s.length).pure[F]
-
-      def fs2ClientStreaming(req: Stream[F, Request]): F[Response] =
-        req.map(_.s.length).compile.foldMonoid.map(Response(_))
-
-      def fs2ServerStreaming(req: Request): F[Stream[F, Response]] =
-        Stream(Response(req.s.length)).covary[F].pure[F]
-
-      def fs2BidiStreaming(req: Stream[F, Request]): F[Stream[F, Response]] =
-        req.map(r => Response(r.s.length)).pure[F]
-
-      def monixClientStreaming(req: Observable[Request]): F[Response] =
-        req.map(_.s.length).foldL.map(Response(_)).toAsync[F]
-
-      def monixServerStreaming(req: Request): F[Observable[Response]] =
-        Observable(Response(req.s.length)).pure[F]
-
-      def monixBidiStreaming(req: Observable[Request]): F[Observable[Response]] =
-        req.map(r => Response(r.s.length)).pure[F]
-
-    }
-
   }
 
   import RPCService._
   import higherkindness.mu.rpc.TestsImplicits._
 
+  val serverPort = 10000 + Random.nextInt(2000)
+  val channelFor = ChannelForAddress("localhost", serverPort)
+
   implicit val tracingService: TracingServiceDef[Kleisli[IO, Span[IO], *]] =
     new TracingServiceDef[Kleisli[IO, Span[IO], *]](Scheduler(EC))
+
+  def serverResource(S: GrpcServer[IO]): Resource[IO, Unit] =
+    Resource.make(S.start)(_ => S.shutdown >> S.awaitTermination)
+
+  /**
+   * Build a Resource that starts a server and builds a client to connect to it.
+   * The resource finalizer will shut down the server.
+   */
+  def mkClientResource[C[_[_]]](
+      bind: EntryPoint[IO] => IO[ServerServiceDefinition],
+      fromChannelFor: ChannelFor => Resource[IO, C[Kleisli[IO, Span[IO], *]]],
+      ep: EntryPoint[IO]
+  ): Resource[IO, C[Kleisli[IO, Span[IO], *]]] =
+    for {
+      serviceDef <- Resource.liftF(bind(ep))
+      grpcServer <- Resource.liftF(
+        GrpcServer.default[IO](serverPort, List(AddService(serviceDef)))
+      )
+      _         <- serverResource(grpcServer)
+      clientRes <- fromChannelFor(channelFor)
+    } yield clientRes
 
   /*
    * This is the core program common to all the tests:
@@ -157,18 +152,14 @@ class RPCTracingTests extends AnyFunSpec {
 
     describe("unary call") {
 
-      def mkClientResource(
-          ep: EntryPoint[IO]
-      ): Resource[IO, UnaryServiceDef[Kleisli[IO, Span[IO], *]]] =
-        for {
-          sc        <- withServerChannel(UnaryServiceDef.bindTracingService[IO](ep))
-          clientRes <- UnaryServiceDef.tracingClientFromChannel[IO](IO.pure(sc.channel))
-        } yield clientRes
-
       it("traces the call on both the client side and server side") {
         val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
         val ep: EntryPoint[IO]        = entrypoint(ref)
-        val clientResource            = mkClientResource(ep)
+        val clientResource = mkClientResource(
+          UnaryServiceDef.bindTracingService[IO],
+          UnaryServiceDef.tracingClient[IO](_),
+          ep
+        )
 
         val prog: IO[(Response, List[String])] =
           program(clientResource, ep, ref) {
@@ -196,18 +187,14 @@ class RPCTracingTests extends AnyFunSpec {
 
     describe("FS2 streaming endpoints") {
 
-      def mkClientResource(
-          ep: EntryPoint[IO]
-      ): Resource[IO, FS2ServiceDef[Kleisli[IO, Span[IO], *]]] =
-        for {
-          sc        <- withServerChannel(FS2ServiceDef.bindTracingService[IO](ep))
-          clientRes <- FS2ServiceDef.tracingClientFromChannel[IO](IO.pure(sc.channel))
-        } yield clientRes
-
       it("traces a client-streaming call") {
         val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
         val ep: EntryPoint[IO]        = entrypoint(ref)
-        val clientResource            = mkClientResource(ep)
+        val clientResource = mkClientResource(
+          FS2ServiceDef.bindTracingService[IO],
+          FS2ServiceDef.tracingClient[IO](_),
+          ep
+        )
 
         val prog: IO[(Response, List[String])] =
           program(clientResource, ep, ref) {
@@ -232,7 +219,11 @@ class RPCTracingTests extends AnyFunSpec {
       it("traces a server-streaming call") {
         val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
         val ep: EntryPoint[IO]        = entrypoint(ref)
-        val clientResource            = mkClientResource(ep)
+        val clientResource = mkClientResource(
+          FS2ServiceDef.bindTracingService[IO],
+          FS2ServiceDef.tracingClient[IO](_),
+          ep
+        )
 
         val prog: IO[(Response, List[String])] =
           program(clientResource, ep, ref) {
@@ -262,7 +253,11 @@ class RPCTracingTests extends AnyFunSpec {
       it("traces a bidirectional-streaming call") {
         val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
         val ep: EntryPoint[IO]        = entrypoint(ref)
-        val clientResource            = mkClientResource(ep)
+        val clientResource = mkClientResource(
+          FS2ServiceDef.bindTracingService[IO],
+          FS2ServiceDef.tracingClient[IO](_),
+          ep
+        )
 
         val prog: IO[(Response, List[String])] =
           program(clientResource, ep, ref) {
@@ -296,41 +291,14 @@ class RPCTracingTests extends AnyFunSpec {
 
       implicit val scheduler: Scheduler = Scheduler(EC)
 
-      def mkClientResource(
-          ep: EntryPoint[IO]
-      ): Resource[IO, MonixServiceDef[Kleisli[IO, Span[IO], *]]] =
-        for {
-          sc        <- withServerChannel(MonixServiceDef.bindTracingService[IO](ep))
-          clientRes <- MonixServiceDef.tracingClientFromChannel[IO](IO.pure(sc.channel))
-        } yield clientRes
-
-      it("client-streaming call without tracing works fine") {
-        implicit val nonTracingService: NonTracingServiceDef[IO] =
-          new NonTracingServiceDef[IO](Scheduler(EC))
-        val clientResource =
-          for {
-            sc        <- withServerChannel(MonixServiceDef.bindService[IO])
-            clientRes <- MonixServiceDef.clientFromChannel[IO](IO.pure(sc.channel))
-          } yield clientRes
-
-        val response =
-          clientResource
-            .use { client =>
-              client.monixClientStreaming(Observable(Request("abc"), Request("defg")))
-            }
-            .unsafeRunSync()
-
-        assert(response == Response(7))
-      }
-
-      // TODO Delete the test above.
-      // It was a sanity check I wrote while debugging why the test below fails.
-      // Not sure what's going on here but it feels like a Monday problem.
-
       it("traces a client-streaming call") {
         val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
         val ep: EntryPoint[IO]        = entrypoint(ref)
-        val clientResource            = mkClientResource(ep)
+        val clientResource = mkClientResource(
+          MonixServiceDef.bindTracingService[IO],
+          MonixServiceDef.tracingClient[IO](_),
+          ep
+        )
 
         val prog: IO[(Response, List[String])] =
           program(clientResource, ep, ref) {
@@ -355,7 +323,11 @@ class RPCTracingTests extends AnyFunSpec {
       it("traces a server-streaming call") {
         val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
         val ep: EntryPoint[IO]        = entrypoint(ref)
-        val clientResource            = mkClientResource(ep)
+        val clientResource = mkClientResource(
+          MonixServiceDef.bindTracingService[IO],
+          MonixServiceDef.tracingClient[IO](_),
+          ep
+        )
 
         val prog: IO[(Response, List[String])] =
           program(clientResource, ep, ref) {
@@ -383,7 +355,11 @@ class RPCTracingTests extends AnyFunSpec {
       it("traces a bidirectional-streaming call") {
         val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
         val ep: EntryPoint[IO]        = entrypoint(ref)
-        val clientResource            = mkClientResource(ep)
+        val clientResource = mkClientResource(
+          MonixServiceDef.bindTracingService[IO],
+          MonixServiceDef.tracingClient[IO](_),
+          ep
+        )
 
         val prog: IO[(Response, List[String])] =
           program(clientResource, ep, ref) {

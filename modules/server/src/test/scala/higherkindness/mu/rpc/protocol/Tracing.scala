@@ -22,14 +22,14 @@ import cats.syntax.applicativeError._
 import natchez._
 
 /*
- * A minimal Natchez tracing imlementation that accumulates
+ * A minimal Natchez tracing implementation that accumulates
  * trace data in a cats-effect Ref.
  */
 object Tracing {
 
   case class TracingData(nextSpanId: Int, log: Vector[String]) {
     def append(entry: String): TracingData =
-      copy(log = log.appended(entry))
+      copy(log = log :+ entry)
 
     def incrementNextSpanId: (TracingData, Int) =
       (copy(nextSpanId = nextSpanId + 1), nextSpanId)
