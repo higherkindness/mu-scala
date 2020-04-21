@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees <http://47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package higherkindness.mu.rpc.server.metrics
 
 import cats.effect.{Clock, IO, Resource}
-import cats.syntax.apply._
 import higherkindness.mu.rpc.common.{A => _, _}
 import higherkindness.mu.rpc.common.util.FakeClock
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo

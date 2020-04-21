@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees <http://47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import io.grpc.Status
 import org.scalacheck.{Gen, Properties}
 import org.scalacheck.Prop._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
 

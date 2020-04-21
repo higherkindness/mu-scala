@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees <http://47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@ import java.util.concurrent.{Executor => JavaExecutor}
 import cats.effect.{ContextShift, Effect}
 import cats.syntax.apply._
 import com.google.common.util.concurrent.{FutureCallback, Futures, ListenableFuture}
+import io.grpc.Metadata
+import io.grpc.Metadata.{ASCII_STRING_MARSHALLER, Key}
+import natchez.Kernel
 
 package object client {
 
@@ -41,5 +44,14 @@ package object client {
         }
       )
     }
+
+  private[internal] def tracingKernelToHeaders(kernel: Kernel): Metadata = {
+    val headers = new Metadata()
+    kernel.toHeaders.foreach {
+      case (k, v) =>
+        headers.put(Key.of(k, ASCII_STRING_MARSHALLER), v)
+    }
+    headers
+  }
 
 }

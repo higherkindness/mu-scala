@@ -1,4 +1,15 @@
-pgpPassphrase := Some(getEnvVar("PGP_PASSPHRASE").getOrElse("").toCharArray)
+lazy val checkScalafmt         = "+scalafmtCheck; +scalafmtSbtCheck;"
+lazy val checkBenchmarks       = "benchmarks-root/test;"
+lazy val checkDocs             = "+docs/mdoc;"
+lazy val checkIntegrationTests = "+haskell-integration-tests/test;"
+lazy val checkTests            = "+coverage; +test; +coverageReport; +coverageAggregate;"
+
+addCommandAlias(
+  "ci-test",
+  s"$checkScalafmt $checkBenchmarks $checkDocs $checkIntegrationTests $checkTests"
+)
+addCommandAlias("ci-docs", "project-docs/mdoc; docs/mdoc; headerCreateAll")
+addCommandAlias("ci-microsite", "docs/publishMicrosite")
 
 ////////////////
 //// COMMON ////
@@ -287,7 +298,7 @@ lazy val root = project
   .aggregate(coreModules: _*)
   .dependsOn(coreModulesDeps: _*)
 
-lazy val `root-non-crossed-scala-versions` = project
+lazy val `benchmarks-root` = project
   .in(file("benchmarks"))
   .settings(name := "mu-scala-benchmarks")
   .settings(noPublishSettings)
@@ -303,4 +314,13 @@ lazy val docs = project
   .settings(micrositeSettings)
   .settings(noPublishSettings)
   .enablePlugins(MicrositesPlugin)
+  .enablePlugins(MdocPlugin)
+
+lazy val `project-docs` = (project in file(".docs"))
+  .aggregate(coreModules: _*)
+  .dependsOn(coreModulesDeps: _*)
+  .settings(moduleName := "mu-project-docs")
+  .settings(mdocIn := file(".docs"))
+  .settings(mdocOut := file("."))
+  .settings(noPublishSettings)
   .enablePlugins(MdocPlugin)

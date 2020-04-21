@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees <http://47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -255,6 +255,13 @@ object serviceImpl {
         s"@service-annotated class $serviceName's type parameter must be higher-kinded"
       )
 
+      // Type lambda for Kleisli[F, Span[F], *]
+      private val kleisliFSpanF =
+        tq"({ type T[α] = _root_.cats.data.Kleisli[$F, _root_.natchez.Span[$F], α] })#T"
+
+      private def kleisliFSpanFB(B: Tree) =
+        tq"_root_.cats.data.Kleisli[$F, _root_.natchez.Span[$F], $B]"
+
       private val defs: List[Tree] = serviceDef.impl.body
 
       private val (rpcDefs, nonRpcDefs) = defs.collect {
@@ -284,7 +291,7 @@ object serviceImpl {
           case "None"          => ""
         }.getOrElse("")
 
-      private val fullyServiceName = namespacePrefix + serviceName.toString
+      private val fullServiceName = namespacePrefix + serviceName.toString
 
       private val methodNameStyle: MethodNameStyle =
         annotationParam(3, "methodNameStyle") {
@@ -355,9 +362,28 @@ object serviceImpl {
 
       val bindService: DefDef = q"""
         def bindService[$F_](implicit ..$bindImplicits): $F[_root_.io.grpc.ServerServiceDefinition] =
-          _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](${lit(
-        fullyServiceName
-      )}, ..$serverCallDescriptorsAndHandlers)
+          _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](
+            ${lit(fullServiceName)},
+            ..$serverCallDescriptorsAndHandlers
+          )
+        """
+
+      private val serverCallDescriptorsAndTracingHandlers: List[Tree] =
+        rpcRequests.map(_.descriptorAndTracingHandler)
+
+      val tracingAlgebra = q"algebra: $serviceName[$kleisliFSpanF]"
+      val bindTracingServiceImplicits: List[Tree] = ceImplicit :: tracingAlgebra :: rpcRequests
+        .find(_.operation.isMonixObservable)
+        .map(_ => schedulerImplicit)
+        .toList
+
+      val bindTracingService: DefDef = q"""
+        def bindTracingService[$F_](entrypoint: _root_.natchez.EntryPoint[$F])
+                                   (implicit ..$bindTracingServiceImplicits): $F[_root_.io.grpc.ServerServiceDefinition] =
+          _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](
+            ${lit(fullServiceName)},
+            ..$serverCallDescriptorsAndTracingHandlers
+          )
         """
 
       private val clientCallMethods: List[Tree] = rpcRequests.map(_.clientDef)
@@ -407,14 +433,21 @@ object serviceImpl {
         q"""
         def client[$F_](
           channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
-          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] = List(
-            _root_.higherkindness.mu.rpc.channel.UsePlaintext()),
-            options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-          )(implicit ..$classImplicits): _root_.cats.effect.Resource[F, $serviceName[$F]] =
-          _root_.cats.effect.Resource.make {
+          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
+            List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): _root_.cats.effect.Resource[F, $serviceName[$F]] =
+          _root_.cats.effect.Resource.make(
             new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
-          }(channel => CE.void(CE.delay(channel.shutdown()))).flatMap(ch =>
-          _root_.cats.effect.Resource.make[F, $serviceName[$F]](CE.delay(new $Client[$F](ch, options)))($anonymousParam=> CE.unit))
+          )(channel =>
+            CE.void(CE.delay(channel.shutdown()))
+          ).flatMap(ch =>
+            _root_.cats.effect.Resource.make[F, $serviceName[$F]](
+              CE.delay(new $Client[$F](ch, options))
+            )($anonymousParam =>
+              CE.unit
+            )
+          )
         """.supressWarts("DefaultArguments")
 
       val clientFromChannel: DefDef =
@@ -422,19 +455,26 @@ object serviceImpl {
         def clientFromChannel[$F_](
           channel: $F[_root_.io.grpc.ManagedChannel],
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-        )(implicit ..$classImplicits): _root_.cats.effect.Resource[$F, $serviceName[$F]] = _root_.cats.effect.Resource.make(channel)(channel =>
-        CE.void(CE.delay(channel.shutdown()))).flatMap(ch =>
-        _root_.cats.effect.Resource.make[$F, $serviceName[$F]](CE.delay(new $Client[$F](ch, options)))($anonymousParam => CE.unit))
+        )(implicit ..$classImplicits): _root_.cats.effect.Resource[$F, $serviceName[$F]] =
+          _root_.cats.effect.Resource.make(channel)(channel =>
+            CE.void(CE.delay(channel.shutdown()))
+          ).flatMap(ch =>
+            _root_.cats.effect.Resource.make[$F, $serviceName[$F]](
+              CE.delay(new $Client[$F](ch, options))
+            )($anonymousParam =>
+              CE.unit
+            )
+          )
         """.supressWarts("DefaultArguments")
 
       val unsafeClient: DefDef =
         q"""
         def unsafeClient[$F_](
           channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
-          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] = List(
-            _root_.higherkindness.mu.rpc.channel.UsePlaintext()),
-            options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-          )(implicit ..$classImplicits): $serviceName[$F] = {
+          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
+            List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): $serviceName[$F] = {
           val managedChannelInterpreter =
             new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).unsafeBuild
           new $Client[$F](managedChannelInterpreter, options)
@@ -446,6 +486,80 @@ object serviceImpl {
           channel: _root_.io.grpc.Channel,
           options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
         )(implicit ..$classImplicits): $serviceName[$F] = new $Client[$F](channel, options)
+        """.supressWarts("DefaultArguments")
+
+      private val tracingClientCallMethods: List[Tree] = rpcRequests.map(_.tracingClientDef)
+      private val TracingClient                        = TypeName("TracingClient")
+      val tracingClientClass: ClassDef =
+        q"""
+        class $TracingClient[$F_](
+          channel: _root_.io.grpc.Channel,
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits) extends _root_.io.grpc.stub.AbstractStub[$TracingClient[$F]](channel, options) with $serviceName[$kleisliFSpanF] {
+          override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $TracingClient[$F] =
+              new $TracingClient[$F](channel, options)
+
+          ..$tracingClientCallMethods
+          ..$nonRpcDefs
+        }""".supressWarts("DefaultArguments")
+
+      val tracingClient: DefDef =
+        q"""
+        def tracingClient[$F_](
+          channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
+          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
+            List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): _root_.cats.effect.Resource[F, $serviceName[$kleisliFSpanF]] =
+          _root_.cats.effect.Resource.make(
+            new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
+          )(channel =>
+            CE.void(CE.delay(channel.shutdown()))
+          ).flatMap(ch =>
+            _root_.cats.effect.Resource.make[F, $serviceName[$kleisliFSpanF]](
+              CE.delay(new $TracingClient[$F](ch, options))
+            )($anonymousParam =>
+              CE.unit
+            )
+          )
+        """.supressWarts("DefaultArguments")
+
+      val tracingClientFromChannel: DefDef =
+        q"""
+        def tracingClientFromChannel[$F_](
+          channel: $F[_root_.io.grpc.ManagedChannel],
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): _root_.cats.effect.Resource[$F, $serviceName[$kleisliFSpanF]] =
+          _root_.cats.effect.Resource.make(channel)(channel =>
+            CE.void(CE.delay(channel.shutdown()))
+          ).flatMap(ch =>
+            _root_.cats.effect.Resource.make[$F, $serviceName[$kleisliFSpanF]](
+              CE.delay(new $TracingClient[$F](ch, options))
+            )($anonymousParam =>
+              CE.unit
+            )
+          )
+        """.supressWarts("DefaultArguments")
+
+      val unsafeTracingClient: DefDef =
+        q"""
+        def unsafeTracingClient[$F_](
+          channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
+          channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
+            List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): $serviceName[$kleisliFSpanF] = {
+          val managedChannelInterpreter =
+            new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).unsafeBuild
+          new $TracingClient[$F](managedChannelInterpreter, options)
+        }""".supressWarts("DefaultArguments")
+
+      val unsafeTracingClientFromChannel: DefDef =
+        q"""
+        def unsafeTracingClientFromChannel[$F_](
+          channel: _root_.io.grpc.Channel,
+          options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+        )(implicit ..$classImplicits): $serviceName[$kleisliFSpanF] = new $TracingClient[$F](channel, options)
         """.supressWarts("DefaultArguments")
 
       private def lit(x: Any): Literal = Literal(Constant(x.toString))
@@ -485,9 +599,9 @@ object serviceImpl {
           q"_root_.higherkindness.mu.rpc.protocol.${TermName(compressionType.toString)}"
 
         private val clientCallsImpl = prevalentStreamingTarget match {
-          case _: Fs2StreamTpe       => q"_root_.higherkindness.mu.rpc.internal.client.fs2Calls"
-          case _: MonixObservableTpe => q"_root_.higherkindness.mu.rpc.internal.client.monixCalls"
-          case _                     => q"_root_.higherkindness.mu.rpc.internal.client.unaryCalls"
+          case _: Fs2StreamTpe       => q"_root_.higherkindness.mu.rpc.internal.client.fs2.calls"
+          case _: MonixObservableTpe => q"_root_.higherkindness.mu.rpc.internal.client.monix.calls"
+          case _                     => q"_root_.higherkindness.mu.rpc.internal.client.calls"
         }
 
         private val streamingMethodType = {
@@ -511,10 +625,11 @@ object serviceImpl {
 
         private val methodDescriptorValName = TermName("_methodDescriptor")
 
-        private val reqType         = request.originalType
-        private val reqElemType     = request.messageType
-        private val wrappedRespType = response.originalType
-        private val respElemType    = response.messageType
+        private val reqType           = request.originalType
+        private val reqElemType       = request.messageType
+        private val wrappedRespType   = response.originalType
+        private val unwrappedRespType = response.unwrappedType
+        private val respElemType      = response.messageType
 
         val methodDescriptorDef: DefDef = q"""
           def $methodDescriptorDefName(implicit
@@ -528,7 +643,7 @@ object serviceImpl {
               .setType($streamingMethodType)
               .setFullMethodName(
                 _root_.io.grpc.MethodDescriptor.generateFullMethodName(
-          ${lit(fullyServiceName)}, ${lit(updatedName)}))
+          ${lit(fullServiceName)}, ${lit(updatedName)}))
               .build()
           }
         """.supressWarts("Null", "ExplicitImplicitTypes")
@@ -551,53 +666,219 @@ object serviceImpl {
         val clientDef: Tree = streamingType match {
           case Some(RequestStreaming) =>
             q"""
-            def $name(input: $reqType): $wrappedRespType = ${clientCallMethodFor(
-              "clientStreaming"
-            )}"""
+            def $name(input: $reqType): $wrappedRespType =
+              ${clientCallMethodFor("clientStreaming")}
+            """
           case Some(ResponseStreaming) =>
             q"""
-            def $name(input: $reqType): $wrappedRespType = ${clientCallMethodFor(
-              "serverStreaming"
-            )}"""
+            def $name(input: $reqType): $wrappedRespType =
+              ${clientCallMethodFor("serverStreaming")}
+            """
           case Some(BidirectionalStreaming) =>
             q"""
-            def $name(input: $reqType): $wrappedRespType = ${clientCallMethodFor(
-              "bidiStreaming"
-            )}"""
+            def $name(input: $reqType): $wrappedRespType =
+              ${clientCallMethodFor("bidiStreaming")}
+            """
           case None =>
             q"""
-            def $name(input: $reqType): $wrappedRespType = ${clientCallMethodFor("unary")}"""
+            def $name(input: $reqType): $wrappedRespType =
+              ${clientCallMethodFor("unary")}
+            """
         }
 
-        private def monixServerCallMethodFor(serverMethodName: String) =
-          q"_root_.higherkindness.mu.rpc.internal.server.monixCalls.${TermName(serverMethodName)}[$F, $reqElemType, $respElemType](algebra.$name, $compressionTypeTree)"
+        // Kleisli[F, Span[F], Resp]
+        private val kleisliFSpanFResp = kleisliFSpanFB(respElemType)
 
-        val descriptorAndHandler: Tree = {
-          val handler = (streamingType, prevalentStreamingTarget) match {
-            case (Some(RequestStreaming), _: Fs2StreamTpe) =>
-              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.clientStreamingMethod[$F, $reqElemType, $respElemType](algebra.$name, $compressionTypeTree)"
-            case (Some(RequestStreaming), _: MonixObservableTpe) =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncClientStreamingCall(${monixServerCallMethodFor("clientStreamingMethod")})"
-
-            case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
-              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.serverStreamingMethod[$F, $reqElemType, $respElemType](algebra.$name, $compressionTypeTree)"
-            case (Some(ResponseStreaming), _: MonixObservableTpe) =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncServerStreamingCall(${monixServerCallMethodFor("serverStreamingMethod")})"
-
-            case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
-              q"_root_.higherkindness.mu.rpc.internal.server.fs2Calls.bidiStreamingMethod[$F, $reqElemType, $respElemType](algebra.$name, $compressionTypeTree)"
-            case (Some(BidirectionalStreaming), _: MonixObservableTpe) =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncBidiStreamingCall(${monixServerCallMethodFor("bidiStreamingMethod")})"
-
-            case (None, _) =>
-              q"_root_.io.grpc.stub.ServerCalls.asyncUnaryCall(_root_.higherkindness.mu.rpc.internal.server.unaryCalls.unaryMethod[$F, $reqElemType, $respElemType](algebra.$name, $compressionTypeTree))"
-            case _ =>
-              sys.error(
-                s"Unable to define a handler for the streaming type $streamingType and $prevalentStreamingTarget for the method $name in the service $serviceName"
-              )
-          }
-          q"($methodDescriptorName.$methodDescriptorValName, $handler)"
+        val tracingClientDef: Tree = (streamingType, prevalentStreamingTarget) match {
+          case (None, _) =>
+            // def foo(input: Req): Kleisli[F, Span[F], Resp]
+            q"""
+            def $name(input: $reqType): $kleisliFSpanFResp =
+              ${clientCallMethodFor("tracingUnary")}
+            """
+          case (Some(RequestStreaming), _: Fs2StreamTpe) =>
+            // def foo(input: Stream[Kleisli[F, Span[F], *], Req]): Kleisli[F, Span[F], Resp]
+            q"""
+            def $name(input: _root_.fs2.Stream[$kleisliFSpanF, $reqElemType]): $kleisliFSpanFResp =
+              ${clientCallMethodFor("tracingClientStreaming")}
+            """
+          case (Some(RequestStreaming), _: MonixObservableTpe) =>
+            // def foo(input: Observable[Req]): Kleisli[F, Span[F], Resp]
+            q"""
+            def $name(input: $reqType): $kleisliFSpanFResp =
+              ${clientCallMethodFor("tracingClientStreaming")}
+            """
+          case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
+            // def foo(input: Req): Kleisli[F, Span[F], Stream[Kleisli[F, Span[F], *], Resp]]
+            val returnType = kleisliFSpanFB(tq"_root_.fs2.Stream[$kleisliFSpanF, $respElemType]")
+            q"""
+            def $name(input: $reqType): $returnType =
+              ${clientCallMethodFor("tracingServerStreaming")}
+            """
+          case (Some(ResponseStreaming), _: MonixObservableTpe) =>
+            // def foo(input: Req): Kleisli[F, Span[F], Observable[Resp]]
+            q"""
+            def $name(input: $reqType): ${kleisliFSpanFB(unwrappedRespType)} =
+              ${clientCallMethodFor("tracingServerStreaming")}
+            """
+          case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
+            // def foo(input: Stream[Kleisli[F, Span[F], *], Req]): Stream[Kleisli[F, Span[F], *], Resp]
+            val returnType = kleisliFSpanFB(tq"_root_.fs2.Stream[$kleisliFSpanF, $respElemType]")
+            q"""
+            def $name(input: _root_.fs2.Stream[$kleisliFSpanF, $reqElemType]): $returnType =
+              ${clientCallMethodFor("tracingBidiStreaming")}
+            """
+          case (Some(BidirectionalStreaming), _: MonixObservableTpe) =>
+            // def foo(input: Observable[Req]): Kleisli[F, Span[F], Observable[Resp]]
+            q"""
+            def $name(input: $reqType): ${kleisliFSpanFB(unwrappedRespType)} =
+              ${clientCallMethodFor("tracingBidiStreaming")}
+            """
+          case _ =>
+            c.abort(
+              c.enclosingPosition,
+              s"Unable to define a tracing client method for the streaming type $streamingType and $prevalentStreamingTarget for the method $name in the service $serviceName"
+            )
         }
+
+        val serverCallHandler: Tree = (streamingType, prevalentStreamingTarget) match {
+          case (Some(RequestStreaming), _: Fs2StreamTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.clientStreaming[$F, $reqElemType, $respElemType](
+              { (req: _root_.fs2.Stream[$F, $reqElemType], $anonymousParam) => algebra.$name(req) },
+              $compressionTypeTree
+            )
+            """
+          case (Some(RequestStreaming), _: MonixObservableTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.clientStreaming[$F, $reqElemType, $respElemType](
+              algebra.$name,
+              $compressionTypeTree
+            )
+            """
+
+          case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.serverStreaming[$F, $reqElemType, $respElemType](
+              { (req: $reqType, $anonymousParam) => algebra.$name(req) },
+              $compressionTypeTree
+            )
+            """
+          case (Some(ResponseStreaming), _: MonixObservableTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.serverStreaming[$F, $reqElemType, $respElemType](
+              algebra.$name,
+              $compressionTypeTree
+            )
+            """
+
+          case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.bidiStreaming[$F, $reqElemType, $respElemType](
+              { (req: _root_.fs2.Stream[$F, $reqElemType], $anonymousParam) => algebra.$name(req) },
+              $compressionTypeTree
+            )
+            """
+          case (Some(BidirectionalStreaming), _: MonixObservableTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.bidiStreaming[$F, $reqElemType, $respElemType](
+              algebra.$name,
+              $compressionTypeTree
+            )
+            """
+
+          case (None, _) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.handlers.unary[$F, $reqElemType, $respElemType](
+              algebra.$name,
+              $compressionTypeTree
+            )
+            """
+          case _ =>
+            c.abort(
+              c.enclosingPosition,
+              s"Unable to define a handler for the streaming type $streamingType and $prevalentStreamingTarget for the method $name in the service $serviceName"
+            )
+        }
+
+        val descriptorAndHandler: Tree =
+          q"($methodDescriptorName.$methodDescriptorValName, $serverCallHandler)"
+
+        val tracingServerCallHandler: Tree = (streamingType, prevalentStreamingTarget) match {
+          case (Some(RequestStreaming), _: Fs2StreamTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.tracingClientStreaming(
+              algebra.$name _,
+              $methodDescriptorName.$methodDescriptorValName,
+              entrypoint,
+              $compressionTypeTree
+            )
+            """
+          case (Some(RequestStreaming), _: MonixObservableTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.tracingClientStreaming(
+              algebra.$name _,
+              $methodDescriptorName.$methodDescriptorValName,
+              entrypoint,
+              $compressionTypeTree
+            )
+            """
+          case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.tracingServerStreaming(
+              algebra.$name _,
+              $methodDescriptorName.$methodDescriptorValName,
+              entrypoint,
+              $compressionTypeTree
+            )
+            """
+          case (Some(ResponseStreaming), _: MonixObservableTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.tracingServerStreaming(
+              algebra.$name _,
+              $methodDescriptorName.$methodDescriptorValName,
+              entrypoint,
+              $compressionTypeTree
+            )
+            """
+          case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.tracingBidiStreaming(
+              algebra.$name _,
+              $methodDescriptorName.$methodDescriptorValName,
+              entrypoint,
+              $compressionTypeTree
+            )
+            """
+          case (Some(BidirectionalStreaming), _: MonixObservableTpe) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.monix.handlers.tracingBidiStreaming(
+              algebra.$name _,
+              $methodDescriptorName.$methodDescriptorValName,
+              entrypoint,
+              $compressionTypeTree
+            )
+            """
+          case (None, _) =>
+            q"""
+            _root_.higherkindness.mu.rpc.internal.server.handlers.tracingUnary[$F, $reqElemType, $respElemType](
+              algebra.$name,
+              $methodDescriptorName.$methodDescriptorValName,
+              entrypoint,
+              $compressionTypeTree
+            )
+            """
+          case _ =>
+            c.abort(
+              c.enclosingPosition,
+              s"Unable to define a tracing handler for the streaming type $streamingType and $prevalentStreamingTarget for the method $name in the service $serviceName"
+            )
+        }
+
+        val descriptorAndTracingHandler: Tree = {
+          q"($methodDescriptorName.$methodDescriptorValName, $tracingServerCallHandler)"
+        }
+
       }
 
       case class HttpOperation(operation: Operation) {
@@ -844,11 +1125,17 @@ object serviceImpl {
             companion.impl.self,
             companion.impl.body ++ service.imports ++ service.encodersImport ++ service.methodDescriptors ++ List(
               service.bindService,
+              service.bindTracingService,
               service.clientClass,
               service.client,
               service.clientFromChannel,
               service.unsafeClient,
-              service.unsafeClientFromChannel
+              service.unsafeClientFromChannel,
+              service.tracingClientClass,
+              service.tracingClient,
+              service.tracingClientFromChannel,
+              service.unsafeTracingClient,
+              service.unsafeTracingClientFromChannel
             ) ++ service.http
           )
         )
