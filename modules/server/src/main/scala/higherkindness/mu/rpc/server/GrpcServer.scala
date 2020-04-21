@@ -92,6 +92,9 @@ object GrpcServer {
 
   /**
    * Build a [[GrpcServer]] that uses the default network transport layer.
+   *
+   * The transport layer will be Netty, unless you have written your own
+   * [[io.grpc.ServerProvider]] implementation and added it to the classpath.
    */
   def default[F[_]](port: Int, configList: List[GrpcConfig])(
       implicit F: Sync[F]
