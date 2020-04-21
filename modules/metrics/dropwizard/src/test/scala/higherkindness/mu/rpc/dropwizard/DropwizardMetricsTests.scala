@@ -28,7 +28,7 @@ import io.grpc.Status
 import org.scalacheck.{Gen, Properties}
 import org.scalacheck.Prop._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
 

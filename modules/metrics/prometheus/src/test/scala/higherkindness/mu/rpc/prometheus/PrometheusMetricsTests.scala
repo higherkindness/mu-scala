@@ -26,7 +26,7 @@ import io.prometheus.client.{Collector, CollectorRegistry}
 import org.scalacheck.Prop.forAllNoShrink
 import org.scalacheck.{Gen, Properties}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
 

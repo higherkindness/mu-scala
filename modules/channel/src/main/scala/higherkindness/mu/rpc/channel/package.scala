@@ -18,7 +18,7 @@ package higherkindness.mu.rpc
 
 import cats.data.Kleisli
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import io.grpc._
 
 package object channel {

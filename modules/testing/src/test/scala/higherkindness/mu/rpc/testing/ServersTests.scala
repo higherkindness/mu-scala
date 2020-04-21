@@ -22,7 +22,7 @@ import org.scalatest._
 import org.scalatestplus.scalacheck.Checkers
 import org.scalacheck.Prop._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 

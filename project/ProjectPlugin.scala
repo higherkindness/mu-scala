@@ -213,10 +213,11 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val testingSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "io.grpc"           % "grpc-testing"              % V.grpc,
-        "org.typelevel"     %% "cats-effect"              % V.catsEffect,
-        "org.scalacheck"    %% "scalacheck"               % V.scalacheck % Test,
-        "org.scalatestplus" %% "scalatestplus-scalacheck" % V.scalatestplusScheck % Test
+        "io.grpc"                % "grpc-testing"              % V.grpc,
+        "org.typelevel"          %% "cats-effect"              % V.catsEffect,
+        "org.scalacheck"         %% "scalacheck"               % V.scalacheck % Test,
+        "org.scalatestplus"      %% "scalatestplus-scalacheck" % V.scalatestplusScheck % Test,
+        "org.scala-lang.modules" %% "scala-collection-compat"  % V.scalaCollectionCompat % Test
       )
     )
 

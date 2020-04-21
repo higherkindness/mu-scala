@@ -32,7 +32,7 @@ import io.netty.channel.local.LocalServerChannel
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.handler.ssl.SslContext
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.duration.TimeUnit
 
 trait RpcServerTestSuite extends RpcBaseTestSuite {

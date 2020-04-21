@@ -23,7 +23,7 @@ import cats.syntax.functor._
 import higherkindness.mu.rpc.server.{GrpcServer, GrpcServerOps}
 import io.grpc.{Server, ServerServiceDefinition}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.duration.TimeUnit
 
 private[handlers] class GrpcServerHandler[F[_]: Sync] private[GrpcServerHandler] ()
