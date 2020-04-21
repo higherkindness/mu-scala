@@ -39,7 +39,8 @@ class AvroWithSchemaBenchmark extends ServerRuntime {
     PersonServiceAvroWithSchema
       .client[IO](ChannelForAddress("localhost", grpcPort))
       .use(f)
-      .unsafeRunTimed(defaultTimeOut).get
+      .unsafeRunTimed(defaultTimeOut)
+      .get
 
   @TearDown
   def shutdown(): Unit = {}
