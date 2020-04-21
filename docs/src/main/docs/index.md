@@ -26,10 +26,10 @@ care of the boilerplate and non-functional requirements, including:
 * serialization of requests and responses into Avro/Protobuf/JSON
 * building high-performance [gRPC] servers and clients
 * building HTTP REST servers and clients using [http4s]
-* handling of streaming requests and responses using either [FS2] Stream or
-  [Monix] Observable
-* schema management and schema evolution
-* metrics reporting
+* handling of [streaming requests and responses](guides/grpc-streaming) using
+  either [FS2] Stream or [Monix] Observable
+* [distributed tracing](guides/distributed-tracing)
+* [metrics reporting](guides/metrics-reporting)
 * ... and plenty more features on the way!
 
 Specifically, Mu helps you to build:
