@@ -23,14 +23,14 @@ import higherkindness.mu.rpc.ChannelForAddress
 import higherkindness.mu.rpc.benchmarks.shared.Utils._
 import higherkindness.mu.rpc.benchmarks.shared.models._
 import higherkindness.mu.rpc.benchmarks.shared.protocols.PersonServiceAvro
-import higherkindness.mu.rpc.benchmarks.shared.server._
+import higherkindness.mu.rpc.benchmarks.shared._
 import higherkindness.mu.rpc.protocol.Empty
 import org.openjdk.jmh.annotations._
 
 @State(Scope.Thread)
 @BenchmarkMode(Array(Mode.Throughput))
 @OutputTimeUnit(TimeUnit.SECONDS)
-class AvroBenchmark extends ServerImplicits {
+class AvroBenchmark extends ServerRuntime {
 
   @Setup
   def setup(): Unit = startServer.unsafeRunSync
