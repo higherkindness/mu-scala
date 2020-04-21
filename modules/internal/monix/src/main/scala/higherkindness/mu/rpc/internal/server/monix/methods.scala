@@ -14,23 +14,25 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.internal.server
+package higherkindness.mu.rpc.internal.server.monix
 
-import cats.effect.{ConcurrentEffect, Effect}
-import io.grpc.stub.ServerCalls.{BidiStreamingMethod, ClientStreamingMethod, ServerStreamingMethod}
-import io.grpc.stub.StreamObserver
 import monix.execution.{Ack, Scheduler}
 import monix.reactive.{Observable, Observer, Pipe}
 import monix.reactive.observers.Subscriber
+
+import cats.effect.Effect
+import higherkindness.mu.rpc.internal.server._
 import higherkindness.mu.rpc.protocol.CompressionType
+import io.grpc.stub.ServerCalls.{BidiStreamingMethod, ClientStreamingMethod, ServerStreamingMethod}
+import io.grpc.stub.StreamObserver
 
 import scala.concurrent.Future
 
-object monixCalls {
+object methods {
 
   import higherkindness.mu.rpc.internal.converters._
 
-  def clientStreamingMethod[F[_]: ConcurrentEffect, Req, Res](
+  def clientStreamingMethod[F[_]: Effect, Req, Res](
       f: Observable[Req] => F[Res],
       compressionType: CompressionType
   )(implicit S: Scheduler): ClientStreamingMethod[Req, Res] =

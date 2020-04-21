@@ -17,9 +17,12 @@
 package higherkindness.mu.rpc.internal
 
 import cats.effect.Sync
-import io.grpc.{Status, StatusException, StatusRuntimeException}
+import io.grpc.{Metadata, Status, StatusException, StatusRuntimeException}
+import io.grpc.Metadata.{ASCII_STRING_MARSHALLER, BINARY_HEADER_SUFFIX, Key}
 import io.grpc.stub.{ServerCallStreamObserver, StreamObserver}
 import higherkindness.mu.rpc.protocol._
+import natchez.Kernel
+import scala.jdk.CollectionConverters._
 
 package object server {
 
@@ -54,6 +57,18 @@ package object server {
           Status.INTERNAL.withDescription(e.getMessage).withCause(e).asException()
         )
       }
+  }
+
+  private[internal] def extractTracingKernel(headers: Metadata): Kernel = {
+    val asciiHeaders = headers
+      .keys()
+      .asScala
+      .collect {
+        case k if !k.endsWith(BINARY_HEADER_SUFFIX) =>
+          k -> headers.get(Key.of(k, ASCII_STRING_MARSHALLER))
+      }
+      .toMap
+    Kernel(asciiHeaders)
   }
 
 }

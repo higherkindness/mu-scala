@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.mu
-package rpc
-package internal
+package higherkindness.mu.rpc.internal
 
 import cats.~>
 import cats.instances.future._

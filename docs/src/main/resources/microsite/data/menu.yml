@@ -73,6 +73,10 @@ options:
     menu_type: guides
     url: guides/metrics-reporting
 
+  - title: Distributed tracing
+    menu_type: guides
+    url: guides/distributed-tracing
+
   - title: SSL/TLS
     menu_type: guides
     url: guides/ssl-tls
