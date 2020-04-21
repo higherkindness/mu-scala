@@ -45,18 +45,26 @@ trait ServerRuntime {
   implicit private val avroWithSchemaHandler: AvroWithSchemaHandler[IO] =
     new AvroWithSchemaHandler[IO]
 
-  implicit lazy val grpcConfigsAvro: IO[List[GrpcConfig]] = List(
+  implicit lazy val grpcConfigs: IO[List[GrpcConfig]] = List(
     PersonServicePB.bindService[IO].map(AddService),
     PersonServiceAvro.bindService[IO].map(AddService),
     PersonServiceAvroWithSchema.bindService[IO].map(AddService)
   ).sequence[IO, GrpcConfig]
 
-  def startServer: IO[Unit] =
-    for {
-      _          <- logger.info("starting server..")
-      serviceDef <- grpcConfigsAvro
-      server     <- GrpcServer.default[IO](grpcPort, serviceDef)
-      _          <- Resource.liftF(GrpcServer.server[IO](server)).use(_ => IO.never).start
-      _          <- logger.info("server started..")
-    } yield ()
+  implicit val grpcServer: GrpcServer[IO] =
+    grpcConfigs.flatMap(conf => GrpcServer.default[IO](grpcPort, conf)).unsafeRunSync
+
+  def startServer(implicit server: GrpcServer[IO]): Unit =
+    (for {
+      _ <- logger.info("Starting server..")
+      _ <- Resource.liftF(server.start()).use(_ => IO.never).start
+      _ <- logger.info("Server started..")
+    } yield ()).unsafeRunSync
+
+  def stopServer(implicit server: GrpcServer[IO]): Unit =
+    (for {
+      _ <- logger.info("Stopping server..")
+      _ <- server.shutdownNow()
+      _ <- logger.info("Server Stopped..")
+    } yield ()).unsafeRunSync
 }

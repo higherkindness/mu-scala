@@ -33,7 +33,10 @@ import org.openjdk.jmh.annotations._
 class ProtoBenchmark extends ServerRuntime {
 
   @Setup
-  def setup(): Unit = startServer.unsafeRunSync
+  def setup(): Unit = startServer
+
+  @TearDown
+  def shutdown(): Unit = stopServer
 
   def clientCall[B](f: PersonServicePB[IO] => IO[B]): B =
     PersonServicePB
@@ -41,9 +44,6 @@ class ProtoBenchmark extends ServerRuntime {
       .use(f)
       .unsafeRunTimed(defaultTimeOut)
       .get
-
-  @TearDown
-  def shutdown(): Unit = {}
 
   @Benchmark
   def listPersons: PersonList =

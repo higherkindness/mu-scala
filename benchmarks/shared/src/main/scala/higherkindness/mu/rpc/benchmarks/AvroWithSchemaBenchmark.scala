@@ -33,7 +33,10 @@ import org.openjdk.jmh.annotations._
 class AvroWithSchemaBenchmark extends ServerRuntime {
 
   @Setup
-  def setup(): Unit = startServer.unsafeRunSync
+  def setup(): Unit = startServer
+
+  @TearDown
+  def shutdown(): Unit = stopServer
 
   def clientCall[B](f: PersonServiceAvroWithSchema[IO] => IO[B]): B =
     PersonServiceAvroWithSchema
@@ -41,9 +44,6 @@ class AvroWithSchemaBenchmark extends ServerRuntime {
       .use(f)
       .unsafeRunTimed(defaultTimeOut)
       .get
-
-  @TearDown
-  def shutdown(): Unit = {}
 
   @Benchmark
   def listPersons: PersonList =
