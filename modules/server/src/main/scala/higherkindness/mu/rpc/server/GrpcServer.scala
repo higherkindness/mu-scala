@@ -91,22 +91,22 @@ object GrpcServer {
     serverResource[F](S).use(_ => F.never[Unit])
 
   /**
-    * Build a [[GrpcServer]] that uses the default network transport layer.
-    */
+   * Build a [[GrpcServer]] that uses the default network transport layer.
+   */
   def default[F[_]](port: Int, configList: List[GrpcConfig])(
       implicit F: Sync[F]
   ): F[GrpcServer[F]] =
     F.delay(buildServer(ServerBuilder.forPort(port), configList)).map(fromServer[F])
 
   /**
-    * Build a [[GrpcServer]] that uses the Netty network transport layer.
-    */
+   * Build a [[GrpcServer]] that uses the Netty network transport layer.
+   */
   def netty[F[_]](port: Int, configList: List[GrpcConfig])(implicit F: Sync[F]): F[GrpcServer[F]] =
     netty(ChannelForPort(port), configList)
 
   /**
-    * Build a [[GrpcServer]] that uses the Netty network transport layer.
-    */
+   * Build a [[GrpcServer]] that uses the Netty network transport layer.
+   */
   def netty[F[_]](channelFor: ChannelFor, configList: List[GrpcConfig])(
       implicit F: Sync[F]
   ): F[GrpcServer[F]] =
@@ -116,8 +116,8 @@ object GrpcServer {
     } yield fromServer[F](server)
 
   /**
-    * Helper to convert an [[io.grpc.Server]] into a [[GrpcServer]].
-    */
+   * Helper to convert an [[io.grpc.Server]] into a [[GrpcServer]].
+   */
   def fromServer[F[_]: Sync](server: Server): GrpcServer[F] =
     handlers.GrpcServerHandler[F].mapK(λ[GrpcServerOps[F, ?] ~> F](_.run(server)))
 
