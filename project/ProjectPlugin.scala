@@ -1,14 +1,7 @@
 import microsites.MicrositesPlugin.autoImport._
 import sbt.Keys._
 import sbt._
-import sbtorgpolicies.OrgPoliciesPlugin
-import sbtorgpolicies.OrgPoliciesPlugin.autoImport._
-import sbtorgpolicies.model._
-import sbtorgpolicies.templates._
-import sbtorgpolicies.templates.badges._
-import sbtorgpolicies.runnable.syntax._
-import sbtrelease.ReleasePlugin.autoImport._
-import sbtrelease.ReleaseStateTransformations._
+import com.alejandrohdezma.sbt.github.SbtGithubPlugin
 import scoverage.ScoverageKeys._
 
 import scala.language.reflectiveCalls
@@ -16,7 +9,7 @@ import mdoc.MdocPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
 
-  override def requires: Plugins = OrgPoliciesPlugin
+  override def requires: Plugins = SbtGithubPlugin
 
   override def trigger: PluginTrigger = allRequirements
 
@@ -60,6 +53,12 @@ object ProjectPlugin extends AutoPlugin {
       val scalatestplusScheck: String   = "3.1.0.0-RC2"
       val slf4j: String                 = "1.7.30"
     }
+
+    lazy val noPublishSettings = Seq(
+      publish := ((): Unit),
+      publishArtifact := false,
+      publishMavenStyle := false // suppress warnings about intransitive deps (not published anyway)
+    )
 
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
@@ -275,7 +274,7 @@ object ProjectPlugin extends AutoPlugin {
       micrositeCompilingDocsTool := WithMdoc,
       micrositePushSiteWith := GitHub4s,
       mdocIn := (sourceDirectory in Compile).value / "docs",
-      micrositeGithubToken := sys.env.get(orgGithubTokenSetting.value),
+      micrositeGithubToken := Option(System.getenv().get("GITHUB_TOKEN")),
       micrositePalette := Map(
         "brand-primary"   -> "#001e38",
         "brand-secondary" -> "#F44336",
@@ -318,32 +317,15 @@ object ProjectPlugin extends AutoPlugin {
 
   import autoImport._
 
-  case class FixedCodecovBadge(info: BadgeInformation) extends Badge(info) {
-
-    override def badgeIcon: Option[BadgeIcon] =
-      BadgeIcon(
-        title = "codecov.io",
-        icon = s"http://codecov.io/gh/${info.owner}/${info.repo}/branch/master/graph/badge.svg",
-        url = s"http://codecov.io/gh/${info.owner}/${info.repo}"
-      ).some
-  }
-
   override def projectSettings: Seq[Def.Setting[_]] =
     Seq(
       description := "mu RPC is a purely functional library for " +
         "building RPC endpoint based services with support for RPC and HTTP/2",
-      startYear := Some(2017),
-      orgProjectName := "mu-scala",
-      orgGithubSetting := GitHubSettings(
-        organization = "higherkindness",
-        project = (name in LocalRootProject).value,
-        organizationName = "47 Degrees",
-        groupId = "io.higherkindness",
-        organizationHomePage = url("http://47deg.com"),
-        organizationEmail = "hello@47deg.com"
-      ),
-      scalaVersion := V.scala213,
+      organization := "io.higherkindness",
+      organizationName := "47 Degrees",
+      organizationHomepage := Some(url("http://47deg.com")),
       crossScalaVersions := Seq(V.scala212, V.scala213),
+      startYear := Some(2017),
       scalacOptions --= Seq("-Xfuture", "-Xfatal-warnings"),
       Test / fork := true,
       compileOrder in Compile := CompileOrder.JavaThenScala,
@@ -354,65 +336,6 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         "org.scalatest" %% "scalatest" % V.scalatest % Test,
         "org.slf4j"     % "slf4j-nop"  % V.slf4j     % Test
-      ),
-      releaseProcess := Seq[ReleaseStep](
-        orgInitialVcsChecks,
-        checkSnapshotDependencies,
-        orgInquireVersions,
-        orgTagRelease,
-        orgUpdateChangeLog,
-        releaseStepCommandAndRemaining("+publishSigned"),
-        releaseStepCommand("sonatypeBundleRelease"),
-        setNextVersion,
-        orgCommitNextVersion,
-        orgPostRelease
-      )
-    ) ++ Seq(
-      // sbt-org-policies settings:
-      // format: OFF
-      orgMaintainersSetting := List(Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
-      orgBadgeListSetting := List(
-        TravisBadge.apply,
-        FixedCodecovBadge.apply,
-        { info => MavenCentralBadge.apply(info.copy(libName = "mu-scala")) },
-        ScalaLangBadge.apply,
-        LicenseBadge.apply,
-        // Gitter badge (owner field) can be configured with default value if we migrate it to the higherkindness organization
-        { info => GitterBadge.apply(info.copy(owner = "47deg", repo = "mu")) },
-        GitHubIssuesBadge.apply
-      ),
-      orgEnforcedFilesSetting := List(
-        LicenseFileType(orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
-        ContributingFileType(
-          orgProjectName.value,
-          // Organization field can be configured with default value if we migrate it to the higherkindness organization
-          orgGithubSetting.value.copy(organization = "47deg", project = "mu-scala")
-        ),
-        AuthorsFileType(
-          name.value,
-          orgGithubSetting.value,
-          orgMaintainersSetting.value,
-          orgContributorsSetting.value),
-        NoticeFileType(orgProjectName.value, orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
-        VersionSbtFileType,
-        ChangelogFileType,
-        ReadmeFileType(
-          orgProjectName.value,
-          orgGithubSetting.value,
-          startYear.value,
-          orgLicenseSetting.value,
-          orgCommitBranchSetting.value,
-          sbtPlugin.value,
-          name.value,
-          version.value,
-          scalaBinaryVersion.value,
-          sbtBinaryVersion.value,
-          orgSupportedScalaJSVersion.value,
-          orgBadgeListSetting.value
-        ),
-        ScalafmtFileType,
-        TravisFileType(crossScalaVersions.value, orgScriptCICommandKey, orgAfterCISuccessCommandKey)
       )
     ) ++ macroSettings
-  // format: ON
 }

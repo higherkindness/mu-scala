@@ -60,7 +60,7 @@ much faster.
 2. Rebuild the Haskell Docker image.
 3. Make any necessary changes to the Scala code.
 4. Run the tests to check they work: `sbt haskell-integration-tests/test`
-5. Push the new Docker image to Docker Hub so Travis can use it: `docker push`.
+5. Push the new Docker image to Docker Hub so the CI integration system can use it: `docker push`.
    (Currently only @cb372 can do this step. If it becomes a major bottleneck, we
    can migrate the image to a `higherkindness` organisation or something.)
 6. Push your changes to GitHub
