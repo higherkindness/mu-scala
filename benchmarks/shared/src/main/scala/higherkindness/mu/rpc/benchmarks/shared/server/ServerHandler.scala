@@ -19,8 +19,6 @@ package shared
 package server
 
 import cats.effect._
-import cats.instances.list._
-import cats.syntax.traverse._
 import higherkindness.mu.rpc.benchmarks.shared.models._
 import higherkindness.mu.rpc.benchmarks.shared.protocols._
 import higherkindness.mu.rpc.protocol.Empty

@@ -18,6 +18,8 @@ package higherkindness.mu.rpc.benchmarks
 package shared
 
 import cats.effect._
+import cats.instances.list._
+import cats.syntax.traverse._
 import higherkindness.mu.rpc.benchmarks.shared.protocols._
 import higherkindness.mu.rpc.benchmarks.shared.server._
 import higherkindness.mu.rpc.server._
