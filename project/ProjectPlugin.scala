@@ -54,6 +54,12 @@ object ProjectPlugin extends AutoPlugin {
       val slf4j: String                 = "1.7.30"
     }
 
+    lazy val noPublishSettings = Seq(
+      publish := ((): Unit),
+      publishArtifact := false,
+      publishMavenStyle := false // suppress warnings about intransitive deps (not published anyway)
+    )
+
     lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "org.typelevel"     %% "cats-effect"                 % V.catsEffect          % Test,
@@ -318,7 +324,6 @@ object ProjectPlugin extends AutoPlugin {
       organization := "io.higherkindness",
       organizationName := "47 Degrees",
       organizationHomepage := Some(url("http://47deg.com")),
-      scalaVersion := V.scala213,
       crossScalaVersions := Seq(V.scala212, V.scala213),
       startYear := Some(2017),
       scalacOptions --= Seq("-Xfuture", "-Xfatal-warnings"),
