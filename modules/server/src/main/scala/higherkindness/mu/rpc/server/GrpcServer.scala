@@ -18,7 +18,7 @@ package higherkindness.mu.rpc
 package server
 
 import cats.~>
-import cats.effect.{Async, Effect, Resource, Sync}
+import cats.effect.{Async, Resource, Sync}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import io.grpc.{Server, ServerBuilder, ServerServiceDefinition}
@@ -77,20 +77,39 @@ trait GrpcServer[F[_]] { self =>
 
 object GrpcServer {
 
-  def server[F[_]](S: GrpcServer[F])(implicit F: Effect[F]): F[Unit] =
-    F.bracket(S.start)(_ => F.never[Unit])(_ => S.shutdown >> S.awaitTermination)
-
+  /**
+   * Build a Resource that starts the given [[GrpcServer]] before use,
+   * and shuts it down afterwards.
+   */
   def serverResource[F[_]](S: GrpcServer[F])(implicit F: Async[F]): Resource[F, Unit] =
-    Resource.make(S.start >> F.never[Unit])(_ => S.shutdown >> S.awaitTermination)
+    Resource.make(S.start)(_ => S.shutdown >> S.awaitTermination)
 
+  /**
+   * Start the given server and keep it running forever.
+   */
+  def server[F[_]](S: GrpcServer[F])(implicit F: Async[F]): F[Unit] =
+    serverResource[F](S).use(_ => F.never[Unit])
+
+  /**
+   * Build a [[GrpcServer]] that uses the default network transport layer.
+   *
+   * The transport layer will be Netty, unless you have written your own
+   * [[io.grpc.ServerProvider]] implementation and added it to the classpath.
+   */
   def default[F[_]](port: Int, configList: List[GrpcConfig])(
       implicit F: Sync[F]
   ): F[GrpcServer[F]] =
     F.delay(buildServer(ServerBuilder.forPort(port), configList)).map(fromServer[F])
 
+  /**
+   * Build a [[GrpcServer]] that uses the Netty network transport layer.
+   */
   def netty[F[_]](port: Int, configList: List[GrpcConfig])(implicit F: Sync[F]): F[GrpcServer[F]] =
     netty(ChannelForPort(port), configList)
 
+  /**
+   * Build a [[GrpcServer]] that uses the Netty network transport layer.
+   */
   def netty[F[_]](channelFor: ChannelFor, configList: List[GrpcConfig])(
       implicit F: Sync[F]
   ): F[GrpcServer[F]] =
@@ -99,6 +118,9 @@ object GrpcServer {
       server  <- F.delay(buildNettyServer(builder, configList))
     } yield fromServer[F](server)
 
+  /**
+   * Helper to convert an [[io.grpc.Server]] into a [[GrpcServer]].
+   */
   def fromServer[F[_]: Sync](server: Server): GrpcServer[F] =
     handlers.GrpcServerHandler[F].mapK(λ[GrpcServerOps[F, ?] ~> F](_.run(server)))
 
