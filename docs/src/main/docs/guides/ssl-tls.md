@@ -24,7 +24,9 @@ Mu allows you to choose the underlying transport layer you want to use for your
 gRPC servers and clients:
 
 * For the server you can use `Netty`, or the default transport provided by the
-  gRPC Java library.
+  gRPC Java library. (In reality the default transport will also be `Netty`,
+  unless you have written your own `io.grpc.ServerProvider` implementation and
+  added it to the classpath.)
 * For the client you can use `Netty` or `OkHttp`.
 
 However, SSL/TLS encryption in Mu is currently only supported for servers and
