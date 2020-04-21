@@ -104,7 +104,7 @@ object ProjectPlugin extends AutoPlugin {
         "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat
       ),
       // Disable this flag because quasiquotes trigger a lot of false positive warnings
-      scalacOptions -= "-Wunused:patvars", // for Scala 2.13
+      scalacOptions -= "-Wunused:patvars",    // for Scala 2.13
       scalacOptions -= "-Ywarn-unused:params" // for Scala 2.12
     )
 
