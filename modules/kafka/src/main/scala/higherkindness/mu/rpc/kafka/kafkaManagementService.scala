@@ -41,7 +41,7 @@ import org.apache.kafka.clients.admin.{
 import org.apache.kafka.clients.consumer.{OffsetAndMetadata => KOffsetAndMetadata}
 import pbdirect.Pos
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object kafkaManagementService {
   final case class CreatePartitionsRequest(name: String, numPartitions: Int)

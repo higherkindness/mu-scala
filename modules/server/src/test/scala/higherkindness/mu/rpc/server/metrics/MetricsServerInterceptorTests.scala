@@ -17,7 +17,6 @@
 package higherkindness.mu.rpc.server.metrics
 
 import cats.effect.{Clock, IO, Resource}
-import cats.syntax.apply._
 import higherkindness.mu.rpc.common.{A => _, _}
 import higherkindness.mu.rpc.common.util.FakeClock
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
