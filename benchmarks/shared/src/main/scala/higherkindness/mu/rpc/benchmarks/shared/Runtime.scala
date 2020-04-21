@@ -20,13 +20,16 @@ package shared
 import cats.effect.{ContextShift, IO, Timer}
 
 import scala.concurrent.ExecutionContext
+import io.chrisdavenport.log4cats.Logger
+import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 trait Runtime {
 
-  implicit val EC: ExecutionContext = ExecutionContext.Implicits.global
+  val EC: ExecutionContext = ExecutionContext.Implicits.global
 
-  implicit val timer: Timer[IO]     = IO.timer(EC)
-  implicit val cs: ContextShift[IO] = IO.contextShift(EC)
+  implicit val logger: Logger[IO]        = Slf4jLogger.getLogger[IO]
+  implicit lazy val timer: Timer[IO]     = IO.timer(EC)
+  implicit lazy val cs: ContextShift[IO] = IO.contextShift(EC)
 
   implicit val persistenceService: PersistenceService[IO] = PersistenceService[IO]
 

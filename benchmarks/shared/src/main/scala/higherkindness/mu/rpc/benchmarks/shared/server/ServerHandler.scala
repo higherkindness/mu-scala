@@ -60,7 +60,7 @@ trait ServerImplicits extends Runtime {
   implicit private val avroWithSchemaHandler: AvroWithSchemaHandler[IO] =
     new AvroWithSchemaHandler[IO]
 
-  implicit val grpcConfigsAvro: IO[List[GrpcConfig]] = List(
+  implicit lazy val grpcConfigsAvro: IO[List[GrpcConfig]] = List(
     PersonServicePB.bindService[IO].map(AddService),
     PersonServiceAvro.bindService[IO].map(AddService),
     PersonServiceAvroWithSchema.bindService[IO].map(AddService)

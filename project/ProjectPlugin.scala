@@ -35,7 +35,7 @@ object ProjectPlugin extends AutoPlugin {
       val fs2: String                 = "2.3.0"
       val fs2Grpc: String             = "0.7.0"
       val fs2Kafka: String            = "0.20.2"
-      val grpc: String                = "1.28.1"
+      val grpc: String                = "1.30.0-SNAPSHOT"
       val jodaTime: String            = "2.10.5"
       val http4s: String              = "0.21.0-M6"
       val kindProjector: String       = "0.10.3"
@@ -246,8 +246,21 @@ object ProjectPlugin extends AutoPlugin {
       },
       unmanagedSourceDirectories in Test += {
         baseDirectory.value.getParentFile / "shared" / "src" / "test" / "scala"
-      }
+      },
+  fork := false,
+  libraryDependencies ++= Seq(
+    "io.grpc" % "grpc-all" % V.grpc,
+
+        "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
+        "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
+        "org.slf4j" % "log4j-over-slf4j" % "1.7.30",
+         "org.slf4j" % "jul-to-slf4j" % "1.7.30",
+         "org.slf4j" % "jcl-over-slf4j" % "1.7.30",
+         "org.slf4j" % "slf4j-api" % "1.7.30",
+        "ch.qos.logback" % "logback-core" % "1.1.8",
+        "ch.qos.logback" % "logback-classic" % "1.1.8"
     )
+  )
 
     lazy val noCrossCompilationLastScala: Seq[Def.Setting[_]] = Seq(
       scalaVersion := V.scala212,
@@ -341,6 +354,8 @@ object ProjectPlugin extends AutoPlugin {
         organizationEmail = "hello@47deg.com"
       ),
       scalaVersion := V.scala213,
+      resolvers +=
+  "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
       crossScalaVersions := Seq(V.scala212, V.scala213),
       scalacOptions --= Seq("-Xfuture", "-Xfatal-warnings"),
       Test / fork := true,
