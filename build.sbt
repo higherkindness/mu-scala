@@ -1,4 +1,11 @@
-pgpPassphrase := Some(getEnvVar("PGP_PASSPHRASE").getOrElse("").toCharArray)
+addCommandAlias(
+  "ci-test",
+  "+scalafmtCheck; +scalafmtSbtCheck; root-non-crossed-scala-versions/test; +haskell-integration-tests/test; +docs/mdoc; +coverage; +test; +coverageReport; +coverageAggregate"
+)
+addCommandAlias("ci-docs", "project-docs/mdoc; docs/mdoc; headerCreateAll")
+addCommandAlias("ci-microsite", "docs/publishMicrosite")
+
+skip in publish := true
 
 ////////////////
 //// COMMON ////
@@ -186,7 +193,7 @@ lazy val `benchmarks-vprev` = project
   .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vprev")
   .settings(crossSettings)
-  .settings(noPublishSettings)
+  .settings(skip in publish := true)
   .enablePlugins(JmhPlugin)
 
 lazy val `benchmarks-vnext` = project
@@ -197,7 +204,7 @@ lazy val `benchmarks-vnext` = project
   .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vnext")
   .settings(crossSettings)
-  .settings(noPublishSettings)
+  .settings(skip in publish := true)
   .enablePlugins(JmhPlugin)
 
 /////////////////////
@@ -238,7 +245,7 @@ lazy val `legacy-avro-decimal-compat-encoders` = project
 
 lazy val `haskell-integration-tests` = project
   .in(file("modules/haskell-integration-tests"))
-  .settings(noPublishSettings)
+  .settings(skip in publish := true)
   .settings(haskellIntegrationTestSettings)
   .dependsOn(server, netty, channel, fs2)
 
@@ -283,14 +290,14 @@ lazy val coreModulesDeps: Seq[ClasspathDependency] =
 lazy val root = project
   .in(file("."))
   .settings(name := "mu-scala")
-  .settings(noPublishSettings)
+  .settings(skip in publish := true)
   .aggregate(coreModules: _*)
   .dependsOn(coreModulesDeps: _*)
 
 lazy val `root-non-crossed-scala-versions` = project
   .in(file("benchmarks"))
   .settings(name := "mu-scala-benchmarks")
-  .settings(noPublishSettings)
+  .settings(skip in publish := true)
   .settings(noCrossCompilationLastScala)
   .aggregate(nonCrossedScalaVersionModules: _*)
   .dependsOn(nonCrossedScalaVersionModules.map(ClasspathDependency(_, None)): _*)
@@ -301,6 +308,15 @@ lazy val docs = project
   .settings(name := "mu-docs")
   .settings(docsSettings)
   .settings(micrositeSettings)
-  .settings(noPublishSettings)
+  .settings(skip in publish := true)
   .enablePlugins(MicrositesPlugin)
+  .enablePlugins(MdocPlugin)
+
+lazy val `project-docs` = (project in file(".docs"))
+  .aggregate(coreModules: _*)
+  .dependsOn(coreModulesDeps: _*)
+  .settings(moduleName := "mu-project-docs")
+  .settings(mdocIn := file(".docs"))
+  .settings(mdocOut := file("."))
+  .settings(skip in publish := true)
   .enablePlugins(MdocPlugin)
