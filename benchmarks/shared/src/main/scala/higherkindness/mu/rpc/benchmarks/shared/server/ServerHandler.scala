@@ -55,6 +55,8 @@ class AvroWithSchemaHandler[F[_]: Effect](implicit PS: PersistenceService[F])
 
 trait ServerImplicits extends Runtime {
 
+  val grpcPort: Int = 12345
+
   implicit private val pbHandler: ProtoHandler[IO]  = new ProtoHandler[IO]
   implicit private val avroHandler: AvroHandler[IO] = new AvroHandler[IO]
   implicit private val avroWithSchemaHandler: AvroWithSchemaHandler[IO] =
@@ -65,4 +67,13 @@ trait ServerImplicits extends Runtime {
     PersonServiceAvro.bindService[IO].map(AddService),
     PersonServiceAvroWithSchema.bindService[IO].map(AddService)
   ).sequence[IO, GrpcConfig]
+
+  def startServer: IO[Unit] =
+    for {
+      _          <- logger.info("starting server..")
+      serviceDef <- grpcConfigsAvro
+      server     <- GrpcServer.default[IO](grpcPort, serviceDef)
+      _          <- Resource.liftF(GrpcServer.server[IO](server)).use(_ => IO.never).start
+      _          <- logger.info("server started..")
+    } yield ()
 }

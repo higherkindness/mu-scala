@@ -18,52 +18,51 @@ package higherkindness.mu.rpc.benchmarks
 
 import java.util.concurrent.TimeUnit
 
-import cats.effect.{IO, Resource}
-import higherkindness.mu.rpc.benchmarks.shared.Runtime
+import cats.effect.IO
+import higherkindness.mu.rpc.ChannelForAddress
 import higherkindness.mu.rpc.benchmarks.shared.Utils._
 import higherkindness.mu.rpc.benchmarks.shared.models._
 import higherkindness.mu.rpc.benchmarks.shared.protocols.PersonServiceAvro
 import higherkindness.mu.rpc.benchmarks.shared.server._
 import higherkindness.mu.rpc.protocol.Empty
-import higherkindness.mu.rpc.testing.servers.ServerChannel
 import org.openjdk.jmh.annotations._
 
 @State(Scope.Thread)
 @BenchmarkMode(Array(Mode.Throughput))
 @OutputTimeUnit(TimeUnit.SECONDS)
-class AvroBenchmark extends Runtime {
+class AvroBenchmark extends ServerImplicits {
 
-  implicit val handler: AvroHandler[IO] = new AvroHandler[IO]
+  @Setup
+  def setup(): Unit = startServer.unsafeRunSync
 
-  def clientIO: Resource[IO, PersonServiceAvro[IO]] =
-    Resource
-      .liftF(PersonServiceAvro.bindService[IO])
-      .flatMap(ServerChannel[IO](_))
-      .flatMap(sc => PersonServiceAvro.clientFromChannel[IO](IO(sc.channel)))
+  def clientCall[B](f: PersonServiceAvro[IO] => IO[B]): B =
+    PersonServiceAvro
+      .client[IO](ChannelForAddress("localhost", grpcPort))
+      .use(f)
+      .unsafeRunTimed(defaultTimeOut).get
 
   @TearDown
   def shutdown(): Unit = {}
 
   @Benchmark
   def listPersons: PersonList =
-    clientIO.use(_.listPersons(Empty)).unsafeRunTimed(defaultTimeOut).get
+    clientCall(_.listPersons(Empty))
 
   @Benchmark
   def getPerson: Person =
-    clientIO.use(_.getPerson(PersonId("1"))).unsafeRunTimed(defaultTimeOut).get
+    clientCall(_.getPerson(PersonId("1")))
 
   @Benchmark
   def getPersonLinks: PersonLinkList =
-    clientIO.use(_.getPersonLinks(PersonId("1"))).unsafeRunTimed(defaultTimeOut).get
+    clientCall(_.getPersonLinks(PersonId("1")))
 
   @Benchmark
   def createPerson: Person =
-    clientIO.use(_.createPerson(person)).unsafeRunTimed(defaultTimeOut).get
+    clientCall(_.createPerson(person))
 
   @Benchmark
-  def programComposition: PersonAggregation = {
-
-    def clientProgram: IO[PersonAggregation] = clientIO.use { client =>
+  def programComposition: PersonAggregation =
+    clientCall { client =>
       for {
         personList <- client.listPersons(Empty)
         p1         <- client.getPerson(PersonId("1"))
@@ -75,8 +74,5 @@ class AvroBenchmark extends Runtime {
         pNew       <- client.createPerson(person)
       } yield (p1, p2, p3, p4, p1Links, p3Links, personList.add(pNew))
     }
-
-    clientProgram.unsafeRunTimed(defaultTimeOut).get
-  }
 
 }
