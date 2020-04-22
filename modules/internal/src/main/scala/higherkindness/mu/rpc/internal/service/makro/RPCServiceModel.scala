@@ -86,8 +86,8 @@ class RPCServiceModel[C <: Context](val c: C) {
         EnclosingService(
           serviceName,
           fullServiceName,
-        compressionType,
-        methodNameStyle,
+          compressionType,
+          methodNameStyle,
           F,
           kleisliFSpanF
         ),
@@ -340,7 +340,7 @@ class RPCServiceModel[C <: Context](val c: C) {
       }
 
     val httpOperations: List[HttpOperation] = for {
-      d <- rpcDefs.collect { case x if findAnnotation(x.mods, "http").isDefined => x }
+      d      <- rpcDefs.collect { case x if findAnnotation(x.mods, "http").isDefined => x }
       params <- d.vparamss
       _ = require(params.length == 1, s"RPC call ${d.name} has more than one request parameter")
       p <- params.headOption.toList
@@ -403,12 +403,8 @@ class RPCServiceModel[C <: Context](val c: C) {
     val HttpRestService: TypeName = TypeName(serviceDef.name.toString + "RestService")
 
     val arguments: List[Tree] = List(q"handler: ${serviceDef.name}[F]") ++
-      requestTypes.map(n =>
-        q"${TermName("decoder" + n)}: _root_.io.circe.Decoder[${TypeName(n)}]"
-      ) ++
-      responseTypes.map(n =>
-        q"${TermName("encoder" + n)}: _root_.io.circe.Encoder[${TypeName(n)}]"
-      ) ++
+      requestTypes.map(n => q"${TermName("decoder" + n)}: _root_.io.circe.Decoder[${TypeName(n)}]") ++
+      responseTypes.map(n => q"${TermName("encoder" + n)}: _root_.io.circe.Encoder[${TypeName(n)}]") ++
       streamConstraints
 
     val httpRestServiceClass: Tree = q"""

@@ -48,12 +48,12 @@ class OperationModels[C <: Context](val c: C) {
   }
 
   case class EnclosingService(
-    serviceName: TypeName,
-    fullServiceName: String,
-    compressionType: CompressionType,
-    methodNameStyle: MethodNameStyle,
-    F: TypeName,
-    kleisliFSpanF: SelectFromTypeTree
+      serviceName: TypeName,
+      fullServiceName: String,
+      compressionType: CompressionType,
+      methodNameStyle: MethodNameStyle,
+      F: TypeName,
+      kleisliFSpanF: SelectFromTypeTree
   )
 
   //todo: validate that the request and responses are case classes, if possible
@@ -355,9 +355,9 @@ class OperationModels[C <: Context](val c: C) {
   }
 
   case class HttpOperation(
-    operation: Operation,
-    F: TypeName
-    ) {
+      operation: Operation,
+      F: TypeName
+  ) {
 
     import operation._
 
