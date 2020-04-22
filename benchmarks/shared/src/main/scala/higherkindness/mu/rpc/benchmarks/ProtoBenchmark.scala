@@ -19,7 +19,6 @@ package higherkindness.mu.rpc.benchmarks
 import java.util.concurrent.TimeUnit
 
 import cats.effect.IO
-import higherkindness.mu.rpc.ChannelForAddress
 import higherkindness.mu.rpc.benchmarks.shared.Utils._
 import higherkindness.mu.rpc.benchmarks.shared.models._
 import higherkindness.mu.rpc.benchmarks.shared.protocols.PersonServicePB
@@ -32,38 +31,33 @@ import org.openjdk.jmh.annotations._
 @OutputTimeUnit(TimeUnit.SECONDS)
 class ProtoBenchmark extends ServerRuntime {
 
+  lazy val client = PersonServicePB.unsafeClientFromChannel[IO](clientChannel)
+
   @Setup
   def setup(): Unit = startServer
 
   @TearDown
-  def shutdown(): Unit = stopServer
-
-  def clientCall[B](f: PersonServicePB[IO] => IO[B]): B =
-    PersonServicePB
-      .client[IO](ChannelForAddress("localhost", grpcPort))
-      .use(f)
-      .unsafeRunTimed(defaultTimeOut)
-      .get
+  def shutdown(): Unit = tearDown
 
   @Benchmark
   def listPersons: PersonList =
-    clientCall(_.listPersons(Empty))
+    client.listPersons(Empty).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
   def getPerson: Person =
-    clientCall(_.getPerson(PersonId("1")))
+    client.getPerson(PersonId("1")).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
   def getPersonLinks: PersonLinkList =
-    clientCall(_.getPersonLinks(PersonId("1")))
+    client.getPersonLinks(PersonId("1")).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
   def createPerson: Person =
-    clientCall(_.createPerson(person))
+    client.createPerson(person).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
-  def programComposition: PersonAggregation = clientCall { client =>
-    for {
+  def programComposition: PersonAggregation =
+    (for {
       personList <- client.listPersons(Empty)
       p1         <- client.getPerson(PersonId("1"))
       p2         <- client.getPerson(PersonId("2"))
@@ -72,7 +66,8 @@ class ProtoBenchmark extends ServerRuntime {
       p1Links    <- client.getPersonLinks(PersonId(p1.id))
       p3Links    <- client.getPersonLinks(PersonId(p3.id))
       pNew       <- client.createPerson(person)
-    } yield (p1, p2, p3, p4, p1Links, p3Links, personList.add(pNew))
-  }
+    } yield (p1, p2, p3, p4, p1Links, p3Links, personList.add(pNew)))
+      .unsafeRunTimed(defaultTimeOut)
+      .get
 
 }

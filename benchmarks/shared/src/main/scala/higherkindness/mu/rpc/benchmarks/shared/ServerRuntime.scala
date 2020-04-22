@@ -20,6 +20,8 @@ package shared
 import cats.effect._
 import cats.instances.list._
 import cats.syntax.traverse._
+import higherkindness.mu.rpc._
+import higherkindness.mu.rpc.channel.ManagedChannelInterpreter
 import higherkindness.mu.rpc.benchmarks.shared.protocols._
 import higherkindness.mu.rpc.benchmarks.shared.server._
 import higherkindness.mu.rpc.server._
@@ -27,6 +29,9 @@ import higherkindness.mu.rpc.server._
 import scala.concurrent.ExecutionContext
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import java.util.concurrent.TimeUnit
+import io.grpc.ManagedChannel
+import higherkindness.mu.rpc.channel.UsePlaintext
 
 trait ServerRuntime {
 
@@ -51,7 +56,13 @@ trait ServerRuntime {
     PersonServiceAvroWithSchema.bindService[IO].map(AddService)
   ).sequence[IO, GrpcConfig]
 
-  implicit val grpcServer: GrpcServer[IO] =
+  implicit lazy val clientChannel =
+    new ManagedChannelInterpreter[IO](
+      ChannelForAddress("localhost", grpcPort),
+      List(UsePlaintext())
+    ).build.unsafeRunSync
+
+  implicit lazy val grpcServer: GrpcServer[IO] =
     grpcConfigs.flatMap(conf => GrpcServer.default[IO](grpcPort, conf)).unsafeRunSync
 
   def startServer(implicit server: GrpcServer[IO]): Unit =
@@ -61,10 +72,15 @@ trait ServerRuntime {
       _ <- logger.info("Server started..")
     } yield ()).unsafeRunSync
 
-  def stopServer(implicit server: GrpcServer[IO]): Unit =
+  def tearDown(implicit server: GrpcServer[IO], channel: ManagedChannel): Unit =
     (for {
+      _ <- logger.info("Stopping client..")
+      _ <- IO(channel.shutdownNow())
+      _ <- IO(channel.awaitTermination(1, TimeUnit.SECONDS))
+      _ <- logger.info("Client Stopped..")
       _ <- logger.info("Stopping server..")
       _ <- server.shutdownNow()
+      _ <- server.awaitTerminationTimeout(1, TimeUnit.SECONDS)
       _ <- logger.info("Server Stopped..")
     } yield ()).unsafeRunSync
 }
