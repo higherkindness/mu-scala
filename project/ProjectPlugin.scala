@@ -43,14 +43,14 @@ object ProjectPlugin extends AutoPlugin {
       val prometheus: String            = "0.8.1"
       val pureconfig: String            = "0.12.3"
       val reactiveStreams: String       = "1.0.3"
-      val scala212: String              = "2.12.10"
+      val scala212: String              = "2.12.11"
       val scala213: String              = "2.13.1"
       val scalaCollectionCompat: String = "2.1.6"
       val scalacheck: String            = "1.14.3"
       val scalacheckToolbox: String     = "0.3.5"
       val scalamock: String             = "4.4.0"
       val scalatest: String             = "3.1.1"
-      val scalatestplusScheck: String   = "3.1.0.0-RC2"
+      val scalatestplusScheck: String   = "3.1.1.1"
       val slf4j: String                 = "1.7.30"
     }
 
@@ -65,7 +65,7 @@ object ProjectPlugin extends AutoPlugin {
         "org.typelevel"     %% "cats-effect"                 % V.catsEffect          % Test,
         "org.scalamock"     %% "scalamock"                   % V.scalamock           % Test,
         "com.47deg"         %% "scalacheck-toolbox-datetime" % V.scalacheckToolbox   % Test,
-        "org.scalatestplus" %% "scalatestplus-scalacheck"    % V.scalatestplusScheck % Test
+        "org.scalatestplus" %% "scalacheck-1-14"             % V.scalatestplusScheck % Test
       )
     )
 
@@ -213,11 +213,11 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val testingSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "io.grpc"                % "grpc-testing"              % V.grpc,
-        "org.typelevel"          %% "cats-effect"              % V.catsEffect,
-        "org.scalacheck"         %% "scalacheck"               % V.scalacheck % Test,
-        "org.scalatestplus"      %% "scalatestplus-scalacheck" % V.scalatestplusScheck % Test,
-        "org.scala-lang.modules" %% "scala-collection-compat"  % V.scalaCollectionCompat % Test
+        "io.grpc"                % "grpc-testing"             % V.grpc,
+        "org.typelevel"          %% "cats-effect"             % V.catsEffect,
+        "org.scalacheck"         %% "scalacheck"              % V.scalacheck % Test,
+        "org.scalatestplus"      %% "scalacheck-1-14"         % V.scalatestplusScheck % Test,
+        "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat % Test
       )
     )
 
@@ -241,13 +241,27 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val crossSettings: Seq[Def.Setting[_]] = Seq(
+    lazy val benchmarksSettings: Seq[Def.Setting[_]] = Seq(
       unmanagedSourceDirectories in Compile += {
         baseDirectory.value.getParentFile / "shared" / "src" / "main" / "scala"
       },
+      unmanagedResourceDirectories in Compile += {
+        baseDirectory.value.getParentFile / "shared" / "src" / "main" / "resources"
+      },
       unmanagedSourceDirectories in Test += {
         baseDirectory.value.getParentFile / "shared" / "src" / "test" / "scala"
-      }
+      },
+      libraryDependencies ++= Seq(
+        "io.grpc"           % "grpc-all"         % V.grpc,
+        "io.chrisdavenport" %% "log4cats-core"   % V.log4cats,
+        "io.chrisdavenport" %% "log4cats-slf4j"  % V.log4cats,
+        "org.slf4j"         % "log4j-over-slf4j" % V.slf4j,
+        "org.slf4j"         % "jul-to-slf4j"     % V.slf4j,
+        "org.slf4j"         % "jcl-over-slf4j"   % V.slf4j,
+        "org.slf4j"         % "slf4j-api"        % V.slf4j,
+        "ch.qos.logback"    % "logback-core"     % V.logback,
+        "ch.qos.logback"    % "logback-classic"  % V.logback
+      )
     )
 
     lazy val noCrossCompilationLastScala: Seq[Def.Setting[_]] = Seq(
@@ -291,10 +305,10 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "org.scalatest"         %% "scalatest"                % V.scalatest,
-        "org.scalatestplus"     %% "scalatestplus-scalacheck" % V.scalatestplusScheck,
-        "io.dropwizard.metrics" % "metrics-jmx"               % V.dropwizard,
-        "org.tpolecat"          %% "natchez-jaeger"           % V.natchez
+        "org.scalatest"         %% "scalatest"       % V.scalatest,
+        "org.scalatestplus"     %% "scalacheck-1-14" % V.scalatestplusScheck,
+        "io.dropwizard.metrics" % "metrics-jmx"      % V.dropwizard,
+        "org.tpolecat"          %% "natchez-jaeger"  % V.natchez
       )
     ) ++ mdocSettings
 

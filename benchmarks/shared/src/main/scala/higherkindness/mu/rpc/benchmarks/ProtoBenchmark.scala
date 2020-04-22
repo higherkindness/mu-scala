@@ -16,67 +16,58 @@
 
 package higherkindness.mu.rpc.benchmarks
 
-import cats.effect.{IO, Resource}
-import higherkindness.mu.rpc.protocol.Empty
 import java.util.concurrent.TimeUnit
 
+import cats.effect.IO
 import higherkindness.mu.rpc.benchmarks.shared.Utils._
 import higherkindness.mu.rpc.benchmarks.shared.models._
 import higherkindness.mu.rpc.benchmarks.shared.protocols.PersonServicePB
-import higherkindness.mu.rpc.benchmarks.shared.Runtime
-import higherkindness.mu.rpc.benchmarks.shared.server._
-import higherkindness.mu.rpc.testing.servers.ServerChannel
+import higherkindness.mu.rpc.benchmarks.shared._
+import higherkindness.mu.rpc.protocol.Empty
 import org.openjdk.jmh.annotations._
 
 @State(Scope.Thread)
 @BenchmarkMode(Array(Mode.Throughput))
 @OutputTimeUnit(TimeUnit.SECONDS)
-class ProtoBenchmark extends Runtime {
+class ProtoBenchmark extends ServerRuntime {
 
-  implicit val handler: ProtoHandler[IO] = new ProtoHandler[IO]
+  lazy val client = PersonServicePB.unsafeClientFromChannel[IO](clientChannel)
 
-  def clientIO: Resource[IO, PersonServicePB[IO]] =
-    Resource
-      .liftF(PersonServicePB.bindService[IO])
-      .flatMap(ServerChannel[IO](_))
-      .flatMap(sc => PersonServicePB.clientFromChannel[IO](IO(sc.channel)))
+  @Setup
+  def setup(): Unit = startServer
 
   @TearDown
-  def shutdown(): Unit = {}
+  def shutdown(): Unit = tearDown
 
   @Benchmark
   def listPersons: PersonList =
-    clientIO.use(_.listPersons(Empty)).unsafeRunTimed(defaultTimeOut).get
+    client.listPersons(Empty).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
   def getPerson: Person =
-    clientIO.use(_.getPerson(PersonId("1"))).unsafeRunTimed(defaultTimeOut).get
+    client.getPerson(PersonId("1")).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
   def getPersonLinks: PersonLinkList =
-    clientIO.use(_.getPersonLinks(PersonId("1"))).unsafeRunTimed(defaultTimeOut).get
+    client.getPersonLinks(PersonId("1")).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
   def createPerson: Person =
-    clientIO.use(_.createPerson(person)).unsafeRunTimed(defaultTimeOut).get
+    client.createPerson(person).unsafeRunTimed(defaultTimeOut).get
 
   @Benchmark
-  def programComposition: PersonAggregation = {
-
-    def clientProgram: IO[PersonAggregation] = clientIO.use { client =>
-      for {
-        personList <- client.listPersons(Empty)
-        p1         <- client.getPerson(PersonId("1"))
-        p2         <- client.getPerson(PersonId("2"))
-        p3         <- client.getPerson(PersonId("3"))
-        p4         <- client.getPerson(PersonId("4"))
-        p1Links    <- client.getPersonLinks(PersonId(p1.id))
-        p3Links    <- client.getPersonLinks(PersonId(p3.id))
-        pNew       <- client.createPerson(person)
-      } yield (p1, p2, p3, p4, p1Links, p3Links, personList.add(pNew))
-    }
-
-    clientProgram.unsafeRunTimed(defaultTimeOut).get
-  }
+  def programComposition: PersonAggregation =
+    (for {
+      personList <- client.listPersons(Empty)
+      p1         <- client.getPerson(PersonId("1"))
+      p2         <- client.getPerson(PersonId("2"))
+      p3         <- client.getPerson(PersonId("3"))
+      p4         <- client.getPerson(PersonId("4"))
+      p1Links    <- client.getPersonLinks(PersonId(p1.id))
+      p3Links    <- client.getPersonLinks(PersonId(p3.id))
+      pNew       <- client.createPerson(person)
+    } yield (p1, p2, p3, p4, p1Links, p3Links, personList.add(pNew)))
+      .unsafeRunTimed(defaultTimeOut)
+      .get
 
 }

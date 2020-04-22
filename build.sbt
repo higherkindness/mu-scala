@@ -190,13 +190,12 @@ lazy val `benchmarks-vprev` = project
   .settings(
     libraryDependencies ++= Seq(
       "io.higherkindness" %% "mu-rpc-channel" % V.lastRelease,
-      "io.higherkindness" %% "mu-rpc-server"  % V.lastRelease,
-      "io.higherkindness" %% "mu-rpc-testing" % V.lastRelease
+      "io.higherkindness" %% "mu-rpc-server"  % V.lastRelease
     )
   )
   .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vprev")
-  .settings(crossSettings)
+  .settings(benchmarksSettings)
   .settings(noPublishSettings)
   .enablePlugins(JmhPlugin)
 
@@ -204,10 +203,9 @@ lazy val `benchmarks-vnext` = project
   .in(file("benchmarks/vnext"))
   .dependsOn(channel)
   .dependsOn(server)
-  .dependsOn(testing)
   .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vnext")
-  .settings(crossSettings)
+  .settings(benchmarksSettings)
   .settings(noPublishSettings)
   .enablePlugins(JmhPlugin)
 
