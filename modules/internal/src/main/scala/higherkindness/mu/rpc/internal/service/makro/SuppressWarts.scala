@@ -13,7 +13,6 @@ object SuppressWarts {
 class WartSuppression[C <: Context](val c: C) {
   import c.universe._
 
-
   implicit val suppressWartsOnModifier: SuppressWarts[Modifiers] = new SuppressWarts[Modifiers] {
     def suppressWarts(warts: String*)(mod: Modifiers): Modifiers = {
       val argList = warts.map(ws => s"org.wartremover.warts.$ws")
