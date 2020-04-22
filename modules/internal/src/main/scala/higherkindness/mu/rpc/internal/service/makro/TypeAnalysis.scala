@@ -104,7 +104,7 @@ class TypeAnalysis[C <: Context](val c: C) {
             if possiblyQualifiedName(tpe, fs2StreamFQN) && effectType.toString == F.decodedName.toString =>
           Fs2StreamTpe(t, unwrappedType, elemType)
         case tq"Empty.type" => EmptyTpe(t, unwrappedType, unwrappedType)
-        case other          => UnaryTpe(t, unwrappedType, unwrappedType)
+        case _              => UnaryTpe(t, unwrappedType, unwrappedType)
       }
 
     }
