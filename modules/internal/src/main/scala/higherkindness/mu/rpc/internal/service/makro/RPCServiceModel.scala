@@ -341,8 +341,6 @@ class RPCServiceModel[C <: Context](val c: C) {
 
     val httpOperations: List[HttpOperation] = for {
       d <- rpcDefs.collect { case x if findAnnotation(x.mods, "http").isDefined => x }
-      // TODO not sure what the following line is doing, as the result is not used. Is it needed?
-      _      <- findAnnotation(d.mods, "http").collect({ case Apply(_, args) => args }).toList
       params <- d.vparamss
       _ = require(params.length == 1, s"RPC call ${d.name} has more than one request parameter")
       p <- params.headOption.toList
