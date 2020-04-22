@@ -68,7 +68,7 @@ trait ServerRuntime {
   def startServer(implicit server: GrpcServer[IO]): Unit =
     (for {
       _ <- logger.info("Starting server..")
-      _ <- Resource.liftF(server.start()).use(_ => IO.never).start
+      _ <- server.start()
       _ <- logger.info("Server started..")
     } yield ()).unsafeRunSync
 
