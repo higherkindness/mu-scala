@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
-package internal
+package higherkindness.mu.rpc.internal
 
+import higherkindness.mu.rpc.internal.service.makro._
 import higherkindness.mu.rpc.protocol._
 import scala.reflect.macros.blackbox
 
@@ -25,67 +25,8 @@ class serviceImpl(val c: blackbox.Context) {
 
   import c.universe._
 
-  trait SupressWarts[T] {
-    def supressWarts(warts: String*)(t: T): T
-  }
-
-  object SupressWarts {
-    def apply[A](implicit A: SupressWarts[A]): SupressWarts[A] = A
-
-    implicit val supressWartsOnModifier: SupressWarts[Modifiers] = new SupressWarts[Modifiers] {
-      def supressWarts(warts: String*)(mod: Modifiers): Modifiers = {
-        val argList = warts.map(ws => s"org.wartremover.warts.$ws")
-
-        Modifiers(
-          mod.flags,
-          mod.privateWithin,
-          q"new _root_.java.lang.SuppressWarnings(_root_.scala.Array(..$argList))" :: mod.annotations
-        )
-      }
-    }
-
-    implicit val supressWartsOnClassDef: SupressWarts[ClassDef] = new SupressWarts[ClassDef] {
-      def supressWarts(warts: String*)(clazz: ClassDef): ClassDef = {
-        ClassDef(
-          SupressWarts[Modifiers].supressWarts(warts: _*)(clazz.mods),
-          clazz.name,
-          clazz.tparams,
-          clazz.impl
-        )
-      }
-    }
-
-    implicit val supressWartsOnDefDef: SupressWarts[DefDef] = new SupressWarts[DefDef] {
-      def supressWarts(warts: String*)(defdef: DefDef): DefDef = {
-        DefDef(
-          SupressWarts[Modifiers].supressWarts(warts: _*)(defdef.mods),
-          defdef.name,
-          defdef.tparams,
-          defdef.vparamss,
-          defdef.tpt,
-          defdef.rhs
-        )
-      }
-    }
-
-    implicit val supressWartsOnValDef: SupressWarts[ValDef] = new SupressWarts[ValDef] {
-      def supressWarts(warts: String*)(valdef: ValDef): ValDef = {
-        ValDef(
-          SupressWarts[Modifiers].supressWarts(warts: _*)(valdef.mods),
-          valdef.name,
-          valdef.tpt,
-          valdef.rhs
-        )
-      }
-    }
-
-    implicit class SupressWartsSyntax[A](value: A)(implicit A: SupressWarts[A]) {
-      def supressWarts(warts: String*): A = A.supressWarts(warts: _*)(value)
-    }
-
-  }
-
-  import SupressWarts._
+  val wartSuppression = new WartSuppression[c.type](c)
+  import wartSuppression._
 
   def service(annottees: c.Expr[Any]*): c.Expr[Any] = {
     import Flag._
@@ -119,7 +60,7 @@ class serviceImpl(val c: blackbox.Context) {
         }
 
         val enrichedCompanion = ModuleDef(
-          companion.mods.supressWarts("Any", "NonUnitStatements", "StringPlusAny", "Throw"),
+          companion.mods.suppressWarts("Any", "NonUnitStatements", "StringPlusAny", "Throw"),
           companion.name,
           Template(
             companion.impl.parents,
@@ -457,7 +398,7 @@ class serviceImpl(val c: blackbox.Context) {
 
         ..$clientCallMethods
         ..$nonRpcDefs
-      }""".supressWarts("DefaultArguments")
+      }""".suppressWarts("DefaultArguments")
 
     /*
      * When you write an anonymous parameter in an anonymous function that
@@ -506,7 +447,7 @@ class serviceImpl(val c: blackbox.Context) {
             CE.unit
           )
         )
-      """.supressWarts("DefaultArguments")
+      """.suppressWarts("DefaultArguments")
 
     val clientFromChannel: DefDef =
       q"""
@@ -523,7 +464,7 @@ class serviceImpl(val c: blackbox.Context) {
             CE.unit
           )
         )
-      """.supressWarts("DefaultArguments")
+      """.suppressWarts("DefaultArguments")
 
     val unsafeClient: DefDef =
       q"""
@@ -536,7 +477,7 @@ class serviceImpl(val c: blackbox.Context) {
         val managedChannelInterpreter =
           new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).unsafeBuild
         new $Client[$F](managedChannelInterpreter, options)
-      }""".supressWarts("DefaultArguments")
+      }""".suppressWarts("DefaultArguments")
 
     val unsafeClientFromChannel: DefDef =
       q"""
@@ -544,7 +485,7 @@ class serviceImpl(val c: blackbox.Context) {
         channel: _root_.io.grpc.Channel,
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
       )(implicit ..$classImplicits): $serviceName[$F] = new $Client[$F](channel, options)
-      """.supressWarts("DefaultArguments")
+      """.suppressWarts("DefaultArguments")
 
     private val tracingClientCallMethods: List[Tree] = rpcRequests.map(_.tracingClientDef)
     private val TracingClient                        = TypeName("TracingClient")
@@ -559,7 +500,7 @@ class serviceImpl(val c: blackbox.Context) {
 
         ..$tracingClientCallMethods
         ..$nonRpcDefs
-      }""".supressWarts("DefaultArguments")
+      }""".suppressWarts("DefaultArguments")
 
     val tracingClient: DefDef =
       q"""
@@ -580,7 +521,7 @@ class serviceImpl(val c: blackbox.Context) {
             CE.unit
           )
         )
-      """.supressWarts("DefaultArguments")
+      """.suppressWarts("DefaultArguments")
 
     val tracingClientFromChannel: DefDef =
       q"""
@@ -597,7 +538,7 @@ class serviceImpl(val c: blackbox.Context) {
             CE.unit
           )
         )
-      """.supressWarts("DefaultArguments")
+      """.suppressWarts("DefaultArguments")
 
     val unsafeTracingClient: DefDef =
       q"""
@@ -610,7 +551,7 @@ class serviceImpl(val c: blackbox.Context) {
         val managedChannelInterpreter =
           new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).unsafeBuild
         new $TracingClient[$F](managedChannelInterpreter, options)
-      }""".supressWarts("DefaultArguments")
+      }""".suppressWarts("DefaultArguments")
 
     val unsafeTracingClientFromChannel: DefDef =
       q"""
@@ -618,7 +559,7 @@ class serviceImpl(val c: blackbox.Context) {
         channel: _root_.io.grpc.Channel,
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
       )(implicit ..$classImplicits): $serviceName[$kleisliFSpanF] = new $TracingClient[$F](channel, options)
-      """.supressWarts("DefaultArguments")
+      """.suppressWarts("DefaultArguments")
 
     private def lit(x: Any): Literal = Literal(Constant(x.toString))
 
@@ -704,7 +645,7 @@ class serviceImpl(val c: blackbox.Context) {
         ${lit(fullServiceName)}, ${lit(updatedName)}))
             .build()
         }
-      """.supressWarts("Null", "ExplicitImplicitTypes")
+      """.suppressWarts("Null", "ExplicitImplicitTypes")
 
       val methodDescriptorVal: ValDef = q"""
         val $methodDescriptorValName: _root_.io.grpc.MethodDescriptor[$reqElemType, $respElemType] =
