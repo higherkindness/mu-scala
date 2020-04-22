@@ -2,6 +2,7 @@ package higherkindness.mu.rpc.internal.service.makro
 
 import scala.reflect.macros.blackbox.Context
 
+// $COVERAGE-OFF$
 class TreeHelpers[C <: Context](val c: C) {
   import c.universe._
 
@@ -36,3 +37,4 @@ class TreeHelpers[C <: Context](val c: C) {
   def lit(x: Any): Literal = Literal(Constant(x.toString))
 
 }
+// $COVERAGE-ON$

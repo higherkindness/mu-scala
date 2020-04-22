@@ -2,6 +2,7 @@ package higherkindness.mu.rpc.internal.service.makro
 
 import scala.reflect.macros.blackbox.Context
 
+// $COVERAGE-OFF$
 class TypeAnalysis[C <: Context](val c: C) {
   import c.universe._
 
@@ -124,3 +125,4 @@ class TypeAnalysis[C <: Context](val c: C) {
       extends TypeTypology(orig, unwrapped, streamElem)
 
 }
+// $COVERAGE-ON$

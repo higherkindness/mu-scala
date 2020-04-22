@@ -2,6 +2,7 @@ package higherkindness.mu.rpc.internal.service.makro
 
 import scala.reflect.macros.blackbox.Context
 
+// $COVERAGE-OFF$
 trait SuppressWarts[T] {
   def suppressWarts(warts: String*)(t: T): T
 }
@@ -65,5 +66,4 @@ class WartSuppression[C <: Context](val c: C) {
   }
 
 }
-
-
+// $COVERAGE-ON$
