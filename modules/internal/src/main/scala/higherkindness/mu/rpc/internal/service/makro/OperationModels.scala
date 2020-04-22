@@ -354,7 +354,10 @@ class OperationModels[C <: Context](val c: C) {
 
   }
 
-  case class HttpOperation(operation: Operation) {
+  case class HttpOperation(
+    operation: Operation,
+    F: TypeName
+    ) {
 
     import operation._
 
@@ -367,32 +370,32 @@ class OperationModels[C <: Context](val c: C) {
 
     val requestTypology: Tree = request match {
       case _: UnaryTpe =>
-        q"val request = _root_.org.http4s.Request[F](_root_.org.http4s.Method.$method, uri / ${uri
+        q"val request = _root_.org.http4s.Request[$F](_root_.org.http4s.Method.$method, uri / ${uri
           .replace("\"", "")}).withEntity(req.asJson)"
       case _: Fs2StreamTpe =>
-        q"val request = _root_.org.http4s.Request[F](_root_.org.http4s.Method.$method, uri / ${uri
+        q"val request = _root_.org.http4s.Request[$F](_root_.org.http4s.Method.$method, uri / ${uri
           .replace("\"", "")}).withEntity(req.map(_.asJson))"
       case _ =>
-        q"val request = _root_.org.http4s.Request[F](_root_.org.http4s.Method.$method, uri / ${uri
+        q"val request = _root_.org.http4s.Request[$F](_root_.org.http4s.Method.$method, uri / ${uri
           .replace("\"", "")})"
     }
 
     val executionClient: Tree = response match {
       case _: Fs2StreamTpe =>
-        q"_root_.cats.Applicative[F].pure(client.stream(request).flatMap(_.asStream[${response.messageType}]))"
+        q"_root_.cats.Applicative[$F].pure(client.stream(request).flatMap(_.asStream[${response.messageType}]))"
       case _ =>
-        q"""client.expectOr[${response.messageType}](request)(handleResponseError)(_root_.org.http4s.circe.jsonOf[F, ${response.messageType}])"""
+        q"""client.expectOr[${response.messageType}](request)(handleResponseError)(_root_.org.http4s.circe.jsonOf[$F, ${response.messageType}])"""
     }
 
     def toRequestTree: Tree = request match {
       case _: EmptyTpe =>
-        q"""def $name(client: _root_.org.http4s.client.Client[F])(
+        q"""def $name(client: _root_.org.http4s.client.Client[$F])(
              implicit responseDecoder: _root_.io.circe.Decoder[${response.messageType}]): ${response.originalType} = {
                $requestTypology
                $executionClient
              }"""
       case _ =>
-        q"""def $name(req: ${request.originalType})(client: _root_.org.http4s.client.Client[F])(
+        q"""def $name(req: ${request.originalType})(client: _root_.org.http4s.client.Client[$F])(
              implicit requestEncoder: _root_.io.circe.Encoder[${request.messageType}],
              responseDecoder: _root_.io.circe.Decoder[${response.messageType}]
           ): ${response.originalType} = {

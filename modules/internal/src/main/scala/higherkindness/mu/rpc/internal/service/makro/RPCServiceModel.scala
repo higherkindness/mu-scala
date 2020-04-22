@@ -353,7 +353,7 @@ class RPCServiceModel[C <: Context](val c: C) {
         sys.error(
           "Monix.Observable is not compatible with streaming services. Please consider using Fs2.Stream instead."
         )
-    } yield HttpOperation(op)
+    } yield HttpOperation(op, F)
 
     val streamConstraints: List[Tree] = List(q"F: _root_.cats.effect.Sync[$F]")
 
