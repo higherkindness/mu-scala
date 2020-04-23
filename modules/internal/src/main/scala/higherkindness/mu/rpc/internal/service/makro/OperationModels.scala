@@ -134,29 +134,28 @@ class OperationModels[C <: Context](val c: C) {
     """
 
     private def clientCallMethodFor(clientMethodName: String) =
-      q"$clientCallsImpl.${TermName(clientMethodName)}[$F, $reqElemType, $respElemType](input, $methodDescriptorName.$methodDescriptorValName, channel, options)"
+      q"""
+      $clientCallsImpl.${TermName(clientMethodName)}[$F, $reqElemType, $respElemType](
+        input,
+        $methodDescriptorName.$methodDescriptorValName,
+        channel,
+        options
+      )
+      """
 
-    val clientDef: Tree = streamingType match {
-      case Some(RequestStreaming) =>
+    val clientDef: Tree = {
+      def method(clientCallMethodName: String) =
         q"""
         def $name(input: $reqType): $wrappedRespType =
-          ${clientCallMethodFor("clientStreaming")}
+          ${clientCallMethodFor(clientCallMethodName)}
         """
-      case Some(ResponseStreaming) =>
-        q"""
-        def $name(input: $reqType): $wrappedRespType =
-          ${clientCallMethodFor("serverStreaming")}
-        """
-      case Some(BidirectionalStreaming) =>
-        q"""
-        def $name(input: $reqType): $wrappedRespType =
-          ${clientCallMethodFor("bidiStreaming")}
-        """
-      case None =>
-        q"""
-        def $name(input: $reqType): $wrappedRespType =
-          ${clientCallMethodFor("unary")}
-        """
+
+      streamingType match {
+        case Some(RequestStreaming)       => method("clientStreaming")
+        case Some(ResponseStreaming)      => method("serverStreaming")
+        case Some(BidirectionalStreaming) => method("bidiStreaming")
+        case None                         => method("unary")
+      }
     }
 
     // Kleisli[F, Span[F], Resp]
