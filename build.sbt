@@ -222,25 +222,6 @@ lazy val `marshallers-jodatime` = project
   .settings(moduleName := "mu-rpc-marshallers-jodatime")
   .settings(marshallersJodatimeSettings)
 
-///////////////////////////
-//// DECIMAL MIGRATION ////
-///////////////////////////
-
-lazy val `legacy-avro-decimal-compat-protocol` = project
-  .in(file("modules/legacy-avro-decimal/procotol"))
-  .settings(moduleName := "legacy-avro-decimal-compat-protocol")
-  .disablePlugins(scoverage.ScoverageSbtPlugin)
-
-lazy val `legacy-avro-decimal-compat-model` = project
-  .in(file("modules/legacy-avro-decimal/model"))
-  .settings(moduleName := "legacy-avro-decimal-compat-model")
-
-lazy val `legacy-avro-decimal-compat-encoders` = project
-  .in(file("modules/legacy-avro-decimal/encoders"))
-  .settings(moduleName := "legacy-avro-decimal-compat-encoders")
-  .dependsOn(`legacy-avro-decimal-compat-model` % "provided")
-  .dependsOn(`internal-core`)
-
 //////////////////////////////////////
 //// MU-HASKELL INTEGRATION TESTS ////
 //////////////////////////////////////
@@ -275,9 +256,6 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   http,
   kafka,
   `marshallers-jodatime`,
-  `legacy-avro-decimal-compat-model`,
-  `legacy-avro-decimal-compat-protocol`,
-  `legacy-avro-decimal-compat-encoders`,
   `health-check-unary`
 )
 
