@@ -334,9 +334,6 @@ object ProjectPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] =
     Seq(
-      organization := "io.higherkindness",
-      organizationName := "47 Degrees",
-      organizationHomepage := Some(url("http://47deg.com")),
       crossScalaVersions := Seq(V.scala212, V.scala213),
       scalacOptions --= Seq("-Xfuture", "-Xfatal-warnings"),
       Test / fork := true,
