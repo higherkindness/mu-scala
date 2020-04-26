@@ -334,13 +334,10 @@ object ProjectPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] =
     Seq(
-      description := "mu RPC is a purely functional library for " +
-        "building RPC endpoint based services with support for RPC and HTTP/2",
       organization := "io.higherkindness",
       organizationName := "47 Degrees",
       organizationHomepage := Some(url("http://47deg.com")),
       crossScalaVersions := Seq(V.scala212, V.scala213),
-      startYear := Some(2017),
       scalacOptions --= Seq("-Xfuture", "-Xfatal-warnings"),
       Test / fork := true,
       compileOrder in Compile := CompileOrder.JavaThenScala,
