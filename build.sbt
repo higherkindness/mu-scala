@@ -1,6 +1,5 @@
 ThisBuild / organization := "io.higherkindness"
-ThisBuild / organizationName := "47 Degrees"
-ThisBuild / organizationHomepage := Some(url("http://47deg.com"))
+ThisBuild / githubOrganization := "47degrees"
 
 lazy val checkScalafmt         = "+scalafmtCheck; +scalafmtSbtCheck;"
 lazy val checkBenchmarks       = "benchmarks-root/test;"
