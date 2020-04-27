@@ -82,34 +82,38 @@ lazy val fs2 = project
   .dependsOn(`internal-fs2`)
   .settings(moduleName := "mu-rpc-fs2")
 
-lazy val netty = project
-  .in(file("modules/channel/netty"))
-  .dependsOn(channel % "compile->compile;test->test")
-  .settings(moduleName := "mu-rpc-netty")
-  .settings(clientNettySettings)
-
-lazy val okhttp = project
-  .in(file("modules/channel/okhttp"))
-  .dependsOn(channel % "compile->compile;test->test")
-  .settings(moduleName := "mu-rpc-okhttp")
-  .settings(clientOkHttpSettings)
-
-lazy val ssl = project
-  .in(file("modules/channel/netty-ssl"))
-  .dependsOn(server % "test->test")
-  .dependsOn(`netty` % "compile->compile;test->test")
-  .settings(moduleName := "mu-rpc-netty-ssl")
-  .settings(nettySslSettings)
-
 ////////////////
 //// CLIENT ////
 ////////////////
 
+lazy val `client-netty` = project
+  .in(file("modules/client/netty"))
+  .dependsOn(channel % "compile->compile;test->test")
+  .settings(moduleName := "mu-rpc-client-netty")
+  .settings(clientNettySettings)
+
+lazy val `client-okhttp` = project
+  .in(file("modules/client/okhttp"))
+  .dependsOn(channel % "compile->compile;test->test")
+  .settings(moduleName := "mu-rpc-client-okhttp")
+  .settings(clientOkHttpSettings)
+
 lazy val `client-cache` = project
-  .in(file("modules/client-cache"))
+  .in(file("modules/client/cache"))
   .dependsOn(common % "test->test")
   .settings(moduleName := "mu-rpc-client-cache")
   .settings(clientCacheSettings)
+
+///////////////////
+//// NETTY SSL ////
+///////////////////
+
+lazy val `netty-ssl` = project
+  .in(file("modules/netty-ssl"))
+  .dependsOn(server % "test->test")
+  .dependsOn(`client-netty` % "test->test")
+  .settings(moduleName := "mu-rpc-netty-ssl")
+  .settings(nettySslSettings)
 
 ////////////////
 //// SERVER ////
@@ -230,7 +234,7 @@ lazy val `haskell-integration-tests` = project
   .in(file("modules/haskell-integration-tests"))
   .settings(noPublishSettings)
   .settings(haskellIntegrationTestSettings)
-  .dependsOn(server, netty, channel, fs2)
+  .dependsOn(server, `client-netty`, channel, fs2)
 
 //////////////////////////
 //// MODULES REGISTRY ////
@@ -244,15 +248,15 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   channel,
   monix,
   fs2,
+  `client-netty`,
+  `client-okhttp`,
   `client-cache`,
-  netty,
-  okhttp,
   server,
   config,
   dropwizard,
   prometheus,
   testing,
-  ssl,
+  `netty-ssl`,
   http,
   kafka,
   `marshallers-jodatime`,

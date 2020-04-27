@@ -31,9 +31,9 @@ permalink: reference/modules-artifacts
 | `mu-rpc-channel`  | Server/Client  | Yes  | Mandatory to define protocols and auto-derived clients. |
 | `mu-rpc-monix`  | Server/Client  | Yes  | Mandatory to define streaming operations with Monix Observables. |
 | `mu-rpc-fs2`  | Server/Client  | Yes  | Mandatory to define streaming operations with fs2 Streams. |
-| `mu-rpc-netty`  | Client  | Yes*  | `Netty` transport layer for the client. Mandatory if you need SSL/TLS support. |
+| `mu-rpc-client-netty`  | Client  | Yes*  | `Netty` transport layer for the client. Mandatory if you need SSL/TLS support. |
+| `mu-rpc-client-okhttp`  | Client  | Yes*  | `OkHttp` transport layer for the client. An alternative to `Netty`. |
 | `mu-rpc-netty-ssl`  | Server/Client  | No  | Adds the `io.netty:netty-tcnative-boringssl-static:jar` dependency, aligned with the Netty version (if that's the case) used in the `mu-rpc` build. See [this section](https://github.com/grpc/grpc-java/blob/master/SECURITY.md#netty) for more information. By adding this you wouldn't need to figure the right version, `mu-rpc` gives you the right one. |
-| `mu-rpc-okhttp`  | Client  | Yes*  | `OkHttp` transport layer for the client. An alternative to `Netty`. |
 
 * `Yes*`: on the client-side, you must choose either `Netty` or `OkHttp` as the transport layer.
 * `Provided*`: you don't need to add it to your build, it'll be transitively provided when using other dependencies.
@@ -72,9 +72,9 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-monix" % "@VERSION@"
 libraryDependencies += "io.higherkindness" %% "mu-rpc-fs2" % "@VERSION@"
 
 // required for the use of generated RPC clients, using either Netty or OkHttp as transport layer:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-netty" % "@VERSION@"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-client-netty" % "@VERSION@"
 // or:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-okhttp" % "@VERSION@"
+libraryDependencies += "io.higherkindness" %% "mu-rpc-client-okhttp" % "@VERSION@"
 
 // optional - for easy RPC server/client configuration.
 libraryDependencies += "io.higherkindness" %% "mu-config" % "@VERSION@"
