@@ -9,11 +9,12 @@
 The maintainers of the project are:
 
 - [![47erbot](https://avatars1.githubusercontent.com/u/24799081?v=4&s=20) **47erbot**](https://github.com/47erbot)
-- [![AntonioMateoGomez](https://avatars0.githubusercontent.com/u/25897490?v=4&s=20) **AntonioMateoGomez**](https://github.com/AntonioMateoGomez)
 - [![mrtmmr](https://avatars2.githubusercontent.com/u/44172755?v=4&s=20) **mrtmmr**](https://github.com/mrtmmr)
 - [![naree](https://avatars0.githubusercontent.com/u/4437502?v=4&s=20) **naree**](https://github.com/naree)
 - [![AdrianRaFo](https://avatars0.githubusercontent.com/u/15971742?v=4&s=20) **Adrian Ramirez Fornell (AdrianRaFo)**](https://github.com/AdrianRaFo)
+- [![alejandrohdezma](https://avatars0.githubusercontent.com/u/9027541?v=4&s=20) **Alejandro Hernández (alejandrohdezma)**](https://github.com/alejandrohdezma)
 - [![angoglez](https://avatars0.githubusercontent.com/u/10107285?v=4&s=20) **Ana Gómez González (angoglez)**](https://github.com/angoglez)
+- [![AntonioMateoGomez](https://avatars0.githubusercontent.com/u/25897490?v=4&s=20) **Antonio Mateo (AntonioMateoGomez)**](https://github.com/AntonioMateoGomez)
 - [![BenFradet](https://avatars2.githubusercontent.com/u/1737211?v=4&s=20) **Ben Fradet (BenFradet)**](https://github.com/BenFradet)
 - [![cb372](https://avatars1.githubusercontent.com/u/106760?v=4&s=20) **Chris Birchall (cb372)**](https://github.com/cb372)
 - [![fedefernandez](https://avatars0.githubusercontent.com/u/720923?v=4&s=20) **Fede Fernández (fedefernandez)**](https://github.com/fedefernandez)
@@ -57,6 +58,7 @@ These are the people that have contributed to the _mu-scala_ project:
 - [![juliano](https://avatars0.githubusercontent.com/u/35762?v=4&s=20) **juliano**](https://github.com/juliano)
 - [![noelmarkham](https://avatars1.githubusercontent.com/u/1492487?v=4&s=20) **noelmarkham**](https://github.com/noelmarkham)
 - [![tyler-clark](https://avatars0.githubusercontent.com/u/2521136?v=4&s=20) **tyler-clark**](https://github.com/tyler-clark)
+- [![alejandrohdezma](https://avatars0.githubusercontent.com/u/9027541?v=4&s=20) **alejandrohdezma**](https://github.com/alejandrohdezma)
 - [![angoglez](https://avatars0.githubusercontent.com/u/10107285?v=4&s=20) **angoglez**](https://github.com/angoglez)
 - [![maaaikoool](https://avatars1.githubusercontent.com/u/3258096?v=4&s=20) **maaaikoool**](https://github.com/maaaikoool)
 - [![rlmark](https://avatars3.githubusercontent.com/u/7613551?v=4&s=20) **rlmark**](https://github.com/rlmark)
