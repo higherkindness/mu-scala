@@ -26,7 +26,7 @@ object ProjectPlugin extends AutoPlugin {
       val enumeratum: String            = "1.5.15"
       val fs2: String                   = "2.3.0"
       val fs2Grpc: String               = "0.7.0"
-      val fs2Kafka: String              = "0.20.2"
+      val fs2Kafka: String              = "1.0.0"
       val grpc: String                  = "1.29.0"
       val jodaTime: String              = "2.10.6"
       val http4s: String                = "0.21.0-M6"
@@ -62,18 +62,14 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val rpcServiceSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "org.typelevel"          %% "cats-effect"                 % V.catsEffect,
-        "com.47deg"              %% "pbdirect"                    % V.pbdirect,
-        "com.beachape"           %% "enumeratum"                  % V.enumeratum,
-        "com.sksamuel.avro4s"    %% "avro4s-core"                 % V.avro4s,
-        "org.log4s"              %% "log4s"                       % V.log4s,
-        "org.tpolecat"           %% "natchez-core"                % V.natchez,
-        "org.scala-lang.modules" %% "scala-collection-compat"     % V.scalaCollectionCompat,
-        "io.grpc"                % "grpc-stub"                    % V.grpc,
-        "io.grpc"                % "grpc-netty"                   % V.grpc % Test,
-        "org.scalamock"          %% "scalamock"                   % V.scalamock % Test,
-        "com.47deg"              %% "scalacheck-toolbox-datetime" % V.scalacheckToolbox % Test,
-        "org.scalatestplus"      %% "scalacheck-1-14"             % V.scalatestplusScheck % Test
+        "org.typelevel"          %% "cats-effect"             % V.catsEffect,
+        "com.47deg"              %% "pbdirect"                % V.pbdirect,
+        "com.beachape"           %% "enumeratum"              % V.enumeratum,
+        "com.sksamuel.avro4s"    %% "avro4s-core"             % V.avro4s,
+        "org.log4s"              %% "log4s"                   % V.log4s,
+        "org.tpolecat"           %% "natchez-core"            % V.natchez,
+        "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat,
+        "io.grpc"                % "grpc-stub"                % V.grpc
       ),
       // Disable this flag because quasiquotes trigger a lot of false positive warnings
       scalacOptions -= "-Wunused:patvars", // for Scala 2.13
@@ -119,8 +115,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val clientNettySettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "io.grpc"  % "grpc-netty"                      % V.grpc,
-        "io.netty" % "netty-tcnative-boringssl-static" % V.nettySSL % Test
+        "io.grpc" % "grpc-netty" % V.grpc
       )
     )
 
@@ -147,19 +142,15 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "io.grpc"  % "grpc-netty"                      % V.grpc,
-        "io.netty" % "netty-tcnative-boringssl-static" % V.nettySSL % Test
+        "io.grpc" % "grpc-netty" % V.grpc
       )
     )
 
     lazy val httpSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "org.http4s"     %% "http4s-dsl"          % V.http4s,
-        "org.http4s"     %% "http4s-blaze-server" % V.http4s,
-        "org.http4s"     %% "http4s-circe"        % V.http4s,
-        "org.http4s"     %% "http4s-blaze-client" % V.http4s % Test,
-        "io.circe"       %% "circe-generic"       % V.circe % Test,
-        "ch.qos.logback" % "logback-classic"      % V.logback % Test
+        "org.http4s" %% "http4s-dsl"          % V.http4s,
+        "org.http4s" %% "http4s-blaze-server" % V.http4s,
+        "org.http4s" %% "http4s-circe"        % V.http4s
       )
     )
 
@@ -183,11 +174,8 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val testingSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "io.grpc"                % "grpc-testing"             % V.grpc,
-        "org.typelevel"          %% "cats-effect"             % V.catsEffect,
-        "org.scalacheck"         %% "scalacheck"              % V.scalacheck % Test,
-        "org.scalatestplus"      %% "scalacheck-1-14"         % V.scalatestplusScheck % Test,
-        "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat % Test
+        "io.grpc"       % "grpc-testing" % V.grpc,
+        "org.typelevel" %% "cats-effect" % V.catsEffect
       )
     )
 
@@ -199,15 +187,13 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val kafkaSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "com.ovoenergy"           %% "fs2-kafka"      % V.fs2Kafka,
-        "io.github.embeddedkafka" %% "embedded-kafka" % V.embeddedKafka % Test
+        "com.github.fd4s" %% "fs2-kafka" % V.fs2Kafka
       )
     )
 
     lazy val marshallersJodatimeSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "joda-time" % "joda-time"                    % V.jodaTime,
-        "com.47deg" %% "scalacheck-toolbox-datetime" % V.scalacheckToolbox % Test
+        "joda-time" % "joda-time" % V.jodaTime
       )
     )
 
@@ -282,6 +268,24 @@ object ProjectPlugin extends AutoPlugin {
       )
     ) ++ mdocSettings
 
+    lazy val testSettings = Seq(
+      publishArtifact := false,
+      libraryDependencies ++= Seq(
+        "io.grpc"                 % "grpc-netty"                      % V.grpc                  % Test,
+        "io.netty"                % "netty-tcnative-boringssl-static" % V.nettySSL              % Test,
+        "org.scalatest"           %% "scalatest"                      % V.scalatest             % Test,
+        "org.scalatestplus"       %% "scalacheck-1-14"                % V.scalatestplusScheck   % Test,
+        "org.scalamock"           %% "scalamock"                      % V.scalamock             % Test,
+        "com.47deg"               %% "scalacheck-toolbox-datetime"    % V.scalacheckToolbox     % Test,
+        "org.scala-lang.modules"  %% "scala-collection-compat"        % V.scalaCollectionCompat % Test,
+        "io.github.embeddedkafka" %% "embedded-kafka"                 % V.embeddedKafka         % Test,
+        "org.http4s"              %% "http4s-blaze-client"            % V.http4s                % Test,
+        "io.circe"                %% "circe-generic"                  % V.circe                 % Test,
+        "ch.qos.logback"          % "logback-classic"                 % V.logback               % Test,
+        "org.slf4j"               % "slf4j-nop"                       % V.slf4j                 % Test
+      )
+    )
+
     lazy val haskellIntegrationTestSettings = Seq(
       publishArtifact := false,
       Test / parallelExecution := false,
@@ -312,10 +316,6 @@ object ProjectPlugin extends AutoPlugin {
       coverageFailOnMinimum := false,
       addCompilerPlugin(
         "org.typelevel" % "kind-projector" % V.kindProjector cross CrossVersion.binary
-      ),
-      libraryDependencies ++= Seq(
-        "org.scalatest" %% "scalatest" % V.scalatest % Test,
-        "org.slf4j"     % "slf4j-nop"  % V.slf4j     % Test
       )
     ) ++ macroSettings
 }
