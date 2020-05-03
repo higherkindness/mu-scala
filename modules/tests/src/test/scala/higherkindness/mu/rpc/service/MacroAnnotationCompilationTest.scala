@@ -17,7 +17,7 @@
 package higherkindness.mu.rpc
 
 import higherkindness.mu.rpc.protocol._
-import fs2.Stream
+import _root_.fs2.Stream
 import monix.reactive.Observable
 
 // This is not a normal "test" with assertions.

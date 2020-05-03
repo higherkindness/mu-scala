@@ -72,7 +72,7 @@ object ProjectPlugin extends AutoPlugin {
         "io.grpc"                % "grpc-stub"                % V.grpc
       ),
       // Disable this flag because quasiquotes trigger a lot of false positive warnings
-      scalacOptions -= "-Wunused:patvars", // for Scala 2.13
+      scalacOptions -= "-Wunused:patvars",    // for Scala 2.13
       scalacOptions -= "-Ywarn-unused:params" // for Scala 2.12
     )
 

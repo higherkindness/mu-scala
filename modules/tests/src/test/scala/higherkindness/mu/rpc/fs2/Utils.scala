@@ -21,7 +21,7 @@ import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.protocol._
 import _root_.fs2._
 import cats.effect.{Effect, IO, Resource}
-import io.grpc.{CallOptions, Status}
+import _root_.io.grpc.{CallOptions, Status}
 import cats.syntax.applicative._
 
 object Utils extends CommonUtils {
