@@ -141,25 +141,9 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val healthCheckSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "org.typelevel" %% "cats-effect" % V.catsEffect
-      )
-    )
-
-    lazy val healthCheckSettingsFS2: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
-        "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
-        "co.fs2"            %% "fs2-core"       % V.fs2,
-        "org.typelevel"     %% "cats-effect"    % V.catsEffect
-      )
-    )
-
-    lazy val healthCheckSettingsMonix: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
-        "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
-        "io.monix"          %% "monix"          % V.monix,
-        "org.typelevel"     %% "cats-effect"    % V.catsEffect
+        "org.typelevel" %% "cats-effect" % V.catsEffect,
+        "co.fs2"        %% "fs2-core"    % V.fs2 % Optional,
+        "io.monix"      %% "monix"       % V.monix % Optional
       )
     )
 
@@ -304,7 +288,8 @@ object ProjectPlugin extends AutoPlugin {
       publishArtifact := false,
       Test / parallelExecution := false,
       libraryDependencies ++= Seq(
-        "org.scalatest" %% "scalatest"                   % V.scalatest     % Test,
+        "co.fs2"        %% "fs2-core"                    % V.fs2,
+        "org.scalatest" %% "scalatest"                   % V.scalatest % Test,
         "com.whisk"     %% "docker-testkit-scalatest"    % V.dockerItScala % Test,
         "com.whisk"     %% "docker-testkit-impl-spotify" % V.dockerItScala % Test
       )

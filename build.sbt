@@ -52,24 +52,6 @@ lazy val testing = project
   .settings(moduleName := "mu-rpc-testing")
   .settings(testingSettings)
 
-///////////////////////////////////
-//// TRANSPORT LAYER - CHANNEL ////
-///////////////////////////////////
-
-lazy val monix = project
-  .in(file("modules/streaming/monix"))
-  .dependsOn(`rpc-service`)
-  .dependsOn(`health-check-unary`)
-  .dependsOn(`internal-monix`)
-  .settings(moduleName := "mu-rpc-monix")
-
-lazy val fs2 = project
-  .in(file("modules/streaming/fs2"))
-  .dependsOn(`rpc-service`)
-  .dependsOn(`health-check-unary`)
-  .dependsOn(`internal-fs2`)
-  .settings(moduleName := "mu-rpc-fs2")
-
 ////////////////
 //// CLIENT ////
 ////////////////
@@ -120,11 +102,11 @@ lazy val server = project
 //// HEALTHCHECK ////
 /////////////////////
 
-lazy val `health-check-unary` = project
-  .in(file("modules/health-check-unary"))
+lazy val `health-check` = project
+  .in(file("modules/health-check"))
   .dependsOn(`rpc-service`)
   .settings(healthCheckSettings)
-  .settings(moduleName := "mu-rpc-health-check-unary")
+  .settings(moduleName := "mu-rpc-health-check")
 
 ////////////////////
 //// PROMETHEUS ////
@@ -218,7 +200,7 @@ lazy val `haskell-integration-tests` = project
   .in(file("modules/haskell-integration-tests"))
   .settings(noPublishSettings)
   .settings(haskellIntegrationTestSettings)
-  .dependsOn(server, `client-netty`, `rpc-service`, fs2)
+  .dependsOn(server, `client-netty`, `rpc-service`)
 
 //////////////////////////
 //// MODULES REGISTRY ////
@@ -228,8 +210,6 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   `rpc-service`,
   `internal-monix`,
   `internal-fs2`,
-  monix,
-  fs2,
   `client-netty`,
   `client-okhttp`,
   `client-cache`,
@@ -242,7 +222,7 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   http,
   kafka,
   `marshallers-jodatime`,
-  `health-check-unary`
+  `health-check`
 )
 
 lazy val nonCrossedScalaVersionModules: Seq[ProjectReference] = Seq(
