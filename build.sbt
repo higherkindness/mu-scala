@@ -125,7 +125,6 @@ lazy val dropwizard = project
 
 lazy val http = project
   .in(file("modules/http"))
-  .dependsOn(`rpc-service`)
   .settings(moduleName := "mu-rpc-http")
   .settings(httpSettings)
 

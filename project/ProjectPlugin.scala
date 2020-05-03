@@ -150,7 +150,8 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         "org.http4s" %% "http4s-dsl"          % V.http4s,
         "org.http4s" %% "http4s-blaze-server" % V.http4s,
-        "org.http4s" %% "http4s-circe"        % V.http4s
+        "org.http4s" %% "http4s-circe"        % V.http4s,
+        "io.grpc"    % "grpc-stub"            % V.grpc
       )
     )
 
