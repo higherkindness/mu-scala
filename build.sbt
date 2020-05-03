@@ -18,35 +18,30 @@ addCommandAlias("ci-microsite", "docs/publishMicrosite")
 //// COMMON ////
 ////////////////
 
-lazy val common = project
-  .in(file("modules/common"))
-  .settings(moduleName := "mu-common")
-  .settings(commonSettings)
-
-lazy val `internal-core` = project
-  .in(file("modules/internal"))
-  .dependsOn(common % "compile->compile;test->test")
+lazy val `rpc-service` = project
+  .in(file("modules/service"))
+  .settings(moduleName := "mu-rpc-service")
+  .settings(rpcServiceSettings)
   .dependsOn(testing % "test->test")
-  .settings(moduleName := "mu-rpc-internal-core")
-  .settings(internalCoreSettings)
+  .dependsOn(`internal-fs2` % "test->test")
+  .dependsOn(`internal-monix` % "test->test")
 
 lazy val `internal-monix` = project
   .in(file("modules/internal/monix"))
-  .dependsOn(`internal-core` % "compile->compile;test->test")
+  .dependsOn(`rpc-service` % "compile->compile;test->test")
   .settings(moduleName := "mu-rpc-internal-monix")
   .settings(internalMonixSettings)
 
 lazy val `internal-fs2` = project
   .in(file("modules/internal/fs2"))
-  .dependsOn(`internal-core` % "compile->compile;test->test")
+  .dependsOn(`rpc-service` % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-internal-fs2")
   .settings(internalFs2Settings)
 
 lazy val config = project
   .in(file("modules/config"))
-  .dependsOn(common % "test->test")
-  .dependsOn(channel % "compile->compile;test->test")
+  .dependsOn(`rpc-service` % "compile->compile;test->test")
   .dependsOn(server % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-config")
@@ -61,26 +56,16 @@ lazy val testing = project
 //// TRANSPORT LAYER - CHANNEL ////
 ///////////////////////////////////
 
-lazy val channel = project
-  .in(file("modules/channel"))
-  .dependsOn(common % "compile->compile;test->test")
-  .dependsOn(`internal-core` % "compile->compile;test->test")
-  .dependsOn(`internal-fs2` % "test->test")
-  .dependsOn(`internal-monix` % "test->test")
-  .dependsOn(testing % "test->test")
-  .settings(moduleName := "mu-rpc-channel")
-  .settings(clientCoreSettings)
-
 lazy val monix = project
   .in(file("modules/streaming/monix"))
-  .dependsOn(channel)
+  .dependsOn(`rpc-service`)
   .dependsOn(`health-check-unary`)
   .dependsOn(`internal-monix`)
   .settings(moduleName := "mu-rpc-monix")
 
 lazy val fs2 = project
   .in(file("modules/streaming/fs2"))
-  .dependsOn(channel)
+  .dependsOn(`rpc-service`)
   .dependsOn(`health-check-unary`)
   .dependsOn(`internal-fs2`)
   .settings(moduleName := "mu-rpc-fs2")
@@ -91,19 +76,19 @@ lazy val fs2 = project
 
 lazy val `client-netty` = project
   .in(file("modules/client/netty"))
-  .dependsOn(channel % "compile->compile;test->test")
+  .dependsOn(`rpc-service` % "compile->compile;test->test")
   .settings(moduleName := "mu-rpc-client-netty")
   .settings(clientNettySettings)
 
 lazy val `client-okhttp` = project
   .in(file("modules/client/okhttp"))
-  .dependsOn(channel % "compile->compile;test->test")
+  .dependsOn(`rpc-service` % "compile->compile;test->test")
   .settings(moduleName := "mu-rpc-client-okhttp")
   .settings(clientOkHttpSettings)
 
 lazy val `client-cache` = project
   .in(file("modules/client/cache"))
-  .dependsOn(common % "test->test")
+  .dependsOn(`rpc-service` % "test->test")
   .settings(moduleName := "mu-rpc-client-cache")
   .settings(clientCacheSettings)
 
@@ -124,11 +109,9 @@ lazy val `netty-ssl` = project
 
 lazy val server = project
   .in(file("modules/server"))
-  .dependsOn(common % "compile->compile;test->test")
-  .dependsOn(`internal-core` % "compile->compile;test->test")
+  .dependsOn(`rpc-service` % "compile->compile;test->test")
   .dependsOn(`internal-monix` % "test->test")
   .dependsOn(`internal-fs2` % "test->test")
-  .dependsOn(channel % "test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-server")
   .settings(serverSettings)
@@ -139,7 +122,7 @@ lazy val server = project
 
 lazy val `health-check-unary` = project
   .in(file("modules/health-check-unary"))
-  .dependsOn(channel)
+  .dependsOn(`rpc-service`)
   .settings(healthCheckSettings)
   .settings(moduleName := "mu-rpc-health-check-unary")
 
@@ -149,7 +132,7 @@ lazy val `health-check-unary` = project
 
 lazy val prometheus = project
   .in(file("modules/metrics/prometheus"))
-  .dependsOn(`internal-core` % "compile->compile;test->test")
+  .dependsOn(`rpc-service` % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-prometheus")
   .settings(prometheusMetricsSettings)
@@ -160,7 +143,7 @@ lazy val prometheus = project
 
 lazy val dropwizard = project
   .in(file("modules/metrics/dropwizard"))
-  .dependsOn(`internal-core` % "compile->compile;test->test")
+  .dependsOn(`rpc-service` % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-dropwizard")
   .settings(dropwizardMetricsSettings)
@@ -171,7 +154,7 @@ lazy val dropwizard = project
 
 lazy val http = project
   .in(file("modules/http"))
-  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`rpc-service` % "compile->compile;test->test")
   .dependsOn(server % "compile->compile;test->test")
   .settings(moduleName := "mu-rpc-http")
   .settings(httpSettings)
@@ -182,7 +165,7 @@ lazy val http = project
 
 lazy val kafka = project
   .in(file("modules/kafka"))
-  .dependsOn(channel)
+  .dependsOn(`rpc-service`)
   .dependsOn(server % "test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-kafka")
@@ -208,7 +191,7 @@ lazy val `benchmarks-vprev` = project
 
 lazy val `benchmarks-vnext` = project
   .in(file("benchmarks/vnext"))
-  .dependsOn(channel)
+  .dependsOn(`rpc-service`)
   .dependsOn(server)
   .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vnext")
@@ -222,9 +205,7 @@ lazy val `benchmarks-vnext` = project
 
 lazy val `marshallers-jodatime` = project
   .in(file("modules/marshallers/jodatime"))
-  .dependsOn(common % "compile->compile;test->test")
-  .dependsOn(channel % "compile->compile;test->test")
-  .dependsOn(`internal-core` % "compile->compile;test->test")
+  .dependsOn(`rpc-service` % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-marshallers-jodatime")
   .settings(marshallersJodatimeSettings)
@@ -237,18 +218,16 @@ lazy val `haskell-integration-tests` = project
   .in(file("modules/haskell-integration-tests"))
   .settings(noPublishSettings)
   .settings(haskellIntegrationTestSettings)
-  .dependsOn(server, `client-netty`, channel, fs2)
+  .dependsOn(server, `client-netty`, `rpc-service`, fs2)
 
 //////////////////////////
 //// MODULES REGISTRY ////
 //////////////////////////
 
 lazy val coreModules: Seq[ProjectReference] = Seq(
-  common,
-  `internal-core`,
+  `rpc-service`,
   `internal-monix`,
   `internal-fs2`,
-  channel,
   monix,
   fs2,
   `client-netty`,

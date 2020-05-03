@@ -60,13 +60,24 @@ object ProjectPlugin extends AutoPlugin {
       publishMavenStyle := false // suppress warnings about intransitive deps (not published anyway)
     )
 
-    lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
+    lazy val rpcServiceSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "org.typelevel"     %% "cats-effect"                 % V.catsEffect          % Test,
-        "org.scalamock"     %% "scalamock"                   % V.scalamock           % Test,
-        "com.47deg"         %% "scalacheck-toolbox-datetime" % V.scalacheckToolbox   % Test,
-        "org.scalatestplus" %% "scalacheck-1-14"             % V.scalatestplusScheck % Test
-      )
+        "org.typelevel"          %% "cats-effect"                 % V.catsEffect,
+        "com.47deg"              %% "pbdirect"                    % V.pbdirect,
+        "com.beachape"           %% "enumeratum"                  % V.enumeratum,
+        "com.sksamuel.avro4s"    %% "avro4s-core"                 % V.avro4s,
+        "org.log4s"              %% "log4s"                       % V.log4s,
+        "org.tpolecat"           %% "natchez-core"                % V.natchez,
+        "org.scala-lang.modules" %% "scala-collection-compat"     % V.scalaCollectionCompat,
+        "io.grpc"                % "grpc-stub"                    % V.grpc,
+        "io.grpc"                % "grpc-netty"                   % V.grpc % Test,
+        "org.scalamock"          %% "scalamock"                   % V.scalamock % Test,
+        "com.47deg"              %% "scalacheck-toolbox-datetime" % V.scalacheckToolbox % Test,
+        "org.scalatestplus"      %% "scalacheck-1-14"             % V.scalatestplusScheck % Test
+      ),
+      // Disable this flag because quasiquotes trigger a lot of false positive warnings
+      scalacOptions -= "-Wunused:patvars", // for Scala 2.13
+      scalacOptions -= "-Ywarn-unused:params" // for Scala 2.12
     )
 
     lazy val macroSettings: Seq[Setting[_]] = {
@@ -92,22 +103,6 @@ object ProjectPlugin extends AutoPlugin {
       )
     }
 
-    lazy val internalCoreSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "org.typelevel"          %% "cats-effect"             % V.catsEffect,
-        "io.grpc"                % "grpc-stub"                % V.grpc,
-        "com.47deg"              %% "pbdirect"                % V.pbdirect,
-        "com.beachape"           %% "enumeratum"              % V.enumeratum,
-        "com.sksamuel.avro4s"    %% "avro4s-core"             % V.avro4s,
-        "org.log4s"              %% "log4s"                   % V.log4s,
-        "org.tpolecat"           %% "natchez-core"            % V.natchez,
-        "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat
-      ),
-      // Disable this flag because quasiquotes trigger a lot of false positive warnings
-      scalacOptions -= "-Wunused:patvars",    // for Scala 2.13
-      scalacOptions -= "-Ywarn-unused:params" // for Scala 2.12
-    )
-
     lazy val internalMonixSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.monix"            %% "monix"           % V.monix,
@@ -119,13 +114,6 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         "co.fs2"                %% "fs2-core"     % V.fs2,
         "org.lyranthe.fs2-grpc" %% "java-runtime" % V.fs2Grpc
-      )
-    )
-
-    lazy val clientCoreSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "org.typelevel" %% "cats-effect" % V.catsEffect,
-        "io.grpc"       % "grpc-netty"   % V.grpc % Test
       )
     )
 
