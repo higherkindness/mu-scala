@@ -23,21 +23,19 @@ lazy val `rpc-service` = project
   .settings(moduleName := "mu-rpc-service")
   .settings(rpcServiceSettings)
   .dependsOn(testing % "test->test")
-  .dependsOn(`internal-fs2` % "test->test")
-  .dependsOn(`internal-monix` % "test->test")
 
-lazy val `internal-monix` = project
-  .in(file("modules/internal/monix"))
+lazy val monix = project
+  .in(file("modules/monix"))
   .dependsOn(`rpc-service` % "compile->compile;test->test")
-  .settings(moduleName := "mu-rpc-internal-monix")
-  .settings(internalMonixSettings)
+  .settings(moduleName := "mu-rpc-monix")
+  .settings(monixSettings)
 
-lazy val `internal-fs2` = project
-  .in(file("modules/internal/fs2"))
+lazy val fs2 = project
+  .in(file("modules/fs2"))
   .dependsOn(`rpc-service` % "compile->compile;test->test")
   .dependsOn(testing % "test->test")
-  .settings(moduleName := "mu-rpc-internal-fs2")
-  .settings(internalFs2Settings)
+  .settings(moduleName := "mu-rpc-fs2")
+  .settings(fs2Settings)
 
 lazy val config = project
   .in(file("modules/config"))
@@ -92,8 +90,8 @@ lazy val `netty-ssl` = project
 lazy val server = project
   .in(file("modules/server"))
   .dependsOn(`rpc-service` % "compile->compile;test->test")
-  .dependsOn(`internal-monix` % "test->test")
-  .dependsOn(`internal-fs2` % "test->test")
+  .dependsOn(monix % "test->test")
+  .dependsOn(fs2 % "test->test")
   .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-server")
   .settings(serverSettings)
@@ -105,6 +103,8 @@ lazy val server = project
 lazy val `health-check` = project
   .in(file("modules/health-check"))
   .dependsOn(`rpc-service`)
+  .dependsOn(fs2)
+  .dependsOn(monix)
   .settings(healthCheckSettings)
   .settings(moduleName := "mu-rpc-health-check")
 
@@ -208,8 +208,8 @@ lazy val `haskell-integration-tests` = project
 
 lazy val coreModules: Seq[ProjectReference] = Seq(
   `rpc-service`,
-  `internal-monix`,
-  `internal-fs2`,
+  monix,
+  fs2,
   `client-netty`,
   `client-okhttp`,
   `client-cache`,

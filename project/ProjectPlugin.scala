@@ -103,14 +103,14 @@ object ProjectPlugin extends AutoPlugin {
       )
     }
 
-    lazy val internalMonixSettings: Seq[Def.Setting[_]] = Seq(
+    lazy val monixSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.monix"            %% "monix"           % V.monix,
         "org.reactivestreams" % "reactive-streams" % V.reactiveStreams
       )
     )
 
-    lazy val internalFs2Settings: Seq[Def.Setting[_]] = Seq(
+    lazy val fs2Settings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "co.fs2"                %% "fs2-core"     % V.fs2,
         "org.lyranthe.fs2-grpc" %% "java-runtime" % V.fs2Grpc
@@ -141,9 +141,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val healthCheckSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "org.typelevel" %% "cats-effect" % V.catsEffect,
-        "co.fs2"        %% "fs2-core"    % V.fs2 % Optional,
-        "io.monix"      %% "monix"       % V.monix % Optional
+        "org.typelevel" %% "cats-effect" % V.catsEffect
       )
     )
 
