@@ -233,9 +233,7 @@ lazy val root = project
   .settings(name := "mu-scala")
   .settings(noPublishSettings)
   .aggregate(coreModules: _*)
-  .dependsOn(coreModulesDeps: _*)
   .aggregate(testModules: _*)
-  .dependsOn(testModules.map(ClasspathDependency(_, None)): _*)
 
 lazy val `benchmarks-root` = project
   .in(file("benchmarks"))
