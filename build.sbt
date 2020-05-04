@@ -94,8 +94,8 @@ lazy val server = project
 lazy val `health-check` = project
   .in(file("modules/health-check"))
   .dependsOn(`rpc-service`)
-  .dependsOn(fs2)
-  .dependsOn(monix)
+  .dependsOn(fs2 % "optional->compile")
+  .dependsOn(monix % "optional->compile")
   .settings(healthCheckSettings)
   .settings(moduleName := "mu-rpc-health-check")
 
