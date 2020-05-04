@@ -152,16 +152,17 @@ object Utils extends CommonUtils {
 
         def unary(a: A): F[C] = c1.pure[F]
 
-        def unaryWithError(e: E): F[C] = e.foo match {
-          case "SE" =>
-            M.raiseError(Status.INVALID_ARGUMENT.withDescription(e.foo).asException)
-          case "SRE" =>
-            M.raiseError(Status.INVALID_ARGUMENT.withDescription(e.foo).asRuntimeException)
-          case "RTE" =>
-            M.raiseError(new IllegalArgumentException(e.foo))
-          case _ =>
-            sys.error(e.foo)
-        }
+        def unaryWithError(e: E): F[C] =
+          e.foo match {
+            case "SE" =>
+              M.raiseError(Status.INVALID_ARGUMENT.withDescription(e.foo).asException)
+            case "SRE" =>
+              M.raiseError(Status.INVALID_ARGUMENT.withDescription(e.foo).asRuntimeException)
+            case "RTE" =>
+              M.raiseError(new IllegalArgumentException(e.foo))
+            case _ =>
+              sys.error(e.foo)
+          }
 
         def unaryWithSchema(a: A): F[C] = unary(a)
 

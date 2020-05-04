@@ -33,8 +33,8 @@ class UnaryGreeterRestClient[F[_]: Sync](uri: Uri) {
     client.expectOr[HelloResponse](request)(handleResponseError)(jsonOf[F, HelloResponse])
   }
 
-  def sayHello(arg: HelloRequest)(client: Client[F])(
-      implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
+  def sayHello(arg: HelloRequest)(client: Client[F])(implicit
+      encoderHelloRequest: io.circe.Encoder[HelloRequest],
       decoderHelloResponse: io.circe.Decoder[HelloResponse]
   ): F[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHello")
@@ -47,8 +47,8 @@ class UnaryGreeterRestClient[F[_]: Sync](uri: Uri) {
 
 class Fs2GreeterRestClient[F[_]: Sync](uri: Uri) {
 
-  def sayHellos(arg: Stream[F, HelloRequest])(client: Client[F])(
-      implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
+  def sayHellos(arg: Stream[F, HelloRequest])(client: Client[F])(implicit
+      encoderHelloRequest: io.circe.Encoder[HelloRequest],
       decoderHelloResponse: io.circe.Decoder[HelloResponse]
   ): F[HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellos")
@@ -57,16 +57,16 @@ class Fs2GreeterRestClient[F[_]: Sync](uri: Uri) {
     )
   }
 
-  def sayHelloAll(arg: HelloRequest)(client: Client[F])(
-      implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
+  def sayHelloAll(arg: HelloRequest)(client: Client[F])(implicit
+      encoderHelloRequest: io.circe.Encoder[HelloRequest],
       decoderHelloResponse: io.circe.Decoder[HelloResponse]
   ): Stream[F, HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHelloAll")
     client.stream(request.withEntity(arg.asJson)).flatMap(_.asStream[HelloResponse])
   }
 
-  def sayHellosAll(arg: Stream[F, HelloRequest])(client: Client[F])(
-      implicit encoderHelloRequest: io.circe.Encoder[HelloRequest],
+  def sayHellosAll(arg: Stream[F, HelloRequest])(client: Client[F])(implicit
+      encoderHelloRequest: io.circe.Encoder[HelloRequest],
       decoderHelloResponse: io.circe.Decoder[HelloResponse]
   ): Stream[F, HelloResponse] = {
     val request = Request[F](Method.POST, uri / "sayHellosAll")

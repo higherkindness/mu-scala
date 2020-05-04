@@ -26,11 +26,12 @@ trait HaskellServerRunningInDocker extends DockerTestKit with DockerKitSpotify {
   def serverPort: Int
   def serverExecutableName: String
 
-  override def dockerContainers: List[DockerContainer] = List(
-    DockerContainer(Constants.ImageName)
-      .withPorts(serverPort -> Some(serverPort))
-      .withCommand(s"/opt/mu-haskell-client-server/$serverExecutableName")
-  )
+  override def dockerContainers: List[DockerContainer] =
+    List(
+      DockerContainer(Constants.ImageName)
+        .withPorts(serverPort -> Some(serverPort))
+        .withCommand(s"/opt/mu-haskell-client-server/$serverExecutableName")
+    )
 
   override def startAllOrFail(): Unit = {
     println("Starting Mu-Haskell server in Docker container...")

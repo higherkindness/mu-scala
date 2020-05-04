@@ -35,8 +35,8 @@ class ClientCacheTests extends AnyWordSpec with Matchers {
 
   private[this] val clockStep: Int = 50
 
-  def buildTimer: IO[Timer[IO]] = FakeClock.build[IO](clockStep.toLong, TimeUnit.MILLISECONDS).map {
-    fakeClock =>
+  def buildTimer: IO[Timer[IO]] =
+    FakeClock.build[IO](clockStep.toLong, TimeUnit.MILLISECONDS).map { fakeClock =>
       new Timer[IO] {
 
         private[this] val innerTimer = IO.timer(EC)
@@ -44,7 +44,7 @@ class ClientCacheTests extends AnyWordSpec with Matchers {
         override def clock: Clock[IO]                          = fakeClock
         override def sleep(duration: FiniteDuration): IO[Unit] = innerTimer.sleep(duration)
       }
-  }
+    }
 
   implicit val cs: ContextShift[IO] = IO.contextShift(EC)
 

@@ -58,39 +58,41 @@ object MetricsOps {
   case object Unknown           extends GrpcStatus
   case object UnreachableError  extends GrpcStatus
 
-  def grpcStatusFromRawStatus(status: Status): GrpcStatus = status match {
-    case Status.ABORTED             => UnreachableError
-    case Status.ALREADY_EXISTS      => UnreachableError
-    case Status.CANCELLED           => Cancelled
-    case Status.DATA_LOSS           => UnreachableError
-    case Status.DEADLINE_EXCEEDED   => DeadlineExceeded
-    case Status.FAILED_PRECONDITION => UnreachableError
-    case Status.INTERNAL            => Internal
-    case Status.INVALID_ARGUMENT    => UnreachableError
-    case Status.NOT_FOUND           => UnreachableError
-    case Status.OK                  => OK
-    case Status.OUT_OF_RANGE        => UnreachableError
-    case Status.PERMISSION_DENIED   => UnreachableError
-    case Status.RESOURCE_EXHAUSTED  => ResourceExhausted
-    case Status.UNAUTHENTICATED     => Unauthenticated
-    case Status.UNAVAILABLE         => Unavailable
-    case Status.UNIMPLEMENTED       => Unimplemented
-    case Status.UNKNOWN             => Unknown
-    case _                          => UnreachableError
-  }
+  def grpcStatusFromRawStatus(status: Status): GrpcStatus =
+    status match {
+      case Status.ABORTED             => UnreachableError
+      case Status.ALREADY_EXISTS      => UnreachableError
+      case Status.CANCELLED           => Cancelled
+      case Status.DATA_LOSS           => UnreachableError
+      case Status.DEADLINE_EXCEEDED   => DeadlineExceeded
+      case Status.FAILED_PRECONDITION => UnreachableError
+      case Status.INTERNAL            => Internal
+      case Status.INVALID_ARGUMENT    => UnreachableError
+      case Status.NOT_FOUND           => UnreachableError
+      case Status.OK                  => OK
+      case Status.OUT_OF_RANGE        => UnreachableError
+      case Status.PERMISSION_DENIED   => UnreachableError
+      case Status.RESOURCE_EXHAUSTED  => ResourceExhausted
+      case Status.UNAUTHENTICATED     => Unauthenticated
+      case Status.UNAVAILABLE         => Unavailable
+      case Status.UNIMPLEMENTED       => Unimplemented
+      case Status.UNKNOWN             => Unknown
+      case _                          => UnreachableError
+    }
 
-  def statusDescription(status: GrpcStatus): String = status match {
-    case OK                => "ok"
-    case Cancelled         => "cancelled"
-    case DeadlineExceeded  => "deadline-exceeded"
-    case Internal          => "internal"
-    case ResourceExhausted => "resource-exhausted"
-    case Unauthenticated   => "unauthenticated"
-    case Unavailable       => "unavailable"
-    case Unimplemented     => "unimplemented"
-    case Unknown           => "unknown-status"
-    case _                 => "unreachable-error"
-  }
+  def statusDescription(status: GrpcStatus): String =
+    status match {
+      case OK                => "ok"
+      case Cancelled         => "cancelled"
+      case DeadlineExceeded  => "deadline-exceeded"
+      case Internal          => "internal"
+      case ResourceExhausted => "resource-exhausted"
+      case Unauthenticated   => "unauthenticated"
+      case Unavailable       => "unavailable"
+      case Unimplemented     => "unimplemented"
+      case Unknown           => "unknown-status"
+      case _                 => "unreachable-error"
+    }
 
   def methodTypeDescription(methodInfo: GrpcMethodInfo): String =
     methodInfo.`type` match {

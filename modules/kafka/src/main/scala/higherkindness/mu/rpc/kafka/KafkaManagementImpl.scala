@@ -30,10 +30,11 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
 
   override def alterConfigs(acr: AlterConfigsRequest): F[Unit] =
     for {
-      configs <- acr.configs
-        .map(c => ConfigResource.toJava(c.resource) -> c.ops.map(AlterConfigOp.toJava))
-        .toMap
-        .pure[F]
+      configs <-
+        acr.configs
+          .map(c => ConfigResource.toJava(c.resource) -> c.ops.map(AlterConfigOp.toJava))
+          .toMap
+          .pure[F]
       alterConfigs <- adminClient.alterConfigs(configs)
     } yield alterConfigs
 
@@ -45,9 +46,10 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
 
   override def createTopics(ctrs: CreateTopicRequests): F[Unit] =
     for {
-      newTopics <- ctrs.createTopicRequests
-        .map(ctr => new NewTopic(ctr.name, ctr.numPartitions, ctr.replicationFactor))
-        .pure[F]
+      newTopics <-
+        ctrs.createTopicRequests
+          .map(ctr => new NewTopic(ctr.name, ctr.numPartitions, ctr.replicationFactor))
+          .pure[F]
       _ <- adminClient.createTopics(newTopics)
     } yield ()
 

@@ -69,7 +69,7 @@ object ProjectPlugin extends AutoPlugin {
         "org.log4s"              %% "log4s"                   % V.log4s,
         "org.tpolecat"           %% "natchez-core"            % V.natchez,
         "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat,
-        "io.grpc"                % "grpc-stub"                % V.grpc
+        "io.grpc"                 % "grpc-stub"               % V.grpc
       ),
       // Disable this flag because quasiquotes trigger a lot of false positive warnings
       scalacOptions -= "-Wunused:patvars",    // for Scala 2.13
@@ -101,7 +101,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val monixSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "io.monix"            %% "monix"           % V.monix,
+        "io.monix"           %% "monix"            % V.monix,
         "org.reactivestreams" % "reactive-streams" % V.reactiveStreams
       )
     )
@@ -151,7 +151,7 @@ object ProjectPlugin extends AutoPlugin {
         "org.http4s" %% "http4s-dsl"          % V.http4s,
         "org.http4s" %% "http4s-blaze-server" % V.http4s,
         "org.http4s" %% "http4s-circe"        % V.http4s,
-        "io.grpc"    % "grpc-stub"            % V.grpc
+        "io.grpc"     % "grpc-stub"           % V.grpc
       )
     )
 
@@ -175,8 +175,8 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val testingSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "io.grpc"       % "grpc-testing" % V.grpc,
-        "org.typelevel" %% "cats-effect" % V.catsEffect
+        "io.grpc"        % "grpc-testing" % V.grpc,
+        "org.typelevel" %% "cats-effect"  % V.catsEffect
       )
     )
 
@@ -209,15 +209,15 @@ object ProjectPlugin extends AutoPlugin {
         baseDirectory.value.getParentFile / "shared" / "src" / "test" / "scala"
       },
       libraryDependencies ++= Seq(
-        "io.grpc"           % "grpc-all"         % V.grpc,
-        "io.chrisdavenport" %% "log4cats-core"   % V.log4cats,
-        "io.chrisdavenport" %% "log4cats-slf4j"  % V.log4cats,
-        "org.slf4j"         % "log4j-over-slf4j" % V.slf4j,
-        "org.slf4j"         % "jul-to-slf4j"     % V.slf4j,
-        "org.slf4j"         % "jcl-over-slf4j"   % V.slf4j,
-        "org.slf4j"         % "slf4j-api"        % V.slf4j,
-        "ch.qos.logback"    % "logback-core"     % V.logback,
-        "ch.qos.logback"    % "logback-classic"  % V.logback
+        "io.grpc"            % "grpc-all"         % V.grpc,
+        "io.chrisdavenport" %% "log4cats-core"    % V.log4cats,
+        "io.chrisdavenport" %% "log4cats-slf4j"   % V.log4cats,
+        "org.slf4j"          % "log4j-over-slf4j" % V.slf4j,
+        "org.slf4j"          % "jul-to-slf4j"     % V.slf4j,
+        "org.slf4j"          % "jcl-over-slf4j"   % V.slf4j,
+        "org.slf4j"          % "slf4j-api"        % V.slf4j,
+        "ch.qos.logback"     % "logback-core"     % V.logback,
+        "ch.qos.logback"     % "logback-classic"  % V.logback
       )
     )
 
@@ -257,33 +257,37 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val mdocSettings = Seq(
-      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings", "-Ywarn-unused-import", "-Xlint").contains)
+      scalacOptions ~= (_ filterNot Set(
+        "-Xfatal-warnings",
+        "-Ywarn-unused-import",
+        "-Xlint"
+      ).contains)
     )
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "org.scalatest"         %% "scalatest"       % V.scalatest,
-        "org.scalatestplus"     %% "scalacheck-1-14" % V.scalatestplusScheck,
-        "io.dropwizard.metrics" % "metrics-jmx"      % V.dropwizard,
-        "org.tpolecat"          %% "natchez-jaeger"  % V.natchez
+        "org.scalatest"        %% "scalatest"       % V.scalatest,
+        "org.scalatestplus"    %% "scalacheck-1-14" % V.scalatestplusScheck,
+        "io.dropwizard.metrics" % "metrics-jmx"     % V.dropwizard,
+        "org.tpolecat"         %% "natchez-jaeger"  % V.natchez
       )
     ) ++ mdocSettings
 
     lazy val testSettings = Seq(
       publishArtifact := false,
       libraryDependencies ++= Seq(
-        "io.grpc"                 % "grpc-netty"                      % V.grpc                  % Test,
-        "io.netty"                % "netty-tcnative-boringssl-static" % V.nettySSL              % Test,
-        "org.scalatest"           %% "scalatest"                      % V.scalatest             % Test,
-        "org.scalatestplus"       %% "scalacheck-1-14"                % V.scalatestplusScheck   % Test,
-        "org.scalamock"           %% "scalamock"                      % V.scalamock             % Test,
-        "com.47deg"               %% "scalacheck-toolbox-datetime"    % V.scalacheckToolbox     % Test,
-        "org.scala-lang.modules"  %% "scala-collection-compat"        % V.scalaCollectionCompat % Test,
-        "io.github.embeddedkafka" %% "embedded-kafka"                 % V.embeddedKafka         % Test,
-        "org.http4s"              %% "http4s-blaze-client"            % V.http4s                % Test,
-        "io.circe"                %% "circe-generic"                  % V.circe                 % Test,
-        "ch.qos.logback"          % "logback-classic"                 % V.logback               % Test,
-        "org.slf4j"               % "slf4j-nop"                       % V.slf4j                 % Test
+        "io.grpc"                  % "grpc-netty"                      % V.grpc                  % Test,
+        "io.netty"                 % "netty-tcnative-boringssl-static" % V.nettySSL              % Test,
+        "org.scalatest"           %% "scalatest"                       % V.scalatest             % Test,
+        "org.scalatestplus"       %% "scalacheck-1-14"                 % V.scalatestplusScheck   % Test,
+        "org.scalamock"           %% "scalamock"                       % V.scalamock             % Test,
+        "com.47deg"               %% "scalacheck-toolbox-datetime"     % V.scalacheckToolbox     % Test,
+        "org.scala-lang.modules"  %% "scala-collection-compat"         % V.scalaCollectionCompat % Test,
+        "io.github.embeddedkafka" %% "embedded-kafka"                  % V.embeddedKafka         % Test,
+        "org.http4s"              %% "http4s-blaze-client"             % V.http4s                % Test,
+        "io.circe"                %% "circe-generic"                   % V.circe                 % Test,
+        "ch.qos.logback"           % "logback-classic"                 % V.logback               % Test,
+        "org.slf4j"                % "slf4j-nop"                       % V.slf4j                 % Test
       )
     )
 
@@ -292,7 +296,7 @@ object ProjectPlugin extends AutoPlugin {
       Test / parallelExecution := false,
       libraryDependencies ++= Seq(
         "co.fs2"        %% "fs2-core"                    % V.fs2,
-        "org.scalatest" %% "scalatest"                   % V.scalatest % Test,
+        "org.scalatest" %% "scalatest"                   % V.scalatest     % Test,
         "com.whisk"     %% "docker-testkit-scalatest"    % V.dockerItScala % Test,
         "com.whisk"     %% "docker-testkit-impl-spotify" % V.dockerItScala % Test
       )

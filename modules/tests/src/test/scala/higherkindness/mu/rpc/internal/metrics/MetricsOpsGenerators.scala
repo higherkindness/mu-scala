@@ -47,24 +47,25 @@ object MetricsOpsGenerators {
       methodType
     )
 
-  def statusGen: Gen[Status] = Gen.oneOf(
-    Status.ABORTED,
-    Status.ALREADY_EXISTS,
-    Status.CANCELLED,
-    Status.DATA_LOSS,
-    Status.DEADLINE_EXCEEDED,
-    Status.FAILED_PRECONDITION,
-    Status.INTERNAL,
-    Status.INVALID_ARGUMENT,
-    Status.NOT_FOUND,
-    Status.OK,
-    Status.OUT_OF_RANGE,
-    Status.PERMISSION_DENIED,
-    Status.RESOURCE_EXHAUSTED,
-    Status.UNAUTHENTICATED,
-    Status.UNAVAILABLE,
-    Status.UNIMPLEMENTED,
-    Status.UNKNOWN
-  )
+  def statusGen: Gen[Status] =
+    Gen.oneOf(
+      Status.ABORTED,
+      Status.ALREADY_EXISTS,
+      Status.CANCELLED,
+      Status.DATA_LOSS,
+      Status.DEADLINE_EXCEEDED,
+      Status.FAILED_PRECONDITION,
+      Status.INTERNAL,
+      Status.INVALID_ARGUMENT,
+      Status.NOT_FOUND,
+      Status.OK,
+      Status.OUT_OF_RANGE,
+      Status.PERMISSION_DENIED,
+      Status.RESOURCE_EXHAUSTED,
+      Status.UNAUTHENTICATED,
+      Status.UNAVAILABLE,
+      Status.UNIMPLEMENTED,
+      Status.UNKNOWN
+    )
 
 }

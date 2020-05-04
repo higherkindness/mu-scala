@@ -29,12 +29,13 @@ import io.grpc._
 
 object servers {
 
-  def serverCallHandler[Req, Res]: ServerCallHandler[Req, Res] = new ServerCallHandler[Req, Res] {
-    override def startCall(
-        call: ServerCall[Req, Res],
-        headers: Metadata
-    ): ServerCall.Listener[Req] = new NoopServerCallListener[Req]
-  }
+  def serverCallHandler[Req, Res]: ServerCallHandler[Req, Res] =
+    new ServerCallHandler[Req, Res] {
+      override def startCall(
+          call: ServerCall[Req, Res],
+          headers: Metadata
+      ): ServerCall.Listener[Req] = new NoopServerCallListener[Req]
+    }
 
   def serverServiceDefinition(
       serviceName: String,
