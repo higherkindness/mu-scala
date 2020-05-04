@@ -16,7 +16,7 @@
 
 package higherkindness.mu.rpc.server.metrics
 
-import cats.effect.{Clock, IO, Resource}
+import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc.common.{A => _, _}
 import higherkindness.mu.rpc.common.util.FakeClock
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
@@ -70,7 +70,6 @@ class MetricsServerInterceptorTests extends RpcBaseTestSuite {
   private[this] def makeProtoCalls[A](metricsOps: MetricsOps[IO])(
       f: ProtoRPCService[IO] => IO[A]
   )(implicit H: ProtoRPCService[IO], clock: FakeClock[IO]): IO[Either[Throwable, A]] = {
-    implicit val _: Clock[IO] = clock
     withServerChannel[IO](
       service = ProtoRPCService
         .bindService[IO]
