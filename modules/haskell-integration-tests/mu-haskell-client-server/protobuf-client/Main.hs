@@ -1,10 +1,7 @@
 {-# language DataKinds             #-}
 {-# language FlexibleContexts      #-}
-{-# language PartialTypeSignatures #-}
 {-# language OverloadedLabels      #-}
-{-# language OverloadedStrings     #-}
 {-# language TypeApplications      #-}
-{-# OPTIONS_GHC -fno-warn-partial-type-signatures #-}
 
 module Main where
 
@@ -59,15 +56,15 @@ getForecast client city days = do
   GRpcOk resp <- (client ^. #getForecast) req
   putStrLn $ showGetForecastResponse resp
  where
-  c   = Just (T.pack city)
-  d   = readMaybe days
+  c   = T.pack city
+  d   = fromMaybe 5 $ readMaybe days
   req = record (c, d)
 
 showGetForecastResponse :: GetForecastResponse -> String
 showGetForecastResponse resp = lastUpdated ++ " " ++ dailyForecasts
  where
-  lastUpdated    = T.unpack (fromMaybe "" (resp ^. #last_updated))
-  dailyForecasts = toJsonString (fromMaybe [] (resp ^. #daily_forecasts))
+  lastUpdated    = T.unpack $ resp ^. #last_updated
+  dailyForecasts = toJsonString $ resp ^. #daily_forecasts
 
 publishRainEvents
   :: GRpcConnection WeatherService 'MsgProtoBuf -> String -> IO ()
@@ -78,9 +75,9 @@ publishRainEvents client city = do
  where
   stream = C.yieldMany events
   events = toRainEvent <$> [started, stopped, started, stopped, started]
-  toRainEvent x = record (Just $ T.pack city, Just x)
+  toRainEvent x = record (T.pack city, Just x)
   showResponse rainedCount =
-    "It started raining " ++ show (fromMaybe 0 rainedCount) ++ " times"
+    "It started raining " ++ show rainedCount ++ " times"
 
 subscribeToRainEvents
   :: GRpcConnection WeatherService 'MsgProtoBuf -> String -> IO ()
@@ -91,7 +88,7 @@ subscribeToRainEvents client city = do
     .| C.map (toJsonString . extractEventType)
     .| C.mapM_ putStrLn
  where
-  req = record1 $ Just (T.pack city)
+  req = record1 $ T.pack city
   extractEventType (GRpcOk reply) = reply ^. #event_type
 
 toJsonString :: A.ToJSON a => a -> String

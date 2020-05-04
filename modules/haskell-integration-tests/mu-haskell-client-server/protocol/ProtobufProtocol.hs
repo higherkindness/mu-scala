@@ -23,17 +23,16 @@ import           Mu.Schema.Optics
 grpc "WeatherProtocol" id "weather.proto"
 
 type GetForecastRequest
-  = Term Maybe WeatherProtocol (WeatherProtocol :/: "GetForecastRequest")
+  = Term WeatherProtocol (WeatherProtocol :/: "GetForecastRequest")
 
-type Weather = Term Maybe WeatherProtocol (WeatherProtocol :/: "Weather")
+type Weather = Term WeatherProtocol (WeatherProtocol :/: "Weather")
 
 type GetForecastResponse
-  = Term Maybe WeatherProtocol (WeatherProtocol :/: "GetForecastResponse")
+  = Term WeatherProtocol (WeatherProtocol :/: "GetForecastResponse")
 
-type RainEvent = Term Maybe WeatherProtocol (WeatherProtocol :/: "RainEvent")
+type RainEvent = Term WeatherProtocol (WeatherProtocol :/: "RainEvent")
 
-type RainEventType
-  = Term Maybe WeatherProtocol (WeatherProtocol :/: "RainEventType")
+type RainEventType = Term WeatherProtocol (WeatherProtocol :/: "RainEventType")
 
 started :: RainEventType
 started = enum @"STARTED"
@@ -42,11 +41,8 @@ stopped :: RainEventType
 stopped = enum @"STOPPED"
 
 type RainSummaryResponse
-  = Term Maybe WeatherProtocol (WeatherProtocol :/: "RainSummaryResponse")
+  = Term WeatherProtocol (WeatherProtocol :/: "RainSummaryResponse")
 
 type SubscribeToRainEventsRequest
-  = Term
-      Maybe
-      WeatherProtocol
-      (WeatherProtocol :/: "SubscribeToRainEventsRequest")
+  = Term WeatherProtocol (WeatherProtocol :/: "SubscribeToRainEventsRequest")
 

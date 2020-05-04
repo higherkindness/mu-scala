@@ -1,10 +1,6 @@
 {-# language DataKinds             #-}
-{-# language FlexibleContexts      #-}
-{-# language PartialTypeSignatures #-}
 {-# language OverloadedLabels      #-}
-{-# language OverloadedStrings     #-}
 {-# language TypeApplications      #-}
-{-# OPTIONS_GHC -fno-warn-partial-type-signatures #-}
 
 module Main where
 
@@ -16,7 +12,6 @@ import           Data.ByteString.Char8         as BS
                                                 ( unpack )
 import           Data.ByteString.Lazy          as LBS
                                                 ( toStrict )
-import           Data.Functor.Identity
 import           Data.List                      ( intercalate )
 import           Data.Maybe                     ( fromMaybe )
 import           Data.Text                     as T

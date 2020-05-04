@@ -10,7 +10,6 @@ module Main where
 
 import           Data.Conduit
 import qualified Data.Conduit.Combinators      as C
-import           Data.Maybe                     ( fromMaybe )
 import           Data.Monoid                   as M
 import           Data.Text                     as T
                                                 ( Text )
@@ -30,9 +29,9 @@ ping = return ()
 getForecast :: (MonadServer m) => GetForecastRequest -> m GetForecastResponse
 getForecast req = return resp
  where
-  days      = fromIntegral $ fromMaybe 5 (req ^. #days_required)
+  days      = fromIntegral $ req ^. #days_required
   forecasts = sunnyDays days
-  resp      = record (Just lastUpdated, Just forecasts)
+  resp      = record (lastUpdated, forecasts)
 
 lastUpdated :: T.Text
 lastUpdated = "2020-03-20T12:00:00Z"
@@ -44,7 +43,7 @@ publishRainEvents
   :: (MonadServer m) => ConduitT () RainEvent m () -> m RainSummaryResponse
 publishRainEvents source = toResponse <$> countRainStartedEvents
  where
-  toResponse count = record1 $ Just (fromIntegral (M.getSum count))
+  toResponse count = record1 $ fromIntegral (M.getSum count)
   countRainStartedEvents = runConduit $ source .| C.foldMap countMsg
   countMsg msg = countEvent $ msg ^. #event_type
   countEvent (Just x) | x == started = M.Sum 1
@@ -61,11 +60,10 @@ subscribeToRainEvents req sink = runConduit $ C.yieldMany events .| sink
   toRainEvent x = record (city, Just x)
   city = req ^. #city
 
-server :: (MonadServer m) => ServerT Maybe WeatherService m _
-server = Server
-  (     ping
-  :<|>: getForecast
-  :<|>: publishRainEvents
-  :<|>: subscribeToRainEvents
-  :<|>: H0
+server :: (MonadServer m) => SingleServerT WeatherService m _
+server = singleService
+  ( method @"ping" ping
+  , method @"getForecast" getForecast
+  , method @"publishRainEvents" publishRainEvents
+  , method @"subscribeToRainEvents" subscribeToRainEvents
   )
