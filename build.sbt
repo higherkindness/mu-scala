@@ -182,7 +182,6 @@ lazy val `marshallers-jodatime` = project
 lazy val tests = project
   .in(file("modules/tests"))
   .dependsOn(coreModulesDeps: _*)
-  .dependsOn(testing % "test->test")
   .settings(moduleName := "mu-rpc-tests")
   .settings(testSettings)
 
