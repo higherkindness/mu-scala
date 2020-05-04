@@ -23,20 +23,20 @@ class TypeAnalysis[C <: Context](val c: C) {
   import c.universe._
 
   /**
-   * @originalType The original type written by the user.
-   *               For a request type, this will be e.g. `MyRequest` or `Stream[F, MyRequest]`
-   *               or `Observable[MyRequest]`.
-   *               For a response type, it will be inside an effect type,
-   *               e.g. `F[MyResponse]` or `F[Stream[F, MyResponse]]` or `F[Observable[MyResponse]]`
+   * @param originalType The original type written by the user.
+   *                     For a request type, this will be e.g.
+   *                     `MyRequest` or `Stream[F, MyRequest]` or `Observable[MyRequest]`.
+   *                     For a response type, it will be inside an effect type,
+   *                     e.g. `F[MyResponse]` or `F[Stream[F, MyResponse]]` or `F[Observable[MyResponse]]`
    *
-   * @unwrappedType The type, with any surrounding effect type stripped.
-   *                e.g. `MyRequest` or `Stream[F, MyRequest]` or `Observable[MyRequest]`
-   *                For a request type, `unwrappedType` == `originalType`.
+   * @param unwrappedType The type, with any surrounding effect type stripped.
+   *                      e.g. `MyRequest` or `Stream[F, MyRequest]` or `Observable[MyRequest]`
+   *                      For a request type, `unwrappedType` == `originalType`.
    *
-   * @messageType The type of the message in a request/response.
-   *              For non-streaming request/responses, `messageType` == `unwrappedType`.
-   *              For streaming request/responses, `messageType` is the type of the stream elements.
-   *              e.g. if `originalType` is `F[Stream[F, MyResponse]]` then `messageType` is `MyResponse`.
+   * @param messageType The type of the message in a request/response.
+   *                    For non-streaming request/responses, `messageType` == `unwrappedType`.
+   *                    For streaming request/responses, `messageType` is the type of the stream elements.
+   *                    e.g. if `originalType` is `F[Stream[F, MyResponse]]` then `messageType` is `MyResponse`.
    */
   abstract class TypeTypology(
       val originalType: Tree,
