@@ -315,7 +315,10 @@ object ProjectPlugin extends AutoPlugin {
   override def projectSettings: Seq[Def.Setting[_]] =
     Seq(
       crossScalaVersions := Seq(V.scala212, V.scala213),
-      scalacOptions --= Seq("-Xfuture", "-Xfatal-warnings"),
+      scalacOptions --= {
+        if (isOlderScalaVersion(scalaVersion.value)) Seq("-Xfatal-warnings")
+        else Nil
+      },
       Test / fork := true,
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
