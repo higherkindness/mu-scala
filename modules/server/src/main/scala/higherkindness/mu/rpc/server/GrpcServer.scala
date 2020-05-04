@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 47 Degrees <http://47deg.com>
+ * Copyright 2017-2020 47 Degrees Open Source <https://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,30 +49,31 @@ trait GrpcServer[F[_]] { self =>
 
   def awaitTermination(): F[Unit]
 
-  def mapK[G[_]](fk: F ~> G): GrpcServer[G] = new GrpcServer[G] {
-    def start(): G[Unit] = fk(self.start)
+  def mapK[G[_]](fk: F ~> G): GrpcServer[G] =
+    new GrpcServer[G] {
+      def start(): G[Unit] = fk(self.start)
 
-    def getPort: G[Int] = fk(self.getPort)
+      def getPort: G[Int] = fk(self.getPort)
 
-    def getServices: G[List[ServerServiceDefinition]] = fk(self.getServices)
+      def getServices: G[List[ServerServiceDefinition]] = fk(self.getServices)
 
-    def getImmutableServices: G[List[ServerServiceDefinition]] = fk(self.getImmutableServices)
+      def getImmutableServices: G[List[ServerServiceDefinition]] = fk(self.getImmutableServices)
 
-    def getMutableServices: G[List[ServerServiceDefinition]] = fk(self.getMutableServices)
+      def getMutableServices: G[List[ServerServiceDefinition]] = fk(self.getMutableServices)
 
-    def shutdown(): G[Unit] = fk(self.shutdown)
+      def shutdown(): G[Unit] = fk(self.shutdown)
 
-    def shutdownNow(): G[Unit] = fk(self.shutdownNow)
+      def shutdownNow(): G[Unit] = fk(self.shutdownNow)
 
-    def isShutdown: G[Boolean] = fk(self.isShutdown)
+      def isShutdown: G[Boolean] = fk(self.isShutdown)
 
-    def isTerminated: G[Boolean] = fk(self.isTerminated)
+      def isTerminated: G[Boolean] = fk(self.isTerminated)
 
-    def awaitTerminationTimeout(timeout: Long, unit: TimeUnit): G[Boolean] =
-      fk(self.awaitTerminationTimeout(timeout, unit))
+      def awaitTerminationTimeout(timeout: Long, unit: TimeUnit): G[Boolean] =
+        fk(self.awaitTerminationTimeout(timeout, unit))
 
-    def awaitTermination(): G[Unit] = fk(self.awaitTermination)
-  }
+      def awaitTermination(): G[Unit] = fk(self.awaitTermination)
+    }
 }
 
 object GrpcServer {
@@ -94,10 +95,10 @@ object GrpcServer {
    * Build a [[GrpcServer]] that uses the default network transport layer.
    *
    * The transport layer will be Netty, unless you have written your own
-   * [[io.grpc.ServerProvider]] implementation and added it to the classpath.
+   * `io.grpc.ServerProvider` implementation and added it to the classpath.
    */
-  def default[F[_]](port: Int, configList: List[GrpcConfig])(
-      implicit F: Sync[F]
+  def default[F[_]](port: Int, configList: List[GrpcConfig])(implicit
+      F: Sync[F]
   ): F[GrpcServer[F]] =
     F.delay(buildServer(ServerBuilder.forPort(port), configList)).map(fromServer[F])
 
@@ -110,8 +111,8 @@ object GrpcServer {
   /**
    * Build a [[GrpcServer]] that uses the Netty network transport layer.
    */
-  def netty[F[_]](channelFor: ChannelFor, configList: List[GrpcConfig])(
-      implicit F: Sync[F]
+  def netty[F[_]](channelFor: ChannelFor, configList: List[GrpcConfig])(implicit
+      F: Sync[F]
   ): F[GrpcServer[F]] =
     for {
       builder <- F.delay(nettyBuilder(channelFor))
@@ -119,12 +120,15 @@ object GrpcServer {
     } yield fromServer[F](server)
 
   /**
-   * Helper to convert an [[io.grpc.Server]] into a [[GrpcServer]].
+   * Helper to convert an `io.grpc.Server` into a [[GrpcServer]].
    */
   def fromServer[F[_]: Sync](server: Server): GrpcServer[F] =
     handlers.GrpcServerHandler[F].mapK(λ[GrpcServerOps[F, ?] ~> F](_.run(server)))
 
-  private[this] def buildServer(bldr: ServerBuilder[SB] forSome { type SB <: ServerBuilder[SB] }, configList: List[GrpcConfig]): Server = {
+  private[this] def buildServer(
+      bldr: ServerBuilder[SB] forSome { type SB <: ServerBuilder[SB] },
+      configList: List[GrpcConfig]
+  ): Server = {
     configList
       .foldLeft(bldr)((bldr, cfg) => SBuilder(bldr)(cfg))
       .build()

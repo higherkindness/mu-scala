@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees Open Source <https://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,10 @@ trait RunHaskellClientInDocker { self: Suite =>
   // An address for the RPC server that can be reached from inside a docker container
   val hostExternalIpAddress = {
     import sys.process._
-    if (sys.props("os.name").contains("Mac")) {
+    if (sys.props("os.name").contains("Mac"))
       "ipconfig getifaddr en0".!!.trim
-    } else {
+    else
       "hostname -I".!!.trim.split(" ").head
-    }
   }
 
   def containerConfig(clientArgs: List[String]) =
@@ -60,9 +59,7 @@ trait RunHaskellClientInDocker { self: Suite =>
         s"Client exited with code ${exit.statusCode} and output: $output"
       )
       output
-    } finally {
-      logstream.close()
-    }
+    } finally logstream.close()
   }
 
 }

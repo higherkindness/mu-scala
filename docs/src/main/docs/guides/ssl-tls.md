@@ -48,7 +48,7 @@ On the server and client side, we will need two files to configure the
 ## Usage
 
 The first step to secure our [Mu] services is to add the library dependencies
-`mu-rpc-netty-ssl` and `mu-rpc-netty` in our build.
+`mu-rpc-netty-ssl` and `mu-rpc-client-netty` in our build.
 
 For the second step, we have to move both server/client certificates and private
 keys to a place where they can be loaded at runtime, either from the filesystem

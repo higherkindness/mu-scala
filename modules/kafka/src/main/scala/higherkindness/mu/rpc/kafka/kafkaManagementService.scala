@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 47 Degrees <http://47deg.com>
+ * Copyright 2017-2020 47 Degrees Open Source <https://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,18 +65,20 @@ object kafkaManagementService {
     final case object UnknownConfigType      extends ConfigType with Pos._2
     final case object BrokerLoggerConfigType extends ConfigType with Pos._3
 
-    def toJava(ct: ConfigType): KConfigResource.Type = ct match {
-      case TopicConfigType        => KConfigResource.Type.TOPIC
-      case BrokerConfigType       => KConfigResource.Type.BROKER
-      case UnknownConfigType      => KConfigResource.Type.UNKNOWN
-      case BrokerLoggerConfigType => KConfigResource.Type.BROKER_LOGGER
-    }
-    def fromJava(kct: KConfigResource.Type): ConfigType = kct match {
-      case KConfigResource.Type.TOPIC         => TopicConfigType
-      case KConfigResource.Type.BROKER        => BrokerConfigType
-      case KConfigResource.Type.UNKNOWN       => UnknownConfigType
-      case KConfigResource.Type.BROKER_LOGGER => BrokerLoggerConfigType
-    }
+    def toJava(ct: ConfigType): KConfigResource.Type =
+      ct match {
+        case TopicConfigType        => KConfigResource.Type.TOPIC
+        case BrokerConfigType       => KConfigResource.Type.BROKER
+        case UnknownConfigType      => KConfigResource.Type.UNKNOWN
+        case BrokerLoggerConfigType => KConfigResource.Type.BROKER_LOGGER
+      }
+    def fromJava(kct: KConfigResource.Type): ConfigType =
+      kct match {
+        case KConfigResource.Type.TOPIC         => TopicConfigType
+        case KConfigResource.Type.BROKER        => BrokerConfigType
+        case KConfigResource.Type.UNKNOWN       => UnknownConfigType
+        case KConfigResource.Type.BROKER_LOGGER => BrokerLoggerConfigType
+      }
   }
   final case class ConfigResource(typ: ConfigType, name: String)
   object ConfigResource {
@@ -96,15 +98,16 @@ object kafkaManagementService {
     final case object UnknownConfig              extends ConfigSource with Pos._5
     final case object DynamicBrokerLoggerConfig  extends ConfigSource with Pos._6
 
-    def fromJava(kcs: KConfigEntry.ConfigSource): ConfigSource = kcs match {
-      case KConfigEntry.ConfigSource.DYNAMIC_TOPIC_CONFIG          => DynamicTopicConfig
-      case KConfigEntry.ConfigSource.DYNAMIC_BROKER_CONFIG         => DynamicBrokerConfig
-      case KConfigEntry.ConfigSource.DYNAMIC_DEFAULT_BROKER_CONFIG => DynamicDefaultBrokerConfig
-      case KConfigEntry.ConfigSource.STATIC_BROKER_CONFIG          => StaticBrokerConfig
-      case KConfigEntry.ConfigSource.DEFAULT_CONFIG                => DefaultConfig
-      case KConfigEntry.ConfigSource.UNKNOWN                       => UnknownConfig
-      case KConfigEntry.ConfigSource.DYNAMIC_BROKER_LOGGER_CONFIG  => DynamicBrokerLoggerConfig
-    }
+    def fromJava(kcs: KConfigEntry.ConfigSource): ConfigSource =
+      kcs match {
+        case KConfigEntry.ConfigSource.DYNAMIC_TOPIC_CONFIG          => DynamicTopicConfig
+        case KConfigEntry.ConfigSource.DYNAMIC_BROKER_CONFIG         => DynamicBrokerConfig
+        case KConfigEntry.ConfigSource.DYNAMIC_DEFAULT_BROKER_CONFIG => DynamicDefaultBrokerConfig
+        case KConfigEntry.ConfigSource.STATIC_BROKER_CONFIG          => StaticBrokerConfig
+        case KConfigEntry.ConfigSource.DEFAULT_CONFIG                => DefaultConfig
+        case KConfigEntry.ConfigSource.UNKNOWN                       => UnknownConfig
+        case KConfigEntry.ConfigSource.DYNAMIC_BROKER_LOGGER_CONFIG  => DynamicBrokerLoggerConfig
+      }
   }
   final case class ConfigSynonym(name: String, value: String, source: ConfigSource)
   object ConfigSynonym {
@@ -120,14 +123,15 @@ object kafkaManagementService {
       synonyms: List[ConfigSynonym]
   )
   object ConfigEntry {
-    def fromJava(kce: KConfigEntry): ConfigEntry = ConfigEntry(
-      kce.name(),
-      kce.value(),
-      ConfigSource.fromJava(kce.source()),
-      kce.isSensitive(),
-      kce.isReadOnly(),
-      kce.synonyms().asScala.map(ConfigSynonym.fromJava).toList
-    )
+    def fromJava(kce: KConfigEntry): ConfigEntry =
+      ConfigEntry(
+        kce.name(),
+        kce.value(),
+        ConfigSource.fromJava(kce.source()),
+        kce.isSensitive(),
+        kce.isReadOnly(),
+        kce.synonyms().asScala.map(ConfigSynonym.fromJava).toList
+      )
   }
   final case class Config(resource: ConfigResource, entries: List[ConfigEntry])
   final case class Configs(configs: List[Config])
@@ -138,12 +142,13 @@ object kafkaManagementService {
     final case object Append   extends OpType with Pos._2
     final case object Subtract extends OpType with Pos._3
 
-    def toJava(ot: OpType): KAlterConfigOp.OpType = ot match {
-      case Set      => KAlterConfigOp.OpType.SET
-      case Delete   => KAlterConfigOp.OpType.DELETE
-      case Append   => KAlterConfigOp.OpType.APPEND
-      case Subtract => KAlterConfigOp.OpType.SUBTRACT
-    }
+    def toJava(ot: OpType): KAlterConfigOp.OpType =
+      ot match {
+        case Set      => KAlterConfigOp.OpType.SET
+        case Delete   => KAlterConfigOp.OpType.DELETE
+        case Append   => KAlterConfigOp.OpType.APPEND
+        case Subtract => KAlterConfigOp.OpType.SUBTRACT
+      }
   }
   final case class AlterConfigOp(name: String, value: String, opType: OpType)
   object AlterConfigOp {
@@ -170,12 +175,13 @@ object kafkaManagementService {
       assignment: MemberAssignment
   )
   object MemberDescription {
-    def fromJava(kmd: KMemberDescription): MemberDescription = MemberDescription(
-      kmd.consumerId(),
-      kmd.clientId(),
-      kmd.host(),
-      MemberAssignment.fromJava(kmd.assignment())
-    )
+    def fromJava(kmd: KMemberDescription): MemberDescription =
+      MemberDescription(
+        kmd.consumerId(),
+        kmd.clientId(),
+        kmd.host(),
+        MemberAssignment.fromJava(kmd.assignment())
+      )
   }
   sealed trait ConsumerGroupState extends Pos
   object ConsumerGroupState {
@@ -186,14 +192,15 @@ object kafkaManagementService {
     final case object Stable              extends ConsumerGroupState with Pos._4
     final case object Unknown             extends ConsumerGroupState with Pos._5
 
-    def fromJava(kcgs: KConsumerGroupState): ConsumerGroupState = kcgs match {
-      case KConsumerGroupState.COMPLETING_REBALANCE => CompletingRebalance
-      case KConsumerGroupState.DEAD                 => Dead
-      case KConsumerGroupState.EMPTY                => Empty
-      case KConsumerGroupState.PREPARING_REBALANCE  => PreparingRebalance
-      case KConsumerGroupState.STABLE               => Stable
-      case KConsumerGroupState.UNKNOWN              => Unknown
-    }
+    def fromJava(kcgs: KConsumerGroupState): ConsumerGroupState =
+      kcgs match {
+        case KConsumerGroupState.COMPLETING_REBALANCE => CompletingRebalance
+        case KConsumerGroupState.DEAD                 => Dead
+        case KConsumerGroupState.EMPTY                => Empty
+        case KConsumerGroupState.PREPARING_REBALANCE  => PreparingRebalance
+        case KConsumerGroupState.STABLE               => Stable
+        case KConsumerGroupState.UNKNOWN              => Unknown
+      }
   }
   sealed trait AclOperation extends Pos
   object AclOperation {
@@ -211,21 +218,22 @@ object kafkaManagementService {
     final case object Unknown         extends AclOperation with Pos._11
     final case object Write           extends AclOperation with Pos._12
 
-    def fromJava(kao: KAclOperation): AclOperation = kao match {
-      case KAclOperation.ALL              => All
-      case KAclOperation.ALTER            => Alter
-      case KAclOperation.ALTER_CONFIGS    => AlterConfigs
-      case KAclOperation.ANY              => Any
-      case KAclOperation.CLUSTER_ACTION   => ClusterAction
-      case KAclOperation.CREATE           => Create
-      case KAclOperation.DELETE           => Delete
-      case KAclOperation.DESCRIBE         => Describe
-      case KAclOperation.DESCRIBE_CONFIGS => DescribeConfigs
-      case KAclOperation.IDEMPOTENT_WRITE => IdempotentWrite
-      case KAclOperation.READ             => Read
-      case KAclOperation.UNKNOWN          => Unknown
-      case KAclOperation.WRITE            => Write
-    }
+    def fromJava(kao: KAclOperation): AclOperation =
+      kao match {
+        case KAclOperation.ALL              => All
+        case KAclOperation.ALTER            => Alter
+        case KAclOperation.ALTER_CONFIGS    => AlterConfigs
+        case KAclOperation.ANY              => Any
+        case KAclOperation.CLUSTER_ACTION   => ClusterAction
+        case KAclOperation.CREATE           => Create
+        case KAclOperation.DELETE           => Delete
+        case KAclOperation.DESCRIBE         => Describe
+        case KAclOperation.DESCRIBE_CONFIGS => DescribeConfigs
+        case KAclOperation.IDEMPOTENT_WRITE => IdempotentWrite
+        case KAclOperation.READ             => Read
+        case KAclOperation.UNKNOWN          => Unknown
+        case KAclOperation.WRITE            => Write
+      }
   }
   final case class ConsumerGroupDescription(
       groupId: String,
@@ -274,12 +282,13 @@ object kafkaManagementService {
       authorizedOperations: List[AclOperation]
   )
   object TopicDescription {
-    def fromJava(ktd: KTopicDescription): TopicDescription = TopicDescription(
-      ktd.name(),
-      ktd.isInternal(),
-      ktd.partitions().asScala.map(TopicPartitionInfo.fromJava).toList,
-      ktd.authorizedOperations().asScala.map(AclOperation.fromJava).toList
-    )
+    def fromJava(ktd: KTopicDescription): TopicDescription =
+      TopicDescription(
+        ktd.name(),
+        ktd.isInternal(),
+        ktd.partitions().asScala.map(TopicPartitionInfo.fromJava).toList,
+        ktd.authorizedOperations().asScala.map(AclOperation.fromJava).toList
+      )
   }
   final case class Topics(topics: List[TopicDescription])
   final case class DescribeTopicsRequest(names: List[String])
@@ -306,10 +315,11 @@ object kafkaManagementService {
       isSimpleConsumerGroup: Boolean
   )
   object ConsumerGroupListing {
-    def fromJava(kcgl: KConsumerGroupListing): ConsumerGroupListing = ConsumerGroupListing(
-      kcgl.groupId(),
-      kcgl.isSimpleConsumerGroup()
-    )
+    def fromJava(kcgl: KConsumerGroupListing): ConsumerGroupListing =
+      ConsumerGroupListing(
+        kcgl.groupId(),
+        kcgl.isSimpleConsumerGroup()
+      )
   }
   final case class ConsumerGroupListings(consumerGroupListings: List[ConsumerGroupListing])
 
