@@ -62,8 +62,7 @@ class RPCTracingTests extends AnyFunSpec {
       def monixBidiStreaming(req: Observable[Request]): F[Observable[Response]]
     }
 
-    class TracingServiceDef[F[_]: Async: Trace](s: Scheduler)(
-        implicit
+    class TracingServiceDef[F[_]: Async: Trace](s: Scheduler)(implicit
         c: Stream.Compiler[F, F]
     ) extends UnaryServiceDef[F]
         with FS2ServiceDef[F]
@@ -230,8 +229,9 @@ class RPCTracingTests extends AnyFunSpec {
             case (client, span) =>
               for {
                 respStreamK <- client.fs2ServerStreaming(Request("abc")).run(span)
-                respStream = respStreamK
-                  .translateInterruptible(Kleisli.applyK[IO, Span[IO]](span))
+                respStream =
+                  respStreamK
+                    .translateInterruptible(Kleisli.applyK[IO, Span[IO]](span))
                 lastResp <- respStream.compile.lastOrError
               } yield lastResp
           }
@@ -265,8 +265,9 @@ class RPCTracingTests extends AnyFunSpec {
               val reqStream = Stream(Request("abc"))
               for {
                 respStreamK <- client.fs2BidiStreaming(reqStream).run(span)
-                respStream = respStreamK
-                  .translateInterruptible(Kleisli.applyK[IO, Span[IO]](span))
+                respStream =
+                  respStreamK
+                    .translateInterruptible(Kleisli.applyK[IO, Span[IO]](span))
                 lastResp <- respStream.compile.lastOrError
               } yield lastResp
           }

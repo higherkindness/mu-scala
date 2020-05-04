@@ -110,21 +110,21 @@ object avro {
     private[this] def toDecimalTag[SP](bigDecimal: BigDecimal): BigDecimal @@ SP =
       shapeless.tag[SP][BigDecimal](bigDecimal)
 
-    private[this] def avro4sPrecisionAndScale[A <: Nat, B <: Nat](
-        implicit toIntNA: ToInt[A],
+    private[this] def avro4sPrecisionAndScale[A <: Nat, B <: Nat](implicit
+        toIntNA: ToInt[A],
         toIntNB: ToInt[B]
     ) =
       ScalePrecision(Nat.toInt[B], Nat.toInt[A])
 
-    private[this] def avro4sPrecisionAndScale[A <: Nat, B <: Nat, C <: Nat](
-        implicit toIntNA: ToInt[A],
+    private[this] def avro4sPrecisionAndScale[A <: Nat, B <: Nat, C <: Nat](implicit
+        toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         toIntNC: ToInt[C]
     ) =
       ScalePrecision(Nat.toInt[C], Nat.toInt[A] * 10 + Nat.toInt[B])
 
-    private[this] def avro4sPrecisionAndScale[A <: Nat, B <: Nat, C <: Nat, D <: Nat](
-        implicit toIntNA: ToInt[A],
+    private[this] def avro4sPrecisionAndScale[A <: Nat, B <: Nat, C <: Nat, D <: Nat](implicit
+        toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
         toIntND: ToInt[D]
@@ -182,44 +182,45 @@ object avro {
       }
     }
 
-    implicit def bigDecimalSchemaForSimple[A <: Nat, B <: Nat](
-        implicit toIntNA: ToInt[A],
+    implicit def bigDecimalSchemaForSimple[A <: Nat, B <: Nat](implicit
+        toIntNA: ToInt[A],
         toIntNB: ToInt[B]
     ): SchemaFor[BigDecimal @@ (A, B)] =
       bigDecimalSchemaFor[A, B](avro4sPrecisionAndScale[A, B])
 
-    implicit def bigDecimalSchemaForBigPrecision[A <: Nat, B <: Nat, C <: Nat](
-        implicit toIntNA: ToInt[A],
+    implicit def bigDecimalSchemaForBigPrecision[A <: Nat, B <: Nat, C <: Nat](implicit
+        toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         toIntNC: ToInt[C]
     ): SchemaFor[BigDecimal @@ ((A, B), C)] =
       bigDecimalSchemaFor[(A, B), C](avro4sPrecisionAndScale[A, B, C])
 
     implicit def bigDecimalSchemaForBigPrecisionScale[A <: Nat, B <: Nat, C <: Nat, D <: Nat](
-        implicit toIntNA: ToInt[A],
+        implicit
+        toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
         toIntND: ToInt[D]
     ): SchemaFor[BigDecimal @@ ((A, B), (C, D))] =
       bigDecimalSchemaFor[(A, B), (C, D)](avro4sPrecisionAndScale[A, B, C, D])
 
-    implicit def bigDecimalDecoderSimple[A <: Nat, B <: Nat](
-        implicit toIntNA: ToInt[A],
+    implicit def bigDecimalDecoderSimple[A <: Nat, B <: Nat](implicit
+        toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
     ): Decoder[BigDecimal @@ (A, B)] =
       bigDecimalDecoder[A, B](avro4sPrecisionAndScale[A, B], RM)
 
-    implicit def bigDecimalDecoderBigPrecision[A <: Nat, B <: Nat, C <: Nat](
-        implicit toIntNA: ToInt[A],
+    implicit def bigDecimalDecoderBigPrecision[A <: Nat, B <: Nat, C <: Nat](implicit
+        toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
         RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
     ): Decoder[BigDecimal @@ ((A, B), C)] =
       bigDecimalDecoder[(A, B), C](avro4sPrecisionAndScale[A, B, C], RM)
 
-    implicit def bigDecimalDecoderBigPrecisionScale[A <: Nat, B <: Nat, C <: Nat, D <: Nat](
-        implicit toIntNA: ToInt[A],
+    implicit def bigDecimalDecoderBigPrecisionScale[A <: Nat, B <: Nat, C <: Nat, D <: Nat](implicit
+        toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
         toIntND: ToInt[D],
@@ -227,23 +228,23 @@ object avro {
     ): Decoder[BigDecimal @@ ((A, B), (C, D))] =
       bigDecimalDecoder[(A, B), (C, D)](avro4sPrecisionAndScale[A, B, C, D], RM)
 
-    implicit def bigDecimalEncoderSimple[A <: Nat, B <: Nat](
-        implicit toIntNA: ToInt[A],
+    implicit def bigDecimalEncoderSimple[A <: Nat, B <: Nat](implicit
+        toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
     ): Encoder[BigDecimal @@ (A, B)] =
       bigDecimalEncoder[A, B](avro4sPrecisionAndScale[A, B], RM)
 
-    implicit def bigDecimalEncoderBigPrecision[A <: Nat, B <: Nat, C <: Nat](
-        implicit toIntNA: ToInt[A],
+    implicit def bigDecimalEncoderBigPrecision[A <: Nat, B <: Nat, C <: Nat](implicit
+        toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
         RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
     ): Encoder[BigDecimal @@ ((A, B), C)] =
       bigDecimalEncoder[(A, B), C](avro4sPrecisionAndScale[A, B, C], RM)
 
-    implicit def bigDecimalEncoderBigPrecisionScale[A <: Nat, B <: Nat, C <: Nat, D <: Nat](
-        implicit toIntNA: ToInt[A],
+    implicit def bigDecimalEncoderBigPrecisionScale[A <: Nat, B <: Nat, C <: Nat, D <: Nat](implicit
+        toIntNA: ToInt[A],
         toIntNB: ToInt[B],
         toIntNC: ToInt[C],
         toIntND: ToInt[D],
@@ -259,8 +260,8 @@ object avro {
      */
     object marshallers {
 
-      implicit def bigDecimalMarshaller2[A <: Nat, B <: Nat](
-          implicit toIntNA: ToInt[A],
+      implicit def bigDecimalMarshaller2[A <: Nat, B <: Nat](implicit
+          toIntNA: ToInt[A],
           toIntNB: ToInt[B],
           RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
       ): Marshaller[BigDecimal @@ (A, B)] =
@@ -276,25 +277,26 @@ object avro {
             )
         }
 
-      implicit def bigDecimalMarshaller3[A <: Nat, B <: Nat, C <: Nat](
-          implicit toIntNA: ToInt[A],
+      implicit def bigDecimalMarshaller3[A <: Nat, B <: Nat, C <: Nat](implicit
+          toIntNA: ToInt[A],
           toIntNB: ToInt[B],
           toIntNC: ToInt[C],
           RM: RoundingMode.RoundingMode = RoundingMode.UNNECESSARY
-      ): Marshaller[BigDecimal @@ ((A, B), C)] = new Marshaller[BigDecimal @@ ((A, B), C)] {
-        val inner: BDSerializer = BDSerializer(avro4sPrecisionAndScale[A, B, C], RM)
+      ): Marshaller[BigDecimal @@ ((A, B), C)] =
+        new Marshaller[BigDecimal @@ ((A, B), C)] {
+          val inner: BDSerializer = BDSerializer(avro4sPrecisionAndScale[A, B, C], RM)
 
-        override def stream(value: BigDecimal @@ ((A, B), C)): InputStream =
-          new ByteArrayInputStream(inner.toByteBuffer(value).array())
+          override def stream(value: BigDecimal @@ ((A, B), C)): InputStream =
+            new ByteArrayInputStream(inner.toByteBuffer(value).array())
 
-        override def parse(stream: InputStream): BigDecimal @@ ((A, B), C) =
-          toDecimalTag[((A, B), C)](
-            inner.fromByteBuffer(ByteBuffer.wrap(ByteStreams.toByteArray(stream)))
-          )
-      }
+          override def parse(stream: InputStream): BigDecimal @@ ((A, B), C) =
+            toDecimalTag[((A, B), C)](
+              inner.fromByteBuffer(ByteBuffer.wrap(ByteStreams.toByteArray(stream)))
+            )
+        }
 
-      implicit def bigDecimalMarshaller4[A <: Nat, B <: Nat, C <: Nat, D <: Nat](
-          implicit toIntNA: ToInt[A],
+      implicit def bigDecimalMarshaller4[A <: Nat, B <: Nat, C <: Nat, D <: Nat](implicit
+          toIntNA: ToInt[A],
           toIntNB: ToInt[B],
           toIntNC: ToInt[C],
           toIntND: ToInt[D],

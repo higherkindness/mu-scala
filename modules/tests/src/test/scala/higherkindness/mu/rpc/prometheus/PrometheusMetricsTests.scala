@@ -148,16 +148,17 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
 
         (for {
           metrics <- PrometheusMetrics.build[IO](registry, prefix)
-          op1 <- (1 to numberOfCalls).toList
-            .traverse_(_ =>
-              metrics.recordTotalTime(methodInfo, status, elapsed.toLong, Some(classifier))
-            )
-            .map { _ =>
-              checkMetrics(
-                registry,
-                metricName
-              )(checkSeriesSamples(metricName, numberOfCalls, elapsed))
-            }
+          op1 <-
+            (1 to numberOfCalls).toList
+              .traverse_(_ =>
+                metrics.recordTotalTime(methodInfo, status, elapsed.toLong, Some(classifier))
+              )
+              .map { _ =>
+                checkMetrics(
+                  registry,
+                  metricName
+                )(checkSeriesSamples(metricName, numberOfCalls, elapsed))
+              }
         } yield op1).unsafeRunSync()
     }
 
@@ -169,16 +170,17 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
 
         (for {
           metrics <- PrometheusMetrics.buildFullTotal[IO](registry, prefix)
-          op1 <- (1 to numberOfCalls).toList
-            .traverse_(_ =>
-              metrics.recordTotalTime(methodInfo, status, elapsed.toLong, Some(classifier))
-            )
-            .map { _ =>
-              checkMetrics(
-                registry,
-                metricName
-              )(checkSeriesSamples(metricName, numberOfCalls, elapsed))
-            }
+          op1 <-
+            (1 to numberOfCalls).toList
+              .traverse_(_ =>
+                metrics.recordTotalTime(methodInfo, status, elapsed.toLong, Some(classifier))
+              )
+              .map { _ =>
+                checkMetrics(
+                  registry,
+                  metricName
+                )(checkSeriesSamples(metricName, numberOfCalls, elapsed))
+              }
         } yield op1).unsafeRunSync()
     }
 }

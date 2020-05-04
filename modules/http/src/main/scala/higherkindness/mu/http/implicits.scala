@@ -36,10 +36,11 @@ import scala.util.control.NoStackTrace
 object implicits {
 
   implicit val unexpectedErrorEncoder: Encoder[UnexpectedError] = new Encoder[UnexpectedError] {
-    final def apply(a: UnexpectedError): Json = Json.obj(
-      ("className", Json.fromString(a.className)),
-      ("msg", a.msg.fold(Json.Null)(s => Json.fromString(s)))
-    )
+    final def apply(a: UnexpectedError): Json =
+      Json.obj(
+        ("className", Json.fromString(a.className)),
+        ("msg", a.msg.fold(Json.Null)(s => Json.fromString(s)))
+      )
   }
 
   implicit val unexpectedErrorDecoder: Decoder[UnexpectedError] = new Decoder[UnexpectedError] {
@@ -60,8 +61,8 @@ object implicits {
 
   implicit class MessageOps[F[_]](private val message: Message[F]) extends AnyVal {
 
-    def jsonBodyAsStream[A](
-        implicit decoder: Decoder[A],
+    def jsonBodyAsStream[A](implicit
+        decoder: Decoder[A],
         F: ApplicativeError[F, Throwable]
     ): Stream[F, A] =
       message.body.chunks.parseJsonStream.map(_.as[A]).rethrow
@@ -80,8 +81,8 @@ object implicits {
 
   implicit class ResponseOps[F[_]](private val response: Response[F]) {
 
-    def asStream[A](
-        implicit decoder: Decoder[A],
+    def asStream[A](implicit
+        decoder: Decoder[A],
         F: ApplicativeError[F, Throwable],
         R: RaiseThrowable[F]
     ): Stream[F, A] =
@@ -98,11 +99,12 @@ object implicits {
   implicit class FResponseOps[F[_]: Sync](private val response: F[Response[F]])
       extends Http4sDsl[F] {
 
-    def adaptErrors: F[Response[F]] = response.handleErrorWith {
-      case se: StatusException         => errorFromStatus(se.getStatus, se.getMessage)
-      case sre: StatusRuntimeException => errorFromStatus(sre.getStatus, sre.getMessage)
-      case other: Throwable            => InternalServerError(other.getMessage)
-    }
+    def adaptErrors: F[Response[F]] =
+      response.handleErrorWith {
+        case se: StatusException         => errorFromStatus(se.getStatus, se.getMessage)
+        case sre: StatusRuntimeException => errorFromStatus(sre.getStatus, sre.getMessage)
+        case other: Throwable            => InternalServerError(other.getMessage)
+      }
 
     private def errorFromStatus(status: io.grpc.Status, message: String): F[Response[F]] =
       status.getCode match {
