@@ -158,7 +158,6 @@ lazy val `benchmarks-vprev` = project
 
 lazy val `benchmarks-vnext` = project
   .in(file("benchmarks/vnext"))
-  .dependsOn(`rpc-service`)
   .dependsOn(server)
   .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vnext")
@@ -195,7 +194,7 @@ lazy val `haskell-integration-tests` = project
   .in(file("modules/haskell-integration-tests"))
   .settings(noPublishSettings)
   .settings(haskellIntegrationTestSettings)
-  .dependsOn(server, `client-netty`, `rpc-service`, fs2)
+  .dependsOn(server, `client-netty`, fs2)
 
 //////////////////////////
 //// MODULES REGISTRY ////
