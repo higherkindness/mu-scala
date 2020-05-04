@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
-package protocol
-
-import scala.annotation.StaticAnnotation
+package higherkindness.mu.rpc.protocol
 
 sealed trait StreamingType         extends Product with Serializable
 case object RequestStreaming       extends StreamingType
@@ -37,9 +34,5 @@ case object Gzip                      extends CompressionType
 sealed abstract class MethodNameStyle extends Product with Serializable
 case object Unchanged                 extends MethodNameStyle
 case object Capitalize                extends MethodNameStyle
-
-class option(name: String, value: Any) extends StaticAnnotation
-class outputPackage(value: String)     extends StaticAnnotation
-class outputName(value: String)        extends StaticAnnotation
 
 object Empty
