@@ -25,8 +25,8 @@ import org.http4s._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
-class UnaryGreeterRestService[F[_]: Sync](
-    implicit handler: UnaryGreeter[F],
+class UnaryGreeterRestService[F[_]: Sync](implicit
+    handler: UnaryGreeter[F],
     decoderHelloRequest: io.circe.Decoder[HelloRequest],
     encoderHelloResponse: io.circe.Encoder[HelloResponse]
 ) extends Http4sDsl[F] {
@@ -35,45 +35,47 @@ class UnaryGreeterRestService[F[_]: Sync](
 
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
 
-  def service: HttpRoutes[F] = HttpRoutes.of[F] {
+  def service: HttpRoutes[F] =
+    HttpRoutes.of[F] {
 
-    case GET -> Root / "getHello" => Ok(handler.getHello(Empty).map(_.asJson))
+      case GET -> Root / "getHello" => Ok(handler.getHello(Empty).map(_.asJson))
 
-    case msg @ POST -> Root / "sayHello" =>
-      for {
-        request  <- msg.as[HelloRequest]
-        response <- Ok(handler.sayHello(request).map(_.asJson)).adaptErrors
-      } yield response
-  }
+      case msg @ POST -> Root / "sayHello" =>
+        for {
+          request  <- msg.as[HelloRequest]
+          response <- Ok(handler.sayHello(request).map(_.asJson)).adaptErrors
+        } yield response
+    }
 }
 
-class Fs2GreeterRestService[F[_]: Sync](
-    implicit handler: Fs2Greeter[F],
+class Fs2GreeterRestService[F[_]: Sync](implicit
+    handler: Fs2Greeter[F],
     decoderHelloRequest: io.circe.Decoder[HelloRequest],
     encoderHelloResponse: io.circe.Encoder[HelloResponse]
 ) extends Http4sDsl[F] {
 
   private implicit val requestDecoder: EntityDecoder[F, HelloRequest] = jsonOf[F, HelloRequest]
 
-  def service: HttpRoutes[F] = HttpRoutes.of[F] {
+  def service: HttpRoutes[F] =
+    HttpRoutes.of[F] {
 
-    case msg @ POST -> Root / "sayHellos" =>
-      val requests = msg.asStream[HelloRequest]
-      Ok(handler.sayHellos(requests).map(_.asJson))
+      case msg @ POST -> Root / "sayHellos" =>
+        val requests = msg.asStream[HelloRequest]
+        Ok(handler.sayHellos(requests).map(_.asJson))
 
-    case msg @ POST -> Root / "sayHelloAll" =>
-      for {
-        request    <- msg.as[HelloRequest]
-        respStream <- handler.sayHelloAll(request)
-        responses  <- Ok(respStream.asJsonEither)
-      } yield responses
+      case msg @ POST -> Root / "sayHelloAll" =>
+        for {
+          request    <- msg.as[HelloRequest]
+          respStream <- handler.sayHelloAll(request)
+          responses  <- Ok(respStream.asJsonEither)
+        } yield responses
 
-    case msg @ POST -> Root / "sayHellosAll" =>
-      val requests = msg.asStream[HelloRequest]
-      for {
-        respStream <- handler.sayHellosAll(requests)
-        responses  <- Ok(respStream.asJsonEither)
-      } yield responses
+      case msg @ POST -> Root / "sayHellosAll" =>
+        val requests = msg.asStream[HelloRequest]
+        for {
+          respStream <- handler.sayHellosAll(requests)
+          responses  <- Ok(respStream.asJsonEither)
+        } yield responses
 
-  }
+    }
 }

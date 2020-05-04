@@ -1,7 +1,7 @@
 ThisBuild / organization := "io.higherkindness"
 ThisBuild / githubOrganization := "47degrees"
 
-lazy val checkScalafmt         = "+scalafmtCheck; +scalafmtSbtCheck;"
+lazy val checkScalafmt         = "+scalafmtCheckAll; +scalafmtSbtCheck;"
 lazy val checkBenchmarks       = "benchmarks-root/test;"
 lazy val checkDocs             = "+docs/mdoc;"
 lazy val checkIntegrationTests = "+haskell-integration-tests/test;"

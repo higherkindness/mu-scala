@@ -39,8 +39,8 @@ object ClientCache {
       createClient: H => Resource[F, Client[F]],
       tryToRemoveUnusedEvery: FiniteDuration,
       removeUnusedAfter: FiniteDuration
-  )(
-      implicit CE: ConcurrentEffect[F],
+  )(implicit
+      CE: ConcurrentEffect[F],
       cs: ContextShift[F],
       timer: Timer[F]
   ): Stream[F, ClientCache[Client, F]] =
@@ -51,8 +51,8 @@ object ClientCache {
       createClient: H => F[(Client[F], F[Unit])],
       tryToRemoveUnusedEvery: FiniteDuration,
       removeUnusedAfter: FiniteDuration
-  )(
-      implicit CE: ConcurrentEffect[F],
+  )(implicit
+      CE: ConcurrentEffect[F],
       cs: ContextShift[F],
       timer: Timer[F]
   ): Stream[F, ClientCache[Client, F]] = {
@@ -64,34 +64,39 @@ object ClientCache {
     val nowUnix: F[UnixMillis] =
       timer.clock.realTime(MILLISECONDS).map(_.millis)
 
-    def create(ref: Ref[F, State]): ClientCache[Client, F] = new ClientCache[Client, F] {
-      val getClient: F[Client[F]] = for {
-        key      <- getKey
-        now      <- nowUnix
-        (map, _) <- ref.get
-        client <- map
-          .get(key)
-          .fold {
-            createClient(key).flatMap {
-              case (client, close) =>
-                CE.delay(logger.info(s"Created new RPC client for $key")) *>
+    def create(ref: Ref[F, State]): ClientCache[Client, F] =
+      new ClientCache[Client, F] {
+        val getClient: F[Client[F]] = for {
+          key      <- getKey
+          now      <- nowUnix
+          (map, _) <- ref.get
+          client <-
+            map
+              .get(key)
+              .fold {
+                createClient(key).flatMap {
+                  case (client, close) =>
+                    CE.delay(logger.info(s"Created new RPC client for $key")) *>
+                      ref
+                        .update(_.leftMap(_ + (key -> ClientMeta(client, close, now))))
+                        .as(client)
+                }
+              }(clientMeta =>
+                CE.delay(logger.debug(s"Reuse existing RPC client for $key")) *>
                   ref
-                    .update(_.leftMap(_ + (key -> ClientMeta(client, close, now))))
-                    .as(client)
-            }
-          }(clientMeta =>
-            CE.delay(logger.debug(s"Reuse existing RPC client for $key")) *>
-              ref
-                .update(_.leftMap(_.updated(key, clientMeta.copy(lastAccessed = now))))
-                .as(clientMeta.client)
-          )
+                    .update(_.leftMap(_.updated(key, clientMeta.copy(lastAccessed = now))))
+                    .as(clientMeta.client)
+              )
 
-        (_, lastClean) <- ref.get
-        _ <- if (lastClean < (now - tryToRemoveUnusedEvery))
-          Concurrent[F].start(cs.shift *> cleanup(ref, _.lastAccessed < (now - removeUnusedAfter)))
-        else CE.unit
-      } yield client
-    }
+          (_, lastClean) <- ref.get
+          _ <-
+            if (lastClean < (now - tryToRemoveUnusedEvery))
+              Concurrent[F].start(
+                cs.shift *> cleanup(ref, _.lastAccessed < (now - removeUnusedAfter))
+              )
+            else CE.unit
+        } yield client
+      }
 
     def cleanup(ref: Ref[F, State], canBeRemoved: ClientMeta => Boolean): F[Unit] =
       for {

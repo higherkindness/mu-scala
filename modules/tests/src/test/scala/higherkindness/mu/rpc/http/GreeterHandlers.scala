@@ -29,13 +29,14 @@ class UnaryGreeterHandler[F[_]: Applicative](implicit F: MonadError[F, Throwable
 
   def getHello(request: Empty.type): F[HelloResponse] = HelloResponse("hey").pure
 
-  def sayHello(request: HelloRequest): F[HelloResponse] = request.hello match {
-    case "SE"  => F.raiseError(INVALID_ARGUMENT.withDescription("SE").asException)
-    case "SRE" => F.raiseError(INVALID_ARGUMENT.withDescription("SRE").asRuntimeException)
-    case "RTE" => F.raiseError(new IllegalArgumentException("RTE"))
-    case "TR"  => throw new IllegalArgumentException("Thrown")
-    case other => HelloResponse(other).pure
-  }
+  def sayHello(request: HelloRequest): F[HelloResponse] =
+    request.hello match {
+      case "SE"  => F.raiseError(INVALID_ARGUMENT.withDescription("SE").asException)
+      case "SRE" => F.raiseError(INVALID_ARGUMENT.withDescription("SRE").asRuntimeException)
+      case "RTE" => F.raiseError(new IllegalArgumentException("RTE"))
+      case "TR"  => throw new IllegalArgumentException("Thrown")
+      case other => HelloResponse(other).pure
+    }
 
 }
 

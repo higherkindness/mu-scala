@@ -363,9 +363,8 @@ class OperationModels[C <: Context](val c: C) {
         )
     }
 
-    val descriptorAndTracingHandler: Tree = {
+    val descriptorAndTracingHandler: Tree =
       q"($methodDescriptorName.$methodDescriptorValName, $tracingServerCallHandler)"
-    }
 
   }
 
@@ -402,22 +401,23 @@ class OperationModels[C <: Context](val c: C) {
         q"""client.expectOr[${response.messageType}](request)(handleResponseError)(_root_.org.http4s.circe.jsonOf[$F, ${response.messageType}])"""
     }
 
-    def toRequestTree: Tree = request match {
-      case _: EmptyTpe =>
-        q"""def $name(client: _root_.org.http4s.client.Client[$F])(
+    def toRequestTree: Tree =
+      request match {
+        case _: EmptyTpe =>
+          q"""def $name(client: _root_.org.http4s.client.Client[$F])(
              implicit responseDecoder: _root_.io.circe.Decoder[${response.messageType}]): ${response.originalType} = {
                $requestTypology
                $executionClient
              }"""
-      case _ =>
-        q"""def $name(req: ${request.originalType})(client: _root_.org.http4s.client.Client[$F])(
+        case _ =>
+          q"""def $name(req: ${request.originalType})(client: _root_.org.http4s.client.Client[$F])(
              implicit requestEncoder: _root_.io.circe.Encoder[${request.messageType}],
              responseDecoder: _root_.io.circe.Decoder[${response.messageType}]
           ): ${response.originalType} = {
             $requestTypology
             $executionClient
           }"""
-    }
+      }
 
     val routeTypology: Tree = (request, response) match {
       // Stream -> Stream
@@ -481,10 +481,11 @@ class OperationModels[C <: Context](val c: C) {
     val postPattern =
       pq"msg @ _root_.org.http4s.Method.POST -> _root_.org.http4s.dsl.impl.Root / ${operation.name.toString}"
 
-    def toRouteTree: Tree = request match {
-      case _: EmptyTpe => cq"$getPattern => $routeTypology"
-      case _           => cq"$postPattern => $routeTypology"
-    }
+    def toRouteTree: Tree =
+      request match {
+        case _: EmptyTpe => cq"$getPattern => $routeTypology"
+        case _           => cq"$postPattern => $routeTypology"
+      }
 
   }
 

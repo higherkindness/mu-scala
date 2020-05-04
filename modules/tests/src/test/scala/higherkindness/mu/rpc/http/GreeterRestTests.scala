@@ -57,7 +57,10 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
   val server: BlazeServerBuilder[IO] = BlazeServerBuilder[IO]
     .bindHttp(Port, Hostname)
     .withHttpApp(
-      Router(s"/$UnaryServicePrefix" -> unaryService, s"/$Fs2ServicePrefix" -> fs2Service).orNotFound
+      Router(
+        s"/$UnaryServicePrefix" -> unaryService,
+        s"/$Fs2ServicePrefix"   -> fs2Service
+      ).orNotFound
     )
 
   var serverTask: Fiber[IO, Nothing] = _

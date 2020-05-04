@@ -45,16 +45,18 @@ class TypeAnalysis[C <: Context](val c: C) {
   ) extends Product
       with Serializable {
 
-    def isEmpty: Boolean = this match {
-      case _: EmptyTpe => true
-      case _           => false
-    }
+    def isEmpty: Boolean =
+      this match {
+        case _: EmptyTpe => true
+        case _           => false
+      }
 
-    def isStreaming: Boolean = this match {
-      case _: Fs2StreamTpe       => true
-      case _: MonixObservableTpe => true
-      case _                     => false
-    }
+    def isStreaming: Boolean =
+      this match {
+        case _: Fs2StreamTpe       => true
+        case _: MonixObservableTpe => true
+        case _                     => false
+      }
   }
   object TypeTypology {
 
@@ -66,13 +68,14 @@ class TypeAnalysis[C <: Context](val c: C) {
      * extractName(tq"monix.reactive.Observable") == List("monix", "reactive", "Observable")
      * }}}
      */
-    private def extractName(tree: Tree): List[String] = tree match {
-      case Ident(TermName(name))             => List(name)
-      case Ident(TypeName(name))             => List(name)
-      case Select(qualifier, TypeName(name)) => extractName(qualifier) :+ name
-      case Select(qualifier, TermName(name)) => extractName(qualifier) :+ name
-      case _                                 => Nil
-    }
+    private def extractName(tree: Tree): List[String] =
+      tree match {
+        case Ident(TermName(name))             => List(name)
+        case Ident(TypeName(name))             => List(name)
+        case Select(qualifier, TypeName(name)) => extractName(qualifier) :+ name
+        case Select(qualifier, TermName(name)) => extractName(qualifier) :+ name
+        case _                                 => Nil
+      }
 
     /**
      * Is the given tree a type name or term name that matches the given
@@ -108,17 +111,19 @@ class TypeAnalysis[C <: Context](val c: C) {
                 "Invalid RPC response type. All response types should have the shape F[...], where F[_] is the service's type parameter."
               )
           }
-        } else {
+        } else
           // Request type is not wrapped in F[...], so return it as-is
           t
-        }
       }
 
       unwrappedType match {
         case tq"$tpe[$elemType]" if possiblyQualifiedName(tpe, monixObservableFQN) =>
           MonixObservableTpe(t, unwrappedType, elemType)
         case tq"$tpe[$effectType, $elemType]"
-            if possiblyQualifiedName(tpe, fs2StreamFQN) && effectType.toString == F.decodedName.toString =>
+            if possiblyQualifiedName(
+              tpe,
+              fs2StreamFQN
+            ) && effectType.toString == F.decodedName.toString =>
           Fs2StreamTpe(t, unwrappedType, elemType)
         case tq"Empty.type" => EmptyTpe(t, unwrappedType, unwrappedType)
         case _              => UnaryTpe(t, unwrappedType, unwrappedType)

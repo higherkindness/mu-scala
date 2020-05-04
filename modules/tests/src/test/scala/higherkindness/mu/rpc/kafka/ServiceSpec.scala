@@ -77,9 +77,10 @@ class ServiceSpec extends AnyFunSuite with Matchers with OneInstancePerTest with
       withClient(settings) { client =>
         for {
           topicNames <- List("topic1", "topic2").pure[IO]
-          creates <- client
-            .createTopics(CreateTopicRequests(topicNames.map(CreateTopicRequest(_, 2, 1))))
-            .attempt
+          creates <-
+            client
+              .createTopics(CreateTopicRequests(topicNames.map(CreateTopicRequest(_, 2, 1))))
+              .attempt
           _                <- IO(assert(creates.isRight))
           listedTopicNames <- client.listTopics(Empty)
           _                <- IO(assert(topicNames.forall(listedTopicNames.listings.map(_.name).contains)))
@@ -112,9 +113,10 @@ class ServiceSpec extends AnyFunSuite with Matchers with OneInstancePerTest with
                 .getOrElse(false)
             )
           )
-          partition <- client
-            .createPartitions(CreatePartitionsRequest(topicName, 4))
-            .attempt
+          partition <-
+            client
+              .createPartitions(CreatePartitionsRequest(topicName, 4))
+              .attempt
           _        <- IO(assert(partition.isRight))
           describe <- client.describeTopics(DescribeTopicsRequest(List(topicName)))
           _        <- IO(assert(describe.topics.size == 1))
@@ -145,7 +147,10 @@ class ServiceSpec extends AnyFunSuite with Matchers with OneInstancePerTest with
           _         <- IO(assert(create.isRight))
           resource = ConfigResource(ConfigType.TopicConfigType, topicName)
           request = AlterConfigsRequest(
-            AlterConfig(resource, AlterConfigOp("cleanup.policy", "compact", OpType.Set) :: Nil) :: Nil
+            AlterConfig(
+              resource,
+              AlterConfigOp("cleanup.policy", "compact", OpType.Set) :: Nil
+            ) :: Nil
           )
           alter <- client.alterConfigs(request).attempt
           _     <- IO(assert(alter.isRight))
@@ -186,18 +191,21 @@ class ServiceSpec extends AnyFunSuite with Matchers with OneInstancePerTest with
           groups <- client.listConsumerGroups(Empty).attempt
           _      <- IO(assert(groups.isRight))
           _      <- IO(assert(groups.toOption.map(_.consumerGroupListings.size == 1).getOrElse(false)))
-          groupId = groups.toOption
-            .flatMap(_.consumerGroupListings.headOption)
-            .map(_.groupId)
-            .getOrElse("")
-          offsets <- client
-            .listConsumerGroupOffsets(ListConsumerGroupOffsetsRequest(groupId))
-            .attempt
+          groupId =
+            groups.toOption
+              .flatMap(_.consumerGroupListings.headOption)
+              .map(_.groupId)
+              .getOrElse("")
+          offsets <-
+            client
+              .listConsumerGroupOffsets(ListConsumerGroupOffsetsRequest(groupId))
+              .attempt
           _ <- IO(assert(offsets.isRight))
           _ <- IO(assert(offsets.toOption.map(_.offsets.size == 1).getOrElse(false)))
-          describe <- client
-            .describeConsumerGroups(DescribeConsumerGroupsRequest(List(groupId)))
-            .attempt
+          describe <-
+            client
+              .describeConsumerGroups(DescribeConsumerGroupsRequest(List(groupId)))
+              .attempt
           _ <- IO(assert(describe.isRight))
           _ <- IO(assert(describe.toOption.map(_.consumerGroups.size == 1).getOrElse(false)))
         } yield ()

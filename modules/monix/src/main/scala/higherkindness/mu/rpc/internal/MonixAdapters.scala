@@ -32,45 +32,48 @@ trait MonixAdapters {
   def monixSubscriber2StreamObserver: Subscriber ~> StreamObserver =
     new (Subscriber ~> StreamObserver) {
 
-      override def apply[A](fa: Subscriber[A]): StreamObserver[A] = new StreamObserver[A] {
+      override def apply[A](fa: Subscriber[A]): StreamObserver[A] =
+        new StreamObserver[A] {
 
-        override def onError(t: Throwable): Unit = fa.onError(t)
-        override def onCompleted(): Unit         = fa.onComplete()
-        override def onNext(value: A): Unit = {
-          fa.onNext(value)
-          (): Unit
+          override def onError(t: Throwable): Unit = fa.onError(t)
+          override def onCompleted(): Unit         = fa.onComplete()
+          override def onNext(value: A): Unit = {
+            fa.onNext(value)
+            (): Unit
+          }
         }
-      }
     }
 
   def reactiveSubscriber2StreamObserver: RSubscriber ~> StreamObserver =
     new (RSubscriber ~> StreamObserver) {
 
-      override def apply[A](fa: RSubscriber[A]): StreamObserver[A] = new StreamObserver[A] {
+      override def apply[A](fa: RSubscriber[A]): StreamObserver[A] =
+        new StreamObserver[A] {
 
-        override def onError(t: Throwable): Unit = fa.onError(t)
-        override def onCompleted(): Unit         = fa.onComplete()
-        override def onNext(value: A): Unit      = fa.onNext(value)
-      }
+          override def onError(t: Throwable): Unit = fa.onError(t)
+          override def onCompleted(): Unit         = fa.onComplete()
+          override def onNext(value: A): Unit      = fa.onNext(value)
+        }
     }
 
   def streamObserver2MonixSubscriber(implicit S: Scheduler): StreamObserver ~> Subscriber =
     new (StreamObserver ~> Subscriber) {
 
-      override def apply[A](fa: StreamObserver[A]): Subscriber[A] = new Subscriber[A] {
+      override def apply[A](fa: StreamObserver[A]): Subscriber[A] =
+        new Subscriber[A] {
 
-        override implicit val scheduler: Scheduler = S
-        override def onError(ex: Throwable): Unit  = fa.onError(ex)
-        override def onComplete(): Unit            = fa.onCompleted()
-        override def onNext(elem: A): Future[Ack] =
-          catsStdInstancesForFuture(S).handleError[Ack] {
-            fa.onNext(elem)
-            Continue
-          } { t: Throwable =>
-            fa.onError(t)
-            Stop
-          }
-      }
+          override implicit val scheduler: Scheduler = S
+          override def onError(ex: Throwable): Unit  = fa.onError(ex)
+          override def onComplete(): Unit            = fa.onCompleted()
+          override def onNext(elem: A): Future[Ack] =
+            catsStdInstancesForFuture(S).handleError[Ack] {
+              fa.onNext(elem)
+              Continue
+            } { t: Throwable =>
+              fa.onError(t)
+              Stop
+            }
+        }
     }
 
 }

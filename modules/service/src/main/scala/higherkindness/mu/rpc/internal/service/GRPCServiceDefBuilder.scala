@@ -32,15 +32,16 @@ object GRPCServiceDefBuilder {
     def addMethod(
         builder: ServerServiceDefinition.Builder,
         call: MethodCall
-    ): F[ServerServiceDefinition.Builder] = Sync[F].delay {
-      val (descriptor, callHandler) = call
-      builder.addMethod(
-        ServerMethodDefinition.create(
-          descriptor.asInstanceOf[MethodDescriptor[Any, Any]],
-          callHandler.asInstanceOf[ServerCallHandler[Any, Any]]
+    ): F[ServerServiceDefinition.Builder] =
+      Sync[F].delay {
+        val (descriptor, callHandler) = call
+        builder.addMethod(
+          ServerMethodDefinition.create(
+            descriptor.asInstanceOf[MethodDescriptor[Any, Any]],
+            callHandler.asInstanceOf[ServerCallHandler[Any, Any]]
+          )
         )
-      )
-    }
+      }
 
     val builder: ServerServiceDefinition.Builder = io.grpc.ServerServiceDefinition.builder(name)
 

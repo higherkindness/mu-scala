@@ -411,7 +411,9 @@ class RPCServiceModel[C <: Context](val c: C) {
 
     val requestDecoders =
       requestTypes.map(n =>
-        q"""implicit private val ${TermName("entityDecoder" + n)}:_root_.org.http4s.EntityDecoder[F, ${TypeName(
+        q"""implicit private val ${TermName(
+          "entityDecoder" + n
+        )}:_root_.org.http4s.EntityDecoder[F, ${TypeName(
           n
         )}] = jsonOf[F, ${TypeName(n)}]"""
       )
@@ -419,8 +421,12 @@ class RPCServiceModel[C <: Context](val c: C) {
     val HttpRestService: TypeName = TypeName(serviceDef.name.toString + "RestService")
 
     val arguments: List[Tree] = List(q"handler: ${serviceDef.name}[F]") ++
-      requestTypes.map(n => q"${TermName("decoder" + n)}: _root_.io.circe.Decoder[${TypeName(n)}]") ++
-      responseTypes.map(n => q"${TermName("encoder" + n)}: _root_.io.circe.Encoder[${TypeName(n)}]") ++
+      requestTypes.map(n =>
+        q"${TermName("decoder" + n)}: _root_.io.circe.Decoder[${TypeName(n)}]"
+      ) ++
+      responseTypes.map(n =>
+        q"${TermName("encoder" + n)}: _root_.io.circe.Encoder[${TypeName(n)}]"
+      ) ++
       streamConstraints
 
     val httpRestServiceClass: Tree = q"""

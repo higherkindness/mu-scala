@@ -30,7 +30,7 @@ object BigDecimalUtil {
 
   def byteToBigDecimal(raw: Array[Byte]): BigDecimal = {
     val scale =
-      (raw(0) & 0xFF) << 24 | (raw(1) & 0xFF) << 16 | (raw(2) & 0xFF) << 8 | (raw(3) & 0xFF)
+      (raw(0) & 0xff) << 24 | (raw(1) & 0xff) << 16 | (raw(2) & 0xff) << 8 | (raw(3) & 0xff)
     val sig = new java.math.BigInteger(raw.drop(4))
     BigDecimal(sig, scale)
   }
