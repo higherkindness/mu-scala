@@ -16,7 +16,7 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String                = "3.0.9"
+      val avro4s: String                = "3.0.10-temp"
       val betterMonadicFor: String      = "0.3.1"
       val catsEffect: String            = "2.1.3"
       val circe: String                 = "0.13.0"
@@ -65,7 +65,7 @@ object ProjectPlugin extends AutoPlugin {
         "org.typelevel"          %% "cats-effect"             % V.catsEffect,
         "com.47deg"              %% "pbdirect"                % V.pbdirect,
         "com.beachape"           %% "enumeratum"              % V.enumeratum,
-        "com.sksamuel.avro4s"    %% "avro4s-core"             % V.avro4s,
+        "com.47deg"              %% "avro4s-core"             % V.avro4s,
         "org.log4s"              %% "log4s"                   % V.log4s,
         "org.tpolecat"           %% "natchez-core"            % V.natchez,
         "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat,
