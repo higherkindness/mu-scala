@@ -63,7 +63,7 @@ object handlers {
       compressionType: CompressionType
   ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F].unaryToStreamingCall[Req, Res](
-      (req, metadata) => Stream.eval(f(req, metadata)).flatten,
+      (req, metadata) => Stream.force(f(req, metadata)),
       serverCallOptions(compressionType)
     )
 
@@ -72,7 +72,7 @@ object handlers {
       compressionType: CompressionType
   ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F].streamingToStreamingCall[Req, Res](
-      (stream, metadata) => Stream.eval(f(stream, metadata)).flatten,
+      (stream, metadata) => Stream.force(f(stream, metadata)),
       serverCallOptions(compressionType)
     )
 
