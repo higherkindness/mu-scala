@@ -9,45 +9,6 @@
   <li><code class="highlighter-rouge">Test</code>: useful to test <code class="highlighter-rouge">Mu</code> applications.</li>
 </ul>
 
-<h2 id="common">Common</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th><em>Artifact Name</em></th>
-      <th><em>Scope</em></th>
-      <th><em>Mandatory</em></th>
-      <th><em>Description</em></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><code class="highlighter-rouge">mu-common</code></td>
-      <td>Server/Client</td>
-      <td>Provided*</td>
-      <td>Common things that are used throughout the project.</td>
-    </tr>
-    <tr>
-      <td><code class="highlighter-rouge">mu-rpc-internal-core</code></td>
-      <td>Server/Client</td>
-      <td>Provided*</td>
-      <td>Macros.</td>
-    </tr>
-    <tr>
-      <td><code class="highlighter-rouge">mu-rpc-internal-monix</code></td>
-      <td>Server/Client</td>
-      <td>Provided*</td>
-      <td>Macros.</td>
-    </tr>
-    <tr>
-      <td><code class="highlighter-rouge">mu-rpc-internal-fs2</code></td>
-      <td>Server/Client</td>
-      <td>Provided*</td>
-      <td>Macros.</td>
-    </tr>
-  </tbody>
-</table>
-
 <h2 id="rpc-clientserver">RPC Client/Server</h2>
 
 <table>
@@ -61,13 +22,7 @@
   </thead>
   <tbody>
     <tr>
-      <td><code class="highlighter-rouge">mu-rpc-server</code></td>
-      <td>Server</td>
-      <td>Yes</td>
-      <td>Needed to attach RPC Services and spin-up an RPC Server.</td>
-    </tr>
-    <tr>
-      <td><code class="highlighter-rouge">mu-rpc-channel</code></td>
+      <td><code class="highlighter-rouge">mu-rpc-service</code></td>
       <td>Server/Client</td>
       <td>Yes</td>
       <td>Mandatory to define protocols and auto-derived clients.</td>
@@ -82,7 +37,13 @@
       <td><code class="highlighter-rouge">mu-rpc-fs2</code></td>
       <td>Server/Client</td>
       <td>Yes</td>
-      <td>Mandatory to define streaming operations with fs2 Streams.</td>
+      <td>Mandatory to define streaming operations with FS2 Streams.</td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">mu-rpc-server</code></td>
+      <td>Server</td>
+      <td>Yes</td>
+      <td>Needed to attach RPC Services and spin-up an RPC Server.</td>
     </tr>
     <tr>
       <td><code class="highlighter-rouge">mu-rpc-client-netty</code></td>
@@ -107,7 +68,6 @@
 
 <ul>
   <li><code class="highlighter-rouge">Yes*</code>: on the client-side, you must choose either <code class="highlighter-rouge">Netty</code> or <code class="highlighter-rouge">OkHttp</code> as the transport layer.</li>
-  <li><code class="highlighter-rouge">Provided*</code>: you don’t need to add it to your build, it’ll be transitively provided when using other dependencies.</li>
 </ul>
 
 <h2 id="metrics">Metrics</h2>
@@ -126,13 +86,13 @@
       <td><code class="highlighter-rouge">mu-rpc-prometheus</code></td>
       <td>Server/Client</td>
       <td>No</td>
-      <td>Scala interceptors which can be used to monitor gRPC services using Prometheus.</td>
+      <td>Interceptors which can be used to monitor gRPC services using Prometheus.</td>
     </tr>
     <tr>
       <td><code class="highlighter-rouge">mu-rpc-dropwizard</code></td>
       <td>Server/Client</td>
       <td>No</td>
-      <td>Scala interceptors which can be used to monitor gRPC services using Dropwizard metrics.</td>
+      <td>Interceptors which can be used to monitor gRPC services using Dropwizard metrics.</td>
     </tr>
   </tbody>
 </table>
@@ -179,16 +139,16 @@
 <h2 id="build">Build</h2>
 <p>You can install any of these dependencies in your build as follows:</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// required for the RPC server
-</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-server"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
-
-<span class="c1">// required for a protocol definition:
-</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-channel"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// required for a protocol definition:
+</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-service"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
 
 <span class="c1">// required for a protocol definition with streaming operations:
 </span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-monix"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
 <span class="c1">// or:
 </span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-fs2"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
+
+<span class="c1">// required for the RPC server
+</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-server"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
 
 <span class="c1">// required for the use of generated RPC clients, using either Netty or OkHttp as transport layer:
 </span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-client-netty"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
