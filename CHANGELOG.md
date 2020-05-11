@@ -1,5 +1,19 @@
 # Changelog
 
+## [v0.22.1](https://github.com/higherkindness/mu-scala/tree/v0.22.1) (2020-05-11)
+
+[Full Changelog](https://github.com/higherkindness/mu-scala/compare/v0.22.0...v0.22.1)
+
+📈 **Dependency updates**
+
+- Update scalatest to 3.1.2 [\#917](https://github.com/higherkindness/mu-scala/pull/917) ([scala-steward](https://github.com/scala-steward))
+
+**Merged pull requests:**
+
+- Bumps pbdirect [\#915](https://github.com/higherkindness/mu-scala/pull/915) ([fedefernandez](https://github.com/fedefernandez))
+- Update module names in documentation [\#914](https://github.com/higherkindness/mu-scala/pull/914) ([cb372](https://github.com/cb372))
+- Replace use of Stream.eval\(...\).flatten with Stream.force [\#913](https://github.com/higherkindness/mu-scala/pull/913) ([cb372](https://github.com/cb372))
+
 ## [v0.22.0](https://github.com/higherkindness/mu-scala/tree/v0.22.0) (2020-05-05)
 
 [Full Changelog](https://github.com/higherkindness/mu-scala/compare/v0.21.3...v0.22.0)
@@ -400,7 +414,6 @@
 - Moves the site publication to a new stage [\#561](https://github.com/higherkindness/mu-scala/pull/561) ([fedefernandez](https://github.com/fedefernandez))
 - Update docs and reorganizes modules [\#560](https://github.com/higherkindness/mu-scala/pull/560) ([fedefernandez](https://github.com/fedefernandez))
 - Sample http4s REST client/server with client macro derivation [\#552](https://github.com/higherkindness/mu-scala/pull/552) ([L-Lavigne](https://github.com/L-Lavigne))
-- Server metrics implementation based on MetricOps [\#550](https://github.com/higherkindness/mu-scala/pull/550) ([franciscodr](https://github.com/franciscodr))
 - \[Docs\] Schema Evolution [\#481](https://github.com/higherkindness/mu-scala/pull/481) ([juanpedromoreno](https://github.com/juanpedromoreno))
 
 ## [v0.17.2](https://github.com/higherkindness/mu-scala/tree/v0.17.2) (2019-02-05)
@@ -433,6 +446,7 @@
 - Fixes deployment [\#555](https://github.com/higherkindness/mu-scala/pull/555) ([fedefernandez](https://github.com/fedefernandez))
 - Release 0.17.1 [\#554](https://github.com/higherkindness/mu-scala/pull/554) ([fedefernandez](https://github.com/fedefernandez))
 - Downgrades avro4s [\#553](https://github.com/higherkindness/mu-scala/pull/553) ([fedefernandez](https://github.com/fedefernandez))
+- Server metrics implementation based on MetricOps [\#550](https://github.com/higherkindness/mu-scala/pull/550) ([franciscodr](https://github.com/franciscodr))
 - Fixes typo in the documentation of Dropwizard metrics [\#548](https://github.com/higherkindness/mu-scala/pull/548) ([franciscodr](https://github.com/franciscodr))
 - Updates doc index [\#547](https://github.com/higherkindness/mu-scala/pull/547) ([fedefernandez](https://github.com/fedefernandez))
 - 514 - Dropwizards implementation [\#546](https://github.com/higherkindness/mu-scala/pull/546) ([jdesiloniz](https://github.com/jdesiloniz))
