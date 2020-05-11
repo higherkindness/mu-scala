@@ -48,18 +48,19 @@ ping client = do
 getForecast
   :: GRpcConnection WeatherService 'MsgAvro -> String -> String -> IO ()
 getForecast client city days = do
-  GRpcOk resp <- (client ^. #getForecast) req
+  resp <- (client ^. #getForecast) req
   putStrLn $ showGetForecastResponse resp
  where
   c   = T.pack city
   d   = fromMaybe 5 $ readMaybe days
   req = record (c, d)
 
-showGetForecastResponse :: GetForecastResponse -> String
-showGetForecastResponse resp = lastUpdated ++ " " ++ dailyForecasts
+showGetForecastResponse :: GRpcReply GetForecastResponse -> String
+showGetForecastResponse (GRpcOk resp) = lastUpdated ++ " " ++ dailyForecasts
  where
   lastUpdated    = T.unpack (resp ^. #last_updated)
   dailyForecasts = toJsonString (resp ^. #daily_forecasts)
+showGetForecastResponse errorResp = show errorResp
 
 toJsonString :: A.ToJSON a => a -> String
 toJsonString = BS.unpack . LBS.toStrict . A.encode
