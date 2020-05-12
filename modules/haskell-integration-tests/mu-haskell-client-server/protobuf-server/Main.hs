@@ -13,7 +13,6 @@ import qualified Data.Conduit.Combinators      as C
 import           Data.Monoid                   as M
 import           Data.Text                     as T
                                                 ( Text )
-import           Control.Monad.IO.Class         ( liftIO )
 import           Mu.GRpc.Server
 import           Mu.Server
 import           Mu.Schema.Optics
@@ -47,6 +46,7 @@ publishRainEvents source = toResponse <$> countRainStartedEvents
   countRainStartedEvents = runConduit $ source .| C.foldMap countMsg
   countMsg msg = countEvent $ msg ^. #event_type
   countEvent (Just x) | x == started = M.Sum 1
+  countEvent Nothing                 = M.Sum 1
   countEvent _                       = M.Sum 0
 
 subscribeToRainEvents

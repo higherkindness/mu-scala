@@ -89,7 +89,7 @@ subscribeToRainEvents client city = do
     .| C.mapM_ putStrLn
  where
   req = record1 $ T.pack city
-  extractEventType (GRpcOk reply) = reply ^. #event_type
+  extractEventType (GRpcOk reply) = fromMaybe started $ reply ^. #event_type
 
 toJsonString :: A.ToJSON a => a -> String
 toJsonString = BS.unpack . LBS.toStrict . A.encode
