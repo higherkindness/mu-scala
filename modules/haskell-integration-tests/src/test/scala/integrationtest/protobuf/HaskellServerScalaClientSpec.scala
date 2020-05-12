@@ -48,10 +48,6 @@ class HaskellServerScalaClientSpec extends AnyFlatSpec with HaskellServerRunning
   behavior of "Mu-Haskell server and Mu-Scala client communication using Protobuf"
 
   it should "work for a trivial unary call" in {
-    pending
-    // until we upgrade to a version of Mu-Haskell that contains this fix:
-    // https://github.com/haskell-grpc-native/http2-grpc-haskell/pull/20
-
     val response = clientResource
       .use(client => client.ping(Empty))
       .unsafeRunSync()
@@ -59,10 +55,6 @@ class HaskellServerScalaClientSpec extends AnyFlatSpec with HaskellServerRunning
   }
 
   it should "work for a unary call" in {
-    pending
-    // until we upgrade to a version of Mu-Haskell that contains this fix:
-    // https://github.com/haskell-grpc-native/http2-grpc-haskell/pull/20
-
     val request = GetForecastRequest("London", 3)
     val expectedResponse = GetForecastResponse(
       last_updated = "2020-03-20T12:00:00Z",
@@ -75,10 +67,6 @@ class HaskellServerScalaClientSpec extends AnyFlatSpec with HaskellServerRunning
   }
 
   it should "work for a client-streaming call" in {
-    pending
-    // until we upgrade to a version of Mu-Haskell that contains this fix:
-    // https://github.com/haskell-grpc-native/http2-grpc-haskell/pull/20
-
     val stream =
       Stream(STARTED, STOPPED, STARTED, STOPPED, STARTED)
         .map(RainEvent("London", _))
@@ -91,10 +79,6 @@ class HaskellServerScalaClientSpec extends AnyFlatSpec with HaskellServerRunning
   }
 
   it should "work for a server-streaming call" in {
-    pending
-    // until we upgrade to a version of Mu-Haskell that contains this fix:
-    // https://github.com/haskell-grpc-native/http2-grpc-haskell/pull/20
-
     val request = SubscribeToRainEventsRequest("London")
     val events = clientResource
       .use(client =>
