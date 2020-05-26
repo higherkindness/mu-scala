@@ -81,9 +81,7 @@ class HaskellServerScalaClientSpec extends AnyFlatSpec with HaskellServerRunning
   it should "work for a server-streaming call" in {
     val request = SubscribeToRainEventsRequest("London")
     val events = clientResource
-      .use(client =>
-        Stream.force(client.subscribeToRainEvents(request)).compile.toList
-      )
+      .use(client => Stream.force(client.subscribeToRainEvents(request)).compile.toList)
       .unsafeRunSync()
     val expectedEvents =
       List(STARTED, STOPPED, STARTED, STOPPED, STARTED)
