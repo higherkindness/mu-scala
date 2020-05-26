@@ -3,8 +3,11 @@
 # This is used to speed up the building of the actual image
 # we want to use for the tests.
 
-FROM fpco/stack-build:lts-14.27
+FROM fpco/stack-build:lts-15.5 AS build
 RUN mkdir /opt/build
 RUN mkdir /opt/build/bin
 COPY . /opt/build
 RUN cd /opt/build && stack build --system-ghc
+
+FROM ubuntu:20.04
+COPY --from=build /root/.stack /root/.stack
