@@ -46,17 +46,6 @@ class HaskellServerScalaClientSpec extends AnyFlatSpec with HaskellServerRunning
   behavior of "Mu-Haskell server and Mu-Scala client communication using Avro"
 
   it should "work for a trivial unary call" in {
-    pending
-    // until we upgrade to a version of Mu-Haskell that contains this fix:
-    // https://github.com/haskell-grpc-native/http2-grpc-haskell/pull/20
-    //
-    // However, I think this test may be failing for another reason.  I'm not
-    // sure what the correct behaviour is for a 'void' Avro method in gRPC.
-    // Mu-Scala treats that as "the server returns an `Empty` message", but I
-    // don't know what the Mu-Haskell server is returning. The test fails with
-    // "io.grpc.StatusRuntimeException: INTERNAL: No value received for unary
-    // call".
-
     val response = clientResource
       .use(client => client.ping(Empty))
       .unsafeRunSync()
@@ -64,10 +53,6 @@ class HaskellServerScalaClientSpec extends AnyFlatSpec with HaskellServerRunning
   }
 
   it should "work for a unary call" in {
-    pending
-    // until we upgrade to a version of Mu-Haskell that contains this fix:
-    // https://github.com/haskell-grpc-native/http2-grpc-haskell/pull/20
-
     val request = GetForecastRequest("London", 3)
     val expectedResponse = GetForecastResponse(
       last_updated = "2020-03-20T12:00:00Z",
