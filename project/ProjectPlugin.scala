@@ -30,8 +30,7 @@ object ProjectPlugin extends AutoPlugin {
       val grpc: String                  = "1.29.0"
       val jodaTime: String              = "2.10.6"
       val http4s: String                = "0.21.0-M6"
-      val kindProjector: String         = "0.10.3"
-      val lastRelease                   = "0.21.3"
+      val kindProjector: String         = "0.11.0"
       val log4cats: String              = "1.0.1"
       val log4s: String                 = "1.8.2"
       val logback: String               = "1.2.3"
@@ -43,8 +42,6 @@ object ProjectPlugin extends AutoPlugin {
       val prometheus: String            = "0.9.0"
       val pureconfig: String            = "0.12.3"
       val reactiveStreams: String       = "1.0.3"
-      val scala212: String              = "2.12.11"
-      val scala213: String              = "2.13.2"
       val scalaCollectionCompat: String = "2.1.6"
       val scalacheck: String            = "1.14.3"
       val scalacheckToolbox: String     = "0.3.5"
@@ -221,20 +218,6 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val noCrossCompilationLastScala: Seq[Def.Setting[_]] = Seq(
-      scalaVersion := V.scala212,
-      crossScalaVersions := Seq(V.scala212)
-    )
-
-    lazy val compatSettings: Seq[Def.Setting[_]] = Seq(
-      unmanagedSourceDirectories in Compile += {
-        val base = baseDirectory.value / "src" / "main"
-        val dir  = if (isOlderScalaVersion(scalaVersion.value)) "scala-2.13-" else "scala-2.13+"
-
-        base / dir
-      }
-    )
-
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
       micrositeName := "Mu-Scala",
       micrositeBaseUrl := "mu-scala",
@@ -256,22 +239,19 @@ object ProjectPlugin extends AutoPlugin {
       micrositeHighlightLanguages += "protobuf"
     )
 
-    lazy val mdocSettings = Seq(
-      scalacOptions ~= (_ filterNot Set(
-        "-Xfatal-warnings",
-        "-Ywarn-unused-import",
-        "-Xlint"
-      ).contains)
-    )
-
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "org.scalatest"        %% "scalatest"       % V.scalatest,
         "org.scalatestplus"    %% "scalacheck-1-14" % V.scalatestplusScheck,
         "io.dropwizard.metrics" % "metrics-jmx"     % V.dropwizard,
         "org.tpolecat"         %% "natchez-jaeger"  % V.natchez
-      )
-    ) ++ mdocSettings
+      ),
+      scalacOptions ~= (_ filterNot Set(
+        "-Xfatal-warnings",
+        "-Ywarn-unused-import",
+        "-Xlint"
+      ).contains)
+    )
 
     lazy val testSettings = Seq(
       publishArtifact := false,
@@ -314,16 +294,12 @@ object ProjectPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] =
     Seq(
-      crossScalaVersions := Seq(V.scala212, V.scala213),
-      scalacOptions --= {
-        if (isOlderScalaVersion(scalaVersion.value)) Seq("-Xfatal-warnings")
-        else Nil
-      },
+      scalacOptions --= Seq("-Xfatal-warnings"),
       Test / fork := true,
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
       addCompilerPlugin(
-        "org.typelevel" % "kind-projector" % V.kindProjector cross CrossVersion.binary
+        "org.typelevel" % "kind-projector" % V.kindProjector cross CrossVersion.full
       )
     ) ++ macroSettings
 }

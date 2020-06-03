@@ -1,15 +1,15 @@
 ThisBuild / organization := "io.higherkindness"
 ThisBuild / githubOrganization := "47degrees"
+ThisBuild / crossScalaVersions := Seq("2.12.11", "2.13.2")
 
 lazy val checkScalafmt         = "+scalafmtCheckAll; +scalafmtSbtCheck;"
-lazy val checkBenchmarks       = "benchmarks-root/test;"
 lazy val checkDocs             = "+docs/mdoc;"
 lazy val checkIntegrationTests = "+haskell-integration-tests/test;"
 lazy val checkTests            = "+coverage; +test; +coverageReport; +coverageAggregate;"
 
 addCommandAlias(
   "ci-test",
-  s"$checkScalafmt $checkBenchmarks $checkDocs $checkIntegrationTests $checkTests"
+  s"$checkScalafmt $checkDocs $checkIntegrationTests $checkTests"
 )
 addCommandAlias("ci-docs", "project-docs/mdoc; docs/mdoc; headerCreateAll")
 addCommandAlias("ci-microsite", "docs/publishMicrosite")
@@ -146,8 +146,7 @@ lazy val `benchmarks-vprev` = project
   .in(file("benchmarks/vprev"))
   .settings(
     libraryDependencies ++= Seq(
-      "io.higherkindness" %% "mu-rpc-channel" % V.lastRelease,
-      "io.higherkindness" %% "mu-rpc-server"  % V.lastRelease
+      "io.higherkindness" %% "mu-rpc-server" % "0.22.1"
     )
   )
   .settings(coverageEnabled := false)
@@ -215,10 +214,7 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   http,
   kafka,
   `marshallers-jodatime`,
-  `health-check`
-)
-
-lazy val nonCrossedScalaVersionModules: Seq[ProjectReference] = Seq(
+  `health-check`,
   `benchmarks-vprev`,
   `benchmarks-vnext`
 )
@@ -234,14 +230,6 @@ lazy val root = project
   .settings(noPublishSettings)
   .aggregate(coreModules: _*)
   .aggregate(testModules: _*)
-
-lazy val `benchmarks-root` = project
-  .in(file("benchmarks"))
-  .settings(name := "mu-scala-benchmarks")
-  .settings(noPublishSettings)
-  .settings(noCrossCompilationLastScala)
-  .aggregate(nonCrossedScalaVersionModules: _*)
-  .dependsOn(nonCrossedScalaVersionModules.map(ClasspathDependency(_, None)): _*)
 
 lazy val docs = project
   .in(file("docs"))
