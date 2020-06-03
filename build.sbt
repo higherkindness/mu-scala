@@ -3,16 +3,16 @@ ThisBuild / githubOrganization := "47degrees"
 ThisBuild / crossScalaVersions := Seq("2.12.11", "2.13.2")
 
 lazy val checkScalafmt         = "+scalafmtCheckAll; +scalafmtSbtCheck;"
-lazy val checkDocs             = "+docs/mdoc;"
+lazy val checkMicrosite        = "+microsite/mdoc;"
 lazy val checkIntegrationTests = "+haskell-integration-tests/test;"
 lazy val checkTests            = "+coverage; +test; +coverageReport; +coverageAggregate;"
 
 addCommandAlias(
   "ci-test",
-  s"$checkScalafmt $checkDocs $checkIntegrationTests $checkTests"
+  s"$checkScalafmt $checkMicrosite $checkIntegrationTests $checkTests"
 )
-addCommandAlias("ci-docs", "project-docs/mdoc; docs/mdoc; headerCreateAll")
-addCommandAlias("ci-microsite", "docs/publishMicrosite")
+addCommandAlias("ci-docs", "github; mdoc; headerCreateAll; publishMicrosite")
+addCommandAlias("ci-publish", "github; ci-release")
 
 ////////////////
 //// COMMON ////
@@ -231,10 +231,8 @@ lazy val root = project
   .aggregate(coreModules: _*)
   .aggregate(testModules: _*)
 
-lazy val docs = project
-  .in(file("docs"))
+lazy val microsite = project
   .dependsOn(coreModulesDeps: _*)
-  .settings(name := "mu-docs")
   .settings(docsSettings)
   .settings(micrositeSettings)
   .settings(noPublishSettings)
