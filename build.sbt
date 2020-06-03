@@ -1,5 +1,6 @@
 ThisBuild / organization := "io.higherkindness"
 ThisBuild / githubOrganization := "47degrees"
+ThisBuild / scalaVersion := "2.13.2"
 ThisBuild / crossScalaVersions := Seq("2.12.11", "2.13.2")
 
 lazy val checkScalafmt         = "+scalafmtCheckAll; +scalafmtSbtCheck;"
