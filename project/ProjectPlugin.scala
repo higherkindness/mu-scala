@@ -280,7 +280,7 @@ object ProjectPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] =
     Seq(
-      scalacOptions --= Seq("-Xfatal-warnings"),
+      scalacOptions --= Seq("-Ywarn-unused:patvars"),
       Test / fork := true,
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,

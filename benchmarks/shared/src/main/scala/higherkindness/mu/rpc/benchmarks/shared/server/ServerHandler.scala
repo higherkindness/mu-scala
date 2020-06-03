@@ -25,8 +25,10 @@ import higherkindness.mu.rpc.protocol.Empty
 
 abstract class HandlerImpl[F[_]: Effect](implicit persistenceService: PersistenceService[F]) {
 
-  def listPersons(b: Empty.type): F[PersonList] =
-    persistenceService.listPersons
+  def listPersons(b: Empty.type): F[PersonList] = {
+      val _ = b // makes compiler happy: parameter value b in method listPersons is never used
+      persistenceService.listPersons
+    }
 
   def getPerson(id: PersonId): F[Person] =
     persistenceService.getPerson(id)
