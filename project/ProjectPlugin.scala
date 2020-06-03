@@ -22,8 +22,8 @@ object ProjectPlugin extends AutoPlugin {
       val circe: String                 = "0.13.0"
       val dockerItScala                 = "0.9.9"
       val dropwizard: String            = "4.1.7"
-      val embeddedKafka: String         = "2.4.1.1"
-      val enumeratum: String            = "1.6.0"
+      val embeddedKafka: String         = "2.5.0"
+      val enumeratum: String            = "1.6.1"
       val fs2: String                   = "2.3.0"
       val fs2Grpc: String               = "0.7.0"
       val fs2Kafka: String              = "1.0.0"
@@ -35,7 +35,7 @@ object ProjectPlugin extends AutoPlugin {
       val log4cats: String              = "1.0.1"
       val log4s: String                 = "1.8.2"
       val logback: String               = "1.2.3"
-      val monix: String                 = "3.2.0"
+      val monix: String                 = "3.2.1"
       val natchez: String               = "0.0.11"
       val nettySSL: String              = "2.0.30.Final"
       val paradise: String              = "2.1.1"
@@ -50,7 +50,7 @@ object ProjectPlugin extends AutoPlugin {
       val scalacheckToolbox: String     = "0.3.5"
       val scalamock: String             = "4.4.0"
       val scalatest: String             = "3.1.2"
-      val scalatestplusScheck: String   = "3.1.1.1"
+      val scalatestplusScheck: String   = "3.1.2.0"
       val slf4j: String                 = "1.7.30"
     }
 
