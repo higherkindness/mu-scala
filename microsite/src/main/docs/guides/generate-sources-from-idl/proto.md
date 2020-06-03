@@ -11,13 +11,9 @@ permalink: /guides/generate-sources-from-proto
 
 First add the sbt plugin in `project/plugins.sbt`:
 
-[comment]: # (Start Replace)
-
 ```scala
 addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "@VERSION@")
 ```
-
-[comment]: # (End Replace)
 
 Then configure the plugin by adding a few lines to `build.sbt`:
 
