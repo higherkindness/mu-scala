@@ -65,9 +65,8 @@ object ProjectPlugin extends AutoPlugin {
         "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat,
         "io.grpc"                 % "grpc-stub"               % V.grpc
       ),
-      // Disable this flag because quasiquotes trigger a lot of false positive warnings
-      scalacOptions -= "-Wunused:patvars",    // for Scala 2.13
-      scalacOptions -= "-Ywarn-unused:params" // for Scala 2.12
+      scalacOptions --= on(2, 13)("-Wunused:patvars").value,
+      scalacOptions --= on(2, 12)("-Ywarn-unused:patvars").value
     )
 
     lazy val macroSettings: Seq[Setting[_]] = Seq(
@@ -280,7 +279,6 @@ object ProjectPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] =
     Seq(
-      scalacOptions --= Seq("-Ywarn-unused:patvars"),
       Test / fork := true,
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
