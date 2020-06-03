@@ -4,7 +4,7 @@ ThisBuild / scalaVersion := "2.13.2"
 ThisBuild / crossScalaVersions := Seq("2.12.11", "2.13.2")
 
 lazy val checkScalafmt         = "scalafmtCheckAll; scalafmtSbtCheck;"
-lazy val checkMicrosite        = "+microsite/mdoc;"
+lazy val checkMicrosite        = "microsite/mdoc;"
 lazy val checkIntegrationTests = "+haskell-integration-tests/test;"
 lazy val checkTests            = "+coverage; +test; +coverageReport; +coverageAggregate;"
 
