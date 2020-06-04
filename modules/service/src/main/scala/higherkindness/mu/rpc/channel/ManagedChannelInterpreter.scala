@@ -27,9 +27,16 @@ import io.grpc._
 class ManagedChannelInterpreter[F[_]](
     initConfig: ChannelFor,
     configList: List[ManagedChannelConfig],
-    builderForAddress: (String, Int) => ManagedChannelBuilder[_] = ManagedChannelBuilder.forAddress,
-    builderForTarget: String => ManagedChannelBuilder[_] = ManagedChannelBuilder.forTarget
+    builderForAddress: (String, Int) => ManagedChannelBuilder[_],
+    builderForTarget: String => ManagedChannelBuilder[_]
 )(implicit F: Sync[F]) {
+
+  // Secondary constructor added for bincompat
+  def this(
+    initConfig: ChannelFor,
+    configList: List[ManagedChannelConfig]
+  )(implicit F: Sync[F]) =
+    this(initConfig, configList, ManagedChannelBuilder.forAddress, ManagedChannelBuilder.forTarget)
 
   def apply[A](fa: ManagedChannelOps[F, A]): F[A] =
     fa(build)
