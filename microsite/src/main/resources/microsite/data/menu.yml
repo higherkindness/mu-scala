@@ -94,7 +94,7 @@ options:
         url: guides/generate-sources-from-proto
 
       - title: Compendium
-          url: generate-sources-from-compendium
+        url: guides/generate-sources-from-compendium
 
   # Menu displayed on Reference pages
 
