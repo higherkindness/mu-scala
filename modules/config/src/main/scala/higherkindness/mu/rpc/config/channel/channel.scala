@@ -21,8 +21,8 @@ import cats.Functor
 
 package object channel {
 
-  def ConfigForAddress[F[_]: Functor](hostPath: String, portPath: String)(
-      implicit CC: ChannelConfig[F]
+  def ConfigForAddress[F[_]: Functor](hostPath: String, portPath: String)(implicit
+      CC: ChannelConfig[F]
   ): F[ChannelForAddress] =
     CC.loadChannelAddress(hostPath, portPath)
 

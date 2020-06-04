@@ -8,7 +8,6 @@
 
 module Main where
 
-import           Data.Functor.Identity
 import           Data.Maybe                     ( fromMaybe )
 import           Data.Text                     as T
                                                 ( Text )
@@ -37,5 +36,8 @@ lastUpdated = "2020-03-20T12:00:00Z"
 sunnyDays :: Int -> [Weather]
 sunnyDays n = replicate n (enum @"SUNNY")
 
-server :: (MonadServer m) => ServerT Identity WeatherService m _
-server = Server (getForecast :<|>: ping :<|>: H0)
+server :: (MonadServer m) => SingleServerT WeatherService m _
+server = singleService
+  ( method @"getForecast" getForecast
+  , method @"ping" ping
+  )

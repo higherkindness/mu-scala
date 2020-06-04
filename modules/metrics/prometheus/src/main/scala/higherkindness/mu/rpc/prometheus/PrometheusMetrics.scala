@@ -214,28 +214,30 @@ object PrometheusMetrics {
   private[this] def buildMetrics[F[_]: Sync](
       prefix: String,
       registry: CollectorRegistry
-  ): F[Metrics] = Sync[F].delay {
-    Metrics(
-      activeCalls = defaultActiveCalls(prefix, registry).some,
-      messagesSent = defaultMessageSent(prefix, registry).some,
-      messagesReceived = defaultMessageReceived(prefix, registry).some,
-      headersTime = defaultHeadersTime(prefix, registry).some,
-      totalTime = defaultTotalTime(prefix, registry).some
-    )
-  }
+  ): F[Metrics] =
+    Sync[F].delay {
+      Metrics(
+        activeCalls = defaultActiveCalls(prefix, registry).some,
+        messagesSent = defaultMessageSent(prefix, registry).some,
+        messagesReceived = defaultMessageReceived(prefix, registry).some,
+        headersTime = defaultHeadersTime(prefix, registry).some,
+        totalTime = defaultTotalTime(prefix, registry).some
+      )
+    }
 
   private[this] def buildFullTotalMetrics[F[_]: Sync](
       prefix: String,
       registry: CollectorRegistry
-  ): F[Metrics] = Sync[F].delay {
-    Metrics(
-      activeCalls = defaultActiveCalls(prefix, registry).some,
-      messagesSent = defaultMessageSent(prefix, registry).some,
-      messagesReceived = defaultMessageReceived(prefix, registry).some,
-      headersTime = None,
-      totalTime = fullTotalTime(prefix, registry).some
-    )
-  }
+  ): F[Metrics] =
+    Sync[F].delay {
+      Metrics(
+        activeCalls = defaultActiveCalls(prefix, registry).some,
+        messagesSent = defaultMessageSent(prefix, registry).some,
+        messagesReceived = defaultMessageReceived(prefix, registry).some,
+        headersTime = None,
+        totalTime = fullTotalTime(prefix, registry).some
+      )
+    }
 
   private[this] def label(classifier: Option[String]): String = classifier.getOrElse("")
 
