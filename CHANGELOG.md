@@ -1,5 +1,29 @@
 # Changelog
 
+## [v0.22.2](https://github.com/higherkindness/mu-scala/tree/v0.22.2) (2020-06-04)
+
+[Full Changelog](https://github.com/higherkindness/mu-scala/compare/v0.22.1...v0.22.2)
+
+🚀 **Features**
+
+- Prepare repository for next `.github` release and SBT build improvements [\#927](https://github.com/higherkindness/mu-scala/pull/927) ([juanpedromoreno](https://github.com/juanpedromoreno))
+
+📘 **Documentation**
+
+- Add new compendium plugin page [\#926](https://github.com/higherkindness/mu-scala/pull/926) ([mrtmmr](https://github.com/mrtmmr))
+
+📈 **Dependency updates**
+
+- Update sbt-tpolecat to 0.1.12 [\#925](https://github.com/higherkindness/mu-scala/pull/925) ([scala-steward](https://github.com/scala-steward))
+- Update sbt to 1.3.11 [\#922](https://github.com/higherkindness/mu-scala/pull/922) ([scala-steward](https://github.com/scala-steward))
+- Update simpleclient to 0.9.0 [\#919](https://github.com/higherkindness/mu-scala/pull/919) ([scala-steward](https://github.com/scala-steward))
+
+**Merged pull requests:**
+
+- Make the OkHttp and Netty tests actually use OkHttp/Netty [\#928](https://github.com/higherkindness/mu-scala/pull/928) ([cb372](https://github.com/cb372))
+- Update base image for integration tests Docker images [\#921](https://github.com/higherkindness/mu-scala/pull/921) ([cb372](https://github.com/cb372))
+- Upgrade integration tests to Mu-Haskell v0.3 [\#920](https://github.com/higherkindness/mu-scala/pull/920) ([cb372](https://github.com/cb372))
+
 ## [v0.22.1](https://github.com/higherkindness/mu-scala/tree/v0.22.1) (2020-05-11)
 
 [Full Changelog](https://github.com/higherkindness/mu-scala/compare/v0.22.0...v0.22.1)
@@ -207,7 +231,6 @@
 - Scalameta codegen [\#746](https://github.com/higherkindness/mu-scala/pull/746) ([cb372](https://github.com/cb372))
 - Update sbt-microsites to 1.1.0 [\#745](https://github.com/higherkindness/mu-scala/pull/745) ([scala-steward](https://github.com/scala-steward))
 - Update pbdirect to 0.4.1 [\#744](https://github.com/higherkindness/mu-scala/pull/744) ([scala-steward](https://github.com/scala-steward))
-- Fix gitter channel badge [\#743](https://github.com/higherkindness/mu-scala/pull/743) ([fedefernandez](https://github.com/fedefernandez))
 - Update monocle-core to 2.0.1 [\#741](https://github.com/higherkindness/mu-scala/pull/741) ([scala-steward](https://github.com/scala-steward))
 - Simplify Avro marshaller [\#740](https://github.com/higherkindness/mu-scala/pull/740) ([cb372](https://github.com/cb372))
 - Add release notes for v0.20.0 [\#739](https://github.com/higherkindness/mu-scala/pull/739) ([cb372](https://github.com/cb372))
@@ -227,6 +250,7 @@
 
 **Merged pull requests:**
 
+- Fix gitter channel badge [\#743](https://github.com/higherkindness/mu-scala/pull/743) ([fedefernandez](https://github.com/fedefernandez))
 - Name the scripts in Travis [\#738](https://github.com/higherkindness/mu-scala/pull/738) ([cb372](https://github.com/cb372))
 - Fixes project name [\#737](https://github.com/higherkindness/mu-scala/pull/737) ([juanpedromoreno](https://github.com/juanpedromoreno))
 - Release v0.20.0 [\#736](https://github.com/higherkindness/mu-scala/pull/736) ([cb372](https://github.com/cb372))
@@ -315,7 +339,6 @@
 - Upgrades Sbt/Scala [\#641](https://github.com/higherkindness/mu-scala/pull/641) ([juanpedromoreno](https://github.com/juanpedromoreno))
 - Add avro source generation doc [\#640](https://github.com/higherkindness/mu-scala/pull/640) ([AdrianRaFo](https://github.com/AdrianRaFo))
 - Bump cats-effect to 2.0.0 [\#639](https://github.com/higherkindness/mu-scala/pull/639) ([BenFradet](https://github.com/BenFradet))
-- Mu kafka management service [\#638](https://github.com/higherkindness/mu-scala/pull/638) ([BenFradet](https://github.com/BenFradet))
 - HealthCheck endpoint and service [\#630](https://github.com/higherkindness/mu-scala/pull/630) ([mrtmmr](https://github.com/mrtmmr))
 - Add import root to protobuf source generator [\#627](https://github.com/higherkindness/mu-scala/pull/627) ([bilki](https://github.com/bilki))
 - Mmm/605 docs [\#625](https://github.com/higherkindness/mu-scala/pull/625) ([mrtmmr](https://github.com/mrtmmr))
@@ -331,6 +354,7 @@
 
 **Merged pull requests:**
 
+- Mu kafka management service [\#638](https://github.com/higherkindness/mu-scala/pull/638) ([BenFradet](https://github.com/BenFradet))
 - Support for idiomatic endpoints in protobuf [\#623](https://github.com/higherkindness/mu-scala/pull/623) ([fedefernandez](https://github.com/fedefernandez))
 - Allows generating idiomatic gRPC urls for avro [\#622](https://github.com/higherkindness/mu-scala/pull/622) ([fedefernandez](https://github.com/fedefernandez))
 - Mu documentation changed - New section "Generate sources from IDL" [\#621](https://github.com/higherkindness/mu-scala/pull/621) ([mrtmmr](https://github.com/mrtmmr))
