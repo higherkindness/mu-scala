@@ -140,41 +140,41 @@
 <p>You can install any of these dependencies in your build as follows:</p>
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// required for a protocol definition:
-</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-service"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
+</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-service"</span> <span class="o">%</span> <span class="s">"0.22.2"</span>
 
 <span class="c1">// required for a protocol definition with streaming operations:
-</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-monix"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
+</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-monix"</span> <span class="o">%</span> <span class="s">"0.22.2"</span>
 <span class="c1">// or:
-</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-fs2"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
+</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-fs2"</span> <span class="o">%</span> <span class="s">"0.22.2"</span>
 
 <span class="c1">// required for the RPC server
-</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-server"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
+</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-server"</span> <span class="o">%</span> <span class="s">"0.22.2"</span>
 
 <span class="c1">// required for the use of generated RPC clients, using either Netty or OkHttp as transport layer:
-</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-client-netty"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
+</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-client-netty"</span> <span class="o">%</span> <span class="s">"0.22.2"</span>
 <span class="c1">// or:
-</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-client-okhttp"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
+</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-client-okhttp"</span> <span class="o">%</span> <span class="s">"0.22.2"</span>
 
 <span class="c1">// optional - for easy RPC server/client configuration.
-</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-config"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
+</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-config"</span> <span class="o">%</span> <span class="s">"0.22.2"</span>
 
 <span class="c1">// optional - for RPC server/client metrics reporting, using Prometheus.
-</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-prometheus"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
+</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-prometheus"</span> <span class="o">%</span> <span class="s">"0.22.2"</span>
 
 <span class="c1">// optional - for RPC server/client metrics reporting, using Dropwizard.
-</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-dropwizard"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
+</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-dropwizard"</span> <span class="o">%</span> <span class="s">"0.22.2"</span>
 
 <span class="c1">// optional - for communication between RPC server and client using SSL/TLS.
-</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-netty-ssl"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
+</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-netty-ssl"</span> <span class="o">%</span> <span class="s">"0.22.2"</span>
 
 <span class="c1">// optional - for RPC marshallers for jodatime types.
-</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-marshallers-jodatime"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
+</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-marshallers-jodatime"</span> <span class="o">%</span> <span class="s">"0.22.2"</span>
 
 <span class="c1">// optional - to add caching support to RPC clients.
-</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-client-cache"</span> <span class="o">%</span> <span class="s">"0.22.0"</span>
+</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-client-cache"</span> <span class="o">%</span> <span class="s">"0.22.2"</span>
 
 <span class="c1">// optional - for testing RPC services
-</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-testing"</span> <span class="o">%</span> <span class="s">"0.22.0"</span> <span class="o">%</span> <span class="nc">Test</span>
+</span><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">"io.higherkindness"</span> <span class="o">%%</span> <span class="s">"mu-rpc-testing"</span> <span class="o">%</span> <span class="s">"0.22.2"</span> <span class="o">%</span> <span class="nc">Test</span>
 </code></pre></div></div>
 
 <h3 id="sbt-plugin">sbt plugin</h3>
@@ -182,7 +182,7 @@
 <p>To generate Scala code from IDL files (<code class="highlighter-rouge">.proto</code>, <code class="highlighter-rouge">.avdl</code>, OpenAPI <code class="highlighter-rouge">.yaml</code>,
 etc.), you will need the <code class="highlighter-rouge">sbt-mu-srcgen</code> plugin:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>addSbtPlugin("io.higherkindness" %% "sbt-mu-srcgen" % "0.22.0")
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>addSbtPlugin("io.higherkindness" %% "sbt-mu-srcgen" % "0.22.2")
 </code></pre></div></div>
 
 </section></div></div></div></div><script src="/mu-scala/highlight/highlight.pack.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/protobuf.min.js"></script><script>
