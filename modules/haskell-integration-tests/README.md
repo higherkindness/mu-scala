@@ -31,11 +31,14 @@ This relies on the test knowing what responses the Mu-Haskell server will send.
 The Haskell code is managed as a Stack project in the `mu-haskell-client-server`
 directory.
 
-The Stack project is made up of 3 modules:
+The Stack project is made up of 5 modules:
 
-* `protocol`, where types are generated from the `weather.proto` file
-* `server`
-* `client`
+* `protocol`, where types are generated from the `weather.proto` and
+  `weather.avdl` files
+* `protobuf-server`
+* `protobuf-client`
+* `avro-server`
+* `avro-client`
 
 To build the server and client executables:
 
@@ -56,7 +59,7 @@ much faster.
 
 ## How to make a change
 
-1. Make any necessary changes to the Haskell code in `mu-haskell-cliient-server`.
+1. Make any necessary changes to the Haskell code in `mu-haskell-client-server`.
 2. Rebuild the Haskell Docker image.
 3. Make any necessary changes to the Scala code.
 4. Run the tests to check they work: `sbt haskell-integration-tests/test`

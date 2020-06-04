@@ -106,7 +106,7 @@ sbt module containing the IDL definitions (`foo-domain`):
       muSrcGenJarNames := Seq("foo-domain"),
       muSrcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
       libraryDependencies ++= Seq(
-        "io.higherkindness" %% "mu-rpc-channel" % V.muRPC
+        "io.higherkindness" %% "mu-rpc-service" % V.muRPC
       )
   )
 )

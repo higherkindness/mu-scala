@@ -127,7 +127,7 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
       val request = HelloRequest("")
       val responses =
         BlazeClientBuilder[IO](ec).stream.flatMap(client =>
-          Stream.eval(fs2Client.sayHelloAll(request)(client)).flatten
+          Stream.force(fs2Client.sayHelloAll(request)(client))
         )
       the[UnexpectedError] thrownBy responses.compile.toList
         .unsafeRunSync() should have message "java.lang.IllegalArgumentException: empty greeting"
@@ -137,7 +137,7 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
       val requests = Stream(HelloRequest("hey"), HelloRequest("there"))
       val responses =
         BlazeClientBuilder[IO](ec).stream.flatMap(client =>
-          Stream.eval(fs2Client.sayHellosAll(requests)(client)).flatten
+          Stream.force(fs2Client.sayHellosAll(requests)(client))
         )
       responses.compile.toList
         .unsafeRunSync() shouldBe List(HelloResponse("hey"), HelloResponse("there"))
@@ -147,7 +147,7 @@ class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
       val requests = Stream.empty
       val responses =
         BlazeClientBuilder[IO](ec).stream.flatMap(client =>
-          Stream.eval(fs2Client.sayHellosAll(requests)(client)).flatten
+          Stream.force(fs2Client.sayHellosAll(requests)(client))
         )
       responses.compile.toList.unsafeRunSync() shouldBe Nil
     }

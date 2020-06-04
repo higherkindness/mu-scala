@@ -23,9 +23,9 @@ import           Mu.Schema.Optics
 avdl "WeatherProtocol" "WeatherService" "." "weather.avdl"
 
 type GetForecastRequest
-  = Term Identity WeatherProtocol (WeatherProtocol :/: "GetForecastRequest")
+  = Term WeatherProtocol (WeatherProtocol :/: "GetForecastRequest")
 
-type Weather = Term Identity WeatherProtocol (WeatherProtocol :/: "Weather")
+type Weather = Term WeatherProtocol (WeatherProtocol :/: "Weather")
 
 type GetForecastResponse
-  = Term Identity WeatherProtocol (WeatherProtocol :/: "GetForecastResponse")
+  = Term WeatherProtocol (WeatherProtocol :/: "GetForecastResponse")

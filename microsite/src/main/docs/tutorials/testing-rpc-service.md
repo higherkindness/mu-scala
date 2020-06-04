@@ -90,13 +90,9 @@ trait CatsEffectImplicits {
 You'll need to add a dependency on the `mu-rpc-testing` module. This contains
 some helpers for setting up an in-memory service for testing.
 
-[comment]: # (Start Replace)
-
 ```
 libraryDependencies += "io.higherkindness" %% "mu-rpc-testing" % "@VERSION@" % Test
 ```
-
-[comment]: # (End Replace)
 
 ## Create the service and client
 
