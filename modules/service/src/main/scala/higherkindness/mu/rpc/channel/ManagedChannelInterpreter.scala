@@ -33,8 +33,8 @@ class ManagedChannelInterpreter[F[_]](
 
   // Secondary constructor added for bincompat
   def this(
-    initConfig: ChannelFor,
-    configList: List[ManagedChannelConfig]
+      initConfig: ChannelFor,
+      configList: List[ManagedChannelConfig]
   )(implicit F: Sync[F]) =
     this(initConfig, configList, ManagedChannelBuilder.forAddress, ManagedChannelBuilder.forTarget)
 
