@@ -25,6 +25,9 @@ options:
       - title: OpenAPI
         url: generate-sources-from-openapi
 
+      - title: Compendium
+        url: generate-sources-from-compendium
+
   - title: Patterns
     url: patterns
 
