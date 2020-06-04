@@ -48,12 +48,6 @@ object ProjectPlugin extends AutoPlugin {
       val slf4j: String                 = "1.7.30"
     }
 
-    lazy val noPublishSettings = Seq(
-      publish := ((): Unit),
-      publishArtifact := false,
-      publishMavenStyle := false // suppress warnings about intransitive deps (not published anyway)
-    )
-
     lazy val rpcServiceSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "org.typelevel"          %% "cats-effect"             % V.catsEffect,

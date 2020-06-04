@@ -3,15 +3,13 @@ ThisBuild / githubOrganization := "47degrees"
 ThisBuild / scalaVersion := "2.13.2"
 ThisBuild / crossScalaVersions := Seq("2.12.11", "2.13.2")
 
-lazy val checkScalafmt         = "scalafmtCheckAll; scalafmtSbtCheck;"
-lazy val checkMicrosite        = "microsite/mdoc;"
-lazy val checkIntegrationTests = "+haskell-integration-tests/test;"
+publish / skip := true
 
 addCommandAlias(
   "ci-test",
-  s"$checkScalafmt $checkMicrosite $checkIntegrationTests testCovered"
+  s"scalafmtCheckAll; scalafmtSbtCheck; mdoc; testCovered"
 )
-addCommandAlias("ci-docs", "github; documentation/mdoc; headerCreateAll; publishMicrosite")
+addCommandAlias("ci-docs", "github; mdoc; headerCreateAll; publishMicrosite")
 addCommandAlias("ci-publish", "github; ci-release")
 
 ////////////////
@@ -152,7 +150,7 @@ lazy val `benchmarks-vprev` = project
   .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vprev")
   .settings(benchmarksSettings)
-  .settings(noPublishSettings)
+  .settings(publish / skip := true)
   .enablePlugins(JmhPlugin)
 
 lazy val `benchmarks-vnext` = project
@@ -161,7 +159,7 @@ lazy val `benchmarks-vnext` = project
   .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vnext")
   .settings(benchmarksSettings)
-  .settings(noPublishSettings)
+  .settings(publish / skip := true)
   .enablePlugins(JmhPlugin)
 
 /////////////////////
@@ -182,6 +180,7 @@ lazy val tests = project
   .in(file("modules/tests"))
   .dependsOn(coreModulesDeps: _*)
   .settings(moduleName := "mu-rpc-tests")
+  .settings(publish / skip := true)
   .settings(testSettings)
 
 //////////////////////////////////////
@@ -190,7 +189,7 @@ lazy val tests = project
 
 lazy val `haskell-integration-tests` = project
   .in(file("modules/haskell-integration-tests"))
-  .settings(noPublishSettings)
+  .settings(publish / skip := true)
   .settings(haskellIntegrationTestSettings)
   .dependsOn(server, `client-netty`, fs2)
 
@@ -222,24 +221,15 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
 lazy val coreModulesDeps: Seq[ClasspathDependency] =
   coreModules.map(ClasspathDependency(_, None))
 
-lazy val testModules: Seq[ProjectReference] = Seq(tests, `haskell-integration-tests`)
-
-lazy val root = project
-  .in(file("."))
-  .settings(name := "mu-scala")
-  .settings(noPublishSettings)
-  .aggregate(coreModules: _*)
-  .aggregate(testModules: _*)
-
 lazy val microsite = project
   .dependsOn(coreModulesDeps: _*)
   .settings(docsSettings)
   .settings(micrositeSettings)
-  .settings(noPublishSettings)
+  .settings(publish / skip := true)
   .enablePlugins(MicrositesPlugin)
   .enablePlugins(MdocPlugin)
 
 lazy val documentation = project
   .settings(mdocOut := file("."))
-  .settings(noPublishSettings)
+  .settings(publish / skip := true)
   .enablePlugins(MdocPlugin)
