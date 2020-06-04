@@ -1,9 +1,5 @@
 
-[comment]: # (Start Badges)
-
 [![codecov.io](http://codecov.io/gh/higherkindness/mu-scala/branch/master/graph/badge.svg)](http://codecov.io/gh/higherkindness/mu-scala) [![Maven Central](https://img.shields.io/badge/maven%20central-0.21.3-green.svg)](https://oss.sonatype.org/#nexus-search;gav~io.higherkindness~mu-scala*) [![Latest version](https://img.shields.io/badge/mu--scala-0.21.3-green.svg)](https://index.scala-lang.org/higherkindness/mu-scala) [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/higherkindness/mu-scala/master/LICENSE) [![Join the chat at https://gitter.im/47deg/mu](https://badges.gitter.im/47deg/mu.svg)](https://gitter.im/47deg/mu?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![GitHub Issues](https://img.shields.io/github/issues/higherkindness/mu-scala.svg)](https://github.com/higherkindness/mu-scala/issues)
-
-[comment]: # (End Badges)
 
 # mu-rpc
 
@@ -25,11 +21,8 @@ See the [mu-scala-examples](https://github.com/higherkindness/mu-scala-examples)
 [mu]: https://higherkindness.github.io/mu/
 [frees-config]: http://frees.io/docs/patterns/config/
 
-[comment]: # (Start Copyright)
 # Copyright
 
 mu-scala is designed and developed by 47 Degrees
 
 Copyright (C) 2017-2020 47 Degrees. <http://47deg.com>
-
-[comment]: # (End Copyright)

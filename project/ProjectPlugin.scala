@@ -1,15 +1,12 @@
 import microsites.MicrositesPlugin.autoImport._
 import sbt.Keys._
 import sbt._
-import com.alejandrohdezma.sbt.github.SbtGithubPlugin
 import scoverage.ScoverageKeys._
 
 import scala.language.reflectiveCalls
 import mdoc.MdocPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
-
-  override def requires: Plugins = SbtGithubPlugin
 
   override def trigger: PluginTrigger = allRequirements
 
@@ -23,19 +20,18 @@ object ProjectPlugin extends AutoPlugin {
       val dockerItScala                 = "0.9.9"
       val dropwizard: String            = "4.1.7"
       val embeddedKafka: String         = "2.4.1.1"
-      val enumeratum: String            = "1.6.0"
+      val enumeratum: String            = "1.6.1"
       val fs2: String                   = "2.3.0"
       val fs2Grpc: String               = "0.7.0"
       val fs2Kafka: String              = "1.0.0"
       val grpc: String                  = "1.29.0"
       val jodaTime: String              = "2.10.6"
       val http4s: String                = "0.21.0-M6"
-      val kindProjector: String         = "0.10.3"
-      val lastRelease                   = "0.21.3"
+      val kindProjector: String         = "0.11.0"
       val log4cats: String              = "1.0.1"
       val log4s: String                 = "1.8.2"
       val logback: String               = "1.2.3"
-      val monix: String                 = "3.2.0"
+      val monix: String                 = "3.2.1"
       val natchez: String               = "0.0.11"
       val nettySSL: String              = "2.0.30.Final"
       val paradise: String              = "2.1.1"
@@ -43,22 +39,14 @@ object ProjectPlugin extends AutoPlugin {
       val prometheus: String            = "0.9.0"
       val pureconfig: String            = "0.12.3"
       val reactiveStreams: String       = "1.0.3"
-      val scala212: String              = "2.12.11"
-      val scala213: String              = "2.13.2"
       val scalaCollectionCompat: String = "2.1.6"
       val scalacheck: String            = "1.14.3"
       val scalacheckToolbox: String     = "0.3.5"
       val scalamock: String             = "4.4.0"
       val scalatest: String             = "3.1.2"
-      val scalatestplusScheck: String   = "3.1.1.1"
+      val scalatestplusScheck: String   = "3.1.2.0"
       val slf4j: String                 = "1.7.30"
     }
-
-    lazy val noPublishSettings = Seq(
-      publish := ((): Unit),
-      publishArtifact := false,
-      publishMavenStyle := false // suppress warnings about intransitive deps (not published anyway)
-    )
 
     lazy val rpcServiceSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
@@ -71,33 +59,19 @@ object ProjectPlugin extends AutoPlugin {
         "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat,
         "io.grpc"                 % "grpc-stub"               % V.grpc
       ),
-      // Disable this flag because quasiquotes trigger a lot of false positive warnings
-      scalacOptions -= "-Wunused:patvars",    // for Scala 2.13
-      scalacOptions -= "-Ywarn-unused:params" // for Scala 2.12
+      scalacOptions --= on(2, 13)("-Wunused:patvars").value,
+      scalacOptions --= on(2, 12)("-Ywarn-unused:patvars").value
     )
 
-    lazy val macroSettings: Seq[Setting[_]] = {
-
-      def paradiseDependency(sv: String): Seq[ModuleID] =
-        if (isOlderScalaVersion(sv)) {
-          Seq(
-            compilerPlugin(
-              ("org.scalamacros" % "paradise" % V.paradise).cross(CrossVersion.patch)
-            )
-          )
-        } else Seq.empty
-
-      def macroAnnotationScalacOption(sv: String): Seq[String] =
-        if (isOlderScalaVersion(sv)) Seq.empty
-        else Seq("-Ymacro-annotations")
-
-      Seq(
-        libraryDependencies ++= Seq(
-          scalaOrganization.value % "scala-compiler" % scalaVersion.value % Provided
-        ) ++ paradiseDependency(scalaVersion.value),
-        scalacOptions ++= macroAnnotationScalacOption(scalaVersion.value)
-      )
-    }
+    lazy val macroSettings: Seq[Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        scalaOrganization.value % "scala-compiler" % scalaVersion.value % Provided
+      ),
+      libraryDependencies ++= on(2, 12)(
+        compilerPlugin("org.scalamacros" %% "paradise" % V.paradise cross CrossVersion.full)
+      ).value,
+      scalacOptions ++= on(2, 13)("-Ymacro-annotations").value
+    )
 
     lazy val monixSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
@@ -221,20 +195,6 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val noCrossCompilationLastScala: Seq[Def.Setting[_]] = Seq(
-      scalaVersion := V.scala212,
-      crossScalaVersions := Seq(V.scala212)
-    )
-
-    lazy val compatSettings: Seq[Def.Setting[_]] = Seq(
-      unmanagedSourceDirectories in Compile += {
-        val base = baseDirectory.value / "src" / "main"
-        val dir  = if (isOlderScalaVersion(scalaVersion.value)) "scala-2.13-" else "scala-2.13+"
-
-        base / dir
-      }
-    )
-
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
       micrositeName := "Mu-Scala",
       micrositeBaseUrl := "mu-scala",
@@ -256,22 +216,19 @@ object ProjectPlugin extends AutoPlugin {
       micrositeHighlightLanguages += "protobuf"
     )
 
-    lazy val mdocSettings = Seq(
-      scalacOptions ~= (_ filterNot Set(
-        "-Xfatal-warnings",
-        "-Ywarn-unused-import",
-        "-Xlint"
-      ).contains)
-    )
-
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "org.scalatest"        %% "scalatest"       % V.scalatest,
         "org.scalatestplus"    %% "scalacheck-1-14" % V.scalatestplusScheck,
         "io.dropwizard.metrics" % "metrics-jmx"     % V.dropwizard,
         "org.tpolecat"         %% "natchez-jaeger"  % V.natchez
-      )
-    ) ++ mdocSettings
+      ),
+      scalacOptions ~= (_ filterNot Set(
+        "-Xfatal-warnings",
+        "-Ywarn-unused-import",
+        "-Xlint"
+      ).contains)
+    )
 
     lazy val testSettings = Seq(
       publishArtifact := false,
@@ -302,10 +259,12 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    def isOlderScalaVersion(sv: String): Boolean =
-      CrossVersion.partialVersion(sv) match {
-        case Some((2, minor)) if minor < 13 => true
-        case _                              => false
+    def on[A](major: Int, minor: Int)(a: A): Def.Initialize[Seq[A]] =
+      Def.setting {
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some(v) if v == (major, minor) => Seq(a)
+          case _                              => Nil
+        }
       }
 
   }
@@ -314,16 +273,11 @@ object ProjectPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] =
     Seq(
-      crossScalaVersions := Seq(V.scala212, V.scala213),
-      scalacOptions --= {
-        if (isOlderScalaVersion(scalaVersion.value)) Seq("-Xfatal-warnings")
-        else Nil
-      },
       Test / fork := true,
       compileOrder in Compile := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
       addCompilerPlugin(
-        "org.typelevel" % "kind-projector" % V.kindProjector cross CrossVersion.binary
+        "org.typelevel" % "kind-projector" % V.kindProjector cross CrossVersion.full
       )
     ) ++ macroSettings
 }
