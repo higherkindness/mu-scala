@@ -11,7 +11,7 @@ addCommandAlias(
   "ci-test",
   s"$checkScalafmt $checkMicrosite $checkIntegrationTests testCovered"
 )
-addCommandAlias("ci-docs", "github; docs/mdoc; headerCreateAll; publishMicrosite")
+addCommandAlias("ci-docs", "github; documentation/mdoc; headerCreateAll; publishMicrosite")
 addCommandAlias("ci-publish", "github; ci-release")
 
 ////////////////
@@ -239,7 +239,7 @@ lazy val microsite = project
   .enablePlugins(MicrositesPlugin)
   .enablePlugins(MdocPlugin)
 
-lazy val docs = project
+lazy val documentation = project
   .settings(mdocOut := file("."))
   .settings(noPublishSettings)
   .enablePlugins(MdocPlugin)
