@@ -14,8 +14,25 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
-package channel
-package okhttp
+package higherkindness.mu.rpc.channel.okhttp
 
-class ManagedChannelInterpreterOkHttpTests extends ManagedChannelInterpreterTests
+import higherkindness.mu.rpc.ChannelFor
+import higherkindness.mu.rpc.channel._
+import cats.effect.IO
+
+import io.grpc.okhttp.OkHttpChannelBuilder
+
+class ManagedChannelInterpreterOkHttpTests extends ManagedChannelInterpreterTests {
+
+  def mkInterpreter(
+      channelFor: ChannelFor,
+      channelConfigList: List[ManagedChannelConfig]
+  ): ManagedChannelInterpreter[IO] =
+    new ManagedChannelInterpreter[IO](
+      channelFor,
+      channelConfigList,
+      OkHttpChannelBuilder.forAddress(_, _),
+      OkHttpChannelBuilder.forTarget(_)
+    )
+
+}

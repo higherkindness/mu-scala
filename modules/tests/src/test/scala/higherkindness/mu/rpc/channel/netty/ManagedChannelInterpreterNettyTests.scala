@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
-package channel
-package netty
+package higherkindness.mu.rpc.channel.netty
 
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
 
+import higherkindness.mu.rpc._
+import higherkindness.mu.rpc.channel._
 import higherkindness.mu.rpc.common.SC
+import cats.effect.IO
 import io.grpc.ManagedChannel
 import io.grpc.internal.GrpcUtil
 import io.grpc.netty.{GrpcSslContexts, NegotiationType, NettyChannelBuilder}
@@ -32,6 +33,17 @@ import io.netty.channel.nio.NioEventLoopGroup
 class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests {
 
   import implicits._
+
+  def mkInterpreter(
+      channelFor: ChannelFor,
+      channelConfigList: List[ManagedChannelConfig]
+  ): ManagedChannelInterpreter[IO] =
+    new ManagedChannelInterpreter[IO](
+      channelFor,
+      channelConfigList,
+      NettyChannelBuilder.forAddress,
+      NettyChannelBuilder.forTarget
+    )
 
   "NettyChannelInterpreter" should {
 

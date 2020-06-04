@@ -26,6 +26,11 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
   import implicits._
 
+  def mkInterpreter(
+      channelFor: ChannelFor,
+      channelConfigList: List[ManagedChannelConfig]
+  ): ManagedChannelInterpreter[IO]
+
   "ManagedChannelInterpreter" should {
 
     "build a io.grpc.ManagedChannel based on the specified configuration, for an address" in {
@@ -34,8 +39,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
       val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext())
 
-      val managedChannelInterpreter =
-        new ManagedChannelInterpreter[IO](channelFor, channelConfigList)
+      val managedChannelInterpreter = mkInterpreter(channelFor, channelConfigList)
 
       val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild
 
@@ -50,8 +54,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
       val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext())
 
-      val managedChannelInterpreter =
-        new ManagedChannelInterpreter[IO](channelFor, channelConfigList)
+      val managedChannelInterpreter = mkInterpreter(channelFor, channelConfigList)
 
       val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild
 
@@ -66,8 +69,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
       val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext())
 
-      val managedChannelInterpreter =
-        new ManagedChannelInterpreter[IO](channelFor, channelConfigList)
+      val managedChannelInterpreter = mkInterpreter(channelFor, channelConfigList)
 
       val kleisli: ManagedChannelOps[IO, String] =
         Kleisli.liftF(IO(foo))
@@ -81,8 +83,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
       val channelConfigList: List[ManagedChannelConfig] = managedChannelConfigAllList
 
-      val managedChannelInterpreter =
-        new ManagedChannelInterpreter[IO](channelFor, channelConfigList)
+      val managedChannelInterpreter = mkInterpreter(channelFor, channelConfigList)
 
       val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild
 
@@ -95,8 +96,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
       val channelFor: ChannelFor = ChannelForPort(SC.port)
 
-      val managedChannelInterpreter =
-        new ManagedChannelInterpreter[IO](channelFor, Nil)
+      val managedChannelInterpreter = mkInterpreter(channelFor, Nil)
 
       an[IllegalArgumentException] shouldBe thrownBy(managedChannelInterpreter.build.unsafeRunSync)
     }
