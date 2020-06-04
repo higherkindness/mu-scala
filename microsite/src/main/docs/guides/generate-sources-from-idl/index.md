@@ -27,13 +27,9 @@ Mu can generate code from a number of different IDL formats:
 
 Add the following line to _project/plugins.sbt_:
 
-[comment]: # (Start Replace)
-
 ```scala
 addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "0.21.3")
 ```
-
-[comment]: # (End Replace)
 
 ## How to use the plugin
 
