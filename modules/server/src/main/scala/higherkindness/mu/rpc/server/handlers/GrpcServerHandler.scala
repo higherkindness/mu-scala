@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees Open Source <https://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,13 @@ import cats.syntax.functor._
 import higherkindness.mu.rpc.server.{GrpcServer, GrpcServerOps}
 import io.grpc.{Server, ServerServiceDefinition}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.concurrent.duration.TimeUnit
 
 private[handlers] class GrpcServerHandler[F[_]: Sync] private[GrpcServerHandler] ()
     extends GrpcServer[GrpcServerOps[F, ?]] {
 
-  def start: GrpcServerOps[F, Unit] =
+  def start(): GrpcServerOps[F, Unit] =
     captureWithServer(_.start()).void
 
   def getPort: GrpcServerOps[F, Int] = captureWithServer(_.getPort)
@@ -43,10 +43,10 @@ private[handlers] class GrpcServerHandler[F[_]: Sync] private[GrpcServerHandler]
   def getMutableServices: GrpcServerOps[F, List[ServerServiceDefinition]] =
     captureWithServer(_.getMutableServices.asScala.toList)
 
-  def shutdown: GrpcServerOps[F, Unit] =
+  def shutdown(): GrpcServerOps[F, Unit] =
     captureWithServer(_.shutdown()).void
 
-  def shutdownNow: GrpcServerOps[F, Unit] =
+  def shutdownNow(): GrpcServerOps[F, Unit] =
     captureWithServer(_.shutdownNow()).void
 
   def isShutdown: GrpcServerOps[F, Boolean] = captureWithServer(_.isShutdown)
@@ -56,7 +56,7 @@ private[handlers] class GrpcServerHandler[F[_]: Sync] private[GrpcServerHandler]
   def awaitTerminationTimeout(timeout: Long, unit: TimeUnit): GrpcServerOps[F, Boolean] =
     captureWithServer(_.awaitTermination(timeout, unit))
 
-  def awaitTermination: GrpcServerOps[F, Unit] = captureWithServer(_.awaitTermination())
+  def awaitTermination(): GrpcServerOps[F, Unit] = captureWithServer(_.awaitTermination())
 
   private[this] def captureWithServer[A](f: Server => A): GrpcServerOps[F, A] =
     Kleisli(s => Sync[F].delay(f(s)))

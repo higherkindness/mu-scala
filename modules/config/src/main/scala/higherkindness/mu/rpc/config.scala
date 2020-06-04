@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees Open Source <https://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,10 @@ import com.typesafe.config.{Config, ConfigFactory}
 
 package object config {
 
-  trait ConfigM[F[_]] {
-    def load: F[Config]
-  }
-
-  implicit def syncConfigM[F[_]](implicit F: Sync[F]): ConfigM[F] = new ConfigM[F] {
-    def load: F[Config] = F.delay(ConfigSource.fromConfig(ConfigFactory.load()).loadOrThrow[Config])
-  }
+  implicit def syncConfigM[F[_]](implicit F: Sync[F]): ConfigM[F] =
+    new ConfigM[F] {
+      def load: F[Config] =
+        F.delay(ConfigSource.fromConfig(ConfigFactory.load()).loadOrThrow[Config])
+    }
 
 }

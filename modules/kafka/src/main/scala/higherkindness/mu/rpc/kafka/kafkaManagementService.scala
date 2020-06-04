@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees Open Source <https://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package higherkindness.mu.rpc.kafka
 
 import cats.effect.{Concurrent, ContextShift, Resource}
-import cats.implicits._
+import enumeratum.values.{IntEnum, IntEnumEntry}
 import fs2.kafka._
 import higherkindness.mu.rpc.protocol.{service, Empty}
 import org.apache.kafka.common.{
@@ -39,9 +39,9 @@ import org.apache.kafka.clients.admin.{
   TopicListing => KTopicListing
 }
 import org.apache.kafka.clients.consumer.{OffsetAndMetadata => KOffsetAndMetadata}
-import pbdirect.Pos
 
-import scala.collection.JavaConverters._
+import scala.collection.immutable
+import scala.jdk.CollectionConverters._
 
 object kafkaManagementService {
   final case class CreatePartitionsRequest(name: String, numPartitions: Int)
@@ -58,22 +58,29 @@ object kafkaManagementService {
   }
   final case class Cluster(nodes: List[Node], controller: Node, clusterId: String)
 
-  sealed trait ConfigType extends Pos
-  object ConfigType {
-    final case object TopicConfigType   extends ConfigType with Pos._0
-    final case object BrokerConfigType  extends ConfigType with Pos._1
-    final case object UnknownConfigType extends ConfigType with Pos._2
+  sealed abstract class ConfigType(val value: Int) extends IntEnumEntry
+  object ConfigType extends IntEnum[ConfigType] {
+    final case object TopicConfigType        extends ConfigType(0)
+    final case object BrokerConfigType       extends ConfigType(1)
+    final case object UnknownConfigType      extends ConfigType(2)
+    final case object BrokerLoggerConfigType extends ConfigType(3)
 
-    def toJava(ct: ConfigType): KConfigResource.Type = ct match {
-      case TopicConfigType   => KConfigResource.Type.TOPIC
-      case BrokerConfigType  => KConfigResource.Type.BROKER
-      case UnknownConfigType => KConfigResource.Type.UNKNOWN
-    }
-    def fromJava(kct: KConfigResource.Type): ConfigType = kct match {
-      case KConfigResource.Type.TOPIC   => TopicConfigType
-      case KConfigResource.Type.BROKER  => BrokerConfigType
-      case KConfigResource.Type.UNKNOWN => UnknownConfigType
-    }
+    val values: immutable.IndexedSeq[ConfigType] = findValues
+
+    def toJava(ct: ConfigType): KConfigResource.Type =
+      ct match {
+        case TopicConfigType        => KConfigResource.Type.TOPIC
+        case BrokerConfigType       => KConfigResource.Type.BROKER
+        case UnknownConfigType      => KConfigResource.Type.UNKNOWN
+        case BrokerLoggerConfigType => KConfigResource.Type.BROKER_LOGGER
+      }
+    def fromJava(kct: KConfigResource.Type): ConfigType =
+      kct match {
+        case KConfigResource.Type.TOPIC         => TopicConfigType
+        case KConfigResource.Type.BROKER        => BrokerConfigType
+        case KConfigResource.Type.UNKNOWN       => UnknownConfigType
+        case KConfigResource.Type.BROKER_LOGGER => BrokerLoggerConfigType
+      }
   }
   final case class ConfigResource(typ: ConfigType, name: String)
   object ConfigResource {
@@ -83,23 +90,28 @@ object kafkaManagementService {
       ConfigResource(ConfigType.fromJava(kcr.`type`()), kcr.name())
   }
   final case class DescribeConfigsRequest(resources: List[ConfigResource])
-  sealed trait ConfigSource extends Pos
-  object ConfigSource {
-    final case object DynamicTopicConfig         extends ConfigSource with Pos._0
-    final case object DynamicBrokerConfig        extends ConfigSource with Pos._1
-    final case object DynamicDefaultBrokerConfig extends ConfigSource with Pos._2
-    final case object StaticBrokerConfig         extends ConfigSource with Pos._3
-    final case object DefaultConfig              extends ConfigSource with Pos._4
-    final case object UnknownConfig              extends ConfigSource with Pos._5
+  sealed abstract class ConfigSource(val value: Int) extends IntEnumEntry
+  object ConfigSource extends IntEnum[ConfigSource] {
+    final case object DynamicTopicConfig         extends ConfigSource(0)
+    final case object DynamicBrokerConfig        extends ConfigSource(1)
+    final case object DynamicDefaultBrokerConfig extends ConfigSource(2)
+    final case object StaticBrokerConfig         extends ConfigSource(3)
+    final case object DefaultConfig              extends ConfigSource(4)
+    final case object UnknownConfig              extends ConfigSource(5)
+    final case object DynamicBrokerLoggerConfig  extends ConfigSource(6)
 
-    def fromJava(kcs: KConfigEntry.ConfigSource): ConfigSource = kcs match {
-      case KConfigEntry.ConfigSource.DYNAMIC_TOPIC_CONFIG          => DynamicTopicConfig
-      case KConfigEntry.ConfigSource.DYNAMIC_BROKER_CONFIG         => DynamicBrokerConfig
-      case KConfigEntry.ConfigSource.DYNAMIC_DEFAULT_BROKER_CONFIG => DynamicDefaultBrokerConfig
-      case KConfigEntry.ConfigSource.STATIC_BROKER_CONFIG          => StaticBrokerConfig
-      case KConfigEntry.ConfigSource.DEFAULT_CONFIG                => DefaultConfig
-      case KConfigEntry.ConfigSource.UNKNOWN                       => UnknownConfig
-    }
+    val values: immutable.IndexedSeq[ConfigSource] = findValues
+
+    def fromJava(kcs: KConfigEntry.ConfigSource): ConfigSource =
+      kcs match {
+        case KConfigEntry.ConfigSource.DYNAMIC_TOPIC_CONFIG          => DynamicTopicConfig
+        case KConfigEntry.ConfigSource.DYNAMIC_BROKER_CONFIG         => DynamicBrokerConfig
+        case KConfigEntry.ConfigSource.DYNAMIC_DEFAULT_BROKER_CONFIG => DynamicDefaultBrokerConfig
+        case KConfigEntry.ConfigSource.STATIC_BROKER_CONFIG          => StaticBrokerConfig
+        case KConfigEntry.ConfigSource.DEFAULT_CONFIG                => DefaultConfig
+        case KConfigEntry.ConfigSource.UNKNOWN                       => UnknownConfig
+        case KConfigEntry.ConfigSource.DYNAMIC_BROKER_LOGGER_CONFIG  => DynamicBrokerLoggerConfig
+      }
   }
   final case class ConfigSynonym(name: String, value: String, source: ConfigSource)
   object ConfigSynonym {
@@ -115,30 +127,34 @@ object kafkaManagementService {
       synonyms: List[ConfigSynonym]
   )
   object ConfigEntry {
-    def fromJava(kce: KConfigEntry): ConfigEntry = ConfigEntry(
-      kce.name(),
-      kce.value(),
-      ConfigSource.fromJava(kce.source()),
-      kce.isSensitive(),
-      kce.isReadOnly(),
-      kce.synonyms().asScala.map(ConfigSynonym.fromJava).toList
-    )
+    def fromJava(kce: KConfigEntry): ConfigEntry =
+      ConfigEntry(
+        kce.name(),
+        kce.value(),
+        ConfigSource.fromJava(kce.source()),
+        kce.isSensitive,
+        kce.isReadOnly,
+        kce.synonyms().asScala.map(ConfigSynonym.fromJava).toList
+      )
   }
   final case class Config(resource: ConfigResource, entries: List[ConfigEntry])
   final case class Configs(configs: List[Config])
-  sealed trait OpType extends Pos
-  object OpType {
-    final case object Set      extends OpType with Pos._0
-    final case object Delete   extends OpType with Pos._1
-    final case object Append   extends OpType with Pos._2
-    final case object Subtract extends OpType with Pos._3
+  sealed abstract class OpType(val value: Int) extends IntEnumEntry
+  object OpType extends IntEnum[OpType] {
+    final case object Set      extends OpType(0)
+    final case object Delete   extends OpType(1)
+    final case object Append   extends OpType(2)
+    final case object Subtract extends OpType(3)
 
-    def toJava(ot: OpType): KAlterConfigOp.OpType = ot match {
-      case Set      => KAlterConfigOp.OpType.SET
-      case Delete   => KAlterConfigOp.OpType.DELETE
-      case Append   => KAlterConfigOp.OpType.APPEND
-      case Subtract => KAlterConfigOp.OpType.SUBTRACT
-    }
+    val values: immutable.IndexedSeq[OpType] = findValues
+
+    def toJava(ot: OpType): KAlterConfigOp.OpType =
+      ot match {
+        case Set      => KAlterConfigOp.OpType.SET
+        case Delete   => KAlterConfigOp.OpType.DELETE
+        case Append   => KAlterConfigOp.OpType.APPEND
+        case Subtract => KAlterConfigOp.OpType.SUBTRACT
+      }
   }
   final case class AlterConfigOp(name: String, value: String, opType: OpType)
   object AlterConfigOp {
@@ -165,62 +181,69 @@ object kafkaManagementService {
       assignment: MemberAssignment
   )
   object MemberDescription {
-    def fromJava(kmd: KMemberDescription): MemberDescription = MemberDescription(
-      kmd.consumerId(),
-      kmd.clientId(),
-      kmd.host(),
-      MemberAssignment.fromJava(kmd.assignment())
-    )
+    def fromJava(kmd: KMemberDescription): MemberDescription =
+      MemberDescription(
+        kmd.consumerId(),
+        kmd.clientId(),
+        kmd.host(),
+        MemberAssignment.fromJava(kmd.assignment())
+      )
   }
-  sealed trait ConsumerGroupState extends Pos
-  object ConsumerGroupState {
-    final case object CompletingRebalance extends ConsumerGroupState with Pos._0
-    final case object Dead                extends ConsumerGroupState with Pos._1
-    final case object Empty               extends ConsumerGroupState with Pos._2
-    final case object PreparingRebalance  extends ConsumerGroupState with Pos._3
-    final case object Stable              extends ConsumerGroupState with Pos._4
-    final case object Unknown             extends ConsumerGroupState with Pos._5
+  sealed abstract class ConsumerGroupState(val value: Int) extends IntEnumEntry
+  object ConsumerGroupState extends IntEnum[ConsumerGroupState] {
+    final case object CompletingRebalance extends ConsumerGroupState(0)
+    final case object Dead                extends ConsumerGroupState(1)
+    final case object Empty               extends ConsumerGroupState(2)
+    final case object PreparingRebalance  extends ConsumerGroupState(3)
+    final case object Stable              extends ConsumerGroupState(4)
+    final case object Unknown             extends ConsumerGroupState(5)
 
-    def fromJava(kcgs: KConsumerGroupState): ConsumerGroupState = kcgs match {
-      case KConsumerGroupState.COMPLETING_REBALANCE => CompletingRebalance
-      case KConsumerGroupState.DEAD                 => Dead
-      case KConsumerGroupState.EMPTY                => Empty
-      case KConsumerGroupState.PREPARING_REBALANCE  => PreparingRebalance
-      case KConsumerGroupState.STABLE               => Stable
-      case KConsumerGroupState.UNKNOWN              => Unknown
-    }
+    val values: immutable.IndexedSeq[ConsumerGroupState] = findValues
+
+    def fromJava(kcgs: KConsumerGroupState): ConsumerGroupState =
+      kcgs match {
+        case KConsumerGroupState.COMPLETING_REBALANCE => CompletingRebalance
+        case KConsumerGroupState.DEAD                 => Dead
+        case KConsumerGroupState.EMPTY                => Empty
+        case KConsumerGroupState.PREPARING_REBALANCE  => PreparingRebalance
+        case KConsumerGroupState.STABLE               => Stable
+        case KConsumerGroupState.UNKNOWN              => Unknown
+      }
   }
-  sealed trait AclOperation extends Pos
-  object AclOperation {
-    final case object All             extends AclOperation with Pos._0
-    final case object Alter           extends AclOperation with Pos._1
-    final case object AlterConfigs    extends AclOperation with Pos._2
-    final case object Any             extends AclOperation with Pos._3
-    final case object ClusterAction   extends AclOperation with Pos._4
-    final case object Create          extends AclOperation with Pos._5
-    final case object Delete          extends AclOperation with Pos._6
-    final case object Describe        extends AclOperation with Pos._7
-    final case object DescribeConfigs extends AclOperation with Pos._8
-    final case object IdempotentWrite extends AclOperation with Pos._9
-    final case object Read            extends AclOperation with Pos._10
-    final case object Unknown         extends AclOperation with Pos._11
-    final case object Write           extends AclOperation with Pos._12
+  sealed abstract class AclOperation(val value: Int) extends IntEnumEntry
+  object AclOperation extends IntEnum[AclOperation] {
+    final case object All             extends AclOperation(0)
+    final case object Alter           extends AclOperation(1)
+    final case object AlterConfigs    extends AclOperation(2)
+    final case object Any             extends AclOperation(3)
+    final case object ClusterAction   extends AclOperation(4)
+    final case object Create          extends AclOperation(5)
+    final case object Delete          extends AclOperation(6)
+    final case object Describe        extends AclOperation(7)
+    final case object DescribeConfigs extends AclOperation(8)
+    final case object IdempotentWrite extends AclOperation(9)
+    final case object Read            extends AclOperation(10)
+    final case object Unknown         extends AclOperation(11)
+    final case object Write           extends AclOperation(12)
 
-    def fromJava(kao: KAclOperation): AclOperation = kao match {
-      case KAclOperation.ALL              => All
-      case KAclOperation.ALTER            => Alter
-      case KAclOperation.ALTER_CONFIGS    => AlterConfigs
-      case KAclOperation.ANY              => Any
-      case KAclOperation.CLUSTER_ACTION   => ClusterAction
-      case KAclOperation.CREATE           => Create
-      case KAclOperation.DELETE           => Delete
-      case KAclOperation.DESCRIBE         => Describe
-      case KAclOperation.DESCRIBE_CONFIGS => DescribeConfigs
-      case KAclOperation.IDEMPOTENT_WRITE => IdempotentWrite
-      case KAclOperation.READ             => Read
-      case KAclOperation.UNKNOWN          => Unknown
-      case KAclOperation.WRITE            => Write
-    }
+    val values: immutable.IndexedSeq[AclOperation] = findValues
+
+    def fromJava(kao: KAclOperation): AclOperation =
+      kao match {
+        case KAclOperation.ALL              => All
+        case KAclOperation.ALTER            => Alter
+        case KAclOperation.ALTER_CONFIGS    => AlterConfigs
+        case KAclOperation.ANY              => Any
+        case KAclOperation.CLUSTER_ACTION   => ClusterAction
+        case KAclOperation.CREATE           => Create
+        case KAclOperation.DELETE           => Delete
+        case KAclOperation.DESCRIBE         => Describe
+        case KAclOperation.DESCRIBE_CONFIGS => DescribeConfigs
+        case KAclOperation.IDEMPOTENT_WRITE => IdempotentWrite
+        case KAclOperation.READ             => Read
+        case KAclOperation.UNKNOWN          => Unknown
+        case KAclOperation.WRITE            => Write
+      }
   }
   final case class ConsumerGroupDescription(
       groupId: String,
@@ -235,7 +258,7 @@ object kafkaManagementService {
     def fromJava(kcgd: KConsumerGroupDescription): ConsumerGroupDescription =
       ConsumerGroupDescription(
         kcgd.groupId(),
-        kcgd.isSimpleConsumerGroup(),
+        kcgd.isSimpleConsumerGroup,
         kcgd.members().asScala.map(MemberDescription.fromJava).toList,
         kcgd.partitionAssignor(),
         ConsumerGroupState.fromJava(kcgd.state()),
@@ -269,12 +292,13 @@ object kafkaManagementService {
       authorizedOperations: List[AclOperation]
   )
   object TopicDescription {
-    def fromJava(ktd: KTopicDescription): TopicDescription = TopicDescription(
-      ktd.name(),
-      ktd.isInternal(),
-      ktd.partitions().asScala.map(TopicPartitionInfo.fromJava).toList,
-      ktd.authorizedOperations().asScala.map(AclOperation.fromJava).toList
-    )
+    def fromJava(ktd: KTopicDescription): TopicDescription =
+      TopicDescription(
+        ktd.name(),
+        ktd.isInternal,
+        ktd.partitions().asScala.map(TopicPartitionInfo.fromJava).toList,
+        ktd.authorizedOperations().asScala.map(AclOperation.fromJava).toList
+      )
   }
   final case class Topics(topics: List[TopicDescription])
   final case class DescribeTopicsRequest(names: List[String])
@@ -289,7 +313,7 @@ object kafkaManagementService {
       OffsetAndMetadata(
         koam.offset(),
         koam.metadata(),
-        if (koam.leaderEpoch().isPresent()) Some(koam.leaderEpoch().get) else None
+        if (koam.leaderEpoch().isPresent) Some(koam.leaderEpoch().get) else None
       )
   }
   final case class Offset(topicPartition: TopicPartition, metadata: OffsetAndMetadata)
@@ -301,10 +325,11 @@ object kafkaManagementService {
       isSimpleConsumerGroup: Boolean
   )
   object ConsumerGroupListing {
-    def fromJava(kcgl: KConsumerGroupListing): ConsumerGroupListing = ConsumerGroupListing(
-      kcgl.groupId(),
-      kcgl.isSimpleConsumerGroup()
-    )
+    def fromJava(kcgl: KConsumerGroupListing): ConsumerGroupListing =
+      ConsumerGroupListing(
+        kcgl.groupId(),
+        kcgl.isSimpleConsumerGroup
+      )
   }
   final case class ConsumerGroupListings(consumerGroupListings: List[ConsumerGroupListing])
 
@@ -313,7 +338,7 @@ object kafkaManagementService {
       isInternal: Boolean
   )
   object TopicListing {
-    def fromJava(ktl: KTopicListing): TopicListing = TopicListing(ktl.name(), ktl.isInternal())
+    def fromJava(ktl: KTopicListing): TopicListing = TopicListing(ktl.name(), ktl.isInternal)
   }
   final case class TopicListings(listings: List[TopicListing])
 

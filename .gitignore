@@ -1,47 +1,70 @@
+# Don't edit this file!
+# It is automatically updated after every release of https://github.com/47degrees/.github
+# If you want to suggest a change, please open a PR or issue in that repository
+
+### Intellij ###
+
+.idea
+out/
+
+### Java ###
+
 *.class
 *.log
 
-# sbt specific
-.cache
-.history
-.lib/
+### macOS ###
+
+.DS_Store
+
+### SBT ###
+
 dist/*
-target
+target/
 lib_managed/
 src_managed/
 project/boot/
 project/plugins/project/
+.history
+.cache
+.lib/
 
-# Scala-IDE specific
-.scala_dependencies
-.worksheet
+### Scala ###
 
-# ENSIME specific
-.ensime_cache/
-.ensime
-
-# IDEA Specific
-.idea/
-*.iws
-/out/
-.idea_modules/
-
-*.iml
-
-.DS_Store
-
-/secring.gpg
-benchmarks/results
-
-# Metals Specific
+*.metals
 .bloop/
 .metals/
 project/.bloop/
+project/metals.sbt
 
-# Visual Studio Code Specific
-.vscode/
+### Vim ###
 
-# Microsite
-/_site
+# Swap
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
 
-.jekyll-cache/
+# Session
+Session.vim
+Sessionx.vim
+
+# Temporary
+.netrwhist
+
+# Auto-generated tag files
+tags
+
+# Persistent undo
+[._]*.un~
+
+# Coc configuration directory
+.vim
+
+### VisualStudioCode ###
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json

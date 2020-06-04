@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees Open Source <https://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,11 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
 
   override def alterConfigs(acr: AlterConfigsRequest): F[Unit] =
     for {
-      configs <- acr.configs
-        .map { c =>
-          ConfigResource.toJava(c.resource) -> c.ops.map(AlterConfigOp.toJava)
-        }
-        .toMap
-        .pure[F]
+      configs <-
+        acr.configs
+          .map(c => ConfigResource.toJava(c.resource) -> c.ops.map(AlterConfigOp.toJava))
+          .toMap
+          .pure[F]
       alterConfigs <- adminClient.alterConfigs(configs)
     } yield alterConfigs
 
@@ -47,9 +46,10 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
 
   override def createTopics(ctrs: CreateTopicRequests): F[Unit] =
     for {
-      newTopics <- ctrs.createTopicRequests
-        .map(ctr => new NewTopic(ctr.name, ctr.numPartitions, ctr.replicationFactor))
-        .pure[F]
+      newTopics <-
+        ctrs.createTopicRequests
+          .map(ctr => new NewTopic(ctr.name, ctr.numPartitions, ctr.replicationFactor))
+          .pure[F]
       _ <- adminClient.createTopics(newTopics)
     } yield ()
 
@@ -84,7 +84,7 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
   override def describeTopics(dtr: DescribeTopicsRequest): F[Topics] =
     for {
       kTopics <- adminClient.describeTopics(dtr.names)
-      topics = kTopics.map { case (topic, desc) => TopicDescription.fromJava(desc) }.toList
+      topics = kTopics.map { case (_, desc) => TopicDescription.fromJava(desc) }.toList
     } yield Topics(topics)
 
   override def listConsumerGroupOffsets(
