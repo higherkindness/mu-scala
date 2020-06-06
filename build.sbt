@@ -137,6 +137,7 @@ lazy val kafka = project
   .dependsOn(`rpc-service`)
   .settings(moduleName := "mu-rpc-kafka")
   .settings(kafkaSettings)
+  .settings(testSettings)
 
 ////////////////////
 //// BENCHMARKS ////

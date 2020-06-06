@@ -20,7 +20,7 @@ import cats.effect._
 import fs2._
 import fs2.concurrent.Queue
 import fs2.kafka._
-import higherkindness.mu.format.Encoder
+import higherkindness.mu.format.Serialiser
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
@@ -33,9 +33,7 @@ object ProducerStream {
   )(
       implicit contextShift: ContextShift[F],
       concurrentEffect: ConcurrentEffect[F],
-      timer: Timer[F],
-      sync: Sync[F],
-      encoder: Encoder[A]
+      encoder: Serialiser[A]
   ): fs2.Stream[F, Option[A]] => fs2.Stream[F, ByteArrayProducerResult] =
     as =>
       for {
@@ -50,9 +48,7 @@ object ProducerStream {
   )(
       implicit contextShift: ContextShift[F],
       concurrentEffect: ConcurrentEffect[F],
-      timer: Timer[F],
-      sync: Sync[F],
-      encoder: Encoder[A]
+      encoder: Serialiser[A]
   ): Stream[F, ByteArrayProducerResult] =
     for {
       implicit0(logger: Logger[F]) <- fs2.Stream.eval(Slf4jLogger.create[F])
@@ -62,11 +58,9 @@ object ProducerStream {
   private[kafka] def apply[F[_]: Logger, A](
       publishToKafka: PublishToKafka[F]
   )(topic: String, stream: Stream[F, Option[A]])(
-      implicit contextShift: ContextShift[F],
-      concurrentEffect: ConcurrentEffect[F],
-      timer: Timer[F],
+      implicit concurrentEffect: ConcurrentEffect[F],
       sync: Sync[F],
-      encoder: Encoder[A]
+      serialiser: Serialiser[A]
   ): Stream[F, ByteArrayProducerResult] =
     stream
       .flatMap(a => Stream.eval(Logger[F].info(s"Dequeued $a")).map(_ => a))
@@ -74,7 +68,7 @@ object ProducerStream {
       .evalMap(a =>
         concurrentEffect.delay(
           ProducerRecords
-            .one(ProducerRecord(topic, "dummy-key", encoder.encode(a))) // TODO key generation and propagation
+            .one(ProducerRecord(topic, "dummy-key", serialiser.serialise(a))) // TODO key generation and propagation
         )
       )
       .covary[F]

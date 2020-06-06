@@ -19,7 +19,7 @@ package higherkindness.mu.kafka
 import cats.effect.{ConcurrentEffect, ContextShift, Sync, Timer}
 import fs2.Stream
 import fs2.kafka.{ConsumerSettings, KafkaConsumer}
-import higherkindness.mu.format.Decoder
+import higherkindness.mu.format.Deserialiser
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
@@ -29,8 +29,7 @@ object ConsumerStream {
       implicit contextShift: ContextShift[F],
       concurrentEffect: ConcurrentEffect[F],
       timer: Timer[F],
-      decoder: Decoder[A],
-      sync: Sync[F]
+      decoder: Deserialiser[A]
   ): Stream[F, A] =
     for {
       implicit0(logger: Logger[F]) <- fs2.Stream.eval(Slf4jLogger.create[F])
@@ -40,10 +39,8 @@ object ConsumerStream {
   private[kafka] def apply[F[_], A](
       kafkaConsumerStream: Stream[F, KafkaConsumer[F, String, Array[Byte]]]
   )(topic: String)(
-      implicit contextShift: ContextShift[F],
-      concurrentEffect: ConcurrentEffect[F],
-      timer: Timer[F],
-      decoder: Decoder[A],
+      implicit concurrentEffect: ConcurrentEffect[F],
+      decoder: Deserialiser[A],
       logger: Logger[F]
   ): Stream[F, A] =
     kafkaConsumerStream
@@ -51,7 +48,7 @@ object ConsumerStream {
       .flatMap(
         _.stream
           .flatMap { message =>
-            val a = decoder.decode(message.record.value)
+            val a = decoder.deserialise(message.record.value)
             for {
               _ <- fs2.Stream.eval(logger.info(a.toString))
             } yield a

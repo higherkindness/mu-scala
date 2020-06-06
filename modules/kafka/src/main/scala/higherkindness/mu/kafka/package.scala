@@ -19,8 +19,8 @@ package higherkindness.mu
 import cats.effect.{ConcurrentEffect, ContextShift, Sync, Timer}
 import fs2.{Pipe, Stream}
 import fs2.kafka.{AutoOffsetReset, ProducerRecords, ProducerResult, ProducerSettings}
-import higherkindness.mu.format.{Decoder, Encoder}
 import higherkindness.mu.kafka.config.KafkaBrokers
+import higherkindness.mu.format._
 
 package object kafka {
   type ByteArrayProducerResult  = ProducerResult[String, Array[Byte], Unit]
@@ -49,7 +49,7 @@ package object kafka {
       implicit contextShift: ContextShift[F],
       concurrentEffect: ConcurrentEffect[F],
       timer: Timer[F],
-      decoder: Decoder[A],
+      decoder: Deserialiser[A],
       brokers: KafkaBrokers
   ): F[Unit] =
     ConsumerStream(topic, consumerSettings.atLeastOnceFromEarliest(groupId, brokers))
@@ -68,8 +68,7 @@ package object kafka {
   )(
       implicit contextShift: ContextShift[F],
       concurrentEffect: ConcurrentEffect[F],
-      timer: Timer[F],
-      encoder: Encoder[A],
+      encoder: Serialiser[A],
       brokers: KafkaBrokers
   ): F[Unit] =
     messageStream
