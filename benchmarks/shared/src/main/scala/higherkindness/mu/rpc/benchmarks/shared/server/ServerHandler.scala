@@ -19,12 +19,9 @@ package shared
 package server
 
 import cats.effect._
-import cats.instances.list._
-import cats.syntax.traverse._
 import higherkindness.mu.rpc.benchmarks.shared.models._
 import higherkindness.mu.rpc.benchmarks.shared.protocols._
 import higherkindness.mu.rpc.protocol.Empty
-import higherkindness.mu.rpc.server._
 
 abstract class HandlerImpl[F[_]: Effect](implicit persistenceService: PersistenceService[F]) {
 
@@ -52,17 +49,3 @@ class AvroHandler[F[_]: Effect](implicit PS: PersistenceService[F])
 class AvroWithSchemaHandler[F[_]: Effect](implicit PS: PersistenceService[F])
     extends HandlerImpl[F]
     with PersonServiceAvroWithSchema[F]
-
-trait ServerImplicits extends Runtime {
-
-  implicit private val pbHandler: ProtoHandler[IO]  = new ProtoHandler[IO]
-  implicit private val avroHandler: AvroHandler[IO] = new AvroHandler[IO]
-  implicit private val avroWithSchemaHandler: AvroWithSchemaHandler[IO] =
-    new AvroWithSchemaHandler[IO]
-
-  implicit val grpcConfigsAvro: IO[List[GrpcConfig]] = List(
-    PersonServicePB.bindService[IO].map(AddService),
-    PersonServiceAvro.bindService[IO].map(AddService),
-    PersonServiceAvroWithSchema.bindService[IO].map(AddService)
-  ).sequence[IO, GrpcConfig]
-}

@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-package com.proto;
-
-message Author {
-    string name = 1;
-    string nick = 2;
-}

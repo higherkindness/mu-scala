@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees Open Source <https://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import higherkindness.mu.rpc.internal.util.EncoderUtil
 import higherkindness.mu.rpc.jodatime.util.JodaTimeUtil
 import io.grpc.MethodDescriptor.Marshaller
 import org.apache.avro.Schema
-import org.apache.avro.Schema.Field
 import org.joda.time.{LocalDate, LocalDateTime}
 
 object jodaTimeEncoders {
@@ -53,33 +52,25 @@ object jodaTimeEncoders {
 
     import com.sksamuel.avro4s._
 
-    implicit object JodaLocalDateToSchema extends ToSchema[LocalDate] {
-      override val schema: Schema = Schema.create(Schema.Type.INT)
+    implicit object JodaLocalDateSchemaFor extends SchemaFor[LocalDate] {
+      override def schema(fm: FieldMapper): Schema = Schema.create(Schema.Type.INT)
     }
 
-    implicit object JodaLocalDateFromValue extends FromValue[LocalDate] {
-      override def apply(value: Any, field: Field): LocalDate =
-        JodaTimeUtil.intToJodaLocalDate(value.asInstanceOf[Int])
+    implicit val JodaLocalDateDecoder: Decoder[LocalDate] =
+      Decoder[Int].map(JodaTimeUtil.intToJodaLocalDate)
+
+    implicit val JodaLocalDateEncoder: Encoder[LocalDate] =
+      Encoder[Int].comap(JodaTimeUtil.jodaLocalDateToInt)
+
+    implicit object JodaLocalDateTimeSchemaFor extends SchemaFor[LocalDateTime] {
+      override def schema(fm: FieldMapper): Schema = Schema.create(Schema.Type.LONG)
     }
 
-    implicit object JodalocalDateToValue extends ToValue[LocalDate] {
-      override def apply(value: LocalDate): Int =
-        JodaTimeUtil.jodaLocalDateToInt(value)
-    }
+    implicit val JodaLocalDateTimeDecoder: Decoder[LocalDateTime] =
+      Decoder[Long].map(JodaTimeUtil.longToJodaLocalDateTime)
 
-    implicit object JodaLocalDateTimeToSchema extends ToSchema[LocalDateTime] {
-      override val schema: Schema = Schema.create(Schema.Type.LONG)
-    }
-
-    implicit object JodaLocalDateTimeFromValue extends FromValue[LocalDateTime] {
-      def apply(value: Any, field: Field): LocalDateTime =
-        JodaTimeUtil.longToJodaLocalDateTime(value.asInstanceOf[Long])
-    }
-
-    implicit object JodaLocalDateTimeToValue extends ToValue[LocalDateTime] {
-      override def apply(value: LocalDateTime): Long =
-        JodaTimeUtil.jodaLocalDateTimeToLong(value)
-    }
+    implicit val JodaLocalDateTimeEncoder: Encoder[LocalDateTime] =
+      Encoder[Long].comap(JodaTimeUtil.jodaLocalDateTimeToLong)
 
     /*
      * These marshallers are only used when the entire gRPC request/response

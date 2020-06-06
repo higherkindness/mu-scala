@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2017-2020 47 Degrees Open Source <https://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,13 @@ import io.grpc._
 
 object servers {
 
-  def serverCallHandler[Req, Res]: ServerCallHandler[Req, Res] = new ServerCallHandler[Req, Res] {
-    override def startCall(
-        call: ServerCall[Req, Res],
-        headers: Metadata
-    ): ServerCall.Listener[Req] = new NoopServerCallListener[Req]
-  }
+  def serverCallHandler[Req, Res]: ServerCallHandler[Req, Res] =
+    new ServerCallHandler[Req, Res] {
+      override def startCall(
+          call: ServerCall[Req, Res],
+          headers: Metadata
+      ): ServerCall.Listener[Req] = new NoopServerCallListener[Req]
+    }
 
   def serverServiceDefinition(
       serviceName: String,
@@ -85,9 +86,7 @@ object servers {
       val channelBuilder: InProcessChannelBuilder =
         InProcessChannelBuilder.forName(serverName)
 
-      clientInterceptor.foreach { interceptor =>
-        channelBuilder.intercept(interceptor)
-      }
+      clientInterceptor.foreach(interceptor => channelBuilder.intercept(interceptor))
 
       serverServiceDefinitions.map(serverBuilder.addService)
 
