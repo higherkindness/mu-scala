@@ -16,69 +16,11 @@
 
 package higherkindness.mu
 
-import cats.effect.{ConcurrentEffect, ContextShift, Sync, Timer}
-import fs2.{Pipe, Stream}
-import fs2.kafka.{AutoOffsetReset, ProducerRecords, ProducerResult, ProducerSettings}
-import higherkindness.mu.kafka.config.KafkaBrokers
-import higherkindness.mu.format._
+import fs2.Pipe
+import fs2.kafka.{ProducerRecords, ProducerResult, ProducerSettings}
 
 package object kafka {
   type ByteArrayProducerResult  = ProducerResult[String, Array[Byte], Unit]
   type ByteArrayProducerRecords = ProducerRecords[String, Array[Byte], Unit]
-  type PublishToKafka[F[_]] =
-    Pipe[F, ByteArrayProducerRecords, ByteArrayProducerResult]
-
-  object consumerSettings {
-    def atLeastOnceFromEarliest[F[_]: Sync](
-        groupId: String,
-        brokers: KafkaBrokers
-    ): fs2.kafka.ConsumerSettings[F, String, Array[Byte]] =
-      fs2.kafka
-        .ConsumerSettings[F, String, Array[Byte]]
-        .withGroupId(groupId)
-        .withBootstrapServers(brokers.urls)
-        .withAutoOffsetReset(AutoOffsetReset.Earliest)
-        .withEnableAutoCommit(true)
-  }
-
-  def consumer[F[_], A](
-      topic: String,
-      groupId: String,
-      messageProcessingPipe: Pipe[F, A, A]
-  )(
-      implicit contextShift: ContextShift[F],
-      concurrentEffect: ConcurrentEffect[F],
-      timer: Timer[F],
-      decoder: Deserialiser[A],
-      brokers: KafkaBrokers
-  ): F[Unit] =
-    ConsumerStream(topic, consumerSettings.atLeastOnceFromEarliest(groupId, brokers))
-      .through(messageProcessingPipe)
-      .compile
-      .drain
-
-  object producerSettings {
-    def apply[F[_]: Sync](brokers: KafkaBrokers): ProducerSettings[F, String, Array[Byte]] =
-      ProducerSettings[F, String, Array[Byte]]
-        .withBootstrapServers(brokers.urls)
-  }
-  def producer[F[_], A](
-      topic: String,
-      messageStream: Stream[F, Option[A]]
-  )(
-      implicit contextShift: ContextShift[F],
-      concurrentEffect: ConcurrentEffect[F],
-      encoder: Serialiser[A],
-      brokers: KafkaBrokers
-  ): F[Unit] =
-    messageStream
-      .through(
-        ProducerStream.pipe(
-          topic,
-          producerSettings(brokers)
-        )
-      )
-      .compile
-      .drain
-
+  type PublishToKafka[F[_]] = Pipe[F, ByteArrayProducerRecords, ByteArrayProducerResult]
 }

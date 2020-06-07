@@ -19,7 +19,8 @@ package higherkindness.mu.kafka.it.example
 import cats.effect.{ContextShift, IO, Timer}
 import com.typesafe.scalalogging.LazyLogging
 import fs2.{Pipe, Stream}
-import higherkindness.mu.kafka
+import fs2.kafka.{ConsumerSettings, ProducerSettings}
+import fs2.kafka.AutoOffsetReset
 import higherkindness.mu.kafka.config.KafkaBrokers
 import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
@@ -32,6 +33,7 @@ import org.scalatest.{time, OneInstancePerTest}
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.Promise
 import scala.util.Try
+import higherkindness.mu.kafka.{ProducerStream, ConsumerStream}
 
 class MuKafkaServiceSpec
     extends AnyFlatSpec
@@ -56,41 +58,43 @@ class MuKafkaServiceSpec
     val userDefinedConfig = EmbeddedKafkaConfig(kafkaPort = 0, zooKeeperPort = 0)
 
     withRunningKafkaOnFoundPort(userDefinedConfig) { implicit actualConfig =>
-      implicit val actualBrokers: KafkaBrokers = brokers.copy(list =
+      val actualBrokers: KafkaBrokers = brokers.copy(list =
         brokers.list.map(broker =>
           broker.copy(port = actualConfig.kafkaPort)
         )
       )
+      val producerSettings = ProducerSettings[IO, String, Array[Byte]].withBootstrapServers(actualBrokers.urls)
+      val consumerSettings = ConsumerSettings[IO, String, Array[Byte]]
+        .withGroupId(consumerGroup)
+        .withBootstrapServers(actualBrokers.urls)
+        .withAutoOffsetReset(AutoOffsetReset.Earliest)
+        .withEnableAutoCommit(true)
 
-      // messages
+      // producer messages
       val userAddedMessage: UserAdded = UserAdded("n")
-      val userAddedMessageStream: Stream[IO, Option[UserAdded]] =
-        Stream(Option(userAddedMessage), None)
+      val userAddedMessageStream: Stream[IO, Option[UserAdded]] = Stream(Option(userAddedMessage), None)
 
-      // message processing logic - used here to make the message available for assertion via promise
-      val (consumed, putConsumeMessageIntoFuture): (
-          Promise[UserAdded],
-          Pipe[IO, UserAdded, UserAdded]
-      ) = {
-        val consumed: Promise[UserAdded] = Promise()
-
-        val processor: Pipe[IO, UserAdded, UserAdded] = _.map { userAdded =>
-          logger.info(s"Processing $userAdded")
-          if (consumed.isCompleted)
-            logger.warn(s"UserAdded message was received more than once")
-          else
-            consumed.complete(Try(UserAdded("n")))
+      // consumer essage processing logic - used here to make the message available for assertion via promise
+      val consumed: Promise[UserAdded] = Promise()
+      val putConsumeMessageIntoFuture: Pipe[IO, UserAdded, UserAdded] = _.map { userAdded =>
+        logger.info(s"Processing $userAdded")
+        if (consumed.isCompleted)
+          logger.warn(s"UserAdded message was received more than once")
+        else
+          consumed.complete(Try(UserAdded("n")))
           userAdded
-        }
-        (consumed, processor)
       }
 
-      kafka
-        .producer(topic, userAddedMessageStream)
+      userAddedMessageStream
+        .through(ProducerStream.pipe(topic, producerSettings))
+        .compile
+        .drain
         .unsafeRunAsyncAndForget()
 
-      kafka
-        .consumer(topic, consumerGroup, putConsumeMessageIntoFuture)
+      ConsumerStream[IO, UserAdded](topic, consumerSettings)
+        .through(putConsumeMessageIntoFuture)
+        .compile
+        .drain
         .unsafeRunAsyncAndForget()
 
       whenReady(consumed.future, Timeout(time.Span(5, Seconds)))(userAdded =>
