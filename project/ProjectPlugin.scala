@@ -31,6 +31,7 @@ object ProjectPlugin extends AutoPlugin {
       val log4cats: String              = "1.0.1"
       val log4s: String                 = "1.8.2"
       val logback: String               = "1.2.3"
+      val scalalogging: String          = "3.9.2" // used in tests
       val monix: String                 = "3.2.1"
       val natchez: String               = "0.0.11"
       val nettySSL: String              = "2.0.30.Final"
@@ -162,7 +163,14 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val kafkaSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "com.github.fd4s" %% "fs2-kafka" % V.fs2Kafka
+        "com.github.fd4s"            %% "fs2-kafka"       % V.fs2Kafka,
+        "io.chrisdavenport"          %% "log4cats-slf4j"  % V.log4cats,
+        "io.chrisdavenport"          %% "log4cats-core"   % V.log4cats,
+        "com.sksamuel.avro4s"        %% "avro4s-core"     % V.avro4s,
+        "ch.qos.logback"              % "logback-classic" % V.logback,
+        "io.github.embeddedkafka"    %% "embedded-kafka"  % V.embeddedKafka % Test,
+        "com.typesafe.scala-logging" %% "scala-logging"   % V.scalalogging  % Test,
+        compilerPlugin("com.olegpy" %% "better-monadic-for" % V.betterMonadicFor)
       )
     )
 
