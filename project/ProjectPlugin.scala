@@ -163,13 +163,13 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val kafkaSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "com.github.fd4s" %% "fs2-kafka" % V.fs2Kafka,
-        "io.chrisdavenport" %% "log4cats-slf4j" % V.log4cats,
-        "io.chrisdavenport" %% "log4cats-core"  % V.log4cats,
-        "com.sksamuel.avro4s" %% "avro4s-core" % V.avro4s,
-        "ch.qos.logback" % "logback-classic" % V.logback,
-        "io.github.embeddedkafka" %% "embedded-kafka" % V.embeddedKafka % Test,
-        "com.typesafe.scala-logging" %% "scala-logging" % V.scalalogging % Test,
+        "com.github.fd4s"            %% "fs2-kafka"       % V.fs2Kafka,
+        "io.chrisdavenport"          %% "log4cats-slf4j"  % V.log4cats,
+        "io.chrisdavenport"          %% "log4cats-core"   % V.log4cats,
+        "com.sksamuel.avro4s"        %% "avro4s-core"     % V.avro4s,
+        "ch.qos.logback"              % "logback-classic" % V.logback,
+        "io.github.embeddedkafka"    %% "embedded-kafka"  % V.embeddedKafka % Test,
+        "com.typesafe.scala-logging" %% "scala-logging"   % V.scalalogging  % Test,
         compilerPlugin("com.olegpy" %% "better-monadic-for" % V.betterMonadicFor)
       )
     )
