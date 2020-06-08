@@ -24,13 +24,9 @@ Create a new sbt project, and add the `sbt-mu-srcgen` plugin in
 This plugin is going to discover and parse your OpenAPI YAML
 file and generate corresponding Scala code.
 
-[comment]: # (Start Replace)
-
 ```scala
 addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "@VERSION@")
 ```
-
-[comment]: # (End Replace)
 
 Then configure the plugin by adding a few lines to `build.sbt`:
 

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
-package channel
+package higherkindness.mu.rpc.channel
+
+import higherkindness.mu.rpc._
 
 import cats.effect.{Effect, Resource, Sync}
 import cats.syntax.flatMap._
@@ -25,8 +26,17 @@ import io.grpc._
 
 class ManagedChannelInterpreter[F[_]](
     initConfig: ChannelFor,
-    configList: List[ManagedChannelConfig]
+    configList: List[ManagedChannelConfig],
+    builderForAddress: (String, Int) => ManagedChannelBuilder[_],
+    builderForTarget: String => ManagedChannelBuilder[_]
 )(implicit F: Sync[F]) {
+
+  // Secondary constructor added for bincompat
+  def this(
+      initConfig: ChannelFor,
+      configList: List[ManagedChannelConfig]
+  )(implicit F: Sync[F]) =
+    this(initConfig, configList, ManagedChannelBuilder.forAddress, ManagedChannelBuilder.forTarget)
 
   def apply[A](fa: ManagedChannelOps[F, A]): F[A] =
     fa(build)
@@ -35,9 +45,9 @@ class ManagedChannelInterpreter[F[_]](
 
     val builder: F[T] = initConfig match {
       case ChannelForAddress(name, port) =>
-        F.delay(ManagedChannelBuilder.forAddress(name, port).asInstanceOf[T])
+        F.delay(builderForAddress(name, port).asInstanceOf[T])
       case ChannelForTarget(target) =>
-        F.delay(ManagedChannelBuilder.forTarget(target).asInstanceOf[T])
+        F.delay(builderForTarget(target).asInstanceOf[T])
       case e =>
         F.raiseError(new IllegalArgumentException(s"ManagedChannel not supported for $e"))
     }

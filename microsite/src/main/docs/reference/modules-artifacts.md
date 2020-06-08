@@ -47,8 +47,6 @@ permalink: reference/modules-artifacts
 ## Build
 You can install any of these dependencies in your build as follows:
 
-[comment]: # (Start Replace)
-
 ```scala
 // required for a protocol definition:
 libraryDependencies += "io.higherkindness" %% "mu-rpc-service" % "@VERSION@"
@@ -96,10 +94,6 @@ etc.), you will need the `sbt-mu-srcgen` plugin:
 ```
 addSbtPlugin("io.higherkindness" %% "sbt-mu-srcgen" % "@VERSION@")
 ```
-
-[comment]: # (End Replace)
-
-
 
 [Avro]: https://avro.apache.org/
 [FS2]: https://github.com/functional-streams-for-scala/fs2
