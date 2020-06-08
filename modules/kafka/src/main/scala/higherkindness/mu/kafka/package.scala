@@ -17,7 +17,7 @@
 package higherkindness.mu
 
 import fs2.Pipe
-import fs2.kafka.{ProducerRecords, ProducerResult, ProducerSettings}
+import fs2.kafka.{ProducerRecords, ProducerResult}
 
 package object kafka {
   type ByteArrayProducerResult  = ProducerResult[String, Array[Byte], Unit]
