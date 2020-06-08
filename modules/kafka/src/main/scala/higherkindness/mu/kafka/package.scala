@@ -22,5 +22,5 @@ import fs2.kafka.{ProducerRecords, ProducerResult, ProducerSettings}
 package object kafka {
   type ByteArrayProducerResult  = ProducerResult[String, Array[Byte], Unit]
   type ByteArrayProducerRecords = ProducerRecords[String, Array[Byte], Unit]
-  type PublishToKafka[F[_]] = Pipe[F, ByteArrayProducerRecords, ByteArrayProducerResult]
+  type PublishToKafka[F[_]]     = Pipe[F, ByteArrayProducerRecords, ByteArrayProducerResult]
 }

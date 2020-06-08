@@ -30,8 +30,8 @@ object ProducerStream {
   def pipe[F[_], A](
       topic: String,
       settings: fs2.kafka.ProducerSettings[F, String, Array[Byte]]
-  )(
-      implicit contextShift: ContextShift[F],
+  )(implicit
+      contextShift: ContextShift[F],
       concurrentEffect: ConcurrentEffect[F],
       encoder: Serialiser[A]
   ): fs2.Stream[F, Option[A]] => fs2.Stream[F, ByteArrayProducerResult] =
@@ -45,8 +45,8 @@ object ProducerStream {
       topic: String,
       queue: Queue[F, Option[A]],
       settings: fs2.kafka.ProducerSettings[F, String, Array[Byte]]
-  )(
-      implicit contextShift: ContextShift[F],
+  )(implicit
+      contextShift: ContextShift[F],
       concurrentEffect: ConcurrentEffect[F],
       encoder: Serialiser[A]
   ): Stream[F, ByteArrayProducerResult] =
@@ -57,8 +57,8 @@ object ProducerStream {
 
   private[kafka] def apply[F[_]: Logger, A](
       publishToKafka: PublishToKafka[F]
-  )(topic: String, stream: Stream[F, Option[A]])(
-      implicit concurrentEffect: ConcurrentEffect[F],
+  )(topic: String, stream: Stream[F, Option[A]])(implicit
+      concurrentEffect: ConcurrentEffect[F],
       sync: Sync[F],
       serialiser: Serialiser[A]
   ): Stream[F, ByteArrayProducerResult] =
@@ -68,7 +68,9 @@ object ProducerStream {
       .evalMap(a =>
         concurrentEffect.delay(
           ProducerRecords
-            .one(ProducerRecord(topic, "dummy-key", serialiser.serialise(a))) // TODO key generation and propagation
+            .one(
+              ProducerRecord(topic, "dummy-key", serialiser.serialise(a))
+            ) // TODO key generation and propagation
         )
       )
       .covary[F]

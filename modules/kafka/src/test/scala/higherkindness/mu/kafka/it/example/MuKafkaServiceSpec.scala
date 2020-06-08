@@ -33,7 +33,7 @@ import org.scalatest.{time, OneInstancePerTest}
 import scala.concurrent.ExecutionContext.global
 import scala.concurrent.Promise
 import scala.util.Try
-import higherkindness.mu.kafka.{ProducerStream, ConsumerStream}
+import higherkindness.mu.kafka.{ConsumerStream, ProducerStream}
 
 class MuKafkaServiceSpec
     extends AnyFlatSpec
@@ -58,12 +58,10 @@ class MuKafkaServiceSpec
     val userDefinedConfig = EmbeddedKafkaConfig(kafkaPort = 0, zooKeeperPort = 0)
 
     withRunningKafkaOnFoundPort(userDefinedConfig) { implicit actualConfig =>
-      val actualBrokers: KafkaBrokers = brokers.copy(list =
-        brokers.list.map(broker =>
-          broker.copy(port = actualConfig.kafkaPort)
-        )
-      )
-      val producerSettings = ProducerSettings[IO, String, Array[Byte]].withBootstrapServers(actualBrokers.urls)
+      val actualBrokers: KafkaBrokers =
+        brokers.copy(list = brokers.list.map(broker => broker.copy(port = actualConfig.kafkaPort)))
+      val producerSettings =
+        ProducerSettings[IO, String, Array[Byte]].withBootstrapServers(actualBrokers.urls)
       val consumerSettings = ConsumerSettings[IO, String, Array[Byte]]
         .withGroupId(consumerGroup)
         .withBootstrapServers(actualBrokers.urls)
@@ -72,7 +70,8 @@ class MuKafkaServiceSpec
 
       // producer messages
       val userAddedMessage: UserAdded = UserAdded("n")
-      val userAddedMessageStream: Stream[IO, Option[UserAdded]] = Stream(Option(userAddedMessage), None)
+      val userAddedMessageStream: Stream[IO, Option[UserAdded]] =
+        Stream(Option(userAddedMessage), None)
 
       // consumer essage processing logic - used here to make the message available for assertion via promise
       val consumed: Promise[UserAdded] = Promise()
@@ -82,7 +81,7 @@ class MuKafkaServiceSpec
           logger.warn(s"UserAdded message was received more than once")
         else
           consumed.complete(Try(UserAdded("n")))
-          userAdded
+        userAdded
       }
 
       userAddedMessageStream

@@ -26,7 +26,8 @@ import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 object ConsumerStream {
 
   def apply[F[_]: Sync, A](topic: String, settings: ConsumerSettings[F, String, Array[Byte]])(
-      implicit contextShift: ContextShift[F],
+      implicit
+      contextShift: ContextShift[F],
       concurrentEffect: ConcurrentEffect[F],
       timer: Timer[F],
       decoder: Deserialiser[A]
@@ -38,8 +39,8 @@ object ConsumerStream {
 
   private[kafka] def apply[F[_], A](
       kafkaConsumerStream: Stream[F, KafkaConsumer[F, String, Array[Byte]]]
-  )(topic: String)(
-      implicit concurrentEffect: ConcurrentEffect[F],
+  )(topic: String)(implicit
+      concurrentEffect: ConcurrentEffect[F],
       decoder: Deserialiser[A],
       logger: Logger[F]
   ): Stream[F, A] =
