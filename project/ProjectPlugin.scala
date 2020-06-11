@@ -18,22 +18,23 @@ object ProjectPlugin extends AutoPlugin {
       val catsEffect: String            = "2.1.3"
       val circe: String                 = "0.13.0"
       val dockerItScala                 = "0.9.9"
-      val dropwizard: String            = "4.1.7"
-      val embeddedKafka: String         = "2.5.0"
+      val dropwizard: String            = "4.1.9"
+      val embeddedKafka: String         = "2.4.1.1"
       val enumeratum: String            = "1.6.1"
-      val fs2: String                   = "2.3.0"
-      val fs2Grpc: String               = "0.7.0"
+      val fs2: String                   = "2.4.1"
+      val fs2Grpc: String               = "0.7.1"
       val fs2Kafka: String              = "1.0.0"
       val grpc: String                  = "1.29.0"
       val jodaTime: String              = "2.10.6"
       val http4s: String                = "0.21.0-M6"
       val kindProjector: String         = "0.11.0"
-      val log4cats: String              = "1.0.1"
+      val log4cats: String              = "1.1.1"
       val log4s: String                 = "1.8.2"
       val logback: String               = "1.2.3"
-      val monix: String                 = "3.2.1"
+      val scalalogging: String          = "3.9.2" // used in tests
+      val monix: String                 = "3.2.2"
       val natchez: String               = "0.0.11"
-      val nettySSL: String              = "2.0.30.Final"
+      val nettySSL: String              = "2.0.31.Final"
       val paradise: String              = "2.1.1"
       val pbdirect: String              = "0.5.2"
       val prometheus: String            = "0.9.0"
@@ -162,7 +163,14 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val kafkaSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "com.github.fd4s" %% "fs2-kafka" % V.fs2Kafka
+        "com.github.fd4s"            %% "fs2-kafka"       % V.fs2Kafka,
+        "io.chrisdavenport"          %% "log4cats-slf4j"  % V.log4cats,
+        "io.chrisdavenport"          %% "log4cats-core"   % V.log4cats,
+        "com.sksamuel.avro4s"        %% "avro4s-core"     % V.avro4s,
+        "ch.qos.logback"              % "logback-classic" % V.logback,
+        "io.github.embeddedkafka"    %% "embedded-kafka"  % V.embeddedKafka % Test,
+        "com.typesafe.scala-logging" %% "scala-logging"   % V.scalalogging  % Test,
+        compilerPlugin("com.olegpy" %% "better-monadic-for" % V.betterMonadicFor)
       )
     )
 
