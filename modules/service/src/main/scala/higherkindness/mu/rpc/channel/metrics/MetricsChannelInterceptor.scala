@@ -82,8 +82,10 @@ class MetricsChannelCallListener[F[_], Res](
     metricsOps: MetricsOps[F],
     startTime: Long,
     classifier: Option[String]
-)(implicit E: Effect[F], C: Clock[F])
-    extends ForwardingClientCallListener[Res] {
+)(implicit
+    E: Effect[F],
+    C: Clock[F]
+) extends ForwardingClientCallListener[Res] {
 
   override def onHeaders(headers: Metadata): Unit =
     E.toIO {
