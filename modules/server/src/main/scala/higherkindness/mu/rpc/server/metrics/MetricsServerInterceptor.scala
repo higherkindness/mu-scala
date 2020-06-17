@@ -41,18 +41,17 @@ case class MetricsServerInterceptor[F[_]: Clock](
     val methodInfo: GrpcMethodInfo = GrpcMethodInfo(call.getMethodDescriptor)
 
     E.toIO(
-        MetricsServerCall
-          .build[F, Req, Res](call, methodInfo, metricsOps, classifier)
-          .map(metricsCall =>
-            MetricsServerCallListener[F, Req](
-              next.startCall(metricsCall, requestHeaders),
-              methodInfo,
-              metricsOps,
-              classifier
-            )
+      MetricsServerCall
+        .build[F, Req, Res](call, methodInfo, metricsOps, classifier)
+        .map(metricsCall =>
+          MetricsServerCallListener[F, Req](
+            next.startCall(metricsCall, requestHeaders),
+            methodInfo,
+            metricsOps,
+            classifier
           )
-      )
-      .unsafeRunSync
+        )
+    ).unsafeRunSync
   }
 }
 
@@ -62,8 +61,10 @@ case class MetricsServerCall[F[_], Req, Res](
     metricsOps: MetricsOps[F],
     startTime: Long,
     classifier: Option[String]
-)(implicit E: Effect[F], C: Clock[F])
-    extends ForwardingServerCall.SimpleForwardingServerCall[Req, Res](serverCall) {
+)(implicit
+    E: Effect[F],
+    C: Clock[F]
+) extends ForwardingServerCall.SimpleForwardingServerCall[Req, Res](serverCall) {
 
   override def close(status: Status, responseHeaders: Metadata): Unit =
     E.toIO {
