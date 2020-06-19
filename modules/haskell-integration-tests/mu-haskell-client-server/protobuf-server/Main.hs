@@ -60,7 +60,7 @@ subscribeToRainEvents req sink = runConduit $ C.yieldMany events .| sink
   toRainEvent x = record (city, Just x)
   city = req ^. #city
 
-server :: (MonadServer m) => SingleServerT WeatherService m _
+server :: (MonadServer m) => SingleServerT info WeatherService m _
 server = singleService
   ( method @"ping" ping
   , method @"getForecast" getForecast
