@@ -18,7 +18,6 @@ package higherkindness.mu.rpc
 package testing
 
 import org.scalacheck.Gen
-import org.scalatest._
 import org.scalatestplus.scalacheck.Checkers
 import org.scalacheck.Prop._
 import org.scalatest.matchers.should.Matchers

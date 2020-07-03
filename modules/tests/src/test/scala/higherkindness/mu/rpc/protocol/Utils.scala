@@ -532,7 +532,7 @@ object Utils extends CommonUtils {
     ).sequence.map(_.map(AddService))
 
     implicit val grpcServer: GrpcServer[ConcurrentMonad] =
-      grpcConfigs.flatMap(createServerConf[ConcurrentMonad]).unsafeRunSync
+      grpcConfigs.flatMap(createServerConf[ConcurrentMonad]).unsafeRunSync()
 
     //////////////////////////////////
     // Client Runtime Configuration //
