@@ -41,18 +41,17 @@ case class MetricsServerInterceptor[F[_]: Clock](
     val methodInfo: GrpcMethodInfo = GrpcMethodInfo(call.getMethodDescriptor)
 
     E.toIO(
-        MetricsServerCall
-          .build[F, Req, Res](call, methodInfo, metricsOps, classifier)
-          .map(metricsCall =>
-            MetricsServerCallListener[F, Req](
-              next.startCall(metricsCall, requestHeaders),
-              methodInfo,
-              metricsOps,
-              classifier
-            )
+      MetricsServerCall
+        .build[F, Req, Res](call, methodInfo, metricsOps, classifier)
+        .map(metricsCall =>
+          MetricsServerCallListener[F, Req](
+            next.startCall(metricsCall, requestHeaders),
+            methodInfo,
+            metricsOps,
+            classifier
           )
-      )
-      .unsafeRunSync
+        )
+    ).unsafeRunSync()
   }
 }
 
@@ -62,8 +61,10 @@ case class MetricsServerCall[F[_], Req, Res](
     metricsOps: MetricsOps[F],
     startTime: Long,
     classifier: Option[String]
-)(implicit E: Effect[F], C: Clock[F])
-    extends ForwardingServerCall.SimpleForwardingServerCall[Req, Res](serverCall) {
+)(implicit
+    E: Effect[F],
+    C: Clock[F]
+) extends ForwardingServerCall.SimpleForwardingServerCall[Req, Res](serverCall) {
 
   override def close(status: Status, responseHeaders: Metadata): Unit =
     E.toIO {
@@ -72,13 +73,13 @@ case class MetricsServerCall[F[_], Req, Res](
         _   <- metricsOps.recordTotalTime(methodInfo, status, now - startTime, classifier)
         onC <- E.delay(delegate.close(status, responseHeaders))
       } yield onC
-    }.unsafeRunSync
+    }.unsafeRunSync()
 
   override def sendMessage(message: Res): Unit =
     E.toIO {
       metricsOps.recordMessageSent(methodInfo, classifier) *>
         E.delay(delegate.sendMessage(message))
-    }.unsafeRunSync
+    }.unsafeRunSync()
 }
 
 object MetricsServerCall {
@@ -107,11 +108,11 @@ case class MetricsServerCallListener[F[_], Req](
         _   <- metricsOps.increaseActiveCalls(methodInfo, classifier)
         onM <- E.delay(delegate.onMessage(request))
       } yield onM
-    }.unsafeRunSync
+    }.unsafeRunSync()
 
   override def onComplete(): Unit =
     E.toIO {
       metricsOps.decreaseActiveCalls(methodInfo, classifier) *>
         E.delay(delegate.onComplete())
-    }.unsafeRunSync
+    }.unsafeRunSync()
 }

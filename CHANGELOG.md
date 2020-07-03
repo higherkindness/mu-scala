@@ -1,5 +1,38 @@
 # Changelog
 
+## [v0.22.3](https://github.com/higherkindness/mu-scala/tree/v0.22.3) (2020-07-03)
+
+[Full Changelog](https://github.com/higherkindness/mu-scala/compare/v0.22.2...v0.22.3)
+
+📈 **Dependency updates**
+
+- Update sbt to 1.3.13 [\#958](https://github.com/higherkindness/mu-scala/pull/958) ([scala-steward](https://github.com/scala-steward))
+- Update pureconfig to 0.13.0 [\#957](https://github.com/higherkindness/mu-scala/pull/957) ([scala-steward](https://github.com/scala-steward))
+- Update sbt-tpolecat to 0.1.13 [\#956](https://github.com/higherkindness/mu-scala/pull/956) ([scala-steward](https://github.com/scala-steward))
+- Update sbt-mdoc to 2.2.3 [\#954](https://github.com/higherkindness/mu-scala/pull/954) ([scala-steward](https://github.com/scala-steward))
+- Update grpc-all, grpc-netty, grpc-okhttp, ... to 1.30.2 [\#952](https://github.com/higherkindness/mu-scala/pull/952) ([scala-steward](https://github.com/scala-steward))
+- Update scalafmt-core to 2.6.1 [\#948](https://github.com/higherkindness/mu-scala/pull/948) ([scala-steward](https://github.com/scala-steward))
+- Update scalacheck-1-14 to 3.2.0.0 [\#947](https://github.com/higherkindness/mu-scala/pull/947) ([scala-steward](https://github.com/scala-steward))
+- Update java-runtime to 0.7.2 [\#943](https://github.com/higherkindness/mu-scala/pull/943) ([scala-steward](https://github.com/scala-steward))
+- Update fs2-core to 2.4.2 [\#942](https://github.com/higherkindness/mu-scala/pull/942) ([scala-steward](https://github.com/scala-steward))
+- Update scalafmt-core to 2.5.3 [\#941](https://github.com/higherkindness/mu-scala/pull/941) ([scala-steward](https://github.com/scala-steward))
+- Update sbt-mdoc to 2.2.2 [\#940](https://github.com/higherkindness/mu-scala/pull/940) ([scala-steward](https://github.com/scala-steward))
+- Update netty-tcnative-boringssl-static to 2.0.31.Final [\#939](https://github.com/higherkindness/mu-scala/pull/939) ([scala-steward](https://github.com/scala-steward))
+- Update monix to 3.2.2 [\#938](https://github.com/higherkindness/mu-scala/pull/938) ([scala-steward](https://github.com/scala-steward))
+- Update mu-rpc-server to 0.22.2 [\#937](https://github.com/higherkindness/mu-scala/pull/937) ([scala-steward](https://github.com/scala-steward))
+- Update metrics-core, metrics-jmx to 4.1.9 [\#935](https://github.com/higherkindness/mu-scala/pull/935) ([scala-steward](https://github.com/scala-steward))
+- Update log4cats-core, log4cats-slf4j to 1.1.1 [\#934](https://github.com/higherkindness/mu-scala/pull/934) ([scala-steward](https://github.com/scala-steward))
+- Update fs2-core to 2.4.1 [\#932](https://github.com/higherkindness/mu-scala/pull/932) ([scala-steward](https://github.com/scala-steward))
+- Update java-runtime to 0.7.1 [\#931](https://github.com/higherkindness/mu-scala/pull/931) ([scala-steward](https://github.com/scala-steward))
+- Update fs2-core to 2.4.0 [\#930](https://github.com/higherkindness/mu-scala/pull/930) ([scala-steward](https://github.com/scala-steward))
+
+**Merged pull requests:**
+
+- Downgrades netty-tcnative-boringssl-static dep [\#961](https://github.com/higherkindness/mu-scala/pull/961) ([juanpedromoreno](https://github.com/juanpedromoreno))
+- Update build [\#960](https://github.com/higherkindness/mu-scala/pull/960) ([juanpedromoreno](https://github.com/juanpedromoreno))
+- Update scalafmt-core to 2.6.0 [\#945](https://github.com/higherkindness/mu-scala/pull/945) ([BenFradet](https://github.com/BenFradet))
+- Add mu kafka consumer producer [\#793](https://github.com/higherkindness/mu-scala/pull/793) ([naree](https://github.com/naree))
+
 ## [v0.22.2](https://github.com/higherkindness/mu-scala/tree/v0.22.2) (2020-06-04)
 
 [Full Changelog](https://github.com/higherkindness/mu-scala/compare/v0.22.1...v0.22.2)
@@ -231,6 +264,7 @@
 - Scalameta codegen [\#746](https://github.com/higherkindness/mu-scala/pull/746) ([cb372](https://github.com/cb372))
 - Update sbt-microsites to 1.1.0 [\#745](https://github.com/higherkindness/mu-scala/pull/745) ([scala-steward](https://github.com/scala-steward))
 - Update pbdirect to 0.4.1 [\#744](https://github.com/higherkindness/mu-scala/pull/744) ([scala-steward](https://github.com/scala-steward))
+- Fix gitter channel badge [\#743](https://github.com/higherkindness/mu-scala/pull/743) ([fedefernandez](https://github.com/fedefernandez))
 - Update monocle-core to 2.0.1 [\#741](https://github.com/higherkindness/mu-scala/pull/741) ([scala-steward](https://github.com/scala-steward))
 - Simplify Avro marshaller [\#740](https://github.com/higherkindness/mu-scala/pull/740) ([cb372](https://github.com/cb372))
 - Add release notes for v0.20.0 [\#739](https://github.com/higherkindness/mu-scala/pull/739) ([cb372](https://github.com/cb372))
@@ -250,7 +284,6 @@
 
 **Merged pull requests:**
 
-- Fix gitter channel badge [\#743](https://github.com/higherkindness/mu-scala/pull/743) ([fedefernandez](https://github.com/fedefernandez))
 - Name the scripts in Travis [\#738](https://github.com/higherkindness/mu-scala/pull/738) ([cb372](https://github.com/cb372))
 - Fixes project name [\#737](https://github.com/higherkindness/mu-scala/pull/737) ([juanpedromoreno](https://github.com/juanpedromoreno))
 - Release v0.20.0 [\#736](https://github.com/higherkindness/mu-scala/pull/736) ([cb372](https://github.com/cb372))
@@ -339,6 +372,7 @@
 - Upgrades Sbt/Scala [\#641](https://github.com/higherkindness/mu-scala/pull/641) ([juanpedromoreno](https://github.com/juanpedromoreno))
 - Add avro source generation doc [\#640](https://github.com/higherkindness/mu-scala/pull/640) ([AdrianRaFo](https://github.com/AdrianRaFo))
 - Bump cats-effect to 2.0.0 [\#639](https://github.com/higherkindness/mu-scala/pull/639) ([BenFradet](https://github.com/BenFradet))
+- Mu kafka management service [\#638](https://github.com/higherkindness/mu-scala/pull/638) ([BenFradet](https://github.com/BenFradet))
 - HealthCheck endpoint and service [\#630](https://github.com/higherkindness/mu-scala/pull/630) ([mrtmmr](https://github.com/mrtmmr))
 - Add import root to protobuf source generator [\#627](https://github.com/higherkindness/mu-scala/pull/627) ([bilki](https://github.com/bilki))
 - Mmm/605 docs [\#625](https://github.com/higherkindness/mu-scala/pull/625) ([mrtmmr](https://github.com/mrtmmr))
@@ -354,7 +388,6 @@
 
 **Merged pull requests:**
 
-- Mu kafka management service [\#638](https://github.com/higherkindness/mu-scala/pull/638) ([BenFradet](https://github.com/BenFradet))
 - Support for idiomatic endpoints in protobuf [\#623](https://github.com/higherkindness/mu-scala/pull/623) ([fedefernandez](https://github.com/fedefernandez))
 - Allows generating idiomatic gRPC urls for avro [\#622](https://github.com/higherkindness/mu-scala/pull/622) ([fedefernandez](https://github.com/fedefernandez))
 - Mu documentation changed - New section "Generate sources from IDL" [\#621](https://github.com/higherkindness/mu-scala/pull/621) ([mrtmmr](https://github.com/mrtmmr))

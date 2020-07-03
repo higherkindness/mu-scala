@@ -107,7 +107,7 @@ class RPCTracingTests extends AnyFunSpec {
     new TracingServiceDef[Kleisli[IO, Span[IO], *]](Scheduler(EC))
 
   def serverResource(S: GrpcServer[IO]): Resource[IO, Unit] =
-    Resource.make(S.start)(_ => S.shutdown >> S.awaitTermination)
+    Resource.make(S.start())(_ => S.shutdown() >> S.awaitTermination())
 
   /**
    * Build a Resource that starts a server and builds a client to connect to it.

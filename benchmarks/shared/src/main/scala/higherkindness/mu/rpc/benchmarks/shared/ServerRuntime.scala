@@ -60,17 +60,17 @@ trait ServerRuntime {
     new ManagedChannelInterpreter[IO](
       ChannelForAddress("localhost", grpcPort),
       List(UsePlaintext())
-    ).build.unsafeRunSync
+    ).build.unsafeRunSync()
 
   implicit lazy val grpcServer: GrpcServer[IO] =
-    grpcConfigs.flatMap(conf => GrpcServer.default[IO](grpcPort, conf)).unsafeRunSync
+    grpcConfigs.flatMap(conf => GrpcServer.default[IO](grpcPort, conf)).unsafeRunSync()
 
   def startServer(implicit server: GrpcServer[IO]): Unit =
     (for {
       _ <- logger.info("Starting server..")
       _ <- server.start()
       _ <- logger.info("Server started..")
-    } yield ()).unsafeRunSync
+    } yield ()).unsafeRunSync()
 
   def tearDown(implicit server: GrpcServer[IO], channel: ManagedChannel): Unit =
     (for {
@@ -82,5 +82,5 @@ trait ServerRuntime {
       _ <- server.shutdownNow()
       _ <- server.awaitTerminationTimeout(1, TimeUnit.SECONDS)
       _ <- logger.info("Server Stopped..")
-    } yield ()).unsafeRunSync
+    } yield ()).unsafeRunSync()
 }

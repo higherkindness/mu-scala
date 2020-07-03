@@ -74,7 +74,7 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
       val kleisli: ManagedChannelOps[IO, String] =
         Kleisli.liftF(IO(foo))
 
-      managedChannelInterpreter[String](kleisli).unsafeRunSync shouldBe foo
+      managedChannelInterpreter[String](kleisli).unsafeRunSync() shouldBe foo
     }
 
     "build a io.grpc.ManagedChannel based on any configuration combination" in {
@@ -98,7 +98,9 @@ abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
 
       val managedChannelInterpreter = mkInterpreter(channelFor, Nil)
 
-      an[IllegalArgumentException] shouldBe thrownBy(managedChannelInterpreter.build.unsafeRunSync)
+      an[IllegalArgumentException] shouldBe thrownBy(
+        managedChannelInterpreter.build.unsafeRunSync()
+      )
     }
   }
 }

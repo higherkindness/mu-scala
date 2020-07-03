@@ -122,10 +122,9 @@ object Utils extends CommonUtils {
 
         def biStreaming(oe: Stream[F, E]): F[Stream[F, E]] =
           oe.flatMap { e: E =>
-              save(e)
-              Stream.fromIterator(eList.iterator)
-            }
-            .pure[F]
+            save(e)
+            Stream.fromIterator(eList.iterator)
+          }.pure[F]
 
         def biStreamingWithSchema(oe: Stream[F, E]): F[Stream[F, E]] = biStreaming(oe)
 
@@ -168,7 +167,7 @@ object Utils extends CommonUtils {
     ).sequence.map(_.map(AddService))
 
     implicit val grpcServer: GrpcServer[IO] =
-      grpcConfigs.flatMap(createServerConf[IO]).unsafeRunSync
+      grpcConfigs.flatMap(createServerConf[IO]).unsafeRunSync()
 
     //////////////////////////////////
     // Client Runtime Configuration //

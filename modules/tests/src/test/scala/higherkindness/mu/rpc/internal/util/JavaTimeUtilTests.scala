@@ -22,7 +22,6 @@ import java.time.{Duration, ZoneOffset, ZonedDateTime}
 
 import com.fortysevendeg.scalacheck.datetime.instances.jdk8._
 import com.fortysevendeg.scalacheck.datetime.GenDateTime._
-import org.scalatest._
 import org.scalacheck.Prop._
 import org.scalatestplus.scalacheck.Checkers
 import org.scalatest.matchers.should.Matchers

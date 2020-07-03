@@ -189,19 +189,17 @@ object Utils extends CommonUtils {
 
         def clientStreaming(oa: Observable[A]): F[D] =
           oa.foldLeftL(D(0)) {
-              case (current, a) =>
-                debug(s"[SERVER] Current -> $current / a -> $a")
-                D(current.bar + a.x + a.y)
-            }
-            .toAsync[F]
+            case (current, a) =>
+              debug(s"[SERVER] Current -> $current / a -> $a")
+              D(current.bar + a.x + a.y)
+          }.toAsync[F]
 
         def biStreaming(oe: Observable[E]): F[Observable[E]] =
           oe.flatMap { e: E =>
-              save(e)
+            save(e)
 
-              Observable.fromIterable(eList)
-            }
-            .pure[F]
+            Observable.fromIterable(eList)
+          }.pure[F]
 
         def biStreamingWithSchema(oe: Observable[E]): F[Observable[E]] = biStreaming(oe)
 
@@ -534,7 +532,7 @@ object Utils extends CommonUtils {
     ).sequence.map(_.map(AddService))
 
     implicit val grpcServer: GrpcServer[ConcurrentMonad] =
-      grpcConfigs.flatMap(createServerConf[ConcurrentMonad]).unsafeRunSync
+      grpcConfigs.flatMap(createServerConf[ConcurrentMonad]).unsafeRunSync()
 
     //////////////////////////////////
     // Client Runtime Configuration //

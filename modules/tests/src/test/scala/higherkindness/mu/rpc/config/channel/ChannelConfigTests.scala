@@ -28,7 +28,7 @@ class ChannelConfigTests extends RpcClientTestSuite {
       ConfigForAddress[ConcurrentMonad](
         SC.host,
         SC.port.toString
-      ).unsafeRunSync shouldBe ChannelForAddress(
+      ).unsafeRunSync() shouldBe ChannelForAddress(
         "localhost",
         50051
       )
@@ -36,7 +36,7 @@ class ChannelConfigTests extends RpcClientTestSuite {
 
     "for Target work as expected" in {
 
-      ConfigForTarget[ConcurrentMonad](SC.host).unsafeRunSync shouldBe ChannelForTarget("target")
+      ConfigForTarget[ConcurrentMonad](SC.host).unsafeRunSync() shouldBe ChannelForTarget("target")
     }
 
   }
