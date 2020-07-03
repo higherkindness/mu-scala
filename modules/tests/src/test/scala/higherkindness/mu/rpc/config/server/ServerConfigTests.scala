@@ -31,26 +31,26 @@ class ServerConfigTests extends RpcServerTestSuite {
 
       val loadAndPort = for {
         server <- BuildServerFromConfig[ConcurrentMonad]("rpc.server.port")
-        _      <- server.start
+        _      <- server.start()
         port   <- server.getPort
-        _      <- server.shutdownNow
-        _      <- server.awaitTermination
+        _      <- server.shutdownNow()
+        _      <- server.awaitTermination()
       } yield port
 
-      loadAndPort.unsafeRunSync shouldBe SC.port
+      loadAndPort.unsafeRunSync() shouldBe SC.port
     }
 
     "load the default port when the config port path is not found" in {
 
       val loadAndPort = for {
         server <- BuildServerFromConfig[ConcurrentMonad]("rpc.wrong.port")
-        _      <- server.start
+        _      <- server.start()
         port   <- server.getPort
-        _      <- server.shutdownNow
-        _      <- server.awaitTermination
+        _      <- server.shutdownNow()
+        _      <- server.awaitTermination()
       } yield port
 
-      loadAndPort.unsafeRunSync shouldBe defaultPort
+      loadAndPort.unsafeRunSync() shouldBe defaultPort
     }
 
   }

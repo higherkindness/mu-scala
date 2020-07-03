@@ -51,7 +51,7 @@ trait GrpcServer[F[_]] { self =>
 
   def mapK[G[_]](fk: F ~> G): GrpcServer[G] =
     new GrpcServer[G] {
-      def start(): G[Unit] = fk(self.start)
+      def start(): G[Unit] = fk(self.start())
 
       def getPort: G[Int] = fk(self.getPort)
 
@@ -61,9 +61,9 @@ trait GrpcServer[F[_]] { self =>
 
       def getMutableServices: G[List[ServerServiceDefinition]] = fk(self.getMutableServices)
 
-      def shutdown(): G[Unit] = fk(self.shutdown)
+      def shutdown(): G[Unit] = fk(self.shutdown())
 
-      def shutdownNow(): G[Unit] = fk(self.shutdownNow)
+      def shutdownNow(): G[Unit] = fk(self.shutdownNow())
 
       def isShutdown: G[Boolean] = fk(self.isShutdown)
 
@@ -72,7 +72,7 @@ trait GrpcServer[F[_]] { self =>
       def awaitTerminationTimeout(timeout: Long, unit: TimeUnit): G[Boolean] =
         fk(self.awaitTerminationTimeout(timeout, unit))
 
-      def awaitTermination(): G[Unit] = fk(self.awaitTermination)
+      def awaitTermination(): G[Unit] = fk(self.awaitTermination())
     }
 }
 
@@ -83,7 +83,7 @@ object GrpcServer {
    * and shuts it down afterwards.
    */
   def serverResource[F[_]](S: GrpcServer[F])(implicit F: Async[F]): Resource[F, Unit] =
-    Resource.make(S.start)(_ => S.shutdown >> S.awaitTermination)
+    Resource.make(S.start())(_ => S.shutdown() >> S.awaitTermination())
 
   /**
    * Start the given server and keep it running forever.

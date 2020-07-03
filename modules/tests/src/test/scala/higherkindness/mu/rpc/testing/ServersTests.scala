@@ -18,7 +18,6 @@ package higherkindness.mu.rpc
 package testing
 
 import io.grpc.{ServerCall, ServerCallHandler, ServerServiceDefinition}
-import org.scalatest._
 import org.scalatestplus.scalacheck.Checkers
 import org.scalacheck.Prop._
 

@@ -22,7 +22,6 @@ import org.joda.time._
 import com.fortysevendeg.scalacheck.datetime.instances.joda._
 import com.fortysevendeg.scalacheck.datetime.GenDateTime.genDateTimeWithinRange
 import higherkindness.mu.rpc.jodatime.util.JodaTimeUtil
-import org.scalatest._
 import org.scalacheck.Prop._
 import org.scalatestplus.scalacheck.Checkers
 import org.scalatest.matchers.should.Matchers

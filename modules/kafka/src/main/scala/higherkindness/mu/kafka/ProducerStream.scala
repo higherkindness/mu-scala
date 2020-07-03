@@ -24,8 +24,6 @@ import higherkindness.mu.format.Serialiser
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
-import scala.language.higherKinds
-
 object ProducerStream {
   def pipe[F[_], A](
       topic: String,

@@ -22,7 +22,7 @@ object ProjectPlugin extends AutoPlugin {
       val embeddedKafka: String         = "2.4.1.1"
       val enumeratum: String            = "1.6.1"
       val fs2: String                   = "2.4.2"
-      val fs2Grpc: String               = "0.7.2"
+      val fs2Grpc: String               = "0.7.3"
       val fs2Kafka: String              = "1.0.0"
       val grpc: String                  = "1.30.2"
       val jodaTime: String              = "2.10.6"
@@ -44,7 +44,7 @@ object ProjectPlugin extends AutoPlugin {
       val scalacheck: String            = "1.14.3"
       val scalacheckToolbox: String     = "0.3.5"
       val scalamock: String             = "4.4.0"
-      val scalatest: String             = "3.1.2"
+      val scalatest: String             = "3.2.0"
       val scalatestplusScheck: String   = "3.2.0.0"
       val slf4j: String                 = "1.7.30"
     }

@@ -167,7 +167,7 @@ object Utils extends CommonUtils {
     ).sequence.map(_.map(AddService))
 
     implicit val grpcServer: GrpcServer[IO] =
-      grpcConfigs.flatMap(createServerConf[IO]).unsafeRunSync
+      grpcConfigs.flatMap(createServerConf[IO]).unsafeRunSync()
 
     //////////////////////////////////
     // Client Runtime Configuration //
