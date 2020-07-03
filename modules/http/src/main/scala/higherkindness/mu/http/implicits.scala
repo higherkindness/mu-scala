@@ -118,7 +118,7 @@ object implicits {
   }
 
   def handleResponseError[F[_]: Sync](errorResponse: Response[F]): F[Throwable] =
-    errorResponse.bodyAsText.compile.foldMonoid.map(body =>
+    errorResponse.bodyText.compile.foldMonoid.map(body =>
       ResponseError(errorResponse.status, Some(body).filter(_.nonEmpty))
     )
 
