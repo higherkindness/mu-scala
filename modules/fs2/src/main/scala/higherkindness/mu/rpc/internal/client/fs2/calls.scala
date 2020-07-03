@@ -18,7 +18,6 @@ package higherkindness.mu.rpc.internal.client.fs2
 
 import fs2.Stream
 
-import cats.effect.ConcurrentEffect
 import cats.data.Kleisli
 import cats.effect.ConcurrentEffect
 import cats.syntax.applicative._
