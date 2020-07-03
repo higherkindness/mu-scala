@@ -5,6 +5,7 @@ import scoverage.ScoverageKeys._
 
 import scala.language.reflectiveCalls
 import mdoc.MdocPlugin.autoImport._
+import ch.epfl.scala.sbtmissinglink.MissingLinkPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
 
@@ -277,6 +278,22 @@ object ProjectPlugin extends AutoPlugin {
 
   }
 
+  lazy val missingLinkSettings: Seq[Def.Setting[_]] =
+    Seq(
+      missinglinkExcludedDependencies += moduleFilter(organization = "ch.qos.logback"),
+      missinglinkExcludedDependencies += moduleFilter(
+        organization = "org.slf4j",
+        name = "slf4j-api"
+      ),
+      missinglinkExcludedDependencies += moduleFilter(
+        organization = "org.apache.commons",
+        name = "commons-compress"
+      ),
+      missinglinkIgnoreSourcePackages += IgnoredPackage("org.apache.avro.file"),
+      missinglinkIgnoreSourcePackages += IgnoredPackage("io.netty.util.internal.logging"),
+      missinglinkIgnoreSourcePackages += IgnoredPackage("io.netty.handler.ssl")
+    )
+
   import autoImport._
 
   override def projectSettings: Seq[Def.Setting[_]] =
@@ -287,5 +304,5 @@ object ProjectPlugin extends AutoPlugin {
       addCompilerPlugin(
         "org.typelevel" % "kind-projector" % V.kindProjector cross CrossVersion.full
       )
-    ) ++ macroSettings
+    ) ++ macroSettings ++ missingLinkSettings
 }
