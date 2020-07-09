@@ -12,7 +12,11 @@ Scala source code from Avro/Protobuf/OpenAPI IDL files.
 
 ## Settings
 
-This section explains each of the sbt plugin's settings.
+This section explains each of the sbt plugin's settings.  As a reminder, this plugin needs to be manually enabled for any module for which you want to generate code; you can do that by adding the following to your `build.sbt`:
+
+```scala
+enablePlugins(SrcGenPlugin)
+```
 
 ### muSrcGenIdlType
 
