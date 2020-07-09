@@ -14,6 +14,8 @@ Scala source code from Avro/Protobuf/OpenAPI IDL files.
 
 This section explains each of the sbt plugin's settings.
 
+TODO: should I add a section explaining how this plugin is disabled by default, or is that more appropriate in the other settings?
+
 ### muSrcGenIdlType
 
 The most important sbt setting is `muSrcGenIdlType`, which tells the plugin what kind of

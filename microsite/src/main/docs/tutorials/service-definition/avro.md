@@ -115,6 +115,7 @@ curly brace.
 
 ## Regenerate the code
 
+
 If you run the `muSrcGen` sbt task again, and inspect the
 `protocol/target/scala-2.13/src_managed/main/com/example/Greeter.scala` file
 again, it should look something like this:
