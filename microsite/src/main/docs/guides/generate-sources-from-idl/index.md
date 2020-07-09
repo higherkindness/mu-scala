@@ -58,8 +58,6 @@ $ sbt muSrcGen
 
 You will need to add this import at the top of your `build.sbt`:
 
-[TODO ADD ENABLEMENT STEPS FOR SBT PLUGIN]
-
 
 ```scala
 import higherkindness.mu.rpc.srcgen.Model._
