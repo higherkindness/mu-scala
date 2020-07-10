@@ -66,7 +66,9 @@ object implicits {
         F: ApplicativeError[F, Throwable]
     ): Stream[F, A] =
       message.body.chunks.parseJsonStream
-        .flatMap(_.as[List[A]].map(Stream.emits(_)).fold(_.raiseError[Stream[F, *], A], identity(_)))
+        .flatMap(
+          _.as[List[A]].map(Stream.emits(_)).fold(_.raiseError[Stream[F, *], A], identity(_))
+        )
   }
 
   implicit class RequestOps[F[_]](private val request: Request[F]) {
