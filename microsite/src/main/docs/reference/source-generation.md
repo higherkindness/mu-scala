@@ -119,7 +119,7 @@ sbt module containing the IDL definitions (`foo-domain`):
 
 ## Implementation Notes: An Intentional Incompatibility with the Avro Standard
 
-In order to make it so that it's easier for users to evolve their schemas over time, `sbt-mu-srcgen` intentionally deviates from the Avro standard in one key way: it does not permit primitive types (e.g. `string sendUser(UserWithCountry user)`) to be present in the Avro schema.  If you attempt to write an Avro schema with a primitive type (for example, something like thiss)
+In order to make it so that it's easier for users to evolve their schemas over time, `sbt-mu-srcgen` intentionally deviates from the Avro standard in one key way: it does not permit primitive types (e.g. `string sendUser(UserWithCountry user)`) to be present in the Avro schema.  If you attempt to write an Avro schema with a primitive type (for example, something like this)
 
 ```plaintext
 @namespace("foo")
