@@ -19,7 +19,7 @@ object ProjectPlugin extends AutoPlugin {
       val catsEffect: String            = "2.1.4"
       val circe: String                 = "0.13.0"
       val dockerItScala                 = "0.9.9"
-      val dropwizard: String            = "4.1.11"
+      val dropwizard: String            = "4.1.12.1"
       val embeddedKafka: String         = "2.4.1.1"
       val enumeratum: String            = "1.6.1"
       val fs2: String                   = "2.4.2"
@@ -45,8 +45,8 @@ object ProjectPlugin extends AutoPlugin {
       val scalacheck: String            = "1.14.3"
       val scalacheckToolbox: String     = "0.3.5"
       val scalamock: String             = "5.0.0"
-      val scalatest: String             = "3.2.0"
-      val scalatestplusScheck: String   = "3.2.0.0"
+      val scalatest: String             = "3.2.1"
+      val scalatestplusScheck: String   = "3.2.1.0"
       val slf4j: String                 = "1.7.30"
     }
 
