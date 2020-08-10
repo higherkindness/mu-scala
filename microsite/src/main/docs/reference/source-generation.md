@@ -140,7 +140,7 @@ protocol UserV1 {
 }
 ```
 
-the source generation command (i.e. `muSrcGen`) will fail and return all of the incompatible
+the source generation command (i.e. `muSrcGen`) will fail and return all the incompatible
 Avro schema records  (for example, the above schema would trigger the following 
 message: 
 ```
