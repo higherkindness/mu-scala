@@ -117,6 +117,47 @@ sbt module containing the IDL definitions (`foo-domain`):
 //...
 ```
 
+## Implementation Notes: An Intentional Incompatibility with the Avro Standard
+
+In order to make it so that it's easier for users to evolve their schemas over time, `sbt-mu-srcgen` intentionally deviates from the Avro standard in one key way: it does not permit primitive types (e.g. `String sendUser(UserWithCountry user)`) to be present in the Avro schema.  If you attempt to write an Avro schema with a primitive type (for example,s something like this)
+
+```plaintext
+@namespace("foo")
+
+protocol UserV1 {
+  record UserWithCountry {
+    string name;
+    int age;
+    string country;
+  }
+
+  String sendUser(UserWithCountry user);
+}
+```
+
+you service will fail with an `AvroTypeException` (for example: `org.apache.avro.AvroTypeException: Unable to resolve foo.String`) during the source generation process because the `sendUser` method now has a fixed (i.e. a primitive type, instead of an Avro Record) return type that can't be evolved.
+
+### Additional Context
+
+To understand this potential issue with schema evolution, consider the following example,
+
+```plaintext
+record SearchRequest {
+  string query;
+}
+
+SearchResponse search(SearchRequest request);
+```
+This schema can be evolved to add optional fields (e.g. ordering, filters, ...) to the request.  All the user has to do is just change the _record_.  
+
+This API design, on the other hand, can't be evolved because changing the `SearchResponse` argument from a `string` to any other datatype would introduce backward incompatibility.
+
+```plaintext
+SearchResponse search(string query);
+```
+
+For this reason, we **generally encourage that all requests and responses must be records**.
+
 ## Implementation note: two-stage code generation
 
 For gRPC services generated from an Avro or Protobuf definition, there are
