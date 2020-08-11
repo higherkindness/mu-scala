@@ -74,7 +74,8 @@ protocol AvroGreeter {
 }
 ```
 
-**NOTE:** please be aware that `mu-scala` prohibits the use of primitive types in request arguments; for more context, see the [source generation reference](/reference/source-generation).
+**NOTE:** please be aware that `mu-scala` prohibits the use of primitive types in request arguments for Avro schema; 
+for more context, see the [source generation reference](/reference/source-generation).
 
 You can run the source generator directly:
 
