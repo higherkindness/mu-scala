@@ -145,9 +145,9 @@ message:
 
 ```
 [error] (protocol / muSrcGen) One or more IDL files are invalid. Error details:
-[error]  NonEmptyList(/path/to/the/invalid/file.avdl has the following errors:
+[error]  /path/to/the/invalid/file.avdl has the following errors:
 RPC method request parameter 'user' has non-record request type 'STRING', 
-RPC method response parameter has non-record response type 'STRING')
+RPC method response parameter has non-record response type 'STRING'
 ```
 
 ### Additional Context
