@@ -119,7 +119,11 @@ sbt module containing the IDL definitions (`foo-domain`):
 
 ## Implementation Notes: An Intentional Incompatibility with the Avro Standard
 
-In order to make it so that it's easier for users to evolve their schemas over time, `sbt-mu-srcgen` intentionally deviates from the Avro standard in one key way: it does not permit primitive types (e.g. `String sendUser(UserWithCountry user)`) to be present in the Avro schema.  If you attempt to write an Avro schema with a primitive type (for example,s something like this)
+In order to make it so that it's easier for users to evolve their schemas over time, 
+`sbt-mu-srcgen` intentionally deviates from the Avro standard in one key way: it does 
+not permit primitive types (e.g. `string sendUser(UserWithCountry user)`) to be present 
+in the Avro schema.  If you attempt to write an Avro schema using primitive types instead
+of records (for example, something like this)
 
 ```plaintext
 @namespace("foo")
@@ -131,11 +135,20 @@ protocol UserV1 {
     string country;
   }
 
-  String sendUser(UserWithCountry user);
+  string sendUser(string user);
 }
 ```
 
-you service will fail with an `AvroTypeException` (for example: `org.apache.avro.AvroTypeException: Unable to resolve foo.String`) during the source generation process because the `sendUser` method now has a fixed (i.e. a primitive type, instead of an Avro Record) return type that can't be evolved.
+the source generation command (i.e. `muSrcGen`) will fail and return all the incompatible
+Avro schema records (for example, the above schema would trigger the following 
+message: 
+
+```
+[error] (protocol / muSrcGen) One or more IDL files are invalid. Error details:
+[error]  /path/to/the/invalid/file.avdl has the following errors:
+RPC method request parameter 'user' has non-record request type 'STRING', 
+RPC method response parameter has non-record response type 'STRING'
+```
 
 ### Additional Context
 
