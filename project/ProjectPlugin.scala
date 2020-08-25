@@ -22,7 +22,7 @@ object ProjectPlugin extends AutoPlugin {
       val dropwizard: String            = "4.1.12.1"
       val embeddedKafka: String         = "2.4.1.1"
       val enumeratum: String            = "1.6.1"
-      val fs2: String                   = "2.4.3"
+      val fs2: String                   = "2.4.4"
       val fs2Grpc: String               = "0.7.3"
       val fs2Kafka: String              = "1.0.0"
       val grpc: String                  = "1.30.2"
@@ -35,7 +35,7 @@ object ProjectPlugin extends AutoPlugin {
       val scalalogging: String          = "3.9.2" // used in tests
       val monix: String                 = "3.2.2"
       val natchez: String               = "0.0.12"
-      val nettySSL: String              = "2.0.30.Final"
+      val nettySSL: String              = "2.0.34.Final"
       val paradise: String              = "2.1.1"
       val pbdirect: String              = "0.5.2"
       val prometheus: String            = "0.9.0"
@@ -46,7 +46,7 @@ object ProjectPlugin extends AutoPlugin {
       val scalacheckToolbox: String     = "0.3.5"
       val scalamock: String             = "5.0.0"
       val scalatest: String             = "3.2.2"
-      val scalatestplusScheck: String   = "3.2.1.0"
+      val scalatestplusScheck: String   = "3.2.2.0"
       val slf4j: String                 = "1.7.30"
     }
 
