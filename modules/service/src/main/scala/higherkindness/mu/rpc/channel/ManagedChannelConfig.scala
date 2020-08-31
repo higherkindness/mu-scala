@@ -30,9 +30,7 @@ final case class AddInterceptor(interceptors: ClientInterceptor*) extends Manage
 final case class UserAgent(userAgent: String)                     extends ManagedChannelConfig
 final case class OverrideAuthority(authority: String)             extends ManagedChannelConfig
 final case class UsePlaintext()                                   extends ManagedChannelConfig
-final case class NameResolverFactory(resolverFactory: NameResolver.Factory)
-    extends ManagedChannelConfig
-final case class DefaultLoadBalancingPolicy(policy: String) extends ManagedChannelConfig
+final case class DefaultLoadBalancingPolicy(policy: String)       extends ManagedChannelConfig
 final case class SetDecompressorRegistry(registry: DecompressorRegistry)
     extends ManagedChannelConfig
 final case class SetCompressorRegistry(registry: CompressorRegistry) extends ManagedChannelConfig
