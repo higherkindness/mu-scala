@@ -105,7 +105,7 @@ object Utils extends CommonUtils {
         .map(services => SetSslContext(serverSslContext) :: services)
 
     implicit val grpcServer: GrpcServer[ConcurrentMonad] =
-      grpcConfigs.flatMap(GrpcServer.netty[ConcurrentMonad](SC.port, _)).unsafeRunSync
+      grpcConfigs.flatMap(GrpcServer.netty[ConcurrentMonad](SC.port, _)).unsafeRunSync()
 
     //////////////////////////////////
     // Client Runtime Configuration //

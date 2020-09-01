@@ -67,13 +67,13 @@ case class MetricsClientCall[F[_]: Clock, Req, Res](
         )
         st <- E.delay(delegate.start(listener, headers))
       } yield st
-    }.unsafeRunSync
+    }.unsafeRunSync()
 
   override def sendMessage(requestMessage: Req): Unit =
     E.toIO {
       metricsOps.recordMessageSent(methodInfo, classifier) *>
         E.delay(delegate.sendMessage(requestMessage))
-    }.unsafeRunSync
+    }.unsafeRunSync()
 }
 
 class MetricsChannelCallListener[F[_], Res](
@@ -94,13 +94,13 @@ class MetricsChannelCallListener[F[_], Res](
         _   <- metricsOps.recordHeadersTime(methodInfo, now - startTime, classifier)
         onH <- E.delay(delegate.onHeaders(headers))
       } yield onH
-    }.unsafeRunSync
+    }.unsafeRunSync()
 
   override def onMessage(responseMessage: Res): Unit =
     E.toIO {
       metricsOps.recordMessageReceived(methodInfo, classifier) *>
         E.delay(delegate.onMessage(responseMessage))
-    }.unsafeRunSync
+    }.unsafeRunSync()
 
   override def onClose(status: Status, metadata: Metadata): Unit =
     E.toIO {
@@ -110,7 +110,7 @@ class MetricsChannelCallListener[F[_], Res](
         _   <- metricsOps.decreaseActiveCalls(methodInfo, classifier)
         onC <- E.delay(delegate.onClose(status, metadata))
       } yield onC
-    }.unsafeRunSync
+    }.unsafeRunSync()
 }
 
 object MetricsChannelCallListener {

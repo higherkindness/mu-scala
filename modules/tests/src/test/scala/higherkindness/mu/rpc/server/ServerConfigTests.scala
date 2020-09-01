@@ -33,7 +33,7 @@ class ServerConfigTests extends RpcServerTestSuite {
       val configList: List[GrpcConfig] = List(AddService(sd1))
       val server: IO[GrpcServer[IO]]   = GrpcServer.default(SC.port, configList)
 
-      server.flatMap(_.getServices).unsafeRunSync shouldBe List(sd1)
+      server.flatMap(_.getServices).unsafeRunSync() shouldBe List(sd1)
     }
   }
 
@@ -44,7 +44,7 @@ class ServerConfigTests extends RpcServerTestSuite {
       val configList: List[GrpcConfig] = List(AddService(sd1))
       val server: IO[GrpcServer[IO]]   = GrpcServer.netty(ChannelForPort(SC.port), configList)
 
-      server.flatMap(_.getServices).unsafeRunSync shouldBe List(sd1)
+      server.flatMap(_.getServices).unsafeRunSync() shouldBe List(sd1)
     }
 
     "work as expected for SocketAddress" in {
@@ -56,7 +56,7 @@ class ServerConfigTests extends RpcServerTestSuite {
           configList
         )
 
-      server.flatMap(_.getServices).unsafeRunSync shouldBe List(sd1)
+      server.flatMap(_.getServices).unsafeRunSync() shouldBe List(sd1)
     }
 
     "work as expected for port, with any configuration combination" in {
@@ -64,7 +64,7 @@ class ServerConfigTests extends RpcServerTestSuite {
       val server: IO[GrpcServer[IO]] =
         GrpcServer.netty(ChannelForPort(SC.port), grpcAllConfigList)
 
-      server.flatMap(_.getServices).unsafeRunSync shouldBe List(sd1)
+      server.flatMap(_.getServices).unsafeRunSync() shouldBe List(sd1)
     }
 
     "work as expected for an `Int` port" in {
@@ -72,7 +72,7 @@ class ServerConfigTests extends RpcServerTestSuite {
       val configList: List[GrpcConfig] = List(AddService(sd1))
       val server: IO[GrpcServer[IO]]   = GrpcServer.netty[IO](SC.port, configList)
 
-      server.flatMap(_.getServices).unsafeRunSync shouldBe List(sd1)
+      server.flatMap(_.getServices).unsafeRunSync() shouldBe List(sd1)
     }
 
     "throw an exception when configuration is not recognized" in {
@@ -84,7 +84,7 @@ class ServerConfigTests extends RpcServerTestSuite {
       val server: IO[GrpcServer[IO]] =
         GrpcServer.netty(ChannelForPort(SC.port), configList)
 
-      an[MatchError] shouldBe thrownBy(server.unsafeRunSync)
+      an[MatchError] shouldBe thrownBy(server.unsafeRunSync())
     }
 
     "throw an exception when ChannelFor is not recognized" in {
@@ -94,7 +94,7 @@ class ServerConfigTests extends RpcServerTestSuite {
       val server: IO[GrpcServer[IO]] =
         GrpcServer.netty(ChannelForTarget(SC.host), configList)
 
-      an[IllegalArgumentException] shouldBe thrownBy(server.unsafeRunSync)
+      an[IllegalArgumentException] shouldBe thrownBy(server.unsafeRunSync())
     }
   }
 

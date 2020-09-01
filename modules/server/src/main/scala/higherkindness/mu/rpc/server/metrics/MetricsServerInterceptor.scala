@@ -51,7 +51,7 @@ case class MetricsServerInterceptor[F[_]: Clock](
             classifier
           )
         )
-    ).unsafeRunSync
+    ).unsafeRunSync()
   }
 }
 
@@ -73,13 +73,13 @@ case class MetricsServerCall[F[_], Req, Res](
         _   <- metricsOps.recordTotalTime(methodInfo, status, now - startTime, classifier)
         onC <- E.delay(delegate.close(status, responseHeaders))
       } yield onC
-    }.unsafeRunSync
+    }.unsafeRunSync()
 
   override def sendMessage(message: Res): Unit =
     E.toIO {
       metricsOps.recordMessageSent(methodInfo, classifier) *>
         E.delay(delegate.sendMessage(message))
-    }.unsafeRunSync
+    }.unsafeRunSync()
 }
 
 object MetricsServerCall {
@@ -108,11 +108,11 @@ case class MetricsServerCallListener[F[_], Req](
         _   <- metricsOps.increaseActiveCalls(methodInfo, classifier)
         onM <- E.delay(delegate.onMessage(request))
       } yield onM
-    }.unsafeRunSync
+    }.unsafeRunSync()
 
   override def onComplete(): Unit =
     E.toIO {
       metricsOps.decreaseActiveCalls(methodInfo, classifier) *>
         E.delay(delegate.onComplete())
-    }.unsafeRunSync
+    }.unsafeRunSync()
 }

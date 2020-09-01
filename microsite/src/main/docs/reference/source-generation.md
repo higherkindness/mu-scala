@@ -12,7 +12,11 @@ Scala source code from Avro/Protobuf/OpenAPI IDL files.
 
 ## Settings
 
-This section explains each of the sbt plugin's settings.
+This section explains each of the sbt plugin's settings.  As a reminder, this plugin needs to be manually enabled for any module for which you want to generate code; you can do that by adding the following to your `build.sbt`:
+
+```scala
+enablePlugins(SrcGenPlugin)
+```
 
 ### muSrcGenIdlType
 
@@ -64,7 +68,7 @@ muSrcGenSerializationType := SerializationType.Protobuf // or SerializationType.
 | `muSrcGenBigDecimal` | Specifies how Avro `decimal` types will be represented in the generated Scala. `ScalaBigDecimalGen` produces `scala.math.BigDecimal`. `ScalaBigDecimalTaggedGen` produces `scala.math.BigDecimal` tagged with the 'precision' and 'scale' using a Shapeless tag, e.g. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`. | `ScalaBigDecimalTaggedGen`
 | `muSrcGenCompressionType` | The compression type that will be used by generated RPC services. Set to `higherkindness.mu.rpc.srcgen.Model.GzipGen` for Gzip compression. | `higherkindness.mu.rpc.srcgen.Model.NoCompressionGen` |
 | `muSrcGenIdiomaticEndpoints` | Flag indicating if idiomatic gRPC endpoints should be used. If `true`, the service operations will be prefixed by the namespace and the methods will be capitalized. | `false` |
-| `muSrcGenStreamingImplementation` | Specifies whether generated Scala code will use FS2 `Stream[F, A]` or Monix `Observable[A]` as its streaming implementation. FS2 is the default. This setting is only relevant if you have any RPC endpoint definitions that involve streaming. | `higherkindness.mu.rpc.srcgen.Model.Fs2Stream` |
+| `muSrcGenStreamingImplementation` | Specifies whether generated Scala code will use FS2 `Stream[F, A]` or Monix `Observable[A]` as its streaming implementation. FS2 is the default; set to `higherkindness.mu.rpc.srcgen.Model.MonixObservable` to use Monix `Observable[A]` as its streaming implementation. This setting is only relevant if you have any RPC endpoint definitions that involve streaming. | `higherkindness.mu.rpc.srcgen.Model.Fs2Stream` |
 | `muSrcGenMarshallerImports` | see explanation below | see explanation below |
 
 ### muSrcGenMarshallerImports
@@ -112,6 +116,60 @@ sbt module containing the IDL definitions (`foo-domain`):
 )
 //...
 ```
+
+## Implementation Notes: An Intentional Incompatibility with the Avro Standard
+
+In order to make it so that it's easier for users to evolve their schemas over time, 
+`sbt-mu-srcgen` intentionally deviates from the Avro standard in one key way: it does 
+not permit primitive types (e.g. `string sendUser(UserWithCountry user)`) to be present 
+in the Avro schema.  If you attempt to write an Avro schema using primitive types instead
+of records (for example, something like this)
+
+```plaintext
+@namespace("foo")
+
+protocol UserV1 {
+  record UserWithCountry {
+    string name;
+    int age;
+    string country;
+  }
+
+  string sendUser(string user);
+}
+```
+
+the source generation command (i.e. `muSrcGen`) will fail and return all the incompatible
+Avro schema records (for example, the above schema would trigger the following 
+message: 
+
+```
+[error] (protocol / muSrcGen) One or more IDL files are invalid. Error details:
+[error]  /path/to/the/invalid/file.avdl has the following errors:
+RPC method request parameter 'user' has non-record request type 'STRING', 
+RPC method response parameter has non-record response type 'STRING'
+```
+
+### Additional Context
+
+To understand this potential issue with schema evolution, consider the following example,
+
+```plaintext
+record SearchRequest {
+  string query;
+}
+
+SearchResponse search(SearchRequest request);
+```
+This schema can be evolved to add optional fields (e.g. ordering, filters, ...) to the request.  All the user has to do is just change the _record_.  
+
+This API design, on the other hand, can't be evolved because changing the `SearchResponse` argument from a `string` to any other datatype would introduce backward incompatibility.
+
+```plaintext
+SearchResponse search(string query);
+```
+
+For this reason, we **generally encourage that all requests and responses must be records**.
 
 ## Implementation note: two-stage code generation
 

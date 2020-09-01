@@ -1,11 +1,14 @@
 ThisBuild / organization := "io.higherkindness"
 ThisBuild / githubOrganization := "47degrees"
-ThisBuild / scalaVersion := "2.13.2"
-ThisBuild / crossScalaVersions := Seq("2.12.11", "2.13.2")
+ThisBuild / scalaVersion := "2.13.3"
+ThisBuild / crossScalaVersions := Seq("2.12.11", "2.13.3")
 
 publish / skip := true
 
-addCommandAlias("ci-test", "scalafmtCheckAll; scalafmtSbtCheck; mdoc; testCovered")
+addCommandAlias(
+  "ci-test",
+  "scalafmtCheckAll; scalafmtSbtCheck; missinglinkCheck; mdoc; testCovered"
+)
 addCommandAlias("ci-docs", "github; mdoc; headerCreateAll; publishMicrosite")
 addCommandAlias("ci-publish", "github; ci-release")
 
@@ -142,7 +145,7 @@ lazy val `benchmarks-vprev` = project
   .in(file("benchmarks/vprev"))
   .settings(
     libraryDependencies ++= Seq(
-      "io.higherkindness" %% "mu-rpc-server" % "0.22.2"
+      "io.higherkindness" %% "mu-rpc-server" % "0.22.3"
     )
   )
   .settings(coverageEnabled := false)

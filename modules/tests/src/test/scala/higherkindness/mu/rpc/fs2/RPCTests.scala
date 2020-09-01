@@ -176,7 +176,7 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       muCompressedProtoRPCServiceClient
         .use(_.serverStreamingCompressed(b1).flatMap(_.compile.toList))
-        .unsafeRunSync shouldBe cList
+        .unsafeRunSync() shouldBe cList
 
     }
 

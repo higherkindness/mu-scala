@@ -40,7 +40,7 @@ package object client {
         },
         new JavaExecutor {
           override def execute(command: Runnable): Unit =
-            E.toIO(CS.shift *> E.delay(command.run())).unsafeRunSync
+            E.toIO(CS.shift *> E.delay(command.run())).unsafeRunSync()
         }
       )
     }

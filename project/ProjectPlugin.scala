@@ -5,6 +5,7 @@ import scoverage.ScoverageKeys._
 
 import scala.language.reflectiveCalls
 import mdoc.MdocPlugin.autoImport._
+import ch.epfl.scala.sbtmissinglink.MissingLinkPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
 
@@ -15,16 +16,16 @@ object ProjectPlugin extends AutoPlugin {
     lazy val V = new {
       val avro4s: String                = "3.1.0"
       val betterMonadicFor: String      = "0.3.1"
-      val catsEffect: String            = "2.1.3"
+      val catsEffect: String            = "2.1.4"
       val circe: String                 = "0.13.0"
       val dockerItScala                 = "0.9.9"
-      val dropwizard: String            = "4.1.9"
+      val dropwizard: String            = "4.1.12.1"
       val embeddedKafka: String         = "2.4.1.1"
       val enumeratum: String            = "1.6.1"
-      val fs2: String                   = "2.4.2"
-      val fs2Grpc: String               = "0.7.2"
+      val fs2: String                   = "2.4.4"
+      val fs2Grpc: String               = "0.7.3"
       val fs2Kafka: String              = "1.0.0"
-      val grpc: String                  = "1.29.0"
+      val grpc: String                  = "1.31.1"
       val jodaTime: String              = "2.10.6"
       val http4s: String                = "0.21.0-M6"
       val kindProjector: String         = "0.11.0"
@@ -33,19 +34,18 @@ object ProjectPlugin extends AutoPlugin {
       val logback: String               = "1.2.3"
       val scalalogging: String          = "3.9.2" // used in tests
       val monix: String                 = "3.2.2"
-      val natchez: String               = "0.0.11"
-      val nettySSL: String              = "2.0.31.Final"
+      val natchez: String               = "0.0.12"
+      val nettySSL: String              = "2.0.30.Final"
       val paradise: String              = "2.1.1"
       val pbdirect: String              = "0.5.2"
       val prometheus: String            = "0.9.0"
-      val pureconfig: String            = "0.12.3"
+      val pureconfig: String            = "0.13.0"
       val reactiveStreams: String       = "1.0.3"
       val scalaCollectionCompat: String = "2.1.6"
-      val scalacheck: String            = "1.14.3"
       val scalacheckToolbox: String     = "0.3.5"
-      val scalamock: String             = "4.4.0"
-      val scalatest: String             = "3.1.2"
-      val scalatestplusScheck: String   = "3.2.0.0"
+      val scalamock: String             = "5.0.0"
+      val scalatest: String             = "3.2.2"
+      val scalatestplusScheck: String   = "3.2.2.0"
       val slf4j: String                 = "1.7.30"
     }
 
@@ -277,6 +277,22 @@ object ProjectPlugin extends AutoPlugin {
 
   }
 
+  lazy val missingLinkSettings: Seq[Def.Setting[_]] =
+    Seq(
+      missinglinkExcludedDependencies += moduleFilter(organization = "ch.qos.logback"),
+      missinglinkExcludedDependencies += moduleFilter(
+        organization = "org.slf4j",
+        name = "slf4j-api"
+      ),
+      missinglinkExcludedDependencies += moduleFilter(
+        organization = "org.apache.commons",
+        name = "commons-compress"
+      ),
+      missinglinkIgnoreSourcePackages += IgnoredPackage("org.apache.avro.file"),
+      missinglinkIgnoreSourcePackages += IgnoredPackage("io.netty.util.internal.logging"),
+      missinglinkIgnoreSourcePackages += IgnoredPackage("io.netty.handler.ssl")
+    )
+
   import autoImport._
 
   override def projectSettings: Seq[Def.Setting[_]] =
@@ -287,5 +303,5 @@ object ProjectPlugin extends AutoPlugin {
       addCompilerPlugin(
         "org.typelevel" % "kind-projector" % V.kindProjector cross CrossVersion.full
       )
-    ) ++ macroSettings
+    ) ++ macroSettings ++ missingLinkSettings
 }
