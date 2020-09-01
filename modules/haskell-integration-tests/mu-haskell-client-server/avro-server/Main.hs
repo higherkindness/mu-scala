@@ -36,7 +36,7 @@ lastUpdated = "2020-03-20T12:00:00Z"
 sunnyDays :: Int -> [Weather]
 sunnyDays n = replicate n (enum @"SUNNY")
 
-server :: (MonadServer m) => SingleServerT WeatherService m _
+server :: (MonadServer m) => SingleServerT info WeatherService m _
 server = singleService
   ( method @"getForecast" getForecast
   , method @"ping" ping
