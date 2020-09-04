@@ -145,7 +145,7 @@ lazy val `benchmarks-vprev` = project
   .in(file("benchmarks/vprev"))
   .settings(
     libraryDependencies ++= Seq(
-      "io.higherkindness" %% "mu-rpc-server" % "0.22.4"
+      "io.higherkindness" %% "mu-rpc-server" % "0.23.0"
     )
   )
   .settings(coverageEnabled := false)
