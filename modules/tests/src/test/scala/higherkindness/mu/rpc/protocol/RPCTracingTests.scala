@@ -161,9 +161,8 @@ class RPCTracingTests extends AnyFunSpec {
         )
 
         val prog: IO[(Response, List[String])] =
-          program(clientResource, ep, ref) {
-            case (client, span) =>
-              client.measureString(Request("abc")).run(span)
+          program(clientResource, ep, ref) { case (client, span) =>
+            client.measureString(Request("abc")).run(span)
           }
         val (response, log) = prog.unsafeRunSync()
 
@@ -196,9 +195,8 @@ class RPCTracingTests extends AnyFunSpec {
         )
 
         val prog: IO[(Response, List[String])] =
-          program(clientResource, ep, ref) {
-            case (client, span) =>
-              client.fs2ClientStreaming(Stream(Request("abc"), Request("defg"))).run(span)
+          program(clientResource, ep, ref) { case (client, span) =>
+            client.fs2ClientStreaming(Stream(Request("abc"), Request("defg"))).run(span)
           }
         val (response, log) = prog.unsafeRunSync()
 
@@ -225,15 +223,14 @@ class RPCTracingTests extends AnyFunSpec {
         )
 
         val prog: IO[(Response, List[String])] =
-          program(clientResource, ep, ref) {
-            case (client, span) =>
-              for {
-                respStreamK <- client.fs2ServerStreaming(Request("abc")).run(span)
-                respStream =
-                  respStreamK
-                    .translateInterruptible(Kleisli.applyK[IO, Span[IO]](span))
-                lastResp <- respStream.compile.lastOrError
-              } yield lastResp
+          program(clientResource, ep, ref) { case (client, span) =>
+            for {
+              respStreamK <- client.fs2ServerStreaming(Request("abc")).run(span)
+              respStream =
+                respStreamK
+                  .translateInterruptible(Kleisli.applyK[IO, Span[IO]](span))
+              lastResp <- respStream.compile.lastOrError
+            } yield lastResp
           }
         val (response, log) = prog.unsafeRunSync()
 
@@ -260,16 +257,15 @@ class RPCTracingTests extends AnyFunSpec {
         )
 
         val prog: IO[(Response, List[String])] =
-          program(clientResource, ep, ref) {
-            case (client, span) =>
-              val reqStream = Stream(Request("abc"))
-              for {
-                respStreamK <- client.fs2BidiStreaming(reqStream).run(span)
-                respStream =
-                  respStreamK
-                    .translateInterruptible(Kleisli.applyK[IO, Span[IO]](span))
-                lastResp <- respStream.compile.lastOrError
-              } yield lastResp
+          program(clientResource, ep, ref) { case (client, span) =>
+            val reqStream = Stream(Request("abc"))
+            for {
+              respStreamK <- client.fs2BidiStreaming(reqStream).run(span)
+              respStream =
+                respStreamK
+                  .translateInterruptible(Kleisli.applyK[IO, Span[IO]](span))
+              lastResp <- respStream.compile.lastOrError
+            } yield lastResp
           }
         val (response, log) = prog.unsafeRunSync()
 
@@ -302,9 +298,8 @@ class RPCTracingTests extends AnyFunSpec {
         )
 
         val prog: IO[(Response, List[String])] =
-          program(clientResource, ep, ref) {
-            case (client, span) =>
-              client.monixClientStreaming(Observable(Request("abc"), Request("defg"))).run(span)
+          program(clientResource, ep, ref) { case (client, span) =>
+            client.monixClientStreaming(Observable(Request("abc"), Request("defg"))).run(span)
           }
         val (response, log) = prog.unsafeRunSync()
 
@@ -331,12 +326,11 @@ class RPCTracingTests extends AnyFunSpec {
         )
 
         val prog: IO[(Response, List[String])] =
-          program(clientResource, ep, ref) {
-            case (client, span) =>
-              for {
-                respObs  <- client.monixServerStreaming(Request("abc")).run(span)
-                lastResp <- respObs.lastL.toAsync[IO]
-              } yield lastResp
+          program(clientResource, ep, ref) { case (client, span) =>
+            for {
+              respObs  <- client.monixServerStreaming(Request("abc")).run(span)
+              lastResp <- respObs.lastL.toAsync[IO]
+            } yield lastResp
           }
         val (response, log) = prog.unsafeRunSync()
 
@@ -363,13 +357,12 @@ class RPCTracingTests extends AnyFunSpec {
         )
 
         val prog: IO[(Response, List[String])] =
-          program(clientResource, ep, ref) {
-            case (client, span) =>
-              val reqObs = Observable(Request("abc"))
-              for {
-                respObs  <- client.monixBidiStreaming(reqObs).run(span)
-                lastResp <- respObs.lastL.toAsync[IO]
-              } yield lastResp
+          program(clientResource, ep, ref) { case (client, span) =>
+            val reqObs = Observable(Request("abc"))
+            for {
+              respObs  <- client.monixBidiStreaming(reqObs).run(span)
+              lastResp <- respObs.lastL.toAsync[IO]
+            } yield lastResp
           }
         val (response, log) = prog.unsafeRunSync()
 

@@ -67,17 +67,16 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
   override def describeConfigs(dcr: DescribeConfigsRequest): F[Configs] =
     for {
       kConfigs <- adminClient.describeConfigs(dcr.resources.map(ConfigResource.toJava))
-      configs = kConfigs.map {
-        case (cr, ces) =>
-          Config(ConfigResource.fromJava(cr), ces.map(ConfigEntry.fromJava))
+      configs = kConfigs.map { case (cr, ces) =>
+        Config(ConfigResource.fromJava(cr), ces.map(ConfigEntry.fromJava))
       }.toList
     } yield Configs(configs)
 
   override def describeConsumerGroups(dcgr: DescribeConsumerGroupsRequest): F[ConsumerGroups] =
     for {
       kGroups <- adminClient.describeConsumerGroups(dcgr.groupIds)
-      groups = kGroups.map {
-        case (gid, cgd) => ConsumerGroup(gid, ConsumerGroupDescription.fromJava(cgd))
+      groups = kGroups.map { case (gid, cgd) =>
+        ConsumerGroup(gid, ConsumerGroupDescription.fromJava(cgd))
       }.toList
     } yield ConsumerGroups(groups)
 
@@ -92,9 +91,8 @@ class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
   ): F[ConsumerGroupOffsets] =
     for {
       kOffsets <- adminClient.listConsumerGroupOffsets(lcgor.groupId).partitionsToOffsetAndMetadata
-      offsets = kOffsets.map {
-        case (topic, offset) =>
-          Offset(TopicPartition.fromJava(topic), OffsetAndMetadata.fromJava(offset))
+      offsets = kOffsets.map { case (topic, offset) =>
+        Offset(TopicPartition.fromJava(topic), OffsetAndMetadata.fromJava(offset))
       }.toList
     } yield ConsumerGroupOffsets(offsets)
 

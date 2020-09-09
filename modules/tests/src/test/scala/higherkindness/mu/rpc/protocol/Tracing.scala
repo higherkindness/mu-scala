@@ -86,8 +86,8 @@ object Tracing {
         )(span => ref.update(_.append(s"End $span")))
 
       def continueOrElseRoot(name: String, kernel: Kernel): Resource[IO, Span[IO]] =
-        continue(name, kernel).recoverWith {
-          case _: Exception => root(name)
+        continue(name, kernel).recoverWith { case _: Exception =>
+          root(name)
         }
 
     }

@@ -112,10 +112,9 @@ object Utils extends CommonUtils {
         def serverStreamingCompressed(b: B): F[Stream[F, C]] = serverStreaming(b)
 
         def clientStreaming(oa: Stream[F, A]): F[D] =
-          oa.compile.fold(D(0)) {
-            case (current, a) =>
-              debug(s"[fs2 - SERVER] Current -> $current / a -> $a")
-              D(current.bar + a.x + a.y)
+          oa.compile.fold(D(0)) { case (current, a) =>
+            debug(s"[fs2 - SERVER] Current -> $current / a -> $a")
+            D(current.bar + a.x + a.y)
           }
 
         def clientStreamingCompressed(oa: Stream[F, A]): F[D] = clientStreaming(oa)

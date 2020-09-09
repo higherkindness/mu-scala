@@ -188,10 +188,9 @@ object Utils extends CommonUtils {
         }
 
         def clientStreaming(oa: Observable[A]): F[D] =
-          oa.foldLeftL(D(0)) {
-            case (current, a) =>
-              debug(s"[SERVER] Current -> $current / a -> $a")
-              D(current.bar + a.x + a.y)
+          oa.foldLeftL(D(0)) { case (current, a) =>
+            debug(s"[SERVER] Current -> $current / a -> $a")
+            D(current.bar + a.x + a.y)
           }.toAsync[F]
 
         def biStreaming(oe: Observable[E]): F[Observable[E]] =
@@ -307,10 +306,9 @@ object Utils extends CommonUtils {
             .use(
               _.serverStreaming(B(A(a, a), A(b, b))).flatMap { obs =>
                 obs.zipWithIndex
-                  .map {
-                    case (c, i) =>
-                      debug(s"[CLIENT] Result #$i: $c")
-                      c
+                  .map { case (c, i) =>
+                    debug(s"[CLIENT] Result #$i: $c")
+                    c
                   }
                   .toListL
                   .toAsync[F]
@@ -331,10 +329,9 @@ object Utils extends CommonUtils {
             .use(
               _.serverStreamingWithError(E(a, err)).flatMap { obs =>
                 obs.zipWithIndex
-                  .map {
-                    case (c, i) =>
-                      debug(s"[CLIENT] Result #$i: $c")
-                      c
+                  .map { case (c, i) =>
+                    debug(s"[CLIENT] Result #$i: $c")
+                    c
                   }
                   .toListL
                   .toAsync[F]
@@ -350,10 +347,9 @@ object Utils extends CommonUtils {
             .use(
               _.biStreaming(Observable.fromIterable(eList)).flatMap { obs =>
                 obs.zipWithIndex
-                  .map {
-                    case (c, i) =>
-                      debug(s"[CLIENT] Result #$i: $c")
-                      c
+                  .map { case (c, i) =>
+                    debug(s"[CLIENT] Result #$i: $c")
+                    c
                   }
                   .toListL
                   .toAsync[F]
@@ -366,10 +362,9 @@ object Utils extends CommonUtils {
             .use(
               _.biStreamingWithSchema(Observable.fromIterable(eList)).flatMap { obs =>
                 obs.zipWithIndex
-                  .map {
-                    case (c, i) =>
-                      debug(s"[CLIENT] Result #$i: $c")
-                      c
+                  .map { case (c, i) =>
+                    debug(s"[CLIENT] Result #$i: $c")
+                    c
                   }
                   .toListL
                   .toAsync[F]
@@ -428,10 +423,9 @@ object Utils extends CommonUtils {
             .use(
               _.serverStreamingCompressed(B(A(a, a), A(b, b))).flatMap { obs =>
                 obs.zipWithIndex
-                  .map {
-                    case (c, i) =>
-                      debug(s"[CLIENT] Result #$i: $c")
-                      c
+                  .map { case (c, i) =>
+                    debug(s"[CLIENT] Result #$i: $c")
+                    c
                   }
                   .toListL
                   .toAsync[F]
@@ -452,10 +446,9 @@ object Utils extends CommonUtils {
             .use(
               _.serverStreamingCompressedWithError(E(a, err)).flatMap { obs =>
                 obs.zipWithIndex
-                  .map {
-                    case (c, i) =>
-                      debug(s"[CLIENT] Result #$i: $c")
-                      c
+                  .map { case (c, i) =>
+                    debug(s"[CLIENT] Result #$i: $c")
+                    c
                   }
                   .toListL
                   .toAsync[F]
@@ -471,10 +464,9 @@ object Utils extends CommonUtils {
             .use(
               _.biStreamingCompressed(Observable.fromIterable(eList)).flatMap { obs =>
                 obs.zipWithIndex
-                  .map {
-                    case (c, i) =>
-                      debug(s"[CLIENT] Result #$i: $c")
-                      c
+                  .map { case (c, i) =>
+                    debug(s"[CLIENT] Result #$i: $c")
+                    c
                   }
                   .toListL
                   .toAsync[F]
@@ -487,10 +479,9 @@ object Utils extends CommonUtils {
             .use(
               _.biStreamingCompressedWithSchema(Observable.fromIterable(eList)).flatMap { obs =>
                 obs.zipWithIndex
-                  .map {
-                    case (c, i) =>
-                      debug(s"[CLIENT] Result #$i: $c")
-                      c
+                  .map { case (c, i) =>
+                    debug(s"[CLIENT] Result #$i: $c")
+                    c
                   }
                   .toListL
                   .toAsync[F]

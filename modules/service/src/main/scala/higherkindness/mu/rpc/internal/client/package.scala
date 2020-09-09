@@ -47,9 +47,8 @@ package object client {
 
   private[internal] def tracingKernelToHeaders(kernel: Kernel): Metadata = {
     val headers = new Metadata()
-    kernel.toHeaders.foreach {
-      case (k, v) =>
-        headers.put(Key.of(k, ASCII_STRING_MARSHALLER), v)
+    kernel.toHeaders.foreach { case (k, v) =>
+      headers.put(Key.of(k, ASCII_STRING_MARSHALLER), v)
     }
     headers
   }

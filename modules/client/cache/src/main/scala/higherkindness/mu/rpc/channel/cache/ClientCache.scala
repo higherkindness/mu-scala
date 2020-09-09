@@ -74,12 +74,11 @@ object ClientCache {
             map
               .get(key)
               .fold {
-                createClient(key).flatMap {
-                  case (client, close) =>
-                    CE.delay(logger.info(s"Created new RPC client for $key")) *>
-                      ref
-                        .update(_.leftMap(_ + (key -> ClientMeta(client, close, now))))
-                        .as(client)
+                createClient(key).flatMap { case (client, close) =>
+                  CE.delay(logger.info(s"Created new RPC client for $key")) *>
+                    ref
+                      .update(_.leftMap(_ + (key -> ClientMeta(client, close, now))))
+                      .as(client)
                 }
               }(clientMeta =>
                 CE.delay(logger.debug(s"Reuse existing RPC client for $key")) *>
@@ -101,10 +100,9 @@ object ClientCache {
     def cleanup(ref: Ref[F, State], canBeRemoved: ClientMeta => Boolean): F[Unit] =
       for {
         now <- nowUnix
-        change <- ref.modify {
-          case (map, _) =>
-            val (remove, keep) = map.partition { case (_, clientMeta) => canBeRemoved(clientMeta) }
-            ((keep, now), remove)
+        change <- ref.modify { case (map, _) =>
+          val (remove, keep) = map.partition { case (_, clientMeta) => canBeRemoved(clientMeta) }
+          ((keep, now), remove)
         }
         noLongerUsed = change.values.toList
         _ <- noLongerUsed.traverse_(_.close)
