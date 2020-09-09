@@ -33,10 +33,9 @@ trait RpcBaseTestSuite extends AnyWordSpec with Matchers with OneInstancePerTest
 
   }
 
-  implicit val prettifier: Prettifier = Prettifier {
-    case x => // includes null
-      // initial linebreak makes expected/actual results line up nicely
-      System.lineSeparator + Prettifier.default(x)
+  implicit val prettifier: Prettifier = Prettifier { case x => // includes null
+    // initial linebreak makes expected/actual results line up nicely
+    System.lineSeparator + Prettifier.default(x)
   }
 
   // delegating the check to a def gets its name used in the cancellation message (cleaner than the boolean comparison result)

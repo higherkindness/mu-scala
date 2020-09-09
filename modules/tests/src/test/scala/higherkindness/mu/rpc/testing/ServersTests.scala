@@ -44,14 +44,13 @@ class ServersTests extends AnyWordSpec with Matchers with Checkers {
     "create a server service definition with the provided name and methods" in {
 
       check {
-        forAllNoShrink(serverDefGen) {
-          case (serverName, methodNameList) =>
-            val serverDef: ServerServiceDefinition =
-              servers.serverServiceDefinition(serverName, methodNameList)
-            (serverDef.getServiceDescriptor.getName == serverName) && (serverDef.getMethods.asScala
-              .map(_.getMethodDescriptor.getFullMethodName)
-              .toList
-              .sorted == methodNameList.sorted)
+        forAllNoShrink(serverDefGen) { case (serverName, methodNameList) =>
+          val serverDef: ServerServiceDefinition =
+            servers.serverServiceDefinition(serverName, methodNameList)
+          (serverDef.getServiceDescriptor.getName == serverName) && (serverDef.getMethods.asScala
+            .map(_.getMethodDescriptor.getFullMethodName)
+            .toList
+            .sorted == methodNameList.sorted)
         }
       }
     }

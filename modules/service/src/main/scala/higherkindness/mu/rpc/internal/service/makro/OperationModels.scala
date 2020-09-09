@@ -54,8 +54,8 @@ class OperationModels[C <: Context](val c: C) {
       s"RPC service $name has different streaming implementations for request and response"
     )
 
-    val isMonixObservable: Boolean = List(request, response).collect {
-      case m: MonixObservableTpe => m
+    val isMonixObservable: Boolean = List(request, response).collect { case m: MonixObservableTpe =>
+      m
     }.nonEmpty
 
     val prevalentStreamingTarget: TypeTypology =
