@@ -24,7 +24,7 @@ object ProjectPlugin extends AutoPlugin {
       val enumeratum: String            = "1.6.1"
       val fs2: String                   = "2.4.4"
       val fs2Grpc: String               = "0.7.3"
-      val fs2Kafka: String              = "1.0.0"
+      val fs2Kafka: String              = "1.1.0"
       val grpc: String                  = "1.31.1"
       val jodaTime: String              = "2.10.6"
       val http4s: String                = "0.21.0-M6"
