@@ -20,8 +20,7 @@ this service definition to create a fully working gRPC server or client.
 This tutorial is aimed at developers who:
 
 * are new to Mu-Scala
-* have some understanding of [Avro] and `.avdl` ([Avro
-  IDL](https://avro.apache.org/docs/current/idl.html)) syntax
+* have some understanding of [Avro] and `.avdl` ([Avro IDL](https://avro.apache.org/docs/current/idl.html)) syntax
 * have read the [Getting Started guide](../../getting-started)
 
 This document will focus on Avro. If you would like to use gRPC with Protobuf,
@@ -30,8 +29,7 @@ see the [RPC service definition with Protobuf tutorial](protobuf).
 ## Create a new Mu project
 
 As described in the [Getting Started guide](../../getting-started), we recommend
-you use the Mu-Scala [giter8
-template](https://github.com/higherkindness/mu-scala.g8) to create a new
+you use the Mu-Scala [giter8 template](https://github.com/higherkindness/mu-scala.g8) to create a new
 skeleton project. This will install and configure the `mu-srcgen` sbt plugin,
 which we will need to generate Scala code from an Avro `.avdl` file.
 
@@ -49,10 +47,9 @@ We're going to start by writing a `.avdl` file containing a couple of messages.
 These messages will be used as the request and response types for a gRPC
 endpoint later.
 
-Copy the following Avro IDL and save it as
-`protocol/src/main/resources/avro/hello.avdl`:
+Copy the following Avro IDL and save it as `protocol/src/main/resources/avro/hello.avdl`:
 
-```plaintext
+```avroidl
 @namespace("com.example")
 protocol Greeter {
 
@@ -81,7 +78,7 @@ editor of choice.
 
 It should look something like this:
 
-```scala
+```scala mdoc:silent
 package com.example
 
 import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._
@@ -106,7 +103,7 @@ protocol.
 
 Add the following line to `hello.avro` to define an RPC endpoint:
 
-```plaintext
+```avroidl
 HelloResponse SayHello(HelloRequest request);
 ```
 
@@ -119,7 +116,7 @@ If you run the `muSrcGen` sbt task again, and inspect the
 `protocol/target/scala-2.13/src_managed/main/com/example/Greeter.scala` file
 again, it should look something like this:
 
-```scala
+```scala mdoc:silent
 package com.example
 
 import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._
@@ -130,11 +127,9 @@ final case class HelloRequest(name: String)
 
 final case class HelloResponse(greeting: String, happy: Boolean)
 
-@service(Avro,compressionType = Identity,namespace = Some("com.example"),methodNameStyle = Capitalize)
+@service(Avro, compressionType = Identity, namespace = Some("com.example"))
 trait Greeter[F[_]] {
-
   def SayHello(request: com.example.HelloRequest): F[com.example.HelloResponse]
-
 }
 ```
 
@@ -143,8 +138,7 @@ definition, so a corresponding trait has been added to the generated code.
 
 There's quite a lot going on there, so let's unpack it a bit.
 
-* The trait is called `Greeter`, which matches the protocol name in the `.avdl`
-  file.
+* The trait is called `Greeter`, which matches the protocol name in the `.avdl` file.
 * The trait contains a method for each endpoint in the service.
 * Mu-Scala uses "tagless final" encoding: the trait has a higher-kinded
   type parameter `F[_]` and all methods return their result wrapped in `F[...]`.
@@ -154,23 +148,18 @@ There's quite a lot going on there, so let's unpack it a bit.
   compile the code, it will create a companion object for the trait containing a
   load of useful helper methods for creating servers and clients. We'll see how
   to make use of these helpers in the next tutorial.
-* The annotation has 4 parameters:
+* The annotation has 3 parameters:
     1. `Avro` describes how gRPC requests and responses are serialized
     2. `Identity` means GZip compression of requests and responses is disabled
-    3. `"com.example"` is the namespace in which the RPC endpoint will be
-       exposed
-    4. `Capitalize` means the endpoint will be exposed as `SayHello`, not
-       `sayHello`.
-
+    3. `"com.example"` is the namespace in which the RPC endpoint will be exposed
+       
 These parameters can be customised using sbt settings. Take a look at the
-[source generation reference](../../reference/source-generation) for more
-details.
+[source generation reference](../../reference/source-generation) for more details.
 
 ## Next steps
 
 To find out how to turn this service definition into a working gRPC client or
-server, continue to the [gRPC server and client
-tutorial](../grpc-server-client).
+server, continue to the [gRPC server and client tutorial](../grpc-server-client).
 
 [Avro]: https://avro.apache.org/docs/current/
 [cats-effect]: https://typelevel.org/cats-effect/

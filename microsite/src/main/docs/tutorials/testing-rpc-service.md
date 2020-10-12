@@ -23,8 +23,7 @@ you are using Avro.
 ## Service definition
 
 Let's use the following service definition. (For an explanation of how to create
-service definition, check out the [RPC service definition with Protobuf
-tutorial](service-definition/protobuf).)
+service definition, check out the [RPC service definition with Protobuf tutorial](service-definition/protobuf).)
 
 A client sends a `HelloRequest` containing a name, and the server responds with
 a greeting and an indication of whether it is feeling happy or not.
@@ -36,9 +35,8 @@ object hello {
   case class HelloRequest(@pbdirect.pbIndex(1) name: String)
   case class HelloResponse(@pbdirect.pbIndex(1) greeting: String, @pbdirect.pbIndex(2) happy: Boolean)
 
-  // Note: the @service annotation in your code might reference Avro
-  // instead of Protobuf
-  @service(Protobuf, Identity, namespace = Some("com.example"), methodNameStyle = Capitalize)
+  // Note: the @service annotation in your code might reference Avro instead of Protobuf
+  @service(Protobuf, namespace = Some("com.example"))
   trait Greeter[F[_]] {
     def SayHello(req: HelloRequest): F[HelloResponse]
   }
@@ -90,7 +88,7 @@ trait CatsEffectImplicits {
 You'll need to add a dependency on the `mu-rpc-testing` module. This contains
 some helpers for setting up an in-memory service for testing.
 
-```
+```sbt
 libraryDependencies += "io.higherkindness" %% "mu-rpc-testing" % "@VERSION@" % Test
 ```
 

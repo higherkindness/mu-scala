@@ -79,7 +79,7 @@ editor of choice.
 It's generated code, so it will look pretty ugly. Here's a version of it tidied
 up a bit to make it more readable:
 
-```scala
+```scala mdoc:silent
 package com.example
 
 import higherkindness.mu.rpc.protocol._
@@ -118,7 +118,7 @@ If you run the `muSrcGen` sbt task again, and inspect the
 `protocol/target/scala-2.13/src_managed/main/com/example/hello.scala` file again, it should
 look something like this:
 
-```scala
+```scala mdoc:silent
 package com.example
 
 import higherkindness.mu.rpc.protocol._
@@ -127,7 +127,7 @@ object hello {
   final case class HelloRequest(@pbIndex(1) name: String)
   final case class HelloResponse(@pbIndex(1) greeting: String, @pbIndex(2) happy: Boolean)
 
-  @service(Protobuf, Identity, namespace = Some("com.example"), methodNameStyle = Capitalize)
+  @service(Protobuf, namespace = Some("com.example"))
   trait Greeter[F[_]] {
     def SayHello(req: HelloRequest): F[HelloResponse]
   }
@@ -151,13 +151,10 @@ There's quite a lot going on there, so let's unpack it a bit.
   compile the code, it will create a companion object for the trait containing a
   load of useful helper methods for creating servers and clients. We'll see how
   to make use of these helpers in the next tutorial.
-* The annotation has 4 parameters:
+* The annotation has 3 parameters:
     1. `Protobuf` describes how gRPC requests and responses are serialized
     2. `Identity` means GZip compression of requests and responses is disabled
-    3. `"com.example"` is the namespace in which the RPC endpoint will be
-       exposed
-    4. `Capitalize` means the endpoint will be exposed as `SayHello`, not
-       `sayHello`.
+    3. `"com.example"` is the namespace in which the RPC endpoint will be exposed
 
 These parameters can be customised using sbt settings. Take a look at the
 [source generation reference](../../reference/source-generation) for more
@@ -166,8 +163,7 @@ details.
 ## Next steps
 
 To find out how to turn this service definition into a working gRPC client or
-server, continue to the [gRPC server and client
-tutorial](../grpc-server-client).
+server, continue to the [gRPC server and client tutorial](../grpc-server-client).
 
 [cats-effect]: https://typelevel.org/cats-effect/
 [gRPC]: https://grpc.io/

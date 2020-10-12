@@ -11,9 +11,13 @@ From now on, consider that we are using `AvroWithSchema` as the serialization me
 
 According to the [Avro Specs](http://avro.apache.org/docs/current/spec.html#Schema+Resolution):
 
-> A reader of Avro data, whether from an RPC or a file, can always parse that data because its schema is provided. But that schema may not be exactly the schema that was expected. For example, if the data was written with a different version of the software than it is read, then records may have had fields added or removed.
+> A reader of Avro data, whether from an RPC or a file, can always parse that data because its schema is provided. 
+> But that schema may not be exactly the schema that was expected. For example, if the data was written with a different
+> version of the software than it is read, then records may have had fields added or removed.
 
-For Scala, this section specifies how such schema differences should be resolved to preserve compatibility. We'll try to summarise a bit all the possible cases in both ends: request and response. However, you could go deeper by using this [repo](https://github.com/higherkindness/mu-protocol-decimal-update) where you can play with all of the possibilities.
+For Scala, this section specifies how such schema differences should be resolved to preserve compatibility.
+We'll try to summarise a bit all the possible cases in both ends: request and response.
+However, you could go deeper by using this [repo](https://github.com/higherkindness/mu-protocol-decimal-update) where you can play with all of the possibilities.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -48,13 +52,13 @@ You need to specify a default value for the new field.
 
 * Before:
 
-```scala
+```scala mdoc:silent
 case class Request(a: String, b: Int)
 ```
 
 * After:
 
-```scala
+```scala mdoc:silent
 case class NewRequest(a: String, b: Int, c: Boolean = true)
 ```
 
@@ -68,13 +72,13 @@ In this case, we are safe and no actions are required.
 
 * Before:
 
-```scala
+```scala mdoc:silent
 case class Request(a: Int :+: String :+: CNil)
 ```
 
 * After:
 
-```scala
+```scala mdoc:silent
 case class NewRequest(a: Int :+: String :+: Boolean :+: CNil)
 ```
 
@@ -84,13 +88,13 @@ In this case, we'd be breaking the compatibility. The only way to deal with this
 
 * Before:
 
-```scala
+```scala mdoc:silent
 case class Request(a: Int :+: String :+: CNil)
 ```
 
 * After:
 
-```scala
+```scala mdoc:silent
 case class NewRequest(b: String :+: CNil = Coproduct[String :+: CNil](""))
 ```
 
@@ -100,25 +104,25 @@ As we saw previously, again we are breaking the compatibility. If the type is re
 
 * Before:
 
-```scala
+```scala mdoc:silent
 case class Request(a: Int :+: String :+: CNil)
 ```
 
 * After:
 
-```scala
+```scala mdoc:silent
 case class NewRequest(a: Int :+: Boolean :+: CNil)
 ```
 
 It will work if the request is:
 
-```scala
+```scala mdoc:silent
 Request(a = Coproduct[Int :+: String :+: CNil](10))
 ```
 
 And it will fail if the request is:
 
-```scala
+```scala mdoc:silent
 Request(a = Coproduct[Int :+: String :+: CNil]("Hi"))
 ```
 
@@ -128,13 +132,13 @@ In this case, it's not possible to deal with a type swap, if we are maintaining 
 
 * Before:
 
-```scala
+```scala mdoc:silent
 case class Request(a: String, b: Int)
 ```
 
 * After:
 
-```scala
+```scala mdoc:silent
 case class NewRequest(a: String, c: Boolean = true)
 ```
 
@@ -144,13 +148,13 @@ This operation is completely safe, in Avro, the names are not being sent as part
 
 * Before:
 
-```scala
+```scala mdoc:silent
 case class Request(a: String, b: Int)
 ```
 
 * After:
 
-```scala
+```scala mdoc:silent
 case class NewRequest(a: String, c: Int)
 ```
 
@@ -160,13 +164,13 @@ No action required. However, keep in mind that the value will be ignored when ol
 
 * Before:
 
-```scala
+```scala mdoc:silent
 case class Request(a: String, b: Int)
 ```
 
 * After:
 
-```scala
+```scala mdoc:silent
 case class NewRequest(a: String)
 ```
 
@@ -178,13 +182,13 @@ In this case, the old clients will ignore the value of the new field, so everyth
 
 * Before:
 
-```scala
+```scala mdoc:silent
 case class Response(a: String, b: Int)
 ```
 
 * After:
 
-```scala
+```scala mdoc:silent
 case class NewResponse(a: String, b: Int, c: Boolean)
 ```
 
@@ -198,13 +202,13 @@ In this scenario, the old clients will fail when the result is including the new
 
 * Before:
 
-```scala
+```scala mdoc:silent
 case class Response(a: Int :+: String :+: CNil)
 ```
 
 * After:
 
-```scala
+```scala mdoc:silent
 case class NewResponse(
       a: Int :+: String :+: CNil = Coproduct[Int :+: String :+: CNil](0),
       b: Int :+: String :+: Boolean :+: CNil)
@@ -216,13 +220,13 @@ No action will be required in this case.
 
 * Before:
 
-```scala
+```scala mdoc:silent
 case class Response(a: Int :+: String :+: CNil)
 ```
 
 * After:
 
-```scala
+```scala mdoc:silent
 case class NewResponse(a: Int :+: CNil)
 ```
 
@@ -232,13 +236,13 @@ As long as the value of the coproduct belongs to the previous version, the old c
 
 * Before:
 
-```scala
+```scala mdoc:silent
 case class Response(a: Int :+: String :+: CNil)
 ```
 
 * After:
 
-```scala
+```scala mdoc:silent
 case class NewResponse(a: Int :+: Boolean :+: CNil)
 ```
 
@@ -248,13 +252,13 @@ It will require providing a default value for the previous type, and then, we wo
 
 * Before:
 
-```scala
+```scala mdoc:silent
 case class Response(a: String, b: Int)
 ```
 
 * After:
 
-```scala
+```scala mdoc:silent
 case class NewResponse(a: String, b: Int = 123, c: Boolean)
 ```
 
@@ -264,13 +268,13 @@ It's also safe in Avro, the server responses don't include the parameter names i
 
 * Before:
 
-```scala
+```scala mdoc:silent
 case class Response(a: String, b: Int)
 ```
 
 * After:
 
-```scala
+```scala mdoc:silent
 case class NewResponse(a: String, c: Int)
 ```
 
@@ -280,13 +284,13 @@ This evolution should never happen since we would lose backward compatibility. N
 
 * Before:
 
-```scala
+```scala mdoc:silent
 case class Response(a: String, b: Int = 123)
 ```
 
 * After:
 
-```scala
+```scala mdoc:silent
 case class NewResponse(a: String)
 ```
 
