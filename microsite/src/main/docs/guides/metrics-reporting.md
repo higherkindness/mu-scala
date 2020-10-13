@@ -26,7 +26,7 @@ In order to monitor the RPC calls on the server side we need two things:
 
 Let's see how to register server metrics using `Prometheus` in the following fragment.
 
-```scala mdoc:invisible
+```scala
 val EC: scala.concurrent.ExecutionContext =
   scala.concurrent.ExecutionContext.Implicits.global
 
@@ -34,7 +34,7 @@ implicit val timer: cats.effect.Timer[cats.effect.IO]     = cats.effect.IO.timer
 implicit val cs: cats.effect.ContextShift[cats.effect.IO] = cats.effect.IO.contextShift(EC)
 ```
 
-```scala mdoc:invisible
+```scala
 import higherkindness.mu.rpc.protocol._
 
 object service {
@@ -50,7 +50,7 @@ object service {
 }
 ```
 
-```scala mdoc:invisible
+```scala
 import cats.Applicative
 import cats.syntax.applicative._
 import service._
@@ -142,7 +142,7 @@ To check the metrics from our server or client, `Dropwizard` exposes it through 
 
 And to associate a JMX reporter with the metrics registry on your project,
 
-```scala mdoc:compile-only
+```scala
 val jmxReporter = com.codahale.metrics.jmx.JmxReporter.forRegistry(registry)
 jmxReporter.build().start()
 ```

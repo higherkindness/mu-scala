@@ -68,7 +68,7 @@ We won't cover the details regarding creation of `RPCService`,
 `ServerRPCService` and runtime implicits. You can find more information about
 these in the [gRPC server and client tutorial](../tutorials/grpc-server-client).
 
-```scala mdoc:invisible
+```scala
 trait CommonRuntime {
 
   val EC: scala.concurrent.ExecutionContext =
@@ -80,7 +80,7 @@ trait CommonRuntime {
 }
 ```
 
-```scala mdoc:invisible
+```scala
 import higherkindness.mu.rpc.protocol._
 
 object service {
@@ -96,7 +96,7 @@ object service {
 }
 ```
 
-```scala mdoc:invisible
+```scala
 import cats.Applicative
 import cats.syntax.applicative._
 import service._
