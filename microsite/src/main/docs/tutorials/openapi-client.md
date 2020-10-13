@@ -86,7 +86,7 @@ The file is very large so we won't show it here, but it contains:
 * case classes for all the models
 * Circe `Encoder`/`Decoder`s and http4s `EntityEncoder`/`EntityDecoder`s for all models
 * An interface for a client for the REST API:
-    ```scala mdoc:silent
+    ```scala
     trait PetstoreClient[F[_]] {
       import PetstoreClient._
       def getPets(limit: Option[Int], name: Option[String]): F[Pets]
@@ -97,7 +97,7 @@ The file is very large so we won't show it here, but it contains:
     }
     ```
 * An object containing factory methods to build an http4s-based client:
-    ```scala mdoc:silent
+    ```scala
     object PetstoreHttpClient {
       def build[F[_]: Effect: Sync](client: Client[F], baseUrl: Uri)(implicit ...): PetstoreClient[F] = ...
       def apply[F[_]: ConcurrentEffect](baseUrl: Uri)(implicit ...): Resource[F, PetstoreClient[F]] = ...
@@ -124,7 +124,7 @@ Here is an example showing how to use the generated REST client.
 
 First some imports:
 
-```scala mdoc:silent
+```scala
 import petstore.models.Pets
 import petstore.SwaggerPetstoreClient.ListPetsErrorResponse
 
@@ -139,7 +139,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 Then we need to define some encoders to tell the client how it should encode
 query parameters:
 
-```scala mdoc:silent
+```scala
 trait QueryParamEncoders {
 
   def localDateTimeQueryParamEncoder(formatter: DateTimeFormatter): QueryParamEncoder[LocalDateTime] =
@@ -160,7 +160,7 @@ trait QueryParamEncoders {
 And finally an `IOApp` that builds a client, uses it to hit the "list pets"
 endpoint and prints the response:
 
-```scala mdoc:silent
+```scala
 object ClientDemo extends IOApp with QueryParamEncoders {
 
   val baseUrl = uri"http://localhost:8080"

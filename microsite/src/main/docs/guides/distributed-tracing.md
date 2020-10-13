@@ -40,7 +40,7 @@ Let's look at how to enable tracing on the server side first.
 
 We'll assume the following service definition:
 
-```scala mdoc:silent
+```scala
 import higherkindness.mu.rpc.protocol._
 
 case class HelloRequest(name: String)
@@ -56,7 +56,7 @@ trait MyService[F[_]] {
 
 and an implementation of that definition:
 
-```scala mdoc:silent
+```scala
 import cats.Applicative
 import cats.syntax.applicative._
 
@@ -72,7 +72,7 @@ Ordinarily, if you were not using tracing, you would create a gRPC service
 definition using the macro-generated `MyService.bindService` method, specifying
 your effect monad of choice:
 
-```scala mdoc:silent
+```scala
 import cats.effect.{IO, IOApp, ExitCode}
 import higherkindness.mu.rpc.server.{GrpcServer, AddService}
 
@@ -108,7 +108,7 @@ How you create an `EntryPoint` will depend on what tracing implementation you
 want to use. For example, if you use `natchez-jaeger`, you might create a
 `Resource` of an `EntryPoint` like this:
 
-```scala mdoc:silent
+```scala
 import cats.effect.{Sync, Resource}
 
 import natchez.EntryPoint
@@ -145,7 +145,7 @@ without requiring any changes to your service implementation code.
 
 Putting all this together, your server setup code will look something like this:
 
-```scala mdoc:silent
+```scala
 import cats.data.Kleisli
 import natchez.Span
 
@@ -171,7 +171,7 @@ object TracingServer extends IOApp {
 If you wish, you can make use of the [Natchez] `Trace` typeclass to create child
 spans:
 
-```scala mdoc:silent
+```scala
 import natchez.Trace
 import cats.Monad
 import cats.syntax.all._
@@ -193,7 +193,7 @@ class MyTracingService[F[_]: Monad: Trace] extends MyService[F] {
 Ordinarily, if you were not using tracing, you would create a cats-effect
 `Resource` of an RPC client using the macro-generated `MyService.client` method:
 
-```scala mdoc:silent
+```scala
 import higherkindness.mu.rpc.{ChannelFor, ChannelForAddress}
 
 object OrdinaryClientApp extends IOApp {
@@ -221,7 +221,7 @@ the current span as input and returns a response inside the `F` effect.
 
 For example:
 
-```scala mdoc:silent
+```scala
 object TracingClientApp extends IOApp {
 
   val channelFor: ChannelFor = ChannelForAddress("localhost", 8080)

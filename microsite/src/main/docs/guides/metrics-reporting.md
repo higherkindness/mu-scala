@@ -63,7 +63,7 @@ class ServiceHandler[F[_]: Applicative] extends Greeter[F] {
 }
 ```
 
-```scala mdoc:silent
+```scala
 import cats.effect.IO
 import higherkindness.mu.rpc.prometheus.PrometheusMetrics
 import higherkindness.mu.rpc.server._
@@ -92,7 +92,7 @@ object InterceptingServerCalls {
 
 In this case, in order to intercept the client calls we need additional configuration settings (by using `AddInterceptor`):
 
-```scala mdoc:silent
+```scala
 import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc._
 import higherkindness.mu.rpc.config._
@@ -124,7 +124,7 @@ That is how we use `Prometheus` to monitor both [gRPC] ends.
 
 The usage the same as before, but in this case we need to create a `Dropwizard` backed `MetricsOps` 
 
-```scala mdoc:silent
+```scala
 import cats.effect.IO
 import com.codahale.metrics.MetricRegistry
 import higherkindness.mu.rpc.dropwizard.DropWizardMetrics

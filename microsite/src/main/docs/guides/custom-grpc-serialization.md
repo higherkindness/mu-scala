@@ -28,7 +28,7 @@ To make the server compress its responses, set the compression type argument to
 
 For example:
 
-```scala mdoc:silent
+```scala
 import higherkindness.mu.rpc.protocol._
 
 object CompressionExample {
@@ -51,7 +51,7 @@ option" when constructing the client.
 
 Here is an example of a client with request compression enabled.
 
-```scala mdoc:silent
+```scala
 import cats.effect.{ConcurrentEffect, ContextShift, Resource}
 import higherkindness.mu.rpc._
 import io.grpc.CallOptions
@@ -98,7 +98,7 @@ Here is an example of providing a custom reader and writer for
 We create the reader and writer by building on PBDirect's built-in reader and
 writer for `String`, using `map` and `contramap` respectively.
 
-```scala mdoc:silent
+```scala
 object ProtobufCustomCodecExample {
 
   import java.time._
@@ -135,7 +135,7 @@ instances of three avro4s type classes: `SchemaFor`, `Encoder`, and `Decoder`.
 
 Let's look at the same example as above, this time for Avro.
 
-```scala mdoc:silent
+```scala
 object AvroCustomCodecExample {
 
   import java.time._

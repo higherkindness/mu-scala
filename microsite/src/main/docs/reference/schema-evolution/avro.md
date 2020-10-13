@@ -52,13 +52,13 @@ You need to specify a default value for the new field.
 
 * Before:
 
-```scala mdoc:silent
+```scala
 case class Request(a: String, b: Int)
 ```
 
 * After:
 
-```scala mdoc:silent
+```scala
 case class NewRequest(a: String, b: Int, c: Boolean = true)
 ```
 
@@ -72,13 +72,13 @@ In this case, we are safe and no actions are required.
 
 * Before:
 
-```scala mdoc:silent
+```scala
 case class Request(a: Int :+: String :+: CNil)
 ```
 
 * After:
 
-```scala mdoc:silent
+```scala
 case class NewRequest(a: Int :+: String :+: Boolean :+: CNil)
 ```
 
@@ -88,13 +88,13 @@ In this case, we'd be breaking the compatibility. The only way to deal with this
 
 * Before:
 
-```scala mdoc:silent
+```scala
 case class Request(a: Int :+: String :+: CNil)
 ```
 
 * After:
 
-```scala mdoc:silent
+```scala
 case class NewRequest(b: String :+: CNil = Coproduct[String :+: CNil](""))
 ```
 
@@ -104,25 +104,25 @@ As we saw previously, again we are breaking the compatibility. If the type is re
 
 * Before:
 
-```scala mdoc:silent
+```scala
 case class Request(a: Int :+: String :+: CNil)
 ```
 
 * After:
 
-```scala mdoc:silent
+```scala
 case class NewRequest(a: Int :+: Boolean :+: CNil)
 ```
 
 It will work if the request is:
 
-```scala mdoc:silent
+```scala
 Request(a = Coproduct[Int :+: String :+: CNil](10))
 ```
 
 And it will fail if the request is:
 
-```scala mdoc:silent
+```scala
 Request(a = Coproduct[Int :+: String :+: CNil]("Hi"))
 ```
 
@@ -132,13 +132,13 @@ In this case, it's not possible to deal with a type swap, if we are maintaining 
 
 * Before:
 
-```scala mdoc:silent
+```scala
 case class Request(a: String, b: Int)
 ```
 
 * After:
 
-```scala mdoc:silent
+```scala
 case class NewRequest(a: String, c: Boolean = true)
 ```
 
@@ -148,13 +148,13 @@ This operation is completely safe, in Avro, the names are not being sent as part
 
 * Before:
 
-```scala mdoc:silent
+```scala
 case class Request(a: String, b: Int)
 ```
 
 * After:
 
-```scala mdoc:silent
+```scala
 case class NewRequest(a: String, c: Int)
 ```
 
@@ -164,13 +164,13 @@ No action required. However, keep in mind that the value will be ignored when ol
 
 * Before:
 
-```scala mdoc:silent
+```scala
 case class Request(a: String, b: Int)
 ```
 
 * After:
 
-```scala mdoc:silent
+```scala
 case class NewRequest(a: String)
 ```
 
@@ -182,13 +182,13 @@ In this case, the old clients will ignore the value of the new field, so everyth
 
 * Before:
 
-```scala mdoc:silent
+```scala
 case class Response(a: String, b: Int)
 ```
 
 * After:
 
-```scala mdoc:silent
+```scala
 case class NewResponse(a: String, b: Int, c: Boolean)
 ```
 
@@ -202,13 +202,13 @@ In this scenario, the old clients will fail when the result is including the new
 
 * Before:
 
-```scala mdoc:silent
+```scala
 case class Response(a: Int :+: String :+: CNil)
 ```
 
 * After:
 
-```scala mdoc:silent
+```scala
 case class NewResponse(
       a: Int :+: String :+: CNil = Coproduct[Int :+: String :+: CNil](0),
       b: Int :+: String :+: Boolean :+: CNil)
@@ -220,13 +220,13 @@ No action will be required in this case.
 
 * Before:
 
-```scala mdoc:silent
+```scala
 case class Response(a: Int :+: String :+: CNil)
 ```
 
 * After:
 
-```scala mdoc:silent
+```scala
 case class NewResponse(a: Int :+: CNil)
 ```
 
@@ -236,13 +236,13 @@ As long as the value of the coproduct belongs to the previous version, the old c
 
 * Before:
 
-```scala mdoc:silent
+```scala
 case class Response(a: Int :+: String :+: CNil)
 ```
 
 * After:
 
-```scala mdoc:silent
+```scala
 case class NewResponse(a: Int :+: Boolean :+: CNil)
 ```
 
@@ -252,13 +252,13 @@ It will require providing a default value for the previous type, and then, we wo
 
 * Before:
 
-```scala mdoc:silent
+```scala
 case class Response(a: String, b: Int)
 ```
 
 * After:
 
-```scala mdoc:silent
+```scala
 case class NewResponse(a: String, b: Int = 123, c: Boolean)
 ```
 
@@ -268,13 +268,13 @@ It's also safe in Avro, the server responses don't include the parameter names i
 
 * Before:
 
-```scala mdoc:silent
+```scala
 case class Response(a: String, b: Int)
 ```
 
 * After:
 
-```scala mdoc:silent
+```scala
 case class NewResponse(a: String, c: Int)
 ```
 
@@ -284,13 +284,13 @@ This evolution should never happen since we would lose backward compatibility. N
 
 * Before:
 
-```scala mdoc:silent
+```scala
 case class Response(a: String, b: Int = 123)
 ```
 
 * After:
 
-```scala mdoc:silent
+```scala
 case class NewResponse(a: String)
 ```
 

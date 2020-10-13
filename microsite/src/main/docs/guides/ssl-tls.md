@@ -109,7 +109,7 @@ class ServiceHandler[F[_]: Applicative] extends Greeter[F] {
 }
 ```
 
-```scala mdoc:silent
+```scala
 import java.io.File
 import java.security.cert.X509Certificate
 
@@ -165,7 +165,7 @@ object implicits extends Runtime
 Similarly, let's see how to create a gRPC client with encryption and client
 authentication.
 
-```scala mdoc:silent
+```scala
 import higherkindness.mu.rpc.ChannelForAddress
 import higherkindness.mu.rpc.channel.OverrideAuthority
 import higherkindness.mu.rpc.channel.netty.{
