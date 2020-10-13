@@ -91,7 +91,7 @@ Once the source generator has run, there should be a generated Scala file at
 
 It will look roughly like this (tidied up and simplified for readability):
 
-```scala mdoc:silent
+```scala
 package foo
 
 import higherkindness.mu.rpc.protocol._

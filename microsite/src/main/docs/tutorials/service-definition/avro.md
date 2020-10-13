@@ -78,7 +78,7 @@ editor of choice.
 
 It should look something like this:
 
-```scala mdoc:silent
+```scala
 package com.example
 
 import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._
@@ -116,7 +116,7 @@ If you run the `muSrcGen` sbt task again, and inspect the
 `protocol/target/scala-2.13/src_managed/main/com/example/Greeter.scala` file
 again, it should look something like this:
 
-```scala mdoc:silent
+```scala
 package com.example
 
 import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._

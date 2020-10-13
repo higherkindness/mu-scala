@@ -93,7 +93,7 @@ Once the source generator has run, there should be a generated Scala file at
 
 It will look like this (tidied up and simplified for readability):
 
-```scala mdoc:silent
+```scala
 package foo
 
 import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._

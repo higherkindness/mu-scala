@@ -207,7 +207,7 @@ service MyService {
 
 would result in a `.scala` file that looks like (slightly simplified):
 
-```scala mdoc:silent
+```scala
 package foo.bar
 
 object myproto {
@@ -223,7 +223,7 @@ object myproto {
 After the `@service` annotation is expanded at compile time, the entire
 generated code would look something like:
 
-```scala mdoc:silent
+```scala
 package foo.bar
 
 object myproto {

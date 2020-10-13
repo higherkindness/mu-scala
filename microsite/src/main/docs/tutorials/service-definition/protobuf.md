@@ -79,7 +79,7 @@ editor of choice.
 It's generated code, so it will look pretty ugly. Here's a version of it tidied
 up a bit to make it more readable:
 
-```scala mdoc:silent
+```scala
 package com.example
 
 import higherkindness.mu.rpc.protocol._
@@ -118,7 +118,7 @@ If you run the `muSrcGen` sbt task again, and inspect the
 `protocol/target/scala-2.13/src_managed/main/com/example/hello.scala` file again, it should
 look something like this:
 
-```scala mdoc:silent
+```scala
 package com.example
 
 import higherkindness.mu.rpc.protocol._
