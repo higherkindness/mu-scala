@@ -339,7 +339,7 @@ protocol PeopleService {
 
 ***muSrcGen =>***
 
-```scala mdoc:silent
+```scala
 @service(Avro) trait PeopleService[F[_]] {
   def getPerson(request: example.protocol.PeopleRequest): F[example.protocol.PeopleResponse]
 }
@@ -355,7 +355,7 @@ protocol PeopleService {
 
 ***muSrcGen =>***
 
-```scala mdoc:silent
+```scala
 @service(Avro) trait PeopleService[F[_]] {
   def insertPerson(arg: Empty.type): F[Empty.type]
 }
