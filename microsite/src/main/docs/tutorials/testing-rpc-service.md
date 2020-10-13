@@ -156,7 +156,7 @@ class ServiceSpec extends AnyFlatSpec with ServiceAndClient {
 
 Let's see the test in action:
 
-```scala mdoc
+```scala
 org.scalatest.nocolor.run(new ServiceSpec)
 ```
 
@@ -195,6 +195,6 @@ class PropertyBasedServiceSpec extends AnyFlatSpec with ServiceAndClient with Ch
 
 Let's run this test as well:
 
-```scala mdoc
+```scala
 org.scalatest.nocolor.run(new PropertyBasedServiceSpec)
 ```
