@@ -156,7 +156,7 @@ class ServiceSpec extends AnyFlatSpec with ServiceAndClient {
 
 Let's see the test in action:
 
-```scala
+```scala mdoc
 org.scalatest.nocolor.run(new ServiceSpec)
 ```
 
