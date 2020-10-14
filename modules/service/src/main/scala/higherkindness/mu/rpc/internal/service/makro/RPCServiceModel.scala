@@ -55,8 +55,8 @@ class RPCServiceModel[C <: Context](val c: C) {
 
     private val defs: List[Tree] = serviceDef.impl.body
 
-    private val (rpcDefs, nonRpcDefs) = defs.collect {
-      case d: DefDef => d
+    private val (rpcDefs, nonRpcDefs) = defs.collect { case d: DefDef =>
+      d
     } partition (_.rhs.isEmpty)
 
     val annotationParams: List[Either[String, (String, String)]] = c.prefix.tree match {
@@ -111,8 +111,8 @@ class RPCServiceModel[C <: Context](val c: C) {
       )
     }
 
-    val imports: List[Tree] = defs.collect {
-      case imp: Import => imp
+    val imports: List[Tree] = defs.collect { case imp: Import =>
+      imp
     }
 
     private val serializationType: SerializationType =
