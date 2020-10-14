@@ -300,7 +300,7 @@ record PeopleResponse {
 
 ***muSrcGen =>***
 
-```scala mdoc:silent:nested
+```scala mdoc:silent:nest
 case class PeopleResponse(result: Either[Errors.Value, Person])
 ```
 
@@ -317,7 +317,7 @@ record PeopleResponse {
 
 ***muSrcGen =>***
 
-```scala mdoc:silent:nested
+```scala mdoc:silent:nest
 import shapeless.{:+:, CNil}
 
 case class PeopleResponse(result: String :+: Int :+: Errors.Value :+: CNil)
