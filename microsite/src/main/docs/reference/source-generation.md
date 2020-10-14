@@ -14,7 +14,7 @@ Scala source code from Avro/Protobuf/OpenAPI IDL files.
 
 This section explains each of the sbt plugin's settings.  As a reminder, this plugin needs to be manually enabled for any module for which you want to generate code; you can do that by adding the following to your `build.sbt`:
 
-```scala
+```sbt
 enablePlugins(SrcGenPlugin)
 ```
 
@@ -23,7 +23,7 @@ enablePlugins(SrcGenPlugin)
 The most important sbt setting is `muSrcGenIdlType`, which tells the plugin what kind of
 IDL files (Avro/Protobuf/OpenAPI) to look for.
 
-```scala
+```sbt
 muSrcGenIdlType := IdlType.Proto // or IdlType.Avro or IdlType.OpenAPI
 ```
 
@@ -45,7 +45,7 @@ for the `muSrcGenIdlType` setting:
       schema evolution.
 * For OpenAPI, this setting is ignored, so you don't need to set it.
 
-```scala
+```sbt
 muSrcGenSerializationType := SerializationType.Protobuf // or SerializationType.Avro or SerializationType.AvroWithSchema
 ```
 
@@ -67,7 +67,7 @@ muSrcGenSerializationType := SerializationType.Protobuf // or SerializationType.
 | `muSrcGenIdlExtension` | The extension of IDL files to extract from JAR files or sbt modules. | * `avdl` if `muSrcGenIdlType` is `avro`<br/> * `proto` if `muSrcGenIdlType` is `Proto` |
 | `muSrcGenBigDecimal` | Specifies how Avro `decimal` types will be represented in the generated Scala. `ScalaBigDecimalGen` produces `scala.math.BigDecimal`. `ScalaBigDecimalTaggedGen` produces `scala.math.BigDecimal` tagged with the 'precision' and 'scale' using a Shapeless tag, e.g. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`. | `ScalaBigDecimalTaggedGen`
 | `muSrcGenCompressionType` | The compression type that will be used by generated RPC services. Set to `higherkindness.mu.rpc.srcgen.Model.GzipGen` for Gzip compression. | `higherkindness.mu.rpc.srcgen.Model.NoCompressionGen` |
-| `muSrcGenIdiomaticEndpoints` | Flag indicating if idiomatic gRPC endpoints should be used. If `true`, the service operations will be prefixed by the namespace and the methods will be capitalized. | `false` |
+| `muSrcGenIdiomaticEndpoints` | Flag indicating if idiomatic gRPC endpoints should be used. If `true`, the service operations will be prefixed by the namespace. | `true` |
 | `muSrcGenStreamingImplementation` | Specifies whether generated Scala code will use FS2 `Stream[F, A]` or Monix `Observable[A]` as its streaming implementation. FS2 is the default; set to `higherkindness.mu.rpc.srcgen.Model.MonixObservable` to use Monix `Observable[A]` as its streaming implementation. This setting is only relevant if you have any RPC endpoint definitions that involve streaming. | `higherkindness.mu.rpc.srcgen.Model.Fs2Stream` |
 | `muSrcGenMarshallerImports` | see explanation below | see explanation below |
 
@@ -84,7 +84,7 @@ The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also
 
 You can also specify custom imports with the following:
 
-```scala
+```sbt
 muSrcGenMarshallerImports := List(higherkindness.mu.rpc.srcgen.Model.CustomMarshallersImport("com.sample.marshallers._"))
 ```
 
@@ -101,7 +101,7 @@ without binary code (to prevent binary conflicts in clients).
 The following example shows how to set up a dependency with another artifact or
 sbt module containing the IDL definitions (`foo-domain`):
 
-```scala
+```sbt
 //...
 .settings(
   Seq(
@@ -125,7 +125,7 @@ not permit primitive types (e.g. `string sendUser(UserWithCountry user)`) to be 
 in the Avro schema.  If you attempt to write an Avro schema using primitive types instead
 of records (for example, something like this)
 
-```plaintext
+```avroidl
 @namespace("foo")
 
 protocol UserV1 {
@@ -154,7 +154,7 @@ RPC method response parameter has non-record response type 'STRING'
 
 To understand this potential issue with schema evolution, consider the following example,
 
-```plaintext
+```avroidl
 record SearchRequest {
   string query;
 }
@@ -165,7 +165,7 @@ This schema can be evolved to add optional fields (e.g. ordering, filters, ...) 
 
 This API design, on the other hand, can't be evolved because changing the `SearchResponse` argument from a `string` to any other datatype would introduce backward incompatibility.
 
-```plaintext
+```avroidl
 SearchResponse search(string query);
 ```
 
@@ -197,7 +197,7 @@ message MyRequest {
 }
 
 message MyResponse {
-  string a= 1;
+  string a = 1;
 }
 
 service MyService {
@@ -215,7 +215,7 @@ object myproto {
   final case class MyResponse(a: String)
 
   @service(Protobuf) trait MyService[F[_]] {
-    def MyEndpoint(req: MyReqeust): F[MyResponse]
+    def MyEndpoint(req: MyRequest): F[MyResponse]
   }
 }
 ```
@@ -231,7 +231,7 @@ object myproto {
   final case class MyResponse(a: String)
 
   @service(Protobuf) trait MyService[F[_]] {
-    def MyEndpoint(req: MyReqeust): F[MyResponse]
+    def MyEndpoint(req: MyRequest): F[MyResponse]
   }
 
   object MyService {

@@ -47,7 +47,7 @@ permalink: reference/modules-artifacts
 ## Build
 You can install any of these dependencies in your build as follows:
 
-```scala
+```sbt
 // required for a protocol definition:
 libraryDependencies += "io.higherkindness" %% "mu-rpc-service" % "@VERSION@"
 
@@ -91,7 +91,7 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-testing" % "@VERSION@" % T
 To generate Scala code from IDL files (`.proto`, `.avdl`, OpenAPI `.yaml`,
 etc.), you will need the `sbt-mu-srcgen` plugin:
 
-```
+```sbt
 addSbtPlugin("io.higherkindness" %% "sbt-mu-srcgen" % "@VERSION@")
 ```
 

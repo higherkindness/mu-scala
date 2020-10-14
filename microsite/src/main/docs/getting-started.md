@@ -7,10 +7,10 @@ permalink: /getting-started
 
 # Getting Started
 
-The easiest way to get started is to use our [giter8
-template](https://github.com/higherkindness/mu-scala.g8) to start a new project:
+The easiest way to get started is to use our [giter8 template](https://github.com/higherkindness/mu-scala.g8)
+to start a new project:
 
-```
+```shell script
 sbt new higherkindness/mu-scala.g8
 ```
 You can customise the template using a few parameters:
@@ -70,7 +70,6 @@ You can also run the unit test with `sbt server/test`.
 
 Learn more about Mu-Scala concepts by following a [tutorial](tutorials).
 
-The [RPC service definition with
-Protobuf](tutorials/service-definition/protobuf) tutorial, or [RPC service
-definition with Avro](tutorials/service-definition/avro) if you prefer Avro, is
+The [RPC service definition with Protobuf](tutorials/service-definition/protobuf) tutorial, or 
+[RPC service definition with Avro](tutorials/service-definition/avro) if you prefer Avro, is
 a good place to start.
