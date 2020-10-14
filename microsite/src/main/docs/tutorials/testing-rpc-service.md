@@ -28,7 +28,7 @@ service definition, check out the [RPC service definition with Protobuf tutorial
 A client sends a `HelloRequest` containing a name, and the server responds with
 a greeting and an indication of whether it is feeling happy or not.
 
-```scala
+```scala mdoc:silent
 import higherkindness.mu.rpc.protocol._
 
 object hello {
@@ -48,7 +48,7 @@ object hello {
 
 Here's the implementation we want to test.
 
-```scala
+```scala mdoc:silent
 import cats.Applicative
 import cats.syntax.applicative._
 import hello._
@@ -69,7 +69,7 @@ In our test we'll use cats-effect `IO` as our concrete effect monad.
 
 We need to provide a couple of implicits to make that work:
 
-```scala
+```scala mdoc:silent
 import cats.effect.{IO, ContextShift, Timer}
 import scala.concurrent.ExecutionContext
 
@@ -101,7 +101,7 @@ channel.
 We'll also create a client and connect it to the same in-memory channel, so it
 can make requests to the service.
 
-```scala
+```scala mdoc:silent
 import hello._
 import cats.effect.Resource
 import higherkindness.mu.rpc.testing.servers.withServerChannel
@@ -133,7 +133,7 @@ Now we're ready to write our test.
 With the service and client in place, the test consists of using the client to
 make a request and then asserting that the response matches what we expect.
 
-```scala
+```scala mdoc:silent
 import hello._
 import org.scalatest.flatspec.AnyFlatSpec
 
@@ -166,7 +166,7 @@ Since the `HappyGreeter` service is *always* happy, we could also write this as
 a property-based test with ScalaCheck to verify that the service's happiness
 does not depend on the incoming request.
 
-```scala
+```scala mdoc:silent
 import org.scalatestplus.scalacheck.Checkers
 import org.scalacheck.Gen
 import org.scalacheck.Prop._

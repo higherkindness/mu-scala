@@ -68,7 +68,7 @@ We won't cover the details regarding creation of `RPCService`,
 `ServerRPCService` and runtime implicits. You can find more information about
 these in the [gRPC server and client tutorial](../tutorials/grpc-server-client).
 
-```scala
+```scala mdoc:invisible
 trait CommonRuntime {
 
   val EC: scala.concurrent.ExecutionContext =
@@ -78,9 +78,7 @@ trait CommonRuntime {
   implicit val cs: cats.effect.ContextShift[cats.effect.IO] = cats.effect.IO.contextShift(EC)
 
 }
-```
 
-```scala
 import higherkindness.mu.rpc.protocol._
 
 object service {
@@ -94,9 +92,7 @@ object service {
     def sayHello(request: HelloRequest): F[HelloResponse]
   }
 }
-```
 
-```scala
 import cats.Applicative
 import cats.syntax.applicative._
 import service._
@@ -109,7 +105,7 @@ class ServiceHandler[F[_]: Applicative] extends Greeter[F] {
 }
 ```
 
-```scala
+```scala mdoc:silent
 import java.io.File
 import java.security.cert.X509Certificate
 
@@ -165,14 +161,10 @@ object implicits extends Runtime
 Similarly, let's see how to create a gRPC client with encryption and client
 authentication.
 
-```scala
+```scala mdoc:silent
 import higherkindness.mu.rpc.ChannelForAddress
 import higherkindness.mu.rpc.channel.OverrideAuthority
-import higherkindness.mu.rpc.channel.netty.{
-  NettyChannelInterpreter,
-  NettyNegotiationType,
-  NettySslContext
-}
+import higherkindness.mu.rpc.channel.netty.{NettyChannelInterpreter, NettyNegotiationType, NettySslContext}
 import io.grpc.netty.NegotiationType
 
 object MainApp extends CommonRuntime {

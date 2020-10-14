@@ -45,13 +45,13 @@ streaming endpoints.
 
 Before starting, here is one import we'll need:
 
-```scala
+```scala mdoc:silent
 import higherkindness.mu.rpc.protocol._
 ```
 
 And here are the equest/response models for our service:
 
-```scala
+```scala mdoc:silent
 case class HelloRequest(greeting: String)
 
 case class HelloResponse(reply: String)
@@ -61,7 +61,7 @@ We'll write the service definition using both Monix and FS2 so we can compare.
 
 ### Using Monix Observable
 
-```scala
+```scala mdoc:silent
 object MonixService {
 
   import monix.reactive.Observable
@@ -124,7 +124,7 @@ Let's review the different endpoints one by one:
 
 Let's write the same service definition using `fs2.Stream` instead of `Observable`.
 
-```scala
+```scala mdoc:silent
 object servicefs2 {
 
   import fs2.Stream

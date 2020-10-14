@@ -26,15 +26,12 @@ In order to monitor the RPC calls on the server side we need two things:
 
 Let's see how to register server metrics using `Prometheus` in the following fragment.
 
-```scala
-val EC: scala.concurrent.ExecutionContext =
-  scala.concurrent.ExecutionContext.Implicits.global
+```scala mdoc:invisible
+val EC: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
 implicit val timer: cats.effect.Timer[cats.effect.IO]     = cats.effect.IO.timer(EC)
 implicit val cs: cats.effect.ContextShift[cats.effect.IO] = cats.effect.IO.contextShift(EC)
-```
 
-```scala
 import higherkindness.mu.rpc.protocol._
 
 object service {
@@ -48,9 +45,7 @@ object service {
     def sayHello(request: HelloRequest): F[HelloResponse]
   }
 }
-```
 
-```scala
 import cats.Applicative
 import cats.syntax.applicative._
 import service._
@@ -63,7 +58,7 @@ class ServiceHandler[F[_]: Applicative] extends Greeter[F] {
 }
 ```
 
-```scala
+```scala mdoc:silent
 import cats.effect.IO
 import higherkindness.mu.rpc.prometheus.PrometheusMetrics
 import higherkindness.mu.rpc.server._
@@ -92,7 +87,7 @@ object InterceptingServerCalls {
 
 In this case, in order to intercept the client calls we need additional configuration settings (by using `AddInterceptor`):
 
-```scala
+```scala mdoc:silent
 import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc._
 import higherkindness.mu.rpc.config._
@@ -124,7 +119,7 @@ That is how we use `Prometheus` to monitor both [gRPC] ends.
 
 The usage the same as before, but in this case we need to create a `Dropwizard` backed `MetricsOps` 
 
-```scala
+```scala mdoc:silent
 import cats.effect.IO
 import com.codahale.metrics.MetricRegistry
 import higherkindness.mu.rpc.dropwizard.DropWizardMetrics
@@ -142,7 +137,7 @@ To check the metrics from our server or client, `Dropwizard` exposes it through 
 
 And to associate a JMX reporter with the metrics registry on your project,
 
-```scala
+```scala mdoc:compile-only
 val jmxReporter = com.codahale.metrics.jmx.JmxReporter.forRegistry(registry)
 jmxReporter.build().start()
 ```

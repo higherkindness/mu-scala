@@ -27,7 +27,7 @@ you are using Avro.
 If you have followed one of the previous tutorials, you should already have a
 service definition that looks like this:
 
-```scala
+```scala mdoc:silent
 import higherkindness.mu.rpc.protocol._
 
 object hello {
@@ -50,7 +50,7 @@ This is the interesting part: writing the business logic for your service.
 We do this by implementing the `Greeter` trait. Let's make a `Greeter` that says
 "hello" in a happy voice:
 
-```scala
+```scala mdoc:silent
 import cats.Applicative
 import cats.syntax.applicative._
 import hello._
@@ -73,7 +73,7 @@ Now we have a `Greeter` implementation, let's expose it as a gRPC server.
 We're going to use cats-effect `IO` as our concrete IO monad, and we'll make use
 `IOApp` from cats-effect.
 
-```scala
+```scala mdoc:silent
 import cats.effect.{IO, IOApp, ExitCode}
 import hello.Greeter
 import higherkindness.mu.rpc.server.{GrpcServer, AddService}
@@ -125,7 +125,7 @@ Let's see how to make a client to communicate with the server.
 Here is a tiny demo that makes a request to the `SayHello` endpoint and
 prints out the reply to the console.
 
-```scala
+```scala mdoc:silent
 import cats.effect.{IO, IOApp, Resource, ExitCode}
 import hello.{Greeter, HelloRequest}
 import higherkindness.mu.rpc._
