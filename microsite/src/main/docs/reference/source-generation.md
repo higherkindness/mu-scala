@@ -179,7 +179,7 @@ record Filter {
 SearchResponse search(SearchRequest query, Filter filter)
 ```
 
-If we wanted to add a way to order the results and add it to our `SearchRequest`, it starts to make less sense to have `filter` be its own argument. 
+If we wanted to add a way to order the results and add it to our `SearchRequest`, it doesn't make sense to have `filter` be its own argument.
 
 For this reason, we **enforce that all requests and responses must be records**.
 
