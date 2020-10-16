@@ -78,9 +78,7 @@ trait CommonRuntime {
   implicit val cs: cats.effect.ContextShift[cats.effect.IO] = cats.effect.IO.contextShift(EC)
 
 }
-```
 
-```scala mdoc:invisible
 import higherkindness.mu.rpc.protocol._
 
 object service {
@@ -94,9 +92,7 @@ object service {
     def sayHello(request: HelloRequest): F[HelloResponse]
   }
 }
-```
 
-```scala mdoc:invisible
 import cats.Applicative
 import cats.syntax.applicative._
 import service._
@@ -168,11 +164,7 @@ authentication.
 ```scala mdoc:silent
 import higherkindness.mu.rpc.ChannelForAddress
 import higherkindness.mu.rpc.channel.OverrideAuthority
-import higherkindness.mu.rpc.channel.netty.{
-  NettyChannelInterpreter,
-  NettyNegotiationType,
-  NettySslContext
-}
+import higherkindness.mu.rpc.channel.netty.{NettyChannelInterpreter, NettyNegotiationType, NettySslContext}
 import io.grpc.netty.NegotiationType
 
 object MainApp extends CommonRuntime {

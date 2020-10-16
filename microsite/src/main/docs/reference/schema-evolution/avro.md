@@ -11,9 +11,13 @@ From now on, consider that we are using `AvroWithSchema` as the serialization me
 
 According to the [Avro Specs](http://avro.apache.org/docs/current/spec.html#Schema+Resolution):
 
-> A reader of Avro data, whether from an RPC or a file, can always parse that data because its schema is provided. But that schema may not be exactly the schema that was expected. For example, if the data was written with a different version of the software than it is read, then records may have had fields added or removed.
+> A reader of Avro data, whether from an RPC or a file, can always parse that data because its schema is provided. 
+> But that schema may not be exactly the schema that was expected. For example, if the data was written with a different
+> version of the software than it is read, then records may have had fields added or removed.
 
-For Scala, this section specifies how such schema differences should be resolved to preserve compatibility. We'll try to summarise a bit all the possible cases in both ends: request and response. However, you could go deeper by using this [repo](https://github.com/higherkindness/mu-protocol-decimal-update) where you can play with all of the possibilities.
+For Scala, this section specifies how such schema differences should be resolved to preserve compatibility.
+We'll try to summarise a bit all the possible cases in both ends: request and response.
+However, you could go deeper by using this [repo](https://github.com/higherkindness/mu-protocol-decimal-update) where you can play with all of the possibilities.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->

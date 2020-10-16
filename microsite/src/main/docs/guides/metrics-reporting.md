@@ -20,20 +20,18 @@ Mu exposes the following metrics, for both servers and clients:
 
 In order to monitor the RPC calls on the server side we need two things:
 
-* A `MetricsOps` implementation. `MetricsOps` is an algebra located in the `internal-core` module with the needed operations for registering metrics. [Mu] provides two implementations, one for `Prometheus` and another one for `Dropwizard` but you can provide your own.
+* A `MetricsOps` implementation. `MetricsOps` is an algebra located in the `internal-core` module with the needed operations for registering metrics.
+  [Mu] provides two implementations, one for `Prometheus` and another one for `Dropwizard` but you can provide your own.
 * A `MetricsServerInterceptor`. [Mu] provides an interceptor that receives a `MetricsOps` as an argument and collects server metrics.
 
 Let's see how to register server metrics using `Prometheus` in the following fragment.
 
 ```scala mdoc:invisible
-val EC: scala.concurrent.ExecutionContext =
-  scala.concurrent.ExecutionContext.Implicits.global
+val EC: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
 implicit val timer: cats.effect.Timer[cats.effect.IO]     = cats.effect.IO.timer(EC)
 implicit val cs: cats.effect.ContextShift[cats.effect.IO] = cats.effect.IO.contextShift(EC)
-```
 
-```scala mdoc:invisible
 import higherkindness.mu.rpc.protocol._
 
 object service {
@@ -47,9 +45,7 @@ object service {
     def sayHello(request: HelloRequest): F[HelloResponse]
   }
 }
-```
 
-```scala mdoc:invisible
 import cats.Applicative
 import cats.syntax.applicative._
 import service._
@@ -135,7 +131,7 @@ val metricsOps = DropWizardMetrics[IO](registry)
 
 To check the metrics from our server or client, `Dropwizard` exposes it through `JMX`. You'll need the following dependency:
 
-```scala
+```sbt
 "io.dropwizard.metrics" % "metrics-jmx" % "4.1.4"
 ```
 
