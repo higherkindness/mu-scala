@@ -74,7 +74,7 @@ protocol AvroGreeter {
 ```
 
 **NOTE:** please be aware that `mu-scala` restricts Avro RPC method arguments to a single record type and only permits records as return types; 
-for more context, see the [source generation reference](/reference/source-generation).
+for more context, see the [source generation reference](../reference/source-generation).
 
 You can run the source generator directly:
 

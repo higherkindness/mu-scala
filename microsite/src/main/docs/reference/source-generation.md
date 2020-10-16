@@ -147,8 +147,8 @@ message:
 ```
 [error] (protocol / muSrcGen) One or more IDL files are invalid. Error details:
 [error]  /path/to/the/invalid/file.avdl has the following errors:
-RPC method request parameter 'user' has non-record request type 'STRING', 
-RPC method response parameter has non-record response type 'STRING'
+Encountered an unsupported request type: Skeuomorph only supports Record types for Avro requests. Encountered request schema with type STRING
+Encountered an unsupported request type: Skeuomorph only supports Record types for Avro responses. Encountered response schema with type STRING
 ```
 
 ### Additional Context
