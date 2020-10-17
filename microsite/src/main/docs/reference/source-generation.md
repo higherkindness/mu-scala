@@ -148,7 +148,7 @@ message:
 [error] (protocol / muSrcGen) One or more IDL files are invalid. Error details:
 [error]  /path/to/the/invalid/file.avdl has the following errors:
 Encountered an unsupported request type: Skeuomorph only supports Record types for Avro requests. Encountered request schema with type STRING
-Encountered an unsupported request type: Skeuomorph only supports Record types for Avro responses. Encountered response schema with type STRING
+Encountered an unsupported response type: Skeuomorph only supports Record types for Avro responses. Encountered response schema with type STRING
 ```
 
 ### Additional Context
