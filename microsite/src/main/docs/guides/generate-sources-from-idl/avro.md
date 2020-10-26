@@ -11,27 +11,27 @@ permalink: /guides/generate-sources-from-avro
 
 First add the sbt plugin in `project/plugins.sbt`:
 
-```scala
+```sbt
 addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "@VERSION@")
 ```
 
 **NOTE**
 
-For users of the `sbt-mu-srcgen` plugin `v0.22.x` and below, the plugin is enabled automatically as soon as it's added to the `project/plugins.sbt`.  However, for users of the `sbt-mu-srcgen` plugin `v0.23.x` and beyond, the plugin needs to be manually enabled for any module for which you want to generate code.  To enable the module, add the following line to your `build.sbt`
-```scala
+For users of the `sbt-mu-srcgen` plugin `v0.22.x` and below, the plugin is enabled automatically as soon as it's added to the `project/plugins.sbt`.
+However, for users of the `sbt-mu-srcgen` plugin `v0.23.x` and beyond, the plugin needs to be manually enabled for any module for which you want to generate code.
+To enable the module, add the following line to your `build.sbt`
+
+```sbt
 enablePlugins(SrcGenPlugin)
 ```
 
 Once the plugin is enabled, you can configure it by adding a few lines to `build.sbt`:
 
-```scala
+```sbt
 import higherkindness.mu.rpc.srcgen.Model._
 
 // Look for Avro IDL files
 muSrcGenIdlType := IdlType.Avro
-
-// Make it easy for 3rd-party clients to communicate with our gRPC server
-muSrcGenIdiomaticEndpoints := true
 ```
 
 Finally, make sure you have Scala macro annotations enabled, to ensure the
@@ -40,20 +40,20 @@ using.
 
 For Scala 2.12, add this to `build.sbt`:
 
-```scala
+```sbt
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch)
 ```
 
 For Scala 2.13, add this:
 
-```scala
+```sbt
 scalacOptions += "-Ymacro-annotations"
 ```
 
 Suppose you want to generate Scala code for a gRPC service based on the
 following Avro IDL file, `src/main/resources/hello.avdl`:
 
-```plaintext
+```avroidl
 @namespace("foo")
 protocol AvroGreeter {
 
@@ -70,7 +70,6 @@ protocol AvroGreeter {
     }
 
     foo.HelloResponse sayHelloAvro(foo.HelloRequest arg);
-
 }
 ```
 
@@ -79,14 +78,14 @@ for more context, see the [source generation reference](/reference/source-genera
 
 You can run the source generator directly:
 
-```sh
-$ sbt muSrcGen
+```shell script
+sbt muSrcGen
 ```
 
 or as part of compilation:
 
-```sh
-$ sbt compile
+```shell script
+sbt compile
 ```
 
 Once the source generator has run, there should be a generated Scala file at
@@ -113,7 +112,7 @@ final case class HelloResponse(
   arg3: Seq[String]
 )
 
-@service(Avro,compressionType = Identity,namespace = Some("foo"),methodNameStyle = Capitalize) trait AvroGreeter[F[_]] {
+@service(Avro, compressionType = Identity, namespace = Some("foo")) trait AvroGreeter[F[_]] {
   def sayHelloAvro(arg: HelloRequest): F[HelloResponse]
 }
 ```
@@ -122,7 +121,7 @@ It's also possible to generate Scala code from `.avpr` (JSON) files.
 
 Suppose you delete `src/main/resources/hello.avdl` and replace it with `src/main/resources/hello.avpr`:
 
-```plaintext
+```avroidl
 {
   "namespace" : "foo",
   "protocol" : "AvroGreeter",
@@ -205,7 +204,7 @@ Let's start from the beginning, everything on Avro should be declared inside a `
 
 The name of that protocol will be the name of our Scala file.
 
-```plaintext
+```avroidl
 protocol People {
  ...
 }
@@ -217,7 +216,7 @@ protocol People {
 
 Furthermore, the `protocol` can have a `namespace` which will be our Scala package:
 
-```plaintext
+```avroidl
 @namespace("example.protocol")
 protocol People {
  ...
@@ -233,7 +232,7 @@ protocol People {
 On Avro, the messages are declared with the keyword `record` and contains different fields inside.
 The `record` will be translated to a `case class` with the same fields on it:
 
-```plaintext
+```avroidl
 record Person {
   string name;
   int age;
@@ -251,7 +250,7 @@ case class Person(name: String, age: Int, crossfitter: Boolean)
 
 Avro supports `enum`s too and they are translated to a Scala `Enumeration`:
 
-```plaintext
+```avroidl
 enum Errors {
   NotFound, Duplicated, None
 }
@@ -277,7 +276,7 @@ Depending on the types composing the `union`, `Mu` will interpret it on differen
 
 When we add a **`null`** to a `union` expression, we'll get a Scala `Option` of the other types declared along the `null`:
 
-```plaintext
+```avroidl
 record PeopleRequest {
   union {null, string} name;
 }
@@ -293,7 +292,7 @@ case class PeopleRequest(name: Option[String])
 
 When we join **`two non-null types`** on a `union` we'll get an Scala `Either` with the same types order:
 
-```plaintext
+```avroidl
 record PeopleResponse {
   union { Errors, Person } result;
 }
@@ -301,7 +300,7 @@ record PeopleResponse {
 
 ***muSrcGen =>***
 
-```scala mdoc:silent
+```scala mdoc:silent:nest
 case class PeopleResponse(result: Either[Errors.Value, Person])
 ```
 
@@ -310,7 +309,7 @@ case class PeopleResponse(result: Either[Errors.Value, Person])
 And finally, when we have **`three or more non-null types`** on a single `union`,
 we'll have a [shapeless](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#coproducts-and-discriminated-unions)' `Coproduct` on the same order as well:
 
-```plaintext
+```avroidl
 record PeopleResponse {
   union{ string, int, Errors } result;
 }
@@ -330,12 +329,11 @@ When we declare a method or `endpoint` inside a `protocol` this will be converte
 
 As we would want to have our models separated from our services. Avro make us able to import other Avro files to use their `record`s:
 
-```plaintext
+```avroidl
 protocol PeopleService {
   import idl "People.avdl"; //Under the same folder
 
   example.protocol.PeopleResponse getPerson(example.protocol.PeopleRequest request);
-
 }
 ```
 
@@ -343,19 +341,15 @@ protocol PeopleService {
 
 ```scala
 @service(Avro) trait PeopleService[F[_]] {
-
   def getPerson(request: example.protocol.PeopleRequest): F[example.protocol.PeopleResponse]
-
 }
 ```
 
 Also, an endpoint can be declared without params or non returning anything and `Mu` will use its `Empty` type to cover these cases:
 
-```plaintext
+```avroidl
 protocol PeopleService {
-
   void insertPerson();
-
 }
 ```
 
@@ -363,9 +357,7 @@ protocol PeopleService {
 
 ```scala
 @service(Avro) trait PeopleService[F[_]] {
-
   def insertPerson(arg: Empty.type): F[Empty.type]
-
 }
 ```
 
