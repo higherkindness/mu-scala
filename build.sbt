@@ -163,16 +163,6 @@ lazy val `benchmarks-vnext` = project
   .settings(publish / skip := true)
   .enablePlugins(JmhPlugin)
 
-/////////////////////
-//// MARSHALLERS ////
-/////////////////////
-
-lazy val `marshallers-jodatime` = project
-  .in(file("modules/marshallers/jodatime"))
-  .dependsOn(`rpc-service`)
-  .settings(moduleName := "mu-rpc-marshallers-jodatime")
-  .settings(marshallersJodatimeSettings)
-
 ///////////////
 //// TESTS ////
 ///////////////
@@ -213,7 +203,6 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   `netty-ssl`,
   http,
   kafka,
-  `marshallers-jodatime`,
   `health-check`,
   `benchmarks-vprev`,
   `benchmarks-vnext`
