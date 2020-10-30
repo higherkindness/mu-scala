@@ -65,30 +65,10 @@ muSrcGenSerializationType := SerializationType.Protobuf // or SerializationType.
 | --- | --- | --- |
 | `muSrcGenJarNames` | A list of JAR file or sbt module names where extra IDL files can be found. See the [srcGenJarNames section](#musrcgenjarnames) section below for more details. | `Nil` |
 | `muSrcGenIdlExtension` | The extension of IDL files to extract from JAR files or sbt modules. | * `avdl` if `muSrcGenIdlType` is `avro`<br/> * `proto` if `muSrcGenIdlType` is `Proto` |
-| `muSrcGenBigDecimal` | Specifies how Avro `decimal` types will be represented in the generated Scala. `ScalaBigDecimalGen` produces `scala.math.BigDecimal`. `ScalaBigDecimalTaggedGen` produces `scala.math.BigDecimal` tagged with the 'precision' and 'scale' using a Shapeless tag, e.g. `scala.math.BigDecimal @@ (Nat._8, Nat._2)`. | `ScalaBigDecimalTaggedGen`
 | `muSrcGenCompressionType` | The compression type that will be used by generated RPC services. Set to `higherkindness.mu.rpc.srcgen.Model.GzipGen` for Gzip compression. | `higherkindness.mu.rpc.srcgen.Model.NoCompressionGen` |
 | `muSrcGenIdiomaticEndpoints` | Flag indicating if idiomatic gRPC endpoints should be used. If `true`, the service operations will be prefixed by the namespace. | `true` |
 | `muSrcGenStreamingImplementation` | Specifies whether generated Scala code will use FS2 `Stream[F, A]` or Monix `Observable[A]` as its streaming implementation. FS2 is the default; set to `higherkindness.mu.rpc.srcgen.Model.MonixObservable` to use Monix `Observable[A]` as its streaming implementation. This setting is only relevant if you have any RPC endpoint definitions that involve streaming. | `higherkindness.mu.rpc.srcgen.Model.Fs2Stream` |
-| `muSrcGenMarshallerImports` | see explanation below | see explanation below |
 
-### muSrcGenMarshallerImports
-
-This setting specifies additional imports to add on top to the generated service files. This property can be used for importing extra codecs for your services.
-
-By default:
-  * `List(BigDecimalAvroMarshallers, JavaTimeDateAvroMarshallers)` if `muSrcGenSerializationType` is `Avro` or `AvroWithSchema` and `muSrcGenBigDecimal` is `ScalaBigDecimalGen`
-  * `List(BigDecimalTaggedAvroMarshallers, JavaTimeDateAvroMarshallers)` if `muSrcGenSerializationType` is `Avro` or `AvroWithSchema` and `muSrcGenBigDecimal` is `ScalaBigDecimalTaggedGen`
-  * `List(BigDecimalProtobufMarshallers, JavaTimeDateProtobufMarshallers)` if `muSrcGenSerializationType` is `Protobuf`.
-
-The `JodaDateTimeAvroMarshallers` and `JodaDateTimeProtobufMarshallers` are also available, but they need the dependency `mu-rpc-marshallers-jodatime`.
-
-You can also specify custom imports with the following:
-
-```sbt
-muSrcGenMarshallerImports := List(higherkindness.mu.rpc.srcgen.Model.CustomMarshallersImport("com.sample.marshallers._"))
-```
-
-See the [custom gRPC serialization guide](../guides/custom-grpc-serialization) for more information.
 
 ### muSrcGenJarNames
 
