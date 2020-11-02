@@ -11,27 +11,27 @@ permalink: /guides/generate-sources-from-proto
 
 First add the sbt plugin in `project/plugins.sbt`:
 
-```scala
+```sbt
 addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "@VERSION@")
 ```
 
 **NOTE**
 
-For users of the `sbt-mu-srcgen` plugin `v0.22.x` and below, the plugin is enabled automatically as soon as it's added to the `project/plugins.sbt`.  However, for users of the `sbt-mu-srcgen` plugin `v0.23.x` and beyond, the plugin needs to be manually enabled for any module for which you want to generate code.  To enable the module, add the following line to your `build.sbt`
-```scala
+For users of the `sbt-mu-srcgen` plugin `v0.22.x` and below, the plugin is enabled automatically as soon as it's added to the `project/plugins.sbt`.
+However, for users of the `sbt-mu-srcgen` plugin `v0.23.x` and beyond, the plugin needs to be manually enabled for any module for which you want to generate code.
+To enable the module, add the following line to your `build.sbt`:
+
+```sbt
 enablePlugins(SrcGenPlugin)
 ```
 
 Once the plugin is enabled, you can configure it by adding a few lines to `build.sbt`:
 
-```scala
+```sbt
 import higherkindness.mu.rpc.srcgen.Model._
 
 // Look for .proto files
 muSrcGenIdlType := IdlType.Proto
-
-// Make it easy for 3rd-party clients to communicate with our gRPC server
-muSrcGenIdiomaticEndpoints := true
 ```
 
 Finally, make sure you have Scala macro annotations enabled, to ensure the
@@ -40,13 +40,13 @@ using.
 
 For Scala 2.12, add this to `build.sbt`:
 
-```scala
+```sbt
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch)
 ```
 
 For Scala 2.13, add this:
 
-```scala
+```sbt
 scalacOptions += "-Ymacro-annotations"
 ```
 
@@ -76,14 +76,14 @@ service ProtoGreeter {
 
 You can run the source generator directly:
 
-```sh
-$ sbt muSrcGen
+```shell script
+sbt muSrcGen
 ```
 
 or as part of compilation:
 
-```sh
-$ sbt compile
+```shell script
+sbt compile
 ```
 
 Once the source generator has run, there should be a generated Scala file at
@@ -108,7 +108,7 @@ object hello {
     arg3: List[String]
   )
 
-  @service(Protobuf, Identity, namespace = Some("foo"), methodNameStyle = Capitalize) trait ProtoGreeter[F[_]] {
+  @service(Protobuf, namespace = Some("foo")) trait ProtoGreeter[F[_]] {
     def SayHelloProto(req: HelloRequest): F[HelloResponse]
   }
 }

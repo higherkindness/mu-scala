@@ -36,13 +36,10 @@ object CompressionExample {
   case class HelloRequest(name: String)
   case class HelloResponse(greeting: String)
 
-  @service(Protobuf, Gzip)
+  @service(Protobuf, compressionType = Gzip)
   trait Greeter[F[_]] {
-
     def emptyCompressed(req: HelloRequest): F[HelloResponse]
-
   }
-
 }
 ```
 
@@ -66,7 +63,6 @@ object CompressionExampleClient {
 
   def clientResource[F[_]: ConcurrentEffect: ContextShift]: Resource[F, Greeter[F]] =
     Greeter.client[F](channelFor, options = CallOptions.DEFAULT.withCompression("gzip"))
-
 }
 ```
 
@@ -185,7 +181,7 @@ Mu provides Protobuf codecs for:
 Add the following imports to your service code:
 
 | Types | Import |
-|---|--|
+|---|---|
 | `BigDecimal` | `import higherkindness.mu.rpc.internal.encoders.pbd.bigDecimal._` |
 | `java.time.{LocalDate, LocalDateTime, Instant}` | `import higherkindness.mu.rpc.internal.encoders.pbd.javatime._` |
 | `org.joda.time.{LocalDate, LocalDateTime}` | `import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.pbd._` |
@@ -207,7 +203,7 @@ Mu provides Avro codecs for:
 Add the following imports to your service code:
 
 | Types | Import |
-|---|--|
+|---|---|
 | `BigDecimal` | `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimal._` |
 | Tagged `BigDecimal` | `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._` |
 | `java.time.*` | `import higherkindness.mu.rpc.internal.encoders.avro.javatime._` |
@@ -227,7 +223,7 @@ provide an instance of `io.grpc.MethodDescriptor.Marshaller`.
 Mu provides marshallers for these types under separate imports:
 
 | Types | Import |
-|---|--|
+|---|---|
 | `BigDecimal` | `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimal.marshallers._` |
 | Tagged `BigDecimal` | `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._` |
 | `java.time.*` | `import higherkindness.mu.rpc.internal.encoders.avro.javatime.marshallers._` |
