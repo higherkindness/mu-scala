@@ -120,9 +120,10 @@ sbt module containing the IDL definitions (`foo-domain`):
 ## Implementation Notes: An Intentional Incompatibility with the Avro Standard
 
 In order to make it so that it's easier for users to evolve their schemas over time, 
-`sbt-mu-srcgen` intentionally deviates from the Avro standard in one key way: it does 
-not permit primitive types (e.g. `string sendUser(UserWithCountry user)`) to be present 
-in the Avro schema.  If you attempt to write an Avro schema using primitive types instead
+`sbt-mu-srcgen` intentionally deviates from the Avro standard in one key way: 
+it restricts RPC return types to record types (`string sendUser(UserWithCountry user)` is not permitted)
+as well as restricting the arguments of RPC messages to _none_ or to a single record type (`SendUserResponse sendUser(UserWithCountry user, RequestId id)` is not permitted).  
+If you attempt to write an Avro schema using primitive types instead
 of records (for example, something like this)
 
 ```avroidl
@@ -146,8 +147,8 @@ message:
 ```
 [error] (protocol / muSrcGen) One or more IDL files are invalid. Error details:
 [error]  /path/to/the/invalid/file.avdl has the following errors:
-RPC method request parameter 'user' has non-record request type 'STRING', 
-RPC method response parameter has non-record response type 'STRING'
+Encountered an unsupported request type: Skeuomorph only supports Record types for Avro requests. Encountered request schema with type STRING
+Encountered an unsupported response type: Skeuomorph only supports Record types for Avro responses. Encountered response schema with type STRING
 ```
 
 ### Additional Context
@@ -161,7 +162,7 @@ record SearchRequest {
 
 SearchResponse search(SearchRequest request);
 ```
-This schema can be evolved to add optional fields (e.g. ordering, filters, ...) to the request.  All the user has to do is just change the _record_.  
+This schema can be evolved to add optional fields (e.g. ordering, filters, ...) to the request.  All the user has to do is just change the _single record_.  
 
 This API design, on the other hand, can't be evolved because changing the `SearchResponse` argument from a `string` to any other datatype would introduce backward incompatibility.
 
@@ -169,7 +170,18 @@ This API design, on the other hand, can't be evolved because changing the `Searc
 SearchResponse search(string query);
 ```
 
-For this reason, we **generally encourage that all requests and responses must be records**.
+Similarly, multiple arguments don't fully restrict API evolutions but can become inconsistent. Consider,
+
+```avroidl
+record Filter {
+  array<string> exclude;
+}
+SearchResponse search(SearchRequest query, Filter filter)
+```
+
+If we wanted to add a way to order the results and add it to our `SearchRequest`, it doesn't make sense to have `filter` be its own argument.
+
+For this reason, we **enforce that all requests and responses must be records**.
 
 ## Implementation note: two-stage code generation
 
