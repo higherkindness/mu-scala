@@ -7,9 +7,11 @@ permalink: /guides/generate-sources-from-compendium
 
 # Generating sources from IDLs stored in Compendium
 
-[compendium] is a standalone solution, implemented as an HTTP service, that provides storage, conversion and client generation for your schemas in a format-agnostic fashion. `sbt-mu-srcgen` provides a feature that enables the user to store and get IDL definitions from compendium.
+[compendium] is a standalone solution, implemented as an HTTP service, that provides storage, conversion and client generation for your schemas in a format-agnostic fashion.
+`sbt-mu-srcgen` provides a feature that enables the user to store and get IDL definitions from compendium.
 
-This section will provide instructions about how to configure the sbt settings to use compendium. We are assuming you have a compendium instance running. If not, please check the [compendium microsite](https://higherkindness.io/compendium/).
+This section will provide instructions about how to configure the sbt settings to use compendium. We are assuming you have a compendium instance running.
+If not, please check the [compendium microsite](https://higherkindness.io/compendium/).
 Also, the configuration related to the IDL type could be checked on:
 
 * [Avro section](generate-sources-from-avro)
@@ -27,14 +29,14 @@ Settings related to compendium interaction are:
 
 So in order to use compendium, you'll need to add those settings in your `build.sbt`:
 
-```scala
+```sbt
 muSrcGenCompendiumProtocolIdentifiers := List(ProtocolAndVersion("example1", None))
 muSrcGenExecutionMode := Compendium
 ```
 
 If needed, you can also point out to your compendium server if it's not on the default value, `http://localhost:8080`:
 
-```scala
+```sbt
 muSrcGenCompendiumServerUrl := "http://localhost:47047"
 muSrcGenCompendiumProtocolIdentifiers := List(ProtocolAndVersion("example2", Some(2)))
 muSrcGenExecutionMode := Compendium
