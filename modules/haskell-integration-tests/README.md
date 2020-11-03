@@ -67,14 +67,3 @@ much faster.
    (Currently only @cb372 can do this step. If it becomes a major bottleneck, we
    can migrate the image to a `higherkindness` organisation or something.)
 6. Push your changes to GitHub
-
-## Further work
-
-* Add similar tests for Avro.
-* Try to extract these tests into their own repo so they can act as a
-  centralised test suite for both Mu-Scala and Mu-Haskell.
-    * Maybe run nightly, or triggered by a push to master in either repo?
-    * It would need to build the master branch of both Mu-Scala and Mu-Haskell,
-      publish them locally, and make the Haskell server and client and the tests
-      depend on those locally published artifacts. Would also need to build the
-      Docker image before running the tests.

@@ -18,7 +18,7 @@ package integrationtest
 
 object Constants {
 
-  val ImageName = "cb372/mu-scala-haskell-integration-tests:latest"
+  val ImageName = "cb372/mu-scala-haskell-integration-tests:mu-haskell-0.4.0"
 
   val ProtobufPort = 9123
   val AvroPort     = 9124
