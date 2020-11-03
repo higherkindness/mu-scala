@@ -2,7 +2,7 @@ resolver: lts-16.20
 allow-newer: true
 extra-deps:
 # mu
-- mu-schema-0.3.1.0
+- mu-schema-0.3.1.1
 - mu-rpc-0.4.0.0
 - mu-optics-0.3.0.0
 - mu-avro-0.4.0.1
