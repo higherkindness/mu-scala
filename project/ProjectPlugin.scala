@@ -19,18 +19,17 @@ object ProjectPlugin extends AutoPlugin {
       val catsEffect: String            = "2.2.0"
       val circe: String                 = "0.13.0"
       val dockerItScala                 = "0.9.9"
-      val dropwizard: String            = "4.1.13"
+      val dropwizard: String            = "4.1.14"
       val embeddedKafka: String         = "2.4.1.1"
       val enumeratum: String            = "1.6.1"
       val fs2: String                   = "2.4.4"
       val fs2Grpc: String               = "0.7.3"
-      val fs2Kafka: String              = "1.1.0"
-      val grpc: String                  = "1.32.2"
-      val jodaTime: String              = "2.10.6"
+      val fs2Kafka: String              = "1.0.0"
+      val grpc: String                  = "1.33.1"
       val http4s: String                = "0.21.0-M6"
       val kindProjector: String         = "0.11.0"
       val log4cats: String              = "1.1.1"
-      val log4s: String                 = "1.8.2"
+      val log4s: String                 = "1.9.0"
       val logback: String               = "1.2.3"
       val scalalogging: String          = "3.9.2" // used in tests
       val monix: String                 = "3.2.2"
@@ -39,10 +38,10 @@ object ProjectPlugin extends AutoPlugin {
       val paradise: String              = "2.1.1"
       val pbdirect: String              = "0.5.2"
       val prometheus: String            = "0.9.0"
-      val pureconfig: String            = "0.13.0"
+      val pureconfig: String            = "0.14.0"
       val reactiveStreams: String       = "1.0.3"
       val scalaCollectionCompat: String = "2.2.0"
-      val scalacheckToolbox: String     = "0.3.5"
+      val scalacheckToolbox: String     = "0.4.0"
       val scalamock: String             = "5.0.0"
       val scalatest: String             = "3.2.2"
       val scalatestplusScheck: String   = "3.2.2.0"
@@ -171,12 +170,6 @@ object ProjectPlugin extends AutoPlugin {
         "io.github.embeddedkafka"    %% "embedded-kafka"  % V.embeddedKafka % Test,
         "com.typesafe.scala-logging" %% "scala-logging"   % V.scalalogging  % Test,
         compilerPlugin("com.olegpy" %% "better-monadic-for" % V.betterMonadicFor)
-      )
-    )
-
-    lazy val marshallersJodatimeSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "joda-time" % "joda-time" % V.jodaTime
       )
     )
 

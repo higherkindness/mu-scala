@@ -73,8 +73,8 @@ protocol AvroGreeter {
 }
 ```
 
-**NOTE:** please be aware that `mu-scala` prohibits the use of primitive types in request arguments for Avro schema; 
-for more context, see the [source generation reference](/reference/source-generation).
+**NOTE:** please be aware that `mu-scala` restricts Avro RPC method arguments to a single record type and only permits records as return types; 
+for more context, see the [source generation reference](../reference/source-generation).
 
 You can run the source generator directly:
 
@@ -103,13 +103,13 @@ import higherkindness.mu.rpc.protocol._
 final case class HelloRequest(
   arg1: String,
   arg2: Option[String],
-  arg3: Seq[String]
+  arg3: List[String]
 )
 
 final case class HelloResponse(
   arg1: String,
   arg2: Option[String],
-  arg3: Seq[String]
+  arg3: List[String]
 )
 
 @service(Avro, compressionType = Identity, namespace = Some("foo")) trait AvroGreeter[F[_]] {
