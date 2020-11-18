@@ -43,7 +43,7 @@ object ProjectPlugin extends AutoPlugin {
       val scalaCollectionCompat: String = "2.2.0"
       val scalacheckToolbox: String     = "0.4.0"
       val scalamock: String             = "5.0.0"
-      val scalatest: String             = "3.2.2"
+      val scalatest: String             = "3.2.3"
       val scalatestplusScheck: String   = "3.2.2.0"
       val slf4j: String                 = "1.7.30"
     }
