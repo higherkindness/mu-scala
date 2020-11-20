@@ -176,7 +176,6 @@ Mu provides Protobuf codecs for:
 
 * `BigDecimal`
 * `java.time.LocalDate`, `java.time.LocalDateTime` and `java.time.Instant`
-* `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime`
 
 Add the following imports to your service code:
 
@@ -184,37 +183,22 @@ Add the following imports to your service code:
 |---|---|
 | `BigDecimal` | `import higherkindness.mu.rpc.internal.encoders.pbd.bigDecimal._` |
 | `java.time.{LocalDate, LocalDateTime, Instant}` | `import higherkindness.mu.rpc.internal.encoders.pbd.javatime._` |
-| `org.joda.time.{LocalDate, LocalDateTime}` | `import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.pbd._` |
-
-Notes:
-
-* For the jodatime encoders, you will need to add a dependency on the
-  `mu-rpc-marshallers-jodatime` module.
 
 ## Avro codecs
 
 Mu provides Avro codecs for:
 
 * `BigDecimal`
-* `BigDecimal` tagged with 'precision' and 'scale' (e.g. `BigDecimal @@ (Nat._8, Nat._2)`
 * `java.time.LocalDate`, `java.time.LocalDateTime` and `java.time.Instant`
-* `org.joda.time.LocalDate` and `org.joda.time.LocalDateTime`
 
 Add the following imports to your service code:
 
 | Types | Import |
 |---|---|
 | `BigDecimal` | `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimal._` |
-| Tagged `BigDecimal` | `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._` |
 | `java.time.*` | `import higherkindness.mu.rpc.internal.encoders.avro.javatime._` |
-| `org.joda.time.*` | `import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.avro._` |
 
 Notes:
-
-* The `BigDecimal` codec is not compliant with the Avro spec. We recommend you
-  use the tagged `BigDecimal` codec.
-* For the jodatime encoders, you will need to add a dependency on the
-  `mu-rpc-marshallers-jodatime` module.
 
 If you want to send one of these types directly as an Avro-encoded request or
 response (instead of as a field within a request or response), you need to
@@ -225,9 +209,7 @@ Mu provides marshallers for these types under separate imports:
 | Types | Import |
 |---|---|
 | `BigDecimal` | `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimal.marshallers._` |
-| Tagged `BigDecimal` | `import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged.marshallers._` |
 | `java.time.*` | `import higherkindness.mu.rpc.internal.encoders.avro.javatime.marshallers._` |
-| `org.joda.time.*` | `import higherkindness.mu.rpc.marshallers.jodaTimeEncoders.avro.marshallers._` |
 
 [Avro]: https://avro.apache.org/
 [avro4s]: https://github.com/sksamuel/avro4s

@@ -1,5 +1,5 @@
-FROM fpco/stack-build:lts-15.5 as build
-COPY --from=cb372/mu-haskell-warm-dot-stack /root/.stack /root/.stack
+FROM fpco/stack-build:lts-16.22 as build
+COPY --from=cb372/mu-haskell-warm-dot-stack:lts-16.22 /root/.stack /root/.stack
 RUN mkdir /opt/build
 RUN mkdir /opt/build/bin
 COPY . /opt/build
