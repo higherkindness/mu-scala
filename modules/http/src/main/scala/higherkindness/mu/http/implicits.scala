@@ -66,7 +66,6 @@ object implicits {
         F: ApplicativeError[F, Throwable]
     ): Stream[F, A] =
       message.body.chunks.unwrapJsonArray.map(_.as[A]).rethrow
-        )
   }
 
   implicit class RequestOps[F[_]](private val request: Request[F]) {
