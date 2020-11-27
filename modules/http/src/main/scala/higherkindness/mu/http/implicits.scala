@@ -65,9 +65,7 @@ object implicits {
         decoder: Decoder[A],
         F: ApplicativeError[F, Throwable]
     ): Stream[F, A] =
-      message.body.chunks.parseJsonStream
-        .flatMap(
-          _.as[List[A]].map(Stream.emits(_)).fold(_.raiseError[Stream[F, *], A], identity(_))
+      message.body.chunks.unwrapJsonArray.map(_.as[A]).rethrow
         )
   }
 
