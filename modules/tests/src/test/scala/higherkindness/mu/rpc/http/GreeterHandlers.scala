@@ -46,11 +46,10 @@ class Fs2GreeterHandler[F[_]: Sync] extends Fs2Greeter[F] {
   import higherkindness.mu.rpc.protocol.Empty
 
   def sayHellos(requests: Stream[F, HelloRequest]): F[HelloResponse] =
-    requests.compile.fold(HelloResponse("")) {
-      case (response, request) =>
-        HelloResponse(
-          if (response.hello.isEmpty) request.hello else s"${response.hello}, ${request.hello}"
-        )
+    requests.compile.fold(HelloResponse("")) { case (response, request) =>
+      HelloResponse(
+        if (response.hello.isEmpty) request.hello else s"${response.hello}, ${request.hello}"
+      )
     }
 
   def rudelyIgnoreStreamOfHellos(requests: Stream[F, HelloRequest]): F[Empty.type] =

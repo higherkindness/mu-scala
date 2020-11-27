@@ -27,6 +27,7 @@ project/plugins/project/
 .history
 .cache
 .lib/
+.bsp
 
 ### Scala ###
 
@@ -63,6 +64,7 @@ tags
 
 ### VisualStudioCode ###
 
+.vscode/
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json

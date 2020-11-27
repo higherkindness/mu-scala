@@ -27,14 +27,15 @@ Mu can generate code from a number of different IDL formats:
 
 Add the following line to _project/plugins.sbt_:
 
-```scala
+```sbt
 addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "@VERSION@")
 ```
 
 **NOTE**
 
 For users of the `sbt-mu-srcgen` plugin `v0.22.x` and below, the plugin is enabled automatically as soon as it's added to the `project/plugins.sbt`.  However, for users of the `sbt-mu-srcgen` plugin `v0.23.x` and beyond, the plugin needs to be manually enabled for any module for which you want to generate code.  To enable the module, add the following line to your `build.sbt`
-```scala
+
+```sbt
 enablePlugins(SrcGenPlugin)
 ```
 
@@ -50,22 +51,20 @@ process, so the sources are generated before compilation when you run the
 
 You can also run the sbt task manually:
 
-```sh
-$ sbt muSrcGen
+```shell script
+sbt muSrcGen
 ```
 
 ## Import
 
 You will need to add this import at the top of your `build.sbt`:
 
-
-```scala
+```sbt
 import higherkindness.mu.rpc.srcgen.Model._
 ```
 
 ## Settings
 
-For an explanation of the plugin's settings, see the [source generation
-reference](../reference/source-generation).
+For an explanation of the plugin's settings, see the [source generation reference](../reference/source-generation).
 
 [Mu]: https://github.com/higherkindness/mu-scala

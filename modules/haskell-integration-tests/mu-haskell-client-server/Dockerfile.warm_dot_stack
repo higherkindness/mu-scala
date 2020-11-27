@@ -3,7 +3,7 @@
 # This is used to speed up the building of the actual image
 # we want to use for the tests.
 
-FROM fpco/stack-build:lts-15.5 AS build
+FROM fpco/stack-build:lts-16.22 AS build
 RUN mkdir /opt/build
 RUN mkdir /opt/build/bin
 COPY . /opt/build

@@ -42,12 +42,11 @@ permalink: reference/modules-artifacts
 | `mu-config`  | Server/Client  | No  | Provides configuration helpers using [pureconfig] to load the application configuration values.  |
 | `mu-rpc-testing`  | Test  | No  | Utilities to test out `Mu` applications. It provides the `grpc-testing` library as the transitive dependency.  |
 | `mu-rpc-client-cache`  | Client  | No  | Provides an algebra for caching RPC clients.  |
-| `mu-rpc-marshallers-jodatime`  | Server/Client  | No  | Provides marshallers for serializing and deserializing jodatime `LocalDate` and `LocalDateTime` instances.  |
 
 ## Build
 You can install any of these dependencies in your build as follows:
 
-```scala
+```sbt
 // required for a protocol definition:
 libraryDependencies += "io.higherkindness" %% "mu-rpc-service" % "@VERSION@"
 
@@ -76,9 +75,6 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-dropwizard" % "@VERSION@"
 // optional - for communication between RPC server and client using SSL/TLS.
 libraryDependencies += "io.higherkindness" %% "mu-rpc-netty-ssl" % "@VERSION@"
 
-// optional - for RPC marshallers for jodatime types.
-libraryDependencies += "io.higherkindness" %% "mu-rpc-marshallers-jodatime" % "@VERSION@"
-
 // optional - to add caching support to RPC clients.
 libraryDependencies += "io.higherkindness" %% "mu-rpc-client-cache" % "@VERSION@"
 
@@ -91,7 +87,7 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-testing" % "@VERSION@" % T
 To generate Scala code from IDL files (`.proto`, `.avdl`, OpenAPI `.yaml`,
 etc.), you will need the `sbt-mu-srcgen` plugin:
 
-```
+```sbt
 addSbtPlugin("io.higherkindness" %% "sbt-mu-srcgen" % "@VERSION@")
 ```
 

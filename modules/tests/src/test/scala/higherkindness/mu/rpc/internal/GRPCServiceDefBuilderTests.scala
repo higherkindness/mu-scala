@@ -43,11 +43,11 @@ class GRPCServiceDefBuilderTests extends RpcBaseTestSuite {
     "build a ServerServiceDefinition based on the provided " +
       "MethodDescriptor's and ServerCallHandler's" in {
 
-      GRPCServiceDefBuilder
-        .build[IO](serviceName, (flowMethod, handler))
-        .map(_.getServiceDescriptor.getName)
-        .unsafeRunSync() shouldBe serviceName
-    }
+        GRPCServiceDefBuilder
+          .build[IO](serviceName, (flowMethod, handler))
+          .map(_.getServiceDescriptor.getName)
+          .unsafeRunSync() shouldBe serviceName
+      }
 
     "throw an java.lang.IllegalArgumentException when the serviceName is not valid" in {
 

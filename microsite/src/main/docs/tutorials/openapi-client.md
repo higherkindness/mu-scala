@@ -24,13 +24,13 @@ Create a new sbt project, and add the `sbt-mu-srcgen` plugin in
 This plugin is going to discover and parse your OpenAPI YAML
 file and generate corresponding Scala code.
 
-```scala
+```sbt
 addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "@VERSION@")
 ```
 
 Then configure the plugin by adding a few lines to `build.sbt`:
 
-```scala
+```sbt
 import higherkindness.mu.rpc.srcgen.Model._
 
 // Look for OpenAPI YAML files
@@ -47,7 +47,7 @@ The generated client will make use of
 
 So we need to add the appropriate dependencies to make it compile:
 
-```
+```sbt
 libraryDependencies ++= Seq(
   "io.circe"   %% "circe-core"          % "0.12.3",
   "io.circe"   %% "circe-generic"       % "0.12.3",
@@ -59,7 +59,8 @@ libraryDependencies ++= Seq(
 ## Add OpenAPI specification file
 
 Suppose you want to generate Scala code for a REST service based on the
-"Petstore" example OpenAPI IDL file (available for download [here](https://github.com/OAI/OpenAPI-Specification/blob/master/examples/v3.0/petstore.yaml)).
+"Petstore" example OpenAPI IDL file (available for download 
+[here](https://github.com/OAI/OpenAPI-Specification/blob/master/examples/v3.0/petstore.yaml)).
 
 Download that file and save it as `src/main/resources/petstore/petstore.yaml`.
 
@@ -67,14 +68,14 @@ Download that file and save it as `src/main/resources/petstore/petstore.yaml`.
 
 You can run the source generator directly:
 
-```sh
-$ sbt muSrcGen
+```shell script
+sbt muSrcGen
 ```
 
 or as part of compilation:
 
-```sh
-$ sbt compile
+```shell script
+sbt compile
 ```
 
 Once the source generator has run, there should be a generated Scala file at
@@ -85,7 +86,6 @@ The file is very large so we won't show it here, but it contains:
 * case classes for all the models
 * Circe `Encoder`/`Decoder`s and http4s `EntityEncoder`/`EntityDecoder`s for all models
 * An interface for a client for the REST API:
-
     ```scala
     trait PetstoreClient[F[_]] {
       import PetstoreClient._
@@ -97,7 +97,6 @@ The file is very large so we won't show it here, but it contains:
     }
     ```
 * An object containing factory methods to build an http4s-based client:
-
     ```scala
     object PetstoreHttpClient {
       def build[F[_]: Effect: Sync](client: Client[F], baseUrl: Uri)(implicit ...): PetstoreClient[F] = ...
