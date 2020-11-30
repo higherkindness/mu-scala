@@ -25,14 +25,14 @@ grpc "WeatherProtocol" id "weather.proto"
 type GetForecastRequest
   = Term WeatherProtocol (WeatherProtocol :/: "GetForecastRequest")
 
-type Weather = Term WeatherProtocol (WeatherProtocol :/: "Weather")
+type Weather = Term WeatherProtocol (WeatherProtocol :/: "GetForecastResponse.Weather")
 
 type GetForecastResponse
   = Term WeatherProtocol (WeatherProtocol :/: "GetForecastResponse")
 
 type RainEvent = Term WeatherProtocol (WeatherProtocol :/: "RainEvent")
 
-type RainEventType = Term WeatherProtocol (WeatherProtocol :/: "RainEventType")
+type RainEventType = Term WeatherProtocol (WeatherProtocol :/: "RainEvent.RainEventType")
 
 started :: RainEventType
 started = enum @"STARTED"
