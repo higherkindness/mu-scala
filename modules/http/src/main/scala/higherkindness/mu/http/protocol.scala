@@ -22,7 +22,9 @@ import org.http4s.HttpRoutes
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.implicits._
 import org.http4s.server.Router
+
 import scala.annotation.StaticAnnotation
+import scala.concurrent.ExecutionContext
 
 class http extends StaticAnnotation
 
@@ -34,8 +36,8 @@ object HttpServer {
       port: Int,
       host: String,
       routes: RouteMap[F]*
-  ): BlazeServerBuilder[F] =
-    BlazeServerBuilder[F]
+  )(implicit EC: ExecutionContext): BlazeServerBuilder[F] =
+    BlazeServerBuilder[F](EC)
       .bindHttp(port, host)
       .withHttpApp(Router(routes.map(r => (s"/${r.prefix}", r.route)): _*).orNotFound)
 

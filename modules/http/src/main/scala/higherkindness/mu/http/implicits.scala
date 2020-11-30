@@ -65,7 +65,7 @@ object implicits {
         decoder: Decoder[A],
         F: ApplicativeError[F, Throwable]
     ): Stream[F, A] =
-      message.body.chunks.parseJsonStream.map(_.as[A]).rethrow
+      message.body.chunks.unwrapJsonArray.map(_.as[A]).rethrow
   }
 
   implicit class RequestOps[F[_]](private val request: Request[F]) {
@@ -118,7 +118,7 @@ object implicits {
   }
 
   def handleResponseError[F[_]: Sync](errorResponse: Response[F]): F[Throwable] =
-    errorResponse.bodyAsText.compile.foldMonoid.map(body =>
+    errorResponse.bodyText.compile.foldMonoid.map(body =>
       ResponseError(errorResponse.status, Some(body).filter(_.nonEmpty))
     )
 
