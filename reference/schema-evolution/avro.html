@@ -1,0 +1,344 @@
+<!DOCTYPE html><html><head><title>Mu-Scala: Schema Evolution - Avro</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="47 Degrees Open Source" /><meta name="description" content="A purely functional library for building RPC endpoint-based services" /><meta name="og:image" content="/mu-scala/img/poster.png" /><meta name="image" property="og:image" content="/mu-scala/img/poster.png" /><meta name="og:title" content="Mu-Scala: Schema Evolution - Avro" /><meta name="title" property="og:title" content="Mu-Scala: Schema Evolution - Avro" /><meta name="og:site_name" content="Mu-Scala" /><meta name="og:url" content="https://github.com/higherkindness/mu-scala" /><meta name="og:type" content="website" /><meta name="og:description" content="A purely functional library for building RPC endpoint-based services" /><link rel="icon" type="image/png" href="/mu-scala/img/favicon.png" /><meta name="twitter:title" content="Mu-Scala: Schema Evolution - Avro" /><meta name="twitter:image" content="/mu-scala/img/poster.png" /><meta name="twitter:description" content="A purely functional library for building RPC endpoint-based services" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/mu-scala/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/mu-scala/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/mu-scala/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/mu-scala/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/mu-scala/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/mu-scala/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/mu-scala/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/mu-scala/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/mu-scala/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/mu-scala/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/mu-scala/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/mu-scala/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/mu-scala/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/mu-scala/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/mu-scala/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/mu-scala/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/mu-scala/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/mu-scala/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/mu-scala/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/mu-scala/img/favicon310x150.png" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/mu-scala/highlight/styles/github-gist.css" /><link rel="stylesheet" href="/mu-scala/css/light-style.css" /><link rel="stylesheet" href="/mu-scala/css/mu-styles.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><div id="sidebar-brand"><a href="/mu-scala/" class="brand"><div class="brand-wrapper"></div><span>Mu-Scala</span></a><button id="main-toggle" class="sidebar-toggle"><span class="close"></span></button></div><div class="sidebar-nav">                   <div class="sidebar-nav-item  "><a href="/mu-scala/reference" title="Reference" class="">Reference</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/reference/modules-artifacts" title="Modules and artifacts" class="">Modules and artifacts</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/reference/source-generation" title="Source generation" class="">Source generation</a></div> <div class="sidebar-nav-item  open"><a href="/mu-scala/reference/schema-evolution" title="Schema Evolution" class="drop-nested">Schema Evolution</a><i class="fa fa-angle-right"></i><div class="sub-section"> <a href="/mu-scala/reference/schema-evolution/avro" title="Avro" class="active">Avro</a> <a href="/mu-scala/reference/schema-evolution/proto" title="Protocol Buffers" class="">Protocol Buffers</a></div></div> <div class="sidebar-nav-item  "><a href="/mu-scala/reference/further-reading" title="Further reading" class="">Further reading</a></div></div></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li id="gh-eyes-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu-scala" target="_blank" rel="noopener noreferrer"><i class="fa fa-eye"></i><span>Watchers<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu-scala" target="_blank" rel="noopener noreferrer"><i class="fa fa-star-o"></i><span>Stars<span id="stars" class="label label-default">--</span></span></a></li></ul></div></div></div></div><div id="content" data-github-owner="higherkindness" data-github-repo="mu-scala"><div class="content-wrapper"><section><h1 id="avro---schema-evolution">Avro - Schema Evolution</h1>
+
+<p>From now on, consider that we are using <code class="highlighter-rouge">AvroWithSchema</code> as the serialization mechanism in your <a href="https://github.com/higherkindness/mu-scala">Mu</a> program.</p>
+
+<p>According to the <a href="http://avro.apache.org/docs/current/spec.html#Schema+Resolution">Avro Specs</a>:</p>
+
+<blockquote>
+  <p>A reader of Avro data, whether from an RPC or a file, can always parse that data because its schema is provided. 
+But that schema may not be exactly the schema that was expected. For example, if the data was written with a different
+version of the software than it is read, then records may have had fields added or removed.</p>
+</blockquote>
+
+<p>For Scala, this section specifies how such schema differences should be resolved to preserve compatibility.
+We’ll try to summarise a bit all the possible cases in both ends: request and response.
+However, you could go deeper by using this <a href="https://github.com/higherkindness/mu-protocol-decimal-update">repo</a> where you can play with all of the possibilities.</p>
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+<h2 id="cases">Cases</h2>
+
+<ul>
+  <li><a href="#modifying-the-request-client-side">Modifying the Request (Client side)</a>
+    <ul>
+      <li><a href="#a-adding-a-new-non-optional-field">A: Adding a new non-optional field</a></li>
+      <li><a href="#b-adding-a-new-optional-field">B: Adding a new optional field</a></li>
+      <li><a href="#c-adding-new-item-to-a-union">C: Adding new item to a union</a></li>
+      <li><a href="#d-removing-item-from-a-union">D: Removing item from a union</a></li>
+      <li><a href="#e-replacing-item-in-a-union">E: Replacing item in a union</a></li>
+      <li><a href="#f-changing-the-type-of-an-existing-field">F: Changing the type of an existing field</a></li>
+      <li><a href="#g-renaming-a-field">G: Renaming a field</a></li>
+      <li><a href="#h-removing-a-field">H: Removing a field</a></li>
+    </ul>
+  </li>
+  <li><a href="#modifying-the-response-server-side">Modifying the Response (Server side)</a>
+    <ul>
+      <li><a href="#i-adding-a-new-non-optional-field">I: Adding a new non-optional field</a></li>
+      <li><a href="#j-adding-a-new-optional-field">J: Adding a new optional field</a></li>
+      <li><a href="#k-adding-a-new-item-to-a-union">K: Adding a new item to a union</a></li>
+      <li><a href="#l-removing-item-from-a-union">L: Removing item from a union</a></li>
+      <li><a href="#m-replacing-item-from-a-union">M: Replacing item from a union</a></li>
+      <li><a href="#n-changing-the-type-of-an-existing-field">N: Changing the type of an existing field</a></li>
+      <li><a href="#o-renaming-a-field">O: Renaming a field</a></li>
+      <li><a href="#p-removing-a-field">P: Removing a field</a></li>
+    </ul>
+  </li>
+</ul>
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+<h3 id="modifying-the-request-client-side">Modifying the Request (Client side)</h3>
+
+<h4 id="a-adding-a-new-non-optional-field">A: Adding a new non-optional field</h4>
+
+<p>You need to specify a default value for the new field.</p>
+
+<ul>
+  <li>Before:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">Request</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>After:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">NewRequest</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">c</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span><span class="o">)</span>
+</code></pre></div></div>
+
+<h4 id="b-adding-a-new-optional-field">B: Adding a new optional field</h4>
+
+<p>This is a particular case of the previous scenario, hence, the solution could be providing a default value, that presumably, in Scala would be <code class="highlighter-rouge">None</code>.</p>
+
+<h4 id="c-adding-new-item-to-a-union">C: Adding new item to a union</h4>
+
+<p>In this case, we are safe and no actions are required.</p>
+
+<ul>
+  <li>Before:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">Request</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">Int</span> <span class="kt">:+:</span> <span class="kt">String</span> <span class="kt">:+:</span> <span class="kt">CNil</span><span class="o">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>After:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">NewRequest</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">Int</span> <span class="kt">:+:</span> <span class="kt">String</span> <span class="kt">:+:</span> <span class="kt">Boolean</span> <span class="kt">:+:</span> <span class="kt">CNil</span><span class="o">)</span>
+</code></pre></div></div>
+
+<h4 id="d-removing-item-from-a-union">D: Removing item from a union</h4>
+
+<p>In this case, we’d be breaking the compatibility. The only way to deal with this situation is considering this as a change of type, see the next case for details.</p>
+
+<ul>
+  <li>Before:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">Request</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">Int</span> <span class="kt">:+:</span> <span class="kt">String</span> <span class="kt">:+:</span> <span class="kt">CNil</span><span class="o">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>After:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">NewRequest</span><span class="o">(</span><span class="n">b</span><span class="k">:</span> <span class="kt">String</span> <span class="kt">:+:</span> <span class="kt">CNil</span> <span class="o">=</span> <span class="nc">Coproduct</span><span class="o">[</span><span class="kt">String</span> <span class="kt">:+:</span> <span class="kt">CNil</span><span class="o">](</span><span class="s">""</span><span class="o">))</span>
+</code></pre></div></div>
+
+<h4 id="e-replacing-item-in-a-union">E: Replacing item in a union</h4>
+
+<p>As we saw previously, again we are breaking the compatibility. If the type is replaced, it will work while the provided value is one of the types in common between the previous <code class="highlighter-rouge">coproduct</code> and the new one.</p>
+
+<ul>
+  <li>Before:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">Request</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">Int</span> <span class="kt">:+:</span> <span class="kt">String</span> <span class="kt">:+:</span> <span class="kt">CNil</span><span class="o">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>After:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">NewRequest</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">Int</span> <span class="kt">:+:</span> <span class="kt">Boolean</span> <span class="kt">:+:</span> <span class="kt">CNil</span><span class="o">)</span>
+</code></pre></div></div>
+
+<p>It will work if the request is:</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Request</span><span class="o">(</span><span class="n">a</span> <span class="k">=</span> <span class="nc">Coproduct</span><span class="o">[</span><span class="kt">Int</span> <span class="kt">:+:</span> <span class="kt">String</span> <span class="kt">:+:</span> <span class="kt">CNil</span><span class="o">](</span><span class="mi">10</span><span class="o">))</span>
+</code></pre></div></div>
+
+<p>And it will fail if the request is:</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Request</span><span class="o">(</span><span class="n">a</span> <span class="k">=</span> <span class="nc">Coproduct</span><span class="o">[</span><span class="kt">Int</span> <span class="kt">:+:</span> <span class="kt">String</span> <span class="kt">:+:</span> <span class="kt">CNil</span><span class="o">](</span><span class="s">"Hi"</span><span class="o">))</span>
+</code></pre></div></div>
+
+<h4 id="f-changing-the-type-of-an-existing-field">F: Changing the type of an existing field</h4>
+
+<p>In this case, it’s not possible to deal with a type swap, if we are maintaining the same name of the field. So the solution would be to consider this replacement as a combination of removing the old field/type, and adding a new field with the new type with a default value.</p>
+
+<ul>
+  <li>Before:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">Request</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>After:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">NewRequest</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">c</span><span class="k">:</span> <span class="kt">Boolean</span> <span class="o">=</span> <span class="kc">true</span><span class="o">)</span>
+</code></pre></div></div>
+
+<h4 id="g-renaming-a-field">G: Renaming a field</h4>
+
+<p>This operation is completely safe, in Avro, the names are not being sent as part of the request, so no matter how they are named.</p>
+
+<ul>
+  <li>Before:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">Request</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>After:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">NewRequest</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">c</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+</code></pre></div></div>
+
+<h4 id="h-removing-a-field">H: Removing a field</h4>
+
+<p>No action required. However, keep in mind that the value will be ignored when old clients include it in the request.</p>
+
+<ul>
+  <li>Before:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">Request</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>After:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">NewRequest</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
+</code></pre></div></div>
+
+<h3 id="modifying-the-response-server-side">Modifying the Response (Server side)</h3>
+
+<h4 id="i-adding-a-new-non-optional-field">I: Adding a new non-optional field</h4>
+
+<p>In this case, the old clients will ignore the value of the new field, so everything will be safe in terms of backward compatibility.</p>
+
+<ul>
+  <li>Before:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">Response</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>After:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">NewResponse</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">c</span><span class="k">:</span> <span class="kt">Boolean</span><span class="o">)</span>
+</code></pre></div></div>
+
+<h4 id="j-adding-a-new-optional-field">J: Adding a new optional field</h4>
+
+<p>This would be just a particular case of the previous scenario, where the default value would be <code class="highlighter-rouge">None</code>, in the case of <code class="highlighter-rouge">Scala</code>.</p>
+
+<h4 id="k-adding-a-new-item-to-a-union">K: Adding a new item to a union</h4>
+
+<p>In this scenario, the old clients will fail when the result is including the new item. Hence, the solution would be to provide a default value to the old coproduct and creating a new field with the new coproduct.</p>
+
+<ul>
+  <li>Before:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">Response</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">Int</span> <span class="kt">:+:</span> <span class="kt">String</span> <span class="kt">:+:</span> <span class="kt">CNil</span><span class="o">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>After:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">NewResponse</span><span class="o">(</span>
+      <span class="n">a</span><span class="k">:</span> <span class="kt">Int</span> <span class="kt">:+:</span> <span class="kt">String</span> <span class="kt">:+:</span> <span class="kt">CNil</span> <span class="o">=</span> <span class="nc">Coproduct</span><span class="o">[</span><span class="kt">Int</span> <span class="kt">:+:</span> <span class="kt">String</span> <span class="kt">:+:</span> <span class="kt">CNil</span><span class="o">](</span><span class="mi">0</span><span class="o">),</span>
+      <span class="n">b</span><span class="k">:</span> <span class="kt">Int</span> <span class="kt">:+:</span> <span class="kt">String</span> <span class="kt">:+:</span> <span class="kt">Boolean</span> <span class="kt">:+:</span> <span class="kt">CNil</span><span class="o">)</span>
+</code></pre></div></div>
+
+<h4 id="l-removing-item-from-a-union">L: Removing item from a union</h4>
+
+<p>No action will be required in this case.</p>
+
+<ul>
+  <li>Before:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">Response</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">Int</span> <span class="kt">:+:</span> <span class="kt">String</span> <span class="kt">:+:</span> <span class="kt">CNil</span><span class="o">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>After:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">NewResponse</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">Int</span> <span class="kt">:+:</span> <span class="kt">CNil</span><span class="o">)</span>
+</code></pre></div></div>
+
+<h4 id="m-replacing-item-from-a-union">M: Replacing item from a union</h4>
+
+<p>As long as the value of the coproduct belongs to the previous version, the old client should be able to accept the response as valid. Thus, we would need to follow the same approach as above when <em>Adding a new item to a coproduct</em>.</p>
+
+<ul>
+  <li>Before:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">Response</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">Int</span> <span class="kt">:+:</span> <span class="kt">String</span> <span class="kt">:+:</span> <span class="kt">CNil</span><span class="o">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>After:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">NewResponse</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">Int</span> <span class="kt">:+:</span> <span class="kt">Boolean</span> <span class="kt">:+:</span> <span class="kt">CNil</span><span class="o">)</span>
+</code></pre></div></div>
+
+<h4 id="n-changing-the-type-of-an-existing-field">N: Changing the type of an existing field</h4>
+
+<p>It will require providing a default value for the previous type, and then, we would need to create a new field with the new type.</p>
+
+<ul>
+  <li>Before:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">Response</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>After:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">NewResponse</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">123</span><span class="o">,</span> <span class="n">c</span><span class="k">:</span> <span class="kt">Boolean</span><span class="o">)</span>
+</code></pre></div></div>
+
+<h4 id="o-renaming-a-field">O: Renaming a field</h4>
+
+<p>It’s also safe in Avro, the server responses don’t include the parameter names inside and they will be ignored when the data is serialized and sent through the wire.</p>
+
+<ul>
+  <li>Before:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">Response</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>After:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">NewResponse</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">c</span><span class="k">:</span> <span class="kt">Int</span><span class="o">)</span>
+</code></pre></div></div>
+
+<h4 id="p-removing-a-field">P: Removing a field</h4>
+
+<p>This evolution should never happen since we would lose backward compatibility. Nonetheless, it would work only under the special case that the old response has a default value for the field that we want to delete, where this operation would be feasible by removing the field in the new version of the server response.</p>
+
+<ul>
+  <li>Before:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">Response</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">b</span><span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">123</span><span class="o">)</span>
+</code></pre></div></div>
+
+<ul>
+  <li>After:</li>
+</ul>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">NewResponse</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
+</code></pre></div></div>
+
+</section></div></div></div></div><script src="/mu-scala/highlight/highlight.pack.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/protobuf.min.js"></script><script>
+// For all code blocks, copy the language from the containing div
+// to the inner code tag (where hljs expects it to be)
+const langPrefix = 'language-';
+document.querySelectorAll(`div[class^='${langPrefix}']`).forEach(function(div) {
+  div.classList.forEach(function(cssClass) {
+    if (cssClass.startsWith(langPrefix)) {
+      const lang = cssClass.substring(langPrefix.length);
+      div.querySelectorAll('pre code').forEach(function(code) {
+        code.classList.add(lang);
+      });
+    }
+  });
+});
+
+hljs.configure({languages:['scala','java','bash','protobuf']});
+hljs.initHighlightingOnLoad();
+      </script><script>console.info('\x57\x65\x62\x73\x69\x74\x65\x20\x62\x75\x69\x6c\x74\x20\x77\x69\x74\x68\x3a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x5f\x5f\x0a\x20\x20\x20\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x5f\x20\x20\x2f\x20\x2f\x5f\x20\x20\x20\x20\x20\x20\x5f\x5f\x5f\x5f\x20\x5f\x5f\x5f\x20\x20\x28\x5f\x29\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x28\x5f\x29\x20\x2f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x0a\x20\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x60\x5f\x5f\x20\x5c\x2f\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x20\x2f\x20\x5f\x5f\x2f\x20\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x0a\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x5f\x2f\x20\x2f\x20\x2f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x5f\x5f\x2f\x20\x2f\x20\x20\x2f\x20\x2f\x5f\x2f\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x20\x2f\x5f\x2f\x20\x20\x5f\x5f\x28\x5f\x5f\x20\x20\x29\x0a\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2e\x5f\x5f\x5f\x2f\x5c\x5f\x5f\x2f\x20\x20\x20\x20\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x2f\x20\x20\x20\x5c\x5f\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x0a\x0a\x68\x74\x74\x70\x73\x3a\x2f\x2f\x34\x37\x64\x65\x67\x2e\x67\x69\x74\x68\x75\x62\x2e\x69\x6f\x2f\x73\x62\x74\x2d\x6d\x69\x63\x72\x6f\x73\x69\x74\x65\x73')</script><script>((window.gitter = {}).chat = {}).options = {
+room: '47deg/mu'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/mu-scala/js/docs.js"></script></body></html>
