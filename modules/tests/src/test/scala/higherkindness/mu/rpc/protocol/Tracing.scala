@@ -21,6 +21,8 @@ import cats.effect.concurrent.Ref
 import cats.syntax.applicativeError._
 import natchez._
 
+import java.net.URI
+
 /*
  * A minimal Natchez tracing implementation that accumulates
  * trace data in a cats-effect Ref.
@@ -56,6 +58,9 @@ object Tracing {
         } yield span
       )(span => ref.update(_.append(s"End $span")))
 
+    override def traceId: IO[Option[String]] = IO.pure(Some(id.toString))
+
+    override def traceUri: IO[Option[URI]] = IO.pure(None)
   }
 
   def entrypoint(ref: Ref[IO, TracingData]): EntryPoint[IO] =

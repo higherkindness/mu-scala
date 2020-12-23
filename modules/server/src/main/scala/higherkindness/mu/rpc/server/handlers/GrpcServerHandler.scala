@@ -27,7 +27,7 @@ import scala.jdk.CollectionConverters._
 import scala.concurrent.duration.TimeUnit
 
 private[handlers] class GrpcServerHandler[F[_]: Sync] private[GrpcServerHandler] ()
-    extends GrpcServer[GrpcServerOps[F, ?]] {
+    extends GrpcServer[GrpcServerOps[F, *]] {
 
   def start(): GrpcServerOps[F, Unit] =
     captureWithServer(_.start()).void
@@ -64,6 +64,6 @@ private[handlers] class GrpcServerHandler[F[_]: Sync] private[GrpcServerHandler]
 }
 
 object GrpcServerHandler {
-  def apply[F[_]](implicit F: Sync[F]): GrpcServer[GrpcServerOps[F, ?]] =
+  def apply[F[_]](implicit F: Sync[F]): GrpcServer[GrpcServerOps[F, *]] =
     new GrpcServerHandler[F]()(F)
 }
