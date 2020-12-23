@@ -1,0 +1,191 @@
+<!DOCTYPE html><html><head><title>Mu-Scala: SSL/TLS</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="47 Degrees Open Source" /><meta name="description" content="A purely functional library for building RPC endpoint-based services" /><meta name="og:image" content="/mu-scala/img/poster.png" /><meta name="image" property="og:image" content="/mu-scala/img/poster.png" /><meta name="og:title" content="Mu-Scala: SSL/TLS" /><meta name="title" property="og:title" content="Mu-Scala: SSL/TLS" /><meta name="og:site_name" content="Mu-Scala" /><meta name="og:url" content="https://github.com/higherkindness/mu-scala" /><meta name="og:type" content="website" /><meta name="og:description" content="A purely functional library for building RPC endpoint-based services" /><link rel="icon" type="image/png" href="/mu-scala/img/favicon.png" /><meta name="twitter:title" content="Mu-Scala: SSL/TLS" /><meta name="twitter:image" content="/mu-scala/img/poster.png" /><meta name="twitter:description" content="A purely functional library for building RPC endpoint-based services" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/mu-scala/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/mu-scala/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/mu-scala/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/mu-scala/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/mu-scala/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/mu-scala/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/mu-scala/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/mu-scala/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/mu-scala/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/mu-scala/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/mu-scala/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/mu-scala/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/mu-scala/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/mu-scala/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/mu-scala/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/mu-scala/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/mu-scala/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/mu-scala/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/mu-scala/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/mu-scala/img/favicon310x150.png" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/mu-scala/highlight/styles/github-gist.css" /><link rel="stylesheet" href="/mu-scala/css/light-style.css" /><link rel="stylesheet" href="/mu-scala/css/mu-styles.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><div id="sidebar-brand"><a href="/mu-scala/" class="brand"><div class="brand-wrapper"></div><span>Mu-Scala</span></a><button id="main-toggle" class="sidebar-toggle"><span class="close"></span></button></div><div class="sidebar-nav">            <div class="sidebar-nav-item  "><a href="/mu-scala/guides" title="How-To Guides" class="">How-To Guides</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/grpc-streaming" title="gRPC streaming" class="">gRPC streaming</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/custom-grpc-serialization" title="Custom gRPC serialization" class="">Custom gRPC serialization</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/metrics-reporting" title="Metrics reporting" class="">Metrics reporting</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/distributed-tracing" title="Distributed tracing" class="">Distributed tracing</a></div> <div class="sidebar-nav-item active "><a href="/mu-scala/guides/ssl-tls" title="SSL/TLS" class="active">SSL/TLS</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/generate-sources-from-idl" title="Generate sources from IDL" class="drop-nested">Generate sources from IDL</a><i class="fa fa-angle-right"></i><div class="sub-section"> <a href="/mu-scala/guides/generate-sources-from-avro" title="Avro" class="">Avro</a> <a href="/mu-scala/guides/generate-sources-from-proto" title="Protocol Buffers" class="">Protocol Buffers</a> <a href="/mu-scala/guides/generate-sources-from-compendium" title="Compendium" class="">Compendium</a></div></div>     </div></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li id="gh-eyes-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu-scala" target="_blank" rel="noopener noreferrer"><i class="fa fa-eye"></i><span>Watchers<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu-scala" target="_blank" rel="noopener noreferrer"><i class="fa fa-star-o"></i><span>Stars<span id="stars" class="label label-default">--</span></span></a></li></ul></div></div></div></div><div id="content" data-github-owner="higherkindness" data-github-repo="mu-scala"><div class="content-wrapper"><section><h1 id="ssltls-encryption">SSL/TLS Encryption</h1>
+
+<p>From the <a href="https://grpc.io/docs/guides/auth/">gRPC authentication guide</a>:</p>
+
+<blockquote>
+  <p>gRPC has SSL/TLS integration and promotes the use of SSL/TLS to authenticate
+the server and encrypt all the data exchanged between the client and the
+server. Optional mechanisms are available for clients to provide certificates
+for mutual authentication.</p>
+</blockquote>
+
+<p><a href="https://github.com/higherkindness/mu-scala">Mu</a> allows you to encrypt the connection between the server and the client
+through SSL/TLS. The main goal of using SSL is to protect your sensitive
+information and to keep your data secure between servers and clients.</p>
+
+<h2 id="netty-transport">Netty transport</h2>
+
+<p>Mu allows you to choose the underlying transport layer you want to use for your
+gRPC servers and clients:</p>
+
+<ul>
+  <li>For the server you can use <code class="highlighter-rouge">Netty</code>, or the default transport provided by the
+gRPC Java library. (In reality the default transport will also be <code class="highlighter-rouge">Netty</code>,
+unless you have written your own <code class="highlighter-rouge">io.grpc.ServerProvider</code> implementation and
+added it to the classpath.)</li>
+  <li>For the client you can use <code class="highlighter-rouge">Netty</code> or <code class="highlighter-rouge">OkHttp</code>.</li>
+</ul>
+
+<p>However, SSL/TLS encryption in Mu is currently only supported for servers and
+clients that use the <code class="highlighter-rouge">Netty</code> transport.</p>
+
+<h2 id="requirements">Requirements</h2>
+
+<p>On the server and client side, we will need two files to configure the
+<code class="highlighter-rouge">SslContext</code> in <code class="highlighter-rouge">gRPC</code>:</p>
+
+<ul>
+  <li>
+    <p>Server/Client certificate file: Small data files that digitally bind a
+cryptographic key to an organization’s details. This file could be generated
+or obtained from a third party.</p>
+  </li>
+  <li>
+    <p>Server/Client private key file: The private key is a separate file that is
+used in the encryption of data sent between your server and the clients. All
+SSL certificates require a private key to work.</p>
+  </li>
+</ul>
+
+<h2 id="usage">Usage</h2>
+
+<p>The first step to secure our <a href="https://github.com/higherkindness/mu-scala">Mu</a> services is to add the library dependencies
+<code class="highlighter-rouge">mu-rpc-netty-ssl</code> and <code class="highlighter-rouge">mu-rpc-client-netty</code> in our build.</p>
+
+<p>For the second step, we have to move both server/client certificates and private
+keys to a place where they can be loaded at runtime, either from the filesystem
+or the classpath. However, these files contain secrets, so they should <strong>not</strong>
+be included in the project and committed to git.</p>
+
+<p>If we haven’t yet generated or obtained our own certificates, we can test using
+certificates found
+<a href="https://github.com/grpc/grpc-java/tree/master/testing/src/main/resources/certs">here</a>.</p>
+
+<h3 id="server-side">Server side</h3>
+
+<p>Let’s see a piece of code where we will explain line by line how to build a gRPC
+server with SSL encryption enabled.</p>
+
+<p>We won’t cover the details regarding creation of <code class="highlighter-rouge">RPCService</code>,
+<code class="highlighter-rouge">ServerRPCService</code> and runtime implicits. You can find more information about
+these in the <a href="../tutorials/grpc-server-client">gRPC server and client tutorial</a>.</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">java.io.File</span>
+<span class="k">import</span> <span class="nn">java.security.cert.X509Certificate</span>
+
+<span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.server.netty.SetSslContext</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.server.</span><span class="o">{</span><span class="nc">AddService</span><span class="o">,</span> <span class="nc">GrpcConfig</span><span class="o">,</span> <span class="nc">GrpcServer</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">io.grpc.internal.testing.TestUtils</span>
+<span class="k">import</span> <span class="nn">io.grpc.netty.GrpcSslContexts</span>
+<span class="k">import</span> <span class="nn">io.netty.handler.ssl.</span><span class="o">{</span><span class="nc">ClientAuth</span><span class="o">,</span> <span class="nc">SslContext</span><span class="o">,</span> <span class="nc">SslProvider</span><span class="o">}</span>
+
+<span class="k">trait</span> <span class="nc">Runtime</span> <span class="k">extends</span> <span class="nc">CommonRuntime</span> <span class="o">{</span>
+
+  <span class="k">implicit</span> <span class="k">val</span> <span class="nv">muRPCHandler</span><span class="k">:</span> <span class="kt">ServiceHandler</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span> <span class="k">=</span>
+    <span class="k">new</span> <span class="nc">ServiceHandler</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
+
+  <span class="c1">// Load the certicate and private key files.</span>
+
+  <span class="k">val</span> <span class="nv">serverCertFile</span><span class="k">:</span> <span class="kt">File</span>                         <span class="o">=</span> <span class="nv">TestUtils</span><span class="o">.</span><span class="py">loadCert</span><span class="o">(</span><span class="s">"server1.pem"</span><span class="o">)</span>
+  <span class="k">val</span> <span class="nv">serverPrivateKeyFile</span><span class="k">:</span> <span class="kt">File</span>                   <span class="o">=</span> <span class="nv">TestUtils</span><span class="o">.</span><span class="py">loadCert</span><span class="o">(</span><span class="s">"server1.key"</span><span class="o">)</span>
+  <span class="k">val</span> <span class="nv">serverTrustedCaCerts</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">X509Certificate</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Array</span><span class="o">(</span><span class="nv">TestUtils</span><span class="o">.</span><span class="py">loadX509Cert</span><span class="o">(</span><span class="s">"ca.pem"</span><span class="o">))</span>
+
+  <span class="c1">// Build the SslContext, passing our server certificate, private key, and trusted certs.</span>
+  <span class="c1">// Configure the server to use OpenSSL and require client authentication.</span>
+
+  <span class="k">val</span> <span class="nv">serverSslContext</span><span class="k">:</span> <span class="kt">SslContext</span> <span class="o">=</span>
+    <span class="nc">GrpcSslContexts</span>
+      <span class="o">.</span><span class="py">configure</span><span class="o">(</span>
+        <span class="nv">GrpcSslContexts</span><span class="o">.</span><span class="py">forServer</span><span class="o">(</span><span class="n">serverCertFile</span><span class="o">,</span> <span class="n">serverPrivateKeyFile</span><span class="o">),</span>
+        <span class="nv">SslProvider</span><span class="o">.</span><span class="py">OPENSSL</span><span class="o">)</span>
+      <span class="o">.</span><span class="py">trustManager</span><span class="o">(</span><span class="n">serverTrustedCaCerts</span><span class="k">:</span> <span class="k">_</span><span class="kt">*</span><span class="o">)</span>
+      <span class="o">.</span><span class="py">clientAuth</span><span class="o">(</span><span class="nv">ClientAuth</span><span class="o">.</span><span class="py">REQUIRE</span><span class="o">)</span>
+      <span class="o">.</span><span class="py">build</span><span class="o">()</span>
+
+  <span class="c1">// Add the SslContext to the list of GrpConfigs.</span>
+
+  <span class="k">val</span> <span class="nv">grpcConfigs</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">List</span><span class="o">[</span><span class="kt">GrpcConfig</span><span class="o">]]</span> <span class="k">=</span>
+     <span class="nv">Greeter</span><span class="o">.</span><span class="py">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
+       <span class="o">.</span><span class="py">map</span><span class="o">(</span><span class="nc">AddService</span><span class="o">)</span>
+       <span class="o">.</span><span class="py">map</span><span class="o">(</span><span class="n">c</span> <span class="k">=&gt;</span> <span class="nc">List</span><span class="o">(</span><span class="nc">SetSslContext</span><span class="o">(</span><span class="n">serverSslContext</span><span class="o">),</span> <span class="n">c</span><span class="o">))</span>
+
+  <span class="c1">// Important: we have to create the server with Netty.</span>
+  <span class="c1">// This is the only server transport that supports SSL encryption.</span>
+
+  <span class="k">val</span> <span class="nv">server</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">GrpcServer</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span> <span class="nv">grpcConfigs</span><span class="o">.</span><span class="py">flatMap</span><span class="o">(</span><span class="nv">GrpcServer</span><span class="o">.</span><span class="py">netty</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="mi">8080</span><span class="o">,</span> <span class="k">_</span><span class="o">))</span>
+
+<span class="o">}</span>
+
+<span class="k">object</span> <span class="nc">implicits</span> <span class="k">extends</span> <span class="nc">Runtime</span>
+</code></pre></div></div>
+
+<h3 id="client-side">Client side</h3>
+
+<p>Similarly, let’s see how to create a gRPC client with encryption and client
+authentication.</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">higherkindness.mu.rpc.ChannelForAddress</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.channel.OverrideAuthority</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.channel.netty.</span><span class="o">{</span><span class="nc">NettyChannelInterpreter</span><span class="o">,</span> <span class="nc">NettyNegotiationType</span><span class="o">,</span> <span class="nc">NettySslContext</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">io.grpc.netty.NegotiationType</span>
+
+<span class="k">object</span> <span class="nc">MainApp</span> <span class="k">extends</span> <span class="nc">CommonRuntime</span> <span class="o">{</span>
+
+  <span class="c1">// Load the certicate and private key files.</span>
+
+  <span class="k">val</span> <span class="nv">clientCertChainFile</span><span class="k">:</span> <span class="kt">File</span>                    <span class="o">=</span> <span class="nv">TestUtils</span><span class="o">.</span><span class="py">loadCert</span><span class="o">(</span><span class="s">"client.pem"</span><span class="o">)</span>
+  <span class="k">val</span> <span class="nv">clientPrivateKeyFile</span><span class="k">:</span> <span class="kt">File</span>                   <span class="o">=</span> <span class="nv">TestUtils</span><span class="o">.</span><span class="py">loadCert</span><span class="o">(</span><span class="s">"client.key"</span><span class="o">)</span>
+  <span class="k">val</span> <span class="nv">clientTrustedCaCerts</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">X509Certificate</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Array</span><span class="o">(</span><span class="nv">TestUtils</span><span class="o">.</span><span class="py">loadX509Cert</span><span class="o">(</span><span class="s">"ca.pem"</span><span class="o">))</span>
+
+  <span class="c1">// We have to create the SslContext for the client, like we did for the server.</span>
+
+  <span class="k">val</span> <span class="nv">clientSslContext</span><span class="k">:</span> <span class="kt">SslContext</span> <span class="o">=</span>
+    <span class="nv">GrpcSslContexts</span><span class="o">.</span><span class="py">forClient</span>
+      <span class="o">.</span><span class="py">keyManager</span><span class="o">(</span><span class="n">clientCertChainFile</span><span class="o">,</span> <span class="n">clientPrivateKeyFile</span><span class="o">)</span>
+      <span class="o">.</span><span class="py">trustManager</span><span class="o">(</span><span class="n">clientTrustedCaCerts</span><span class="k">:</span> <span class="k">_</span><span class="kt">*</span><span class="o">)</span>
+      <span class="o">.</span><span class="py">build</span><span class="o">()</span>
+
+  <span class="c1">// Important: the channel interpreter must be NettyChannelInterpreter.</span>
+  <span class="c1">// We configure the channel interpreter to enable TLS and to use the SSL context we built.</span>
+
+  <span class="k">val</span> <span class="nv">channelInterpreter</span><span class="k">:</span> <span class="kt">NettyChannelInterpreter</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">NettyChannelInterpreter</span><span class="o">(</span>
+    <span class="nc">ChannelForAddress</span><span class="o">(</span><span class="s">"localhost"</span><span class="o">,</span> <span class="mi">8080</span><span class="o">),</span>
+    <span class="nc">List</span><span class="o">(</span><span class="nc">OverrideAuthority</span><span class="o">(</span><span class="nv">TestUtils</span><span class="o">.</span><span class="py">TEST_SERVER_HOST</span><span class="o">)),</span>
+    <span class="nc">List</span><span class="o">(</span>
+      <span class="nc">NettyNegotiationType</span><span class="o">(</span><span class="nv">NegotiationType</span><span class="o">.</span><span class="py">TLS</span><span class="o">),</span>
+      <span class="nc">NettySslContext</span><span class="o">(</span><span class="n">clientSslContext</span><span class="o">)</span>
+    <span class="o">)</span>
+  <span class="o">)</span>
+
+  <span class="k">val</span> <span class="nv">muRPCServiceClient</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">Greeter</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span>
+    <span class="nv">Greeter</span><span class="o">.</span><span class="py">clientFromChannel</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="nc">IO</span><span class="o">(</span><span class="nv">channelInterpreter</span><span class="o">.</span><span class="py">build</span><span class="o">))</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="further-reading">Further reading</h2>
+
+<p>For more details,
+<a href="https://www.47deg.com/blog/mu-rpc-securing-communications-with-mu/">here</a> you
+can check a full explanation and an example about securing communications.</p>
+
+</section></div></div></div></div><script src="/mu-scala/highlight/highlight.pack.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/protobuf.min.js"></script><script>
+// For all code blocks, copy the language from the containing div
+// to the inner code tag (where hljs expects it to be)
+const langPrefix = 'language-';
+document.querySelectorAll(`div[class^='${langPrefix}']`).forEach(function(div) {
+  div.classList.forEach(function(cssClass) {
+    if (cssClass.startsWith(langPrefix)) {
+      const lang = cssClass.substring(langPrefix.length);
+      div.querySelectorAll('pre code').forEach(function(code) {
+        code.classList.add(lang);
+      });
+    }
+  });
+});
+
+hljs.configure({languages:['scala','java','bash','protobuf']});
+hljs.initHighlightingOnLoad();
+      </script><script>console.info('\x57\x65\x62\x73\x69\x74\x65\x20\x62\x75\x69\x6c\x74\x20\x77\x69\x74\x68\x3a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x5f\x5f\x0a\x20\x20\x20\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x5f\x20\x20\x2f\x20\x2f\x5f\x20\x20\x20\x20\x20\x20\x5f\x5f\x5f\x5f\x20\x5f\x5f\x5f\x20\x20\x28\x5f\x29\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x28\x5f\x29\x20\x2f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x0a\x20\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x60\x5f\x5f\x20\x5c\x2f\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x20\x2f\x20\x5f\x5f\x2f\x20\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x0a\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x5f\x2f\x20\x2f\x20\x2f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x5f\x5f\x2f\x20\x2f\x20\x20\x2f\x20\x2f\x5f\x2f\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x20\x2f\x5f\x2f\x20\x20\x5f\x5f\x28\x5f\x5f\x20\x20\x29\x0a\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2e\x5f\x5f\x5f\x2f\x5c\x5f\x5f\x2f\x20\x20\x20\x20\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x2f\x20\x20\x20\x5c\x5f\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x0a\x0a\x68\x74\x74\x70\x73\x3a\x2f\x2f\x34\x37\x64\x65\x67\x2e\x67\x69\x74\x68\x75\x62\x2e\x69\x6f\x2f\x73\x62\x74\x2d\x6d\x69\x63\x72\x6f\x73\x69\x74\x65\x73')</script><script>((window.gitter = {}).chat = {}).options = {
+room: '47deg/mu'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/mu-scala/js/docs.js"></script></body></html>

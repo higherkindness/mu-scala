@@ -1,0 +1,267 @@
+<!DOCTYPE html><html><head><title>Mu-Scala: Custom gRPC Serialization</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="47 Degrees Open Source" /><meta name="description" content="A purely functional library for building RPC endpoint-based services" /><meta name="og:image" content="/mu-scala/img/poster.png" /><meta name="image" property="og:image" content="/mu-scala/img/poster.png" /><meta name="og:title" content="Mu-Scala: Custom gRPC Serialization" /><meta name="title" property="og:title" content="Mu-Scala: Custom gRPC Serialization" /><meta name="og:site_name" content="Mu-Scala" /><meta name="og:url" content="https://github.com/higherkindness/mu-scala" /><meta name="og:type" content="website" /><meta name="og:description" content="A purely functional library for building RPC endpoint-based services" /><link rel="icon" type="image/png" href="/mu-scala/img/favicon.png" /><meta name="twitter:title" content="Mu-Scala: Custom gRPC Serialization" /><meta name="twitter:image" content="/mu-scala/img/poster.png" /><meta name="twitter:description" content="A purely functional library for building RPC endpoint-based services" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/mu-scala/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/mu-scala/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/mu-scala/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/mu-scala/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/mu-scala/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/mu-scala/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/mu-scala/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/mu-scala/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/mu-scala/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/mu-scala/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/mu-scala/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/mu-scala/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/mu-scala/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/mu-scala/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/mu-scala/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/mu-scala/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/mu-scala/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/mu-scala/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/mu-scala/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/mu-scala/img/favicon310x150.png" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/mu-scala/highlight/styles/github-gist.css" /><link rel="stylesheet" href="/mu-scala/css/light-style.css" /><link rel="stylesheet" href="/mu-scala/css/mu-styles.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><div id="sidebar-brand"><a href="/mu-scala/" class="brand"><div class="brand-wrapper"></div><span>Mu-Scala</span></a><button id="main-toggle" class="sidebar-toggle"><span class="close"></span></button></div><div class="sidebar-nav">            <div class="sidebar-nav-item  "><a href="/mu-scala/guides" title="How-To Guides" class="">How-To Guides</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/grpc-streaming" title="gRPC streaming" class="">gRPC streaming</a></div> <div class="sidebar-nav-item active "><a href="/mu-scala/guides/custom-grpc-serialization" title="Custom gRPC serialization" class="active">Custom gRPC serialization</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/metrics-reporting" title="Metrics reporting" class="">Metrics reporting</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/distributed-tracing" title="Distributed tracing" class="">Distributed tracing</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/ssl-tls" title="SSL/TLS" class="">SSL/TLS</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/generate-sources-from-idl" title="Generate sources from IDL" class="drop-nested">Generate sources from IDL</a><i class="fa fa-angle-right"></i><div class="sub-section"> <a href="/mu-scala/guides/generate-sources-from-avro" title="Avro" class="">Avro</a> <a href="/mu-scala/guides/generate-sources-from-proto" title="Protocol Buffers" class="">Protocol Buffers</a> <a href="/mu-scala/guides/generate-sources-from-compendium" title="Compendium" class="">Compendium</a></div></div>     </div></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li id="gh-eyes-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu-scala" target="_blank" rel="noopener noreferrer"><i class="fa fa-eye"></i><span>Watchers<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs"><a href="https://github.com/higherkindness/mu-scala" target="_blank" rel="noopener noreferrer"><i class="fa fa-star-o"></i><span>Stars<span id="stars" class="label label-default">--</span></span></a></li></ul></div></div></div></div><div id="content" data-github-owner="higherkindness" data-github-repo="mu-scala"><div class="content-wrapper"><section><h1 id="custom-grpc-serialization">Custom gRPC serialization</h1>
+
+<p>Mu will serialize <a href="https://grpc.io/">gRPC</a> requests and responses using <a href="https://avro.apache.org/">Avro</a> or <a href="https://developers.google.com/protocol-buffers">Protobuf</a>,
+depending on the compression format specified in the <code class="highlighter-rouge">@service</code> annotation on
+the service definition trait.</p>
+
+<p>This serialization can be customised in a few different ways.</p>
+
+<h2 id="compression">Compression</h2>
+
+<p>Mu supports compression of RPC requests and responses. We can enable this
+compression either on the server or the client side.</p>
+
+<p>Mu supports <code class="highlighter-rouge">Gzip</code> as the compression format.</p>
+
+<p>The server will automatically handle compressed requests from clients,
+decompressing them appropriately.</p>
+
+<p>To make the server compress its responses, set the compression type argument to
+<code class="highlighter-rouge">Gzip</code> in the <code class="highlighter-rouge">@service</code> annotation when defining the service.</p>
+
+<p>For example:</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">higherkindness.mu.rpc.protocol._</span>
+
+<span class="k">object</span> <span class="nc">CompressionExample</span> <span class="o">{</span>
+
+  <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloRequest</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
+  <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloResponse</span><span class="o">(</span><span class="n">greeting</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
+
+  <span class="nd">@service</span><span class="o">(</span><span class="nc">Protobuf</span><span class="o">,</span> <span class="n">compressionType</span> <span class="k">=</span> <span class="nc">Gzip</span><span class="o">)</span>
+  <span class="k">trait</span> <span class="nc">Greeter</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
+    <span class="k">def</span> <span class="nf">emptyCompressed</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>The client will automatically handle compressed responses from servers,
+decompressing them appropriately.</p>
+
+<p>To make the client compress its requests, you need to add the appropriate “call
+option” when constructing the client.</p>
+
+<p>Here is an example of a client with request compression enabled.</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">ConcurrentEffect</span><span class="o">,</span> <span class="nc">ContextShift</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc._</span>
+<span class="k">import</span> <span class="nn">io.grpc.CallOptions</span>
+<span class="k">import</span> <span class="nn">CompressionExample._</span>
+
+<span class="k">object</span> <span class="nc">CompressionExampleClient</span> <span class="o">{</span>
+
+  <span class="k">val</span> <span class="nv">channelFor</span><span class="k">:</span> <span class="kt">ChannelFor</span> <span class="o">=</span> <span class="nc">ChannelForAddress</span><span class="o">(</span><span class="s">"localhost"</span><span class="o">,</span> <span class="mi">12345</span><span class="o">)</span>
+
+  <span class="k">def</span> <span class="nf">clientResource</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span><span class="kt">:</span> <span class="kt">ConcurrentEffect:</span> <span class="kt">ContextShift</span><span class="o">]</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">Greeter</span><span class="o">[</span><span class="kt">F</span><span class="o">]]</span> <span class="k">=</span>
+    <span class="nv">Greeter</span><span class="o">.</span><span class="py">client</span><span class="o">[</span><span class="kt">F</span><span class="o">](</span><span class="n">channelFor</span><span class="o">,</span> <span class="n">options</span> <span class="k">=</span> <span class="nv">CallOptions</span><span class="o">.</span><span class="py">DEFAULT</span><span class="o">.</span><span class="py">withCompression</span><span class="o">(</span><span class="s">"gzip"</span><span class="o">))</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="technical-details">Technical details</h3>
+
+<p>To be strictly accurate, when you enable compression on the client or server
+side, the requests and responses are not compressed, but the messages inside
+them are.</p>
+
+<p>For example, if you enable compression on the client side, the client will
+compress the message when constructing a request. It will set the <code class="highlighter-rouge">compression</code>
+flag on the message to indicate that it is compressed, and it will set the
+<code class="highlighter-rouge">grpc-encoding: gzip</code> request header so that the server knows how to decompress
+the message.</p>
+
+<h2 id="custom-codecs">Custom codecs</h2>
+
+<p>Mu allows you to use custom decoders and encoders for Avro/Protobuf
+serialization of gRPC requests and responses.</p>
+
+<p>Let’s look at an example in both Avro and Protobuf.</p>
+
+<h3 id="custom-protobuf-codec">Custom Protobuf codec</h3>
+
+<p>Mu uses a library called <a href="https://github.com/47deg/pbdirect">PBDirect</a> for Protobuf serialization.</p>
+
+<p>To customise the serialization of fields in Protobuf messages, you need to
+provide instances of PBDirect’s <code class="highlighter-rouge">PBScalarValueReader</code> and <code class="highlighter-rouge">PBScalarValueWriter</code>
+type classes.</p>
+
+<p>Here is an example of providing a custom reader and writer for
+<code class="highlighter-rouge">java.time.LocalDate</code> that serializes the date as a <code class="highlighter-rouge">String</code> in ISO 8601 format.
+We create the reader and writer by building on PBDirect’s built-in reader and
+writer for <code class="highlighter-rouge">String</code>, using <code class="highlighter-rouge">map</code> and <code class="highlighter-rouge">contramap</code> respectively.</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">object</span> <span class="nc">ProtobufCustomCodecExample</span> <span class="o">{</span>
+
+  <span class="k">import</span> <span class="nn">java.time._</span>
+  <span class="k">import</span> <span class="nn">java.time.format._</span>
+
+  <span class="k">import</span> <span class="nn">pbdirect._</span>
+
+  <span class="k">import</span> <span class="nn">cats.syntax.contravariant._</span>
+  <span class="k">import</span> <span class="nn">cats.syntax.functor._</span>
+
+  <span class="k">implicit</span> <span class="k">val</span> <span class="nv">localDateReader</span><span class="k">:</span> <span class="kt">PBScalarValueReader</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="k">=</span>
+    <span class="nc">PBScalarValueReader</span><span class="o">[</span><span class="kt">String</span><span class="o">].</span><span class="py">map</span><span class="o">(</span><span class="n">string</span> <span class="k">=&gt;</span> <span class="nv">LocalDate</span><span class="o">.</span><span class="py">parse</span><span class="o">(</span><span class="n">string</span><span class="o">,</span> <span class="nv">DateTimeFormatter</span><span class="o">.</span><span class="py">ISO_LOCAL_DATE</span><span class="o">))</span>
+
+  <span class="k">implicit</span> <span class="k">val</span> <span class="nv">localDateWriter</span><span class="k">:</span> <span class="kt">PBScalarValueWriter</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="k">=</span>
+    <span class="nc">PBScalarValueWriter</span><span class="o">[</span><span class="kt">String</span><span class="o">].</span><span class="py">contramap</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">](</span><span class="nv">_</span><span class="o">.</span><span class="py">format</span><span class="o">(</span><span class="nv">DateTimeFormatter</span><span class="o">.</span><span class="py">ISO_LOCAL_DATE</span><span class="o">))</span>
+
+  <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloRequest</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">date</span><span class="k">:</span> <span class="kt">LocalDate</span><span class="o">)</span>
+
+  <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloReply</span><span class="o">(</span><span class="n">message</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
+
+  <span class="nd">@service</span><span class="o">(</span><span class="nc">Protobuf</span><span class="o">)</span>
+  <span class="k">trait</span> <span class="nc">Greeter</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
+    <span class="k">def</span> <span class="nf">sayHello</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloReply</span><span class="o">]</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="custom-avro-codec">Custom Avro codec</h3>
+
+<p>Mu uses a library called <a href="https://github.com/sksamuel/avro4s">avro4s</a> For Avro serialization.</p>
+
+<p>To customise the serialization of fields in Avro records, you need to provide
+instances of three avro4s type classes: <code class="highlighter-rouge">SchemaFor</code>, <code class="highlighter-rouge">Encoder</code>, and <code class="highlighter-rouge">Decoder</code>.</p>
+
+<p>Let’s look at the same example as above, this time for Avro.</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">object</span> <span class="nc">AvroCustomCodecExample</span> <span class="o">{</span>
+
+  <span class="k">import</span> <span class="nn">java.time._</span>
+  <span class="k">import</span> <span class="nn">java.time.format._</span>
+
+  <span class="k">import</span> <span class="nn">com.sksamuel.avro4s._</span>
+  <span class="k">import</span> <span class="nn">org.apache.avro.Schema</span>
+
+  <span class="k">implicit</span> <span class="k">object</span> <span class="nc">LocalDateSchemaFor</span> <span class="k">extends</span> <span class="nc">SchemaFor</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="o">{</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="nf">schema</span><span class="o">(</span><span class="n">fm</span><span class="k">:</span> <span class="kt">com.sksamuel.avro4s.FieldMapper</span><span class="o">)</span><span class="k">:</span> <span class="kt">Schema</span> <span class="o">=</span>
+      <span class="nv">Schema</span><span class="o">.</span><span class="py">create</span><span class="o">(</span><span class="nv">Schema</span><span class="o">.</span><span class="py">Type</span><span class="o">.</span><span class="py">STRING</span><span class="o">)</span>
+  <span class="o">}</span>
+
+  <span class="k">implicit</span> <span class="k">object</span> <span class="nc">LocalDateEncoder</span> <span class="k">extends</span> <span class="nc">Encoder</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="o">{</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="nf">encode</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">LocalDate</span><span class="o">,</span> <span class="n">schema</span><span class="k">:</span> <span class="kt">Schema</span><span class="o">,</span> <span class="n">fm</span><span class="k">:</span> <span class="kt">FieldMapper</span><span class="o">)</span><span class="k">:</span> <span class="kt">String</span> <span class="o">=</span>
+      <span class="nv">value</span><span class="o">.</span><span class="py">format</span><span class="o">(</span><span class="nv">DateTimeFormatter</span><span class="o">.</span><span class="py">ISO_LOCAL_DATE</span><span class="o">)</span>
+  <span class="o">}</span>
+
+  <span class="k">implicit</span> <span class="k">object</span> <span class="nc">LocalDateDecoder</span> <span class="k">extends</span> <span class="nc">Decoder</span><span class="o">[</span><span class="kt">LocalDate</span><span class="o">]</span> <span class="o">{</span>
+    <span class="k">override</span> <span class="k">def</span> <span class="nf">decode</span><span class="o">(</span><span class="n">value</span><span class="k">:</span> <span class="kt">Any</span><span class="o">,</span> <span class="n">schema</span><span class="k">:</span> <span class="kt">Schema</span><span class="o">,</span> <span class="n">fm</span><span class="k">:</span> <span class="kt">FieldMapper</span><span class="o">)</span><span class="k">:</span> <span class="kt">LocalDate</span> <span class="o">=</span>
+      <span class="nv">LocalDate</span><span class="o">.</span><span class="py">parse</span><span class="o">(</span><span class="nv">value</span><span class="o">.</span><span class="py">toString</span><span class="o">(),</span> <span class="nv">DateTimeFormatter</span><span class="o">.</span><span class="py">ISO_LOCAL_DATE</span><span class="o">)</span>
+  <span class="o">}</span>
+
+  <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloRequest</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">date</span><span class="k">:</span> <span class="kt">LocalDate</span><span class="o">)</span>
+
+  <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloReply</span><span class="o">(</span><span class="n">message</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
+
+  <span class="nd">@service</span><span class="o">(</span><span class="nc">Avro</span><span class="o">)</span>
+  <span class="k">trait</span> <span class="nc">Greeter</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
+    <span class="k">def</span> <span class="nf">sayHello</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloReply</span><span class="o">]</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="protobuf-codecs">Protobuf codecs</h2>
+
+<p>Mu provides Protobuf codecs for:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">BigDecimal</code></li>
+  <li><code class="highlighter-rouge">java.time.LocalDate</code>, <code class="highlighter-rouge">java.time.LocalDateTime</code> and <code class="highlighter-rouge">java.time.Instant</code></li>
+</ul>
+
+<p>Add the following imports to your service code:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Types</th>
+      <th>Import</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="highlighter-rouge">BigDecimal</code></td>
+      <td><code class="highlighter-rouge">import higherkindness.mu.rpc.internal.encoders.pbd.bigDecimal._</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">java.time.{LocalDate, LocalDateTime, Instant}</code></td>
+      <td><code class="highlighter-rouge">import higherkindness.mu.rpc.internal.encoders.pbd.javatime._</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="avro-codecs">Avro codecs</h2>
+
+<p>Mu provides Avro codecs for:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">BigDecimal</code></li>
+  <li><code class="highlighter-rouge">java.time.LocalDate</code>, <code class="highlighter-rouge">java.time.LocalDateTime</code> and <code class="highlighter-rouge">java.time.Instant</code></li>
+</ul>
+
+<p>Add the following imports to your service code:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Types</th>
+      <th>Import</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="highlighter-rouge">BigDecimal</code></td>
+      <td><code class="highlighter-rouge">import higherkindness.mu.rpc.internal.encoders.avro.bigDecimal._</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">java.time.*</code></td>
+      <td><code class="highlighter-rouge">import higherkindness.mu.rpc.internal.encoders.avro.javatime._</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Notes:</p>
+
+<p>If you want to send one of these types directly as an Avro-encoded request or
+response (instead of as a field within a request or response), you need to
+provide an instance of <code class="highlighter-rouge">io.grpc.MethodDescriptor.Marshaller</code>.</p>
+
+<p>Mu provides marshallers for these types under separate imports:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Types</th>
+      <th>Import</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="highlighter-rouge">BigDecimal</code></td>
+      <td><code class="highlighter-rouge">import higherkindness.mu.rpc.internal.encoders.avro.bigDecimal.marshallers._</code></td>
+    </tr>
+    <tr>
+      <td><code class="highlighter-rouge">java.time.*</code></td>
+      <td><code class="highlighter-rouge">import higherkindness.mu.rpc.internal.encoders.avro.javatime.marshallers._</code></td>
+    </tr>
+  </tbody>
+</table>
+
+</section></div></div></div></div><script src="/mu-scala/highlight/highlight.pack.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/protobuf.min.js"></script><script>
+// For all code blocks, copy the language from the containing div
+// to the inner code tag (where hljs expects it to be)
+const langPrefix = 'language-';
+document.querySelectorAll(`div[class^='${langPrefix}']`).forEach(function(div) {
+  div.classList.forEach(function(cssClass) {
+    if (cssClass.startsWith(langPrefix)) {
+      const lang = cssClass.substring(langPrefix.length);
+      div.querySelectorAll('pre code').forEach(function(code) {
+        code.classList.add(lang);
+      });
+    }
+  });
+});
+
+hljs.configure({languages:['scala','java','bash','protobuf']});
+hljs.initHighlightingOnLoad();
+      </script><script>console.info('\x57\x65\x62\x73\x69\x74\x65\x20\x62\x75\x69\x6c\x74\x20\x77\x69\x74\x68\x3a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x5f\x5f\x0a\x20\x20\x20\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x5f\x20\x20\x2f\x20\x2f\x5f\x20\x20\x20\x20\x20\x20\x5f\x5f\x5f\x5f\x20\x5f\x5f\x5f\x20\x20\x28\x5f\x29\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x28\x5f\x29\x20\x2f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x0a\x20\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x60\x5f\x5f\x20\x5c\x2f\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x20\x2f\x20\x5f\x5f\x2f\x20\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x0a\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x5f\x2f\x20\x2f\x20\x2f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x5f\x5f\x2f\x20\x2f\x20\x20\x2f\x20\x2f\x5f\x2f\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x20\x2f\x5f\x2f\x20\x20\x5f\x5f\x28\x5f\x5f\x20\x20\x29\x0a\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2e\x5f\x5f\x5f\x2f\x5c\x5f\x5f\x2f\x20\x20\x20\x20\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x2f\x20\x20\x20\x5c\x5f\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x0a\x0a\x68\x74\x74\x70\x73\x3a\x2f\x2f\x34\x37\x64\x65\x67\x2e\x67\x69\x74\x68\x75\x62\x2e\x69\x6f\x2f\x73\x62\x74\x2d\x6d\x69\x63\x72\x6f\x73\x69\x74\x65\x73')</script><script>((window.gitter = {}).chat = {}).options = {
+room: '47deg/mu'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/mu-scala/js/docs.js"></script></body></html>
