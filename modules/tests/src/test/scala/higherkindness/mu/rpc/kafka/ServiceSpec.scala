@@ -117,7 +117,7 @@ class ServiceSpec extends AnyFunSuite with Matchers with OneInstancePerTest with
             client
               .createPartitions(CreatePartitionsRequest(topicName, 4))
               .attempt
-          _        <- IO(assert(partition.isRight))
+          _ <- IO(assert(partition.isRight))
           // describe fails after upgrading to embed-kafka 2.7.0
           // describe <- client.describeTopics(DescribeTopicsRequest(List(topicName)))
           // _        <- IO(assert(describe.topics.size == 1))
