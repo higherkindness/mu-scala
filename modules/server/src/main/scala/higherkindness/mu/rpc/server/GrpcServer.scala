@@ -123,7 +123,7 @@ object GrpcServer {
    * Helper to convert an `io.grpc.Server` into a [[GrpcServer]].
    */
   def fromServer[F[_]: Sync](server: Server): GrpcServer[F] =
-    handlers.GrpcServerHandler[F].mapK(λ[GrpcServerOps[F, ?] ~> F](_.run(server)))
+    handlers.GrpcServerHandler[F].mapK(λ[GrpcServerOps[F, *] ~> F](_.run(server)))
 
   private[this] def buildServer(
       bldr: ServerBuilder[SB] forSome { type SB <: ServerBuilder[SB] },
