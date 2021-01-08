@@ -204,7 +204,6 @@ object ProjectPlugin extends AutoPlugin {
       micrositeGithubRepo := "mu-scala",
       micrositeGitterChannelUrl := "47deg/mu",
       micrositeOrganizationHomepage := "https://www.47deg.com",
-      micrositeCompilingDocsTool := WithMdoc,
       micrositePushSiteWith := GitHub4s,
       mdocIn := (sourceDirectory in Compile).value / "docs",
       micrositeGithubToken := Option(System.getenv().get("GITHUB_TOKEN")),
