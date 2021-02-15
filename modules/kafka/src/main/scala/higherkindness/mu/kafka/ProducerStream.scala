@@ -23,6 +23,7 @@ import fs2.kafka._
 import higherkindness.mu.format.Serialiser
 import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import fs2.kafka.KafkaProducer
 
 object ProducerStream {
   def pipe[F[_], A](
@@ -36,7 +37,7 @@ object ProducerStream {
     as =>
       for {
         implicit0(logger: Logger[F]) <- fs2.Stream.eval(Slf4jLogger.create[F])
-        s                            <- apply(fs2.kafka.produce(settings))(topic, as)
+        s                            <- apply(fs2.kafka.KafkaProducer.pipeKafkaProducer.pipe(settings))(topic, as)
       } yield s
 
   def apply[F[_], A](
@@ -50,7 +51,7 @@ object ProducerStream {
   ): Stream[F, ByteArrayProducerResult] =
     for {
       implicit0(logger: Logger[F]) <- fs2.Stream.eval(Slf4jLogger.create[F])
-      s                            <- apply(fs2.kafka.produce(settings))(topic, queue.dequeue)
+      s                            <- apply(fs2.kafka.KafkaProducer.pipeKafkaProducer.pipe(settings))(topic, queue.dequeue)
     } yield s
 
   private[kafka] def apply[F[_]: Logger, A](
