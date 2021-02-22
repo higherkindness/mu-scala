@@ -22,7 +22,7 @@ object ProjectPlugin extends AutoPlugin {
       val dropwizard: String            = "4.1.17"
       val embeddedKafka: String         = "2.7.0"
       val enumeratum: String            = "1.6.1"
-      val fs2: String                   = "2.5.2"
+      val fs2: String                   = "2.5.3"
       val fs2Grpc: String               = "0.8.0"
       val fs2Kafka: String              = "1.1.0"
       val grpc: String                  = "1.34.1"
