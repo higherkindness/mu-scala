@@ -119,8 +119,8 @@ class RPCTracingTests extends AnyFunSpec {
       ep: EntryPoint[IO]
   ): Resource[IO, C[Kleisli[IO, Span[IO], *]]] =
     for {
-      serviceDef <- Resource.liftF(bind(ep))
-      grpcServer <- Resource.liftF(
+      serviceDef <- Resource.eval(bind(ep))
+      grpcServer <- Resource.eval(
         GrpcServer.default[IO](serverPort, List(AddService(serviceDef)))
       )
       _         <- serverResource(grpcServer)

@@ -58,7 +58,7 @@ object servers {
       services: F[List[ServerServiceDefinition]],
       clientInterceptor: Option[ClientInterceptor] = None
   ): Resource[F, ServerChannel] =
-    Resource.liftF(services).flatMap(ServerChannel.fromList(_, clientInterceptor))
+    Resource.eval(services).flatMap(ServerChannel.fromList(_, clientInterceptor))
 
   final case class ServerChannel(server: Server, channel: ManagedChannel)
 
