@@ -364,7 +364,8 @@ object kafkaManagementService {
     def buildInstance[F[_]: ContextShift: Concurrent](
         settings: AdminClientSettings[F]
     ): Resource[F, KafkaManagement[F]] =
-      KafkaAdminClient.resource[F](settings)
+      KafkaAdminClient
+        .resource[F](settings)
         .map(new KafkaManagementImpl(_))
   }
 }
