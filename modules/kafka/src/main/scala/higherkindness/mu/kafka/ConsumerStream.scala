@@ -34,7 +34,7 @@ object ConsumerStream {
   ): Stream[F, A] =
     for {
       implicit0(logger: Logger[F]) <- fs2.Stream.eval(Slf4jLogger.create[F])
-      s                            <- apply(fs2.kafka.consumerStream(settings))(topic)
+      s                            <- apply(fs2.kafka.KafkaConsumer.stream(settings))(topic)
     } yield s
 
   private[kafka] def apply[F[_], A](
