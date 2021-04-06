@@ -42,6 +42,7 @@ import org.apache.kafka.clients.consumer.{OffsetAndMetadata => KOffsetAndMetadat
 
 import scala.collection.immutable
 import scala.jdk.CollectionConverters._
+import fs2.kafka.KafkaAdminClient
 
 object kafkaManagementService {
   final case class CreatePartitionsRequest(name: String, numPartitions: Int)
@@ -363,7 +364,8 @@ object kafkaManagementService {
     def buildInstance[F[_]: ContextShift: Concurrent](
         settings: AdminClientSettings[F]
     ): Resource[F, KafkaManagement[F]] =
-      adminClientResource[F](settings)
+      KafkaAdminClient
+        .resource[F](settings)
         .map(new KafkaManagementImpl(_))
   }
 }
