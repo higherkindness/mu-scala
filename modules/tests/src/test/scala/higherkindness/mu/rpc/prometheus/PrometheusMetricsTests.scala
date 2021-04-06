@@ -19,7 +19,7 @@ package higherkindness.mu.rpc.prometheus
 import cats.effect.IO
 import cats.implicits._
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
-import higherkindness.mu.rpc.internal.metrics.MetricsOpsGenerators.{methodInfoGen, statusGen}
+import higherkindness.mu.rpc.internal.metrics.MetricsOpsGenerators._
 import io.grpc.Status
 import io.prometheus.client.Collector.MetricFamilySamples
 import io.prometheus.client.{Collector, CollectorRegistry}
@@ -83,6 +83,14 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
       .exists(compareWithMinError(_, (numberOfCalls * elapsed).toDouble))
   }
 
+  // Prometheus creates two metrics per each Counter
+  // See https://github.com/prometheus/client_java/pull/615
+  def checkCounterSamples(metricName: String, value: Double)(
+      samples: List[MetricFamilySamples.Sample]
+  ): Boolean =
+    samples.find(_.name == metricName + "_total").exists(_.value == value) &&
+      samples.exists(_.name == metricName + "_created")
+
   property("creates and updates counter when registering an active call") =
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int) =>
@@ -119,7 +127,7 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
             registry,
             metricName,
             metrics.recordMessageReceived(methodInfo, Some(classifier))
-          )(checkSingleSamples(metricName, numberOfCalls.toDouble))
+          )(checkCounterSamples(metricName, numberOfCalls.toDouble))
         } yield op1).unsafeRunSync()
     }
 
