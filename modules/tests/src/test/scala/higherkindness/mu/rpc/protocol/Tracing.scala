@@ -61,6 +61,8 @@ object Tracing {
     override def traceId: IO[Option[String]] = IO.pure(Some(id.toString))
 
     override def traceUri: IO[Option[URI]] = IO.pure(None)
+
+    override def spanId: IO[Option[String]] = IO.pure(Some(id.toString))
   }
 
   def entrypoint(ref: Ref[IO, TracingData]): EntryPoint[IO] =
