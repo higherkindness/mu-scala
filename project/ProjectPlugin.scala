@@ -34,7 +34,7 @@ object ProjectPlugin extends AutoPlugin {
       val scalalogging: String          = "3.9.3" // used in tests
       val monix: String                 = "3.3.0"
       val natchez: String               = "0.0.22"
-      val nettySSL: String              = "2.0.38.Final"
+      val nettySSL: String              = "2.0.34.Final"
       val paradise: String              = "2.1.1"
       val pbdirect: String              = "0.6.1"
       val prometheus: String            = "0.10.0"
@@ -174,13 +174,13 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val benchmarksSettings: Seq[Def.Setting[_]] = Seq(
-      unmanagedSourceDirectories in Compile += {
+      Compile / unmanagedSourceDirectories += {
         baseDirectory.value.getParentFile / "shared" / "src" / "main" / "scala"
       },
-      unmanagedResourceDirectories in Compile += {
+      Compile / unmanagedResourceDirectories += {
         baseDirectory.value.getParentFile / "shared" / "src" / "main" / "resources"
       },
-      unmanagedSourceDirectories in Test += {
+      Test / unmanagedSourceDirectories += {
         baseDirectory.value.getParentFile / "shared" / "src" / "test" / "scala"
       },
       libraryDependencies ++= Seq(
@@ -205,7 +205,7 @@ object ProjectPlugin extends AutoPlugin {
       micrositeGitterChannelUrl := "47deg/mu",
       micrositeOrganizationHomepage := "https://www.47deg.com",
       micrositePushSiteWith := GitHub4s,
-      mdocIn := (sourceDirectory in Compile).value / "docs",
+      mdocIn := (Compile / sourceDirectory).value / "docs",
       micrositeGithubToken := Option(System.getenv().get("GITHUB_TOKEN")),
       micrositePalette := Map(
         "brand-primary"   -> "#001e38",
@@ -290,7 +290,7 @@ object ProjectPlugin extends AutoPlugin {
   override def projectSettings: Seq[Def.Setting[_]] =
     Seq(
       Test / fork := true,
-      compileOrder in Compile := CompileOrder.JavaThenScala,
+      Compile / compileOrder := CompileOrder.JavaThenScala,
       coverageFailOnMinimum := false,
       addCompilerPlugin(
         "org.typelevel" % "kind-projector" % V.kindProjector cross CrossVersion.full
