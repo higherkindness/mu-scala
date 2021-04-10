@@ -81,12 +81,12 @@ class serviceImpl(val c: blackbox.Context) {
           )
         )
 
-        println(serviceDef)
-        println(enrichedCompanion)
-        println()
-        println()
-        println()
-        println()
+        // println(serviceDef)
+        // println(enrichedCompanion)
+        // println()
+        // println()
+        // println()
+        // println()
 
         List(serviceDef, enrichedCompanion)
       case _ => sys.error("@service-annotated definition must be a trait or abstract class")
