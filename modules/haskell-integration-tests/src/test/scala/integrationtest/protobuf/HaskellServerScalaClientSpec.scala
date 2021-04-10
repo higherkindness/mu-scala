@@ -30,7 +30,6 @@ import fs2._
 
 import org.scalatest.flatspec.AnyFlatSpec
 
-
 class HaskellServerScalaClientSpec extends AnyFlatSpec with HaskellServerRunningInDocker {
 
   def serverPort: Int              = Constants.ProtobufPort

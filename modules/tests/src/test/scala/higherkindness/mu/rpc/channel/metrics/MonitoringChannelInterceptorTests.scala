@@ -68,14 +68,14 @@ class MonitoringChannelInterceptorTests extends RpcBaseTestSuite {
       f: ProtoRPCService[IO] => IO[A]
   )(implicit H: ProtoRPCService[IO]): IO[Either[Throwable, A]] = {
     (for {
-      dispatcher <- Dispatcher[IO]
+      dispatcher  <- Dispatcher[IO]
       interceptor <- MetricsChannelInterceptor(metricsOps, myClassifier)
       serverChannel <- withServerChannel[IO](
         service = ProtoRPCService.bindService[IO](dispatcher),
         clientInterceptor = Some(interceptor)
       )
       client <- createClient(serverChannel)
-    } yield client).use(f(_).attempt)      
+    } yield client).use(f(_).attempt)
   }
 
   private[this] def checkCalls(

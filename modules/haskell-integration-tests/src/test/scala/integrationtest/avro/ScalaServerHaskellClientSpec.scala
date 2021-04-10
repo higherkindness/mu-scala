@@ -27,7 +27,6 @@ import cats.effect.unsafe.implicits.global
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.flatspec.AnyFlatSpec
 
-
 class ScalaServerHaskellClientSpec
     extends AnyFlatSpec
     with RunHaskellClientInDocker
@@ -37,11 +36,13 @@ class ScalaServerHaskellClientSpec
 
   implicit val service: WeatherService[IO] = new MyWeatherService[IO]
 
-  private val runServer: Resource[IO, Unit] =for {
+  private val runServer: Resource[IO, Unit] = for {
     dispatcher <- Dispatcher[IO]
     serviceDef <- Resource.eval(WeatherService.bindService[IO](dispatcher))
-    serverDef  <- Resource.eval(GrpcServer.default[IO](Constants.AvroPort, List(AddService(serviceDef))))
-    _          <- GrpcServer.serverResource[IO](serverDef)
+    serverDef <- Resource.eval(
+      GrpcServer.default[IO](Constants.AvroPort, List(AddService(serviceDef)))
+    )
+    _ <- GrpcServer.serverResource[IO](serverDef)
   } yield ()
 
   private var cancelToken: IO[Unit] = IO.unit
@@ -54,7 +55,7 @@ class ScalaServerHaskellClientSpec
 
   override def afterAll(): Unit =
     // stop the server
-   cancelToken.unsafeRunSync()
+    cancelToken.unsafeRunSync()
 
   behavior of "Mu-Scala server and Mu-Haskell client communication using Avro"
 

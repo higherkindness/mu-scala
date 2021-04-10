@@ -52,9 +52,9 @@ class RPCTests extends RpcBaseTestSuite {
   ): Resource[ConcurrentMonad, service.RPCService[ConcurrentMonad]] =
     for {
       dispatcher <- Dispatcher[ConcurrentMonad]
-      channel <- withServerChannel[ConcurrentMonad](ssd(dispatcher))
-      client <- service.RPCService.clientFromChannel[ConcurrentMonad](IO(channel.channel))
-    } yield client 
+      channel    <- withServerChannel[ConcurrentMonad](ssd(dispatcher))
+      client     <- service.RPCService.clientFromChannel[ConcurrentMonad](IO(channel.channel))
+    } yield client
 
   "An AvroWithSchema service with an updated request model" can {
 

@@ -46,8 +46,8 @@ private class MetricsChannelInterceptor[F[_]: Async: Clock](
 
 object MetricsChannelInterceptor {
   def apply[F[_]: Async: Clock](
-    metricsOps: MetricsOps[F],
-    classifier: Option[String] = None
+      metricsOps: MetricsOps[F],
+      classifier: Option[String] = None
   ): Resource[F, ClientInterceptor] =
     // TODO I don't think we really want to share this Dispatcher
     Dispatcher[F].map(new MetricsChannelInterceptor(metricsOps, classifier, _))
@@ -79,7 +79,7 @@ private case class MetricsClientCall[F[_]: Clock, Req, Res](
   override def sendMessage(requestMessage: Req): Unit =
     dispatcher.unsafeRunAndForget {
       metricsOps.recordMessageSent(methodInfo, classifier) *>
-      E.delay(delegate.sendMessage(requestMessage))
+        E.delay(delegate.sendMessage(requestMessage))
     }
 }
 
@@ -126,11 +126,13 @@ private object MetricsChannelCallListener {
       delegate: ClientCall.Listener[Res],
       methodInfo: GrpcMethodInfo,
       metricsOps: MetricsOps[F],
-      classifier: Option[String],
+      classifier: Option[String]
   )(implicit C: Clock[F]): F[MetricsChannelCallListener[F, Res]] =
     Dispatcher[F].use { d =>
       C.monotonic
         .map(_.toNanos)
-        .map(new MetricsChannelCallListener[F, Res](delegate, methodInfo, metricsOps, _, classifier, d))
+        .map(
+          new MetricsChannelCallListener[F, Res](delegate, methodInfo, metricsOps, _, classifier, d)
+        )
     }
 }

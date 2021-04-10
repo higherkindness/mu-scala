@@ -27,8 +27,8 @@ import io.grpc._
 
 object MetricsServerInterceptor {
   def apply[F[_]: Async: Clock](
-    metricsOps: MetricsOps[F],
-    classifier: Option[String] = None
+      metricsOps: MetricsOps[F],
+      classifier: Option[String] = None
   ): Resource[F, ServerInterceptor] =
     Dispatcher[F].map(new MetricsServerInterceptor(metricsOps, _, classifier))
 }
@@ -87,7 +87,7 @@ private case class MetricsServerCall[F[_], Req, Res](
     }
 
   override def sendMessage(message: Res): Unit =
-    dispatcher.unsafeRunAndForget  {
+    dispatcher.unsafeRunAndForget {
       metricsOps.recordMessageSent(methodInfo, classifier) *>
         E.delay(delegate.sendMessage(message))
     }
@@ -103,7 +103,16 @@ private object MetricsServerCall {
   )(implicit C: Clock[F]): F[MetricsServerCall[F, Req, Res]] =
     C.monotonic
       .map(_.toNanos)
-      .map(new MetricsServerCall[F, Req, Res](serverCall, methodInfo, metricsOps, _, classifier, dispatcher))
+      .map(
+        new MetricsServerCall[F, Req, Res](
+          serverCall,
+          methodInfo,
+          metricsOps,
+          _,
+          classifier,
+          dispatcher
+        )
+      )
 }
 
 private case class MetricsServerCallListener[F[_], Req](
@@ -116,7 +125,7 @@ private case class MetricsServerCallListener[F[_], Req](
     extends ForwardingServerCallListener[Req] {
 
   override def onMessage(request: Req): Unit =
-    dispatcher.unsafeRunAndForget  {
+    dispatcher.unsafeRunAndForget {
       for {
         _   <- metricsOps.recordMessageReceived(methodInfo, classifier)
         _   <- metricsOps.increaseActiveCalls(methodInfo, classifier)
@@ -125,7 +134,7 @@ private case class MetricsServerCallListener[F[_], Req](
     }
 
   override def onComplete(): Unit =
-    dispatcher.unsafeRunAndForget  {
+    dispatcher.unsafeRunAndForget {
       metricsOps.decreaseActiveCalls(methodInfo, classifier) *>
         E.delay(delegate.onComplete())
     }

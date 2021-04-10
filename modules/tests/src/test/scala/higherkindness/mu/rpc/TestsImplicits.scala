@@ -16,6 +16,4 @@
 
 package higherkindness.mu.rpc
 
-object TestsImplicits {
-
-}
+object TestsImplicits {}

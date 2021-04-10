@@ -72,7 +72,7 @@ class serviceImpl(val c: blackbox.Context) {
               service.clientClass,
               service.client,
               service.clientFromChannel,
-              service.unsafeClientFromChannel,
+              service.unsafeClientFromChannel
               // service.tracingClientClass,
               // service.tracingClient,
               // service.tracingClientFromChannel,

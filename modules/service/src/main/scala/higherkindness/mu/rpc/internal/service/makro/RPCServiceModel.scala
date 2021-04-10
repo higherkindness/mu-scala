@@ -143,8 +143,8 @@ class RPCServiceModel[C <: Context](val c: C) {
     private val serverCallDescriptorsAndHandlers: List[Tree] =
       rpcRequests.map(_.descriptorAndHandler)
 
-    val asyncImplicit: Tree        = q"F: _root_.cats.effect.Async[$F]"
-    val schedulerImplicit: Tree    = q"S: _root_.monix.execution.Scheduler"
+    val asyncImplicit: Tree     = q"F: _root_.cats.effect.Async[$F]"
+    val schedulerImplicit: Tree = q"S: _root_.monix.execution.Scheduler"
 
     val bindImplicits: List[Tree] = asyncImplicit :: q"algebra: $serviceName[$F]" :: rpcRequests
       .find(_.operation.isMonixObservable)

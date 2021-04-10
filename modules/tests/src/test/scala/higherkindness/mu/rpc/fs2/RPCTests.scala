@@ -120,7 +120,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       muAvroWithSchemaRPCServiceClient
         .use(
-          _.biStreamingWithSchema(Stream.fromIterator[IO](eList.iterator, 1)).flatMap(_.compile.toList)
+          _.biStreamingWithSchema(Stream.fromIterator[IO](eList.iterator, 1))
+            .flatMap(_.compile.toList)
         )
         .unsafeRunSync()
         .distinct shouldBe eList
@@ -192,7 +193,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
 
       muCompressedAvroRPCServiceClient
         .use(
-          _.biStreamingCompressed(Stream.fromIterator[IO](eList.iterator, 1)).flatMap(_.compile.toList)
+          _.biStreamingCompressed(Stream.fromIterator[IO](eList.iterator, 1))
+            .flatMap(_.compile.toList)
         )
         .unsafeRunSync()
         .distinct shouldBe eList

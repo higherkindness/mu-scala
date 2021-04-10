@@ -55,7 +55,7 @@ object calls {
       parentSpan.span(descriptor.getFullMethodName()).use { span =>
         span.kernel.flatMap { kernel =>
           val headers = tracingKernelToHeaders(kernel)
-          unary[F, Req, Res](request, descriptor, channel, options, dispatcher,  headers)
+          unary[F, Req, Res](request, descriptor, channel, options, dispatcher, headers)
         }
       }
     }

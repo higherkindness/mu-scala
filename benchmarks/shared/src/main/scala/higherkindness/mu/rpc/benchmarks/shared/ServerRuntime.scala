@@ -36,7 +36,7 @@ trait ServerRuntime {
 
   val grpcPort: Int = 12345
 
-  implicit val logger: Logger[IO]        = Slf4jLogger.getLogger[IO]
+  implicit val logger: Logger[IO] = Slf4jLogger.getLogger[IO]
 
   implicit val persistenceService: PersistenceService[IO] = PersistenceService[IO]
 

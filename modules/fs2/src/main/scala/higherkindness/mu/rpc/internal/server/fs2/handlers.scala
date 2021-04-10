@@ -44,7 +44,7 @@ object handlers {
   def unary[F[_]: Async, Req, Res](
       f: (Req, Metadata) => F[Res],
       compressionType: CompressionType,
-      dispatcher: Dispatcher[F],
+      dispatcher: Dispatcher[F]
   ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F](dispatcher).unaryToUnaryCall[Req, Res](
       f,
@@ -54,7 +54,7 @@ object handlers {
   def clientStreaming[F[_]: Async, Req, Res](
       f: (Stream[F, Req], Metadata) => F[Res],
       compressionType: CompressionType,
-      dispatcher: Dispatcher[F],
+      dispatcher: Dispatcher[F]
   ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F](dispatcher).streamingToUnaryCall[Req, Res](
       f,
@@ -64,7 +64,7 @@ object handlers {
   def serverStreaming[F[_]: Async, Req, Res](
       f: (Req, Metadata) => F[Stream[F, Res]],
       compressionType: CompressionType,
-      dispatcher: Dispatcher[F],
+      dispatcher: Dispatcher[F]
   ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F](dispatcher).unaryToStreamingCall[Req, Res](
       (req, metadata) => Stream.force(f(req, metadata)),
@@ -74,7 +74,7 @@ object handlers {
   def bidiStreaming[F[_]: Async, Req, Res](
       f: (Stream[F, Req], Metadata) => F[Stream[F, Res]],
       compressionType: CompressionType,
-      dispatcher: Dispatcher[F],
+      dispatcher: Dispatcher[F]
   ): ServerCallHandler[Req, Res] =
     Fs2ServerCallHandler[F](dispatcher).streamingToStreamingCall[Req, Res](
       (stream, metadata) => Stream.force(f(stream, metadata)),
@@ -89,7 +89,7 @@ object handlers {
       descriptor: MethodDescriptor[Req, Res],
       entrypoint: EntryPoint[F],
       compressionType: CompressionType,
-      dispatcher: Dispatcher[F],
+      dispatcher: Dispatcher[F]
   ): ServerCallHandler[Req, Res] =
     clientStreaming[F, Req, Res](
       { (req: Stream[F, Req], metadata: Metadata) =>
@@ -108,7 +108,7 @@ object handlers {
       descriptor: MethodDescriptor[Req, Res],
       entrypoint: EntryPoint[F],
       compressionType: CompressionType,
-      dispatcher: Dispatcher[F],
+      dispatcher: Dispatcher[F]
   ): ServerCallHandler[Req, Res] =
     serverStreaming[F, Req, Res](
       { (req: Req, metadata: Metadata) =>
@@ -132,7 +132,7 @@ object handlers {
       descriptor: MethodDescriptor[Req, Res],
       entrypoint: EntryPoint[F],
       compressionType: CompressionType,
-      dispatcher: Dispatcher[F],
+      dispatcher: Dispatcher[F]
   ): ServerCallHandler[Req, Res] =
     bidiStreaming[F, Req, Res](
       { (req: Stream[F, Req], metadata: Metadata) =>

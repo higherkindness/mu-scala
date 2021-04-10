@@ -37,13 +37,14 @@ class ScalaServerHaskellClientSpec
 
   implicit val service: WeatherService[IO] = new MyWeatherService[IO]
 
-  private val runServer: Resource[IO, Unit] =for {
+  private val runServer: Resource[IO, Unit] = for {
     dispatcher <- Dispatcher[IO]
     serviceDef <- Resource.eval(WeatherService.bindService[IO](dispatcher))
-    serverDef  <- Resource.eval(GrpcServer.default[IO](Constants.ProtobufPort, List(AddService(serviceDef))))
-    _          <- GrpcServer.serverResource[IO](serverDef)
+    serverDef <- Resource.eval(
+      GrpcServer.default[IO](Constants.ProtobufPort, List(AddService(serviceDef)))
+    )
+    _ <- GrpcServer.serverResource[IO](serverDef)
   } yield ()
-
 
   private var cancelToken: IO[Unit] = IO.unit
 

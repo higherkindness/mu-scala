@@ -69,7 +69,7 @@ class MetricsServerInterceptorTests extends RpcBaseTestSuite {
       f: ProtoRPCService[IO] => IO[A]
   )(implicit H: ProtoRPCService[IO]): IO[Either[Throwable, A]] = {
     (for {
-      dispatcher <- Dispatcher[IO]
+      dispatcher  <- Dispatcher[IO]
       interceptor <- MetricsServerInterceptor(metricsOps, myClassifier)
       serverChannel <- withServerChannel[IO](
         service = ProtoRPCService

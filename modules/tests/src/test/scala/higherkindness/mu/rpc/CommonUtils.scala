@@ -95,10 +95,10 @@ trait CommonUtils {
       resourceBuilder: ConcurrentMonad[ManagedChannel] => Resource[ConcurrentMonad, Client]
   )(f: Client => T): T = {
     val makeClientFromServer = for {
-      dispatcher <- Dispatcher[ConcurrentMonad]
+      dispatcher    <- Dispatcher[ConcurrentMonad]
       serverChannel <- withServerChannel(serviceDef(dispatcher))
-      client <- resourceBuilder(suspendM(serverChannel.channel))
-    } yield client 
+      client        <- resourceBuilder(suspendM(serverChannel.channel))
+    } yield client
     makeClientFromServer.use(client => suspendM(f(client))).unsafeRunSync()
   }
 }

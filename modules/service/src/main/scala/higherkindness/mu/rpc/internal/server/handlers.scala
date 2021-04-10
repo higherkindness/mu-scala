@@ -77,9 +77,10 @@ object handlers {
           }
           .handleError { t =>
             observer.onError(t match {
-              case s: StatusException => s
+              case s: StatusException        => s
               case s: StatusRuntimeException => s
-              case other => Status.INTERNAL.withDescription(other.getMessage).withCause(other).asException()
+              case other =>
+                Status.INTERNAL.withDescription(other.getMessage).withCause(other).asException()
             })
           }
         val cancel = dispatcher.unsafeRunCancelable(handleRequest)
