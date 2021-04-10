@@ -17,46 +17,53 @@
 package higherkindness.mu.rpc
 package channel.metrics
 
-import cats.effect.{Clock, Effect}
+import cats.effect.kernel.{Async, Clock, Resource, Sync}
+import cats.effect.std.Dispatcher
 import cats.implicits._
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
 import higherkindness.mu.rpc.internal.metrics.MetricsOps
 import io.grpc._
 
-import scala.concurrent.duration._
-
-case class MetricsChannelInterceptor[F[_]: Effect: Clock](
+private class MetricsChannelInterceptor[F[_]: Async: Clock](
     metricsOps: MetricsOps[F],
-    classifier: Option[String] = None
+    classifier: Option[String] = None,
+    dispatcher: Dispatcher[F]
 ) extends ClientInterceptor {
 
   override def interceptCall[Req, Res](
       methodDescriptor: MethodDescriptor[Req, Res],
       callOptions: CallOptions,
       channel: Channel
-  ): ClientCall[Req, Res] = {
-
-    val methodInfo: GrpcMethodInfo = GrpcMethodInfo(methodDescriptor)
-
+  ): ClientCall[Req, Res] =
     MetricsClientCall[F, Req, Res](
       channel.newCall(methodDescriptor, callOptions),
-      methodInfo,
+      GrpcMethodInfo(methodDescriptor),
       metricsOps,
-      classifier
+      classifier,
+      dispatcher
     )
-  }
 }
 
-case class MetricsClientCall[F[_]: Clock, Req, Res](
+object MetricsChannelInterceptor {
+  def apply[F[_]: Async: Clock](
+    metricsOps: MetricsOps[F],
+    classifier: Option[String] = None
+  ): Resource[F, ClientInterceptor] =
+    // TODO I don't think we really want to share this Dispatcher
+    Dispatcher[F].map(new MetricsChannelInterceptor(metricsOps, classifier, _))
+}
+
+private case class MetricsClientCall[F[_]: Clock, Req, Res](
     clientCall: ClientCall[Req, Res],
     methodInfo: GrpcMethodInfo,
     metricsOps: MetricsOps[F],
-    classifier: Option[String]
-)(implicit E: Effect[F])
+    classifier: Option[String],
+    dispatcher: Dispatcher[F]
+)(implicit E: Async[F])
     extends ForwardingClientCall.SimpleForwardingClientCall[Req, Res](clientCall) {
 
   override def start(responseListener: ClientCall.Listener[Res], headers: Metadata): Unit =
-    E.toIO {
+    dispatcher.unsafeRunAndForget {
       for {
         _ <- metricsOps.increaseActiveCalls(methodInfo, classifier)
         listener <- MetricsChannelCallListener.build[F, Res](
@@ -67,59 +74,63 @@ case class MetricsClientCall[F[_]: Clock, Req, Res](
         )
         st <- E.delay(delegate.start(listener, headers))
       } yield st
-    }.unsafeRunSync()
+    }
 
   override def sendMessage(requestMessage: Req): Unit =
-    E.toIO {
+    dispatcher.unsafeRunAndForget {
       metricsOps.recordMessageSent(methodInfo, classifier) *>
-        E.delay(delegate.sendMessage(requestMessage))
-    }.unsafeRunSync()
+      E.delay(delegate.sendMessage(requestMessage))
+    }
 }
 
-class MetricsChannelCallListener[F[_], Res](
+private class MetricsChannelCallListener[F[_], Res](
     val delegate: ClientCall.Listener[Res],
     methodInfo: GrpcMethodInfo,
     metricsOps: MetricsOps[F],
     startTime: Long,
-    classifier: Option[String]
+    classifier: Option[String],
+    dispatcher: Dispatcher[F]
 )(implicit
-    E: Effect[F],
+    E: Sync[F],
     C: Clock[F]
 ) extends ForwardingClientCallListener[Res] {
 
   override def onHeaders(headers: Metadata): Unit =
-    E.toIO {
+    dispatcher.unsafeRunAndForget {
       for {
-        now <- C.monotonic(NANOSECONDS)
+        now <- C.monotonic.map(_.toNanos)
         _   <- metricsOps.recordHeadersTime(methodInfo, now - startTime, classifier)
         onH <- E.delay(delegate.onHeaders(headers))
       } yield onH
-    }.unsafeRunSync()
+    }
 
   override def onMessage(responseMessage: Res): Unit =
-    E.toIO {
+    dispatcher.unsafeRunAndForget {
       metricsOps.recordMessageReceived(methodInfo, classifier) *>
         E.delay(delegate.onMessage(responseMessage))
-    }.unsafeRunSync()
+    }
 
   override def onClose(status: Status, metadata: Metadata): Unit =
-    E.toIO {
+    dispatcher.unsafeRunAndForget {
       for {
-        now <- C.monotonic(NANOSECONDS)
+        now <- C.monotonic.map(_.toNanos)
         _   <- metricsOps.recordTotalTime(methodInfo, status, now - startTime, classifier)
         _   <- metricsOps.decreaseActiveCalls(methodInfo, classifier)
         onC <- E.delay(delegate.onClose(status, metadata))
       } yield onC
-    }.unsafeRunSync()
+    }
 }
 
-object MetricsChannelCallListener {
-  def build[F[_]: Effect, Res](
+private object MetricsChannelCallListener {
+  def build[F[_]: Async, Res](
       delegate: ClientCall.Listener[Res],
       methodInfo: GrpcMethodInfo,
       metricsOps: MetricsOps[F],
-      classifier: Option[String]
+      classifier: Option[String],
   )(implicit C: Clock[F]): F[MetricsChannelCallListener[F, Res]] =
-    C.monotonic(NANOSECONDS)
-      .map(new MetricsChannelCallListener[F, Res](delegate, methodInfo, metricsOps, _, classifier))
+    Dispatcher[F].use { d =>
+      C.monotonic
+        .map(_.toNanos)
+        .map(new MetricsChannelCallListener[F, Res](delegate, methodInfo, metricsOps, _, classifier, d))
+    }
 }
