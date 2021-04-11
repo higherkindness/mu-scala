@@ -24,7 +24,7 @@ import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
 import higherkindness.mu.rpc.internal.metrics.MetricsOps
 import io.grpc._
 
-private class MetricsChannelInterceptor[F[_]: Async: Clock](
+private class MetricsChannelInterceptor[F[_]: Sync: Clock](
     metricsOps: MetricsOps[F],
     classifier: Option[String] = None,
     dispatcher: Dispatcher[F]
@@ -50,7 +50,14 @@ object MetricsChannelInterceptor {
       classifier: Option[String] = None
   ): Resource[F, ClientInterceptor] =
     // TODO I don't think we really want to share this Dispatcher
-    Dispatcher[F].map(new MetricsChannelInterceptor(metricsOps, classifier, _))
+    Dispatcher[F].map(apply(metricsOps, classifier, _))
+
+  def apply[F[_]: Sync: Clock](
+      metricsOps: MetricsOps[F],
+      classifier: Option[String],
+      dispatcher: Dispatcher[F]
+  ): ClientInterceptor =
+    new MetricsChannelInterceptor(metricsOps, classifier, dispatcher)
 }
 
 private case class MetricsClientCall[F[_]: Clock, Req, Res](
@@ -59,25 +66,26 @@ private case class MetricsClientCall[F[_]: Clock, Req, Res](
     metricsOps: MetricsOps[F],
     classifier: Option[String],
     dispatcher: Dispatcher[F]
-)(implicit E: Async[F])
+)(implicit E: Sync[F])
     extends ForwardingClientCall.SimpleForwardingClientCall[Req, Res](clientCall) {
 
   override def start(responseListener: ClientCall.Listener[Res], headers: Metadata): Unit =
-    dispatcher.unsafeRunAndForget {
+    dispatcher.unsafeRunSync {
       for {
         _ <- metricsOps.increaseActiveCalls(methodInfo, classifier)
         listener <- MetricsChannelCallListener.build[F, Res](
           delegate = responseListener,
           methodInfo = methodInfo,
           metricsOps = metricsOps,
-          classifier = classifier
+          classifier = classifier,
+          dispatcher = dispatcher
         )
         st <- E.delay(delegate.start(listener, headers))
       } yield st
     }
 
   override def sendMessage(requestMessage: Req): Unit =
-    dispatcher.unsafeRunAndForget {
+    dispatcher.unsafeRunSync {
       metricsOps.recordMessageSent(methodInfo, classifier) *>
         E.delay(delegate.sendMessage(requestMessage))
     }
@@ -96,7 +104,7 @@ private class MetricsChannelCallListener[F[_], Res](
 ) extends ForwardingClientCallListener[Res] {
 
   override def onHeaders(headers: Metadata): Unit =
-    dispatcher.unsafeRunAndForget {
+    dispatcher.unsafeRunSync {
       for {
         now <- C.monotonic.map(_.toNanos)
         _   <- metricsOps.recordHeadersTime(methodInfo, now - startTime, classifier)
@@ -105,13 +113,13 @@ private class MetricsChannelCallListener[F[_], Res](
     }
 
   override def onMessage(responseMessage: Res): Unit =
-    dispatcher.unsafeRunAndForget {
+    dispatcher.unsafeRunSync {
       metricsOps.recordMessageReceived(methodInfo, classifier) *>
         E.delay(delegate.onMessage(responseMessage))
     }
 
   override def onClose(status: Status, metadata: Metadata): Unit =
-    dispatcher.unsafeRunAndForget {
+    dispatcher.unsafeRunSync {
       for {
         now <- C.monotonic.map(_.toNanos)
         _   <- metricsOps.recordTotalTime(methodInfo, status, now - startTime, classifier)
@@ -122,17 +130,23 @@ private class MetricsChannelCallListener[F[_], Res](
 }
 
 private object MetricsChannelCallListener {
-  def build[F[_]: Async, Res](
+  def build[F[_]: Sync, Res](
       delegate: ClientCall.Listener[Res],
       methodInfo: GrpcMethodInfo,
       metricsOps: MetricsOps[F],
-      classifier: Option[String]
+      classifier: Option[String],
+      dispatcher: Dispatcher[F]
   )(implicit C: Clock[F]): F[MetricsChannelCallListener[F, Res]] =
-    Dispatcher[F].use { d =>
-      C.monotonic
-        .map(_.toNanos)
-        .map(
-          new MetricsChannelCallListener[F, Res](delegate, methodInfo, metricsOps, _, classifier, d)
+    C.monotonic
+      .map(_.toNanos)
+      .map(
+        new MetricsChannelCallListener[F, Res](
+          delegate,
+          methodInfo,
+          metricsOps,
+          _,
+          classifier,
+          dispatcher
         )
-    }
+      )
 }

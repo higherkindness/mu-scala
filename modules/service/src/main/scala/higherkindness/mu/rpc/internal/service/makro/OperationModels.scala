@@ -160,6 +160,7 @@ class OperationModels[C <: Context](val c: C) {
       )
       """
 
+    // Dispatcher doesn't work with streaming, because stream escapes resource scope
     val clientDef: Tree = {
       def method(clientCallMethodName: String) =
         q"""

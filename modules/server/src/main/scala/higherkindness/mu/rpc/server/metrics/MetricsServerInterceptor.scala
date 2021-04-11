@@ -30,14 +30,21 @@ object MetricsServerInterceptor {
       metricsOps: MetricsOps[F],
       classifier: Option[String] = None
   ): Resource[F, ServerInterceptor] =
-    Dispatcher[F].map(new MetricsServerInterceptor(metricsOps, _, classifier))
+    Dispatcher[F].map(apply(metricsOps, _, classifier))
+
+  def apply[F[_]: Sync: Clock](
+      metricsOps: MetricsOps[F],
+      dispatcher: Dispatcher[F],
+      classifier: Option[String]
+  ): ServerInterceptor =
+    new MetricsServerInterceptor(metricsOps, dispatcher, classifier)
 }
 
 private class MetricsServerInterceptor[F[_]: Clock](
     metricsOps: MetricsOps[F],
     dispatcher: Dispatcher[F],
     classifier: Option[String]
-)(implicit E: Async[F])
+)(implicit E: Sync[F])
     extends ServerInterceptor {
 
   override def interceptCall[Req, Res](
@@ -48,19 +55,17 @@ private class MetricsServerInterceptor[F[_]: Clock](
     val methodInfo: GrpcMethodInfo = GrpcMethodInfo(call.getMethodDescriptor)
     // ugh
     dispatcher.unsafeRunSync(
-      Dispatcher[F].use { d =>
-        MetricsServerCall
-          .build[F, Req, Res](call, methodInfo, metricsOps, classifier, d)
-          .map(metricsCall =>
-            MetricsServerCallListener[F, Req](
-              next.startCall(metricsCall, requestHeaders),
-              methodInfo,
-              metricsOps,
-              classifier,
-              d
-            )
+      MetricsServerCall
+        .build[F, Req, Res](call, methodInfo, metricsOps, classifier, dispatcher)
+        .map(metricsCall =>
+          MetricsServerCallListener[F, Req](
+            next.startCall(metricsCall, requestHeaders),
+            methodInfo,
+            metricsOps,
+            classifier,
+            dispatcher
           )
-      }
+        )
     )
   }
 }
@@ -78,7 +83,7 @@ private case class MetricsServerCall[F[_], Req, Res](
 ) extends ForwardingServerCall.SimpleForwardingServerCall[Req, Res](serverCall) {
 
   override def close(status: Status, responseHeaders: Metadata): Unit =
-    dispatcher.unsafeRunAndForget {
+    dispatcher.unsafeRunSync {
       for {
         now <- C.monotonic.map(_.toNanos)
         _   <- metricsOps.recordTotalTime(methodInfo, status, now - startTime, classifier)
@@ -87,14 +92,14 @@ private case class MetricsServerCall[F[_], Req, Res](
     }
 
   override def sendMessage(message: Res): Unit =
-    dispatcher.unsafeRunAndForget {
+    dispatcher.unsafeRunSync {
       metricsOps.recordMessageSent(methodInfo, classifier) *>
         E.delay(delegate.sendMessage(message))
     }
 }
 
 private object MetricsServerCall {
-  def build[F[_]: Async, Req, Res](
+  def build[F[_]: Sync, Req, Res](
       serverCall: ServerCall[Req, Res],
       methodInfo: GrpcMethodInfo,
       metricsOps: MetricsOps[F],
@@ -121,11 +126,11 @@ private case class MetricsServerCallListener[F[_], Req](
     metricsOps: MetricsOps[F],
     classifier: Option[String],
     dispatcher: Dispatcher[F]
-)(implicit E: Async[F])
+)(implicit E: Sync[F])
     extends ForwardingServerCallListener[Req] {
 
   override def onMessage(request: Req): Unit =
-    dispatcher.unsafeRunAndForget {
+    dispatcher.unsafeRunSync {
       for {
         _   <- metricsOps.recordMessageReceived(methodInfo, classifier)
         _   <- metricsOps.increaseActiveCalls(methodInfo, classifier)
@@ -134,7 +139,7 @@ private case class MetricsServerCallListener[F[_], Req](
     }
 
   override def onComplete(): Unit =
-    dispatcher.unsafeRunAndForget {
+    dispatcher.unsafeRunSync {
       metricsOps.decreaseActiveCalls(methodInfo, classifier) *>
         E.delay(delegate.onComplete())
     }

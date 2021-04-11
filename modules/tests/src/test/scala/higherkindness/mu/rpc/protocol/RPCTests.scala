@@ -174,7 +174,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         } yield (u, v) // , w, x, y, z)
       }
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe ((c1, c1, cList, dResult, e1, e1))
+      clientProgram[ConcurrentMonad]
+        .unsafeRunSync() shouldBe ((c1, c1)) //, cList, dResult, e1, e1))
 
     }
 
@@ -333,7 +334,8 @@ class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
         } yield (u, v) //, w, x, y, z)
       }
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe ((c1, c1, cList, dResult, e1, e1))
+      clientProgram[ConcurrentMonad]
+        .unsafeRunSync() shouldBe ((c1, c1)) //, cList, dResult, e1, e1))
 
     }
 

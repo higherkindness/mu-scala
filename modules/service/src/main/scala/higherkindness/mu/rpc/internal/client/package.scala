@@ -36,7 +36,8 @@ package object client {
             override def onFailure(t: Throwable): Unit = cb(Left(t))
           }
           Futures.addCallback(fa, callback, ec.execute(_))
-          Some(F.delay(fa.cancel(false)).void)
+          // Some(F.delay(fa.cancel(false)).void)
+          Some(F.delay { println("cancel"); fa.cancel(false) }.void)
         }
       }
     }
