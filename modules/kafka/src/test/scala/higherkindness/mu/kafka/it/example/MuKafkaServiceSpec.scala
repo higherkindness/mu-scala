@@ -49,7 +49,7 @@ class MuKafkaServiceSpec
 
   // dependencies for mu kafka consumer & producer
   implicit val cs: ContextShift[IO] = IO.contextShift(global)
-  implicit val timer: Temporal[IO]     = IO.timer(global)
+  implicit val timer: Temporal[IO]  = IO.timer(global)
   import higherkindness.mu.format.AvroWithSchema._
 
   // kafka config

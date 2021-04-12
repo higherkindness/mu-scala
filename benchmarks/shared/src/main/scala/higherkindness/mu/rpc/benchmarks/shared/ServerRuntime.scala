@@ -41,7 +41,7 @@ trait ServerRuntime {
   val EC: ExecutionContext = ExecutionContext.Implicits.global
 
   implicit val logger: Logger[IO]        = Slf4jLogger.getLogger[IO]
-  implicit lazy val timer: Temporal[IO]     = IO.timer(EC)
+  implicit lazy val timer: Temporal[IO]  = IO.timer(EC)
   implicit lazy val cs: ContextShift[IO] = IO.contextShift(EC)
 
   implicit val persistenceService: PersistenceService[IO] = PersistenceService[IO]
