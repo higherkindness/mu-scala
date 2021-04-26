@@ -23,7 +23,7 @@ object ProjectPlugin extends AutoPlugin {
       val embeddedKafka: String         = "2.7.0"
       val enumeratum: String            = "1.6.1"
       val fs2: String                   = "2.5.4"
-      val fs2Grpc: String               = "0.10.2"
+      val fs2Grpc: String               = "0.10.3"
       val fs2Kafka: String              = "1.5.0"
       val grpc: String                  = "1.36.1"
       val http4s: String                = "0.21.22"
@@ -33,8 +33,8 @@ object ProjectPlugin extends AutoPlugin {
       val logback: String               = "1.2.3"
       val scalalogging: String          = "3.9.3" // used in tests
       val monix: String                 = "3.3.0"
-      val natchez: String               = "0.0.22"
-      val nettySSL: String              = "2.0.38.Final"
+      val natchez: String               = "0.0.23"
+      val nettySSL: String              = "2.0.34.Final"
       val paradise: String              = "2.1.1"
       val pbdirect: String              = "0.6.1"
       val prometheus: String            = "0.10.0"
@@ -43,7 +43,7 @@ object ProjectPlugin extends AutoPlugin {
       val scalaCollectionCompat: String = "2.4.3"
       val scalacheckToolbox: String     = "0.5.0"
       val scalamock: String             = "5.1.0"
-      val scalatest: String             = "3.2.7"
+      val scalatest: String             = "3.2.8"
       val scalatestplusScheck: String   = "3.2.2.0"
       val slf4j: String                 = "1.7.30"
     }
