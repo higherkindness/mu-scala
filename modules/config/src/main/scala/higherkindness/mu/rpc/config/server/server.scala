@@ -17,16 +17,19 @@
 package higherkindness.mu.rpc
 package config
 
+import scala.annotation.nowarn
 import cats.Functor
 import higherkindness.mu.rpc.server.{GrpcConfig, GrpcServer}
 
 package object server {
 
+  @nowarn
   def BuildServerFromConfig[F[_]: Functor](portPath: String, configList: List[GrpcConfig] = Nil)(
       implicit SC: ServerConfig[F]
   ): F[GrpcServer[F]] =
     SC.buildServer(portPath, configList)
 
+  @nowarn
   def BuildNettyServerFromConfig[F[_]: Functor](
       portPath: String,
       configList: List[GrpcConfig] = Nil

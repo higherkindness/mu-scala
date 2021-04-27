@@ -16,6 +16,7 @@
 
 package higherkindness.mu.kafka
 
+import scala.annotation.nowarn
 import cats.effect.{ConcurrentEffect, ContextShift, Sync, Timer}
 import fs2.Stream
 import fs2.kafka.{ConsumerSettings, KafkaConsumer}
@@ -25,6 +26,7 @@ import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 object ConsumerStream {
 
+  @nowarn
   def apply[F[_]: Sync, A](topic: String, settings: ConsumerSettings[F, String, Array[Byte]])(
       implicit
       contextShift: ContextShift[F],

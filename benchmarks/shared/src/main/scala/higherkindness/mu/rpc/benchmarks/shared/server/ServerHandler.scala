@@ -18,11 +18,13 @@ package higherkindness.mu.rpc.benchmarks
 package shared
 package server
 
+import scala.annotation.nowarn
 import cats.effect._
 import higherkindness.mu.rpc.benchmarks.shared.models._
 import higherkindness.mu.rpc.benchmarks.shared.protocols._
 import higherkindness.mu.rpc.protocol.Empty
 
+@nowarn
 abstract class HandlerImpl[F[_]: Effect](implicit persistenceService: PersistenceService[F]) {
 
   def listPersons(b: Empty.type): F[PersonList] = {

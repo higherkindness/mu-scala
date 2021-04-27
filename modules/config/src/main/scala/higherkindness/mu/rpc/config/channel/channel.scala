@@ -17,15 +17,18 @@
 package higherkindness.mu.rpc
 package config
 
+import scala.annotation.nowarn
 import cats.Functor
 
 package object channel {
 
+  @nowarn
   def ConfigForAddress[F[_]: Functor](hostPath: String, portPath: String)(implicit
       CC: ChannelConfig[F]
   ): F[ChannelForAddress] =
     CC.loadChannelAddress(hostPath, portPath)
 
+  @nowarn
   def ConfigForTarget[F[_]: Functor](
       target: String
   )(implicit CC: ChannelConfig[F]): F[ChannelForTarget] =

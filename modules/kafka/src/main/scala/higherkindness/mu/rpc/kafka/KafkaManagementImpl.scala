@@ -16,6 +16,8 @@
 
 package higherkindness.mu.rpc.kafka
 
+import scala.annotation.nowarn
+
 import cats.effect.{Concurrent, ContextShift}
 import cats.implicits._
 import fs2.kafka._
@@ -24,6 +26,7 @@ import org.apache.kafka.clients.admin.{NewPartitions, NewTopic}
 
 import kafkaManagementService._
 
+@nowarn
 class KafkaManagementImpl[F[_]: ContextShift: Concurrent] private[kafka] (
     adminClient: KafkaAdminClient[F]
 ) extends KafkaManagement[F] {

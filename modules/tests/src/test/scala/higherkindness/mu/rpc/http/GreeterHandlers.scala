@@ -16,11 +16,13 @@
 
 package higherkindness.mu.rpc.http
 
+import scala.annotation.nowarn
 import cats.{Applicative, MonadError}
 import cats.syntax.applicative._
 import cats.syntax.functor._
 import cats.effect._
 
+@nowarn
 class UnaryGreeterHandler[F[_]: Applicative](implicit F: MonadError[F, Throwable])
     extends UnaryGreeter[F] {
 
