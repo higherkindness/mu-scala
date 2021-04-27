@@ -21,8 +21,8 @@ import fs2._
 import fs2.concurrent.Queue
 import fs2.kafka._
 import higherkindness.mu.format.Serialiser
-import io.chrisdavenport.log4cats.Logger
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.Logger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 object ProducerStream {
   def pipe[F[_], A](
