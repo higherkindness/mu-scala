@@ -144,18 +144,17 @@ object AvroCustomCodecExample {
   import com.sksamuel.avro4s._
   import org.apache.avro.Schema
 
-  implicit object LocalDateSchemaFor extends SchemaFor[LocalDate] {
-    override def schema(fm: com.sksamuel.avro4s.FieldMapper): Schema =
-      Schema.create(Schema.Type.STRING)
-  }
+  implicit val LocalDateSchemaFor: SchemaFor[LocalDate] = SchemaFor[LocalDate](Schema.create(Schema.Type.STRING))
 
   implicit object LocalDateEncoder extends Encoder[LocalDate] {
-    override def encode(value: LocalDate, schema: Schema, fm: FieldMapper): String =
+    override val schemaFor = LocalDateSchemaFor
+    override def encode(value: LocalDate): String =
       value.format(DateTimeFormatter.ISO_LOCAL_DATE)
   }
 
   implicit object LocalDateDecoder extends Decoder[LocalDate] {
-    override def decode(value: Any, schema: Schema, fm: FieldMapper): LocalDate =
+    override val schemaFor = LocalDateSchemaFor
+    override def decode(value: Any): LocalDate =
       LocalDate.parse(value.toString(), DateTimeFormatter.ISO_LOCAL_DATE)
   }
 

@@ -56,7 +56,7 @@ object avro {
 
       override def stream(value: A): InputStream = {
         val baos: ByteArrayOutputStream = new ByteArrayOutputStream()
-        val output: AvroOutputStream[A] = AvroOutputStream.binary[A].to(baos).build(AvroSchema[A])
+        val output: AvroOutputStream[A] = AvroOutputStream.binary[A].to(baos).build()
         output.write(value)
         output.close()
 
@@ -73,17 +73,22 @@ object avro {
   )
   object bigdecimal {
 
-    implicit object bigDecimalSchemaFor extends SchemaFor[BigDecimal] {
-      def schema(fm: FieldMapper): Schema = Schema.create(Schema.Type.BYTES)
-    }
+    implicit val bigDecimalSchemaFor: SchemaFor[BigDecimal] =
+      SchemaFor[BigDecimal](Schema.create(Schema.Type.BYTES))
 
     implicit object bigDecimalDecoder extends Decoder[BigDecimal] {
-      def decode(value: Any, schema: Schema, fm: FieldMapper): BigDecimal =
+
+      override val schemaFor = bigDecimalSchemaFor
+
+      def decode(value: Any): BigDecimal =
         BigDecimalUtil.byteToBigDecimal(value.asInstanceOf[ByteBuffer].array())
     }
 
     implicit object bigDecimalEncoder extends Encoder[BigDecimal] {
-      def encode(value: BigDecimal, schema: Schema, fm: FieldMapper): ByteBuffer =
+
+      override val schemaFor = bigDecimalSchemaFor
+
+      def encode(value: BigDecimal): ByteBuffer =
         ByteBuffer.wrap(BigDecimalUtil.bigDecimalToByte(value))
     }
 
@@ -150,14 +155,10 @@ object avro {
 
     private[this] def bigDecimalSchemaFor[A, B](
         sp: ScalePrecision
-    ): SchemaFor[BigDecimal @@ (A, B)] = {
-      new SchemaFor[BigDecimal @@ (A, B)] {
-        def schema(fm: FieldMapper) = {
-          val schema = Schema.create(Schema.Type.BYTES)
-          LogicalTypes.decimal(sp.precision, sp.scale).addToSchema(schema)
-          schema
-        }
-      }
+    ): SchemaFor[BigDecimal @@ (A, B)] = SchemaFor[BigDecimal @@ (A, B)] {
+      val schema = Schema.create(Schema.Type.BYTES)
+      LogicalTypes.decimal(sp.precision, sp.scale).addToSchema(schema)
+      schema
     }
 
     private[this] def bigDecimalDecoder[A, B](
@@ -166,7 +167,10 @@ object avro {
     ): Decoder[BigDecimal @@ (A, B)] = {
       new Decoder[BigDecimal @@ (A, B)] {
         val inner = BDSerializer(sp, rm)
-        def decode(value: Any, schema: Schema, fm: FieldMapper): BigDecimal @@ (A, B) =
+
+        override val schemaFor = bigDecimalSchemaFor[A, B](sp)
+
+        def decode(value: Any): BigDecimal @@ (A, B) =
           toDecimalTag[(A, B)](inner.fromByteBuffer(value.asInstanceOf[ByteBuffer]))
       }
     }
@@ -176,8 +180,11 @@ object avro {
         rm: RoundingMode.RoundingMode
     ): Encoder[BigDecimal @@ (A, B)] = {
       new Encoder[BigDecimal @@ (A, B)] {
+
+        override val schemaFor = bigDecimalSchemaFor[A, B](sp)
+
         val inner = BDSerializer(sp, rm)
-        def encode(value: BigDecimal @@ (A, B), schema: Schema, fm: FieldMapper): ByteBuffer =
+        def encode(value: BigDecimal @@ (A, B)): ByteBuffer =
           inner.toByteBuffer(value)
       }
     }
@@ -327,9 +334,8 @@ object avro {
      * the datetime as nanoseconds).
      */
 
-    implicit object localDateTimeSchemaFor extends SchemaFor[LocalDateTime] {
-      override def schema(fm: FieldMapper): Schema = Schema.create(Schema.Type.LONG)
-    }
+    implicit val localDateTimeSchemaFor: SchemaFor[LocalDateTime] =
+      SchemaFor[LocalDateTime](Schema.create(Schema.Type.LONG))
 
     implicit val localDateTimeDecoder: Decoder[LocalDateTime] =
       Decoder[Long].map(JavaTimeUtil.longToLocalDateTime)
@@ -403,12 +409,12 @@ object avrowithschema {
 
       override def parse(stream: InputStream): A = {
         val dfs = new DataFileStream(stream, new GenericDatumReader[GenericRecord](schema))
-        FromRecord[A](schema).from(dfs.next())
+        FromRecord[A](Decoder[A]).from(dfs.next())
       }
 
       override def stream(value: A): InputStream = {
         val baos: ByteArrayOutputStream = new ByteArrayOutputStream()
-        val output: AvroOutputStream[A] = AvroOutputStream.data[A].to(baos).build(schema)
+        val output: AvroOutputStream[A] = AvroOutputStream.data[A].to(baos).build()
         output.write(value)
         output.close()
 

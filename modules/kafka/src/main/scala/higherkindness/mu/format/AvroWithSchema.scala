@@ -20,11 +20,11 @@ import java.io.ByteArrayOutputStream
 import com.sksamuel.avro4s._
 
 object AvroWithSchema {
-  implicit def serialiser[T: Encoder: SchemaFor]: Serialiser[T] =
+  implicit def serialiser[T: Encoder]: Serialiser[T] =
     new Serialiser[T] {
       override def serialise(t: T): Array[Byte] = {
         val bOut = new ByteArrayOutputStream()
-        val out  = AvroOutputStream.data[T].to(bOut).build(AvroSchema[T])
+        val out  = AvroOutputStream.data[T].to(bOut).build()
         out.write(t)
         out.close()
         bOut.toByteArray
