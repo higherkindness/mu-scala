@@ -1,0 +1,196 @@
+<!DOCTYPE html><html><head><title>Mu-Scala: gRPC server and client</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="47 Degrees Open Source" /><meta name="description" content="A purely functional library for building RPC endpoint-based services" /><meta name="og:image" content="/mu-scala/img/poster.png" /><meta name="image" property="og:image" content="/mu-scala/img/poster.png" /><meta name="og:title" content="Mu-Scala: gRPC server and client" /><meta name="title" property="og:title" content="Mu-Scala: gRPC server and client" /><meta name="og:site_name" content="Mu-Scala" /><meta name="og:url" content="https://github.com/higherkindness/mu-scala" /><meta name="og:type" content="website" /><meta name="og:description" content="A purely functional library for building RPC endpoint-based services" /><link rel="icon" type="image/png" href="/mu-scala/img/favicon.png" /><meta name="twitter:title" content="Mu-Scala: gRPC server and client" /><meta name="twitter:image" content="/mu-scala/img/poster.png" /><meta name="twitter:description" content="A purely functional library for building RPC endpoint-based services" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/mu-scala/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/mu-scala/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/mu-scala/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/mu-scala/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/mu-scala/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/mu-scala/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/mu-scala/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/mu-scala/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/mu-scala/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/mu-scala/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/mu-scala/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/mu-scala/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/mu-scala/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/mu-scala/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/mu-scala/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/mu-scala/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/mu-scala/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/mu-scala/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/mu-scala/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/mu-scala/img/favicon310x150.png" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/mu-scala/highlight/styles/github-gist.css" /><link rel="stylesheet" href="/mu-scala/css/light-style.css" /><link rel="stylesheet" href="/mu-scala/css/mu-styles.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><div id="sidebar-brand"><a href="/mu-scala/" class="brand"><div class="brand-wrapper"></div><span>Mu-Scala</span></a><button id="main-toggle" class="sidebar-toggle"><span class="close"></span></button></div><div class="sidebar-nav">      <div class="sidebar-nav-item  "><a href="/mu-scala/tutorials" title="Tutorials" class="">Tutorials</a></div> <div class="sidebar-nav-item  "><button type="button" title="RPC service definition" class="button drop-nested">RPC service definition</button><i class="fa fa-angle-right"></i><div class="sub-section"> <a href="/mu-scala/tutorials/service-definition/protobuf" title="Protobuf" class="">Protobuf</a> <a href="/mu-scala/tutorials/service-definition/avro" title="Avro" class="">Avro</a></div></div> <div class="sidebar-nav-item active "><a href="/mu-scala/tutorials/grpc-server-client" title="gRPC server and client" class="active">gRPC server and client</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/tutorials/testing-rpc-service" title="Testing an RPC service" class="">Testing an RPC service</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/tutorials/openapi-client" title="OpenAPI REST client" class="">OpenAPI REST client</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/tutorials/deployment" title="Deploying a Mu service" class="">Deploying a Mu service</a></div>            </div></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li class="search-nav"><div id="search-dropdown"><label><i class="fa fa-search"></i>Search</label><input id="search-bar" type="text" placeholder="Enter keywords here..." onclick="displayToggleSearch(event)" /><ul id="search-dropdown-content" class="dropdown dropdown-content"></ul></div></li><li id="gh-eyes-item" class="hidden-xs to-uppercase"><a href="https://github.com/higherkindness/mu-scala" target="_blank" rel="noopener noreferrer"><i class="fa fa-eye"></i><span>Watchers<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs to-uppercase"><a href="https://github.com/higherkindness/mu-scala" target="_blank" rel="noopener noreferrer"><i class="fa fa-star-o"></i><span>Stars<span id="stars" class="label label-default">--</span></span></a></li></ul></div></div></div></div><div id="content" data-github-owner="higherkindness" data-github-repo="mu-scala"><div class="content-wrapper"><section><h1 id="tutorial-grpc-server-and-client">Tutorial: gRPC server and client</h1>
+
+<p>This tutorial will show you how to implement a working gRPC server and client
+based on a Mu service defintion.</p>
+
+<p>This tutorial is aimed at developers who:</p>
+
+<ul>
+  <li>are new to Mu-Scala</li>
+  <li>have some understanding of <a href="https://typelevel.org/cats-effect/">cats-effect</a></li>
+  <li>have read the <a href="../getting-started">Getting Started guide</a></li>
+  <li>have followed either the <a href="service-definition/protobuf">RPC service definition with Protobuf</a> or 
+<a href="service-definition/avro">RPC service definition with Avro</a> tutorial</li>
+</ul>
+
+<p>Mu supports both Protobuf and Avro. For the purposes of this tutorial we will
+assume you are using Protobuf, but it’s possible to follow the tutorial even if
+you are using Avro.</p>
+
+<h2 id="service-definition">Service definition</h2>
+
+<p>If you have followed one of the previous tutorials, you should already have a
+service definition that looks like this:</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">higherkindness.mu.rpc.protocol._</span>
+
+<span class="k">object</span> <span class="nc">hello</span> <span class="o">{</span>
+  <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloRequest</span><span class="o">(</span><span class="nd">@pbdirect</span><span class="o">.</span><span class="py">pbIndex</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span> <span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
+  <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloResponse</span><span class="o">(</span><span class="nd">@pbdirect</span><span class="o">.</span><span class="py">pbIndex</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span> <span class="n">greeting</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="nd">@pbdirect</span><span class="o">.</span><span class="py">pbIndex</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span> <span class="n">happy</span><span class="k">:</span> <span class="kt">Boolean</span><span class="o">)</span>
+
+  <span class="c1">// Note: the @service annotation in your code might reference Avro instead of Protobuf</span>
+  <span class="nd">@service</span><span class="o">(</span><span class="nc">Protobuf</span><span class="o">,</span> <span class="n">compressionType</span> <span class="k">=</span> <span class="nc">Identity</span><span class="o">,</span> <span class="n">namespace</span> <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="s">"com.example"</span><span class="o">))</span>
+  <span class="k">trait</span> <span class="nc">Greeter</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
+    <span class="k">def</span> <span class="nf">SayHello</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
+  <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="implement-the-server">Implement the server</h2>
+
+<p>This is the interesting part: writing the business logic for your service.</p>
+
+<p>We do this by implementing the <code class="highlighter-rouge">Greeter</code> trait. Let’s make a <code class="highlighter-rouge">Greeter</code> that says
+“hello” in a happy voice:</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.Applicative</span>
+<span class="k">import</span> <span class="nn">cats.syntax.applicative._</span>
+<span class="k">import</span> <span class="nn">hello._</span>
+
+<span class="k">class</span> <span class="nc">HappyGreeter</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span><span class="kt">:</span> <span class="kt">Applicative</span><span class="o">]</span> <span class="nc">extends</span> <span class="nc">Greeter</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span> <span class="o">{</span>
+
+  <span class="k">def</span> <span class="nf">SayHello</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span> <span class="k">=</span>
+    <span class="nc">HelloResponse</span><span class="o">(</span><span class="n">s</span><span class="s">"Hello, ${req.name}!"</span><span class="o">,</span> <span class="n">happy</span> <span class="k">=</span> <span class="kc">true</span><span class="o">).</span><span class="py">pure</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Note that in this implementation we aren’t performing any effects, so we don’t
+care what <code class="highlighter-rouge">F[_]</code> is as long as we can lift a pure value into it.</p>
+
+<h2 id="server-entrypoint">Server entrypoint</h2>
+
+<p>Now we have a <code class="highlighter-rouge">Greeter</code> implementation, let’s expose it as a gRPC server.</p>
+
+<p>We’re going to use cats-effect <code class="highlighter-rouge">IO</code> as our concrete IO monad, and we’ll make use
+<code class="highlighter-rouge">IOApp</code> from cats-effect.</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">IOApp</span><span class="o">,</span> <span class="nc">ExitCode</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">hello.Greeter</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.server.</span><span class="o">{</span><span class="nc">GrpcServer</span><span class="o">,</span> <span class="nc">AddService</span><span class="o">}</span>
+
+<span class="k">object</span> <span class="nc">Server</span> <span class="k">extends</span> <span class="nc">IOApp</span> <span class="o">{</span>
+
+  <span class="k">implicit</span> <span class="k">val</span> <span class="nv">greeter</span><span class="k">:</span> <span class="kt">Greeter</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">HappyGreeter</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>  <span class="c1">// 1</span>
+
+  <span class="k">def</span> <span class="nf">run</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">ExitCode</span><span class="o">]</span> <span class="k">=</span> <span class="k">for</span> <span class="o">{</span>
+    <span class="n">serviceDef</span> <span class="k">&lt;-</span> <span class="nv">Greeter</span><span class="o">.</span><span class="py">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>                                      <span class="c1">// 2</span>
+    <span class="n">server</span>     <span class="k">&lt;-</span> <span class="nv">GrpcServer</span><span class="o">.</span><span class="py">default</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="mi">12345</span><span class="o">,</span> <span class="nc">List</span><span class="o">(</span><span class="nc">AddService</span><span class="o">(</span><span class="n">serviceDef</span><span class="o">)))</span>  <span class="c1">// 3</span>
+    <span class="k">_</span>          <span class="k">&lt;-</span> <span class="nv">GrpcServer</span><span class="o">.</span><span class="py">server</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="n">server</span><span class="o">)</span>                                <span class="c1">// 4</span>
+  <span class="o">}</span> <span class="k">yield</span> <span class="nv">ExitCode</span><span class="o">.</span><span class="py">Success</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Let’s go through this line by line.</p>
+
+<ol>
+  <li>
+    <p>First we instantiate our <code class="highlighter-rouge">HappyGreeter</code>, concretized to <code class="highlighter-rouge">IO</code>, and make it
+available implicitly for use by <code class="highlighter-rouge">Greeter.bindService</code>.</p>
+  </li>
+  <li>Next we call <code class="highlighter-rouge">Greeter.bindService</code>. This is a helper method generated by the
+<code class="highlighter-rouge">@service</code> macro annotation on the <code class="highlighter-rouge">Greeter</code> trait. It converts our <code class="highlighter-rouge">Greeter</code>
+service into a gRPC “service definition”, returning
+<code class="highlighter-rouge">IO[io.grpc.ServerServiceDefinition]</code>. 
+Each Scala method in the service will become a gRPC method of the same name,
+with the following adjustments:
+    <ul>
+      <li>If the <code class="highlighter-rouge">@service</code> annotation has a <code class="highlighter-rouge">methodNameStyle = Capitalize</code> argument,
+ the first letter of the method name will be capitalized;</li>
+      <li>If the <code class="highlighter-rouge">@service</code> annotation has a <code class="highlighter-rouge">namespace = Some(ns)</code> argument, 
+ the method name will be prefixed by the value of <code class="highlighter-rouge">ns</code>, followed by a dot.</li>
+    </ul>
+  </li>
+  <li>
+    <p>We build a description of the whole gRPC server by calling
+<code class="highlighter-rouge">GrpcServer.default</code>. We tell it the port we want to run on (12345), and the
+list of services we want it to expose. The method is called <code class="highlighter-rouge">default</code> because
+we want to use gRPC’s default HTTP transport layer.</p>
+  </li>
+  <li>Finally we can call <code class="highlighter-rouge">GrpcServer.server</code>, passing it our server description.
+This actually starts the server.</li>
+</ol>
+
+<p>If you copy the above code into a <code class="highlighter-rouge">.scala</code> file in the <code class="highlighter-rouge">server</code> module of your
+project, you should be able to start a server using <code class="highlighter-rouge">sbt server/run</code>.</p>
+
+<h2 id="client">Client</h2>
+
+<p>Let’s see how to make a client to communicate with the server.</p>
+
+<p>Here is a tiny demo that makes a request to the <code class="highlighter-rouge">SayHello</code> endpoint and
+prints out the reply to the console.</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">IOApp</span><span class="o">,</span> <span class="nc">Resource</span><span class="o">,</span> <span class="nc">ExitCode</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">hello.</span><span class="o">{</span><span class="nc">Greeter</span><span class="o">,</span> <span class="nc">HelloRequest</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc._</span>
+
+<span class="k">object</span> <span class="nc">ClientDemo</span> <span class="k">extends</span> <span class="nc">IOApp</span> <span class="o">{</span>
+
+  <span class="k">val</span> <span class="nv">channelFor</span><span class="k">:</span> <span class="kt">ChannelFor</span> <span class="o">=</span> <span class="nc">ChannelForAddress</span><span class="o">(</span><span class="s">"localhost"</span><span class="o">,</span> <span class="mi">12345</span><span class="o">)</span>  <span class="c1">// 1</span>
+
+  <span class="k">val</span> <span class="nv">clientResource</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">Greeter</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span> <span class="nv">Greeter</span><span class="o">.</span><span class="py">client</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="n">channelFor</span><span class="o">)</span>  <span class="c1">// 2</span>
+
+  <span class="k">def</span> <span class="nf">run</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">ExitCode</span><span class="o">]</span> <span class="k">=</span>
+    <span class="k">for</span> <span class="o">{</span>
+      <span class="n">response</span>   <span class="k">&lt;-</span> <span class="nv">clientResource</span><span class="o">.</span><span class="py">use</span><span class="o">(</span><span class="n">c</span> <span class="k">=&gt;</span> <span class="nv">c</span><span class="o">.</span><span class="py">SayHello</span><span class="o">(</span><span class="nc">HelloRequest</span><span class="o">(</span><span class="n">name</span> <span class="k">=</span> <span class="s">"Chris"</span><span class="o">)))</span>  <span class="c1">// 3</span>
+      <span class="n">serverMood</span> <span class="k">=</span> <span class="nf">if</span> <span class="o">(</span><span class="nv">response</span><span class="o">.</span><span class="py">happy</span><span class="o">)</span> <span class="s">"happy"</span> <span class="k">else</span> <span class="s">"unhappy"</span>
+      <span class="k">_</span>          <span class="k">&lt;-</span> <span class="nc">IO</span><span class="o">(</span><span class="nf">println</span><span class="o">(</span><span class="n">s</span><span class="s">"The $serverMood server says '${response.greeting}'"</span><span class="o">))</span>
+    <span class="o">}</span> <span class="k">yield</span> <span class="nv">ExitCode</span><span class="o">.</span><span class="py">Success</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Again we’ll go through this line by line.</p>
+
+<ol>
+  <li>
+    <p>We create a channel, which tells the client how to connect to the server.</p>
+  </li>
+  <li>
+    <p>We call <code class="highlighter-rouge">Greeter.client</code>, another helper method generated by the <code class="highlighter-rouge">@service</code>
+macro. This returns a cats-effect
+<a href="https://typelevel.org/cats-effect/datatypes/resource.html">Resource</a>, which
+will take care of safely allocated and cleaning up resources every time we
+want to use a client.</p>
+  </li>
+  <li>
+    <p>We <code class="highlighter-rouge">use</code> the resource, using the resulting client to send a request to the
+<code class="highlighter-rouge">SayHello</code> endpoint and get back a response.</p>
+  </li>
+</ol>
+
+<p>If you copy the above code into a <code class="highlighter-rouge">.scala</code> file in the <code class="highlighter-rouge">client</code> module of your
+project, and your server is still running, you should be able to see the client
+in action using <code class="highlighter-rouge">sbt client/run</code>.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[info] running com.example.ClientDemo
+The happy server says 'Hello, Chris!'
+[success] Total time: 1 s, completed 5 Mar 2020, 15:49:03
+</code></pre></div></div>
+
+<h2 id="next-steps">Next steps</h2>
+
+<p>If you want to write tests for your RPC service, take a look at the <a href="testing-rpc-service">Testing an RPC service tutorial</a>.</p>
+
+</section></div></div></div></div><script src="/mu-scala/highlight/highlight.pack.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/protobuf.min.js"></script><script src="/mu-scala/lunr/lunr.js"></script><script>
+// For all code blocks, copy the language from the containing div
+// to the inner code tag (where hljs expects it to be)
+const langPrefix = 'language-';
+document.querySelectorAll(`div[class^='${langPrefix}']`).forEach(function(div) {
+  div.classList.forEach(function(cssClass) {
+    if (cssClass.startsWith(langPrefix)) {
+      const lang = cssClass.substring(langPrefix.length);
+      div.querySelectorAll('pre code').forEach(function(code) {
+        code.classList.add(lang);
+      });
+    }
+  });
+});
+
+hljs.configure({languages:['scala','java','bash','protobuf']});
+hljs.initHighlightingOnLoad();
+      </script><script>console.info('\x57\x65\x62\x73\x69\x74\x65\x20\x62\x75\x69\x6c\x74\x20\x77\x69\x74\x68\x3a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x5f\x5f\x0a\x20\x20\x20\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x5f\x20\x20\x2f\x20\x2f\x5f\x20\x20\x20\x20\x20\x20\x5f\x5f\x5f\x5f\x20\x5f\x5f\x5f\x20\x20\x28\x5f\x29\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x28\x5f\x29\x20\x2f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x0a\x20\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x60\x5f\x5f\x20\x5c\x2f\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x20\x2f\x20\x5f\x5f\x2f\x20\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x0a\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x5f\x2f\x20\x2f\x20\x2f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x5f\x5f\x2f\x20\x2f\x20\x20\x2f\x20\x2f\x5f\x2f\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x20\x2f\x5f\x2f\x20\x20\x5f\x5f\x28\x5f\x5f\x20\x20\x29\x0a\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2e\x5f\x5f\x5f\x2f\x5c\x5f\x5f\x2f\x20\x20\x20\x20\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x2f\x20\x20\x20\x5c\x5f\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x0a\x0a\x68\x74\x74\x70\x73\x3a\x2f\x2f\x34\x37\x64\x65\x67\x2e\x67\x69\x74\x68\x75\x62\x2e\x69\x6f\x2f\x73\x62\x74\x2d\x6d\x69\x63\x72\x6f\x73\x69\x74\x65\x73')</script><script>((window.gitter = {}).chat = {}).options = {
+room: '47deg/mu'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/mu-scala/js/search.js"></script><script src="/mu-scala/js/docs.js"></script></body></html>
