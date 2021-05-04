@@ -20,8 +20,8 @@ import cats.effect.{ConcurrentEffect, ContextShift, Sync, Timer}
 import fs2.Stream
 import fs2.kafka.{ConsumerSettings, KafkaConsumer}
 import higherkindness.mu.format.Deserialiser
-import io.chrisdavenport.log4cats.Logger
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.Logger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 object ConsumerStream {
 

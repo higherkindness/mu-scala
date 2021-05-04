@@ -101,7 +101,7 @@ class RPCTests extends RpcBaseTestSuite {
         )(_.getCoproduct(requestCoproduct(request)))
       }
 
-      "be able to respond to an outdated request with the removed valued of the previous coproduct" in {
+      "be able to respond to an outdated request with the removed valued of the previous coproduct" ignore {
         runSucceedAssertion(
           serviceRequestRemovedCoproductItem.RPCService.bindService[ConcurrentMonad],
           responseCoproduct(response)

@@ -27,8 +27,8 @@ import higherkindness.mu.rpc.benchmarks.shared.server._
 import higherkindness.mu.rpc.server._
 
 import scala.concurrent.ExecutionContext
-import io.chrisdavenport.log4cats.Logger
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
+import org.typelevel.log4cats.Logger
+import org.typelevel.log4cats.slf4j.Slf4jLogger
 import java.util.concurrent.TimeUnit
 import io.grpc.ManagedChannel
 import higherkindness.mu.rpc.channel.UsePlaintext

@@ -33,7 +33,7 @@ object Utils extends CommonUtils {
   case class RequestCoproduct[A](a: Int :+: String :+: A :+: CNil)
   case class RequestSuperCoproduct[A](a: Int :+: String :+: Boolean :+: A :+: CNil)
   case class RequestCoproductNoInt[A](
-      b: String :+: A :+: CNil = Coproduct[String :+: A :+: CNil]("")
+      a: String :+: A :+: CNil = Coproduct[String :+: A :+: CNil]("")
   )
   case class RequestCoproductReplaced[A](a: Int :+: Boolean :+: A :+: CNil)
 
