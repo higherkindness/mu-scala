@@ -1,4 +1,4 @@
-addSbtPlugin("pl.project13.scala"        % "sbt-jmh"                  % "0.4.0")
+addSbtPlugin("pl.project13.scala"        % "sbt-jmh"                  % "0.4.1")
 addSbtPlugin("com.geirsson"              % "sbt-ci-release"           % "1.5.7")
 addSbtPlugin("com.47deg"                 % "sbt-microsites"           % "1.3.4")
 addSbtPlugin("org.scoverage"             % "sbt-scoverage"            % "1.7.3")
