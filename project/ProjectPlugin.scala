@@ -29,7 +29,7 @@ object ProjectPlugin extends AutoPlugin {
       val http4s: String                = "0.21.23"
       val kindProjector: String         = "0.13.0"
       val log4cats: String              = "1.3.0"
-      val log4s: String                 = "1.9.0"
+      val log4s: String                 = "1.10.0"
       val logback: String               = "1.2.3"
       val scalalogging: String          = "3.9.3" // used in tests
       val monix: String                 = "3.4.0"
