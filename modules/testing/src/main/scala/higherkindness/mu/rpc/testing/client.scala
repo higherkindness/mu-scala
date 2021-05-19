@@ -19,7 +19,6 @@ package testing
 
 import java.net.URI
 
-import io.grpc.Attributes
 import io.grpc.NameResolver
 
 import scala.annotation.nowarn
@@ -28,7 +27,7 @@ object client {
 
   case class FakeNameResolverFactory(expectedScheme: String) extends NameResolver.Factory {
     @nowarn
-    override def newNameResolver(targetUri: URI, params: Attributes): NameResolver =
+    override def newNameResolver(targetUri: URI, args: NameResolver.Args): NameResolver =
       if (expectedScheme == targetUri.getScheme) FakeNameResolver(targetUri) else null
 
     override def getDefaultScheme: String = expectedScheme
