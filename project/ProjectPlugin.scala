@@ -17,7 +17,7 @@ object ProjectPlugin extends AutoPlugin {
       val avro4s: String                = "4.0.9"
       val betterMonadicFor: String      = "0.3.1"
       val catsEffect: String            = "2.5.1"
-      val circe: String                 = "0.13.0"
+      val circe: String                 = "0.14.1"
       val dockerItScala                 = "0.9.9"
       val dropwizard: String            = "4.2.0"
       val embeddedKafka: String         = "2.7.0"
