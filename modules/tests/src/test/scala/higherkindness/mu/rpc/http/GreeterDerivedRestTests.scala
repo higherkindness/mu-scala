@@ -23,8 +23,8 @@ import higherkindness.mu.http.protocol.{HttpServer, RouteMap}
 import higherkindness.mu.rpc.common.RpcBaseTestSuite
 import io.circe.generic.auto._
 import org.http4s._
-import org.http4s.client.blaze.BlazeClientBuilder
-import org.http4s.server.blaze._
+import org.http4s.blaze.client.BlazeClientBuilder
+import org.http4s.blaze.server._
 import org.scalatest._
 
 class GreeterDerivedRestTests extends RpcBaseTestSuite with BeforeAndAfter {
