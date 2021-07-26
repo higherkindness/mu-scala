@@ -32,6 +32,7 @@ import org.http4s.server.blaze._
 import org.scalatest._
 import org.http4s.implicits._
 import org.http4s.server.Router
+import cats.effect.Temporal
 
 class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
 
@@ -46,7 +47,7 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
 
   implicit val ec                   = scala.concurrent.ExecutionContext.Implicits.global
   implicit val cs: ContextShift[IO] = IO.contextShift(ec)
-  implicit val timer: Timer[IO]     = IO.timer(ec)
+  implicit val timer: Temporal[IO]     = IO.timer(ec)
 
   implicit val unaryHandlerIO = new UnaryGreeterHandler[IO]
   implicit val fs2HandlerIO   = new Fs2GreeterHandler[IO]

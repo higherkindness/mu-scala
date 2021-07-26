@@ -21,7 +21,6 @@ import cats.syntax.applicative._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.effect.{Async, IO, Resource}
-import cats.effect.concurrent.Ref
 import cats.instances.int._
 import fs2.Stream
 import higherkindness.mu.rpc._
@@ -34,6 +33,7 @@ import org.scalatest.funspec.AnyFunSpec
 import scala.util.Random
 
 import Tracing._
+import cats.effect.Ref
 
 class RPCTracingTests extends AnyFunSpec {
 

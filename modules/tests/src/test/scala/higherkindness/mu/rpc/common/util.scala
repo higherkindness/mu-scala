@@ -18,10 +18,10 @@ package higherkindness.mu.rpc.common
 
 import java.util.concurrent.TimeUnit
 
-import cats.effect.concurrent.Ref
 import cats.effect.{Clock, Sync}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import cats.effect.Ref
 
 object util {
 

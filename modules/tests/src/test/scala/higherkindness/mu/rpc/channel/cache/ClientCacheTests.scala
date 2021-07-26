@@ -19,7 +19,6 @@ package higherkindness.mu.rpc.channel.cache
 import java.util.concurrent.TimeUnit
 
 import cats.effect._
-import cats.effect.concurrent.Ref
 import cats.implicits._
 import fs2.Stream
 import higherkindness.mu.rpc.common.util.FakeClock
@@ -27,6 +26,7 @@ import higherkindness.mu.rpc.common.util.FakeClock
 import scala.concurrent.duration._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import cats.effect.{ Ref, Temporal }
 
 class ClientCacheTests extends AnyWordSpec with Matchers {
 
@@ -35,9 +35,9 @@ class ClientCacheTests extends AnyWordSpec with Matchers {
 
   private[this] val clockStep: Int = 50
 
-  def buildTimer: IO[Timer[IO]] =
+  def buildTimer: IO[Temporal[IO]] =
     FakeClock.build[IO](clockStep.toLong, TimeUnit.MILLISECONDS).map { fakeClock =>
-      new Timer[IO] {
+      new Temporal[IO] {
 
         private[this] val innerTimer = IO.timer(EC)
 
