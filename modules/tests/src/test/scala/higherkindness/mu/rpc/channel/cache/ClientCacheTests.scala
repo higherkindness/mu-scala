@@ -26,7 +26,7 @@ import higherkindness.mu.rpc.common.util.FakeClock
 import scala.concurrent.duration._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import cats.effect.{ Ref, Temporal }
+import cats.effect.{Ref, Temporal}
 
 class ClientCacheTests extends AnyWordSpec with Matchers {
 

@@ -47,7 +47,7 @@ class GreeterRestTests extends RpcBaseTestSuite with BeforeAndAfter {
 
   implicit val ec                   = scala.concurrent.ExecutionContext.Implicits.global
   implicit val cs: ContextShift[IO] = IO.contextShift(ec)
-  implicit val timer: Temporal[IO]     = IO.timer(ec)
+  implicit val timer: Temporal[IO]  = IO.timer(ec)
 
   implicit val unaryHandlerIO = new UnaryGreeterHandler[IO]
   implicit val fs2HandlerIO   = new Fs2GreeterHandler[IO]
