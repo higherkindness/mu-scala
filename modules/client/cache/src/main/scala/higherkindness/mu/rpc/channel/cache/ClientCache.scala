@@ -22,7 +22,7 @@ import fs2.Stream
 import org.log4s.{getLogger, Logger}
 
 import scala.concurrent.duration.{Duration, DurationLong, FiniteDuration, MILLISECONDS}
-import cats.effect.{ Ref, Spawn, Temporal }
+import cats.effect.{Ref, Spawn, Temporal}
 
 trait ClientCache[Client[_[_]], F[_]] {
 
