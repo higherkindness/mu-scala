@@ -19,7 +19,7 @@ package protocol
 
 import cats.effect.{ConcurrentEffect, Timer}
 import org.http4s.HttpRoutes
-import org.http4s.server.blaze.BlazeServerBuilder
+import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.implicits._
 import org.http4s.server.Router
 

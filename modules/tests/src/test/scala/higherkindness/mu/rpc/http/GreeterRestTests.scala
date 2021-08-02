@@ -27,8 +27,8 @@ import io.circe.syntax._
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.client.UnexpectedStatus
-import org.http4s.client.blaze.BlazeClientBuilder
-import org.http4s.server.blaze._
+import org.http4s.blaze.client.BlazeClientBuilder
+import org.http4s.blaze.server._
 import org.scalatest._
 import org.http4s.implicits._
 import org.http4s.server.Router
