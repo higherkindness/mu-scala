@@ -161,7 +161,7 @@ class RPCServiceModel[C <: Context](val c: C) {
         _root_.cats.effect.std.Dispatcher.apply[$F](CE).evalMap { disp =>
           _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](
             ${lit(fullServiceName)},
-            ..${serverCallDescriptorsAndHandlers}
+            ..$serverCallDescriptorsAndHandlers
           )
         }
       """
@@ -181,7 +181,7 @@ class RPCServiceModel[C <: Context](val c: C) {
         _root_.cats.effect.std.Dispatcher.apply[$F](CE).evalMap { disp =>
           _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](
             ${lit(fullServiceName)},
-            ..${serverCallDescriptorsAndTracingHandlers}
+            ..$serverCallDescriptorsAndTracingHandlers
           )
         }
       """
