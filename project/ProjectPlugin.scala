@@ -182,16 +182,16 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val micrositeSettings: Seq[Def.Setting[_]] = Seq(
-      micrositeName := "Mu-Scala",
+      micrositeName    := "Mu-Scala",
       micrositeBaseUrl := "mu-scala",
       micrositeDescription := "A purely functional library for building RPC endpoint-based services",
-      micrositeGithubOwner := "higherkindness",
-      micrositeGithubRepo := "mu-scala",
-      micrositeGitterChannelUrl := "47deg/mu",
+      micrositeGithubOwner          := "higherkindness",
+      micrositeGithubRepo           := "mu-scala",
+      micrositeGitterChannelUrl     := "47deg/mu",
       micrositeOrganizationHomepage := "https://www.47deg.com",
-      micrositePushSiteWith := GitHub4s,
-      mdocIn := (Compile / sourceDirectory).value / "docs",
-      micrositeGithubToken := Option(System.getenv().get("GITHUB_TOKEN")),
+      micrositePushSiteWith         := GitHub4s,
+      mdocIn                        := (Compile / sourceDirectory).value / "docs",
+      micrositeGithubToken          := Option(System.getenv().get("GITHUB_TOKEN")),
       micrositePalette := Map(
         "brand-primary"   -> "#001e38",
         "brand-secondary" -> "#F44336",
@@ -218,22 +218,22 @@ object ProjectPlugin extends AutoPlugin {
     lazy val testSettings = Seq(
       publishArtifact := false,
       libraryDependencies ++= Seq(
-        "io.grpc"                 % "grpc-netty"                      % V.grpc                  % Test,
-        "io.netty"                % "netty-tcnative-boringssl-static" % V.nettySSL              % Test,
-        "org.scalatest"          %% "scalatest"                       % V.scalatest             % Test,
-        "org.scalatestplus"      %% "scalacheck-1-14"                 % V.scalatestplusScheck   % Test,
-        "org.scalamock"          %% "scalamock"                       % V.scalamock             % Test,
-        "com.47deg"              %% "scalacheck-toolbox-datetime"     % V.scalacheckToolbox     % Test,
-        "org.scala-lang.modules" %% "scala-collection-compat"         % V.scalaCollectionCompat % Test,
-        "org.http4s"             %% "http4s-blaze-client"             % V.http4s                % Test,
-        "io.circe"               %% "circe-generic"                   % V.circe                 % Test,
-        "ch.qos.logback"          % "logback-classic"                 % V.logback               % Test,
-        "org.slf4j"               % "slf4j-nop"                       % V.slf4j                 % Test
+        "io.grpc"            % "grpc-netty"                      % V.grpc                % Test,
+        "io.netty"           % "netty-tcnative-boringssl-static" % V.nettySSL            % Test,
+        "org.scalatest"     %% "scalatest"                       % V.scalatest           % Test,
+        "org.scalatestplus" %% "scalacheck-1-14"                 % V.scalatestplusScheck % Test,
+        "org.scalamock"     %% "scalamock"                       % V.scalamock           % Test,
+        "com.47deg"         %% "scalacheck-toolbox-datetime"     % V.scalacheckToolbox   % Test,
+        "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat % Test,
+        "org.http4s"             %% "http4s-blaze-client"     % V.http4s                % Test,
+        "io.circe"               %% "circe-generic"           % V.circe                 % Test,
+        "ch.qos.logback"          % "logback-classic"         % V.logback               % Test,
+        "org.slf4j"               % "slf4j-nop"               % V.slf4j                 % Test
       )
     )
 
     lazy val haskellIntegrationTestSettings = Seq(
-      publishArtifact := false,
+      publishArtifact          := false,
       Test / parallelExecution := false,
       libraryDependencies ++= Seq(
         "co.fs2"        %% "fs2-core"                    % V.fs2,
@@ -273,9 +273,9 @@ object ProjectPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] =
     Seq(
-      Test / fork := true,
+      Test / fork            := true,
       Compile / compileOrder := CompileOrder.JavaThenScala,
-      coverageFailOnMinimum := false,
+      coverageFailOnMinimum  := false,
       addCompilerPlugin(
         "org.typelevel" % "kind-projector" % V.kindProjector cross CrossVersion.full
       )

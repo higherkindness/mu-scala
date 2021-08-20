@@ -40,8 +40,8 @@ class MetricsServerInterceptorTests extends RpcBaseTestSuite {
       (for {
         metricsOps <- MetricsOpsRegister.build
         clock      <- FakeClock.build[IO]()
-        _          <- makeProtoCalls(metricsOps)(_.serviceOp1(Request()))(protoRPCServiceImpl, clock)
-        assertion  <- checkCalls(metricsOps, List(serviceOp1Info))
+        _         <- makeProtoCalls(metricsOps)(_.serviceOp1(Request()))(protoRPCServiceImpl, clock)
+        assertion <- checkCalls(metricsOps, List(serviceOp1Info))
       } yield assertion).unsafeRunSync()
     }
 
@@ -60,8 +60,8 @@ class MetricsServerInterceptorTests extends RpcBaseTestSuite {
       (for {
         metricsOps <- MetricsOpsRegister.build
         clock      <- FakeClock.build[IO]()
-        _          <- makeProtoCalls(metricsOps)(_.serviceOp1(Request()))(protoRPCServiceErrorImpl, clock)
-        assertion  <- checkCalls(metricsOps, List(serviceOp1Info), serverError = true)
+        _ <- makeProtoCalls(metricsOps)(_.serviceOp1(Request()))(protoRPCServiceErrorImpl, clock)
+        assertion <- checkCalls(metricsOps, List(serviceOp1Info), serverError = true)
       } yield assertion).unsafeRunSync()
     }
 
