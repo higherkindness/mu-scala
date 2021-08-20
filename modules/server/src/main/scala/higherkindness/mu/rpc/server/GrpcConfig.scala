@@ -22,10 +22,10 @@ import java.util.concurrent.Executor
 
 import io.grpc._
 
-trait GrpcConfig                                                               extends Product with Serializable
-case object DirectExecutor                                                     extends GrpcConfig
-final case class SetExecutor(executor: Executor)                               extends GrpcConfig
-final case class AddService(service: ServerServiceDefinition)                  extends GrpcConfig
+trait GrpcConfig                                              extends Product with Serializable
+case object DirectExecutor                                    extends GrpcConfig
+final case class SetExecutor(executor: Executor)              extends GrpcConfig
+final case class AddService(service: ServerServiceDefinition) extends GrpcConfig
 final case class AddBindableService(bindableService: BindableService)          extends GrpcConfig
 final case class AddTransportFilter(filter: ServerTransportFilter)             extends GrpcConfig
 final case class AddStreamTracerFactory(factory: ServerStreamTracer.Factory)   extends GrpcConfig

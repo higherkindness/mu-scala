@@ -374,7 +374,7 @@ class RPCServiceModel[C <: Context](val c: C) {
 
     val httpRequests = httpOperations.map(_.toRequestTree)
 
-    val HttpClient      = TypeName("HttpClient")
+    val HttpClient = TypeName("HttpClient")
     val httpClientClass = q"""
         class $HttpClient[$F_](uri: _root_.org.http4s.Uri)(implicit ..$streamConstraints) {
           ..$httpRequests

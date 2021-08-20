@@ -39,15 +39,15 @@ trait RpcServerTestSuite extends RpcBaseTestSuite with OneInstancePerTest {
 
   trait DummyData {
 
-    val serverMock: Server                                  = stub[Server]
-    val serverCopyMock: Server                              = stub[Server]
-    val timeout: Long                                       = 1L
-    val timeoutUnit: TimeUnit                               = TimeUnit.MINUTES
-    val b: Boolean                                          = true
-    val unit: Unit                                          = ()
-    val sd1: ServerServiceDefinition                        = ServerServiceDefinition.builder("s1").build()
-    val sd2: ServerServiceDefinition                        = ServerServiceDefinition.builder("s2").build()
-    val serviceList: List[ServerServiceDefinition]          = List(sd1, sd2)
+    val serverMock: Server                         = stub[Server]
+    val serverCopyMock: Server                     = stub[Server]
+    val timeout: Long                              = 1L
+    val timeoutUnit: TimeUnit                      = TimeUnit.MINUTES
+    val b: Boolean                                 = true
+    val unit: Unit                                 = ()
+    val sd1: ServerServiceDefinition               = ServerServiceDefinition.builder("s1").build()
+    val sd2: ServerServiceDefinition               = ServerServiceDefinition.builder("s2").build()
+    val serviceList: List[ServerServiceDefinition] = List(sd1, sd2)
     val immutableServiceList: List[ServerServiceDefinition] = List(sd1)
     val mutableServiceList: List[ServerServiceDefinition]   = List(sd2)
 

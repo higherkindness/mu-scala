@@ -85,8 +85,7 @@ object GrpcServer {
     Resource.eval(default[F](port, configList)).flatMap(s => serverResource(s).as(s))
 
   /**
-   * Build a Resource that starts the given [[GrpcServer]] before use,
-   * and shuts it down afterwards.
+   * Build a Resource that starts the given [[GrpcServer]] before use, and shuts it down afterwards.
    */
   def serverResource[F[_]](S: GrpcServer[F])(implicit F: Async[F]): Resource[F, Unit] =
     Resource.make(S.start)(_ => S.shutdown >> S.awaitTermination)
@@ -100,8 +99,8 @@ object GrpcServer {
   /**
    * Build a [[GrpcServer]] that uses the default network transport layer.
    *
-   * The transport layer will be Netty, unless you have written your own
-   * `io.grpc.ServerProvider` implementation and added it to the classpath.
+   * The transport layer will be Netty, unless you have written your own `io.grpc.ServerProvider`
+   * implementation and added it to the classpath.
    */
   def default[F[_]](port: Int, configList: List[GrpcConfig])(implicit
       F: Sync[F]

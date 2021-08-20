@@ -52,17 +52,17 @@ object Utils extends CommonUtils {
 
   val request                   = Request("foo", 123)
   def requestCoproduct[A](a: A) = RequestCoproduct(Coproduct[Int :+: String :+: A :+: CNil](a))
-  val requestCoproductInt       = RequestCoproduct(Coproduct[Int :+: String :+: Request :+: CNil](1))
+  val requestCoproductInt = RequestCoproduct(Coproduct[Int :+: String :+: Request :+: CNil](1))
   val requestCoproductString = RequestCoproduct(
     Coproduct[Int :+: String :+: Request :+: CNil]("hi")
   )
 
-  val response                        = Response("foo", 123)
-  val responseAddedBoolean            = ResponseAddedBoolean(response.a, response.b, true)
-  val responseReplacedType            = ResponseReplacedType(a = response.a, c = true)
-  val responseRenamedField            = ResponseRenamedField(a = response.a, c = 456)
-  val responseDroppedField            = ResponseDroppedField(response.a)
-  def responseCoproduct[A](a: A)      = ResponseCoproduct(Coproduct[Int :+: String :+: A :+: CNil](a))
+  val response                   = Response("foo", 123)
+  val responseAddedBoolean       = ResponseAddedBoolean(response.a, response.b, true)
+  val responseReplacedType       = ResponseReplacedType(a = response.a, c = true)
+  val responseRenamedField       = ResponseRenamedField(a = response.a, c = 456)
+  val responseDroppedField       = ResponseDroppedField(response.a)
+  def responseCoproduct[A](a: A) = ResponseCoproduct(Coproduct[Int :+: String :+: A :+: CNil](a))
   def responseCoproductNoInt[A](a: A) = ResponseCoproductNoInt(Coproduct[String :+: A :+: CNil](a))
   def responseCoproductReplaced[A](a: A) =
     ResponseCoproductReplaced(Coproduct[Int :+: Boolean :+: A :+: CNil](a))

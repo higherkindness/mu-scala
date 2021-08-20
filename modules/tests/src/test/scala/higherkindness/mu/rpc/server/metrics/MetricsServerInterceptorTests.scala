@@ -39,8 +39,8 @@ class MetricsServerInterceptorTests extends RpcBaseTestSuite with OneInstancePer
     "generate the right metrics with proto" in {
       (for {
         metricsOps <- MetricsOpsRegister.build
-        _          <- makeProtoCalls(metricsOps)(_.serviceOp1(Request()))(protoRPCServiceImpl)
-        assertion  <- checkCalls(metricsOps, List(serviceOp1Info))
+        _         <- makeProtoCalls(metricsOps)(_.serviceOp1(Request()))(protoRPCServiceImpl)
+        assertion <- checkCalls(metricsOps, List(serviceOp1Info))
       } yield assertion).unsafeRunSync()
     }
 
@@ -57,8 +57,8 @@ class MetricsServerInterceptorTests extends RpcBaseTestSuite with OneInstancePer
     "generate the right metrics with proto when the server returns an error" in {
       (for {
         metricsOps <- MetricsOpsRegister.build
-        _          <- makeProtoCalls(metricsOps)(_.serviceOp1(Request()))(protoRPCServiceErrorImpl)
-        assertion  <- checkCalls(metricsOps, List(serviceOp1Info), serverError = true)
+        _ <- makeProtoCalls(metricsOps)(_.serviceOp1(Request()))(protoRPCServiceErrorImpl)
+        assertion <- checkCalls(metricsOps, List(serviceOp1Info), serverError = true)
       } yield assertion).unsafeRunSync()
     }
 
