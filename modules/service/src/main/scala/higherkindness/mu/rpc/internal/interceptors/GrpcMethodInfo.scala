@@ -23,10 +23,14 @@ import io.grpc.MethodDescriptor.MethodType
 /**
  * This model encapsulates a friendly representation of an RPC `io.grpc.MethodDescriptor`.
  *
- * @param serviceName Service name owning the method.
- * @param fullMethodName Service full name, in format `full.serviceName/MethodName`.
- * @param methodName Just the method name.
- * @param `type` Method Type.
+ * @param serviceName
+ *   Service name owning the method.
+ * @param fullMethodName
+ *   Service full name, in format `full.serviceName/MethodName`.
+ * @param methodName
+ *   Just the method name.
+ * @param `type`
+ *   Method Type.
  */
 case class GrpcMethodInfo(
     serviceName: String,

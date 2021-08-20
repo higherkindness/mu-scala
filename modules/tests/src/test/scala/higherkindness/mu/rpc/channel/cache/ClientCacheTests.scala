@@ -71,9 +71,9 @@ class ClientCacheTests extends AnyWordSpec with Matchers {
 
   def test(numClients: Int, cleanUp: Int): (Int, Int) =
     (for {
-      ref1         <- Ref.of[IO, Int](0)
-      ref2         <- Ref.of[IO, Int](0)
-      _            <- compiledStream(ref1, ref2, (1 to numClients).toList.map("node-0000" + _), cleanUp)
+      ref1 <- Ref.of[IO, Int](0)
+      ref2 <- Ref.of[IO, Int](0)
+      _    <- compiledStream(ref1, ref2, (1 to numClients).toList.map("node-0000" + _), cleanUp)
       numCreations <- ref1.get
       numCloses    <- ref2.get
     } yield (numCreations, numCloses)).unsafeRunSync()
