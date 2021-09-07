@@ -12,6 +12,8 @@ addCommandAlias(
 addCommandAlias("ci-docs", "github; mdoc; headerCreateAll; publishMicrosite")
 addCommandAlias("ci-publish", "github; ci-release")
 
+Global / concurrentRestrictions += Tags.limit(Tags.Test, 1)
+
 ////////////////
 //// COMMON ////
 ////////////////
