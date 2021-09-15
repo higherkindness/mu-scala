@@ -32,7 +32,7 @@ object ProjectPlugin extends AutoPlugin {
       val scalalogging: String          = "3.9.4" // used in tests
       val monix: String                 = "3.4.0"
       val natchez: String               = "0.0.26"
-      val nettySSL: String              = "2.0.42.Final"
+      val nettySSL: String              = "2.0.43.Final"
       val paradise: String              = "2.1.1"
       val pbdirect: String              = "0.6.1"
       val prometheus: String            = "0.10.0"
