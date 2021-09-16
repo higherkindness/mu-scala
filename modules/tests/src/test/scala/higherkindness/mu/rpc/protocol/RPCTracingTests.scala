@@ -24,12 +24,12 @@ import higherkindness.mu.rpc._
 import higherkindness.mu.rpc.protocol.Tracing._
 import higherkindness.mu.rpc.server._
 import io.grpc.ServerServiceDefinition
+import munit.CatsEffectSuite
 import natchez._
-import org.scalatest.funspec.AnyFunSpec
 
 import scala.util.Random
 
-class RPCTracingTests extends AnyFunSpec {
+class RPCTracingTests extends CatsEffectSuite {
 
   object RPCService {
 
@@ -69,7 +69,6 @@ class RPCTracingTests extends AnyFunSpec {
   }
 
   import RPCService._
-  import higherkindness.mu.rpc.TestsImplicits._
 
   val serverPort = 10000 + Random.nextInt(2000)
   val channelFor = ChannelForAddress("localhost", serverPort)
@@ -115,143 +114,134 @@ class RPCTracingTests extends AnyFunSpec {
       } yield (resp, td.log.toList)
     }
 
-  describe("distributed tracing") {
+  test(
+    "distributed tracing with unary call traces the call on both the client side and server side"
+  ) {
+    val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
+    val ep: EntryPoint[IO]        = entrypoint(ref)
+    val clientResource = mkClientResource(
+      UnaryServiceDef.bindTracingService[IO],
+      UnaryServiceDef.tracingClient[IO](_),
+      ep
+    )
 
-    describe("unary call") {
-
-      it("traces the call on both the client side and server side") {
-        val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
-        val ep: EntryPoint[IO]        = entrypoint(ref)
-        val clientResource = mkClientResource(
-          UnaryServiceDef.bindTracingService[IO],
-          UnaryServiceDef.tracingClient[IO](_),
-          ep
-        )
-
-        val prog: IO[(Response, List[String])] =
-          program(clientResource, ep, ref) { case (client, span) =>
-            client.measureString(Request("abc")).run(span)
-          }
-        val (response, log) = prog.unsafeRunSync()
-
-        assert(response == Response(length = 3))
-
-        val expectedLog = List(
-          "Start span 0 [client root span] (root)",
-          "Start span 1 [com.foo.UnaryServiceDef/measureString] (child of 0)",
-          "Start span 2 [com.foo.UnaryServiceDef/measureString] (child of 1)",
-          "Start span 3 [do something on server side] (child of 2)",
-          "End span 3 [do something on server side] (child of 2)",
-          "End span 2 [com.foo.UnaryServiceDef/measureString] (child of 1)",
-          "End span 1 [com.foo.UnaryServiceDef/measureString] (child of 0)",
-          "End span 0 [client root span] (root)"
-        )
-        assert(log == expectedLog)
+    val prog: IO[(Response, List[String])] =
+      program(clientResource, ep, ref) { case (client, span) =>
+        client.measureString(Request("abc")).run(span)
       }
 
+    prog.map { case (response, log) =>
+      assertEquals(response, Response(length = 3))
+
+      val expectedLog = List(
+        "Start span 0 [client root span] (root)",
+        "Start span 1 [com.foo.UnaryServiceDef/measureString] (child of 0)",
+        "Start span 2 [com.foo.UnaryServiceDef/measureString] (child of 1)",
+        "Start span 3 [do something on server side] (child of 2)",
+        "End span 3 [do something on server side] (child of 2)",
+        "End span 2 [com.foo.UnaryServiceDef/measureString] (child of 1)",
+        "End span 1 [com.foo.UnaryServiceDef/measureString] (child of 0)",
+        "End span 0 [client root span] (root)"
+      )
+      assertEquals(log, expectedLog)
     }
+  }
 
-    describe("FS2 streaming endpoints") {
+  test("distributed tracing with FS2 streaming endpoints traces a client-streaming call") {
+    val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
+    val ep: EntryPoint[IO]        = entrypoint(ref)
+    val clientResource = mkClientResource(
+      FS2ServiceDef.bindTracingService[IO],
+      FS2ServiceDef.tracingClient[IO](_),
+      ep
+    )
 
-      it("traces a client-streaming call") {
-        val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
-        val ep: EntryPoint[IO]        = entrypoint(ref)
-        val clientResource = mkClientResource(
-          FS2ServiceDef.bindTracingService[IO],
-          FS2ServiceDef.tracingClient[IO](_),
-          ep
-        )
-
-        val prog: IO[(Response, List[String])] =
-          program(clientResource, ep, ref) { case (client, span) =>
-            client.fs2ClientStreaming(Stream(Request("abc"), Request("defg"))).run(span)
-          }
-        val (response, log) = prog.unsafeRunSync()
-
-        assert(response == Response(length = 7))
-
-        val expectedLog = List(
-          "Start span 0 [client root span] (root)",
-          "Start span 1 [com.foo.FS2ServiceDef/fs2ClientStreaming] (child of 0)",
-          "Start span 2 [com.foo.FS2ServiceDef/fs2ClientStreaming] (child of 1)",
-          "End span 2 [com.foo.FS2ServiceDef/fs2ClientStreaming] (child of 1)",
-          "End span 1 [com.foo.FS2ServiceDef/fs2ClientStreaming] (child of 0)",
-          "End span 0 [client root span] (root)"
-        )
-        assert(log == expectedLog)
+    val prog: IO[(Response, List[String])] =
+      program(clientResource, ep, ref) { case (client, span) =>
+        client.fs2ClientStreaming(Stream(Request("abc"), Request("defg"))).run(span)
       }
+    prog.map { case (response, log) =>
+      assertEquals(response, Response(length = 7))
 
-      it("traces a server-streaming call") {
-        val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
-        val ep: EntryPoint[IO]        = entrypoint(ref)
-        val clientResource = mkClientResource(
-          FS2ServiceDef.bindTracingService[IO],
-          FS2ServiceDef.tracingClient[IO](_),
-          ep
-        )
-
-        val prog: IO[(Response, List[String])] =
-          program(clientResource, ep, ref) { case (client, span) =>
-            for {
-              respStreamK <- client.fs2ServerStreaming(Request("abc")).run(span)
-              respStream =
-                respStreamK
-                  .translate(Kleisli.applyK[IO, Span[IO]](span))
-              lastResp <- respStream.compile.lastOrError
-            } yield lastResp
-          }
-        val (response, log) = prog.unsafeRunSync()
-
-        assert(response == Response(length = 3))
-
-        val expectedLog = List(
-          "Start span 0 [client root span] (root)",
-          "Start span 1 [com.foo.FS2ServiceDef/fs2ServerStreaming] (child of 0)",
-          "End span 1 [com.foo.FS2ServiceDef/fs2ServerStreaming] (child of 0)",
-          "Start span 2 [com.foo.FS2ServiceDef/fs2ServerStreaming] (child of 1)",
-          "End span 2 [com.foo.FS2ServiceDef/fs2ServerStreaming] (child of 1)",
-          "End span 0 [client root span] (root)"
-        )
-        assert(log == expectedLog)
-      }
-
-      it("traces a bidirectional-streaming call") {
-        val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
-        val ep: EntryPoint[IO]        = entrypoint(ref)
-        val clientResource = mkClientResource(
-          FS2ServiceDef.bindTracingService[IO],
-          FS2ServiceDef.tracingClient[IO](_),
-          ep
-        )
-
-        val prog: IO[(Response, List[String])] =
-          program(clientResource, ep, ref) { case (client, span) =>
-            val reqStream = Stream(Request("abc"))
-            for {
-              respStreamK <- client.fs2BidiStreaming(reqStream).run(span)
-              respStream =
-                respStreamK
-                  .translate(Kleisli.applyK[IO, Span[IO]](span))
-              lastResp <- respStream.compile.lastOrError
-            } yield lastResp
-          }
-        val (response, log) = prog.unsafeRunSync()
-
-        assert(response == Response(length = 3))
-
-        val expectedLog = List(
-          "Start span 0 [client root span] (root)",
-          "Start span 1 [com.foo.FS2ServiceDef/fs2BidiStreaming] (child of 0)",
-          "End span 1 [com.foo.FS2ServiceDef/fs2BidiStreaming] (child of 0)",
-          "Start span 2 [com.foo.FS2ServiceDef/fs2BidiStreaming] (child of 1)",
-          "End span 2 [com.foo.FS2ServiceDef/fs2BidiStreaming] (child of 1)",
-          "End span 0 [client root span] (root)"
-        )
-        assert(log == expectedLog)
-      }
-
+      val expectedLog = List(
+        "Start span 0 [client root span] (root)",
+        "Start span 1 [com.foo.FS2ServiceDef/fs2ClientStreaming] (child of 0)",
+        "Start span 2 [com.foo.FS2ServiceDef/fs2ClientStreaming] (child of 1)",
+        "End span 2 [com.foo.FS2ServiceDef/fs2ClientStreaming] (child of 1)",
+        "End span 1 [com.foo.FS2ServiceDef/fs2ClientStreaming] (child of 0)",
+        "End span 0 [client root span] (root)"
+      )
+      assertEquals(log, expectedLog)
     }
+  }
 
+  test("distributed tracing with FS2 streaming endpoints traces a server-streaming call") {
+    val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
+    val ep: EntryPoint[IO]        = entrypoint(ref)
+    val clientResource = mkClientResource(
+      FS2ServiceDef.bindTracingService[IO],
+      FS2ServiceDef.tracingClient[IO](_),
+      ep
+    )
+
+    val prog: IO[(Response, List[String])] =
+      program(clientResource, ep, ref) { case (client, span) =>
+        for {
+          respStreamK <- client.fs2ServerStreaming(Request("abc")).run(span)
+          respStream =
+            respStreamK
+              .translate(Kleisli.applyK[IO, Span[IO]](span))
+          lastResp <- respStream.compile.lastOrError
+        } yield lastResp
+      }
+    prog.map { case (response, log) =>
+      assertEquals(response, Response(length = 3))
+
+      val expectedLog = List(
+        "Start span 0 [client root span] (root)",
+        "Start span 1 [com.foo.FS2ServiceDef/fs2ServerStreaming] (child of 0)",
+        "End span 1 [com.foo.FS2ServiceDef/fs2ServerStreaming] (child of 0)",
+        "Start span 2 [com.foo.FS2ServiceDef/fs2ServerStreaming] (child of 1)",
+        "End span 2 [com.foo.FS2ServiceDef/fs2ServerStreaming] (child of 1)",
+        "End span 0 [client root span] (root)"
+      )
+      assertEquals(log, expectedLog)
+    }
+  }
+
+  test("distributed tracing with FS2 streaming endpoints traces a bidirectional-streaming call") {
+    val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
+    val ep: EntryPoint[IO]        = entrypoint(ref)
+    val clientResource = mkClientResource(
+      FS2ServiceDef.bindTracingService[IO],
+      FS2ServiceDef.tracingClient[IO](_),
+      ep
+    )
+
+    val prog: IO[(Response, List[String])] =
+      program(clientResource, ep, ref) { case (client, span) =>
+        val reqStream = Stream(Request("abc"))
+        for {
+          respStreamK <- client.fs2BidiStreaming(reqStream).run(span)
+          respStream =
+            respStreamK
+              .translate(Kleisli.applyK[IO, Span[IO]](span))
+          lastResp <- respStream.compile.lastOrError
+        } yield lastResp
+      }
+    prog.map { case (response, log) =>
+      assertEquals(response, Response(length = 3))
+
+      val expectedLog = List(
+        "Start span 0 [client root span] (root)",
+        "Start span 1 [com.foo.FS2ServiceDef/fs2BidiStreaming] (child of 0)",
+        "End span 1 [com.foo.FS2ServiceDef/fs2BidiStreaming] (child of 0)",
+        "Start span 2 [com.foo.FS2ServiceDef/fs2BidiStreaming] (child of 1)",
+        "End span 2 [com.foo.FS2ServiceDef/fs2BidiStreaming] (child of 1)",
+        "End span 0 [client root span] (root)"
+      )
+      assertEquals(log, expectedLog)
+    }
   }
 
 }

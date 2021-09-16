@@ -30,6 +30,8 @@ object ProjectPlugin extends AutoPlugin {
       val log4cats: String              = "2.1.1"
       val log4s: String                 = "1.10.0"
       val logback: String               = "1.2.6"
+      val munit: String                 = "0.7.29"
+      val munitCE: String               = "1.0.5"
       val natchez: String               = "0.1.4"
       val nettySSL: String              = "2.0.43.Final"
       val paradise: String              = "2.1.1"
@@ -207,16 +209,17 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val testSettings = Seq(
       publishArtifact := false,
+      testFrameworks += new TestFramework("munit.Framework"),
       libraryDependencies ++= Seq(
-        "io.grpc"            % "grpc-netty"                      % V.grpc                % Test,
-        "io.netty"           % "netty-tcnative-boringssl-static" % V.nettySSL            % Test,
-        "org.scalatest"     %% "scalatest"                       % V.scalatest           % Test,
-        "org.scalatestplus" %% "scalacheck-1-14"                 % V.scalatestplusScheck % Test,
-        "org.scalamock"     %% "scalamock"                       % V.scalamock           % Test,
-        "com.47deg"         %% "scalacheck-toolbox-datetime"     % V.scalacheckToolbox   % Test,
+        "io.grpc"    % "grpc-netty"                      % V.grpc              % Test,
+        "io.netty"   % "netty-tcnative-boringssl-static" % V.nettySSL          % Test,
+        "com.47deg" %% "scalacheck-toolbox-datetime"     % V.scalacheckToolbox % Test,
         "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat % Test,
         "org.http4s"             %% "http4s-blaze-client"     % V.http4s                % Test,
         "io.circe"               %% "circe-generic"           % V.circe                 % Test,
+        "org.scalameta"          %% "munit"                   % V.munit                 % Test,
+        "org.scalameta"          %% "munit-scalacheck"        % V.munit                 % Test,
+        "org.typelevel"          %% "munit-cats-effect-3"     % V.munitCE               % Test,
         "ch.qos.logback"          % "logback-classic"         % V.logback               % Test,
         "org.slf4j"               % "slf4j-nop"               % V.slf4j                 % Test
       )
@@ -227,8 +230,8 @@ object ProjectPlugin extends AutoPlugin {
       Test / parallelExecution := false,
       libraryDependencies ++= Seq(
         "co.fs2"        %% "fs2-core"                    % V.fs2,
-        "org.scalatest" %% "scalatest"                   % V.scalatest     % Test,
-        "com.whisk"     %% "docker-testkit-scalatest"    % V.dockerItScala % Test,
+        "org.scalameta" %% "munit"                       % V.munit         % Test,
+        "org.typelevel" %% "munit-cats-effect-3"         % V.munitCE       % Test,
         "com.whisk"     %% "docker-testkit-impl-spotify" % V.dockerItScala % Test
       )
     )

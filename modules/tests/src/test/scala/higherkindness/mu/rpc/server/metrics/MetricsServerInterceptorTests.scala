@@ -18,7 +18,7 @@ package higherkindness.mu.rpc.server.metrics
 
 import cats.effect.std.Dispatcher
 import cats.effect.{IO, Resource}
-import higherkindness.mu.rpc.common.{A => _, _}
+import higherkindness.mu.rpc.common.{A => _}
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
 import higherkindness.mu.rpc.internal.metrics.{MetricsOps, MetricsOpsRegister}
 import higherkindness.mu.rpc.protocol._
@@ -26,42 +26,47 @@ import higherkindness.mu.rpc.server.interceptors.implicits._
 import higherkindness.mu.rpc.testing.servers._
 import io.grpc.MethodDescriptor.MethodType
 import io.grpc.Status
-import org.scalatest.{Assertion, OneInstancePerTest}
+import munit.CatsEffectSuite
 
-class MetricsServerInterceptorTests extends RpcBaseTestSuite with OneInstancePerTest {
+class MetricsServerInterceptorTests extends CatsEffectSuite {
 
   import services._
 
   val myClassifier: Option[String] = Some("MyClassifier")
 
-  "MetricsServerInterceptor" should {
+  test(
+    "MetricsServerInterceptor should " +
+      "generate the right metrics with proto"
+  ) {
+    for {
+      metricsOps <- MetricsOpsRegister.build
+      _          <- makeProtoCalls(metricsOps)(_.serviceOp1(Request()))(protoRPCServiceImpl)
+      assertion  <- checkCalls(metricsOps, List(serviceOp1Info))
+    } yield assertion
+  }
 
-    "generate the right metrics with proto" in {
-      (for {
-        metricsOps <- MetricsOpsRegister.build
-        _          <- makeProtoCalls(metricsOps)(_.serviceOp1(Request()))(protoRPCServiceImpl)
-        assertion  <- checkCalls(metricsOps, List(serviceOp1Info))
-      } yield assertion).unsafeRunSync()
-    }
+  test(
+    "MetricsServerInterceptor should " +
+      "generate the right metrics when calling multiple methods with proto"
+  ) {
+    for {
+      metricsOps <- MetricsOpsRegister.build
+      _ <- makeProtoCalls(metricsOps) { client =>
+        client.serviceOp1(Request()) *> client.serviceOp2(Request())
+      }(protoRPCServiceImpl)
+      assertion <- checkCalls(metricsOps, List(serviceOp1Info, serviceOp2Info))
+    } yield assertion
+  }
 
-    "generate the right metrics when calling multiple methods with proto" in {
-      (for {
-        metricsOps <- MetricsOpsRegister.build
-        _ <- makeProtoCalls(metricsOps) { client =>
-          client.serviceOp1(Request()) *> client.serviceOp2(Request())
-        }(protoRPCServiceImpl)
-        assertion <- checkCalls(metricsOps, List(serviceOp1Info, serviceOp2Info))
-      } yield assertion).unsafeRunSync()
-    }
-
-    "generate the right metrics with proto when the server returns an error" in {
-      (for {
-        metricsOps <- MetricsOpsRegister.build
-        _          <- makeProtoCalls(metricsOps)(_.serviceOp1(Request()))(protoRPCServiceErrorImpl)
-        assertion  <- checkCalls(metricsOps, List(serviceOp1Info), serverError = true)
-      } yield assertion).unsafeRunSync()
-    }
-
+  test(
+    "MetricsServerInterceptor should " +
+      "generate the right metrics with proto when the server returns an error"
+  ) {
+    for {
+      metricsOps <- MetricsOpsRegister.build
+      _          <- makeProtoCalls(metricsOps)(_.serviceOp1(Request()))(protoRPCServiceErrorImpl)
+      assertion  <- checkCalls(metricsOps, List(serviceOp1Info), serverError = true)
+    } yield assertion
   }
 
   private[this] def makeProtoCalls[A](metricsOps: MetricsOps[IO])(
@@ -82,7 +87,7 @@ class MetricsServerInterceptorTests extends RpcBaseTestSuite with OneInstancePer
       metricsOps: MetricsOpsRegister,
       methodCalls: List[GrpcMethodInfo],
       serverError: Boolean = false
-  ): IO[Assertion] = {
+  ): IO[Unit] = {
     for {
       decArgs   <- metricsOps.decreaseActiveCallsReg.get
       incArgs   <- metricsOps.increaseActiveCallsReg.get
@@ -91,24 +96,27 @@ class MetricsServerInterceptorTests extends RpcBaseTestSuite with OneInstancePer
       totalArgs <- metricsOps.recordTotalTimeReg.get
     } yield {
 
-      val argList: List[(GrpcMethodInfo, Option[String])] = methodCalls.map((_, myClassifier))
+      val argList: Set[(GrpcMethodInfo, Option[String])] = methodCalls.map((_, myClassifier)).toSet
 
       // Decrease Active Calls
-      decArgs should contain theSameElementsAs argList
+      assertEquals(decArgs.toSet, argList)
       // Increase Active Calls
-      incArgs should contain theSameElementsAs argList
+      assertEquals(incArgs.toSet, argList)
       // Messages Received
-      recArgs should contain theSameElementsAs argList
+      assertEquals(recArgs.toSet, argList)
       // Messages Sent
-      if (serverError) sentArgs shouldBe empty
-      else sentArgs should contain theSameElementsAs argList
+      if (serverError) assert(sentArgs.isEmpty)
+      else assertEquals(sentArgs.toSet, argList)
       // Total Time
-      totalArgs.map(_._1) should contain theSameElementsAs methodCalls
+      assertEquals(totalArgs.map(_._1).toSet, methodCalls.toSet)
       if (serverError)
-        totalArgs.map(_._2.getCode) shouldBe List.fill(methodCalls.size)(Status.INTERNAL.getCode)
+        assertEquals(
+          totalArgs.map(_._2.getCode),
+          List.fill(methodCalls.size)(Status.INTERNAL.getCode)
+        )
       else
-        totalArgs.map(_._2) shouldBe List.fill(methodCalls.size)(Status.OK)
-      totalArgs.map(_._4) should contain theSameElementsAs argList.map(_._2)
+        assertEquals(totalArgs.map(_._2), List.fill(methodCalls.size)(Status.OK))
+      assertEquals(totalArgs.map(_._4).toSet, argList.map(_._2))
     }
   }
 }

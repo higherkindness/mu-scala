@@ -16,29 +16,26 @@
 
 package higherkindness.mu.rpc.healthcheck.unary
 
+import cats.syntax.all._
 import higherkindness.mu.rpc.healthcheck.ordering._
 import higherkindness.mu.rpc.healthcheck.unary.handler.HealthCheck
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
+import munit.FunSuite
 
-class OrderingTest extends AnyWordSpec with Matchers {
-  "Ordering" should {
-    "work" in {
-      assert(new HealthCheck("example") === new HealthCheck("example"))
-      assert(new HealthCheck("example") !== new HealthCheck("not example"))
-    }
-    "work with boolean comparison" in {
-      assert(orderForHealthCheck.eqv(new HealthCheck("example"), new HealthCheck("example")))
-      assert(!orderForHealthCheck.eqv(new HealthCheck("example"), new HealthCheck("no example")))
-    }
-    "work with integer comparison" in {
-      assert(
-        orderForHealthCheck.compare(new HealthCheck("example"), new HealthCheck("example")) == 0
-      )
-      assert(
-        orderForHealthCheck.compare(new HealthCheck("example"), new HealthCheck("no example")) < 0
-      )
-    }
+class OrderingTest extends FunSuite {
+  test("Ordering should work") {
+    assert(new HealthCheck("example") === new HealthCheck("example"))
+    assert(new HealthCheck("example") =!= new HealthCheck("not example"))
   }
-
+  test("Ordering should work with boolean comparison") {
+    assert(orderForHealthCheck.eqv(new HealthCheck("example"), new HealthCheck("example")))
+    assert(!orderForHealthCheck.eqv(new HealthCheck("example"), new HealthCheck("no example")))
+  }
+  test("Ordering should work with integer comparison") {
+    assert(
+      orderForHealthCheck.compare(new HealthCheck("example"), new HealthCheck("example")) === 0
+    )
+    assert(
+      orderForHealthCheck.compare(new HealthCheck("example"), new HealthCheck("no example")) < 0
+    )
+  }
 }

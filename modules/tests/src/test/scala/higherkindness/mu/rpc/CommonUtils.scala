@@ -77,12 +77,18 @@ trait CommonUtils {
         throw new RuntimeException(e)
     }
 
+  def initServerWithClient[Client](
+      serviceDef: Resource[IO, ServerServiceDefinition],
+      resourceBuilder: IO[ManagedChannel] => Resource[IO, Client]
+  ): Resource[IO, Client] =
+    withServerChannel(serviceDef)
+      .flatMap(sc => resourceBuilder(IO(sc.channel)))
+
   def withClient[Client, T](
       serviceDef: Resource[IO, ServerServiceDefinition],
       resourceBuilder: IO[ManagedChannel] => Resource[IO, Client]
   )(f: Client => T)(implicit ioRuntime: unsafe.IORuntime): T =
-    withServerChannel(serviceDef)
-      .flatMap(sc => resourceBuilder(IO(sc.channel)))
+    initServerWithClient(serviceDef, resourceBuilder)
       .use(client => IO(f(client)))
       .unsafeRunSync()
 }

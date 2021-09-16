@@ -16,99 +16,221 @@
 
 package higherkindness.mu.rpc.protocol
 
-import higherkindness.mu.rpc.common._
-import org.scalatest._
-import org.scalatestplus.scalacheck.Checkers
+import cats.effect.IO
+import cats.syntax.all._
+import munit.CatsEffectSuite
 
-class RPCAnnotationParamTests
-    extends RpcBaseTestSuite
-    with OneInstancePerTest
-    with BeforeAndAfterAll
-    with Checkers {
+class RPCAnnotationParamTests extends CatsEffectSuite {
 
   case class Request(s: String)
   case class Response(length: Int)
 
-  "The service annotation" should {
-
-    "compile when only the protocol is specified" in {
-
-      """
-        @service(Protobuf) trait ServiceDef1[F[_]] {
-          def proto(req: Request): F[Response]
-        }
-        @service(Avro) trait ServiceDef2[F[_]] {
-          def avro(req: Request): F[Response]
-        }
-        @service(AvroWithSchema) trait ServiceDef3[F[_]] {
-          def avroWithSchema(req: Request): F[Response]
-        }
-      """ should compile
-
+  test("The service annotation should work when only the protocol is specified") {
+    @service(Protobuf) trait ServiceDef1[F[_]] {
+      def proto(req: Request): F[Response]
     }
-
-    "compile when the params are specified in order" in {
-
-      """
-        @service(Protobuf, Identity, Some("my.package"), Unchanged) trait ServiceDef1[F[_]] {
-          def proto(req: Request): F[Response]
-        }
-        @service(Avro, Gzip, Some("my.package"), Unchanged) trait ServiceDef2[F[_]] {
-          def avro(req: Request): F[Response]
-        }
-        @service(AvroWithSchema, Identity, Some("my.package"), Capitalize) trait ServiceDef3[F[_]] {
-          def avroWithSchema(req: Request): F[Response]
-        }
-      """ should compile
-
+    @service(Avro) trait ServiceDef2[F[_]] {
+      def avro(req: Request): F[Response]
     }
-
-    "compile when the params are specified with name" in {
-
-      """
-        @service(serializationType = Protobuf, compressionType = Identity, namespace = Some("my.package"), methodNameStyle = Unchanged) trait ServiceDef1[F[_]] {
-          def proto(req: Request): F[Response]
-        }
-        @service(serializationType = Avro, compressionType = Gzip, namespace = Some("my.package"), methodNameStyle = Unchanged) trait ServiceDef2[F[_]] {
-          def avro(req: Request): F[Response]
-        }
-        @service(serializationType = AvroWithSchema, compressionType = Identity, namespace = Some("my.package"), methodNameStyle = Capitalize) trait ServiceDef3[F[_]] {
-          def avroWithSchema(req: Request): F[Response]
-        }
-      """ should compile
-
+    @service(AvroWithSchema) trait ServiceDef3[F[_]] {
+      def avroWithSchema(req: Request): F[Response]
     }
-
-    "compile when the params are specified with name and in different order" in {
-
-      """
-        @service(compressionType = Identity, namespace = Some("my.package"), serializationType = Protobuf, methodNameStyle = Unchanged) trait ServiceDef1[F[_]] {
-          def proto(req: Request): F[Response]
-        }
-        @service(compressionType = Gzip, namespace = Some("my.package"), methodNameStyle = Unchanged, serializationType = Avro) trait ServiceDef2[F[_]] {
-          def avro(req: Request): F[Response]
-        }
-        @service(namespace = Some("my.package"), methodNameStyle = Capitalize, serializationType = AvroWithSchema, compressionType = Identity) trait ServiceDef3[F[_]] {
-          def avroWithSchema(req: Request): F[Response]
-        }
-      """ should compile
-
+    implicit val rpcServiceHandler1: ServiceDef1[IO] = new ServiceDef1[IO] {
+      override def proto(req: Request): IO[Response] = IO.pure(Response(0))
     }
-
-    "compile when some params are specified in order and others with name" in {
-
-      """
-        @service(Protobuf, Identity, namespace = Some("my.package"), methodNameStyle = Unchanged) trait ServiceDef1[F[_]] {
-          def proto(req: Request): F[Response]
-        }
-        @service(Avro, Gzip, Some("my.package"), methodNameStyle = Unchanged) trait ServiceDef2[F[_]] {
-          def avro(req: Request): F[Response]
-        }
-        @service(serializationType = AvroWithSchema, Identity, Some("my.package"), methodNameStyle = Capitalize) trait ServiceDef3[F[_]] {
-          def avroWithSchema(req: Request): F[Response]
-        }
-      """ should compile
-
+    implicit val rpcServiceHandler2: ServiceDef2[IO] = new ServiceDef2[IO] {
+      override def avro(req: Request): IO[Response] = IO.pure(Response(0))
     }
+    implicit val rpcServiceHandler3: ServiceDef3[IO] = new ServiceDef3[IO] {
+      override def avroWithSchema(req: Request): IO[Response] = IO.pure(Response(0))
+    }
+    ServiceDef1
+      .bindService[IO]
+      .use(_.getServiceDescriptor.getName.pure[IO])
+      .assertEquals("ServiceDef1") *>
+      ServiceDef2
+        .bindService[IO]
+        .use(_.getServiceDescriptor.getName.pure[IO])
+        .assertEquals("ServiceDef2") *>
+      ServiceDef3
+        .bindService[IO]
+        .use(_.getServiceDescriptor.getName.pure[IO])
+        .assertEquals("ServiceDef3")
+  }
+
+  test("The service annotation should work when the params are specified in order") {
+    @service(Protobuf, Identity, Some("my.package"), Unchanged) trait ServiceDef1[F[_]] {
+      def proto(req: Request): F[Response]
+    }
+    @service(Avro, Gzip, Some("my.package"), Unchanged) trait ServiceDef2[F[_]] {
+      def avro(req: Request): F[Response]
+    }
+    @service(AvroWithSchema, Identity, Some("my.package"), Capitalize) trait ServiceDef3[F[_]] {
+      def avroWithSchema(req: Request): F[Response]
+    }
+    implicit val rpcServiceHandler1: ServiceDef1[IO] = new ServiceDef1[IO] {
+      override def proto(req: Request): IO[Response] = IO.pure(Response(0))
+    }
+    implicit val rpcServiceHandler2: ServiceDef2[IO] = new ServiceDef2[IO] {
+      override def avro(req: Request): IO[Response] = IO.pure(Response(0))
+    }
+    implicit val rpcServiceHandler3: ServiceDef3[IO] = new ServiceDef3[IO] {
+      override def avroWithSchema(req: Request): IO[Response] = IO.pure(Response(0))
+    }
+    ServiceDef1
+      .bindService[IO]
+      .use(_.getServiceDescriptor.getName.pure[IO])
+      .assertEquals("my.package.ServiceDef1") *>
+      ServiceDef2
+        .bindService[IO]
+        .use(_.getServiceDescriptor.getName.pure[IO])
+        .assertEquals("my.package.ServiceDef2") *>
+      ServiceDef3
+        .bindService[IO]
+        .use(_.getServiceDescriptor.getName.pure[IO])
+        .assertEquals("my.package.ServiceDef3")
+  }
+
+  test("The service annotation should work when the params are specified with name") {
+    @service(
+      serializationType = Protobuf,
+      compressionType = Identity,
+      namespace = Some("my.package"),
+      methodNameStyle = Unchanged
+    ) trait ServiceDef1[F[_]] {
+      def proto(req: Request): F[Response]
+    }
+    @service(
+      serializationType = Avro,
+      compressionType = Gzip,
+      namespace = Some("my.package"),
+      methodNameStyle = Unchanged
+    ) trait ServiceDef2[F[_]] {
+      def avro(req: Request): F[Response]
+    }
+    @service(
+      serializationType = AvroWithSchema,
+      compressionType = Identity,
+      namespace = Some("my.package"),
+      methodNameStyle = Capitalize
+    ) trait ServiceDef3[F[_]] {
+      def avroWithSchema(req: Request): F[Response]
+    }
+    implicit val rpcServiceHandler1: ServiceDef1[IO] = new ServiceDef1[IO] {
+      override def proto(req: Request): IO[Response] = IO.pure(Response(0))
+    }
+    implicit val rpcServiceHandler2: ServiceDef2[IO] = new ServiceDef2[IO] {
+      override def avro(req: Request): IO[Response] = IO.pure(Response(0))
+    }
+    implicit val rpcServiceHandler3: ServiceDef3[IO] = new ServiceDef3[IO] {
+      override def avroWithSchema(req: Request): IO[Response] = IO.pure(Response(0))
+    }
+    ServiceDef1
+      .bindService[IO]
+      .use(_.getServiceDescriptor.getName.pure[IO])
+      .assertEquals("my.package.ServiceDef1") *>
+      ServiceDef2
+        .bindService[IO]
+        .use(_.getServiceDescriptor.getName.pure[IO])
+        .assertEquals("my.package.ServiceDef2") *>
+      ServiceDef3
+        .bindService[IO]
+        .use(_.getServiceDescriptor.getName.pure[IO])
+        .assertEquals("my.package.ServiceDef3")
+  }
+
+  test(
+    "The service annotation should work when the params are specified with name and in different order"
+  ) {
+    @service(
+      compressionType = Identity,
+      namespace = Some("my.package"),
+      serializationType = Protobuf,
+      methodNameStyle = Unchanged
+    ) trait ServiceDef1[F[_]] {
+      def proto(req: Request): F[Response]
+    }
+    @service(
+      compressionType = Gzip,
+      namespace = Some("my.package"),
+      methodNameStyle = Unchanged,
+      serializationType = Avro
+    ) trait ServiceDef2[F[_]] {
+      def avro(req: Request): F[Response]
+    }
+    @service(
+      namespace = Some("my.package"),
+      methodNameStyle = Capitalize,
+      serializationType = AvroWithSchema,
+      compressionType = Identity
+    ) trait ServiceDef3[F[_]] {
+      def avroWithSchema(req: Request): F[Response]
+    }
+    implicit val rpcServiceHandler1: ServiceDef1[IO] = new ServiceDef1[IO] {
+      override def proto(req: Request): IO[Response] = IO.pure(Response(0))
+    }
+    implicit val rpcServiceHandler2: ServiceDef2[IO] = new ServiceDef2[IO] {
+      override def avro(req: Request): IO[Response] = IO.pure(Response(0))
+    }
+    implicit val rpcServiceHandler3: ServiceDef3[IO] = new ServiceDef3[IO] {
+      override def avroWithSchema(req: Request): IO[Response] = IO.pure(Response(0))
+    }
+    ServiceDef1
+      .bindService[IO]
+      .use(_.getServiceDescriptor.getName.pure[IO])
+      .assertEquals("my.package.ServiceDef1") *>
+      ServiceDef2
+        .bindService[IO]
+        .use(_.getServiceDescriptor.getName.pure[IO])
+        .assertEquals("my.package.ServiceDef2") *>
+      ServiceDef3
+        .bindService[IO]
+        .use(_.getServiceDescriptor.getName.pure[IO])
+        .assertEquals("my.package.ServiceDef3")
+  }
+
+  test(
+    "The service annotation should work when some params are specified in order and others with name"
+  ) {
+    @service(
+      Protobuf,
+      Identity,
+      namespace = Some("my.package"),
+      methodNameStyle = Unchanged
+    ) trait ServiceDef1[F[_]] {
+      def proto(req: Request): F[Response]
+    }
+    @service(Avro, Gzip, Some("my.package"), methodNameStyle = Unchanged) trait ServiceDef2[F[_]] {
+      def avro(req: Request): F[Response]
+    }
+    @service(
+      serializationType = AvroWithSchema,
+      Identity,
+      Some("my.package"),
+      methodNameStyle = Capitalize
+    ) trait ServiceDef3[F[_]] {
+      def avroWithSchema(req: Request): F[Response]
+    }
+    implicit val rpcServiceHandler1: ServiceDef1[IO] = new ServiceDef1[IO] {
+      override def proto(req: Request): IO[Response] = IO.pure(Response(0))
+    }
+    implicit val rpcServiceHandler2: ServiceDef2[IO] = new ServiceDef2[IO] {
+      override def avro(req: Request): IO[Response] = IO.pure(Response(0))
+    }
+    implicit val rpcServiceHandler3: ServiceDef3[IO] = new ServiceDef3[IO] {
+      override def avroWithSchema(req: Request): IO[Response] = IO.pure(Response(0))
+    }
+    ServiceDef1
+      .bindService[IO]
+      .use(_.getServiceDescriptor.getName.pure[IO])
+      .assertEquals("my.package.ServiceDef1") *>
+      ServiceDef2
+        .bindService[IO]
+        .use(_.getServiceDescriptor.getName.pure[IO])
+        .assertEquals("my.package.ServiceDef2") *>
+      ServiceDef3
+        .bindService[IO]
+        .use(_.getServiceDescriptor.getName.pure[IO])
+        .assertEquals("my.package.ServiceDef3")
   }
 }

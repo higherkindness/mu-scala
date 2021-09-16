@@ -19,40 +19,37 @@ package higherkindness.mu.rpc.config.server
 import cats.effect.IO
 import higherkindness.mu.rpc.common.SC
 import higherkindness.mu.rpc.server._
+import munit.CatsEffectSuite
 
 import scala.concurrent.ExecutionContext
 
-class ServerConfigTests extends RpcServerTestSuite {
+class ServerConfigTests extends CatsEffectSuite {
 
   val ec: ExecutionContext = ExecutionContext.Implicits.global
 
-  "ServerConfig" should {
+  test("ServerConfig load the port specified in the config file") {
 
-    "load the port specified in the config file" in {
+    val loadAndPort = for {
+      server <- BuildServerFromConfig[IO]("rpc.server.port")
+      _      <- server.start
+      port   <- server.getPort
+      _      <- server.shutdownNow
+      _      <- server.awaitTermination
+    } yield port
 
-      val loadAndPort = for {
-        server <- BuildServerFromConfig[IO]("rpc.server.port")
-        _      <- server.start
-        port   <- server.getPort
-        _      <- server.shutdownNow
-        _      <- server.awaitTermination
-      } yield port
+    loadAndPort.assertEquals(SC.port)
+  }
 
-      loadAndPort.unsafeRunSync() shouldBe SC.port
-    }
+  test("ServerConfig load the default port when the config port path is not found") {
 
-    "load the default port when the config port path is not found" in {
+    val loadAndPort = for {
+      server <- BuildServerFromConfig[IO]("rpc.wrong.port")
+      _      <- server.start
+      port   <- server.getPort
+      _      <- server.shutdownNow
+      _      <- server.awaitTermination
+    } yield port
 
-      val loadAndPort = for {
-        server <- BuildServerFromConfig[IO]("rpc.wrong.port")
-        _      <- server.start
-        port   <- server.getPort
-        _      <- server.shutdownNow
-        _      <- server.awaitTermination
-      } yield port
-
-      loadAndPort.unsafeRunSync() shouldBe defaultPort
-    }
-
+    loadAndPort.assertEquals(defaultPort)
   }
 }

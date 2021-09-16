@@ -17,32 +17,25 @@
 package higherkindness.mu.rpc.healthcheck.fs2
 
 import cats.effect.IO
-import cats.effect.unsafe.implicits.global
 import higherkindness.mu.rpc.healthcheck.fs2.handler.HealthServiceFS2
 import higherkindness.mu.rpc.healthcheck.unary.handler.{HealthCheck, HealthStatus, ServerStatus}
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AsyncWordSpec
 import fs2.Stream
+import munit.CatsEffectSuite
 
-class HealthCheckFS2Test extends AsyncWordSpec with Matchers {
+class HealthCheckFS2Test extends CatsEffectSuite {
 
-  "FS2 health check service" should {
+  val handler = HealthServiceFS2.buildInstance[IO]
+  val hc      = new HealthCheck("example")
+  val status  = HealthStatus(hc, ServerStatus("NOT_SERVING"))
 
-    val handler = HealthServiceFS2.buildInstance[IO]
-    val hc      = new HealthCheck("example")
-
-    "work with setStatus and watch" in {
-      {
-        for {
-          hand <- handler
-          stream1 = Stream.force(hand.watch(hc))
-          v1 <- stream1.take(1).compile.toList.start
-          status = HealthStatus(hc, ServerStatus("NOT_SERVING"))
-          _       <- hand.setStatus(status)
-          outcome <- v1.join
-          result  <- outcome.embed(onCancel = IO(fail("Somehow canceled")))
-        } yield result shouldBe List(status)
-      }.unsafeToFuture()
-    }
+  test("FS2 health check service should work with setStatus and watch") {
+    (for {
+      hand <- handler
+      stream1 = Stream.force(hand.watch(hc))
+      v1      <- stream1.take(1).compile.toList.start
+      _       <- hand.setStatus(status)
+      outcome <- v1.join
+      result  <- outcome.embed(onCancel = IO(fail("Somehow canceled")))
+    } yield result).assertEquals(List(status))
   }
 }

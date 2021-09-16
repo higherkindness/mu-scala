@@ -18,7 +18,6 @@ package higherkindness.mu.rpc.channel.netty
 
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
-
 import higherkindness.mu.rpc._
 import higherkindness.mu.rpc.channel._
 import higherkindness.mu.rpc.common.SC
@@ -32,8 +31,6 @@ import io.netty.channel.nio.NioEventLoopGroup
 
 class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests {
 
-  import implicits._
-
   def mkInterpreter(
       channelFor: ChannelFor,
       channelConfigList: List[ManagedChannelConfig]
@@ -45,73 +42,80 @@ class ManagedChannelInterpreterNettyTests extends ManagedChannelInterpreterTests
       NettyChannelBuilder.forTarget
     )
 
-  "NettyChannelInterpreter" should {
+  test(
+    "NettyChannelInterpreter build an io.grpc.ManagedChannel based on the specified configuration, for a Socket Address"
+  ) {
 
-    "build an io.grpc.ManagedChannel based on the specified configuration, for a Socket Address" in {
+    val channelFor: ChannelFor = ChannelForSocketAddress(new InetSocketAddress(SC.host, 45455))
 
-      val channelFor: ChannelFor = ChannelForSocketAddress(new InetSocketAddress(SC.host, 45455))
+    val channelConfigList = List(UsePlaintext())
 
-      val channelConfigList = List(UsePlaintext())
+    val interpreter = new NettyChannelInterpreter(channelFor, channelConfigList, Nil)
 
-      val interpreter = new NettyChannelInterpreter(channelFor, channelConfigList, Nil)
+    val mc: ManagedChannel = interpreter.build
 
-      val mc: ManagedChannel = interpreter.build
+    assert(Option(mc).nonEmpty)
 
-      mc shouldBe a[ManagedChannel]
+    mc.shutdownNow()
+  }
 
-      mc.shutdownNow()
-    }
+  test(
+    "NettyChannelInterpreter build an io.grpc.ManagedChannel based on the specified configuration, for a Target"
+  ) {
 
-    "build an io.grpc.ManagedChannel based on the specified configuration, for a Target" in {
+    val channelFor: ChannelFor = ChannelForTarget(SC.host)
 
-      val channelFor: ChannelFor = ChannelForTarget(SC.host)
+    val interpreter = new NettyChannelInterpreter(channelFor, Nil, Nil)
 
-      val interpreter = new NettyChannelInterpreter(channelFor, Nil, Nil)
+    val mc: ManagedChannel = interpreter.build
 
-      val mc: ManagedChannel = interpreter.build
+    assert(Option(mc).nonEmpty)
 
-      mc shouldBe a[ManagedChannel]
+    mc.shutdownNow()
+  }
 
-      mc.shutdownNow()
-    }
+  test(
+    "NettyChannelInterpreter build an io.grpc.ManagedChannel based on any configuration combination"
+  ) {
 
-    "build an io.grpc.ManagedChannel based on any configuration combination" in {
+    val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
 
-      val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
+    val nettyChannelConfigList: List[NettyChannelConfig] = List(
+      NettyChannelType((new LocalChannel).getClass),
+      NettyWithOption[Boolean](ChannelOption.valueOf("ALLOCATOR"), true),
+      NettyNegotiationType(NegotiationType.PLAINTEXT),
+      NettyEventLoopGroup(new NioEventLoopGroup(0)),
+      NettySslContext(GrpcSslContexts.forClient.build),
+      NettyFlowControlWindow(NettyChannelBuilder.DEFAULT_FLOW_CONTROL_WINDOW),
+      NettyMaxHeaderListSize(GrpcUtil.DEFAULT_MAX_HEADER_LIST_SIZE),
+      NettyUsePlaintext(),
+      NettyUseTransportSecurity,
+      NettyKeepAliveTime(1, TimeUnit.MINUTES),
+      NettyKeepAliveTimeout(1, TimeUnit.MINUTES),
+      NettyKeepAliveWithoutCalls(false)
+    )
 
-      val nettyChannelConfigList: List[NettyChannelConfig] = List(
-        NettyChannelType((new LocalChannel).getClass),
-        NettyWithOption[Boolean](ChannelOption.valueOf("ALLOCATOR"), true),
-        NettyNegotiationType(NegotiationType.PLAINTEXT),
-        NettyEventLoopGroup(new NioEventLoopGroup(0)),
-        NettySslContext(GrpcSslContexts.forClient.build),
-        NettyFlowControlWindow(NettyChannelBuilder.DEFAULT_FLOW_CONTROL_WINDOW),
-        NettyMaxHeaderListSize(GrpcUtil.DEFAULT_MAX_HEADER_LIST_SIZE),
-        NettyUsePlaintext(),
-        NettyUseTransportSecurity,
-        NettyKeepAliveTime(1, TimeUnit.MINUTES),
-        NettyKeepAliveTimeout(1, TimeUnit.MINUTES),
-        NettyKeepAliveWithoutCalls(false)
+    val interpreter =
+      new NettyChannelInterpreter(
+        channelFor,
+        TestData.managedChannelConfigAllList,
+        nettyChannelConfigList
       )
 
-      val interpreter =
-        new NettyChannelInterpreter(channelFor, managedChannelConfigAllList, nettyChannelConfigList)
+    val mc: ManagedChannel = interpreter.build
 
-      val mc: ManagedChannel = interpreter.build
+    assert(Option(mc).nonEmpty)
 
-      mc shouldBe a[ManagedChannel]
+    mc.shutdownNow()
+  }
 
-      mc.shutdownNow()
-    }
+  test("NettyChannelInterpreter throw an exception when ChannelFor is not recognized") {
 
-    "throw an exception when ChannelFor is not recognized" in {
+    val channelFor: ChannelFor = ChannelForPort(SC.port)
 
-      val channelFor: ChannelFor = ChannelForPort(SC.port)
+    val interpreter = new NettyChannelInterpreter(channelFor, Nil, Nil)
 
-      val interpreter = new NettyChannelInterpreter(channelFor, Nil, Nil)
-
-      an[IllegalArgumentException] shouldBe thrownBy(interpreter.build)
-    }
+    intercept[IllegalArgumentException](interpreter.build)
   }
 
 }

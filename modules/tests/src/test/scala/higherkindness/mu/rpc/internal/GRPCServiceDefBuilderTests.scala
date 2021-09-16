@@ -18,13 +18,12 @@ package higherkindness.mu.rpc
 package internal
 
 import cats.effect.IO
-import higherkindness.mu.rpc.common.RpcBaseTestSuite
 import higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder
 import io.grpc._
 import io.grpc.testing.TestMethodDescriptors
-import org.scalatest.OneInstancePerTest
+import munit.CatsEffectSuite
 
-class GRPCServiceDefBuilderTests extends RpcBaseTestSuite with OneInstancePerTest {
+class GRPCServiceDefBuilderTests extends CatsEffectSuite {
 
   val serviceName                              = "service_foo"
   val invalidServiceName                       = "invalid_service_name"
@@ -39,26 +38,27 @@ class GRPCServiceDefBuilderTests extends RpcBaseTestSuite with OneInstancePerTes
     ): ServerCall.Listener[String] = listener
   }
 
-  "GRPCServiceDefBuilder.apply" should {
+  test(
+    "GRPCServiceDefBuilder.apply should build a ServerServiceDefinition based on the provided " +
+      "MethodDescriptor's and ServerCallHandler's"
+  ) {
 
-    "build a ServerServiceDefinition based on the provided " +
-      "MethodDescriptor's and ServerCallHandler's" in {
+    GRPCServiceDefBuilder
+      .build[IO](serviceName, (flowMethod, handler))
+      .map(_.getServiceDescriptor.getName)
+      .assertEquals(serviceName)
+  }
 
-        GRPCServiceDefBuilder
-          .build[IO](serviceName, (flowMethod, handler))
-          .map(_.getServiceDescriptor.getName)
-          .unsafeRunSync() shouldBe serviceName
-      }
+  test(
+    "GRPCServiceDefBuilder.apply should " +
+      "throw an java.lang.IllegalArgumentException when the serviceName is not valid"
+  ) {
 
-    "throw an java.lang.IllegalArgumentException when the serviceName is not valid" in {
+    val gRPCServiceDefBuilder =
+      GRPCServiceDefBuilder
+        .build[IO](invalidServiceName, (flowMethod, handler))
 
-      val gRPCServiceDefBuilder =
-        GRPCServiceDefBuilder
-          .build[IO](invalidServiceName, (flowMethod, handler))
-
-      an[IllegalArgumentException] should be thrownBy gRPCServiceDefBuilder.unsafeRunSync()
-    }
-
+    interceptIO[IllegalArgumentException](gRPCServiceDefBuilder)
   }
 
 }

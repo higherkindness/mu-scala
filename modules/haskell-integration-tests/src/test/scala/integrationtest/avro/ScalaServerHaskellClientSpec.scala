@@ -17,17 +17,12 @@
 package integrationtest.avro
 
 import cats.effect.{IO, Resource}
-import cats.effect.unsafe.implicits.global
 import higherkindness.mu.rpc.server.{AddService, GrpcServer}
 import integrationtest._
 import integrationtest.avro.weather._
-import org.scalatest.BeforeAndAfterAll
-import org.scalatest.flatspec.AnyFlatSpec
+import munit.CatsEffectSuite
 
-class ScalaServerHaskellClientSpec
-    extends AnyFlatSpec
-    with RunHaskellClientInDocker
-    with BeforeAndAfterAll {
+class ScalaServerHaskellClientSpec extends CatsEffectSuite with RunHaskellClientInDocker {
 
   def clientExecutableName: String = "avro-client"
 
@@ -38,29 +33,22 @@ class ScalaServerHaskellClientSpec
     _          <- GrpcServer.defaultServer[IO](Constants.AvroPort, List(AddService(serviceDef)))
   } yield ()
 
-  private var cancelToken: IO[Unit] = IO.unit
+  val serverFixture = ResourceSuiteLocalFixture("rpc-server", startServer)
 
-  override def beforeAll(): Unit = {
-    cancelToken = startServer.allocated.unsafeRunSync()._2
-    Thread.sleep(500) // give the server a chance to start up
+  override def munitFixtures = List(serverFixture)
+
+  val behaviorOf = "Mu-Scala server and Mu-Haskell client communication using Avro"
+
+  test(behaviorOf + "it should work for a trivial unary call") {
+    IO(serverFixture()) *>
+      runHaskellClientR(List("ping")).assertEquals("pong")
   }
 
-  override def afterAll(): Unit =
-    // stop the server
-    cancelToken.unsafeRunSync()
-
-  behavior of "Mu-Scala server and Mu-Haskell client communication using Avro"
-
-  it should "work for a trivial unary call" in {
-    val clientOutput = runHaskellClient(List("ping"))
-    assert(clientOutput == "pong")
-  }
-
-  it should "work for a unary call" in {
-    val clientOutput = runHaskellClient(List("get-forecast", "London", "3"))
-    assert(
-      clientOutput == """2020-03-20T12:00:00Z ["SUNNY","SUNNY","SUNNY"]"""
-    )
+  test(behaviorOf + "it should work for a unary call") {
+    IO(serverFixture()) *>
+      runHaskellClientR(List("get-forecast", "London", "3")).assertEquals(
+        """2020-03-20T12:00:00Z ["SUNNY","SUNNY","SUNNY"]"""
+      )
   }
 
 }

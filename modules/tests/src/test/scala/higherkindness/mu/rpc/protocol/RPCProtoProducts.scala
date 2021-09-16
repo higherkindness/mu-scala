@@ -19,18 +19,15 @@ package protocol
 
 import cats.Applicative
 import cats.effect.IO
+import cats.effect.unsafe.IORuntime
 import cats.syntax.applicative._
-import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.protocol.Utils._
-import org.scalatest._
+import munit.ScalaCheckSuite
 import org.scalacheck.Prop._
-import org.scalatestplus.scalacheck.Checkers
 
-class RPCProtoProducts
-    extends RpcBaseTestSuite
-    with OneInstancePerTest
-    with BeforeAndAfterAll
-    with Checkers {
+class RPCProtoProducts extends ScalaCheckSuite with RPCFixtures {
+
+  implicit val ioRuntime: IORuntime = IORuntime.global
 
   object RPCService {
 
@@ -84,122 +81,116 @@ class RPCProtoProducts
 
   }
 
-  "A RPC server" should {
+  import RPCService._
 
-    import RPCService._
+  implicit val H: RPCServiceDefImpl[IO] =
+    new RPCServiceDefImpl[IO]
 
-    implicit val H: RPCServiceDefImpl[IO] =
-      new RPCServiceDefImpl[IO]
+  val protoFixture = buildResourceFixture(
+    "rpc-proto-client",
+    initServerWithClient[ProtoRPCServiceDef[IO]](
+      ProtoRPCServiceDef.bindService[IO],
+      ProtoRPCServiceDef.clientFromChannel[IO](_)
+    )
+  )
+  val avroFixture = buildResourceFixture(
+    "rpc-avro-client",
+    initServerWithClient[AvroRPCServiceDef[IO]](
+      AvroRPCServiceDef.bindService[IO],
+      AvroRPCServiceDef.clientFromChannel[IO](_)
+    )
+  )
+  val avroWithSchemaFixture = buildResourceFixture(
+    "rpc-avro-with-schema-client",
+    initServerWithClient[AvroWithSchemaRPCServiceDef[IO]](
+      AvroWithSchemaRPCServiceDef.bindService[IO],
+      AvroWithSchemaRPCServiceDef.clientFromChannel[IO](_)
+    )
+  )
 
-    "be able to serialize and deserialize Options in the request/response using proto format" in {
+  override def munitFixtures = List(protoFixture, avroFixture, avroWithSchemaFixture)
 
-      withClient(
-        ProtoRPCServiceDef.bindService[IO],
-        ProtoRPCServiceDef.clientFromChannel[IO](_)
-      ) { client =>
-        check {
-          forAll { maybeString: Option[String] =>
-            // if the string is "", i.e. the protobuf default value,
-            // it will not be written on the wire by the client,
-            // so the server will decode it as `None`
-            val expectedOption = maybeString.filter(_.nonEmpty)
-            client
-              .optionProto(RequestOption(maybeString.map(MyParam)))
-              .unsafeRunSync() == ResponseOption(expectedOption, true)
-          }
-        }
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize Options in the request/response using proto format"
+  ) {
 
-      }
+    val client = protoFixture()
+    forAll { maybeString: Option[String] =>
+      // if the string is "", i.e. the protobuf default value,
+      // it will not be written on the wire by the client,
+      // so the server will decode it as `None`
+      val expectedOption = maybeString.filter(_.nonEmpty)
+      client
+        .optionProto(RequestOption(maybeString.map(MyParam)))
+        .unsafeRunSync() == ResponseOption(expectedOption, true)
+    }
+  }
 
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize Options in the request/response using avro format"
+  ) {
+
+    val client = avroFixture()
+    forAll { maybeString: Option[String] =>
+      client
+        .optionAvro(RequestOption(maybeString.map(MyParam)))
+        .unsafeRunSync() == ResponseOption(maybeString, true)
     }
 
-    "be able to serialize and deserialize Options in the request/response using avro format" in {
+  }
 
-      withClient(
-        AvroRPCServiceDef.bindService[IO],
-        AvroRPCServiceDef.clientFromChannel[IO](_)
-      ) { client =>
-        check {
-          forAll { maybeString: Option[String] =>
-            client
-              .optionAvro(RequestOption(maybeString.map(MyParam)))
-              .unsafeRunSync() == ResponseOption(maybeString, true)
-          }
-        }
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize Options in the request/response using avro with schema format"
+  ) {
 
-      }
-
+    val client = avroWithSchemaFixture()
+    forAll { maybeString: Option[String] =>
+      client
+        .optionAvroWithSchema(RequestOption(maybeString.map(MyParam)))
+        .unsafeRunSync() == ResponseOption(maybeString, true)
     }
 
-    "be able to serialize and deserialize Options in the request/response using avro with schema format" in {
+  }
 
-      withClient(
-        AvroWithSchemaRPCServiceDef.bindService[IO],
-        AvroWithSchemaRPCServiceDef.clientFromChannel[IO](_)
-      ) { client =>
-        check {
-          forAll { maybeString: Option[String] =>
-            client
-              .optionAvroWithSchema(RequestOption(maybeString.map(MyParam)))
-              .unsafeRunSync() == ResponseOption(maybeString, true)
-          }
-        }
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize Lists in the request/response using proto format"
+  ) {
 
-      }
-
+    val client = protoFixture()
+    forAll { list: List[String] =>
+      client
+        .listProto(RequestList(list.map(MyParam)))
+        .unsafeRunSync() == ResponseList(list, true)
     }
+  }
 
-    "be able to serialize and deserialize Lists in the request/response using proto format" in {
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize Lists in the request/response using avro format"
+  ) {
 
-      withClient(
-        ProtoRPCServiceDef.bindService[IO],
-        ProtoRPCServiceDef.clientFromChannel[IO](_)
-      ) { client =>
-        check {
-          forAll { list: List[String] =>
-            client
-              .listProto(RequestList(list.map(MyParam)))
-              .unsafeRunSync() == ResponseList(list, true)
-          }
-        }
-
-      }
-
+    val client = avroFixture()
+    forAll { list: List[String] =>
+      client
+        .listAvro(RequestList(list.map(MyParam)))
+        .unsafeRunSync() == ResponseList(list, true)
     }
+  }
 
-    "be able to serialize and deserialize Lists in the request/response using avro format" in {
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize Lists in the request/response using avro with schema format"
+  ) {
 
-      withClient(
-        AvroRPCServiceDef.bindService[IO],
-        AvroRPCServiceDef.clientFromChannel[IO](_)
-      ) { client =>
-        check {
-          forAll { list: List[String] =>
-            client
-              .listAvro(RequestList(list.map(MyParam)))
-              .unsafeRunSync() == ResponseList(list, true)
-          }
-        }
-      }
-
-    }
-
-    "be able to serialize and deserialize Lists in the request/response using avro with schema format" in {
-
-      withClient(
-        AvroWithSchemaRPCServiceDef.bindService[IO],
-        AvroWithSchemaRPCServiceDef.clientFromChannel[IO](_)
-      ) { client =>
-        check {
-          forAll { list: List[String] =>
-            client
-              .listAvroWithSchema(RequestList(list.map(MyParam)))
-              .unsafeRunSync() == ResponseList(list, true)
-          }
-        }
-
-      }
-
+    val client = avroWithSchemaFixture()
+    forAll { list: List[String] =>
+      client
+        .listAvroWithSchema(RequestList(list.map(MyParam)))
+        .unsafeRunSync() == ResponseList(list, true)
     }
   }
 

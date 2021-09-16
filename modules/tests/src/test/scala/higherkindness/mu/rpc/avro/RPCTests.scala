@@ -19,12 +19,12 @@ package avro
 
 import cats.effect.{IO, Resource}
 import io.grpc.ServerServiceDefinition
-import higherkindness.mu.rpc.common.{A => _, _}
+import higherkindness.mu.rpc.common.{A => _}
 import higherkindness.mu.rpc.testing.servers.{withServerChannel, ServerChannel}
-import org.scalatest._
+import munit.CatsEffectSuite
 import shapeless.{:+:, CNil, Coproduct}
 
-class RPCTests extends RpcBaseTestSuite with OneInstancePerTest {
+class RPCTests extends CatsEffectSuite {
 
   import higherkindness.mu.rpc.avro.Utils._
   import higherkindness.mu.rpc.avro.Utils.implicits._
@@ -36,232 +36,273 @@ class RPCTests extends RpcBaseTestSuite with OneInstancePerTest {
 
   def runSucceedAssertion[A](ssd: Resource[IO, ServerServiceDefinition], response: A)(
       f: service.RPCService[IO] => IO[A]
-  ): Assertion =
+  ): IO[Unit] =
     withServerChannel[IO](ssd)
       .flatMap(createClient)
       .use(f)
-      .unsafeRunSync() shouldBe response
+      .assertEquals(response)
 
   def runFailedAssertion[A](
       ssd: Resource[IO, ServerServiceDefinition]
-  )(f: service.RPCService[IO] => IO[A]): Assertion =
-    withServerChannel[IO](ssd)
-      .flatMap(createClient)
-      .use(f)
-      .attempt
-      .unsafeRunSync() shouldBe an[Left[io.grpc.StatusRuntimeException, A]]
-
-  "An AvroWithSchema service with an updated request model" can {
-
-    "add a new non-optional field, and" should {
-      "be able to respond to an outdated request without the new value" in {
-        runSucceedAssertion(
-          serviceRequestAddedBoolean.RPCService.bindService[IO],
-          response
-        )(_.get(request))
-      }
-      "be able to respond to an outdated request without the new value within a coproduct" in {
-        runSucceedAssertion(
-          serviceRequestAddedBoolean.RPCService.bindService[IO],
-          responseCoproduct(response)
-        )(_.getCoproduct(requestCoproduct(request)))
-      }
+  )(f: service.RPCService[IO] => IO[A]): IO[io.grpc.StatusRuntimeException] =
+    interceptIO[io.grpc.StatusRuntimeException] {
+      withServerChannel[IO](ssd)
+        .flatMap(createClient)
+        .use(f)
+        .void
     }
 
-    "add a new optional field, and" should {
-      "be able to respond to an outdated request without the new optional value" in {
-        runSucceedAssertion(
-          serviceRequestAddedOptionalBoolean.RPCService.bindService[IO],
-          response
-        )(_.get(request))
-      }
-      "be able to respond to an outdated request without the new optional value within a coproduct" in {
-        runSucceedAssertion(
-          serviceRequestAddedOptionalBoolean.RPCService.bindService[IO],
-          responseCoproduct(response)
-        )(_.getCoproduct(requestCoproduct(request)))
-      }
-    }
+  val testParent1 = "An AvroWithSchema service with an updated request model"
 
-    "add a new item in coproduct, and" should {
-      "be able to respond to an outdated request with the previous coproduct" in {
-        runSucceedAssertion(
-          serviceRequestAddedCoproductItem.RPCService.bindService[IO],
-          responseCoproduct(response)
-        )(_.getCoproduct(requestCoproduct(request)))
-      }
-    }
-
-    "remove an item in coproduct, and" should {
-      "be able to respond to an outdated request with the previous coproduct" in {
-        runSucceedAssertion(
-          serviceRequestRemovedCoproductItem.RPCService.bindService[IO],
-          responseCoproduct(response)
-        )(_.getCoproduct(requestCoproduct(request)))
-      }
-
-      "be able to respond to an outdated request with the removed valued of the previous coproduct" ignore {
-        runSucceedAssertion(
-          serviceRequestRemovedCoproductItem.RPCService.bindService[IO],
-          responseCoproduct(response)
-        )(_.getCoproduct(requestCoproductInt))
-      }
-
-    }
-
-    "replace an item in coproduct, and" should {
-      "be able to respond to an outdated request with the previous coproduct" in {
-        runSucceedAssertion(
-          serviceRequestReplacedCoproductItem.RPCService.bindService[IO],
-          responseCoproduct(response)
-        )(_.getCoproduct(requestCoproduct(request)))
-      }
-
-      "be able to respond to an outdated request with the previous coproduct AAAAA" in {
-        runFailedAssertion(
-          serviceRequestReplacedCoproductItem.RPCService.bindService[IO]
-        )(_.getCoproduct(requestCoproductString))
-      }
-
-    }
-
-    "remove an existing field, and" should {
-      "be able to respond to an outdated request with the old value" in {
-        runSucceedAssertion(
-          serviceRequestDroppedField.RPCService.bindService[IO],
-          response
-        )(_.get(request))
-      }
-      "be able to respond to an outdated request with the old value within a coproduct" in {
-        runSucceedAssertion(
-          serviceRequestDroppedField.RPCService.bindService[IO],
-          responseCoproduct(response)
-        )(_.getCoproduct(requestCoproduct(request)))
-      }
-    }
-
-    "replace the type of a field, and" should {
-      "be able to respond to an outdated request with the previous value" in {
-        runSucceedAssertion(
-          serviceRequestReplacedType.RPCService.bindService[IO],
-          response
-        )(_.get(request))
-      }
-      "be able to respond to an outdated request with the previous value within a coproduct" in {
-        runSucceedAssertion(
-          serviceRequestReplacedType.RPCService.bindService[IO],
-          responseCoproduct(response)
-        )(_.getCoproduct(requestCoproduct(request)))
-      }
-    }
-
-    "rename an existing field, and" should {
-      "be able to respond to an outdated request with the previous name" in {
-        runSucceedAssertion(
-          serviceRequestRenamedField.RPCService.bindService[IO],
-          response
-        )(_.get(request))
-      }
-      "be able to respond to an outdated request with the previous name within a coproduct" in {
-        runSucceedAssertion(
-          serviceRequestRenamedField.RPCService.bindService[IO],
-          responseCoproduct(response)
-        )(_.getCoproduct(requestCoproduct(request)))
-      }
-    }
-
+  test(
+    testParent1 + " add a new non-optional field, and " +
+      "be able to respond to an outdated request without the new value"
+  ) {
+    runSucceedAssertion(serviceRequestAddedBoolean.RPCService.bindService[IO], response)(
+      _.get(request)
+    )
+  }
+  test(
+    testParent1 + " add a new non-optional field, and " +
+      "be able to respond to an outdated request without the new value within a coproduct"
+  ) {
+    runSucceedAssertion(
+      serviceRequestAddedBoolean.RPCService.bindService[IO],
+      responseCoproduct(response)
+    )(_.getCoproduct(requestCoproduct(request)))
   }
 
-  "An AvroWithSchema service with an updated response model" can {
+  test(
+    testParent1 + "add a new optional field, and " +
+      "be able to respond to an outdated request without the new optional value"
+  ) {
+    runSucceedAssertion(serviceRequestAddedOptionalBoolean.RPCService.bindService[IO], response)(
+      _.get(request)
+    )
+  }
+  test(
+    testParent1 + "add a new optional field, and " +
+      "be able to respond to an outdated request without the new optional value within a coproduct"
+  ) {
+    runSucceedAssertion(
+      serviceRequestAddedOptionalBoolean.RPCService.bindService[IO],
+      responseCoproduct(response)
+    )(
+      _.getCoproduct(requestCoproduct(request))
+    )
+  }
 
-    "add a new non-optional field, and" should {
-      "be able to provide a compatible response" in {
-        runSucceedAssertion(
-          serviceResponseAddedBoolean.RPCService.bindService[IO],
-          response
-        )(_.get(request))
-      }
-      "be able to provide a compatible response within a coproduct" in {
-        runSucceedAssertion(
-          serviceResponseAddedBoolean.RPCService.bindService[IO],
-          responseCoproduct(response)
-        )(_.getCoproduct(requestCoproduct(request)))
-      }
-    }
+  test(
+    testParent1 + "add a new item in coproduct, and " +
+      "be able to respond to an outdated request with the previous coproduct"
+  ) {
+    runSucceedAssertion(
+      serviceRequestAddedCoproductItem.RPCService.bindService[IO],
+      responseCoproduct(response)
+    )(_.getCoproduct(requestCoproduct(request)))
+  }
+  test(
+    testParent1 + "remove an item in coproduct, and " +
+      "be able to respond to an outdated request with the previous coproduct"
+  ) {
+    runSucceedAssertion(
+      serviceRequestRemovedCoproductItem.RPCService.bindService[IO],
+      responseCoproduct(response)
+    )(_.getCoproduct(requestCoproduct(request)))
+  }
 
-    "add a new item in a coproduct, and" should {
-      "be able to provide a compatible response within a coproduct" in {
-        runSucceedAssertion(
-          serviceResponseAddedBooleanCoproduct.RPCService.bindService[IO],
-          ResponseCoproduct(Coproduct[Int :+: String :+: Response :+: CNil](0))
-        )(_.getCoproduct(requestCoproduct(request)))
-      }
-    }
+// Ignored
+//  test(
+//    testParent1 +
+//      "be able to respond to an outdated request with the removed valued of the previous coproduct"
+//  ) {
+//    runSucceedAssertion(
+//      serviceRequestRemovedCoproductItem.RPCService.bindService[IO],
+//      responseCoproduct(response)
+//    )(_.getCoproduct(requestCoproductInt))
+//  }
 
-    "remove an item in a coproduct, and" should {
-      "be able to provide a compatible response" in {
-        runSucceedAssertion(
-          serviceResponseRemovedIntCoproduct.RPCService.bindService[IO],
-          responseCoproduct(response)
-        )(_.getCoproduct(requestCoproduct(request)))
-      }
-    }
+  test(
+    testParent1 + "replace an item in coproduct, and " +
+      "be able to respond to an outdated request with the previous coproduct"
+  ) {
+    runSucceedAssertion(
+      serviceRequestReplacedCoproductItem.RPCService.bindService[IO],
+      responseCoproduct(response)
+    )(_.getCoproduct(requestCoproduct(request)))
+  }
+  test(
+    testParent1 + "replace an item in coproduct, and " +
+      "be able to respond to an outdated request with the previous coproduct AAAAA"
+  ) {
+    runFailedAssertion(
+      serviceRequestReplacedCoproductItem.RPCService.bindService[IO]
+    )(_.getCoproduct(requestCoproductString))
+  }
 
-    "replace an item in a coproduct, and" should {
-      "be able to provide a compatible response" in {
-        runSucceedAssertion(
-          serviceResponseReplacedCoproduct.RPCService.bindService[IO],
-          responseCoproduct(response)
-        )(_.getCoproduct(requestCoproduct(request)))
-      }
+  test(
+    testParent1 + "remove an existing field, and " +
+      "be able to respond to an outdated request with the old value"
+  ) {
+    runSucceedAssertion(
+      serviceRequestDroppedField.RPCService.bindService[IO],
+      response
+    )(_.get(request))
+  }
+  test(
+    testParent1 + "remove an existing field, and " +
+      "be able to respond to an outdated request with the old value within a coproduct"
+  ) {
+    runSucceedAssertion(
+      serviceRequestDroppedField.RPCService.bindService[IO],
+      responseCoproduct(response)
+    )(_.getCoproduct(requestCoproduct(request)))
+  }
 
-    }
+  test(
+    testParent1 + "replace the type of a field, and " +
+      "be able to respond to an outdated request with the previous value"
+  ) {
+    runSucceedAssertion(
+      serviceRequestReplacedType.RPCService.bindService[IO],
+      response
+    )(_.get(request))
+  }
+  test(
+    testParent1 + "replace the type of a field, and " +
+      "be able to respond to an outdated request with the previous value within a coproduct"
+  ) {
+    runSucceedAssertion(
+      serviceRequestReplacedType.RPCService.bindService[IO],
+      responseCoproduct(response)
+    )(_.getCoproduct(requestCoproduct(request)))
+  }
 
-    "change the type of a field, and" should {
-      "be able to provide a compatible response" in {
-        runSucceedAssertion(
-          serviceResponseReplacedType.RPCService.bindService[IO],
-          response
-        )(_.get(request))
-      }
-      "be able to provide a compatible response within a coproduct" in {
-        runSucceedAssertion(
-          serviceResponseReplacedType.RPCService.bindService[IO],
-          responseCoproduct(response)
-        )(_.getCoproduct(requestCoproduct(request)))
-      }
-    }
+  test(
+    testParent1 + "rename an existing field, and " +
+      "be able to respond to an outdated request with the previous name"
+  ) {
+    runSucceedAssertion(
+      serviceRequestRenamedField.RPCService.bindService[IO],
+      response
+    )(_.get(request))
+  }
+  test(
+    testParent1 + "rename an existing field, and " +
+      "be able to respond to an outdated request with the previous name within a coproduct"
+  ) {
+    runSucceedAssertion(
+      serviceRequestRenamedField.RPCService.bindService[IO],
+      responseCoproduct(response)
+    )(_.getCoproduct(requestCoproduct(request)))
+  }
 
-    "rename a field, and" should {
-      "be able to provide a compatible response" in {
-        runSucceedAssertion(
-          serviceResponseRenamedField.RPCService.bindService[IO],
-          response
-        )(_.get(request))
-      }
-      "be able to provide a compatible response within a coproduct" in {
-        runSucceedAssertion(
-          serviceResponseRenamedField.RPCService.bindService[IO],
-          responseCoproduct(response)
-        )(_.getCoproduct(requestCoproduct(request)))
-      }
-    }
+  val testParent2 = "An AvroWithSchema service with an updated response model"
 
-    "drop a field, and" should {
-      "be able to provide a compatible response" in {
-        runSucceedAssertion(
-          serviceResponseDroppedField.RPCService.bindService[IO],
-          response
-        )(_.get(request))
-      }
-      "be able to provide a compatible response within a coproduct" in {
-        runSucceedAssertion(
-          serviceResponseDroppedField.RPCService.bindService[IO],
-          responseCoproduct(response)
-        )(_.getCoproduct(requestCoproduct(request)))
-      }
-    }
+  test(
+    testParent2 + "add a new non-optional field, and " +
+      "be able to provide a compatible response"
+  ) {
+    runSucceedAssertion(
+      serviceResponseAddedBoolean.RPCService.bindService[IO],
+      response
+    )(_.get(request))
+  }
+  test(
+    testParent2 + "add a new non-optional field, and " +
+      "be able to provide a compatible response within a coproduct"
+  ) {
+    runSucceedAssertion(
+      serviceResponseAddedBoolean.RPCService.bindService[IO],
+      responseCoproduct(response)
+    )(_.getCoproduct(requestCoproduct(request)))
+  }
 
+  test(
+    testParent2 + "add a new item in a coproduct, and " +
+      "be able to provide a compatible response within a coproduct"
+  ) {
+    runSucceedAssertion(
+      serviceResponseAddedBooleanCoproduct.RPCService.bindService[IO],
+      ResponseCoproduct(Coproduct[Int :+: String :+: Response :+: CNil](0))
+    )(_.getCoproduct(requestCoproduct(request)))
+  }
+
+  test(
+    testParent2 + "remove an item in a coproduct, and " +
+      "be able to provide a compatible response"
+  ) {
+    runSucceedAssertion(
+      serviceResponseRemovedIntCoproduct.RPCService.bindService[IO],
+      responseCoproduct(response)
+    )(_.getCoproduct(requestCoproduct(request)))
+  }
+
+  test(
+    testParent2 + "replace an item in a coproduct, and " +
+      "be able to provide a compatible response"
+  ) {
+    runSucceedAssertion(
+      serviceResponseReplacedCoproduct.RPCService.bindService[IO],
+      responseCoproduct(response)
+    )(_.getCoproduct(requestCoproduct(request)))
+  }
+
+  test(
+    testParent2 + "change the type of a field, and " +
+      "be able to provide a compatible response"
+  ) {
+    runSucceedAssertion(
+      serviceResponseReplacedType.RPCService.bindService[IO],
+      response
+    )(_.get(request))
+  }
+  test(
+    testParent2 + "change the type of a field, and " +
+      "be able to provide a compatible response within a coproduct"
+  ) {
+    runSucceedAssertion(
+      serviceResponseReplacedType.RPCService.bindService[IO],
+      responseCoproduct(response)
+    )(_.getCoproduct(requestCoproduct(request)))
+  }
+
+  test(
+    testParent2 + "rename a field, and " +
+      "be able to provide a compatible response"
+  ) {
+    runSucceedAssertion(
+      serviceResponseRenamedField.RPCService.bindService[IO],
+      response
+    )(_.get(request))
+  }
+  test(
+    testParent2 + "rename a field, and " +
+      "be able to provide a compatible response within a coproduct"
+  ) {
+    runSucceedAssertion(
+      serviceResponseRenamedField.RPCService.bindService[IO],
+      responseCoproduct(response)
+    )(_.getCoproduct(requestCoproduct(request)))
+  }
+
+  test(
+    testParent2 + "drop a field, and " +
+      "be able to provide a compatible response"
+  ) {
+    runSucceedAssertion(
+      serviceResponseDroppedField.RPCService.bindService[IO],
+      response
+    )(_.get(request))
+  }
+  test(
+    testParent2 + "drop a field, and " +
+      "be able to provide a compatible response within a coproduct"
+  ) {
+    runSucceedAssertion(
+      serviceResponseDroppedField.RPCService.bindService[IO],
+      responseCoproduct(response)
+    )(_.getCoproduct(requestCoproduct(request)))
   }
 
 }

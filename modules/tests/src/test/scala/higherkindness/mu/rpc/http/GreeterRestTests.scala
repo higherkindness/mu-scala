@@ -19,21 +19,20 @@ package higherkindness.mu.rpc.http
 import cats.effect.{IO, _}
 import fs2.Stream
 import higherkindness.mu.http.{ResponseError, UnexpectedError}
-import higherkindness.mu.rpc.common.RpcBaseTestSuite
 import higherkindness.mu.http.implicits._
 import io.circe.Json
 import io.circe.generic.auto._
 import io.circe.syntax._
+import munit.CatsEffectSuite
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.client.UnexpectedStatus
 import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.blaze.server._
-import org.scalatest._
 import org.http4s.implicits._
 import org.http4s.server.Router
 
-class GreeterRestTests extends RpcBaseTestSuite with OneInstancePerTest with BeforeAndAfter {
+class GreeterRestTests extends CatsEffectSuite {
 
   val Hostname = "localhost"
   val Port     = 8080
@@ -61,55 +60,45 @@ class GreeterRestTests extends RpcBaseTestSuite with OneInstancePerTest with Bef
       ).orNotFound
     )
 
-  var serverTask: Fiber[IO, Throwable, Nothing] = _
+  val serverFixture = ResourceSuiteLocalFixture(
+    "blaze-server",
+    Resource.make(server.resource.use(_ => IO.never).start)(_.cancel)
+  )
 
-  before {
-    serverTask = server.resource.use(_ => IO.never).start.unsafeRunSync()
+  override def munitFixtures = List(serverFixture)
+
+  test("REST Server should serve a GET request") {
+    val request  = Request[IO](Method.GET, serviceUri / UnaryServicePrefix / "getHello")
+    val response = BlazeClientBuilder[IO](ec).resource.use(_.expect[Json](request))
+    IO(serverFixture()) *> response.assertEquals(HelloResponse("hey").asJson)
   }
-  after(serverTask.cancel)
 
-  "REST Server" should {
+  test("REST Server should serve a POST request") {
+    val request     = Request[IO](Method.POST, serviceUri / UnaryServicePrefix / "sayHello")
+    val requestBody = HelloRequest("hey").asJson
+    val response =
+      BlazeClientBuilder[IO](ec).resource.use(_.expect[Json](request.withEntity(requestBody)))
+    IO(serverFixture()) *> response.assertEquals(HelloResponse("hey").asJson)
+  }
 
-    "serve a GET request" in {
-      val request  = Request[IO](Method.GET, serviceUri / UnaryServicePrefix / "getHello")
-      val response = BlazeClientBuilder[IO](ec).resource.use(_.expect[Json](request))
-      response.unsafeRunSync() shouldBe HelloResponse("hey").asJson
-    }
+  test("REST Server should return a 400 Bad Request for a malformed unary POST request") {
+    val uri         = serviceUri / UnaryServicePrefix / "sayHello"
+    val request     = Request[IO](Method.POST, uri)
+    val requestBody = "{"
+    val response =
+      BlazeClientBuilder[IO](ec).resource.use(_.expect[Json](request.withEntity(requestBody)))
+    IO(serverFixture()) *>
+      response.attempt.assertEquals(Left(UnexpectedStatus(Status.BadRequest, Method.POST, uri)))
+  }
 
-    "serve a POST request" in {
-      val request     = Request[IO](Method.POST, serviceUri / UnaryServicePrefix / "sayHello")
-      val requestBody = HelloRequest("hey").asJson
-      val response =
-        BlazeClientBuilder[IO](ec).resource.use(_.expect[Json](request.withEntity(requestBody)))
-      response.unsafeRunSync() shouldBe HelloResponse("hey").asJson
-    }
-
-    "return a 400 Bad Request for a malformed unary POST request" in {
-      val uri         = serviceUri / UnaryServicePrefix / "sayHello"
-      val request     = Request[IO](Method.POST, uri)
-      val requestBody = "{"
-      val response =
-        BlazeClientBuilder[IO](ec).resource.use(_.expect[Json](request.withEntity(requestBody)))
-      the[UnexpectedStatus] thrownBy response.unsafeRunSync() shouldBe UnexpectedStatus(
-        Status.BadRequest,
-        Method.POST,
-        uri
-      )
-    }
-
-    "return a 400 Bad Request for a malformed streaming POST request" in {
-      val uri         = serviceUri / Fs2ServicePrefix / "sayHellos"
-      val request     = Request[IO](Method.POST, uri)
-      val requestBody = "{"
-      val response =
-        BlazeClientBuilder[IO](ec).resource.use(_.expect[Json](request.withEntity(requestBody)))
-      the[UnexpectedStatus] thrownBy response.unsafeRunSync() shouldBe UnexpectedStatus(
-        Status.BadRequest,
-        Method.POST,
-        uri
-      )
-    }
-
+  test("REST Server should return a 400 Bad Request for a malformed streaming POST request") {
+    val uri         = serviceUri / Fs2ServicePrefix / "sayHellos"
+    val request     = Request[IO](Method.POST, uri)
+    val requestBody = "{"
+    val response =
+      BlazeClientBuilder[IO](ec).resource.use(_.expect[Json](request.withEntity(requestBody)))
+    IO(serverFixture()) *>
+      response.attempt.assertEquals(Left(UnexpectedStatus(Status.BadRequest, Method.POST, uri)))
   }
 
   val unaryServiceClient: UnaryGreeterRestClient[IO] =
@@ -117,93 +106,93 @@ class GreeterRestTests extends RpcBaseTestSuite with OneInstancePerTest with Bef
   val fs2ServiceClient: Fs2GreeterRestClient[IO] =
     new Fs2GreeterRestClient[IO](serviceUri / Fs2ServicePrefix)
 
-  "REST Service" should {
+  test("REST Service should serve a GET request") {
+    val response = BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.getHello()(_))
+    IO(serverFixture()) *> response.assertEquals(HelloResponse("hey"))
+  }
 
-    "serve a GET request" in {
-      val response = BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.getHello()(_))
-      response.unsafeRunSync() shouldBe HelloResponse("hey")
-    }
+  test("REST Service should serve a unary POST request") {
+    val request = HelloRequest("hey")
+    val response =
+      BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.sayHello(request)(_))
+    IO(serverFixture()) *> response.assertEquals(HelloResponse("hey"))
+  }
 
-    "serve a unary POST request" in {
-      val request = HelloRequest("hey")
-      val response =
-        BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.sayHello(request)(_))
-      response.unsafeRunSync() shouldBe HelloResponse("hey")
-    }
-
-    "handle a raised gRPC exception in a unary POST request" in {
-      val request = HelloRequest("SRE")
-      val response =
-        BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.sayHello(request)(_))
-      the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
-        Status.BadRequest,
-        Some("INVALID_ARGUMENT: SRE")
+  test("REST Service should handle a raised gRPC exception in a unary POST request") {
+    val request = HelloRequest("SRE")
+    val response =
+      BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.sayHello(request)(_))
+    IO(serverFixture()) *>
+      response.attempt.assertEquals(
+        Left(ResponseError(Status.BadRequest, Some("INVALID_ARGUMENT: SRE")))
       )
-    }
+  }
 
-    "handle a raised non-gRPC exception in a unary POST request" in {
-      val request = HelloRequest("RTE")
-      val response =
-        BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.sayHello(request)(_))
-      the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
-        Status.InternalServerError,
-        Some("RTE")
-      )
-    }
+  test("REST Service should handle a raised non-gRPC exception in a unary POST request") {
+    val request = HelloRequest("RTE")
+    val response =
+      BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.sayHello(request)(_))
+    IO(serverFixture()) *>
+      response.attempt.assertEquals(Left(ResponseError(Status.InternalServerError, Some("RTE"))))
+  }
 
-    "handle a thrown exception in a unary POST request" in {
-      val request = HelloRequest("TR")
-      val response =
-        BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.sayHello(request)(_))
-      the[ResponseError] thrownBy response.unsafeRunSync() shouldBe ResponseError(
-        Status.InternalServerError
-      )
-    }
+  test("REST Service should handle a thrown exception in a unary POST request") {
+    val request = HelloRequest("TR")
+    val response =
+      BlazeClientBuilder[IO](ec).resource.use(unaryServiceClient.sayHello(request)(_))
+    IO(serverFixture()) *>
+      response.attempt.assertEquals(Left(ResponseError(Status.InternalServerError)))
+  }
 
-    "serve a POST request with fs2 streaming request" in {
-      val requests = Stream(HelloRequest("hey"), HelloRequest("there"))
-      val response =
-        BlazeClientBuilder[IO](ec).resource.use(fs2ServiceClient.sayHellos(requests)(_))
-      response.unsafeRunSync() shouldBe HelloResponse("hey, there")
-    }
+  test("REST Service should serve a POST request with fs2 streaming request") {
+    val requests = Stream(HelloRequest("hey"), HelloRequest("there"))
+    val response =
+      BlazeClientBuilder[IO](ec).resource.use(fs2ServiceClient.sayHellos(requests)(_))
+    IO(serverFixture()) *>
+      response.assertEquals(HelloResponse("hey, there"))
+  }
 
-    "serve a POST request with empty fs2 streaming request" in {
-      val requests = Stream.empty
-      val response =
-        BlazeClientBuilder[IO](ec).resource.use(fs2ServiceClient.sayHellos(requests)(_))
-      response.unsafeRunSync() shouldBe HelloResponse("")
-    }
+  test("REST Service should serve a POST request with empty fs2 streaming request") {
+    val requests = Stream.empty
+    val response =
+      BlazeClientBuilder[IO](ec).resource.use(fs2ServiceClient.sayHellos(requests)(_))
+    IO(serverFixture()) *>
+      response.assertEquals(HelloResponse(""))
+  }
 
-    "serve a POST request with fs2 streaming response" in {
-      val request = HelloRequest("hey")
-      val responses =
-        BlazeClientBuilder[IO](ec).stream.flatMap(fs2ServiceClient.sayHelloAll(request)(_))
+  test("REST Service should serve a POST request with fs2 streaming response") {
+    val request = HelloRequest("hey")
+    val responses =
+      BlazeClientBuilder[IO](ec).stream.flatMap(fs2ServiceClient.sayHelloAll(request)(_))
+    IO(serverFixture()) *>
       responses.compile.toList
-        .unsafeRunSync() shouldBe List(HelloResponse("hey"), HelloResponse("hey"))
-    }
+        .assertEquals(List(HelloResponse("hey"), HelloResponse("hey")))
+  }
 
-    "handle errors with fs2 streaming response" in {
-      val request = HelloRequest("")
-      val responses =
-        BlazeClientBuilder[IO](ec).stream.flatMap(fs2ServiceClient.sayHelloAll(request)(_))
-      the[UnexpectedError] thrownBy responses.compile.toList
-        .unsafeRunSync() should have message "java.lang.IllegalArgumentException: empty greeting"
-    }
+  test("REST Service should handle errors with fs2 streaming response") {
+    val request = HelloRequest("")
+    val responses =
+      BlazeClientBuilder[IO](ec).stream.flatMap(fs2ServiceClient.sayHelloAll(request)(_))
+    IO(serverFixture()) *>
+      interceptMessageIO[UnexpectedError]("java.lang.IllegalArgumentException: empty greeting")(
+        responses.compile.toList
+      )
+  }
 
-    "serve a POST request with bidirectional fs2 streaming" in {
-      val requests = Stream(HelloRequest("hey"), HelloRequest("there"))
-      val responses =
-        BlazeClientBuilder[IO](ec).stream.flatMap(fs2ServiceClient.sayHellosAll(requests)(_))
+  test("REST Service should serve a POST request with bidirectional fs2 streaming") {
+    val requests = Stream(HelloRequest("hey"), HelloRequest("there"))
+    val responses =
+      BlazeClientBuilder[IO](ec).stream.flatMap(fs2ServiceClient.sayHellosAll(requests)(_))
+    IO(serverFixture()) *>
       responses.compile.toList
-        .unsafeRunSync() shouldBe List(HelloResponse("hey"), HelloResponse("there"))
-    }
+        .assertEquals(List(HelloResponse("hey"), HelloResponse("there")))
+  }
 
-    "serve an empty POST request with bidirectional fs2 streaming" in {
-      val requests = Stream.empty
-      val responses =
-        BlazeClientBuilder[IO](ec).stream.flatMap(fs2ServiceClient.sayHellosAll(requests)(_))
-      responses.compile.toList.unsafeRunSync() shouldBe Nil
-    }
-
+  test("REST Service should serve an empty POST request with bidirectional fs2 streaming") {
+    val requests = Stream.empty
+    val responses =
+      BlazeClientBuilder[IO](ec).stream.flatMap(fs2ServiceClient.sayHellosAll(requests)(_))
+    IO(serverFixture()) *>
+      responses.compile.toList.assertEquals(Nil)
   }
 }

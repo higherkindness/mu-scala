@@ -17,11 +17,9 @@
 package integrationtest
 
 import com.whisk.docker.DockerContainer
-import com.whisk.docker.scalatest.DockerTestKit
 import com.whisk.docker.impl.spotify.DockerKitSpotify
-import org.scalatest.Suite
 
-trait HaskellServerRunningInDocker extends DockerTestKit with DockerKitSpotify { self: Suite =>
+trait HaskellServerRunningInDocker extends DockerKitSpotify { self: munit.FunSuite =>
 
   def serverPort: Int
   def serverExecutableName: String
@@ -39,5 +37,11 @@ trait HaskellServerRunningInDocker extends DockerTestKit with DockerKitSpotify {
     println("Started Docker container.")
     Thread.sleep(2000) // give the Haskell server a chance to start up properly
   }
+
+  override def beforeAll(): Unit =
+    startAllOrFail()
+
+  override def afterAll(): Unit =
+    stopAllQuietly()
 
 }

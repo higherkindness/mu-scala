@@ -18,37 +18,27 @@ package higherkindness.mu.rpc
 package internal
 package util
 
+import munit.ScalaCheckSuite
 import org.scalacheck.Prop._
-import org.scalatestplus.scalacheck.Checkers
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
 
-class EncoderUtilTest extends AnyWordSpec with Matchers with Checkers {
+class EncoderUtilTest extends ScalaCheckSuite {
 
-  "EncoderUtil" should {
+  property("EncoderUtil should allow to convert int to and from byteArray") {
+    forAll { n: Int =>
+      val value: Array[Byte] = EncoderUtil.intToByteArray(n)
 
-    "allow to convert int to and from byteArray" in {
-      check {
-        forAll { n: Int =>
-          val value: Array[Byte] = EncoderUtil.intToByteArray(n)
+      EncoderUtil.byteArrayToInt(value) == n
 
-          EncoderUtil.byteArrayToInt(value) == n
-
-        }
-      }
     }
+  }
 
-    "allow to convert long to and from byteArray" in {
-      check {
-        forAll { n: Long =>
-          val value: Array[Byte] = EncoderUtil.longToByteArray(n)
+  property("EncoderUtil should allow to convert long to and from byteArray") {
+    forAll { n: Long =>
+      val value: Array[Byte] = EncoderUtil.longToByteArray(n)
 
-          EncoderUtil.byteArrayToLong(value) == n
+      EncoderUtil.byteArrayToLong(value) == n
 
-        }
-      }
     }
-
   }
 
 }
