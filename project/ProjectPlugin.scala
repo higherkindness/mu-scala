@@ -208,7 +208,8 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val testSettings = Seq(
-      publishArtifact := false,
+      publishArtifact          := false,
+      Test / parallelExecution := false,
       testFrameworks += new TestFramework("munit.Framework"),
       libraryDependencies ++= Seq(
         "io.grpc"    % "grpc-netty"                      % V.grpc              % Test,
@@ -266,7 +267,7 @@ object ProjectPlugin extends AutoPlugin {
 
   override def projectSettings: Seq[Def.Setting[_]] =
     Seq(
-      Test / fork            := true,
+      Test / fork            := false,
       Compile / compileOrder := CompileOrder.JavaThenScala,
       coverageFailOnMinimum  := false,
       addCompilerPlugin(
