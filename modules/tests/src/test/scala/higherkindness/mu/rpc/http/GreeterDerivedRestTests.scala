@@ -26,7 +26,7 @@ import org.http4s._
 import org.http4s.blaze.client.BlazeClientBuilder
 import org.http4s.blaze.server._
 
-class GreeterDerivedRestTests extends CatsEffectSuite {
+abstract class GreeterDerivedRestTests extends CatsEffectSuite {
 
   val host            = "localhost"
   val port            = 8080

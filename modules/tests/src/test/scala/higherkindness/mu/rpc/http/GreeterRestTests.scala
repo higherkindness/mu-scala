@@ -32,7 +32,7 @@ import org.http4s.blaze.server._
 import org.http4s.implicits._
 import org.http4s.server.Router
 
-class GreeterRestTests extends CatsEffectSuite {
+abstract class GreeterRestTests extends CatsEffectSuite {
 
   val Hostname = "localhost"
   val Port     = 8080
