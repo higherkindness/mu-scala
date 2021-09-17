@@ -20,14 +20,27 @@ package fs2
 import cats.effect.IO
 import higherkindness.mu.rpc.common._
 import _root_.fs2.Stream
+import higherkindness.mu.rpc.server.GrpcServer
 import munit.CatsEffectSuite
+
+import scala.concurrent.duration._
 
 class RPCTests extends CatsEffectSuite {
 
   import higherkindness.mu.rpc.fs2.Utils.database._
   import higherkindness.mu.rpc.fs2.Utils.implicits._
 
-  val serverFixture = ResourceSuiteLocalFixture("rpc-server", grpcServer)
+  var grpcServerStarted: Option[GrpcServer[IO]] = None
+  var shutdown: Option[IO[Unit]]                = None
+
+  override def beforeAll(): Unit = {
+    val tuple = grpcServer.allocated.unsafeRunSync()
+    grpcServerStarted = Some(tuple._1)
+    shutdown = Some(tuple._2)
+  }
+
+  override def afterAll(): Unit =
+    shutdown.foreach(_.unsafeRunSync())
 
   val protoFixture = ResourceSuiteLocalFixture("proto-client", muProtoRPCServiceClient)
   val avroFixture  = ResourceSuiteLocalFixture("avro-client", muAvroRPCServiceClient)
@@ -43,7 +56,6 @@ class RPCTests extends CatsEffectSuite {
   )
 
   override def munitFixtures = List(
-    serverFixture,
     protoFixture,
     avroFixture,
     avroWSFixture,
@@ -53,32 +65,35 @@ class RPCTests extends CatsEffectSuite {
   )
 
   test("mu-rpc server should allow to startup a server and check if it's alive") {
-    IO(serverFixture()).flatMap(_.isShutdown).assertEquals(false)
+    IO
+      .fromOption(grpcServerStarted)(new IllegalStateException("Server not initialized"))
+      .flatMap(_.isShutdown)
+      .assertEquals(false)
   }
 
   test("mu-rpc server should allow to get the port where it's running") {
-    IO(serverFixture()).flatMap(_.getPort).assertEquals(SC.port)
+    IO
+      .fromOption(grpcServerStarted)(new IllegalStateException("Server not initialized"))
+      .flatMap(_.getPort)
+      .assertEquals(SC.port)
   }
 
   test("mu-rpc client with fs2.Stream be able to run unary services") {
-    IO(serverFixture()) *>
-      IO(avroFixture())
-        .flatMap(_.unary(a1))
-        .assertEquals(c1)
+    IO(avroFixture())
+      .flatMap(_.unary(a1))
+      .assertEquals(c1)
   }
 
   test("mu-rpc client with fs2.Stream be able to run unary services with avro schemas") {
-    IO(serverFixture()) *>
-      IO(avroWSFixture())
-        .flatMap(_.unaryWithSchema(a1))
-        .assertEquals(c1)
+    IO(avroWSFixture())
+      .flatMap(_.unaryWithSchema(a1))
+      .assertEquals(c1)
   }
 
   test("mu-rpc client with fs2.Stream be able to run server streaming services") {
-    IO(serverFixture()) *>
-      IO(protoFixture())
-        .flatMap(_.serverStreaming(b1).flatMap(_.compile.toList))
-        .assertEquals(cList)
+    IO(protoFixture())
+      .flatMap(_.serverStreaming(b1).flatMap(_.compile.toList))
+      .assertEquals(cList)
   }
 
   test("mu-rpc client with fs2.Stream handle errors in server streaming services") {
@@ -91,9 +106,8 @@ class RPCTests extends CatsEffectSuite {
             .flatMap(_.compile.toList)
         )
 
-    IO(serverFixture()) *>
-      clientProgram("SE")
-        .assertEquals(List(C("INVALID_ARGUMENT: SE", a1))) *>
+    clientProgram("SE")
+      .assertEquals(List(C("INVALID_ARGUMENT: SE", a1))) *>
       clientProgram("SRE")
         .assertEquals(List(C("INVALID_ARGUMENT: SRE", a1))) *>
       clientProgram("RTE")
@@ -103,167 +117,166 @@ class RPCTests extends CatsEffectSuite {
   }
 
   test("mu-rpc client with fs2.Stream be able to run client streaming services") {
-    IO(serverFixture()) *>
-      IO(protoFixture())
-        .flatMap(_.clientStreaming(Stream.fromIterator[IO](aList.iterator, 1)))
-        .assertEquals(dResult33)
+    IO(protoFixture())
+      .flatMap(_.clientStreaming(Stream.fromIterator[IO](aList.iterator, 1)))
+      .assertEquals(dResult33)
   }
 
   test("mu-rpc client with fs2.Stream be able to run client bidirectional streaming services") {
-    IO(serverFixture()) *>
-      IO(avroFixture())
-        .flatMap(
-          _.biStreaming(Stream.fromIterator[IO](eList.iterator, 1)).flatMap(_.compile.toList)
-        )
-        .map(_.distinct)
-        .assertEquals(eList)
+    IO(avroFixture())
+      .flatMap(
+        _.biStreaming(Stream.fromIterator[IO](eList.iterator, 1)).flatMap(_.compile.toList)
+      )
+      .map(_.distinct)
+      .assertEquals(eList)
   }
 
   test(
     "mu-rpc client with fs2.Stream be able to run client bidirectional streaming services with avro schema"
   ) {
-    IO(serverFixture()) *>
-      IO(avroWSFixture())
-        .flatMap(
-          _.biStreamingWithSchema(Stream.fromIterator[IO](eList.iterator, 1))
-            .flatMap(_.compile.toList)
-        )
-        .map(_.distinct)
-        .assertEquals(eList)
+    IO(avroWSFixture())
+      .flatMap(
+        _.biStreamingWithSchema(Stream.fromIterator[IO](eList.iterator, 1))
+          .flatMap(_.compile.toList)
+      )
+      .map(_.distinct)
+      .assertEquals(eList)
   }
 
   test("mu-rpc client with fs2.Stream be able to run multiple rpc services") {
-    val tuple =
-      (
-        IO(avroFixture())
-          .flatMap(_.unary(a1)),
-        IO(avroWSFixture())
-          .flatMap(_.unaryWithSchema(a1)),
-        IO(protoFixture())
-          .flatMap(_.serverStreaming(b1).flatMap(_.compile.toList)),
-        IO(protoFixture())
-          .flatMap(
-            _.clientStreaming(Stream.fromIterator[IO](aList.iterator, 1))
-          ),
-        IO(avroFixture())
-          .flatMap(
-            _.biStreaming(Stream.fromIterator[IO](eList.iterator, 1)).flatMap(_.compile.toList)
-          ),
-        IO(avroWSFixture())
-          .flatMap(
-            _.biStreamingWithSchema(Stream.fromIterator[IO](eList.iterator, 1))
-              .flatMap(_.compile.toList)
-          )
-      )
+    val opTimeout: FiniteDuration = 10.seconds
+    for {
+      avroC <- IO(avroFixture())
+      _ <- avroC
+        .unary(a1)
+        .assertEquals(c1)
+        .timeout(opTimeout)
+      _ <- avroC
+        .biStreaming(Stream.fromIterator[IO](eList.iterator, 1))
+        .flatMap(_.compile.toList)
+        .map(_.distinct)
+        .assertEquals(eList)
+        .timeout(opTimeout)
 
-    IO(serverFixture()) *>
-      tuple._1.assertEquals(c1) *>
-      tuple._2.assertEquals(c1) *>
-      tuple._3.assertEquals(cList) *>
-      tuple._4.assertEquals(dResult33) *>
-      tuple._5.map(_.distinct).assertEquals(eList) *>
-      tuple._6.map(_.distinct).assertEquals(eList)
+      avroWSC <- IO(avroWSFixture())
+      _ <- avroWSC
+        .unaryWithSchema(a1)
+        .assertEquals(c1)
+        .timeout(opTimeout)
+      _ <- avroWSC
+        .biStreamingWithSchema(Stream.fromIterator[IO](eList.iterator, 1))
+        .flatMap(_.compile.toList)
+        .map(_.distinct)
+        .assertEquals(eList)
+        .timeout(opTimeout)
 
+      protoC <- IO(protoFixture())
+      _ <- protoC
+        .serverStreaming(b1)
+        .flatMap(_.compile.toList)
+        .assertEquals(cList)
+        .timeout(opTimeout)
+      _ <- protoC
+        .clientStreaming(Stream.fromIterator[IO](aList.iterator, 1))
+        .assertEquals(dResult33)
+        .timeout(opTimeout)
+    } yield ()
   }
 
   test("mu-rpc client with fs2.Stream and compression enabled be able to run unary services") {
-    IO(serverFixture()) *>
-      IO(avroCompressedFixture())
-        .flatMap(_.unaryCompressed(a1))
-        .assertEquals(c1)
+    IO(avroCompressedFixture())
+      .flatMap(_.unaryCompressed(a1))
+      .assertEquals(c1)
   }
 
   test(
     "mu-rpc client with fs2.Stream and compression enabled be able to run unary services with avro schema"
   ) {
-    IO(serverFixture()) *>
-      IO(avroWSCompressedFixture())
-        .flatMap(_.unaryCompressedWithSchema(a1))
-        .assertEquals(c1)
+    IO(avroWSCompressedFixture())
+      .flatMap(_.unaryCompressedWithSchema(a1))
+      .assertEquals(c1)
   }
 
   test(
     "mu-rpc client with fs2.Stream and compression enabled be able to run server streaming services"
   ) {
-    IO(serverFixture()) *>
-      IO(protoCompressedFixture())
-        .flatMap(_.serverStreamingCompressed(b1).flatMap(_.compile.toList))
-        .assertEquals(cList)
+    IO(protoCompressedFixture())
+      .flatMap(_.serverStreamingCompressed(b1).flatMap(_.compile.toList))
+      .assertEquals(cList)
   }
 
   test(
     "mu-rpc client with fs2.Stream and compression enabled be able to run client streaming services"
   ) {
-    IO(serverFixture()) *>
-      IO(protoCompressedFixture())
-        .flatMap(_.clientStreamingCompressed(Stream.fromIterator[IO](aList.iterator, 1)))
-        .assertEquals(dResult33)
+    IO(protoCompressedFixture())
+      .flatMap(_.clientStreamingCompressed(Stream.fromIterator[IO](aList.iterator, 1)))
+      .assertEquals(dResult33)
   }
 
   test(
     "mu-rpc client with fs2.Stream and compression enabled be able to run client bidirectional streaming services"
   ) {
-    IO(serverFixture()) *>
-      IO(avroCompressedFixture())
-        .flatMap(
-          _.biStreamingCompressed(Stream.fromIterator[IO](eList.iterator, 1))
-            .flatMap(_.compile.toList)
-        )
-        .map(_.distinct)
-        .assertEquals(eList)
+    IO(avroCompressedFixture())
+      .flatMap(
+        _.biStreamingCompressed(Stream.fromIterator[IO](eList.iterator, 1))
+          .flatMap(_.compile.toList)
+      )
+      .map(_.distinct)
+      .assertEquals(eList)
   }
 
   test(
     "mu-rpc client with fs2.Stream and compression enabled be able to run client bidirectional streaming services with avro schema"
   ) {
-    IO(serverFixture()) *>
-      IO(avroWSCompressedFixture())
-        .flatMap(
-          _.biStreamingCompressedWithSchema(Stream.fromIterator[IO](eList.iterator, 1))
-            .flatMap(_.compile.toList)
-        )
-        .map(_.distinct)
-        .assertEquals(eList)
+    IO(avroWSCompressedFixture())
+      .flatMap(
+        _.biStreamingCompressedWithSchema(Stream.fromIterator[IO](eList.iterator, 1))
+          .flatMap(_.compile.toList)
+      )
+      .map(_.distinct)
+      .assertEquals(eList)
   }
 
   test(
     "mu-rpc client with fs2.Stream and compression enabled be able to run multiple rpc services"
   ) {
+    val opTimeout: FiniteDuration = 10.seconds
+    for {
+      avroC <- IO(avroCompressedFixture())
+      _ <- avroC
+        .unaryCompressed(a1)
+        .assertEquals(c1)
+        .timeout(opTimeout)
+      _ <- avroC
+        .biStreamingCompressed(Stream.fromIterator[IO](eList.iterator, 1))
+        .flatMap(_.compile.toList)
+        .map(_.distinct)
+        .assertEquals(eList)
+        .timeout(opTimeout)
 
-    val tuple =
-      (
-        IO(avroCompressedFixture())
-          .flatMap(_.unaryCompressed(a1)),
-        IO(avroWSCompressedFixture())
-          .flatMap(_.unaryCompressedWithSchema(a1)),
-        IO(protoCompressedFixture())
-          .flatMap(
-            _.serverStreamingCompressed(b1).flatMap(_.compile.toList)
-          ),
-        IO(protoCompressedFixture())
-          .flatMap(
-            _.clientStreamingCompressed(Stream.fromIterator[IO](aList.iterator, 1))
-          ),
-        IO(avroCompressedFixture())
-          .flatMap(
-            _.biStreamingCompressed(Stream.fromIterator[IO](eList.iterator, 1))
-              .flatMap(_.compile.toList)
-          ),
-        IO(avroWSCompressedFixture())
-          .flatMap(
-            _.biStreamingCompressedWithSchema(
-              Stream.fromIterator[IO](eList.iterator, 1)
-            ).flatMap(_.compile.toList)
-          )
-      )
+      avroWSC <- IO(avroWSCompressedFixture())
+      _ <- avroWSC
+        .unaryCompressedWithSchema(a1)
+        .assertEquals(c1)
+        .timeout(opTimeout)
+      _ <- avroWSC
+        .biStreamingCompressedWithSchema(Stream.fromIterator[IO](eList.iterator, 1))
+        .flatMap(_.compile.toList)
+        .map(_.distinct)
+        .assertEquals(eList)
+        .timeout(opTimeout)
 
-    IO(serverFixture()) *>
-      tuple._1.assertEquals(c1) *>
-      tuple._2.assertEquals(c1) *>
-      tuple._3.assertEquals(cList) *>
-      tuple._4.assertEquals(dResult33) *>
-      tuple._5.map(_.distinct).assertEquals(eList) *>
-      tuple._6.map(_.distinct).assertEquals(eList)
+      protoC <- IO(protoCompressedFixture())
+      _ <- protoC
+        .serverStreamingCompressed(b1)
+        .flatMap(_.compile.toList)
+        .assertEquals(cList)
+        .timeout(opTimeout)
+      _ <- protoC
+        .clientStreamingCompressed(Stream.fromIterator[IO](aList.iterator, 1))
+        .assertEquals(dResult33)
+        .timeout(opTimeout)
+    } yield ()
   }
 
 }

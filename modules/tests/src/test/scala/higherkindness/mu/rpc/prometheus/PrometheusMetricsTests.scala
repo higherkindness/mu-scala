@@ -24,12 +24,13 @@ import higherkindness.mu.rpc.internal.metrics.MetricsOpsGenerators._
 import io.grpc.Status
 import io.prometheus.client.Collector.MetricFamilySamples
 import io.prometheus.client.{Collector, CollectorRegistry}
+import munit.ScalaCheckSuite
 import org.scalacheck.Prop.forAllNoShrink
-import org.scalacheck.{Gen, Properties}
+import org.scalacheck.Gen
 
 import scala.jdk.CollectionConverters._
 
-class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
+class PrometheusMetricsTests extends ScalaCheckSuite {
 
   val prefix     = "testPrefix"
   val classifier = "classifier"
@@ -92,7 +93,7 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
     samples.find(_.name == metricName + "_total").exists(_.value == value) &&
       samples.exists(_.name == metricName + "_created")
 
-  property("creates and updates counter when registering an active call") =
+  property("creates and updates counter when registering an active call") {
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int) =>
         val registry   = new CollectorRegistry()
@@ -114,8 +115,9 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
           )(checkSingleSamples(metricName, 0L))
         } yield op1 && op2).unsafeRunSync()
     }
+  }
 
-  property("creates and updates counter when registering a received message") =
+  property("creates and updates counter when registering a received message") {
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int) =>
         val registry   = new CollectorRegistry()
@@ -131,8 +133,9 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
           )(checkCounterSamples(metricName, numberOfCalls.toDouble))
         } yield op1).unsafeRunSync()
     }
+  }
 
-  property("creates and updates timer for headers time") =
+  property("creates and updates timer for headers time") {
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10), Gen.chooseNum(100, 1000)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int, elapsed: Int) =>
         val registry   = new CollectorRegistry()
@@ -148,8 +151,9 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
           )(checkSeriesSamples(metricName, numberOfCalls, elapsed))
         } yield op1).unsafeRunSync()
     }
+  }
 
-  property("creates and updates timer for total time metrics") =
+  property("creates and updates timer for total time metrics") {
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10), statusGen, Gen.chooseNum(100, 1000)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int, status: Status, elapsed: Int) =>
         val registry   = new CollectorRegistry()
@@ -170,8 +174,9 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
               }
         } yield op1).unsafeRunSync()
     }
+  }
 
-  property("creates and updates timer for full total time metrics") =
+  property("creates and updates timer for full total time metrics") {
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10), statusGen, Gen.chooseNum(100, 1000)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int, status: Status, elapsed: Int) =>
         val registry   = new CollectorRegistry()
@@ -192,4 +197,5 @@ class PrometheusMetricsTests extends Properties("PrometheusMetrics") {
               }
         } yield op1).unsafeRunSync()
     }
+  }
 }

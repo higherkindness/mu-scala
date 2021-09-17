@@ -27,6 +27,8 @@ import integrationtest.protobuf.weather._
 import io.grpc.CallOptions
 import munit.CatsEffectSuite
 
+import scala.concurrent.duration._
+
 class HaskellServerScalaClientSpec extends CatsEffectSuite with HaskellServerRunningInDocker {
 
   def serverPort: Int              = Constants.ProtobufPort
@@ -75,6 +77,7 @@ class HaskellServerScalaClientSpec extends CatsEffectSuite with HaskellServerRun
     IO(clientFixture())
       .flatMap(client => Stream.force(client.subscribeToRainEvents(request)).compile.toList)
       .assertEquals(expectedEvents)
+      .timeout(10.seconds)
   }
 
 }

@@ -22,6 +22,8 @@ import integrationtest._
 import integrationtest.protobuf.weather._
 import munit.CatsEffectSuite
 
+import scala.concurrent.duration._
+
 class ScalaServerHaskellClientSpec extends CatsEffectSuite with RunHaskellClientInDocker {
 
   def clientExecutableName: String = "protobuf-client"
@@ -60,13 +62,15 @@ class ScalaServerHaskellClientSpec extends CatsEffectSuite with RunHaskellClient
 
   test(behaviorOf + "it should work for a server-streaming call") {
     IO(serverFixture()) *>
-      runHaskellClientR(List("subscribe-to-rain-events", "London")).assertEquals(
-        """|"STARTED"
+      runHaskellClientR(List("subscribe-to-rain-events", "London"))
+        .assertEquals(
+          """|"STARTED"
          |"STOPPED"
          |"STARTED"
          |"STOPPED"
          |"STARTED"""".stripMargin
-      )
+        )
+        .timeout(10.seconds)
   }
 
 }
