@@ -47,10 +47,6 @@ options:
     menu_type: tutorials
     url: tutorials/testing-rpc-service
 
-  - title: OpenAPI REST client
-    menu_type: tutorials
-    url: tutorials/openapi-client
-
   - title: Deploying a Mu service
     menu_type: tutorials
     url: tutorials/deployment

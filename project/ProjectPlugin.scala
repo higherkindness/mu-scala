@@ -24,7 +24,6 @@ object ProjectPlugin extends AutoPlugin {
       val fs2: String                   = "2.5.9"
       val fs2Grpc: String               = "0.10.3"
       val grpc: String                  = "1.40.1"
-      val http4s: String                = "0.21.28"
       val kindProjector: String         = "0.13.2"
       val log4cats: String              = "1.3.1"
       val log4s: String                 = "1.10.0"
@@ -115,15 +114,6 @@ object ProjectPlugin extends AutoPlugin {
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.grpc" % "grpc-netty" % V.grpc
-      )
-    )
-
-    lazy val httpSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "org.http4s" %% "http4s-dsl"          % V.http4s,
-        "org.http4s" %% "http4s-blaze-server" % V.http4s,
-        "org.http4s" %% "http4s-circe"        % V.http4s,
-        "io.grpc"     % "grpc-stub"           % V.grpc
       )
     )
 
@@ -225,7 +215,6 @@ object ProjectPlugin extends AutoPlugin {
         "org.scalamock"     %% "scalamock"                       % V.scalamock           % Test,
         "com.47deg"         %% "scalacheck-toolbox-datetime"     % V.scalacheckToolbox   % Test,
         "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat % Test,
-        "org.http4s"             %% "http4s-blaze-client"     % V.http4s                % Test,
         "io.circe"               %% "circe-generic"           % V.circe                 % Test,
         "ch.qos.logback"          % "logback-classic"         % V.logback               % Test,
         "org.slf4j"               % "slf4j-nop"               % V.slf4j                 % Test
