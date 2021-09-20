@@ -16,7 +16,7 @@ object ProjectPlugin extends AutoPlugin {
     lazy val V = new {
       val avro4s: String                = "4.0.11"
       val betterMonadicFor: String      = "0.3.1"
-      val catsEffect: String            = "2.5.3"
+      val catsEffect: String            = "2.5.4"
       val circe: String                 = "0.14.1"
       val dockerItScala                 = "0.9.9"
       val dropwizard: String            = "4.2.3"
@@ -40,7 +40,7 @@ object ProjectPlugin extends AutoPlugin {
       val scalaCollectionCompat: String = "2.5.0"
       val scalacheckToolbox: String     = "0.6.0"
       val scalamock: String             = "5.1.0"
-      val scalatest: String             = "3.2.9"
+      val scalatest: String             = "3.2.10"
       val scalatestplusScheck: String   = "3.2.2.0"
       val slf4j: String                 = "1.7.32"
     }
