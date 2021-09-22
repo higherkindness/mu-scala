@@ -112,15 +112,6 @@ lazy val dropwizard = project
   .settings(moduleName := "mu-rpc-dropwizard")
   .settings(dropwizardMetricsSettings)
 
-///////////////////
-//// HTTP/REST ////
-///////////////////
-
-lazy val http = project
-  .in(file("modules/http"))
-  .settings(moduleName := "mu-rpc-http")
-  .settings(httpSettings)
-
 ////////////////////
 //// BENCHMARKS ////
 ////////////////////
@@ -177,7 +168,6 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   prometheus,
   testing,
   `netty-ssl`,
-  http,
   `health-check`,
   `benchmarks-vnext`
 )

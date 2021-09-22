@@ -24,8 +24,6 @@ object ProjectPlugin extends AutoPlugin {
       val fs2: String                   = "3.1.2"
       val fs2Grpc: String               = "2.1.7"
       val grpc: String                  = "1.40.1"
-      val http4s: String                = "0.23.1"
-      val jawnFs2: String               = "2.0.0"
       val kindProjector: String         = "0.13.2"
       val log4cats: String              = "2.1.1"
       val log4s: String                 = "1.10.0"
@@ -108,16 +106,6 @@ object ProjectPlugin extends AutoPlugin {
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.grpc" % "grpc-netty" % V.grpc
-      )
-    )
-
-    lazy val httpSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        "org.http4s"    %% "http4s-dsl"          % V.http4s,
-        "org.http4s"    %% "http4s-blaze-server" % V.http4s,
-        "org.http4s"    %% "http4s-circe"        % V.http4s,
-        "org.typelevel" %% "jawn-fs2"            % V.jawnFs2,
-        "io.grpc"        % "grpc-stub"           % V.grpc
       )
     )
 
@@ -216,7 +204,6 @@ object ProjectPlugin extends AutoPlugin {
         "io.netty"   % "netty-tcnative-boringssl-static" % V.nettySSL          % Test,
         "com.47deg" %% "scalacheck-toolbox-datetime"     % V.scalacheckToolbox % Test,
         "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat % Test,
-        "org.http4s"             %% "http4s-blaze-client"     % V.http4s                % Test,
         "io.circe"               %% "circe-generic"           % V.circe                 % Test,
         "org.scalameta"          %% "munit"                   % V.munit                 % Test,
         "org.scalameta"          %% "munit-scalacheck"        % V.munit                 % Test,
