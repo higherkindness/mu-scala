@@ -57,7 +57,7 @@ case class HelloRequest(greeting: String)
 case class HelloResponse(reply: String)
 ```
 
-We'll write the service definition using both Monix and FS2 so we can compare.
+We'll write the service definition using FS2.
 
 ### Using FS2
 
