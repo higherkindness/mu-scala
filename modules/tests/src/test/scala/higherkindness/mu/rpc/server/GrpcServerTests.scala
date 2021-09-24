@@ -20,85 +20,105 @@ package server
 import java.util.concurrent.TimeUnit
 
 import cats.Apply
-import cats.syntax.apply._
-import higherkindness.mu.rpc.common.{ConcurrentMonad, SC}
-import io.grpc.{Server, ServerServiceDefinition}
+import cats.syntax.all._
+import higherkindness.mu.rpc.common.SC
+import cats.effect.{IO, Sync}
+import io.grpc.ServerServiceDefinition
+import munit.CatsEffectSuite
 
-class GrpcServerTests extends RpcServerTestSuite {
+import scala.jdk.CollectionConverters._
 
-  import implicits._
+class GrpcServerTests extends CatsEffectSuite {
 
-  "GrpcServer" should {
+  import TestData._
 
-    type Result = (
-        Boolean,
-        Unit,
-        Int,
-        List[ServerServiceDefinition],
-        List[ServerServiceDefinition],
-        List[ServerServiceDefinition],
-        Unit,
-        Unit,
-        Boolean,
-        Boolean,
-        Boolean,
-        Unit
-    )
+  type Result = (
+      Boolean,
+      Unit,
+      Int,
+      List[ServerServiceDefinition],
+      List[ServerServiceDefinition],
+      List[ServerServiceDefinition],
+      Unit,
+      Unit,
+      Boolean,
+      Boolean,
+      Boolean,
+      Unit
+  )
 
-    "behaves as expected" in {
+  test("GrpcServer should behaves as expected") {
 
-      def program[F[_]: Apply](APP: GrpcServer[F]): F[Result] = {
+    def program[F[_]: Apply](APP: GrpcServer[F]): F[Result] = {
 
-        import APP._
+      import APP._
 
-        val a = isShutdown
-        val b = start()
-        val c = getPort
-        val d = getServices
-        val e = getImmutableServices
-        val f = getMutableServices
-        val g = shutdown()
-        val h = shutdownNow()
-        val i = isShutdown
-        val j = isTerminated
-        val k = awaitTerminationTimeout(timeout, timeoutUnit)
-        val l = awaitTermination()
+      val a = isShutdown
+      val b = start
+      val c = getPort
+      val d = getServices
+      val e = getImmutableServices
+      val f = getMutableServices
+      val g = shutdown
+      val h = shutdownNow
+      val i = isShutdown
+      val j = isTerminated
+      val k = awaitTerminationTimeout(timeout, timeoutUnit)
+      val l = awaitTermination
 
-        (a, b, c, d, e, f, g, h, i, j, k, l).tupled
-      }
-
-      program[ConcurrentMonad](grpcServerHandlerTests).unsafeRunSync() shouldBe ((
-        b,
-        (),
-        SC.port,
-        serviceList,
-        immutableServiceList,
-        mutableServiceList,
-        (),
-        (),
-        b,
-        b,
-        b,
-        unit
-      ): Result)
-
-      (serverMock.start _: () => Server).verify().once()
-      (serverMock.getPort _: () => Int).verify().once()
-      (serverMock.getServices _: () => java.util.List[ServerServiceDefinition]).verify().once()
-      (serverMock.getImmutableServices _: () => java.util.List[ServerServiceDefinition])
-        .verify()
-        .once()
-      (serverMock.getMutableServices _: () => java.util.List[ServerServiceDefinition])
-        .verify()
-        .once()
-      (serverMock.shutdown _: () => Server).verify().once()
-      (serverMock.shutdownNow _: () => Server).verify().once()
-      (serverMock.isShutdown _: () => Boolean).verify().twice()
-      (serverMock.isTerminated _: () => Boolean).verify().once()
-      (serverMock.awaitTermination(_: Long, _: TimeUnit)).verify(timeout, timeoutUnit).once()
-      (serverMock.awaitTermination _: () => Unit).verify().once()
+      (a, b, c, d, e, f, g, h, i, j, k, l).tupled
     }
 
+    program[IO](grpcServerHandlerTests).map(
+      assertEquals(
+        _,
+        (
+          b,
+          (),
+          SC.port,
+          serviceList,
+          immutableServiceList,
+          mutableServiceList,
+          (),
+          (),
+          b,
+          b,
+          b,
+          unit
+        ): Result
+      )
+    )
+  }
+
+  def grpcServerHandlerTests[F[_]](implicit F: Sync[F]): GrpcServer[F] = {
+    new GrpcServer[F] {
+      def start: F[Unit] = F.pure(serverMock.start).void
+
+      def getPort: F[Int] = F.pure(serverMock.getPort)
+
+      def getServices: F[List[ServerServiceDefinition]] =
+        F.pure(serverMock.getServices.asScala.toList)
+
+      def getImmutableServices: F[List[ServerServiceDefinition]] =
+        F.pure(serverMock.getImmutableServices.asScala.toList)
+
+      def getMutableServices: F[List[ServerServiceDefinition]] =
+        F.pure(serverMock.getMutableServices.asScala.toList)
+
+      def shutdown: F[Unit] = F.pure(serverMock.shutdown()).void
+
+      def shutdownNow: F[Unit] = F.pure(serverMock.shutdownNow()).void
+
+      def isShutdown: F[Boolean] = F.pure(serverMock.isShutdown)
+
+      def isTerminated: F[Boolean] = F.pure(serverMock.isTerminated)
+
+      def awaitTerminationTimeout(timeout: Long, unit: TimeUnit): F[Boolean] =
+        F.pure(serverMock.awaitTermination(timeout, unit))
+
+      def awaitTermination: F[Unit] = F.pure(serverMock.awaitTermination())
+
+    }
   }
 
 }

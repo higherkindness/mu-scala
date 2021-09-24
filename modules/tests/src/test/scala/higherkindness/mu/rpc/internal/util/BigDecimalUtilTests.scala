@@ -18,52 +18,49 @@ package higherkindness.mu.rpc
 package internal
 package util
 
+import munit.ScalaCheckSuite
 import org.scalacheck.Gen.Choose
-import org.scalacheck.{Arbitrary, Gen}
-import org.scalatest._
+import org.scalacheck.{Arbitrary, Gen, Prop, Test}
 import org.scalacheck.Prop._
-import org.scalatestplus.scalacheck.Checkers
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
 
-class BigDecimalUtilTests extends AnyWordSpec with Matchers with Checkers {
+class BigDecimalUtilTests extends ScalaCheckSuite {
 
-  def checkAll[T](f: T => BigDecimal)(implicit N: Numeric[T], C: Choose[T]): Assertion = {
+  override protected def scalaCheckTestParameters: Test.Parameters =
+    Test.Parameters.default.withMinSuccessfulTests(1000)
+
+  def checkAll[T](f: T => BigDecimal)(implicit N: Numeric[T], C: Choose[T]): Prop = {
     implicit val bigDecimalArbitrary: Arbitrary[BigDecimal] =
       Arbitrary(Gen.posNum[T].map(f))
 
-    check(
-      forAll { bd: BigDecimal =>
-        val array = BigDecimalUtil.bigDecimalToByte(bd)
-        BigDecimalUtil.byteToBigDecimal(array) == bd
-      },
-      MinSuccessful(1000)
-    )
+    forAll { bd: BigDecimal =>
+      val array = BigDecimalUtil.bigDecimalToByte(bd)
+      BigDecimalUtil.byteToBigDecimal(array) == bd
+    }
   }
 
-  "BigDecimalUtil" should {
-
-    "allow to convert BigDecimals to and from byte arrays" in {
-      check(
-        forAll { bd: BigDecimal =>
-          val array = BigDecimalUtil.bigDecimalToByte(bd)
-          BigDecimalUtil.byteToBigDecimal(array) == bd
-        },
-        MinSuccessful(1000)
-      )
+  property("BigDecimalUtil should allow to convert BigDecimals to and from byte arrays") {
+    forAll { bd: BigDecimal =>
+      val array = BigDecimalUtil.bigDecimalToByte(bd)
+      BigDecimalUtil.byteToBigDecimal(array) == bd
     }
+  }
 
-    "allow to convert BigDecimals created from doubles to and from byte arrays" in {
-      checkAll[Double](BigDecimal.decimal)
-    }
+  property(
+    "BigDecimalUtil should allow to convert BigDecimals created from doubles to and from byte arrays"
+  ) {
+    checkAll[Double](BigDecimal.decimal)
+  }
 
-    "allow to convert BigDecimals created from floats to and from byte arrays" in {
-      checkAll[Float](BigDecimal.decimal)
-    }
+  property(
+    "BigDecimalUtil should allow to convert BigDecimals created from floats to and from byte arrays"
+  ) {
+    checkAll[Float](BigDecimal.decimal)
+  }
 
-    "allow to convert BigDecimals created from longs to and from byte arrays" in {
-      checkAll[Long](BigDecimal.decimal)
-    }
+  property(
+    "BigDecimalUtil should allow to convert BigDecimals created from longs to and from byte arrays"
+  ) {
+    checkAll[Long](BigDecimal.decimal)
   }
 
 }

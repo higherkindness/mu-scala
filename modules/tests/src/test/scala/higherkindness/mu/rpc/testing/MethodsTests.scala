@@ -17,28 +17,20 @@
 package higherkindness.mu.rpc
 package testing
 
+import munit.ScalaCheckSuite
 import org.scalacheck.Gen
-import org.scalatestplus.scalacheck.Checkers
 import org.scalacheck.Prop._
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
 
-class MethodsTests extends AnyWordSpec with Matchers with Checkers {
+class MethodsTests extends ScalaCheckSuite {
 
-  "methods.voidMethod" should {
-
-    "generate the method with the provided name" in {
-      check {
-        forAll(Gen.identifier) { methodName =>
-          methods.voidMethod(Some(methodName)).getFullMethodName == methodName
-        }
-      }
+  test("methods.voidMethod should generate the method with the provided name") {
+    forAll(Gen.identifier) { methodName =>
+      methods.voidMethod(Some(methodName)).getFullMethodName == methodName
     }
+  }
 
-    "generate the method with an auto-generated name" in {
-      methods.voidMethod().getFullMethodName.isEmpty shouldBe false
-    }
-
+  test("methods.voidMethod should generate the method with an auto-generated name") {
+    assert(methods.voidMethod().getFullMethodName.nonEmpty)
   }
 
 }
