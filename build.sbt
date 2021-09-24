@@ -7,10 +7,12 @@ publish / skip := true
 
 addCommandAlias(
   "ci-test",
-  "scalafmtCheckAll; scalafmtSbtCheck; missinglinkCheck; mdoc; testCovered"
+  "scalafmtCheckAll; scalafmtSbtCheck; missinglinkCheck; mdoc; +tests/test; +haskell-integration-tests/test"
 )
 addCommandAlias("ci-docs", "github; mdoc; headerCreateAll; publishMicrosite")
 addCommandAlias("ci-publish", "github; ci-release")
+
+Global / concurrentRestrictions += Tags.limit(Tags.Test, 1)
 
 ////////////////
 //// COMMON ////
@@ -20,12 +22,6 @@ lazy val `rpc-service` = project
   .in(file("modules/service"))
   .settings(moduleName := "mu-rpc-service")
   .settings(rpcServiceSettings)
-
-lazy val monix = project
-  .in(file("modules/monix"))
-  .dependsOn(`rpc-service`)
-  .settings(moduleName := "mu-rpc-monix")
-  .settings(monixSettings)
 
 lazy val fs2 = project
   .in(file("modules/fs2"))
@@ -93,7 +89,6 @@ lazy val `health-check` = project
   .in(file("modules/health-check"))
   .dependsOn(`rpc-service`)
   .dependsOn(fs2 % "optional->compile")
-  .dependsOn(monix % "optional->compile")
   .settings(healthCheckSettings)
   .settings(moduleName := "mu-rpc-health-check")
 
@@ -117,35 +112,19 @@ lazy val dropwizard = project
   .settings(moduleName := "mu-rpc-dropwizard")
   .settings(dropwizardMetricsSettings)
 
-///////////////////
-//// HTTP/REST ////
-///////////////////
-
-lazy val http = project
-  .in(file("modules/http"))
-  .settings(moduleName := "mu-rpc-http")
-  .settings(httpSettings)
-
 ////////////////////
 //// BENCHMARKS ////
 ////////////////////
 
-lazy val `benchmarks-vprev` = project
-  .in(file("benchmarks/vprev"))
-  .settings(
-    libraryDependencies ++= Seq(
-      "io.higherkindness" %% "mu-rpc-server" % "0.26.0"
-    )
-  )
-  .settings(coverageEnabled := false)
-  .settings(moduleName := "mu-benchmarks-vprev")
-  .settings(benchmarksSettings)
-  .settings(publish / skip := true)
-  .enablePlugins(JmhPlugin)
-
 lazy val `benchmarks-vnext` = project
   .in(file("benchmarks/vnext"))
   .dependsOn(server)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "log4cats-core"  % V.log4cats,
+      "org.typelevel" %% "log4cats-slf4j" % V.log4cats
+    )
+  )
   .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vnext")
   .settings(benchmarksSettings)
@@ -179,7 +158,6 @@ lazy val `haskell-integration-tests` = project
 
 lazy val coreModules: Seq[ProjectReference] = Seq(
   `rpc-service`,
-  monix,
   fs2,
   `client-netty`,
   `client-okhttp`,
@@ -190,9 +168,7 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   prometheus,
   testing,
   `netty-ssl`,
-  http,
   `health-check`,
-  `benchmarks-vprev`,
   `benchmarks-vnext`
 )
 

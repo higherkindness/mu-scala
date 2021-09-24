@@ -18,23 +18,24 @@ package higherkindness.mu.rpc
 package protocol
 
 import java.time._
-
 import cats.Applicative
+import cats.effect.IO
+import cats.effect.unsafe.IORuntime
 import cats.syntax.applicative._
 import com.fortysevendeg.scalacheck.datetime.instances.jdk8._
 import com.fortysevendeg.scalacheck.datetime.GenDateTime._
 import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.seconds
-import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.internal.encoders.avro.javatime._
 import higherkindness.mu.rpc.internal.encoders.avro.javatime.marshallers._
 import higherkindness.mu.rpc.internal.encoders.pbd.javatime._
 import higherkindness.mu.rpc.protocol.Utils._
+import munit.ScalaCheckSuite
 import org.scalacheck.Arbitrary
-import org.scalatest._
 import org.scalacheck.Prop._
-import org.scalatestplus.scalacheck.Checkers
 
-class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Checkers {
+class RPCJavaTimeTests extends ScalaCheckSuite with RPCFixtures {
+
+  implicit val ioRuntime: IORuntime = IORuntime.global
 
   object RPCDateService {
 
@@ -95,233 +96,195 @@ class RPCJavaTimeTests extends RpcBaseTestSuite with BeforeAndAfterAll with Chec
     }
 
   }
+  import RPCDateService._
 
-  "A RPC server" should {
+  implicit val H: RPCDateServiceDefImpl[IO] =
+    new RPCDateServiceDefImpl[IO]
 
-    import TestsImplicits._
-    import RPCDateService._
+  val protoFixture = buildResourceFixture(
+    "rpc-proto-client",
+    initServerWithClient[ProtoRPCDateServiceDef[IO]](
+      ProtoRPCDateServiceDef.bindService[IO],
+      ProtoRPCDateServiceDef.clientFromChannel[IO](_)
+    )
+  )
+  val avroFixture = buildResourceFixture(
+    "rpc-avro-client",
+    initServerWithClient[AvroRPCDateServiceDef[IO]](
+      AvroRPCDateServiceDef.bindService[IO],
+      AvroRPCDateServiceDef.clientFromChannel[IO](_)
+    )
+  )
+  val avroWithSchemaFixture = buildResourceFixture(
+    "rpc-avro-with-schema-client",
+    initServerWithClient[AvroWithSchemaRPCDateServiceDef[IO]](
+      AvroWithSchemaRPCDateServiceDef.bindService[IO],
+      AvroWithSchemaRPCDateServiceDef.clientFromChannel[IO](_)
+    )
+  )
 
-    implicit val H: RPCDateServiceDefImpl[ConcurrentMonad] =
-      new RPCDateServiceDefImpl[ConcurrentMonad]
+  override def munitFixtures = List(protoFixture, avroFixture, avroWithSchemaFixture)
 
-    val from: ZonedDateTime = ZonedDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)
-    val range: Duration     = Duration.ofDays(365 * 200)
+  val from: ZonedDateTime = ZonedDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)
+  val range: Duration     = Duration.ofDays(365 * 200)
 
-    "be able to serialize and deserialize LocalDate using proto format" in {
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize LocalDate using proto format"
+  ) {
 
-      withClient(
-        ProtoRPCDateServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
-      ) { client =>
-        check {
-          forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
-            val date = zdt.toLocalDate
-            client.localDateProto(date).unsafeRunSync() == date
-          }
-        }
-      }
-
+    val client = protoFixture()
+    forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
+      val date = zdt.toLocalDate
+      client.localDateProto(date).unsafeRunSync() == date
     }
+  }
 
-    "be able to serialize and deserialize LocalDateTime using proto format" in {
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize LocalDateTime using proto format"
+  ) {
 
-      withClient(
-        ProtoRPCDateServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
-      ) { client =>
-        check {
-          forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
-            val dateTime = zdt.toLocalDateTime
-            client.localDateTimeProto(dateTime).unsafeRunSync() == dateTime
-          }
-        }
-      }
-
+    val client = protoFixture()
+    forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
+      val dateTime = zdt.toLocalDateTime
+      client.localDateTimeProto(dateTime).unsafeRunSync() == dateTime
     }
+  }
 
-    "be able to serialize and deserialize Instant using proto format" in {
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize Instant using proto format"
+  ) {
 
-      withClient(
-        ProtoRPCDateServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
-      ) { client =>
-        check {
-          forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
-            val instant = zdt.toInstant
-            client.instantProto(instant).unsafeRunSync() == instant
-          }
-        }
-      }
-
-    }
-
-    "be able to serialize and deserialize LocalDate, LocalDateTime, and Instant in a Request using proto format" in {
-
-      withClient(
-        ProtoRPCDateServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
-      ) { client =>
-        check {
-          forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
-            (zdt: ZonedDateTime, s: String) =>
-              val date     = zdt.toLocalDate
-              val dateTime = zdt.toLocalDateTime
-              val instant  = zdt.toInstant
-              client
-                .dateProtoWrapper(Request(date, dateTime, instant, s))
-                .unsafeRunSync() == Response(date, dateTime, instant, s, check = true)
-          }
-        }
-
-      }
-
-    }
-
-    "be able to serialize and deserialize LocalDate using avro format" in {
-
-      withClient(
-        AvroRPCDateServiceDef.bindService[ConcurrentMonad],
-        AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
-      ) { client =>
-        check {
-          forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
-            val date = zdt.toLocalDate
-            client.localDateAvro(date).unsafeRunSync() == date
-          }
-        }
-
-      }
-
-    }
-
-    "be able to serialize and deserialize LocalDateTime using avro format" in {
-
-      withClient(
-        AvroRPCDateServiceDef.bindService[ConcurrentMonad],
-        AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
-      ) { client =>
-        check {
-          forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
-            val dateTime = zdt.toLocalDateTime
-            client.localDateTimeAvro(dateTime).unsafeRunSync() == dateTime
-          }
-        }
-      }
-
-    }
-
-    "be able to serialize and deserialize Instant using avro format" in {
-
-      withClient(
-        AvroRPCDateServiceDef.bindService[ConcurrentMonad],
-        AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
-      ) { client =>
-        check {
-          forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
-            val instant = zdt.toInstant
-            client.instantAvro(instant).unsafeRunSync() == instant
-          }
-        }
-
-      }
-
-    }
-
-    "be able to serialize and deserialize LocalDate, LocalDateTime, and Instant in a Request using avro format" in {
-
-      withClient(
-        AvroRPCDateServiceDef.bindService[ConcurrentMonad],
-        AvroRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
-      ) { client =>
-        check {
-          forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
-            (zdt: ZonedDateTime, s: String) =>
-              val date     = zdt.toLocalDate
-              val dateTime = zdt.toLocalDateTime
-              val instant  = zdt.toInstant
-              client
-                .dateAvroWrapper(Request(date, dateTime, instant, s))
-                .unsafeRunSync() == Response(date, dateTime, instant, s, check = true)
-          }
-        }
-
-      }
-
-    }
-
-    "be able to serialize and deserialize LocalDate using avro format with schema" in {
-
-      withClient(
-        AvroWithSchemaRPCDateServiceDef.bindService[ConcurrentMonad],
-        AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
-      ) { client =>
-        check {
-          forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
-            val date = zdt.toLocalDate
-            client.localDateAvroWithSchema(date).unsafeRunSync() == date
-          }
-        }
-
-      }
-
-    }
-
-    "be able to serialize and deserialize LocalDateTime using avro format with schema" in {
-
-      withClient(
-        AvroWithSchemaRPCDateServiceDef.bindService[ConcurrentMonad],
-        AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
-      ) { client =>
-        check {
-          forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
-            val dateTime = zdt.toLocalDateTime
-            client.localDateTimeAvroWithSchema(dateTime).unsafeRunSync() == dateTime
-          }
-        }
-
-      }
-
-    }
-
-    "be able to serialize and deserialize Instant using avro format with schema" in {
-
-      withClient(
-        AvroWithSchemaRPCDateServiceDef.bindService[ConcurrentMonad],
-        AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
-      ) { client =>
-        check {
-          forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
-            val instant = zdt.toInstant
-            client.instantAvroWithSchema(instant).unsafeRunSync() == instant
-          }
-        }
-
-      }
-
-    }
-
-    "be able to serialize and deserialize LocalDate, LocalDateTime, and Instant in a Request using avro format with schema" in {
-
-      withClient(
-        AvroWithSchemaRPCDateServiceDef.bindService[ConcurrentMonad],
-        AvroWithSchemaRPCDateServiceDef.clientFromChannel[ConcurrentMonad](_)
-      ) { client =>
-        check {
-          forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
-            (zdt: ZonedDateTime, s: String) =>
-              val date     = zdt.toLocalDate
-              val dateTime = zdt.toLocalDateTime
-              val instant  = zdt.toInstant
-              client
-                .dateAvroWrapperWithSchema(Request(date, dateTime, instant, s))
-                .unsafeRunSync() == Response(date, dateTime, instant, s, check = true)
-          }
-        }
-
-      }
-
+    val client = protoFixture()
+    forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
+      val instant = zdt.toInstant
+      client.instantProto(instant).unsafeRunSync() == instant
     }
 
   }
 
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize LocalDate, LocalDateTime, and Instant in a Request using proto format"
+  ) {
+
+    val client = protoFixture()
+    forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
+      (zdt: ZonedDateTime, s: String) =>
+        val date     = zdt.toLocalDate
+        val dateTime = zdt.toLocalDateTime
+        val instant  = zdt.toInstant
+        client
+          .dateProtoWrapper(Request(date, dateTime, instant, s))
+          .unsafeRunSync() == Response(date, dateTime, instant, s, check = true)
+    }
+  }
+
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize LocalDate using avro format"
+  ) {
+
+    val client = avroFixture()
+    forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
+      val date = zdt.toLocalDate
+      client.localDateAvro(date).unsafeRunSync() == date
+    }
+  }
+
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize LocalDateTime using avro format"
+  ) {
+
+    val client = avroFixture()
+    forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
+      val dateTime = zdt.toLocalDateTime
+      client.localDateTimeAvro(dateTime).unsafeRunSync() == dateTime
+    }
+  }
+
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize Instant using avro format"
+  ) {
+
+    val client = avroFixture()
+    forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
+      val instant = zdt.toInstant
+      client.instantAvro(instant).unsafeRunSync() == instant
+    }
+  }
+
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize LocalDate, LocalDateTime, and Instant in a Request using avro format"
+  ) {
+
+    val client = avroFixture()
+    forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
+      (zdt: ZonedDateTime, s: String) =>
+        val date     = zdt.toLocalDate
+        val dateTime = zdt.toLocalDateTime
+        val instant  = zdt.toInstant
+        client
+          .dateAvroWrapper(Request(date, dateTime, instant, s))
+          .unsafeRunSync() == Response(date, dateTime, instant, s, check = true)
+    }
+  }
+
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize LocalDate using avro format with schema"
+  ) {
+
+    val client = avroWithSchemaFixture()
+    forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
+      val date = zdt.toLocalDate
+      client.localDateAvroWithSchema(date).unsafeRunSync() == date
+    }
+  }
+
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize LocalDateTime using avro format with schema"
+  ) {
+
+    val client = avroWithSchemaFixture()
+    forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
+      val dateTime = zdt.toLocalDateTime
+      client.localDateTimeAvroWithSchema(dateTime).unsafeRunSync() == dateTime
+    }
+  }
+
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize Instant using avro format with schema"
+  ) {
+
+    val client = avroWithSchemaFixture()
+    forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
+      val instant = zdt.toInstant
+      client.instantAvroWithSchema(instant).unsafeRunSync() == instant
+    }
+  }
+
+  property(
+    "A RPC server should " +
+      "be able to serialize and deserialize LocalDate, LocalDateTime, and Instant in a Request using avro format with schema"
+  ) {
+
+    val client = avroWithSchemaFixture()
+    forAll(genDateTimeWithinRange(from, range), Arbitrary.arbitrary[String]) {
+      (zdt: ZonedDateTime, s: String) =>
+        val date     = zdt.toLocalDate
+        val dateTime = zdt.toLocalDateTime
+        val instant  = zdt.toInstant
+        client
+          .dateAvroWrapperWithSchema(Request(date, dateTime, instant, s))
+          .unsafeRunSync() == Response(date, dateTime, instant, s, check = true)
+    }
+  }
 }

@@ -19,88 +19,86 @@ package channel
 
 import cats.effect.IO
 import cats.data.Kleisli
+import cats.effect.std.Dispatcher
 import higherkindness.mu.rpc.common.SC
 import io.grpc.ManagedChannel
+import munit.CatsEffectSuite
 
-abstract class ManagedChannelInterpreterTests extends RpcClientTestSuite {
+abstract class ManagedChannelInterpreterTests extends CatsEffectSuite {
 
-  import implicits._
+  import TestData._
 
   def mkInterpreter(
       channelFor: ChannelFor,
       channelConfigList: List[ManagedChannelConfig]
   ): ManagedChannelInterpreter[IO]
 
-  "ManagedChannelInterpreter" should {
+  val dispatcher = ResourceFixture(Dispatcher[IO])
 
-    "build a io.grpc.ManagedChannel based on the specified configuration, for an address" in {
+  dispatcher.test(
+    "ManagedChannelInterpreter build a io.grpc.ManagedChannel based on the specified configuration, for an address"
+  ) { disp =>
+    val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
 
-      val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
+    val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext())
 
-      val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext())
+    val managedChannelInterpreter = mkInterpreter(channelFor, channelConfigList)
 
-      val managedChannelInterpreter = mkInterpreter(channelFor, channelConfigList)
+    val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild(disp)
 
-      val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild
+    IO(mc.shutdownNow()).map(_ => assert(Option(mc).nonEmpty))
+  }
 
-      mc shouldBe a[ManagedChannel]
+  dispatcher.test(
+    "ManagedChannelInterpreter build a io.grpc.ManagedChannel based on the specified configuration, for a target"
+  ) { disp =>
+    val channelFor: ChannelFor = ChannelForTarget(SC.host)
 
-      mc.shutdownNow()
-    }
+    val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext())
 
-    "build a io.grpc.ManagedChannel based on the specified configuration, for a target" in {
+    val managedChannelInterpreter = mkInterpreter(channelFor, channelConfigList)
 
-      val channelFor: ChannelFor = ChannelForTarget(SC.host)
+    val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild(disp)
 
-      val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext())
+    IO(mc.shutdownNow()).map(_ => assert(Option(mc).nonEmpty))
 
-      val managedChannelInterpreter = mkInterpreter(channelFor, channelConfigList)
+  }
 
-      val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild
+  test("ManagedChannelInterpreter apply should work as expected") {
 
-      mc shouldBe a[ManagedChannel]
+    val channelFor: ChannelFor = ChannelForTarget(SC.host)
 
-      mc.shutdownNow()
-    }
+    val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext())
 
-    "apply should work as expected" in {
+    val managedChannelInterpreter = mkInterpreter(channelFor, channelConfigList)
 
-      val channelFor: ChannelFor = ChannelForTarget(SC.host)
+    val kleisli: ManagedChannelOps[IO, String] =
+      Kleisli.liftF(IO(foo))
 
-      val channelConfigList: List[ManagedChannelConfig] = List(UsePlaintext())
+    managedChannelInterpreter[String](kleisli).assertEquals(foo)
+  }
 
-      val managedChannelInterpreter = mkInterpreter(channelFor, channelConfigList)
+  dispatcher.test(
+    "ManagedChannelInterpreter build a io.grpc.ManagedChannel based on any configuration combination"
+  ) { disp =>
+    val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
 
-      val kleisli: ManagedChannelOps[IO, String] =
-        Kleisli.liftF(IO(foo))
+    val channelConfigList: List[ManagedChannelConfig] = TestData.managedChannelConfigAllList
 
-      managedChannelInterpreter[String](kleisli).unsafeRunSync() shouldBe foo
-    }
+    val managedChannelInterpreter = mkInterpreter(channelFor, channelConfigList)
 
-    "build a io.grpc.ManagedChannel based on any configuration combination" in {
+    val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild(disp)
 
-      val channelFor: ChannelFor = ChannelForAddress(SC.host, SC.port)
+    IO(mc.shutdownNow()).map(_ => assert(Option(mc).nonEmpty))
 
-      val channelConfigList: List[ManagedChannelConfig] = managedChannelConfigAllList
+  }
 
-      val managedChannelInterpreter = mkInterpreter(channelFor, channelConfigList)
+  test("ManagedChannelInterpreter throw an exception when ChannelFor is not recognized") {
 
-      val mc: ManagedChannel = managedChannelInterpreter.unsafeBuild
+    val channelFor: ChannelFor = ChannelForPort(SC.port)
 
-      mc shouldBe a[ManagedChannel]
+    val managedChannelInterpreter = mkInterpreter(channelFor, Nil)
 
-      mc.shutdownNow()
-    }
-
-    "throw an exception when ChannelFor is not recognized" in {
-
-      val channelFor: ChannelFor = ChannelForPort(SC.port)
-
-      val managedChannelInterpreter = mkInterpreter(channelFor, Nil)
-
-      an[IllegalArgumentException] shouldBe thrownBy(
-        managedChannelInterpreter.build.unsafeRunSync()
-      )
-    }
+    interceptIO[IllegalArgumentException](managedChannelInterpreter.build)
   }
 }
