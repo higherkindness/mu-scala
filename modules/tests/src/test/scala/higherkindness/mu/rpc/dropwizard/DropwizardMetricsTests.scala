@@ -17,6 +17,7 @@
 package higherkindness.mu.rpc.dropwizard
 
 import cats.effect.IO
+import cats.effect.unsafe.implicits.global
 import cats.implicits._
 import com.codahale.metrics.MetricRegistry
 import higherkindness.mu.rpc.dropwizard.DropWizardMetrics._
@@ -25,12 +26,13 @@ import higherkindness.mu.rpc.internal.metrics.MetricsOps
 import higherkindness.mu.rpc.internal.metrics.MetricsOps._
 import higherkindness.mu.rpc.internal.metrics.MetricsOpsGenerators._
 import io.grpc.Status
-import org.scalacheck.{Gen, Properties}
+import munit.ScalaCheckSuite
+import org.scalacheck.Gen
 import org.scalacheck.Prop._
 
 import scala.jdk.CollectionConverters._
 
-object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
+class DropwizardMetricsTests extends ScalaCheckSuite {
 
   val prefix     = "testPrefix"
   val classifier = "classifier"
@@ -66,7 +68,7 @@ object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
     gaugeMap.contains(gaugeName) && gaugeCount == expectedCount
   }
 
-  property("creates and updates counter when registering an active call") =
+  property("creates and updates counter when registering an active call") {
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int) =>
         val registry        = new MetricRegistry()
@@ -92,8 +94,9 @@ object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
           )
         } yield op1 && op2).unsafeRunSync()
     }
+  }
 
-  property("creates and updates counter when registering a sent message") =
+  property("creates and updates counter when registering a sent message") {
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int) =>
         val registry = new MetricRegistry()
@@ -110,8 +113,9 @@ object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
           metrics.recordMessageSent(methodInfo, Some(classifier))
         ).unsafeRunSync()
     }
+  }
 
-  property("creates and updates counter when registering a received message") =
+  property("creates and updates counter when registering a received message") {
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int) =>
         val registry = new MetricRegistry()
@@ -128,8 +132,9 @@ object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
           metrics.recordMessageReceived(methodInfo, Some(classifier))
         ).unsafeRunSync()
     }
+  }
 
-  property("creates and updates timer for headers time") =
+  property("creates and updates timer for headers time") {
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10), Gen.chooseNum(100, 1000)) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int, elapsed: Int) =>
         val registry    = new MetricRegistry()
@@ -145,8 +150,9 @@ object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
           metrics.recordHeadersTime(methodInfo, elapsed.toLong, Some(classifier))
         ).unsafeRunSync()
     }
+  }
 
-  property("creates and updates timer for total time") =
+  property("creates and updates timer for total time") {
     forAllNoShrink(methodInfoGen, Gen.chooseNum[Int](1, 10), statusGen) {
       (methodInfo: GrpcMethodInfo, numberOfCalls: Int, status: Status) =>
         val registry = new MetricRegistry()
@@ -172,5 +178,6 @@ object DropwizardMetricsTests extends Properties("DropWizardMetrics") {
           }
           .unsafeRunSync()
     }
+  }
 
 }

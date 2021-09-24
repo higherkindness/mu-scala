@@ -16,27 +16,23 @@
 
 package integrationtest.protobuf
 
-import integrationtest._
-import weather._
-import weather.GetForecastResponse.Weather.SUNNY
-import weather.RainEvent.EventType._
+import cats.effect.{IO, Resource}
+import fs2._
 import higherkindness.mu.rpc._
 import higherkindness.mu.rpc.protocol.Empty
-
+import integrationtest._
+import integrationtest.protobuf.weather.GetForecastResponse.Weather.SUNNY
+import integrationtest.protobuf.weather.RainEvent.EventType._
+import integrationtest.protobuf.weather._
 import io.grpc.CallOptions
-import cats.effect.{ContextShift, IO, Resource}
-import fs2._
+import munit.CatsEffectSuite
 
-import org.scalatest.flatspec.AnyFlatSpec
+import scala.concurrent.duration._
 
-import scala.concurrent.ExecutionContext
-
-class HaskellServerScalaClientSpec extends AnyFlatSpec with HaskellServerRunningInDocker {
+class HaskellServerScalaClientSpec extends CatsEffectSuite with HaskellServerRunningInDocker {
 
   def serverPort: Int              = Constants.ProtobufPort
   def serverExecutableName: String = "protobuf-server"
-
-  implicit val CS: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
   val channelFor: ChannelFor = ChannelForAddress("localhost", serverPort)
 
@@ -45,48 +41,43 @@ class HaskellServerScalaClientSpec extends AnyFlatSpec with HaskellServerRunning
     options = CallOptions.DEFAULT.withCompression("gzip")
   )
 
-  behavior of "Mu-Haskell server and Mu-Scala client communication using Protobuf"
+  val clientFixture = ResourceSuiteLocalFixture("rpc-client", clientResource)
 
-  it should "work for a trivial unary call" in {
-    val response = clientResource
-      .use(client => client.ping(Empty))
-      .unsafeRunSync()
-    assert(response == Empty)
+  override def munitFixtures = List(clientFixture)
+
+  val behaviorOf = "Mu-Haskell server and Mu-Scala client communication using Protobuf"
+
+  test(behaviorOf + "it should work for a trivial unary call") {
+    IO(clientFixture()).flatMap(_.ping(Empty)).assertEquals(Empty)
   }
 
-  it should "work for a unary call" in {
+  test(behaviorOf + "it should work for a unary call") {
     val request = GetForecastRequest("London", 3)
     val expectedResponse = GetForecastResponse(
       last_updated = "2020-03-20T12:00:00Z",
       daily_forecasts = List(SUNNY, SUNNY, SUNNY)
     )
-    val response = clientResource
-      .use(client => client.getForecast(request))
-      .unsafeRunSync()
-    assert(response == expectedResponse)
+    IO(clientFixture()).flatMap(_.getForecast(request)).assertEquals(expectedResponse)
   }
 
-  it should "work for a client-streaming call" in {
+  test(behaviorOf + "it should work for a client-streaming call") {
     val stream =
       Stream(STARTED, STOPPED, STARTED, STOPPED, STARTED)
         .map(RainEvent("London", _))
         .covary[IO]
     val expectedResponse = RainSummaryResponse(3)
-    val response = clientResource
-      .use(client => client.publishRainEvents(stream))
-      .unsafeRunSync()
-    assert(response == expectedResponse)
+    IO(clientFixture()).flatMap(_.publishRainEvents(stream)).assertEquals(expectedResponse)
   }
 
-  it should "work for a server-streaming call" in {
+  test(behaviorOf + "it should work for a server-streaming call") {
     val request = SubscribeToRainEventsRequest("London")
-    val events = clientResource
-      .use(client => Stream.force(client.subscribeToRainEvents(request)).compile.toList)
-      .unsafeRunSync()
     val expectedEvents =
       List(STARTED, STOPPED, STARTED, STOPPED, STARTED)
         .map(RainEvent("London", _))
-    assert(events == expectedEvents)
+    IO(clientFixture())
+      .flatMap(client => Stream.force(client.subscribeToRainEvents(request)).compile.toList)
+      .assertEquals(expectedEvents)
+      .timeout(10.seconds)
   }
 
 }

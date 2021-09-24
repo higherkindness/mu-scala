@@ -16,13 +16,13 @@
 
 package integrationtest
 
+import cats.effect.IO
+import cats.effect.kernel.Resource
 import com.spotify.docker.client._
-import com.spotify.docker.client.messages.ContainerConfig
+import com.spotify.docker.client.messages.{ContainerConfig, ContainerExit}
 import com.spotify.docker.client.DockerClient._
 
-import org.scalatest.Suite
-
-trait RunHaskellClientInDocker { self: Suite =>
+trait RunHaskellClientInDocker {
 
   def clientExecutableName: String
 
@@ -46,20 +46,28 @@ trait RunHaskellClientInDocker { self: Suite =>
       )
       .build()
 
-  def runHaskellClient(clientArgs: List[String]) = {
-    val containerCreation = docker.createContainer(containerConfig(clientArgs))
-    val id                = containerCreation.id()
-    docker.startContainer(id)
-    val exit      = docker.waitContainer(id)
-    val logstream = docker.logs(id, LogsParam.stdout(), LogsParam.stderr())
-    try {
-      val output = logstream.readFully().trim()
-      assert(
-        exit.statusCode == 0,
-        s"Client exited with code ${exit.statusCode} and output: $output"
-      )
-      output
-    } finally logstream.close()
+  def runHaskellClientR(clientArgs: List[String]): IO[String] = {
+
+    def acquire: IO[(LogStream, ContainerExit)] = IO {
+      val containerCreation = docker.createContainer(containerConfig(clientArgs))
+      val id                = containerCreation.id()
+      docker.startContainer(id)
+      val exit = docker.waitContainer(id)
+      val logs = docker.logs(id, LogsParam.stdout(), LogsParam.stderr())
+      (logs, exit)
+    }
+
+    Resource.make(acquire)(t => IO(t._1.close())).use { case (logs, exit) =>
+      IO(logs.readFully().trim()).flatTap { output =>
+        if (exit.statusCode != 0)
+          IO.raiseError[String](
+            new java.lang.AssertionError(
+              s"Client exited with code ${exit.statusCode} and output: $output"
+            )
+          )
+        else IO.unit
+      }
+    }
   }
 
 }

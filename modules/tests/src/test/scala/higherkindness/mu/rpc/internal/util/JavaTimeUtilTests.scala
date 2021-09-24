@@ -19,53 +19,40 @@ package internal
 package util
 
 import java.time.{Duration, ZoneOffset, ZonedDateTime}
-
 import com.fortysevendeg.scalacheck.datetime.instances.jdk8._
 import com.fortysevendeg.scalacheck.datetime.GenDateTime._
+import munit.ScalaCheckSuite
 import org.scalacheck.Prop._
-import org.scalatestplus.scalacheck.Checkers
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
 
-class JavaTimeUtilTests extends AnyWordSpec with Matchers with Checkers {
+class JavaTimeUtilTests extends ScalaCheckSuite {
 
   val from: ZonedDateTime = ZonedDateTime.of(1970, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)
   val range: Duration     = Duration.ofDays(365 * 200)
 
-  "JavaTimeUtil" should {
-
-    "allow to convert LocalDate to and from int" in {
-      import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.days
-      check {
-        forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
-          val date  = zdt.toLocalDate
-          val value = JavaTimeUtil.localDateToInt(date)
-          JavaTimeUtil.intToLocalDate(value) == date
-        }
-      }
-    }
-
-    "allow to convert LocalDateTime to and from long" in {
-      import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.seconds
-      check {
-        forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
-          val date  = zdt.toLocalDateTime
-          val value = JavaTimeUtil.localDateTimeToLong(date)
-          JavaTimeUtil.longToLocalDateTime(value) == date
-        }
-      }
-    }
-
-    "allow to convert Instant to and from long" in {
-      import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.seconds
-      check {
-        forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
-          val date  = zdt.toInstant
-          val value = JavaTimeUtil.instantToLong(date)
-          JavaTimeUtil.longToInstant(value) == date
-        }
-      }
+  property("JavaTimeUtil should allow to convert LocalDate to and from int") {
+    import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.days
+    forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
+      val date  = zdt.toLocalDate
+      val value = JavaTimeUtil.localDateToInt(date)
+      JavaTimeUtil.intToLocalDate(value) == date
     }
   }
 
+  property("JavaTimeUtil should allow to convert LocalDateTime to and from long") {
+    import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.seconds
+    forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
+      val date  = zdt.toLocalDateTime
+      val value = JavaTimeUtil.localDateTimeToLong(date)
+      JavaTimeUtil.longToLocalDateTime(value) == date
+    }
+  }
+
+  property("JavaTimeUtil should allow to convert Instant to and from long") {
+    import com.fortysevendeg.scalacheck.datetime.jdk8.granularity.seconds
+    forAll(genDateTimeWithinRange(from, range)) { zdt: ZonedDateTime =>
+      val date  = zdt.toInstant
+      val value = JavaTimeUtil.instantToLong(date)
+      JavaTimeUtil.longToInstant(value) == date
+    }
+  }
 }

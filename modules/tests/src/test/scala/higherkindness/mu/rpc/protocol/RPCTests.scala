@@ -17,409 +17,210 @@
 package higherkindness.mu.rpc
 package protocol
 
-import cats.{Monad, MonadError}
-import cats.syntax.flatMap._
-import cats.syntax.functor._
-import org.scalatest._
+import cats.effect.IO
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.protocol.Utils.handlers.client._
-import higherkindness.mu.rpc.server._
+import munit.CatsEffectSuite
 
-class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
+class RPCTests extends CatsEffectSuite {
 
-  import higherkindness.mu.rpc.protocol.Utils._
   import higherkindness.mu.rpc.protocol.Utils.client.MyRPCClient
   import higherkindness.mu.rpc.protocol.Utils.database._
   import higherkindness.mu.rpc.protocol.Utils.implicits._
 
-  override protected def beforeAll(): Unit =
-    serverStart[ConcurrentMonad].unsafeRunSync()
+  val serverFixture = ResourceSuiteLocalFixture("rpc-server", grpcServer)
 
-  override protected def afterAll(): Unit =
-    serverStop[ConcurrentMonad].unsafeRunSync()
+  override def munitFixtures = List(serverFixture)
 
-  "mu server" should {
+  test("mu server should allow to startup a server and check if it's alive") {
+    IO(serverFixture()).flatMap(_.isShutdown).assertEquals(false)
+  }
 
-    "allow to startup a server and check if it's alive" in {
+  test("mu server should allow to get the port where it's running") {
+    IO(serverFixture()).flatMap(_.getPort).assertEquals(SC.port)
+  }
 
-      def check[F[_]](implicit S: GrpcServer[F]): F[Boolean] =
-        S.isShutdown
+  val muRPCServiceClientHandler: MuRPCServiceClientHandler[IO] =
+    new MuRPCServiceClientHandler[IO](
+      protoRPCServiceClient,
+      avroRPCServiceClient,
+      awsRPCServiceClient
+    )
 
-      check[ConcurrentMonad].unsafeRunSync() shouldBe false
+  val muRPCServiceClientCompressedHandler: MuRPCServiceClientCompressedHandler[IO] =
+    new MuRPCServiceClientCompressedHandler[IO](
+      compressedprotoRPCServiceClient,
+      compressedavroRPCServiceClient,
+      compressedawsRPCServiceClient
+    )
 
-    }
+  test("mu-client should be able to run unary services") {
 
-    "allow to get the port where it's running" in {
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[C] =
+      APP.u(a1.x, a1.y)
 
-      def check[F[_]](implicit S: GrpcServer[F]): F[Int] =
-        S.getPort
-
-      check[ConcurrentMonad].unsafeRunSync() shouldBe SC.port
-
-    }
+    clientProgram[IO](muRPCServiceClientHandler).assertEquals(c1)
 
   }
 
-  "mu client" should {
+  test("mu-client should be able to invoke services with empty requests") {
 
-    implicit val muRPCServiceClientHandler: MuRPCServiceClientHandler[ConcurrentMonad] =
-      new MuRPCServiceClientHandler[ConcurrentMonad](
-        protoRPCServiceClient,
-        avroRPCServiceClient,
-        awsRPCServiceClient
-      )
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
+      APP.empty
 
-    "be able to run unary services" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[C] =
-        APP.u(a1.x, a1.y)
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe c1
-
-    }
-
-    "handle errors in unary services" in {
-
-      def clientProgram[F[_]](
-          errorCode: String
-      )(implicit APP: MyRPCClient[F], M: MonadError[F, Throwable]): F[C] =
-        M.handleError(APP.uwe(a1, errorCode))(ex => C(ex.getMessage, a1))
-
-      clientProgram[ConcurrentMonad]("SE")
-        .unsafeRunSync() shouldBe C("INVALID_ARGUMENT: SE", a1)
-      clientProgram[ConcurrentMonad]("SRE")
-        .unsafeRunSync() shouldBe C("INVALID_ARGUMENT: SRE", a1)
-      clientProgram[ConcurrentMonad]("RTE")
-        .unsafeRunSync() shouldBe C("INTERNAL: RTE", a1)
-      clientProgram[ConcurrentMonad]("Thrown")
-        .unsafeRunSync() shouldBe C("UNKNOWN", a1)
-    }
-
-    "be able to run unary services with avro schema" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[C] =
-        APP.uws(a1.x, a1.y)
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe c1
-
-    }
-
-    "be able to run server streaming services" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[List[C]] =
-        APP.ss(a2.x, a2.y)
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe cList
-
-    }
-
-    "handle errors in server streaming services" in {
-
-      def clientProgram[F[_]](
-          errorCode: String
-      )(implicit APP: MyRPCClient[F], M: MonadError[F, Throwable]): F[List[C]] =
-        M.handleError(APP.sswe(a1, errorCode))(ex => List(C(ex.getMessage, a1)))
-
-      clientProgram[ConcurrentMonad]("SE")
-        .unsafeRunSync() shouldBe List(C("INVALID_ARGUMENT: SE", a1))
-      clientProgram[ConcurrentMonad]("SRE")
-        .unsafeRunSync() shouldBe List(C("INVALID_ARGUMENT: SRE", a1))
-      clientProgram[ConcurrentMonad]("RTE")
-        .unsafeRunSync() shouldBe List(
-        C("UNKNOWN", a1)
-      ) //todo: consider preserving the exception as is done for unary
-      clientProgram[ConcurrentMonad]("Thrown")
-        .unsafeRunSync() shouldBe List(C("UNKNOWN", a1))
-    }
-
-    "be able to run client streaming services" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[D] =
-        APP.cs(cList, i)
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe dResult
-    }
-
-    "be able to run client bidirectional streaming services" in {
-
-      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/281 is fixed")
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[E] =
-        APP.bs(eList)
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe e1
-
-    }
-
-    "be able to run client bidirectional streaming services with avro schema" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[E] =
-        APP.bsws(eList)
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe e1
-
-    }
-
-    "be able to run rpc services monadically" in {
-
-      def clientProgram[F[_]: Monad](implicit APP: MyRPCClient[F]): F[(C, C, List[C], D, E, E)] = {
-        for {
-          u <- APP.u(a1.x, a1.y)
-          v <- APP.uws(a1.x, a1.y)
-          w <- APP.ss(a2.x, a2.y)
-          x <- APP.cs(cList, i)
-          y <- APP.bs(eList)
-          z <- APP.bsws(eList)
-        } yield (u, v, w, x, y, z)
-      }
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe ((c1, c1, cList, dResult, e1, e1))
-
-    }
-
-    "be able to invoke services with empty requests" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
-        APP.empty
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
-
-    }
-
-    "#71 issue - empty for avro" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
-        APP.emptyAvro
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
-    }
-
-    "empty for avro with schema" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
-        APP.emptyAvroWithSchema
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
-    }
-
-    "#71 issue - empty response with one param for avro" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
-        APP.emptyAvroParam(a4)
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
-    }
-
-    "empty response with one param for avro with schema" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
-        APP.emptyAvroWithSchemaParam(a4)
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
-    }
-
-    "#71 issue - response with empty params for avro" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[A] =
-        APP.emptyAvroParamResponse
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe a4
-
-    }
-
-    "response with empty params for avro with schema" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[A] =
-        APP.emptyAvroWithSchemaParamResponse
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe a4
-
-    }
-
-    "#71 issue - empty response with one param for proto" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
-        APP.emptyParam(a4)
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
-    }
-
-    "#71 issue - response with empty params for proto" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[A] =
-        APP.emptyParamResponse
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe a4
-
-    }
+    clientProgram[IO](muRPCServiceClientHandler).assertEquals(Empty)
 
   }
 
-  "mu client with compression" should {
+  test("mu-client should #71 issue - empty for avro") {
 
-    implicit val muRPCServiceClientHandler: MuRPCServiceClientCompressedHandler[ConcurrentMonad] =
-      new MuRPCServiceClientCompressedHandler[ConcurrentMonad](
-        compressedprotoRPCServiceClient,
-        compressedavroRPCServiceClient,
-        compressedawsRPCServiceClient
-      )
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
+      APP.emptyAvro
 
-    "be able to run unary services" in {
+    clientProgram[IO](muRPCServiceClientHandler).assertEquals(Empty)
+  }
 
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[C] =
-        APP.u(a1.x, a1.y)
+  test("mu-client should empty for avro with schema") {
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe c1
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
+      APP.emptyAvroWithSchema
 
-    }
+    clientProgram[IO](muRPCServiceClientHandler).assertEquals(Empty)
+  }
 
-    "be able to run unary services with avro schema" in {
+  test("mu-client should #71 issue - empty response with one param for avro") {
 
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[C] =
-        APP.uws(a1.x, a1.y)
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
+      APP.emptyAvroParam(a4)
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe c1
+    clientProgram[IO](muRPCServiceClientHandler).assertEquals(Empty)
+  }
 
-    }
+  test("mu-client should empty response with one param for avro with schema") {
 
-    "be able to run server streaming services" in {
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
+      APP.emptyAvroWithSchemaParam(a4)
 
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[List[C]] =
-        APP.ss(a2.x, a2.y)
+    clientProgram[IO](muRPCServiceClientHandler).assertEquals(Empty)
+  }
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe cList
+  test("mu-client should #71 issue - response with empty params for avro") {
 
-    }
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[A] =
+      APP.emptyAvroParamResponse
 
-    "be able to run client streaming services" in {
+    clientProgram[IO](muRPCServiceClientHandler).assertEquals(a4)
 
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[D] =
-        APP.cs(cList, i)
+  }
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe dResult
-    }
+  test("mu-client should response with empty params for avro with schema") {
 
-    "be able to run client bidirectional streaming services" in {
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[A] =
+      APP.emptyAvroWithSchemaParamResponse
 
-      ignoreOnTravis("TODO: restore once https://github.com/higherkindness/mu/issues/281 is fixed")
+    clientProgram[IO](muRPCServiceClientHandler).assertEquals(a4)
 
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[E] =
-        APP.bs(eList)
+  }
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe e1
+  test("mu-client should #71 issue - empty response with one param for proto") {
 
-    }
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
+      APP.emptyParam(a4)
 
-    "be able to run client bidirectional streaming services with avro schema" in {
+    clientProgram[IO](muRPCServiceClientHandler).assertEquals(Empty)
+  }
 
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[E] =
-        APP.bsws(eList)
+  test("mu-client should #71 issue - response with empty params for proto") {
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe e1
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[A] =
+      APP.emptyParamResponse
 
-    }
+    clientProgram[IO](muRPCServiceClientHandler).assertEquals(a4)
 
-    "be able to run rpc services monadically" in {
+  }
 
-      def clientProgram[F[_]: Monad](implicit APP: MyRPCClient[F]): F[(C, C, List[C], D, E, E)] = {
-        for {
-          u <- APP.u(a1.x, a1.y)
-          v <- APP.uws(a1.x, a1.y)
-          w <- APP.ss(a2.x, a2.y)
-          x <- APP.cs(cList, i)
-          y <- APP.bs(eList)
-          z <- APP.bsws(eList)
-        } yield (u, v, w, x, y, z)
-      }
+  test("mu client with compression - be able to run unary services") {
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe ((c1, c1, cList, dResult, e1, e1))
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[C] =
+      APP.u(a1.x, a1.y)
 
-    }
+    clientProgram[IO](muRPCServiceClientCompressedHandler).assertEquals(c1)
 
-    "be able to invoke services with empty requests" in {
+  }
 
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
-        APP.empty
+  test("mu client with compression - be able to invoke services with empty requests") {
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
+      APP.empty
 
-    }
+    clientProgram[IO](muRPCServiceClientCompressedHandler).assertEquals(Empty)
 
-    "#71 issue - empty for avro" in {
+  }
 
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
-        APP.emptyAvro
+  test("mu client with compression - #71 issue - empty for avro") {
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
-    }
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
+      APP.emptyAvro
 
-    "empty for avro with schema" in {
+    clientProgram[IO](muRPCServiceClientCompressedHandler).assertEquals(Empty)
+  }
 
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
-        APP.emptyAvroWithSchema
+  test("mu client with compression - empty for avro with schema") {
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
-    }
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
+      APP.emptyAvroWithSchema
 
-    "#71 issue - empty response with one param for avro" in {
+    clientProgram[IO](muRPCServiceClientCompressedHandler).assertEquals(Empty)
+  }
 
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
-        APP.emptyAvroParam(a4)
+  test("mu client with compression - #71 issue - empty response with one param for avro") {
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
-    }
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
+      APP.emptyAvroParam(a4)
 
-    "empty response with one param for avro with schema" in {
+    clientProgram[IO](muRPCServiceClientCompressedHandler).assertEquals(Empty)
+  }
 
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
-        APP.emptyAvroWithSchemaParam(a4)
+  test("mu client with compression - empty response with one param for avro with schema") {
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
-    }
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
+      APP.emptyAvroWithSchemaParam(a4)
 
-    "#71 issue - response with empty params for avro" in {
+    clientProgram[IO](muRPCServiceClientCompressedHandler).assertEquals(Empty)
+  }
 
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[A] =
-        APP.emptyAvroParamResponse
+  test("mu client with compression - #71 issue - response with empty params for avro") {
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe a4
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[A] =
+      APP.emptyAvroParamResponse
 
-    }
+    clientProgram[IO](muRPCServiceClientCompressedHandler).assertEquals(a4)
 
-    "response with empty params for avro with schema" in {
+  }
 
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[A] =
-        APP.emptyAvroWithSchemaParamResponse
+  test("mu client with compression - response with empty params for avro with schema") {
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe a4
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[A] =
+      APP.emptyAvroWithSchemaParamResponse
 
-    }
+    clientProgram[IO](muRPCServiceClientCompressedHandler).assertEquals(a4)
 
-    "#71 issue - empty response with one param for proto" in {
+  }
 
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
-        APP.emptyParam(a4)
+  test("mu client with compression - #71 issue - empty response with one param for proto") {
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe Empty
-    }
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[Empty.type] =
+      APP.emptyParam(a4)
 
-    "#71 issue - response with empty params for proto" in {
+    clientProgram[IO](muRPCServiceClientCompressedHandler).assertEquals(Empty)
+  }
 
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[A] =
-        APP.emptyParamResponse
+  test("mu client with compression - #71 issue - response with empty params for proto") {
 
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe a4
+    def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[A] =
+      APP.emptyParamResponse
 
-    }
-
-    "#192 issue - be able to run server streaming services using .toListL without mapping" in {
-
-      def clientProgram[F[_]](implicit APP: MyRPCClient[F]): F[List[C]] =
-        APP.ss192(a2.x, a2.y)
-
-      clientProgram[ConcurrentMonad].unsafeRunSync() shouldBe cList
-
-    }
+    clientProgram[IO](muRPCServiceClientCompressedHandler).assertEquals(a4)
 
   }
 
