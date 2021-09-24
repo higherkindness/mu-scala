@@ -48,7 +48,7 @@ case class MetricsChannelInterceptor[F[_]: Async](
   }
 }
 
-case class MetricsClientCall[F[_]: Clock, Req, Res](
+case class MetricsClientCall[F[_], Req, Res](
     clientCall: ClientCall[Req, Res],
     methodInfo: GrpcMethodInfo,
     metricsOps: MetricsOps[F],
