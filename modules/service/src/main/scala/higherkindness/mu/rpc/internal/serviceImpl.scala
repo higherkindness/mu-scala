@@ -79,10 +79,9 @@ class serviceImpl(val c: blackbox.Context) {
               service.tracingClientFromChannel,
               service.unsafeTracingClient,
               service.unsafeTracingClientFromChannel
-            ) ++ service.http
+            )
           )
         )
-
         List(serviceDef, enrichedCompanion)
       case _ => sys.error("@service-annotated definition must be a trait or abstract class")
     }

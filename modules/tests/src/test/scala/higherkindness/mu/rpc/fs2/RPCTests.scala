@@ -14,235 +14,237 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc
-package fs2
+package higherkindness.mu.rpc.fs2
 
-import cats.effect.IO
+import cats.effect.{IO, Resource}
+import fs2.Stream
 import higherkindness.mu.rpc.common._
-import higherkindness.mu.rpc.server._
-import _root_.fs2.Stream
-import org.scalatest._
+import higherkindness.mu.rpc.fs2.Utils.service.ProtoRPCService
+import munit.CatsEffectSuite
 
-class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
+import scala.concurrent.duration._
 
-  import higherkindness.mu.rpc.fs2.Utils._
+class RPCTests extends CatsEffectSuite {
+
   import higherkindness.mu.rpc.fs2.Utils.database._
   import higherkindness.mu.rpc.fs2.Utils.implicits._
 
-  override protected def beforeAll(): Unit =
-    serverStart[IO].unsafeRunSync()
+  val behaviourOf: String = "mu-rpc client with fs2.Stream"
 
-  override protected def afterAll(): Unit =
-    serverStop[IO].unsafeRunSync()
-
-  "mu-rpc server" should {
-
-    "allow to startup a server and check if it's alive" in {
-
-      def check[F[_]](implicit S: GrpcServer[F]): F[Boolean] =
-        S.isShutdown
-
-      check[IO].unsafeRunSync() shouldBe false
-
-    }
-
-    "allow to get the port where it's running" in {
-
-      def check[F[_]](implicit S: GrpcServer[F]): F[Int] =
-        S.getPort
-
-      check[IO].unsafeRunSync() shouldBe SC.port
-
-    }
-
+  test("mu-rpc server should allow to startup a server and check if it's alive") {
+    grpcServer.use(_.isShutdown).assertEquals(false)
   }
 
-  "mu-rpc client with fs2.Stream as streaming implementation" should {
-
-    "be able to run unary services" in {
-
-      muAvroRPCServiceClient.use(_.unary(a1)).unsafeRunSync() shouldBe c1
-
-    }
-
-    "be able to run unary services with avro schemas" in {
-
-      muAvroWithSchemaRPCServiceClient.use(_.unaryWithSchema(a1)).unsafeRunSync() shouldBe c1
-
-    }
-
-    "be able to run server streaming services" in {
-
-      muProtoRPCServiceClient
-        .use(_.serverStreaming(b1).flatMap(_.compile.toList))
-        .unsafeRunSync() shouldBe cList
-
-    }
-
-    "handle errors in server streaming services" in {
-
-      def clientProgram(errorCode: String): IO[List[C]] =
-        muProtoRPCServiceClient
-          .use(
-            _.serverStreamingWithError(E(a1, errorCode))
-              .map(_.handleErrorWith(ex => Stream(C(ex.getMessage, a1))))
-              .flatMap(_.compile.toList)
-          )
-
-      clientProgram("SE")
-        .unsafeRunSync() shouldBe List(C("INVALID_ARGUMENT: SE", a1))
-      clientProgram("SRE")
-        .unsafeRunSync() shouldBe List(C("INVALID_ARGUMENT: SRE", a1))
-      clientProgram("RTE")
-        .unsafeRunSync() shouldBe List(C("INTERNAL: RTE", a1))
-      clientProgram("Thrown")
-        .unsafeRunSync() shouldBe List(C("INTERNAL: Thrown", a1))
-    }
-
-    "be able to run client streaming services" in {
-
-      muProtoRPCServiceClient
-        .use(_.clientStreaming(Stream.fromIterator[IO](aList.iterator)))
-        .unsafeRunSync() shouldBe dResult33
-    }
-
-    "be able to run client bidirectional streaming services" in {
-
-      muAvroRPCServiceClient
-        .use(_.biStreaming(Stream.fromIterator[IO](eList.iterator)).flatMap(_.compile.toList))
-        .unsafeRunSync()
-        .distinct shouldBe eList
-
-    }
-
-    "be able to run client bidirectional streaming services with avro schema" in {
-
-      muAvroWithSchemaRPCServiceClient
-        .use(
-          _.biStreamingWithSchema(Stream.fromIterator[IO](eList.iterator)).flatMap(_.compile.toList)
-        )
-        .unsafeRunSync()
-        .distinct shouldBe eList
-
-    }
-
-    "be able to run multiple rpc services" in {
-
-      val tuple =
-        (
-          muAvroRPCServiceClient.use(_.unary(a1)),
-          muAvroWithSchemaRPCServiceClient.use(_.unaryWithSchema(a1)),
-          muProtoRPCServiceClient.use(_.serverStreaming(b1).flatMap(_.compile.toList)),
-          muProtoRPCServiceClient.use(
-            _.clientStreaming(Stream.fromIterator[IO](aList.iterator))
-          ),
-          muAvroRPCServiceClient.use(
-            _.biStreaming(Stream.fromIterator[IO](eList.iterator)).flatMap(_.compile.toList)
-          ),
-          muAvroWithSchemaRPCServiceClient.use(
-            _.biStreamingWithSchema(Stream.fromIterator[IO](eList.iterator))
-              .flatMap(_.compile.toList)
-          )
-        )
-
-      tuple._1.unsafeRunSync() shouldBe c1
-      tuple._2.unsafeRunSync() shouldBe c1
-      tuple._3.unsafeRunSync() shouldBe cList
-      tuple._4.unsafeRunSync() shouldBe dResult33
-      tuple._5.unsafeRunSync().distinct shouldBe eList
-      tuple._6.unsafeRunSync().distinct shouldBe eList
-
-    }
-
+  test("mu-rpc server should allow to get the port where it's running") {
+    grpcServer.use(_.getPort).assertEquals(SC.port)
   }
 
-  "mu-rpc client with fs2.Stream as streaming implementation and compression enabled" should {
+  test(behaviourOf + " be able to run unary services") {
+    grpcServer
+      .flatMap(_ => muAvroRPCServiceClient)
+      .use(_.unary(a1))
+      .assertEquals(c1)
+  }
 
-    "be able to run unary services" in {
+  test(behaviourOf + " be able to run unary services with avro schemas") {
+    grpcServer
+      .flatMap(_ => muAvroWithSchemaRPCServiceClient)
+      .use(_.unaryWithSchema(a1))
+      .assertEquals(c1)
+  }
 
-      muCompressedAvroRPCServiceClient.use(_.unaryCompressed(a1)).unsafeRunSync() shouldBe c1
+  test(behaviourOf + " be able to run server streaming services") {
+    grpcServer
+      .flatMap(_ => muProtoRPCServiceClient)
+      .use(_.serverStreaming(b1).flatMap(_.compile.toList))
+      .assertEquals(cList)
+  }
 
-    }
+  test(behaviourOf + " handle errors in server streaming services") {
 
-    "be able to run unary services with avro schema" in {
+    def clientProgram(errorCode: String, s: ProtoRPCService[IO]): IO[List[C]] =
+      s.serverStreamingWithError(E(a1, errorCode))
+        .map(_.handleErrorWith(ex => Stream(C(ex.getMessage, a1))))
+        .flatMap(_.compile.toList)
 
-      muCompressedAvroWithSchemaRPCServiceClient
-        .use(_.unaryCompressedWithSchema(a1))
-        .unsafeRunSync() shouldBe c1
+    grpcServer
+      .flatMap(_ => muProtoRPCServiceClient)
+      .use { s =>
+        clientProgram("SE", s)
+          .assertEquals(List(C("INVALID_ARGUMENT: SE", a1))) *>
+          clientProgram("SRE", s)
+            .assertEquals(List(C("INVALID_ARGUMENT: SRE", a1))) *>
+          clientProgram("RTE", s)
+            .assertEquals(List(C("INTERNAL: RTE", a1))) *>
+          clientProgram("Thrown", s)
+            .assertEquals(List(C("INTERNAL: Thrown", a1)))
+      }
+  }
 
-    }
+  test(behaviourOf + " be able to run client streaming services") {
+    grpcServer
+      .flatMap(_ => muProtoRPCServiceClient)
+      .use(_.clientStreaming(Stream.fromIterator[IO](aList.iterator, 1)))
+      .assertEquals(dResult33)
+  }
 
-    "be able to run server streaming services" in {
+  test((behaviourOf + " be able to run client bidirectional streaming services").ignore) {
+    grpcServer
+      .flatMap(_ => muAvroRPCServiceClient)
+      .use(
+        _.biStreaming(Stream.fromIterator[IO](eList.iterator, 1)).flatMap(_.compile.toList)
+      )
+      .map(_.distinct)
+      .assertEquals(eList)
+  }
 
-      muCompressedProtoRPCServiceClient
-        .use(_.serverStreamingCompressed(b1).flatMap(_.compile.toList))
-        .unsafeRunSync() shouldBe cList
+  test(
+    (behaviourOf + " be able to run client bidirectional streaming services with avro schema").ignore
+  ) {
+    grpcServer
+      .flatMap(_ => muAvroWithSchemaRPCServiceClient)
+      .use(
+        _.biStreamingWithSchema(Stream.fromIterator[IO](eList.iterator, 1))
+          .flatMap(_.compile.toList)
+      )
+      .map(_.distinct)
+      .assertEquals(eList)
+  }
 
-    }
+  test((behaviourOf + " be able to run multiple rpc services").ignore) {
+    val opTimeout: FiniteDuration = 10.seconds
+    (for {
+      _     <- grpcServer
+      avroC <- muAvroRPCServiceClient
+      _     <- Resource.eval(avroC.unary(a1).assertEquals(c1))
+      _ <- Resource.eval(
+        avroC
+          .biStreaming(Stream.fromIterator[IO](eList.iterator, 1))
+          .flatMap(_.compile.toList)
+          .map(_.distinct)
+          .assertEquals(eList)
+      )
 
-    "be able to run client streaming services" in {
+      avroWSC <- muAvroWithSchemaRPCServiceClient
+      _       <- Resource.eval(avroWSC.unaryWithSchema(a1).assertEquals(c1))
+      _ <- Resource.eval(
+        avroWSC
+          .biStreamingWithSchema(Stream.fromIterator[IO](eList.iterator, 1))
+          .flatMap(_.compile.toList)
+          .map(_.distinct)
+          .assertEquals(eList)
+      )
 
-      muCompressedProtoRPCServiceClient
-        .use(_.clientStreamingCompressed(Stream.fromIterator[IO](aList.iterator)))
-        .unsafeRunSync() shouldBe dResult33
-    }
+      protoC <- muProtoRPCServiceClient
+      _ <- Resource.eval(
+        protoC
+          .serverStreaming(b1)
+          .flatMap(_.compile.toList)
+          .assertEquals(cList)
+      )
+      _ <- Resource.eval(
+        protoC
+          .clientStreaming(Stream.fromIterator[IO](aList.iterator, 1))
+          .assertEquals(dResult33)
+      )
+    } yield ()).use_.timeoutTo(opTimeout, IO.println("ERROR on multi-op fs2!"))
+  }
 
-    "be able to run client bidirectional streaming services" in {
+  val behaviourOfC: String = behaviourOf + " and compression enabled"
 
-      muCompressedAvroRPCServiceClient
-        .use(
-          _.biStreamingCompressed(Stream.fromIterator[IO](eList.iterator)).flatMap(_.compile.toList)
-        )
-        .unsafeRunSync()
-        .distinct shouldBe eList
+  test(behaviourOfC + " be able to run unary services") {
+    grpcServer
+      .flatMap(_ => muCompressedAvroRPCServiceClient)
+      .use(_.unaryCompressed(a1))
+      .assertEquals(c1)
+  }
 
-    }
+  test(behaviourOfC + " be able to run unary services with avro schema") {
+    grpcServer
+      .flatMap(_ => muCompressedAvroWithSchemaRPCServiceClient)
+      .use(_.unaryCompressedWithSchema(a1))
+      .assertEquals(c1)
+  }
 
-    "be able to run client bidirectional streaming services with avro schema" in {
+  test(behaviourOfC + " be able to run server streaming services") {
+    grpcServer
+      .flatMap(_ => muCompressedProtoRPCServiceClient)
+      .use(_.serverStreamingCompressed(b1).flatMap(_.compile.toList))
+      .assertEquals(cList)
+  }
 
-      muCompressedAvroWithSchemaRPCServiceClient
-        .use(
-          _.biStreamingCompressedWithSchema(Stream.fromIterator[IO](eList.iterator))
-            .flatMap(_.compile.toList)
-        )
-        .unsafeRunSync()
-        .distinct shouldBe eList
+  test(behaviourOfC + " be able to run client streaming services") {
+    grpcServer
+      .flatMap(_ => muCompressedProtoRPCServiceClient)
+      .use(_.clientStreamingCompressed(Stream.fromIterator[IO](aList.iterator, 1)))
+      .assertEquals(dResult33)
+  }
 
-    }
+  test((behaviourOfC + " be able to run client bidirectional streaming services").ignore) {
+    grpcServer
+      .flatMap(_ => muCompressedAvroRPCServiceClient)
+      .use(
+        _.biStreamingCompressed(Stream.fromIterator[IO](eList.iterator, 1))
+          .flatMap(_.compile.toList)
+      )
+      .map(_.distinct)
+      .assertEquals(eList)
+  }
 
-    "be able to run multiple rpc services" in {
+  test(
+    (behaviourOfC + " be able to run client bidirectional streaming services with avro schema").ignore
+  ) {
+    grpcServer
+      .flatMap(_ => muCompressedAvroWithSchemaRPCServiceClient)
+      .use(
+        _.biStreamingCompressedWithSchema(Stream.fromIterator[IO](eList.iterator, 1))
+          .flatMap(_.compile.toList)
+      )
+      .map(_.distinct)
+      .assertEquals(eList)
+  }
 
-      val tuple =
-        (
-          muCompressedAvroRPCServiceClient.use(_.unaryCompressed(a1)),
-          muCompressedAvroWithSchemaRPCServiceClient.use(_.unaryCompressedWithSchema(a1)),
-          muCompressedProtoRPCServiceClient.use(
-            _.serverStreamingCompressed(b1).flatMap(_.compile.toList)
-          ),
-          muCompressedProtoRPCServiceClient.use(
-            _.clientStreamingCompressed(Stream.fromIterator[IO](aList.iterator))
-          ),
-          muCompressedAvroRPCServiceClient.use(
-            _.biStreamingCompressed(Stream.fromIterator[IO](eList.iterator))
-              .flatMap(_.compile.toList)
-          ),
-          muCompressedAvroWithSchemaRPCServiceClient
-            .use(
-              _.biStreamingCompressedWithSchema(
-                Stream.fromIterator[IO](eList.iterator)
-              ).flatMap(_.compile.toList)
-            )
-        )
+  test((behaviourOfC + " be able to run multiple rpc services").ignore) {
+    val opTimeout: FiniteDuration = 10.seconds
+    (for {
+      _     <- grpcServer
+      avroC <- muCompressedAvroRPCServiceClient
+      _     <- Resource.eval(avroC.unaryCompressed(a1).assertEquals(c1))
+      _ <- Resource.eval(
+        avroC
+          .biStreamingCompressed(Stream.fromIterator[IO](eList.iterator, 1))
+          .flatMap(_.compile.toList)
+          .map(_.distinct)
+          .assertEquals(eList)
+      )
 
-      tuple._1.unsafeRunSync() shouldBe c1
-      tuple._2.unsafeRunSync() shouldBe c1
-      tuple._3.unsafeRunSync() shouldBe cList
-      tuple._4.unsafeRunSync() shouldBe dResult33
-      tuple._5.unsafeRunSync().distinct shouldBe eList
-      tuple._6.unsafeRunSync().distinct shouldBe eList
+      avroWSC <- muCompressedAvroWithSchemaRPCServiceClient
+      _ <- Resource.eval(
+        avroWSC
+          .unaryCompressedWithSchema(a1)
+          .assertEquals(c1)
+      )
+      _ <- Resource.eval(
+        avroWSC
+          .biStreamingCompressedWithSchema(Stream.fromIterator[IO](eList.iterator, 1))
+          .flatMap(_.compile.toList)
+          .map(_.distinct)
+          .assertEquals(eList)
+      )
 
-    }
-
+      protoC <- muCompressedProtoRPCServiceClient
+      _ <- Resource.eval(
+        protoC
+          .serverStreamingCompressed(b1)
+          .flatMap(_.compile.toList)
+          .assertEquals(cList)
+      )
+      _ <- Resource.eval(
+        protoC
+          .clientStreamingCompressed(Stream.fromIterator[IO](aList.iterator, 1))
+          .assertEquals(dResult33)
+      )
+    } yield ()).use_.timeout(opTimeout)
   }
 
 }

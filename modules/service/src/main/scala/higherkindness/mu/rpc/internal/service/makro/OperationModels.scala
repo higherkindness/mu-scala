@@ -87,6 +87,8 @@ class OperationModels[C <: Context](val c: C) {
     private val compressionTypeTree: Tree =
       q"_root_.higherkindness.mu.rpc.protocol.${TermName(compressionType.toString)}"
 
+    private val dispatcherValueName: Tree = q"disp"
+
     private val clientCallsImpl = prevalentStreamingTarget match {
       case _: Fs2StreamTpe       => q"_root_.higherkindness.mu.rpc.internal.client.fs2.calls"
       case _: MonixObservableTpe => q"_root_.higherkindness.mu.rpc.internal.client.monix.calls"
@@ -234,6 +236,7 @@ class OperationModels[C <: Context](val c: C) {
         q"""
         _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.clientStreaming[$F, $reqElemType, $respElemType](
           { (req: _root_.fs2.Stream[$F, $reqElemType], $anonymousParam) => algebra.$name(req) },
+          $dispatcherValueName,
           $compressionTypeTree
         )
         """
@@ -249,6 +252,7 @@ class OperationModels[C <: Context](val c: C) {
         q"""
         _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.serverStreaming[$F, $reqElemType, $respElemType](
           { (req: $reqType, $anonymousParam) => algebra.$name(req) },
+          $dispatcherValueName,
           $compressionTypeTree
         )
         """
@@ -264,6 +268,7 @@ class OperationModels[C <: Context](val c: C) {
         q"""
         _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.bidiStreaming[$F, $reqElemType, $respElemType](
           { (req: _root_.fs2.Stream[$F, $reqElemType], $anonymousParam) => algebra.$name(req) },
+          $dispatcherValueName,
           $compressionTypeTree
         )
         """
@@ -279,7 +284,8 @@ class OperationModels[C <: Context](val c: C) {
         q"""
         _root_.higherkindness.mu.rpc.internal.server.handlers.unary[$F, $reqElemType, $respElemType](
           algebra.$name,
-          $compressionTypeTree
+          $compressionTypeTree,
+          $dispatcherValueName
         )
         """
       case _ =>
@@ -299,6 +305,7 @@ class OperationModels[C <: Context](val c: C) {
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
           entrypoint,
+          $dispatcherValueName,
           $compressionTypeTree
         )
         """
@@ -308,6 +315,7 @@ class OperationModels[C <: Context](val c: C) {
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
           entrypoint,
+          $dispatcherValueName,
           $compressionTypeTree
         )
         """
@@ -317,6 +325,7 @@ class OperationModels[C <: Context](val c: C) {
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
           entrypoint,
+          $dispatcherValueName,
           $compressionTypeTree
         )
         """
@@ -326,6 +335,7 @@ class OperationModels[C <: Context](val c: C) {
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
           entrypoint,
+          $dispatcherValueName,
           $compressionTypeTree
         )
         """
@@ -335,6 +345,7 @@ class OperationModels[C <: Context](val c: C) {
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
           entrypoint,
+          $dispatcherValueName,
           $compressionTypeTree
         )
         """
@@ -344,6 +355,7 @@ class OperationModels[C <: Context](val c: C) {
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
           entrypoint,
+          $dispatcherValueName,
           $compressionTypeTree
         )
         """
@@ -353,7 +365,8 @@ class OperationModels[C <: Context](val c: C) {
           algebra.$name,
           $methodDescriptorName.$methodDescriptorValName,
           entrypoint,
-          $compressionTypeTree
+          $compressionTypeTree,
+          $dispatcherValueName
         )
         """
       case _ =>
@@ -365,127 +378,6 @@ class OperationModels[C <: Context](val c: C) {
 
     val descriptorAndTracingHandler: Tree =
       q"($methodDescriptorName.$methodDescriptorValName, $tracingServerCallHandler)"
-
-  }
-
-  case class HttpOperation(
-      operation: Operation,
-      F: TypeName
-  ) {
-
-    import operation._
-
-    val uri = name.toString
-
-    val method: TermName = request match {
-      case _: EmptyTpe => TermName("GET")
-      case _           => TermName("POST")
-    }
-
-    val requestTypology: Tree = request match {
-      case _: UnaryTpe =>
-        q"val request = _root_.org.http4s.Request[$F](_root_.org.http4s.Method.$method, uri / ${uri
-          .replace("\"", "")}).withEntity(req.asJson)"
-      case _: Fs2StreamTpe =>
-        q"val request = _root_.org.http4s.Request[$F](_root_.org.http4s.Method.$method, uri / ${uri
-          .replace("\"", "")}).withEntity(req.map(_.asJson))"
-      case _ =>
-        q"val request = _root_.org.http4s.Request[$F](_root_.org.http4s.Method.$method, uri / ${uri
-          .replace("\"", "")})"
-    }
-
-    val executionClient: Tree = response match {
-      case _: Fs2StreamTpe =>
-        q"_root_.cats.Applicative[$F].pure(client.stream(request).flatMap(_.asStream[${response.messageType}]))"
-      case _ =>
-        q"""client.expectOr[${response.messageType}](request)(handleResponseError)(_root_.org.http4s.circe.jsonOf[$F, ${response.messageType}])"""
-    }
-
-    def toRequestTree: Tree =
-      request match {
-        case _: EmptyTpe =>
-          q"""def $name(client: _root_.org.http4s.client.Client[$F])(
-             implicit responseDecoder: _root_.io.circe.Decoder[${response.messageType}]): ${response.originalType} = {
-               $requestTypology
-               $executionClient
-             }"""
-        case _ =>
-          q"""def $name(req: ${request.originalType})(client: _root_.org.http4s.client.Client[$F])(
-             implicit requestEncoder: _root_.io.circe.Encoder[${request.messageType}],
-             responseDecoder: _root_.io.circe.Decoder[${response.messageType}]
-          ): ${response.originalType} = {
-            $requestTypology
-            $executionClient
-          }"""
-      }
-
-    val routeTypology: Tree = (request, response) match {
-      // Stream -> Stream
-      case (_: Fs2StreamTpe, _: Fs2StreamTpe) =>
-        q"""val requests = msg.asStream[${operation.request.messageType}]
-            for {
-              respStream <- handler.${operation.name}(requests)
-              responses  <- _root_.org.http4s.Status.Ok.apply(respStream.asJsonEither)
-            } yield responses"""
-
-      // Stream -> Empty
-      case (_: Fs2StreamTpe, _: EmptyTpe) =>
-        q"""val requests = msg.asStream[${operation.request.messageType}]
-            _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(requests).as(()))"""
-
-      // Stream -> Unary
-      case (_: Fs2StreamTpe, _: UnaryTpe) =>
-        q"""val requests = msg.asStream[${operation.request.messageType}]
-            _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(requests).map(_.asJson))"""
-
-      // Empty -> Stream
-      case (_: EmptyTpe, _: Fs2StreamTpe) =>
-        q"""for {
-              respStream <- handler.${operation.name}(_root_.higherkindness.mu.rpc.protocol.Empty)
-              responses  <- _root_.org.http4s.Status.Ok.apply(respStream.asJsonEither)
-            } yield responses"""
-
-      // Empty -> Empty
-      case (_: EmptyTpe, _: EmptyTpe) =>
-        q"""_root_.org.http4s.Status.Ok.apply(handler.${operation.name}(_root_.higherkindness.mu.rpc.protocol.Empty).as(()))"""
-
-      // Empty -> Unary
-      case (_: EmptyTpe, _: UnaryTpe) =>
-        q"""_root_.org.http4s.Status.Ok.apply(handler.${operation.name}(_root_.higherkindness.mu.rpc.protocol.Empty).map(_.asJson))"""
-
-      // Unary -> Stream
-      case (_: UnaryTpe, _: Fs2StreamTpe) =>
-        q"""for {
-            request    <- msg.as[${operation.request.messageType}]
-            respStream <- handler.${operation.name}(request)
-            responses  <- _root_.org.http4s.Status.Ok.apply(respStream.asJsonEither)
-          } yield responses"""
-
-      // Unary -> Empty
-      case (_: UnaryTpe, _: EmptyTpe) =>
-        q"""for {
-            request  <- msg.as[${operation.request.messageType}]
-            response <- _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(request).as(())).adaptErrors
-          } yield response"""
-
-      // Unary -> Unary
-      case _ =>
-        q"""for {
-            request  <- msg.as[${operation.request.messageType}]
-            response <- _root_.org.http4s.Status.Ok.apply(handler.${operation.name}(request).map(_.asJson)).adaptErrors
-          } yield response"""
-    }
-
-    val getPattern =
-      pq"_root_.org.http4s.Method.GET -> _root_.org.http4s.dsl.impl.Root / ${operation.name.toString}"
-    val postPattern =
-      pq"msg @ _root_.org.http4s.Method.POST -> _root_.org.http4s.dsl.impl.Root / ${operation.name.toString}"
-
-    def toRouteTree: Tree =
-      request match {
-        case _: EmptyTpe => cq"$getPattern => $routeTypology"
-        case _           => cq"$postPattern => $routeTypology"
-      }
 
   }
 

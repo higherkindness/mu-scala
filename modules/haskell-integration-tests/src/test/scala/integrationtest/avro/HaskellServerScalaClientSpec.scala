@@ -16,25 +16,19 @@
 
 package integrationtest.avro
 
-import integrationtest._
-import weather._
-import weather.GetForecastResponse.Weather.SUNNY
+import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc._
 import higherkindness.mu.rpc.protocol.Empty
-
+import integrationtest._
+import integrationtest.avro.weather.GetForecastResponse.Weather.SUNNY
+import integrationtest.avro.weather._
 import io.grpc.CallOptions
-import cats.effect.{ContextShift, IO, Resource}
+import munit.CatsEffectSuite
 
-import org.scalatest.flatspec.AnyFlatSpec
-
-import scala.concurrent.ExecutionContext
-
-class HaskellServerScalaClientSpec extends AnyFlatSpec with HaskellServerRunningInDocker {
+class HaskellServerScalaClientSpec extends CatsEffectSuite with HaskellServerRunningInDocker {
 
   def serverPort: Int              = Constants.AvroPort
   def serverExecutableName: String = "avro-server"
-
-  implicit val CS: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
   val channelFor: ChannelFor = ChannelForAddress("localhost", serverPort)
 
@@ -43,25 +37,23 @@ class HaskellServerScalaClientSpec extends AnyFlatSpec with HaskellServerRunning
     options = CallOptions.DEFAULT.withCompression("gzip")
   )
 
-  behavior of "Mu-Haskell server and Mu-Scala client communication using Avro"
+  val clientFixture = ResourceSuiteLocalFixture("rpc-client", clientResource)
 
-  it should "work for a trivial unary call" in {
-    val response = clientResource
-      .use(client => client.ping(Empty))
-      .unsafeRunSync()
-    assert(response == Empty)
+  override def munitFixtures = List(clientFixture)
+
+  val behaviorOf = "Mu-Haskell server and Mu-Scala client communication using Avro"
+
+  test(behaviorOf + "it should work for a trivial unary call") {
+    IO(clientFixture()).flatMap(_.ping(Empty)).assertEquals(Empty)
   }
 
-  it should "work for a unary call" in {
+  test(behaviorOf + "it should work for a unary call") {
     val request = GetForecastRequest("London", 3)
     val expectedResponse = GetForecastResponse(
       last_updated = "2020-03-20T12:00:00Z",
       daily_forecasts = List(SUNNY, SUNNY, SUNNY)
     )
-    val response = clientResource
-      .use(client => client.getForecast(request))
-      .unsafeRunSync()
-    assert(response == expectedResponse)
+    IO(clientFixture()).flatMap(_.getForecast(request)).assertEquals(expectedResponse)
   }
 
 }

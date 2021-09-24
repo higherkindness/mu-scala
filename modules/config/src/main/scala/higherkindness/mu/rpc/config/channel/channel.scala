@@ -17,16 +17,14 @@
 package higherkindness.mu.rpc
 package config
 
-import cats.Functor
-
 package object channel {
 
-  def ConfigForAddress[F[_]: Functor](hostPath: String, portPath: String)(implicit
+  def ConfigForAddress[F[_]](hostPath: String, portPath: String)(implicit
       CC: ChannelConfig[F]
   ): F[ChannelForAddress] =
     CC.loadChannelAddress(hostPath, portPath)
 
-  def ConfigForTarget[F[_]: Functor](
+  def ConfigForTarget[F[_]](
       target: String
   )(implicit CC: ChannelConfig[F]): F[ChannelForTarget] =
     CC.loadChannelTarget(target)
