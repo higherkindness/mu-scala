@@ -16,7 +16,6 @@
 
 package integrationtest.protobuf
 
-import cats.Applicative
 import cats.instances.int._
 import cats.syntax.applicative._
 import cats.syntax.functor._
@@ -25,7 +24,7 @@ import higherkindness.mu.rpc.protocol.Empty
 import integrationtest.protobuf.weather.RainEvent.EventType._
 import integrationtest.protobuf.weather._
 
-class MyWeatherService[F[_]: Applicative](implicit compiler: Compiler.Target[F])
+class MyWeatherService[F[_]](implicit compiler: Compiler.Target[F])
     extends WeatherService[F] {
 
   def ping(req: Empty.type): F[Empty.type] =
