@@ -24,8 +24,7 @@ import higherkindness.mu.rpc.protocol.Empty
 import integrationtest.protobuf.weather.RainEvent.EventType._
 import integrationtest.protobuf.weather._
 
-class MyWeatherService[F[_]](implicit compiler: Compiler.Target[F])
-    extends WeatherService[F] {
+class MyWeatherService[F[_]](implicit compiler: Compiler.Target[F]) extends WeatherService[F] {
 
   def ping(req: Empty.type): F[Empty.type] =
     Empty.pure[F]
