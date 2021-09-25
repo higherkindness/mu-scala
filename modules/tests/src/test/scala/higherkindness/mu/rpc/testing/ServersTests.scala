@@ -18,43 +18,34 @@ package higherkindness.mu.rpc
 package testing
 
 import io.grpc.{ServerCall, ServerCallHandler, ServerServiceDefinition}
-import org.scalatestplus.scalacheck.Checkers
+import munit.ScalaCheckSuite
 import org.scalacheck.Prop._
 
 import scala.jdk.CollectionConverters._
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
 
-class ServersTests extends AnyWordSpec with Matchers with Checkers {
+class ServersTests extends ScalaCheckSuite {
 
   import TestingUtils._
 
-  "servers.serverCallHandler" should {
-
-    "create a noop call handler" in {
-      type StringCallListener = ServerCall.Listener[String]
-      val handler: ServerCallHandler[String, Int] = servers.serverCallHandler[String, Int]
-      handler.startCall(null, null) shouldBe a[StringCallListener]
-    }
-
+  test("servers.serverCallHandler should create a noop call handler") {
+    type StringCallListener = ServerCall.Listener[String]
+    val handler: ServerCallHandler[String, Int] = servers.serverCallHandler[String, Int]
+    assert(Option(handler.startCall(null, null)).exists(_.isInstanceOf[StringCallListener]))
   }
 
-  "servers.serverServiceDefinition" should {
+  test(
+    "servers.serverServiceDefinition should " +
+      "create a server service definition with the provided name and methods"
+  ) {
 
-    "create a server service definition with the provided name and methods" in {
-
-      check {
-        forAllNoShrink(serverDefGen) { case (serverName, methodNameList) =>
-          val serverDef: ServerServiceDefinition =
-            servers.serverServiceDefinition(serverName, methodNameList)
-          (serverDef.getServiceDescriptor.getName == serverName) && (serverDef.getMethods.asScala
-            .map(_.getMethodDescriptor.getFullMethodName)
-            .toList
-            .sorted == methodNameList.sorted)
-        }
-      }
+    forAllNoShrink(serverDefGen) { case (serverName, methodNameList) =>
+      val serverDef: ServerServiceDefinition =
+        servers.serverServiceDefinition(serverName, methodNameList)
+      (serverDef.getServiceDescriptor.getName == serverName) && (serverDef.getMethods.asScala
+        .map(_.getMethodDescriptor.getFullMethodName)
+        .toList
+        .sorted == methodNameList.sorted)
     }
-
   }
 
 }

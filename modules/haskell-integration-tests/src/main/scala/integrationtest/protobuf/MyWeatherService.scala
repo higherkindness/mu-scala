@@ -16,18 +16,15 @@
 
 package integrationtest.protobuf
 
-import cats.Applicative
+import cats.instances.int._
 import cats.syntax.applicative._
 import cats.syntax.functor._
-import cats.instances.int._
-import weather._
-import weather.RainEvent.EventType._
-import higherkindness.mu.rpc.protocol.Empty
 import fs2._
-import fs2.Stream.Compiler
+import higherkindness.mu.rpc.protocol.Empty
+import integrationtest.protobuf.weather.RainEvent.EventType._
+import integrationtest.protobuf.weather._
 
-class MyWeatherService[F[_]: Applicative](implicit compiler: Compiler[F, F])
-    extends WeatherService[F] {
+class MyWeatherService[F[_]](implicit compiler: Compiler.Target[F]) extends WeatherService[F] {
 
   def ping(req: Empty.type): F[Empty.type] =
     Empty.pure[F]
@@ -47,7 +44,7 @@ class MyWeatherService[F[_]: Applicative](implicit compiler: Compiler[F, F])
           case _                           => 0
         }
       }
-      .compile[F, F, Int]
+      .compile
       .foldMonoid
 
     rainStartedCount.map(RainSummaryResponse)

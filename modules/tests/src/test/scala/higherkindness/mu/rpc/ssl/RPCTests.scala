@@ -19,134 +19,111 @@ package ssl
 
 import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc.channel.OverrideAuthority
-import higherkindness.mu.rpc.channel.netty.{
-  NettyChannelInterpreter,
-  NettyNegotiationType,
-  NettySslContext,
-  NettyUsePlaintext
-}
+import higherkindness.mu.rpc.channel.netty._
 import higherkindness.mu.rpc.common._
-import higherkindness.mu.rpc.server._
 import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.NegotiationType
-import org.scalatest._
+import munit.CatsEffectSuite
 
-class RPCTests extends RpcBaseTestSuite with BeforeAndAfterAll {
+class RPCTests extends CatsEffectSuite {
 
-  import TestsImplicits._
   import higherkindness.mu.rpc.ssl.Utils._
   import higherkindness.mu.rpc.ssl.Utils.database._
   import higherkindness.mu.rpc.ssl.Utils.service._
   import higherkindness.mu.rpc.ssl.Utils.implicits._
 
-  override protected def beforeAll(): Unit =
-    serverStart[ConcurrentMonad].unsafeRunSync()
+  val serverFixture = ResourceSuiteLocalFixture("rpc-server", grpcServer)
 
-  override protected def afterAll(): Unit =
-    serverStop[ConcurrentMonad].unsafeRunSync()
+  override def munitFixtures = List(serverFixture)
 
-  "mu-rpc server" should {
-
-    "allow to startup a server and check if it's alive" in {
-
-      def check[F[_]](implicit S: GrpcServer[F]): F[Boolean] =
-        S.isShutdown
-
-      check[ConcurrentMonad].unsafeRunSync() shouldBe false
-    }
-
-    "allow to get the port where it's running" in {
-
-      def check[F[_]](implicit S: GrpcServer[F]): F[Int] =
-        S.getPort
-
-      check[ConcurrentMonad].unsafeRunSync() shouldBe SC.port
-    }
-
+  test("mu-rpc server should allow to startup a server and check if it's alive") {
+    IO(serverFixture()).flatMap(_.isShutdown).assertEquals(false)
   }
 
-  "mu-rpc client should work with SSL/TSL connection" should {
+  test("mu-rpc server should allow to get the port where it's running") {
+    IO(serverFixture()).flatMap(_.getPort).assertEquals(SC.port)
+  }
 
-    "work when certificates are valid" in {
+  test(
+    "mu-rpc client should work with SSL/TSL connection should " +
+      "work when certificates are valid"
+  ) {
 
-      val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
-        createChannelFor,
-        List(OverrideAuthority(TestUtils.TEST_SERVER_HOST)),
-        List(
-          NettyUsePlaintext(),
-          NettyNegotiationType(NegotiationType.TLS),
-          NettySslContext(clientSslContext)
-        )
+    val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
+      createChannelFor,
+      List(OverrideAuthority(TestUtils.TEST_SERVER_HOST)),
+      List(
+        NettyUsePlaintext(),
+        NettyNegotiationType(NegotiationType.TLS),
+        NettySslContext(clientSslContext)
       )
+    )
 
-      val avroRpcService: Resource[ConcurrentMonad, AvroRPCService[ConcurrentMonad]] =
-        AvroRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
-      val avroWithSchemaRpcService: Resource[ConcurrentMonad, AvroWithSchemaRPCService[
-        ConcurrentMonad
-      ]] =
-        AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
+    val avroRpcService: Resource[IO, AvroRPCService[IO]] =
+      AvroRPCService.clientFromChannel[IO](IO(channelInterpreter.build))
 
-      avroRpcService.use(_.unary(a1)).unsafeRunSync() shouldBe c1
-      avroWithSchemaRpcService.use(_.unaryWithSchema(a1)).unsafeRunSync() shouldBe c1
+    val avroWithSchemaRpcService: Resource[
+      IO,
+      AvroWithSchemaRPCService[IO]
+    ] =
+      AvroWithSchemaRPCService.clientFromChannel[IO](IO(channelInterpreter.build))
 
-    }
+    avroRpcService.use(_.unary(a1)).assertEquals(c1) *>
+      avroWithSchemaRpcService.use(_.unaryWithSchema(a1)).assertEquals(c1)
+  }
 
-    "io.grpc.StatusRuntimeException is thrown when no SSLContext is provided" in {
+  test(
+    "mu-rpc client with SSL/TSL connection should " +
+      "throw a io.grpc.StatusRuntimeException when no SSLContext is provided"
+  ) {
 
-      val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
-        createChannelFor,
-        List(OverrideAuthority(TestUtils.TEST_SERVER_HOST)),
-        List(
-          NettyUsePlaintext(),
-          NettyNegotiationType(NegotiationType.TLS)
-        )
+    val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
+      createChannelFor,
+      List(OverrideAuthority(TestUtils.TEST_SERVER_HOST)),
+      List(
+        NettyUsePlaintext(),
+        NettyNegotiationType(NegotiationType.TLS)
       )
+    )
 
-      val avroRpcService: Resource[ConcurrentMonad, AvroRPCService[ConcurrentMonad]] =
-        AvroRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
-      val avroWithSchemaRpcService: Resource[ConcurrentMonad, AvroWithSchemaRPCService[
-        ConcurrentMonad
-      ]] =
-        AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
+    val avroRpcService: Resource[IO, AvroRPCService[IO]] =
+      AvroRPCService.clientFromChannel[IO](IO(channelInterpreter.build))
+    val avroWithSchemaRpcService: Resource[IO, AvroWithSchemaRPCService[
+      IO
+    ]] =
+      AvroWithSchemaRPCService.clientFromChannel[IO](IO(channelInterpreter.build))
 
-      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
-        avroRpcService.use(_.unary(a1)).unsafeRunSync()
+    interceptIO[io.grpc.StatusRuntimeException](avroRpcService.use(_.unary(a1))) *>
+      interceptIO[io.grpc.StatusRuntimeException](
+        avroWithSchemaRpcService.use(_.unaryWithSchema(a1))
       )
+  }
 
-      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
-        avroWithSchemaRpcService.use(_.unaryWithSchema(a1)).unsafeRunSync()
+  test(
+    "mu-rpc client with SSL/TSL connection should " +
+      "throw a io.grpc.StatusRuntimeException when negotiation is skipped"
+  ) {
+
+    val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
+      createChannelFor,
+      List(OverrideAuthority(TestUtils.TEST_SERVER_HOST)),
+      List(
+        NettyUsePlaintext(),
+        NettySslContext(clientSslContext)
       )
+    )
 
-    }
+    val avroRpcService: Resource[IO, AvroRPCService[IO]] =
+      AvroRPCService.clientFromChannel[IO](IO(channelInterpreter.build))
+    val avroWithSchemaRpcService: Resource[IO, AvroWithSchemaRPCService[
+      IO
+    ]] =
+      AvroWithSchemaRPCService.clientFromChannel[IO](IO(channelInterpreter.build))
 
-    "io.grpc.StatusRuntimeException is thrown when negotiation is skipped" in {
-
-      val channelInterpreter: NettyChannelInterpreter = new NettyChannelInterpreter(
-        createChannelFor,
-        List(OverrideAuthority(TestUtils.TEST_SERVER_HOST)),
-        List(
-          NettyUsePlaintext(),
-          NettySslContext(clientSslContext)
-        )
+    interceptIO[io.grpc.StatusRuntimeException](avroRpcService.use(_.unary(a1))) *>
+      interceptIO[io.grpc.StatusRuntimeException](
+        avroWithSchemaRpcService.use(_.unaryWithSchema(a1))
       )
-
-      val avroRpcService: Resource[ConcurrentMonad, AvroRPCService[ConcurrentMonad]] =
-        AvroRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
-      val avroWithSchemaRpcService: Resource[ConcurrentMonad, AvroWithSchemaRPCService[
-        ConcurrentMonad
-      ]] =
-        AvroWithSchemaRPCService.clientFromChannel[ConcurrentMonad](IO(channelInterpreter.build))
-
-      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
-        avroRpcService.use(_.unary(a1)).unsafeRunSync()
-      )
-
-      a[io.grpc.StatusRuntimeException] shouldBe thrownBy(
-        avroWithSchemaRpcService.use(_.unaryWithSchema(a1)).unsafeRunSync()
-      )
-
-    }
-
   }
 
 }

@@ -18,84 +18,90 @@ package higherkindness.mu.rpc
 package server
 
 import java.net.InetSocketAddress
-
 import cats.effect.IO
 import higherkindness.mu.rpc.common.SC
+import munit.CatsEffectSuite
 
-class ServerConfigTests extends RpcServerTestSuite {
+class ServerConfigTests extends CatsEffectSuite {
 
-  import implicits._
+  import TestData._
 
-  "GrpcServer.default" should {
+  test(
+    "GrpcServer.default should " +
+      "work as expected for a basic configuration"
+  ) {
 
-    "work as expected for a basic configuration" in {
+    val configList: List[GrpcConfig] = List(AddService(sd1))
+    val server: IO[GrpcServer[IO]]   = GrpcServer.default(SC.port, configList)
 
-      val configList: List[GrpcConfig] = List(AddService(sd1))
-      val server: IO[GrpcServer[IO]]   = GrpcServer.default(SC.port, configList)
-
-      server.flatMap(_.getServices).unsafeRunSync() shouldBe List(sd1)
-    }
+    server.flatMap(_.getServices).assertEquals(List(sd1))
   }
 
-  "GrpcServer.netty" should {
+  test("GrpcServer.netty should work as expected for port") {
 
-    "work as expected for port" in {
+    val configList: List[GrpcConfig] = List(AddService(sd1))
+    val server: IO[GrpcServer[IO]]   = GrpcServer.netty(ChannelForPort(SC.port), configList)
 
-      val configList: List[GrpcConfig] = List(AddService(sd1))
-      val server: IO[GrpcServer[IO]]   = GrpcServer.netty(ChannelForPort(SC.port), configList)
+    server.flatMap(_.getServices).assertEquals(List(sd1))
+  }
 
-      server.flatMap(_.getServices).unsafeRunSync() shouldBe List(sd1)
-    }
+  test("GrpcServer.netty should work as expected for SocketAddress") {
 
-    "work as expected for SocketAddress" in {
+    val configList: List[GrpcConfig] = List(AddService(sd1))
+    val server: IO[GrpcServer[IO]] =
+      GrpcServer.netty(
+        ChannelForSocketAddress(new InetSocketAddress(SC.host, SC.port)),
+        configList
+      )
 
-      val configList: List[GrpcConfig] = List(AddService(sd1))
-      val server: IO[GrpcServer[IO]] =
-        GrpcServer.netty(
-          ChannelForSocketAddress(new InetSocketAddress(SC.host, SC.port)),
-          configList
-        )
+    server.flatMap(_.getServices).assertEquals(List(sd1))
+  }
 
-      server.flatMap(_.getServices).unsafeRunSync() shouldBe List(sd1)
-    }
+  test(
+    "GrpcServer.netty should " +
+      "work as expected for port, with any configuration combination"
+  ) {
 
-    "work as expected for port, with any configuration combination" in {
+    val server: IO[GrpcServer[IO]] =
+      GrpcServer.netty(ChannelForPort(SC.port), grpcAllConfigList)
 
-      val server: IO[GrpcServer[IO]] =
-        GrpcServer.netty(ChannelForPort(SC.port), grpcAllConfigList)
+    server.flatMap(_.getServices).assertEquals(List(sd1))
+  }
 
-      server.flatMap(_.getServices).unsafeRunSync() shouldBe List(sd1)
-    }
+  test(
+    "GrpcServer.netty should " +
+      "work as expected for an `Int` port"
+  ) {
 
-    "work as expected for an `Int` port" in {
+    val configList: List[GrpcConfig] = List(AddService(sd1))
+    val server: IO[GrpcServer[IO]]   = GrpcServer.netty[IO](SC.port, configList)
 
-      val configList: List[GrpcConfig] = List(AddService(sd1))
-      val server: IO[GrpcServer[IO]]   = GrpcServer.netty[IO](SC.port, configList)
+    server.flatMap(_.getServices).assertEquals(List(sd1))
+  }
 
-      server.flatMap(_.getServices).unsafeRunSync() shouldBe List(sd1)
-    }
+  test(
+    "GrpcServer.netty should " +
+      "throw an exception when configuration is not recognized"
+  ) {
 
-    "throw an exception when configuration is not recognized" in {
+    case object Unexpected extends GrpcConfig
 
-      case object Unexpected extends GrpcConfig
+    val configList: List[GrpcConfig] = List(AddService(sd1), Unexpected)
 
-      val configList: List[GrpcConfig] = List(AddService(sd1), Unexpected)
+    val server: IO[GrpcServer[IO]] =
+      GrpcServer.netty(ChannelForPort(SC.port), configList)
 
-      val server: IO[GrpcServer[IO]] =
-        GrpcServer.netty(ChannelForPort(SC.port), configList)
+    interceptIO[MatchError](server)
+  }
 
-      an[MatchError] shouldBe thrownBy(server.unsafeRunSync())
-    }
+  test("GrpcServer.netty should throw an exception when ChannelFor is not recognized") {
 
-    "throw an exception when ChannelFor is not recognized" in {
+    val configList: List[GrpcConfig] = List(AddService(sd1))
 
-      val configList: List[GrpcConfig] = List(AddService(sd1))
+    val server: IO[GrpcServer[IO]] =
+      GrpcServer.netty(ChannelForTarget(SC.host), configList)
 
-      val server: IO[GrpcServer[IO]] =
-        GrpcServer.netty(ChannelForTarget(SC.host), configList)
-
-      an[IllegalArgumentException] shouldBe thrownBy(server.unsafeRunSync())
-    }
+    interceptIO[IllegalArgumentException](server)
   }
 
 }

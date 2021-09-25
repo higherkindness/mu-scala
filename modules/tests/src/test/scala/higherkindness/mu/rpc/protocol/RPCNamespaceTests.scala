@@ -17,14 +17,16 @@
 package higherkindness.mu.rpc.protocol
 
 import cats.Applicative
+import cats.effect.IO
+import cats.effect.unsafe.IORuntime
 import cats.syntax.applicative._
-import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.protocol.Utils._
+import munit.ScalaCheckSuite
 import org.scalacheck.Prop._
-import org.scalatest._
-import org.scalatestplus.scalacheck.Checkers
 
-class RPCNamespaceTests extends RpcBaseTestSuite with BeforeAndAfterAll with Checkers {
+class RPCNamespaceTests extends ScalaCheckSuite with RPCFixtures {
+
+  implicit val ioRuntime: IORuntime = IORuntime.global
 
   object RPCService {
 
@@ -56,54 +58,52 @@ class RPCNamespaceTests extends RpcBaseTestSuite with BeforeAndAfterAll with Che
 
   }
 
-  "A RPC server" should {
+  import RPCService._
 
-    import RPCService._
-    import higherkindness.mu.rpc.TestsImplicits._
+  implicit val H: RPCServiceDefImpl[IO] = new RPCServiceDefImpl[IO]
 
-    implicit val H: RPCServiceDefImpl[ConcurrentMonad] = new RPCServiceDefImpl[ConcurrentMonad]
+  val protoFixture = buildResourceFixture(
+    "rpc-proto-client",
+    initServerWithClient[ProtoRPCServiceDef[IO]](
+      ProtoRPCServiceDef.bindService[IO],
+      ProtoRPCServiceDef.clientFromChannel[IO](_)
+    )
+  )
+  val avroFixture = buildResourceFixture(
+    "rpc-avro-client",
+    initServerWithClient[AvroRPCServiceDef[IO]](
+      AvroRPCServiceDef.bindService[IO],
+      AvroRPCServiceDef.clientFromChannel[IO](_)
+    )
+  )
+  val avroWithSchemaFixture = buildResourceFixture(
+    "rpc-avro-with-schema-client",
+    initServerWithClient[AvroWithSchemaRPCServiceDef[IO]](
+      AvroWithSchemaRPCServiceDef.bindService[IO],
+      AvroWithSchemaRPCServiceDef.clientFromChannel[IO](_)
+    )
+  )
 
-    "be able to call a service with a defined namespace with proto" in {
+  override def munitFixtures = List(protoFixture, avroFixture, avroWithSchemaFixture)
 
-      withClient(
-        ProtoRPCServiceDef.bindService[ConcurrentMonad],
-        ProtoRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
-      ) { client =>
-        check {
-          forAll { s: String =>
-            client.proto1(Request(s)).map(_.length).unsafeRunSync() == s.length
-          }
-        }
-      }
-
+  property("RPC Server should be able to call a service with a defined namespace with proto") {
+    val client = protoFixture()
+    forAll { s: String =>
+      client.proto1(Request(s)).map(_.length).unsafeRunSync() == s.length
     }
+  }
 
-    "be able to call a service with a defined namespace with avro" in {
+  property("RPC Server should be able to call a service with a defined namespace with avro") {
+    val client = avroFixture()
+    forAll { s: String => client.avro(Request(s)).map(_.length).unsafeRunSync() == s.length }
+  }
 
-      withClient(
-        AvroRPCServiceDef.bindService[ConcurrentMonad],
-        AvroRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
-      ) { client =>
-        check {
-          forAll { s: String => client.avro(Request(s)).map(_.length).unsafeRunSync() == s.length }
-        }
-      }
-
-    }
-
-    "be able to call a service with a defined namespace with avro with schema" in {
-
-      withClient(
-        AvroWithSchemaRPCServiceDef.bindService[ConcurrentMonad],
-        AvroWithSchemaRPCServiceDef.clientFromChannel[ConcurrentMonad](_)
-      ) { client =>
-        check {
-          forAll { s: String =>
-            client.avroWithSchema(Request(s)).map(_.length).unsafeRunSync() == s.length
-          }
-        }
-      }
-
+  property(
+    "RPC Server should be able to call a service with a defined namespace with avro with schema"
+  ) {
+    val client = avroWithSchemaFixture()
+    forAll { s: String =>
+      client.avroWithSchema(Request(s)).map(_.length).unsafeRunSync() == s.length
     }
   }
 }
