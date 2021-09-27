@@ -88,8 +88,8 @@ object TestData {
     override def isShutdown: Boolean                                      = b
     override def isTerminated: Boolean                                    = b
     override def awaitTermination(timeout: Long, unit: TimeUnit): Boolean = b
-    override def awaitTermination(): Unit = {}
-    override def getServices: util.List[ServerServiceDefinition] = serviceList.asJava
+    override def awaitTermination(): Unit                                 = {}
+    override def getServices: util.List[ServerServiceDefinition]          = serviceList.asJava
     override def getImmutableServices: util.List[ServerServiceDefinition] =
       immutableServiceList.asJava
     override def getMutableServices: util.List[ServerServiceDefinition] = mutableServiceList.asJava
