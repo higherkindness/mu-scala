@@ -17,7 +17,6 @@ object ProjectPlugin extends AutoPlugin {
       val avro4s: String                = "4.0.11"
       val betterMonadicFor: String      = "0.3.1"
       val catsEffect: String            = "3.2.9"
-      val circe: String                 = "0.14.1"
       val dockerItScala                 = "0.9.9"
       val dropwizard: String            = "4.2.3"
       val enumeratum: String            = "1.7.0"
@@ -204,7 +203,6 @@ object ProjectPlugin extends AutoPlugin {
         "io.netty"   % "netty-tcnative-boringssl-static" % V.nettySSL          % Test,
         "com.47deg" %% "scalacheck-toolbox-datetime"     % V.scalacheckToolbox % Test,
         "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat % Test,
-        "io.circe"               %% "circe-generic"           % V.circe                 % Test,
         "org.scalameta"          %% "munit"                   % V.munit                 % Test,
         "org.scalameta"          %% "munit-scalacheck"        % V.munit                 % Test,
         "org.typelevel"          %% "munit-cats-effect-3"     % V.munitCE               % Test,
