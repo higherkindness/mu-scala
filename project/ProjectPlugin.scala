@@ -28,7 +28,7 @@ object ProjectPlugin extends AutoPlugin {
       val log4s: String                 = "1.10.0"
       val logback: String               = "1.2.6"
       val munit: String                 = "0.7.29"
-      val munitCE: String               = "1.0.5"
+      val munitCE: String               = "1.0.6"
       val natchez: String               = "0.1.4"
       val nettySSL: String              = "2.0.34.Final"
       val paradise: String              = "2.1.1"
