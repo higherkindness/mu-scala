@@ -18,7 +18,7 @@ object ProjectPlugin extends AutoPlugin {
       val betterMonadicFor: String      = "0.3.1"
       val catsEffect: String            = "3.2.9"
       val dockerItScala                 = "0.9.9"
-      val dropwizard: String            = "4.2.3"
+      val dropwizard: String            = "4.2.4"
       val enumeratum: String            = "1.7.0"
       val fs2: String                   = "3.1.3"
       val fs2Grpc: String               = "2.1.8"
