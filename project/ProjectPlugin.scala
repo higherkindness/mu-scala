@@ -243,6 +243,14 @@ object ProjectPlugin extends AutoPlugin {
         organization = "org.apache.commons",
         name = "commons-compress"
       ),
+      missinglinkExcludedDependencies += moduleFilter(
+        organization = "io.prometheus",
+        name = "simpleclient_tracer_otel"
+      ),
+      missinglinkExcludedDependencies += moduleFilter(
+        organization = "io.prometheus",
+        name = "simpleclient_tracer_otel_agent"
+      ),
       missinglinkIgnoreSourcePackages += IgnoredPackage("org.apache.avro.file"),
       missinglinkIgnoreSourcePackages += IgnoredPackage("io.netty.util.internal.logging"),
       missinglinkIgnoreSourcePackages += IgnoredPackage("io.netty.handler.ssl")
