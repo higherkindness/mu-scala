@@ -17,25 +17,24 @@ object ProjectPlugin extends AutoPlugin {
       val avro4s: String                = "4.0.11"
       val betterMonadicFor: String      = "0.3.1"
       val catsEffect: String            = "3.2.9"
-      val circe: String                 = "0.14.1"
       val dockerItScala                 = "0.9.9"
-      val dropwizard: String            = "4.2.3"
+      val dropwizard: String            = "4.2.4"
       val enumeratum: String            = "1.7.0"
-      val fs2: String                   = "3.1.3"
-      val fs2Grpc: String               = "2.1.7"
+      val fs2: String                   = "3.1.4"
+      val fs2Grpc: String               = "2.1.8"
       val grpc: String                  = "1.41.0"
       val kindProjector: String         = "0.13.2"
       val log4cats: String              = "2.1.1"
       val log4s: String                 = "1.10.0"
       val logback: String               = "1.2.6"
       val munit: String                 = "0.7.29"
-      val munitCE: String               = "1.0.5"
+      val munitCE: String               = "1.0.6"
       val natchez: String               = "0.1.4"
-      val nettySSL: String              = "2.0.43.Final"
+      val nettySSL: String              = "2.0.44.Final"
       val paradise: String              = "2.1.1"
-      val pbdirect: String              = "0.6.1"
+      val pbdirect: String              = "0.7.0"
       val prometheus: String            = "0.12.0"
-      val pureconfig: String            = "0.16.0"
+      val pureconfig: String            = "0.17.0"
       val scalaCollectionCompat: String = "2.5.0"
       val scalacheckToolbox: String     = "0.6.0"
       val scalamock: String             = "5.1.0"
@@ -204,7 +203,6 @@ object ProjectPlugin extends AutoPlugin {
         "io.netty"   % "netty-tcnative-boringssl-static" % V.nettySSL          % Test,
         "com.47deg" %% "scalacheck-toolbox-datetime"     % V.scalacheckToolbox % Test,
         "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat % Test,
-        "io.circe"               %% "circe-generic"           % V.circe                 % Test,
         "org.scalameta"          %% "munit"                   % V.munit                 % Test,
         "org.scalameta"          %% "munit-scalacheck"        % V.munit                 % Test,
         "org.typelevel"          %% "munit-cats-effect-3"     % V.munitCE               % Test,
