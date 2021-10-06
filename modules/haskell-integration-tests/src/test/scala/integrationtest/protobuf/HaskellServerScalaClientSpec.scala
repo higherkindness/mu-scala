@@ -31,6 +31,8 @@ import scala.concurrent.duration._
 
 class HaskellServerScalaClientSpec extends CatsEffectSuite with HaskellServerRunningInDocker {
 
+  override def munitFlakyOK: Boolean = true
+
   def serverPort: Int              = Constants.ProtobufPort
   def serverExecutableName: String = "protobuf-server"
 
@@ -69,7 +71,7 @@ class HaskellServerScalaClientSpec extends CatsEffectSuite with HaskellServerRun
     IO(clientFixture()).flatMap(_.publishRainEvents(stream)).assertEquals(expectedResponse)
   }
 
-  test(behaviorOf + "it should work for a server-streaming call") {
+  test((behaviorOf + "it should work for a server-streaming call").flaky) {
     val request = SubscribeToRainEventsRequest("London")
     val expectedEvents =
       List(STARTED, STOPPED, STARTED, STOPPED, STARTED)
