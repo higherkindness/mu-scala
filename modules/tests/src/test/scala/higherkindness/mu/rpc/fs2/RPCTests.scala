@@ -88,7 +88,7 @@ class RPCTests extends CatsEffectSuite {
       .assertEquals(dResult33)
   }
 
-  test((behaviourOf + " be able to run client bidirectional streaming services").ignore) {
+  test(behaviourOf + " be able to run client bidirectional streaming services") {
     grpcServer
       .flatMap(_ => muAvroRPCServiceClient)
       .use(
@@ -99,7 +99,7 @@ class RPCTests extends CatsEffectSuite {
   }
 
   test(
-    (behaviourOf + " be able to run client bidirectional streaming services with avro schema").ignore
+    behaviourOf + " be able to run client bidirectional streaming services with avro schema"
   ) {
     grpcServer
       .flatMap(_ => muAvroWithSchemaRPCServiceClient)
@@ -111,7 +111,7 @@ class RPCTests extends CatsEffectSuite {
       .assertEquals(eList)
   }
 
-  test((behaviourOf + " be able to run multiple rpc services").ignore) {
+  test(behaviourOf + " be able to run multiple rpc services") {
     val opTimeout: FiniteDuration = 10.seconds
     (for {
       _     <- grpcServer
@@ -180,7 +180,7 @@ class RPCTests extends CatsEffectSuite {
       .assertEquals(dResult33)
   }
 
-  test((behaviourOfC + " be able to run client bidirectional streaming services").ignore) {
+  test(behaviourOfC + " be able to run client bidirectional streaming services") {
     grpcServer
       .flatMap(_ => muCompressedAvroRPCServiceClient)
       .use(
@@ -192,7 +192,7 @@ class RPCTests extends CatsEffectSuite {
   }
 
   test(
-    (behaviourOfC + " be able to run client bidirectional streaming services with avro schema").ignore
+    behaviourOfC + " be able to run client bidirectional streaming services with avro schema"
   ) {
     grpcServer
       .flatMap(_ => muCompressedAvroWithSchemaRPCServiceClient)
@@ -204,7 +204,7 @@ class RPCTests extends CatsEffectSuite {
       .assertEquals(eList)
   }
 
-  test((behaviourOfC + " be able to run multiple rpc services").ignore) {
+  test(behaviourOfC + " be able to run multiple rpc services") {
     val opTimeout: FiniteDuration = 10.seconds
     (for {
       _     <- grpcServer
