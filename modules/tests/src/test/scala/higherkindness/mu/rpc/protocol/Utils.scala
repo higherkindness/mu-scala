@@ -276,9 +276,9 @@ object Utils extends CommonUtils {
     import cats.instances.list._
     import cats.syntax.traverse._
 
-    //////////////////////////////////
+    // ////////////////////////////////
     // Server Runtime Configuration //
-    //////////////////////////////////
+    // ////////////////////////////////
 
     implicit val muRPCHandler: ServerRPCService[IO] =
       new ServerRPCService[IO]
@@ -295,9 +295,9 @@ object Utils extends CommonUtils {
     val grpcServer: Resource[IO, GrpcServer[IO]] =
       grpcConfigs.flatMap(createServerConf[IO])
 
-    //////////////////////////////////
+    // ////////////////////////////////
     // Client Runtime Configuration //
-    //////////////////////////////////
+    // ////////////////////////////////
 
     val protoRPCServiceClient: Resource[IO, ProtoRPCService[IO]] =
       ProtoRPCService.client[IO](createChannelFor)

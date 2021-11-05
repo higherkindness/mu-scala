@@ -72,7 +72,7 @@ class OperationModels[C <: Context](val c: C) {
       kleisliFSpanF: SelectFromTypeTree
   )
 
-  //todo: validate that the request and responses are case classes, if possible
+  // todo: validate that the request and responses are case classes, if possible
   case class RPCMethod(
       service: EnclosingService,
       operation: Operation
