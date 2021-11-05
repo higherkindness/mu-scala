@@ -74,9 +74,9 @@ object Utils extends CommonUtils {
     import cats.instances.list._
     import cats.syntax.traverse._
 
-    //////////////////////////////////
+    // ////////////////////////////////
     // Server Runtime Configuration //
-    //////////////////////////////////
+    // ////////////////////////////////
 
     implicit val muRPCHandler: ServerRPCService[IO] =
       new ServerRPCService[IO]
@@ -108,9 +108,9 @@ object Utils extends CommonUtils {
         Resource.make(s.start)(_ => s.shutdown >> s.awaitTermination).as(s)
       }
 
-    //////////////////////////////////
+    // ////////////////////////////////
     // Client Runtime Configuration //
-    //////////////////////////////////
+    // ////////////////////////////////
 
     // Create a client.
     val clientCertChainFile: File                    = TestUtils.loadCert("client.pem")
