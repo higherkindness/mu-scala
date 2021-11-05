@@ -67,7 +67,7 @@ object Utils extends CommonUtils {
   def responseCoproductReplaced[A](a: A) =
     ResponseCoproductReplaced(Coproduct[Int :+: Boolean :+: A :+: CNil](a))
 
-  //Original Service
+  // Original Service
 
   object service {
     @service(AvroWithSchema)
@@ -78,7 +78,7 @@ object Utils extends CommonUtils {
     }
   }
 
-  //Updated request services
+  // Updated request services
 
   object serviceRequestAddedBoolean {
     @service(AvroWithSchema)
@@ -148,7 +148,7 @@ object Utils extends CommonUtils {
     }
   }
 
-  //Updated response services
+  // Updated response services
 
   object serviceResponseAddedBoolean {
     @service(AvroWithSchema)
@@ -328,9 +328,9 @@ object Utils extends CommonUtils {
 
     import handlers._
 
-    //////////////////////////////////
+    // ////////////////////////////////
     // Server Runtime Configuration //
-    //////////////////////////////////
+    // ////////////////////////////////
 
     implicit val rpcServiceHandler: service.RPCService[IO] =
       new RPCServiceHandler[IO]
@@ -410,9 +410,9 @@ object Utils extends CommonUtils {
     ] =
       new ResponseDroppedFieldRPCServiceHandler[IO]
 
-    //////////////////////////////////
+    // ////////////////////////////////
     // Client Runtime Configuration //
-    //////////////////////////////////
+    // ////////////////////////////////
 
     implicit val muRPCServiceClient: Resource[IO, service.RPCService[
       IO
