@@ -51,6 +51,7 @@ jobs:
                 --project ${repo#*/} \
                 --token $GITHUB_TOKEN \
                 --exclude-labels "duplicate,question,invalid,wontfix,auto-update,auto-changelog,auto-documentation" \
+                --since-tag "v0.20.0" \
                 --configure-sections \
               '{
                 "breaking": {
