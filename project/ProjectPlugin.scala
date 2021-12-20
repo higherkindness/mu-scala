@@ -14,7 +14,7 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String                = "4.0.11"
+      val avro4s: String                = "4.0.12"
       val betterMonadicFor: String      = "0.3.1"
       val catsEffect: String            = "3.3.0"
       val dockerItScala                 = "0.9.9"
