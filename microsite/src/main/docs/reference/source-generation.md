@@ -69,6 +69,7 @@ muSrcGenSerializationType := SerializationType.Protobuf // or SerializationType.
 | `muSrcGenIdiomaticEndpoints` | Flag indicating if idiomatic gRPC endpoints should be used. If `true`, the service operations will be prefixed by the namespace. | `true` |
 | `muSrcGenAvroGeneratorType` | Allows to generate Scala code either using [avrohugger](https://github.com/julianpeeters/avrohugger) or [skeuomorph](https://github.com/higherkindness/skeuomorph). `AvroGeneratorTypeGen.SkeumorphGen` is the default; set to `AvroGeneratorTypeGen.AvrohuggerGen` to use the [avrohugger](https://github.com/julianpeeters/avrohugger) library to generate the Scala code. | `AvroGeneratorTypeGen.SkeumorphGen` |
 | `muSrcGenStreamingImplementation` | Specifies whether generated Scala code will use FS2 `Stream[F, A]` or Monix `Observable[A]` as its streaming implementation. FS2 is the default; set to `higherkindness.mu.rpc.srcgen.Model.MonixObservable` to use Monix `Observable[A]` as its streaming implementation. This setting is only relevant if you have any RPC endpoint definitions that involve streaming. | `higherkindness.mu.rpc.srcgen.Model.Fs2Stream` |
+| `muSrcGenProtocVersion` | Specifies the protoc version when generating source files from proto files. | Check the [SrcGenPlugin.scala](https://github.com/higherkindness/sbt-mu-srcgen/blob/main/plugin/src/main/scala/higherkindness/mu/rpc/srcgen/SrcGenPlugin.scala) | 
 
 
 ### muSrcGenJarNames
