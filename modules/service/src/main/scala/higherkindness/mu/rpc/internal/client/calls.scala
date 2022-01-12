@@ -22,7 +22,6 @@ import cats.syntax.flatMap._
 import higherkindness.mu.rpc.internal.ClientContext
 import io.grpc.stub.ClientCalls
 import io.grpc.{CallOptions, Channel, Metadata, MethodDescriptor}
-import natchez.Span
 
 object calls {
 
@@ -42,21 +41,6 @@ object calls {
           )
       )
     )
-
-  def tracingUnary[F[_]: Async, Req, Res](
-      request: Req,
-      descriptor: MethodDescriptor[Req, Res],
-      channel: Channel,
-      options: CallOptions
-  ): Kleisli[F, Span[F], Res] =
-    Kleisli[F, Span[F], Res] { parentSpan =>
-      parentSpan.span(descriptor.getFullMethodName).use { span =>
-        span.kernel.flatMap { kernel =>
-          val headers = tracingKernelToHeaders(kernel)
-          unary[F, Req, Res](request, descriptor, channel, options, headers)
-        }
-      }
-    }
 
   def contextUnary[F[_]: Async, MC, Req, Res](
       request: Req,

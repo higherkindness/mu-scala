@@ -20,12 +20,12 @@ import cats.data.Kleisli
 import cats.effect.Async
 import cats.effect.std.Dispatcher
 import cats.syntax.all._
+import higherkindness.mu.rpc.internal.ServerContext
 import higherkindness.mu.rpc.protocol.CompressionType
 import io.grpc.ServerCall.Listener
 import io.grpc._
 import io.grpc.stub.ServerCalls.UnaryMethod
 import io.grpc.stub.{ServerCalls, StreamObserver}
-import natchez.{EntryPoint, Span}
 
 object handlers {
 
@@ -36,24 +36,19 @@ object handlers {
   ): ServerCallHandler[Req, Res] =
     ServerCalls.asyncUnaryCall(unaryMethod[F, Req, Res](f, compressionType, disp))
 
-  def tracingUnary[F[_]: Async, Req, Res](
-      f: Req => Kleisli[F, Span[F], Res],
+  def contextUnary[F[_]: Async, MC, Req, Res](
+      f: Req => Kleisli[F, MC, Res],
       methodDescriptor: MethodDescriptor[Req, Res],
-      entrypoint: EntryPoint[F],
       compressionType: CompressionType,
       disp: Dispatcher[F]
-  ): ServerCallHandler[Req, Res] =
+  )(implicit C: ServerContext[F, MC]): ServerCallHandler[Req, Res] =
     new ServerCallHandler[Req, Res] {
       def startCall(
           call: ServerCall[Req, Res],
           metadata: Metadata
       ): Listener[Req] = {
-        val kernel = extractTracingKernel(metadata)
-        val spanResource =
-          entrypoint.continueOrElseRoot(methodDescriptor.getFullMethodName(), kernel)
-
         val method = unaryMethod[F, Req, Res](
-          req => spanResource.use(span => f(req).run(span)),
+          req => C[Req, Res](methodDescriptor, metadata).use(f(req).run),
           compressionType,
           disp
         )

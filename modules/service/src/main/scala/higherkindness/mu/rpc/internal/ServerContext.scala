@@ -13,7 +13,7 @@ trait ServerContext[F[_], C] {
 
 object TracingServerContext {
 
-  def impl[F[_]: Async](entrypoint: EntryPoint[F]): ServerContext[F, Span[F]] = new ServerContext[F, Span[F]] {
+  def impl[F[_]](entrypoint: EntryPoint[F]): ServerContext[F, Span[F]] = new ServerContext[F, Span[F]] {
     override def apply[Req, Res](
       descriptor: MethodDescriptor[Req, Res],
       metadata: Metadata): Resource[F, Span[F]] =

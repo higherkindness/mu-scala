@@ -178,7 +178,7 @@ class RPCServiceModel[C <: Context](val c: C) {
         }
       """
 
-    private val serverCallDescriptorsAndTracingHandlers: List[Tree] =
+    private val serverCallDescriptorsAndContextHandlers: List[Tree] =
       rpcRequests.map(_.descriptorAndContextHandler)
 
     val contextAlgebra = q"algebra: $serviceName[$kleisliFContext]"
@@ -192,7 +192,7 @@ class RPCServiceModel[C <: Context](val c: C) {
         _root_.cats.effect.std.Dispatcher.apply[$F](CE).evalMap { disp =>
           _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](
             ${lit(fullServiceName)},
-            ..$serverCallDescriptorsAndTracingHandlers
+            ..$serverCallDescriptorsAndContextHandlers
           )
         }
       """
