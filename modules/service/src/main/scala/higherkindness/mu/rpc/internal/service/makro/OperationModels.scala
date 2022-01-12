@@ -100,10 +100,10 @@ class OperationModels[C <: Context](val c: C) {
 
     private val methodDescriptorValName = TermName("_methodDescriptor")
 
-    private val reqType           = request.originalType
-    private val reqElemType       = request.messageType
-    private val wrappedRespType   = response.originalType
-    private val respElemType      = response.messageType
+    private val reqType         = request.originalType
+    private val reqElemType     = request.messageType
+    private val wrappedRespType = response.originalType
+    private val respElemType    = response.messageType
 
     val methodDescriptorDef: DefDef = q"""
       def $methodDescriptorDefName(implicit
