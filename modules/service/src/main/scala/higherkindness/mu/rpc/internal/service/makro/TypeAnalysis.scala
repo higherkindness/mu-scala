@@ -55,7 +55,6 @@ class TypeAnalysis[C <: Context](val c: C) {
     def isStreaming: Boolean =
       this match {
         case _: Fs2StreamTpe       => true
-        case _: MonixObservableTpe => true
         case _                     => false
       }
   }
@@ -63,11 +62,6 @@ class TypeAnalysis[C <: Context](val c: C) {
 
     /**
      * Extract the parts of a possibly-qualified type name or term name.
-     *
-     * {{{
-     * extractName(tq"Observable") == List("Observable")
-     * extractName(tq"monix.reactive.Observable") == List("monix", "reactive", "Observable")
-     * }}}
      */
     private def extractName(tree: Tree): List[String] =
       tree match {
@@ -80,23 +74,12 @@ class TypeAnalysis[C <: Context](val c: C) {
 
     /**
      * Is the given tree a type name or term name that matches the given fully-qualified name?
-     *
-     * {{{
-     * val fqn = List("_root_", "monix", "reactive", "Observable")
-     *
-     * possiblyQualifiedName(tq"Observable", fqn) == true
-     * possiblyQualifiedName(tq"reactive.Observable", fqn) == true
-     * possiblyQualifiedName(tq"monix.reactive.Observable", fqn) == true
-     * possiblyQualifiedName(tq"_root_.monix.reactive.Observable", fqn) == true
-     * possiblyQualifiedName(tq"com.mylibrary.Observable", fqn) == false
-     * }}}
      */
     private def possiblyQualifiedName(tree: Tree, fqn: List[String]): Boolean = {
       val name = extractName(tree)
       name.nonEmpty && fqn.endsWith(name)
     }
 
-    private val monixObservableFQN = List("_root_", "monix", "reactive", "Observable")
     private val fs2StreamFQN       = List("_root_", "fs2", "Stream")
 
     def apply(t: Tree, responseType: Boolean, F: TypeName): TypeTypology = {
@@ -117,8 +100,6 @@ class TypeAnalysis[C <: Context](val c: C) {
       }
 
       unwrappedType match {
-        case tq"$tpe[$elemType]" if possiblyQualifiedName(tpe, monixObservableFQN) =>
-          MonixObservableTpe(t, unwrappedType, elemType)
         case tq"$tpe[$effectType, $elemType]"
             if possiblyQualifiedName(
               tpe,
@@ -140,9 +121,6 @@ class TypeAnalysis[C <: Context](val c: C) {
       extends TypeTypology(orig, unwrapped, message)
 
   case class Fs2StreamTpe(orig: Tree, unwrapped: Tree, streamElem: Tree)
-      extends TypeTypology(orig, unwrapped, streamElem)
-
-  case class MonixObservableTpe(orig: Tree, unwrapped: Tree, streamElem: Tree)
       extends TypeTypology(orig, unwrapped, streamElem)
 
 }

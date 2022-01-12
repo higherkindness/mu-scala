@@ -144,17 +144,10 @@ class RPCServiceModel[C <: Context](val c: C) {
       rpcRequests.map(_.descriptorAndHandler)
 
     val ceImplicit: Tree        = q"CE: _root_.cats.effect.Async[$F]"
-    val schedulerImplicit: Tree = q"S: _root_.monix.execution.Scheduler"
 
-    val bindImplicits: List[Tree] = ceImplicit :: q"algebra: $serviceName[$F]" :: rpcRequests
-      .find(_.operation.isMonixObservable)
-      .map(_ => schedulerImplicit)
-      .toList
+    val bindImplicits: List[Tree] = ceImplicit :: q"algebra: $serviceName[$F]" :: Nil
 
-    val classImplicits: List[Tree] = ceImplicit :: rpcRequests
-      .find(_.operation.isMonixObservable)
-      .map(_ => schedulerImplicit)
-      .toList
+    val classImplicits: List[Tree] = ceImplicit :: rpcRequests :: Nil
 
     val bindService: DefDef = q"""
       def bindService[$F_](implicit ..$bindImplicits): _root_.cats.effect.Resource[$F, _root_.io.grpc.ServerServiceDefinition] =
@@ -170,10 +163,7 @@ class RPCServiceModel[C <: Context](val c: C) {
       rpcRequests.map(_.descriptorAndTracingHandler)
 
     val tracingAlgebra = q"algebra: $serviceName[$kleisliFSpanF]"
-    val bindTracingServiceImplicits: List[Tree] = ceImplicit :: tracingAlgebra :: rpcRequests
-      .find(_.operation.isMonixObservable)
-      .map(_ => schedulerImplicit)
-      .toList
+    val bindTracingServiceImplicits: List[Tree] = ceImplicit :: tracingAlgebra :: Nil
 
     val bindTracingService: DefDef = q"""
       def bindTracingService[$F_](entrypoint: _root_.natchez.EntryPoint[$F])
