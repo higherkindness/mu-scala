@@ -1,7 +1,7 @@
 ThisBuild / organization       := "io.higherkindness"
 ThisBuild / githubOrganization := "47degrees"
-ThisBuild / scalaVersion       := "2.13.7"
-ThisBuild / crossScalaVersions := Seq("2.12.15", "2.13.7")
+ThisBuild / scalaVersion       := "2.13.8"
+ThisBuild / crossScalaVersions := Seq("2.12.15", "2.13.8")
 
 publish / skip := true
 
