@@ -143,7 +143,7 @@ class RPCServiceModel[C <: Context](val c: C) {
     private val serverCallDescriptorsAndHandlers: List[Tree] =
       rpcRequests.map(_.descriptorAndHandler)
 
-    val ceImplicit: Tree        = q"CE: _root_.cats.effect.Async[$F]"
+    val ceImplicit: Tree = q"CE: _root_.cats.effect.Async[$F]"
 
     val bindImplicits: List[Tree] = ceImplicit :: q"algebra: $serviceName[$F]" :: Nil
 
@@ -162,7 +162,7 @@ class RPCServiceModel[C <: Context](val c: C) {
     private val serverCallDescriptorsAndTracingHandlers: List[Tree] =
       rpcRequests.map(_.descriptorAndTracingHandler)
 
-    val tracingAlgebra = q"algebra: $serviceName[$kleisliFSpanF]"
+    val tracingAlgebra                          = q"algebra: $serviceName[$kleisliFSpanF]"
     val bindTracingServiceImplicits: List[Tree] = ceImplicit :: tracingAlgebra :: Nil
 
     val bindTracingService: DefDef = q"""

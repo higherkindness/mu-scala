@@ -54,8 +54,8 @@ class TypeAnalysis[C <: Context](val c: C) {
 
     def isStreaming: Boolean =
       this match {
-        case _: Fs2StreamTpe       => true
-        case _                     => false
+        case _: Fs2StreamTpe => true
+        case _               => false
       }
   }
   object TypeTypology {
@@ -80,7 +80,7 @@ class TypeAnalysis[C <: Context](val c: C) {
       name.nonEmpty && fqn.endsWith(name)
     }
 
-    private val fs2StreamFQN       = List("_root_", "fs2", "Stream")
+    private val fs2StreamFQN = List("_root_", "fs2", "Stream")
 
     def apply(t: Tree, responseType: Boolean, F: TypeName): TypeTypology = {
       val unwrappedType: Tree = {

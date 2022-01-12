@@ -75,8 +75,8 @@ class OperationModels[C <: Context](val c: C) {
     private val dispatcherValueName: Tree = q"disp"
 
     private val clientCallsImpl = prevalentStreamingTarget match {
-      case _: Fs2StreamTpe       => q"_root_.higherkindness.mu.rpc.internal.client.fs2.calls"
-      case _                     => q"_root_.higherkindness.mu.rpc.internal.client.calls"
+      case _: Fs2StreamTpe => q"_root_.higherkindness.mu.rpc.internal.client.fs2.calls"
+      case _               => q"_root_.higherkindness.mu.rpc.internal.client.calls"
     }
 
     private val streamingMethodType = {
