@@ -99,7 +99,7 @@ object handlers {
         C[Req, Res](descriptor, metadata)
           .use[Stream[F, Res]] { context =>
             val kleisli: Kleisli[F, MC, Stream[Kleisli[F, MC, *], Res]] = f(req)
-            val fStreamK: F[Stream[Kleisli[F, MC, *], Res]] = kleisli.run(context)
+            val fStreamK: F[Stream[Kleisli[F, MC, *], Res]]             = kleisli.run(context)
             fStreamK.map(_.translate(Kleisli.applyK[F, MC](context)))
           }
       },
@@ -120,7 +120,7 @@ object handlers {
         C[Req, Res](descriptor, metadata)
           .use[Stream[F, Res]] { context =>
             val kleisli: Kleisli[F, MC, Stream[Kleisli[F, MC, *], Res]] = f(reqStreamK)
-            val fStreamK: F[Stream[Kleisli[F, MC, *], Res]] = kleisli.run(context)
+            val fStreamK: F[Stream[Kleisli[F, MC, *], Res]]             = kleisli.run(context)
             fStreamK.map(_.translate(Kleisli.applyK[F, MC](context)))
           }
       },

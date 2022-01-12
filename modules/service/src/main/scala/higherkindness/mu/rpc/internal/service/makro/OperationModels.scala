@@ -315,70 +315,63 @@ class OperationModels[C <: Context](val c: C) {
     val contextServerCallHandler: Tree = (streamingType, prevalentStreamingTarget) match {
       case (Some(RequestStreaming), _: Fs2StreamTpe) =>
         q"""
-        _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.contextClientStreaming(
+        _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.contextClientStreaming[$F, $contextTerm, $reqElemType, $respElemType](
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
-          entrypoint,
           $dispatcherValueName,
           $compressionTypeTree
         )
         """
       case (Some(RequestStreaming), _: MonixObservableTpe) =>
         q"""
-        _root_.higherkindness.mu.rpc.internal.server.monix.handlers.contextClientStreaming(
+        _root_.higherkindness.mu.rpc.internal.server.monix.handlers.contextClientStreaming[$F, $contextTerm, $reqElemType, $respElemType](
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
-          entrypoint,
           $dispatcherValueName,
           $compressionTypeTree
         )
         """
       case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
         q"""
-        _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.contextServerStreaming(
+        _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.contextServerStreaming[$F, $contextTerm, $reqElemType, $respElemType](
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
-          entrypoint,
           $dispatcherValueName,
           $compressionTypeTree
         )
         """
       case (Some(ResponseStreaming), _: MonixObservableTpe) =>
         q"""
-        _root_.higherkindness.mu.rpc.internal.server.monix.handlers.contextServerStreaming(
+        _root_.higherkindness.mu.rpc.internal.server.monix.handlers.contextServerStreaming[$F, $contextTerm, $reqElemType, $respElemType](
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
-          entrypoint,
           $dispatcherValueName,
           $compressionTypeTree
         )
         """
       case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
         q"""
-        _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.contextBidiStreaming(
+        _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.contextBidiStreaming[$F, $contextTerm, $reqElemType, $respElemType](
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
-          entrypoint,
           $dispatcherValueName,
           $compressionTypeTree
         )
         """
       case (Some(BidirectionalStreaming), _: MonixObservableTpe) =>
         q"""
-        _root_.higherkindness.mu.rpc.internal.server.monix.handlers.contextBidiStreaming(
+        _root_.higherkindness.mu.rpc.internal.server.monix.handlers.contextBidiStreaming[$F, $contextTerm, $reqElemType, $respElemType](
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
-          entrypoint,
           $dispatcherValueName,
           $compressionTypeTree
         )
         """
       case (None, _) =>
         q"""
-        _root_.higherkindness.mu.rpc.internal.server.handlers.contextUnary[$F, $reqElemType, $respElemType](
+        _root_.higherkindness.mu.rpc.internal.server.handlers.contextUnary[$F, $contextTerm, $reqElemType, $respElemType](
           algebra.$name,
           $methodDescriptorName.$methodDescriptorValName,
-          entrypoint,
           $compressionTypeTree,
           $dispatcherValueName
         )

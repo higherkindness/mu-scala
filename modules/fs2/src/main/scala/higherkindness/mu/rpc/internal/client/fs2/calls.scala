@@ -92,17 +92,16 @@ object calls {
       options: CallOptions
   )(implicit C: ClientContext[F, MC]): Kleisli[F, MC, Res] =
     Kleisli[F, MC, Res] { parentSpan =>
-      C[Req, Res](descriptor, channel, options, parentSpan).flatMap {
-        case (span, metaData) =>
-          val streamF: Stream[F, Req] =
-            input.translate(Kleisli.applyK[F, MC](span))
-          clientStreaming[F, Req, Res](
-            streamF,
-            descriptor,
-            channel,
-            options,
-            metaData
-          )
+      C[Req, Res](descriptor, channel, options, parentSpan).flatMap { case (span, metaData) =>
+        val streamF: Stream[F, Req] =
+          input.translate(Kleisli.applyK[F, MC](span))
+        clientStreaming[F, Req, Res](
+          streamF,
+          descriptor,
+          channel,
+          options,
+          metaData
+        )
       }
     }
 
@@ -113,16 +112,15 @@ object calls {
       options: CallOptions
   )(implicit C: ClientContext[F, MC]): Kleisli[F, MC, Stream[Kleisli[F, MC, *], Res]] =
     Kleisli[F, MC, Stream[Kleisli[F, MC, *], Res]] { context =>
-      C[Req, Res](descriptor, channel, options, context).map {
-        case (_, metadata) =>
-          Stream
-            .resource(Dispatcher[F])
-            .flatMap { disp =>
-              Stream
-                .eval(Fs2ClientCall[F](channel, descriptor, disp, clientOptions(options)))
-                .flatMap(_.unaryToStreamingCall(request, metadata))
-            }
-            .translate(Kleisli.liftK[F, MC])
+      C[Req, Res](descriptor, channel, options, context).map { case (_, metadata) =>
+        Stream
+          .resource(Dispatcher[F])
+          .flatMap { disp =>
+            Stream
+              .eval(Fs2ClientCall[F](channel, descriptor, disp, clientOptions(options)))
+              .flatMap(_.unaryToStreamingCall(request, metadata))
+          }
+          .translate(Kleisli.liftK[F, MC])
       }
     }
 
@@ -133,17 +131,16 @@ object calls {
       options: CallOptions
   )(implicit C: ClientContext[F, MC]): Kleisli[F, MC, Stream[Kleisli[F, MC, *], Res]] =
     Kleisli[F, MC, Stream[Kleisli[F, MC, *], Res]] { parentContext =>
-      C[Req, Res](descriptor, channel, options, parentContext).map {
-        case (context, metadata) =>
-          val streamF: Stream[F, Req] = input.translate(Kleisli.applyK[F, MC](context))
-          Stream
-            .resource(Dispatcher[F])
-            .flatMap { disp =>
-              Stream
-                .eval(Fs2ClientCall[F](channel, descriptor, disp, clientOptions(options)))
-                .flatMap(_.streamingToStreamingCall(streamF, metadata))
-            }
-            .translate(Kleisli.liftK[F, MC])
+      C[Req, Res](descriptor, channel, options, parentContext).map { case (context, metadata) =>
+        val streamF: Stream[F, Req] = input.translate(Kleisli.applyK[F, MC](context))
+        Stream
+          .resource(Dispatcher[F])
+          .flatMap { disp =>
+            Stream
+              .eval(Fs2ClientCall[F](channel, descriptor, disp, clientOptions(options)))
+              .flatMap(_.streamingToStreamingCall(streamF, metadata))
+          }
+          .translate(Kleisli.liftK[F, MC])
       }
     }
 
