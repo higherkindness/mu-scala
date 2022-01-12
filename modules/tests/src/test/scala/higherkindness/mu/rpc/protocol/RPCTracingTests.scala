@@ -27,8 +27,10 @@ import io.grpc.ServerServiceDefinition
 import munit.CatsEffectSuite
 import natchez._
 
+import scala.annotation.nowarn
 import scala.util.Random
 
+@nowarn
 class RPCTracingTests extends CatsEffectSuite {
 
   object RPCService {
