@@ -103,7 +103,6 @@ class OperationModels[C <: Context](val c: C) {
     private val reqType           = request.originalType
     private val reqElemType       = request.messageType
     private val wrappedRespType   = response.originalType
-    private val unwrappedRespType = response.unwrappedType
     private val respElemType      = response.messageType
 
     val methodDescriptorDef: DefDef = q"""
