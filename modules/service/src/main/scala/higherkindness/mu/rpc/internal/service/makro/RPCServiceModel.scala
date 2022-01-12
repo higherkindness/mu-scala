@@ -147,7 +147,7 @@ class RPCServiceModel[C <: Context](val c: C) {
 
     val bindImplicits: List[Tree] = ceImplicit :: q"algebra: $serviceName[$F]" :: Nil
 
-    val classImplicits: List[Tree] = ceImplicit :: rpcRequests :: Nil
+    val classImplicits: List[Tree] = ceImplicit :: Nil
 
     val bindService: DefDef = q"""
       def bindService[$F_](implicit ..$bindImplicits): _root_.cats.effect.Resource[$F, _root_.io.grpc.ServerServiceDefinition] =
