@@ -37,21 +37,32 @@ class RPCServiceModel[C <: Context](val c: C) {
     val serviceName: TypeName = serviceDef.name
 
     require(
-      serviceDef.tparams.length == 1,
-      s"@service-annotated class $serviceName must have a single type parameter"
+      serviceDef.tparams.nonEmpty && serviceDef.tparams.length <= 2,
+      s"@service-annotated class $serviceName must have a one or two type parameters"
     )
 
     val F_ : TypeDef = serviceDef.tparams.head
     val F: TypeName  = F_.name
+
+    val MC_ : Option[TypeDef] = serviceDef.tparams.lift(1)
+    val MC: Option[TypeName]  = MC_.map(_.name)
 
     require(
       F_.tparams.length == 1,
       s"@service-annotated class $serviceName's type parameter must be higher-kinded"
     )
 
-    // Type lambda for Kleisli[F, Span[F], *]
-    private val kleisliFSpanF: SelectFromTypeTree =
-      tq"({ type T[α] = _root_.cats.data.Kleisli[$F, _root_.natchez.Span[$F], α] })#T"
+    require(
+      MC_.forall(_.tparams.isEmpty),
+      s"@service-annotated class $serviceName's context type parameter must not be higher-kinded"
+    )
+
+    // Type lambda for Kleisli[F, MC, *]. `Span[F]` by default
+    private val kleisliFContext: SelectFromTypeTree =
+      MC.fold(tq"({ type T[α] = _root_.cats.data.Kleisli[$F, _root_.natchez.Span[$F], α] })#T") { context =>
+        tq"({ type T[α] = _root_.cats.data.Kleisli[$F, $context, α] })#T"
+      }
+
 
     private val defs: List[Tree] = serviceDef.impl.body
 
@@ -105,7 +116,8 @@ class RPCServiceModel[C <: Context](val c: C) {
           compressionType,
           methodNameStyle,
           F,
-          kleisliFSpanF
+          MC,
+          kleisliFContext
         ),
         Operation(d.name, requestType, responseType)
       )
@@ -167,17 +179,16 @@ class RPCServiceModel[C <: Context](val c: C) {
       """
 
     private val serverCallDescriptorsAndTracingHandlers: List[Tree] =
-      rpcRequests.map(_.descriptorAndTracingHandler)
+      rpcRequests.map(_.descriptorAndContextHandler)
 
-    val tracingAlgebra = q"algebra: $serviceName[$kleisliFSpanF]"
-    val bindTracingServiceImplicits: List[Tree] = ceImplicit :: tracingAlgebra :: rpcRequests
+    val contextAlgebra = q"algebra: $serviceName[$kleisliFContext]"
+    val bindContextServiceImplicits: List[Tree] = ceImplicit :: contextAlgebra :: rpcRequests
       .find(_.operation.isMonixObservable)
       .map(_ => schedulerImplicit)
       .toList
 
-    val bindTracingService: DefDef = q"""
-      def bindTracingService[$F_](entrypoint: _root_.natchez.EntryPoint[$F])
-                                 (implicit ..$bindTracingServiceImplicits): _root_.cats.effect.Resource[$F, _root_.io.grpc.ServerServiceDefinition] =
+    val bindContextService: DefDef = q"""
+      def bindContextService[$F_](implicit ..$bindContextServiceImplicits): _root_.cats.effect.Resource[$F, _root_.io.grpc.ServerServiceDefinition] =
         _root_.cats.effect.std.Dispatcher.apply[$F](CE).evalMap { disp =>
           _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](
             ${lit(fullServiceName)},
@@ -257,79 +268,79 @@ class RPCServiceModel[C <: Context](val c: C) {
       )(implicit ..$classImplicits): $serviceName[$F] = new $Client[$F](channel, options)
       """.suppressWarts("DefaultArguments")
 
-    private val tracingClientCallMethods: List[Tree] = rpcRequests.map(_.tracingClientDef)
-    private val TracingClient                        = TypeName("TracingClient")
-    val tracingClientClass: ClassDef =
+    private val contextClientCallMethods: List[Tree] = rpcRequests.map(_.contextClientDef)
+    private val ContextClient                        = TypeName("ContextClient")
+    val contextClientClass: ClassDef =
       q"""
-      class $TracingClient[$F_](
+      class $ContextClient[$F_](
         channel: _root_.io.grpc.Channel,
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-      )(implicit ..$classImplicits) extends _root_.io.grpc.stub.AbstractStub[$TracingClient[$F]](channel, options) with $serviceName[$kleisliFSpanF] {
-        override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $TracingClient[$F] =
-            new $TracingClient[$F](channel, options)
+      )(implicit ..$classImplicits) extends _root_.io.grpc.stub.AbstractStub[$ContextClient[$F]](channel, options) with $serviceName[$kleisliFContext] {
+        override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $ContextClient[$F] =
+            new $ContextClient[$F](channel, options)
 
-        ..$tracingClientCallMethods
+        ..$contextClientCallMethods
         ..$nonRpcDefs
       }""".suppressWarts("DefaultArguments")
 
-    val tracingClient: DefDef =
+    val contextClient: DefDef =
       q"""
-      def tracingClient[$F_](
+      def contextClient[$F_](
         channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
         channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
           List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-      )(implicit ..$classImplicits): _root_.cats.effect.Resource[F, $serviceName[$kleisliFSpanF]] =
+      )(implicit ..$classImplicits): _root_.cats.effect.Resource[F, $serviceName[$kleisliFContext]] =
         _root_.cats.effect.Resource.make(
           new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
         )(channel =>
           CE.void(CE.delay(channel.shutdown()))
         ).flatMap(ch =>
-          _root_.cats.effect.Resource.make[F, $serviceName[$kleisliFSpanF]](
-            CE.delay(new $TracingClient[$F](ch, options))
+          _root_.cats.effect.Resource.make[F, $serviceName[$kleisliFContext]](
+            CE.delay(new $ContextClient[$F](ch, options))
           )($anonymousParam =>
             CE.unit
           )
         )
       """.suppressWarts("DefaultArguments")
 
-    val tracingClientFromChannel: DefDef =
+    val contextClientFromChannel: DefDef =
       q"""
-      def tracingClientFromChannel[$F_](
+      def contextClientFromChannel[$F_](
         channel: $F[_root_.io.grpc.ManagedChannel],
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-      )(implicit ..$classImplicits): _root_.cats.effect.Resource[$F, $serviceName[$kleisliFSpanF]] =
+      )(implicit ..$classImplicits): _root_.cats.effect.Resource[$F, $serviceName[$kleisliFContext]] =
         _root_.cats.effect.Resource.make(channel)(channel =>
           CE.void(CE.delay(channel.shutdown()))
         ).flatMap(ch =>
-          _root_.cats.effect.Resource.make[$F, $serviceName[$kleisliFSpanF]](
-            CE.delay(new $TracingClient[$F](ch, options))
+          _root_.cats.effect.Resource.make[$F, $serviceName[$kleisliFContext]](
+            CE.delay(new $ContextClient[$F](ch, options))
           )($anonymousParam =>
             CE.unit
           )
         )
       """.suppressWarts("DefaultArguments")
 
-    val unsafeTracingClient: DefDef =
+    val unsafeContextClient: DefDef =
       q"""
-      def unsafeTracingClient[$F_](
+      def unsafeContextClient[$F_](
         channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
         channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
           List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
         disp: _root_.cats.effect.std.Dispatcher[$F],
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-      )(implicit ..$classImplicits): $serviceName[$kleisliFSpanF] = {
+      )(implicit ..$classImplicits): $serviceName[$kleisliFContext] = {
         val managedChannelInterpreter =
           new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).unsafeBuild(disp)
-        new $TracingClient[$F](managedChannelInterpreter, options)
+        new $ContextClient[$F](managedChannelInterpreter, options)
       }""".suppressWarts("DefaultArguments")
 
-    val unsafeTracingClientFromChannel: DefDef =
+    val unsafeContextClientFromChannel: DefDef =
       q"""
-      def unsafeTracingClientFromChannel[$F_](
+      def unsafeContextClientFromChannel[$F_](
         channel: _root_.io.grpc.Channel,
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-      )(implicit ..$classImplicits): $serviceName[$kleisliFSpanF] = new $TracingClient[$F](channel, options)
+      )(implicit ..$classImplicits): $serviceName[$kleisliFContext] = new $ContextClient[$F](channel, options)
       """.suppressWarts("DefaultArguments")
 
     private def lit(x: Any): Literal = Literal(Constant(x.toString))

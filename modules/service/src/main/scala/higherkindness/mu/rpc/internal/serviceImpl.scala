@@ -68,17 +68,17 @@ class serviceImpl(val c: blackbox.Context) {
             companion.impl.self,
             companion.impl.body ++ service.imports ++ service.encodersImport ++ service.methodDescriptors ++ List(
               service.bindService,
-              service.bindTracingService,
+              service.bindContextService,
               service.clientClass,
               service.client,
               service.clientFromChannel,
               service.unsafeClient,
               service.unsafeClientFromChannel,
-              service.tracingClientClass,
-              service.tracingClient,
-              service.tracingClientFromChannel,
-              service.unsafeTracingClient,
-              service.unsafeTracingClientFromChannel
+              service.contextClientClass,
+              service.contextClient,
+              service.contextClientFromChannel,
+              service.unsafeContextClient,
+              service.unsafeContextClientFromChannel
             )
           )
         )
