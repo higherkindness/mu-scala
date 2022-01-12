@@ -19,6 +19,7 @@ package higherkindness.mu.rpc.internal.client
 import cats.data.Kleisli
 import cats.effect.{Async, Sync}
 import cats.syntax.flatMap._
+import higherkindness.mu.rpc.internal.ClientContext
 import io.grpc.stub.ClientCalls
 import io.grpc.{CallOptions, Channel, Metadata, MethodDescriptor}
 import natchez.Span
@@ -55,6 +56,17 @@ object calls {
           unary[F, Req, Res](request, descriptor, channel, options, headers)
         }
       }
+    }
+
+  def contextUnary[F[_]: Async, MC, Req, Res](
+      request: Req,
+      descriptor: MethodDescriptor[Req, Res],
+      channel: Channel,
+      options: CallOptions
+  )(implicit C: ClientContext[F, MC]): Kleisli[F, MC, Res] =
+    Kleisli[F, MC, Res] { parentSpan =>
+      C[Req, Res](descriptor, channel, options, parentSpan)
+        .flatMap(t => unary[F, Req, Res](request, descriptor, channel, options, t._2))
     }
 
 }
