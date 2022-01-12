@@ -191,6 +191,10 @@ class RPCServiceModel[C <: Context](val c: C) {
         .find(_.operation.isMonixObservable)
         .map(_ => schedulerImplicit)
         .toList
+    val bindTracingServiceImplicits: List[Tree] = ceImplicit :: contextAlgebra :: rpcRequests
+      .find(_.operation.isMonixObservable)
+      .map(_ => schedulerImplicit)
+      .toList
 
     val bindContextService: DefDef = q"""
       def bindContextService[$F_](implicit ..$bindContextServiceImplicits): _root_.cats.effect.Resource[$F, _root_.io.grpc.ServerServiceDefinition] =
@@ -200,6 +204,16 @@ class RPCServiceModel[C <: Context](val c: C) {
             ..$serverCallDescriptorsAndContextHandlers
           )
         }
+      """
+
+    val bindTracingService: DefDef = q"""
+      @deprecated("Use bindContextService instead", "0.27.5")
+      def bindTracingService[$F_](entrypoint: _root_.natchez.EntryPoint[$F])
+                                 (implicit ..$bindTracingServiceImplicits): _root_.cats.effect.Resource[$F, _root_.io.grpc.ServerServiceDefinition] = {
+        implicit val SC: _root_.higherkindness.mu.rpc.internal.ServerContext[$F, _root_.natchez.Span[$F]] =
+          _root_.higherkindness.mu.rpc.internal.tracing.implicits.serverContext[$F](entrypoint)
+        bindContextService[$F]
+      }
       """
 
     private val clientCallMethods: List[Tree] = rpcRequests.map(_.clientDef)
@@ -309,6 +323,21 @@ class RPCServiceModel[C <: Context](val c: C) {
         )
       """.suppressWarts("DefaultArguments")
 
+    val tracingClient: DefDef =
+      q"""
+      @deprecated("Use contextClient instead", "0.27.5")
+      def tracingClient[$F_](
+        channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
+        channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
+          List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
+        options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+      )(implicit ..$classImplicits): _root_.cats.effect.Resource[F, $serviceName[$kleisliFContext]] = {
+        implicit val CC: _root_.higherkindness.mu.rpc.internal.ClientContext[$F, _root_.natchez.Span[$F]] =
+          _root_.higherkindness.mu.rpc.internal.tracing.implicits.clientContext[$F]
+        contextClient(channelFor, channelConfigList, options)
+      }
+      """
+
     val contextClientFromChannel: DefDef =
       q"""
       def contextClientFromChannel[$F_](
@@ -326,6 +355,19 @@ class RPCServiceModel[C <: Context](val c: C) {
         )
       """.suppressWarts("DefaultArguments")
 
+    val tracingClientFromChannel: DefDef =
+      q"""
+      @deprecated("Use contextClientFromChannel instead", "0.27.5")
+      def tracingClientFromChannel[$F_](
+        channel: $F[_root_.io.grpc.ManagedChannel],
+        options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+      )(implicit ..$classImplicits): _root_.cats.effect.Resource[$F, $serviceName[$kleisliFContext]] = {
+        implicit val CC: _root_.higherkindness.mu.rpc.internal.ClientContext[$F, _root_.natchez.Span[$F]] =
+          _root_.higherkindness.mu.rpc.internal.tracing.implicits.clientContext[$F]
+        contextClientFromChannel(channel, options)
+      }
+      """
+
     val unsafeContextClient: DefDef =
       q"""
       def unsafeContextClient[$F_](
@@ -340,12 +382,41 @@ class RPCServiceModel[C <: Context](val c: C) {
         new $ContextClient[$F](managedChannelInterpreter, options)
       }""".suppressWarts("DefaultArguments")
 
+    val unsafeTracingClient: DefDef =
+      q"""
+      @deprecated("Use unsafeContextClient instead", "0.27.5")
+      def unsafeTracingClient[$F_](
+        channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
+        channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
+          List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
+        disp: _root_.cats.effect.std.Dispatcher[$F],
+        options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+      )(implicit ..$classImplicits): $serviceName[$kleisliFContext] = {
+        implicit val CC: _root_.higherkindness.mu.rpc.internal.ClientContext[$F, _root_.natchez.Span[$F]] =
+          _root_.higherkindness.mu.rpc.internal.tracing.implicits.clientContext[$F]
+        unsafeContextClient(channelFor, channelConfigList, disp, options)
+      }
+      """.suppressWarts("DefaultArguments")
+
     val unsafeContextClientFromChannel: DefDef =
       q"""
       def unsafeContextClientFromChannel[$F_](
         channel: _root_.io.grpc.Channel,
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
       )(implicit ..$clientContextClassImplicits): $serviceName[$kleisliFContext] = new $ContextClient[$F](channel, options)
+      """.suppressWarts("DefaultArguments")
+
+    val unsafeTracingClientFromChannel: DefDef =
+      q"""
+      @deprecated("Use unsafeContextClientFromChannel instead", "0.27.5")
+      def unsafeTracingClientFromChannel[$F_](
+        channel: _root_.io.grpc.Channel,
+        options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
+      )(implicit ..$classImplicits): $serviceName[$kleisliFContext] = {
+        implicit val CC: _root_.higherkindness.mu.rpc.internal.ClientContext[$F, _root_.natchez.Span[$F]] =
+          _root_.higherkindness.mu.rpc.internal.tracing.implicits.clientContext[$F]
+        new $ContextClient[$F](channel, options)
+      }
       """.suppressWarts("DefaultArguments")
 
     private def lit(x: Any): Literal = Literal(Constant(x.toString))

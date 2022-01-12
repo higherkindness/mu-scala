@@ -69,7 +69,6 @@ class RPCTracingTests extends CatsEffectSuite {
   }
 
   import RPCService._
-  import higherkindness.mu.rpc.internal.tracing.implicits._
 
   val serverPort = 10000 + Random.nextInt(2000)
   val channelFor = ChannelForAddress("localhost", serverPort)
@@ -85,11 +84,12 @@ class RPCTracingTests extends CatsEffectSuite {
    * finalizer will shut down the server.
    */
   def mkClientResource[C[_[_]]](
-      bind: Resource[IO, ServerServiceDefinition],
-      fromChannelFor: ChannelFor => Resource[IO, C[Kleisli[IO, Span[IO], *]]]
+      bind: EntryPoint[IO] => Resource[IO, ServerServiceDefinition],
+      fromChannelFor: ChannelFor => Resource[IO, C[Kleisli[IO, Span[IO], *]]],
+      ep: EntryPoint[IO]
   ): Resource[IO, C[Kleisli[IO, Span[IO], *]]] =
     for {
-      serviceDef <- bind
+      serviceDef <- bind(ep)
       _          <- GrpcServer.defaultServer[IO](serverPort, List(AddService(serviceDef)))
       clientRes  <- fromChannelFor(channelFor)
     } yield clientRes
@@ -117,11 +117,12 @@ class RPCTracingTests extends CatsEffectSuite {
   test(
     "distributed tracing with unary call traces the call on both the client side and server side"
   ) {
-    val ref: Ref[IO, TracingData]   = Ref.unsafe(TracingData(0, Vector.empty))
-    implicit val ep: EntryPoint[IO] = entrypoint(ref)
+    val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
+    val ep: EntryPoint[IO]        = entrypoint(ref)
     val clientResource = mkClientResource(
-      UnaryServiceDef.bindContextService[IO],
-      UnaryServiceDef.contextClient[IO](_)
+      UnaryServiceDef.bindTracingService[IO],
+      UnaryServiceDef.tracingClient[IO](_),
+      ep
     )
 
     val prog: IO[(Response, List[String])] =
@@ -147,11 +148,12 @@ class RPCTracingTests extends CatsEffectSuite {
   }
 
   test("distributed tracing with FS2 streaming endpoints traces a client-streaming call") {
-    val ref: Ref[IO, TracingData]   = Ref.unsafe(TracingData(0, Vector.empty))
-    implicit val ep: EntryPoint[IO] = entrypoint(ref)
+    val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
+    val ep: EntryPoint[IO]        = entrypoint(ref)
     val clientResource = mkClientResource(
-      FS2ServiceDef.bindContextService[IO],
-      FS2ServiceDef.contextClient[IO](_)
+      FS2ServiceDef.bindTracingService[IO],
+      FS2ServiceDef.tracingClient[IO](_),
+      ep
     )
 
     val prog: IO[(Response, List[String])] =
@@ -174,11 +176,12 @@ class RPCTracingTests extends CatsEffectSuite {
   }
 
   test("distributed tracing with FS2 streaming endpoints traces a server-streaming call") {
-    val ref: Ref[IO, TracingData]   = Ref.unsafe(TracingData(0, Vector.empty))
-    implicit val ep: EntryPoint[IO] = entrypoint(ref)
+    val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
+    val ep: EntryPoint[IO]        = entrypoint(ref)
     val clientResource = mkClientResource(
-      FS2ServiceDef.bindContextService[IO],
-      FS2ServiceDef.contextClient[IO](_)
+      FS2ServiceDef.bindTracingService[IO],
+      FS2ServiceDef.tracingClient[IO](_),
+      ep
     )
 
     val prog: IO[(Response, List[String])] =
@@ -207,11 +210,12 @@ class RPCTracingTests extends CatsEffectSuite {
   }
 
   test("distributed tracing with FS2 streaming endpoints traces a bidirectional-streaming call") {
-    val ref: Ref[IO, TracingData]   = Ref.unsafe(TracingData(0, Vector.empty))
-    implicit val ep: EntryPoint[IO] = entrypoint(ref)
+    val ref: Ref[IO, TracingData] = Ref.unsafe(TracingData(0, Vector.empty))
+    val ep: EntryPoint[IO]        = entrypoint(ref)
     val clientResource = mkClientResource(
-      FS2ServiceDef.bindContextService[IO],
-      FS2ServiceDef.contextClient[IO](_)
+      FS2ServiceDef.bindTracingService[IO],
+      FS2ServiceDef.tracingClient[IO](_),
+      ep
     )
 
     val prog: IO[(Response, List[String])] =
