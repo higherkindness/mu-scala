@@ -47,8 +47,9 @@ object handlers {
           call: ServerCall[Req, Res],
           metadata: Metadata
       ): Listener[Req] = {
+        val spanResource = C[Req, Res](methodDescriptor, metadata)
         val method = unaryMethod[F, Req, Res](
-          req => C[Req, Res](methodDescriptor, metadata).use(f(req).run),
+          req => spanResource.use(span => f(req).run(span)),
           compressionType,
           disp
         )

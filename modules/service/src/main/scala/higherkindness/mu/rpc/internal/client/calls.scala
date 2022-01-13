@@ -50,7 +50,9 @@ object calls {
   )(implicit C: ClientContext[F, MC]): Kleisli[F, MC, Res] =
     Kleisli[F, MC, Res] { parentSpan =>
       C[Req, Res](descriptor, channel, options, parentSpan)
-        .flatMap(t => unary[F, Req, Res](request, descriptor, channel, options, t._2))
+        .flatMap { case (_, metadata) =>
+          unary[F, Req, Res](request, descriptor, channel, options, metadata)
+        }
     }
 
 }
