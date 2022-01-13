@@ -1,6 +1,9 @@
-package higherkindness.mu.rpc.internal
+package higherkindness.mu.rpc.internal.context
 
+import cats.effect.Resource
 import io.grpc.{CallOptions, Channel, Metadata, MethodDescriptor}
+
+final case class ClientContextMetaData[C](context: C, metadata: Metadata)
 
 trait ClientContext[F[_], C] {
 
@@ -9,6 +12,6 @@ trait ClientContext[F[_], C] {
       channel: Channel,
       options: CallOptions,
       current: C
-  ): F[(C, Metadata)]
+  ): Resource[F, ClientContextMetaData[C]]
 
 }

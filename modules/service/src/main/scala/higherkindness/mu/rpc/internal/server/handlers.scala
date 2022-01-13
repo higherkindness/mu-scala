@@ -20,7 +20,7 @@ import cats.data.Kleisli
 import cats.effect.Async
 import cats.effect.std.Dispatcher
 import cats.syntax.all._
-import higherkindness.mu.rpc.internal.ServerContext
+import higherkindness.mu.rpc.internal.context.ServerContext
 import higherkindness.mu.rpc.protocol.CompressionType
 import io.grpc.ServerCall.Listener
 import io.grpc._

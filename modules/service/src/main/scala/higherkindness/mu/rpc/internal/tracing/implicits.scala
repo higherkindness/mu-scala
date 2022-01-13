@@ -2,7 +2,7 @@ package higherkindness.mu.rpc.internal.tracing
 
 import cats.effect.{Async, Resource}
 import cats.syntax.all._
-import higherkindness.mu.rpc.internal.{ClientContext, ServerContext}
+import higherkindness.mu.rpc.internal.context.{ClientContext, ClientContextMetaData, ServerContext}
 import io.grpc.Metadata.{ASCII_STRING_MARSHALLER, BINARY_HEADER_SUFFIX, Key}
 import io.grpc.{CallOptions, Channel, Metadata, MethodDescriptor}
 import natchez.{EntryPoint, Kernel, Span}
@@ -18,10 +18,12 @@ object implicits {
           channel: Channel,
           options: CallOptions,
           current: Span[F]
-      ): F[(Span[F], Metadata)] =
+      ): Resource[F, ClientContextMetaData[Span[F]]] =
         current
           .span(descriptor.getFullMethodName)
-          .use(span => span.kernel.map(tracingKernelToHeaders).fproductLeft(_ => span))
+          .evalMap { span =>
+            span.kernel.map(tracingKernelToHeaders).map(ClientContextMetaData(span, _))
+          }
     }
 
   implicit def serverContext[F[_]](implicit entrypoint: EntryPoint[F]): ServerContext[F, Span[F]] =
@@ -34,7 +36,7 @@ object implicits {
 
     }
 
-  private[this] def tracingKernelToHeaders(kernel: Kernel): Metadata = {
+  def tracingKernelToHeaders(kernel: Kernel): Metadata = {
     val headers = new Metadata()
     kernel.toHeaders.foreach { case (k, v) =>
       headers.put(Key.of(k, ASCII_STRING_MARSHALLER), v)
@@ -42,7 +44,7 @@ object implicits {
     headers
   }
 
-  private[this] def extractTracingKernel(headers: Metadata): Kernel = {
+  def extractTracingKernel(headers: Metadata): Kernel = {
     val asciiHeaders = headers
       .keys()
       .asScala

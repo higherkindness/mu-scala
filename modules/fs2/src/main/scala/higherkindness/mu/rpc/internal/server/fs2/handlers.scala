@@ -22,7 +22,7 @@ import cats.effect.std.Dispatcher
 import cats.syntax.functor._
 import fs2.Stream
 import fs2.grpc.server.{Fs2ServerCallHandler, GzipCompressor, ServerOptions}
-import higherkindness.mu.rpc.internal.ServerContext
+import higherkindness.mu.rpc.internal.context.ServerContext
 import higherkindness.mu.rpc.protocol.{CompressionType, Gzip, Identity}
 import io.grpc.{Metadata, MethodDescriptor, ServerCallHandler}
 

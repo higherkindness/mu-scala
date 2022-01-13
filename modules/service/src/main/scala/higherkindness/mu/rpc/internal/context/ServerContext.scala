@@ -1,4 +1,4 @@
-package higherkindness.mu.rpc.internal
+package higherkindness.mu.rpc.internal.context
 
 import cats.effect._
 import io.grpc.{Metadata, MethodDescriptor}

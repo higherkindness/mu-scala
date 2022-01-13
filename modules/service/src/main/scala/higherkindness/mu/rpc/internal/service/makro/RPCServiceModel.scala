@@ -168,7 +168,7 @@ class RPCServiceModel[C <: Context](val c: C) {
       .toList
 
     val clientContextClassImplicits =
-      classImplicits :+ q"clientContext: _root_.higherkindness.mu.rpc.internal.ClientContext[$F, $context]"
+      classImplicits :+ q"clientContext: _root_.higherkindness.mu.rpc.internal.context.ClientContext[$F, $context]"
 
     val bindService: DefDef = q"""
       def bindService[$F_](implicit ..$bindImplicits): _root_.cats.effect.Resource[$F, _root_.io.grpc.ServerServiceDefinition] =
@@ -184,7 +184,7 @@ class RPCServiceModel[C <: Context](val c: C) {
       rpcRequests.map(_.descriptorAndContextHandler)
 
     val serverContextImplicits =
-      q"serverContext: _root_.higherkindness.mu.rpc.internal.ServerContext[$F, $context]"
+      q"serverContext: _root_.higherkindness.mu.rpc.internal.context.ServerContext[$F, $context]"
     val contextAlgebra = q"algebra: $serviceName[$kleisliFContext]"
     val bindContextServiceImplicits: List[Tree] =
       ceImplicit :: serverContextImplicits :: contextAlgebra :: rpcRequests
@@ -210,7 +210,7 @@ class RPCServiceModel[C <: Context](val c: C) {
       @deprecated("Use bindContextService instead", "0.27.5")
       def bindTracingService[$F_](entrypoint: _root_.natchez.EntryPoint[$F])
                                  (implicit ..$bindTracingServiceImplicits): _root_.cats.effect.Resource[$F, _root_.io.grpc.ServerServiceDefinition] = {
-        implicit val SC: _root_.higherkindness.mu.rpc.internal.ServerContext[$F, _root_.natchez.Span[$F]] =
+        implicit val SC: _root_.higherkindness.mu.rpc.internal.context.ServerContext[$F, _root_.natchez.Span[$F]] =
           _root_.higherkindness.mu.rpc.internal.tracing.implicits.serverContext[$F](entrypoint)
         bindContextService[$F]
       }
@@ -332,7 +332,7 @@ class RPCServiceModel[C <: Context](val c: C) {
           List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
       )(implicit ..$classImplicits): _root_.cats.effect.Resource[F, $serviceName[$kleisliFContext]] = {
-        implicit val CC: _root_.higherkindness.mu.rpc.internal.ClientContext[$F, _root_.natchez.Span[$F]] =
+        implicit val CC: _root_.higherkindness.mu.rpc.internal.context.ClientContext[$F, _root_.natchez.Span[$F]] =
           _root_.higherkindness.mu.rpc.internal.tracing.implicits.clientContext[$F]
         contextClient(channelFor, channelConfigList, options)
       }
@@ -362,7 +362,7 @@ class RPCServiceModel[C <: Context](val c: C) {
         channel: $F[_root_.io.grpc.ManagedChannel],
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
       )(implicit ..$classImplicits): _root_.cats.effect.Resource[$F, $serviceName[$kleisliFContext]] = {
-        implicit val CC: _root_.higherkindness.mu.rpc.internal.ClientContext[$F, _root_.natchez.Span[$F]] =
+        implicit val CC: _root_.higherkindness.mu.rpc.internal.context.ClientContext[$F, _root_.natchez.Span[$F]] =
           _root_.higherkindness.mu.rpc.internal.tracing.implicits.clientContext[$F]
         contextClientFromChannel(channel, options)
       }
@@ -392,7 +392,7 @@ class RPCServiceModel[C <: Context](val c: C) {
         disp: _root_.cats.effect.std.Dispatcher[$F],
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
       )(implicit ..$classImplicits): $serviceName[$kleisliFContext] = {
-        implicit val CC: _root_.higherkindness.mu.rpc.internal.ClientContext[$F, _root_.natchez.Span[$F]] =
+        implicit val CC: _root_.higherkindness.mu.rpc.internal.context.ClientContext[$F, _root_.natchez.Span[$F]] =
           _root_.higherkindness.mu.rpc.internal.tracing.implicits.clientContext[$F]
         unsafeContextClient(channelFor, channelConfigList, disp, options)
       }
@@ -413,7 +413,7 @@ class RPCServiceModel[C <: Context](val c: C) {
         channel: _root_.io.grpc.Channel,
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
       )(implicit ..$classImplicits): $serviceName[$kleisliFContext] = {
-        implicit val CC: _root_.higherkindness.mu.rpc.internal.ClientContext[$F, _root_.natchez.Span[$F]] =
+        implicit val CC: _root_.higherkindness.mu.rpc.internal.context.ClientContext[$F, _root_.natchez.Span[$F]] =
           _root_.higherkindness.mu.rpc.internal.tracing.implicits.clientContext[$F]
         new $ContextClient[$F](channel, options)
       }
