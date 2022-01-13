@@ -154,18 +154,11 @@ class RPCServiceModel[C <: Context](val c: C) {
     private val serverCallDescriptorsAndHandlers: List[Tree] =
       rpcRequests.map(_.descriptorAndHandler)
 
-    val ceImplicit: Tree        = q"CE: _root_.cats.effect.Async[$F]"
-    val schedulerImplicit: Tree = q"S: _root_.monix.execution.Scheduler"
+    val ceImplicit: Tree = q"CE: _root_.cats.effect.Async[$F]"
 
-    val bindImplicits: List[Tree] = ceImplicit :: q"algebra: $serviceName[$F]" :: rpcRequests
-      .find(_.operation.isMonixObservable)
-      .map(_ => schedulerImplicit)
-      .toList
+    val bindImplicits: List[Tree] = ceImplicit :: q"algebra: $serviceName[$F]" :: Nil
 
-    val classImplicits: List[Tree] = ceImplicit :: rpcRequests
-      .find(_.operation.isMonixObservable)
-      .map(_ => schedulerImplicit)
-      .toList
+    val classImplicits: List[Tree] = ceImplicit :: Nil
 
     val clientContextClassImplicits =
       classImplicits :+ q"clientContext: _root_.higherkindness.mu.rpc.internal.context.ClientContext[$F, $context]"
@@ -187,14 +180,8 @@ class RPCServiceModel[C <: Context](val c: C) {
       q"serverContext: _root_.higherkindness.mu.rpc.internal.context.ServerContext[$F, $context]"
     val contextAlgebra = q"algebra: $serviceName[$kleisliFContext]"
     val bindContextServiceImplicits: List[Tree] =
-      ceImplicit :: serverContextImplicits :: contextAlgebra :: rpcRequests
-        .find(_.operation.isMonixObservable)
-        .map(_ => schedulerImplicit)
-        .toList
-    val bindTracingServiceImplicits: List[Tree] = ceImplicit :: contextAlgebra :: rpcRequests
-      .find(_.operation.isMonixObservable)
-      .map(_ => schedulerImplicit)
-      .toList
+      ceImplicit :: serverContextImplicits :: contextAlgebra :: Nil
+    val bindTracingServiceImplicits: List[Tree] = ceImplicit :: contextAlgebra :: Nil
 
     val bindContextService: DefDef = q"""
       def bindContextService[$F_](implicit ..$bindContextServiceImplicits): _root_.cats.effect.Resource[$F, _root_.io.grpc.ServerServiceDefinition] =
