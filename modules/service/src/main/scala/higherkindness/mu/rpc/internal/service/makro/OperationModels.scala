@@ -43,21 +43,6 @@ class OperationModels[C <: Context](val c: C) {
       case _             => None
     }
 
-    val validStreamingComb: Boolean = (request, response) match {
-      case (_: Fs2StreamTpe, _: MonixObservableTpe) => false
-      case (_: MonixObservableTpe, _: Fs2StreamTpe) => false
-      case _                                        => true
-    }
-
-    require(
-      validStreamingComb,
-      s"RPC service $name has different streaming implementations for request and response"
-    )
-
-    val isMonixObservable: Boolean = List(request, response).collect { case m: MonixObservableTpe =>
-      m
-    }.nonEmpty
-
     val prevalentStreamingTarget: TypeTypology =
       if (streamingType.contains(ResponseStreaming)) response else request
 
@@ -90,9 +75,8 @@ class OperationModels[C <: Context](val c: C) {
     private val dispatcherValueName: Tree = q"disp"
 
     private val clientCallsImpl = prevalentStreamingTarget match {
-      case _: Fs2StreamTpe       => q"_root_.higherkindness.mu.rpc.internal.client.fs2.calls"
-      case _: MonixObservableTpe => q"_root_.higherkindness.mu.rpc.internal.client.monix.calls"
-      case _                     => q"_root_.higherkindness.mu.rpc.internal.client.calls"
+      case _: Fs2StreamTpe => q"_root_.higherkindness.mu.rpc.internal.client.fs2.calls"
+      case _               => q"_root_.higherkindness.mu.rpc.internal.client.calls"
     }
 
     private val streamingMethodType = {
@@ -116,11 +100,10 @@ class OperationModels[C <: Context](val c: C) {
 
     private val methodDescriptorValName = TermName("_methodDescriptor")
 
-    private val reqType           = request.originalType
-    private val reqElemType       = request.messageType
-    private val wrappedRespType   = response.originalType
-    private val unwrappedRespType = response.unwrappedType
-    private val respElemType      = response.messageType
+    private val reqType         = request.originalType
+    private val reqElemType     = request.messageType
+    private val wrappedRespType = response.originalType
+    private val respElemType    = response.messageType
 
     val methodDescriptorDef: DefDef = q"""
       def $methodDescriptorDefName(implicit
@@ -192,12 +175,6 @@ class OperationModels[C <: Context](val c: C) {
         def $name(input: _root_.fs2.Stream[$kleisliFSpanF, $reqElemType]): $kleisliFSpanFResp =
           ${clientCallMethodFor("tracingClientStreaming")}
         """
-      case (Some(RequestStreaming), _: MonixObservableTpe) =>
-        // def foo(input: Observable[Req]): Kleisli[F, Span[F], Resp]
-        q"""
-        def $name(input: $reqType): $kleisliFSpanFResp =
-          ${clientCallMethodFor("tracingClientStreaming")}
-        """
       case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
         // def foo(input: Req): Kleisli[F, Span[F], Stream[Kleisli[F, Span[F], *], Resp]]
         val returnType = kleisliFSpanFB(tq"_root_.fs2.Stream[$kleisliFSpanF, $respElemType]")
@@ -205,23 +182,11 @@ class OperationModels[C <: Context](val c: C) {
         def $name(input: $reqType): $returnType =
           ${clientCallMethodFor("tracingServerStreaming")}
         """
-      case (Some(ResponseStreaming), _: MonixObservableTpe) =>
-        // def foo(input: Req): Kleisli[F, Span[F], Observable[Resp]]
-        q"""
-        def $name(input: $reqType): ${kleisliFSpanFB(unwrappedRespType)} =
-          ${clientCallMethodFor("tracingServerStreaming")}
-        """
       case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
         // def foo(input: Stream[Kleisli[F, Span[F], *], Req]): Stream[Kleisli[F, Span[F], *], Resp]
         val returnType = kleisliFSpanFB(tq"_root_.fs2.Stream[$kleisliFSpanF, $respElemType]")
         q"""
         def $name(input: _root_.fs2.Stream[$kleisliFSpanF, $reqElemType]): $returnType =
-          ${clientCallMethodFor("tracingBidiStreaming")}
-        """
-      case (Some(BidirectionalStreaming), _: MonixObservableTpe) =>
-        // def foo(input: Observable[Req]): Kleisli[F, Span[F], Observable[Resp]]
-        q"""
-        def $name(input: $reqType): ${kleisliFSpanFB(unwrappedRespType)} =
           ${clientCallMethodFor("tracingBidiStreaming")}
         """
       case _ =>
@@ -240,13 +205,6 @@ class OperationModels[C <: Context](val c: C) {
           $compressionTypeTree
         )
         """
-      case (Some(RequestStreaming), _: MonixObservableTpe) =>
-        q"""
-        _root_.higherkindness.mu.rpc.internal.server.monix.handlers.clientStreaming[$F, $reqElemType, $respElemType](
-          algebra.$name,
-          $compressionTypeTree
-        )
-        """
 
       case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
         q"""
@@ -256,26 +214,12 @@ class OperationModels[C <: Context](val c: C) {
           $compressionTypeTree
         )
         """
-      case (Some(ResponseStreaming), _: MonixObservableTpe) =>
-        q"""
-        _root_.higherkindness.mu.rpc.internal.server.monix.handlers.serverStreaming[$F, $reqElemType, $respElemType](
-          algebra.$name,
-          $compressionTypeTree
-        )
-        """
 
       case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
         q"""
         _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.bidiStreaming[$F, $reqElemType, $respElemType](
           { (req: _root_.fs2.Stream[$F, $reqElemType], $anonymousParam) => algebra.$name(req) },
           $dispatcherValueName,
-          $compressionTypeTree
-        )
-        """
-      case (Some(BidirectionalStreaming), _: MonixObservableTpe) =>
-        q"""
-        _root_.higherkindness.mu.rpc.internal.server.monix.handlers.bidiStreaming[$F, $reqElemType, $respElemType](
-          algebra.$name,
           $compressionTypeTree
         )
         """
@@ -309,16 +253,6 @@ class OperationModels[C <: Context](val c: C) {
           $compressionTypeTree
         )
         """
-      case (Some(RequestStreaming), _: MonixObservableTpe) =>
-        q"""
-        _root_.higherkindness.mu.rpc.internal.server.monix.handlers.tracingClientStreaming(
-          algebra.$name _,
-          $methodDescriptorName.$methodDescriptorValName,
-          entrypoint,
-          $dispatcherValueName,
-          $compressionTypeTree
-        )
-        """
       case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
         q"""
         _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.tracingServerStreaming(
@@ -329,29 +263,9 @@ class OperationModels[C <: Context](val c: C) {
           $compressionTypeTree
         )
         """
-      case (Some(ResponseStreaming), _: MonixObservableTpe) =>
-        q"""
-        _root_.higherkindness.mu.rpc.internal.server.monix.handlers.tracingServerStreaming(
-          algebra.$name _,
-          $methodDescriptorName.$methodDescriptorValName,
-          entrypoint,
-          $dispatcherValueName,
-          $compressionTypeTree
-        )
-        """
       case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
         q"""
         _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.tracingBidiStreaming(
-          algebra.$name _,
-          $methodDescriptorName.$methodDescriptorValName,
-          entrypoint,
-          $dispatcherValueName,
-          $compressionTypeTree
-        )
-        """
-      case (Some(BidirectionalStreaming), _: MonixObservableTpe) =>
-        q"""
-        _root_.higherkindness.mu.rpc.internal.server.monix.handlers.tracingBidiStreaming(
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
           entrypoint,
