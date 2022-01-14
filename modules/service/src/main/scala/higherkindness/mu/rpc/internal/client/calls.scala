@@ -59,14 +59,14 @@ object calls {
       }
     }
 
-  def contextUnary[F[_]: Async, MC, Req, Res](
+  def contextUnary[F[_]: Async, C, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
       options: CallOptions
-  )(implicit C: ClientContext[F, MC]): Kleisli[F, MC, Res] =
-    Kleisli[F, MC, Res] { parentSpan =>
-      C[Req, Res](descriptor, channel, options, parentSpan).use { c =>
+  )(implicit C: ClientContext[F, C]): Kleisli[F, C, Res] =
+    Kleisli[F, C, Res] { context =>
+      C[Req, Res](descriptor, channel, options, context).use { c =>
         unary[F, Req, Res](request, descriptor, channel, options, c.metadata)
       }
     }

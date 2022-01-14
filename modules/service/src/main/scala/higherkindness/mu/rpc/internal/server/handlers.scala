@@ -36,20 +36,20 @@ object handlers {
   ): ServerCallHandler[Req, Res] =
     ServerCalls.asyncUnaryCall(unaryMethod[F, Req, Res](f, compressionType, disp))
 
-  def contextUnary[F[_]: Async, MC, Req, Res](
-      f: Req => Kleisli[F, MC, Res],
+  def contextUnary[F[_]: Async, C, Req, Res](
+      f: Req => Kleisli[F, C, Res],
       methodDescriptor: MethodDescriptor[Req, Res],
       compressionType: CompressionType,
       disp: Dispatcher[F]
-  )(implicit C: ServerContext[F, MC]): ServerCallHandler[Req, Res] =
+  )(implicit C: ServerContext[F, C]): ServerCallHandler[Req, Res] =
     new ServerCallHandler[Req, Res] {
       def startCall(
           call: ServerCall[Req, Res],
           metadata: Metadata
       ): Listener[Req] = {
-        val spanResource = C[Req, Res](methodDescriptor, metadata)
+        val contextResource = C[Req, Res](methodDescriptor, metadata)
         val method = unaryMethod[F, Req, Res](
-          req => spanResource.use(span => f(req).run(span)),
+          req => contextResource.use(span => f(req).run(span)),
           compressionType,
           disp
         )

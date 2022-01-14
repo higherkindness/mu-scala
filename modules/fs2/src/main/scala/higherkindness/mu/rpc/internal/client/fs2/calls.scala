@@ -85,16 +85,16 @@ object calls {
       }
       .pure[F]
 
-  def contextClientStreaming[F[_]: Async, MC, Req, Res](
-      input: Stream[Kleisli[F, MC, *], Req],
+  def contextClientStreaming[F[_]: Async, C, Req, Res](
+      input: Stream[Kleisli[F, C, *], Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
       options: CallOptions
-  )(implicit C: ClientContext[F, MC]): Kleisli[F, MC, Res] =
-    Kleisli[F, MC, Res] { parentSpan =>
-      C[Req, Res](descriptor, channel, options, parentSpan).use { c =>
+  )(implicit C: ClientContext[F, C]): Kleisli[F, C, Res] =
+    Kleisli[F, C, Res] { context =>
+      C[Req, Res](descriptor, channel, options, context).use { c =>
         val streamF: Stream[F, Req] =
-          input.translate(Kleisli.applyK[F, MC](c.context))
+          input.translate(Kleisli.applyK[F, C](c.context))
         clientStreaming[F, Req, Res](
           streamF,
           descriptor,
@@ -105,13 +105,13 @@ object calls {
       }
     }
 
-  def contextServerStreaming[F[_]: Async, MC, Req, Res](
+  def contextServerStreaming[F[_]: Async, C, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
       options: CallOptions
-  )(implicit C: ClientContext[F, MC]): Kleisli[F, MC, Stream[Kleisli[F, MC, *], Res]] =
-    Kleisli[F, MC, Stream[Kleisli[F, MC, *], Res]] { context =>
+  )(implicit C: ClientContext[F, C]): Kleisli[F, C, Stream[Kleisli[F, C, *], Res]] =
+    Kleisli[F, C, Stream[Kleisli[F, C, *], Res]] { context =>
       C[Req, Res](descriptor, channel, options, context).use { c =>
         Stream
           .resource(Dispatcher[F])
@@ -120,20 +120,20 @@ object calls {
               .eval(Fs2ClientCall[F](channel, descriptor, disp, clientOptions(options)))
               .flatMap(_.unaryToStreamingCall(request, c.metadata))
           }
-          .translate(Kleisli.liftK[F, MC])
+          .translate(Kleisli.liftK[F, C])
           .pure[F]
       }
     }
 
-  def contextBidiStreaming[F[_]: Async, MC, Req, Res](
-      input: Stream[Kleisli[F, MC, *], Req],
+  def contextBidiStreaming[F[_]: Async, C, Req, Res](
+      input: Stream[Kleisli[F, C, *], Req],
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
       options: CallOptions
-  )(implicit C: ClientContext[F, MC]): Kleisli[F, MC, Stream[Kleisli[F, MC, *], Res]] =
-    Kleisli[F, MC, Stream[Kleisli[F, MC, *], Res]] { parentContext =>
-      C[Req, Res](descriptor, channel, options, parentContext).use { c =>
-        val streamF: Stream[F, Req] = input.translate(Kleisli.applyK[F, MC](c.context))
+  )(implicit C: ClientContext[F, C]): Kleisli[F, C, Stream[Kleisli[F, C, *], Res]] =
+    Kleisli[F, C, Stream[Kleisli[F, C, *], Res]] { context =>
+      C[Req, Res](descriptor, channel, options, context).use { c =>
+        val streamF: Stream[F, Req] = input.translate(Kleisli.applyK[F, C](c.context))
         Stream
           .resource(Dispatcher[F])
           .flatMap { disp =>
@@ -141,7 +141,7 @@ object calls {
               .eval(Fs2ClientCall[F](channel, descriptor, disp, clientOptions(options)))
               .flatMap(_.streamingToStreamingCall(streamF, c.metadata))
           }
-          .translate(Kleisli.liftK[F, MC])
+          .translate(Kleisli.liftK[F, C])
           .pure[F]
       }
     }
