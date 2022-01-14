@@ -53,9 +53,7 @@ class OperationModels[C <: Context](val c: C) {
       fullServiceName: String,
       compressionType: CompressionType,
       methodNameStyle: MethodNameStyle,
-      F: TypeName,
-      MC: Option[TypeName],
-      kleisliFSpanF: SelectFromTypeTree
+      F: TypeName
   )
 
   // todo: validate that the request and responses are case classes, if possible
@@ -67,10 +65,12 @@ class OperationModels[C <: Context](val c: C) {
     import service._
     import operation._
 
-    private val contextTerm = MC.fold(tq"_root_.natchez.Span[$F]")(mc => tq"$mc")
+    private def kleisliFContextB(C: TypeName, B: Tree) =
+      tq"_root_.cats.data.Kleisli[$F, $C, $B]"
 
-    private def kleisliFContextB(B: Tree) =
-      tq"_root_.cats.data.Kleisli[$F, $contextTerm, $B]"
+    // Type lambda for Kleisli[F, C, *].
+    private def kleisliFContext(C: TypeName): SelectFromTypeTree =
+      tq"({ type T[α] = _root_.cats.data.Kleisli[$F, $C, α] })#T"
 
     private val compressionTypeTree: Tree =
       q"_root_.higherkindness.mu.rpc.protocol.${TermName(compressionType.toString)}"
@@ -147,9 +147,9 @@ class OperationModels[C <: Context](val c: C) {
       )
       """
 
-    private def clientContextCallMethodFor(clientMethodName: String) =
+    private def clientContextCallMethodFor(C: TypeName, clientMethodName: String) =
       q"""
-      $clientCallsImpl.${TermName(clientMethodName)}[$F, $contextTerm, $reqElemType, $respElemType](
+      $clientCallsImpl.${TermName(clientMethodName)}[$F, $C, $reqElemType, $respElemType](
         input,
         $methodDescriptorName.$methodDescriptorValName,
         channel,
@@ -172,36 +172,35 @@ class OperationModels[C <: Context](val c: C) {
       }
     }
 
-    // Kleisli[F, MC, Resp]
-    private val kleisliContextFResp = kleisliFContextB(respElemType)
+    // Kleisli[F, C, Resp]
+    private def kleisliContextFResp(C: TypeName) = kleisliFContextB(C, respElemType)
 
-    // MC is Span[F] by default
-    val contextClientDef: Tree = (streamingType, prevalentStreamingTarget) match {
+    def contextClientDef(C: TypeName): Tree = (streamingType, prevalentStreamingTarget) match {
       case (None, _) =>
         // def foo(input: Req): Kleisli[F, MC, Resp]
         q"""
-        def $name(input: $reqType): $kleisliContextFResp =
-          ${clientContextCallMethodFor("contextUnary")}
+        def $name(input: $reqType): ${kleisliContextFResp(C)} =
+          ${clientContextCallMethodFor(C, "contextUnary")}
         """
       case (Some(RequestStreaming), _: Fs2StreamTpe) =>
         // def foo(input: Stream[Kleisli[F, MC, *], Req]): Kleisli[F, MC, Resp]
         q"""
-        def $name(input: _root_.fs2.Stream[$kleisliFSpanF, $reqElemType]): $kleisliContextFResp =
-          ${clientContextCallMethodFor("contextClientStreaming")}
+        def $name(input: _root_.fs2.Stream[${kleisliFContext(C)}, $reqElemType]): ${kleisliContextFResp(C)} =
+          ${clientContextCallMethodFor(C, "contextClientStreaming")}
         """
       case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
         // def foo(input: Req): Kleisli[F, MC, Stream[Kleisli[F, MC, *], Resp]]
-        val returnType = kleisliFContextB(tq"_root_.fs2.Stream[$kleisliFSpanF, $respElemType]")
+        val returnType = kleisliFContextB(C, tq"_root_.fs2.Stream[${kleisliFContext(C)}, $respElemType]")
         q"""
         def $name(input: $reqType): $returnType =
-          ${clientContextCallMethodFor("contextServerStreaming")}
+          ${clientContextCallMethodFor(C, "contextServerStreaming")}
         """
       case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
         // def foo(input: Stream[Kleisli[F, MC, *], Req]): Stream[Kleisli[F, MC, *], Resp]
-        val returnType = kleisliFContextB(tq"_root_.fs2.Stream[$kleisliFSpanF, $respElemType]")
+        val returnType = kleisliFContextB(C, tq"_root_.fs2.Stream[${kleisliFContext(C)}, $respElemType]")
         q"""
-        def $name(input: _root_.fs2.Stream[$kleisliFSpanF, $reqElemType]): $returnType =
-          ${clientContextCallMethodFor("contextBidiStreaming")}
+        def $name(input: _root_.fs2.Stream[${kleisliFContext(C)}, $reqElemType]): $returnType =
+          ${clientContextCallMethodFor(C, "contextBidiStreaming")}
         """
       case _ =>
         c.abort(
@@ -256,10 +255,10 @@ class OperationModels[C <: Context](val c: C) {
     val descriptorAndHandler: Tree =
       q"($methodDescriptorName.$methodDescriptorValName, $serverCallHandler)"
 
-    val contextServerCallHandler: Tree = (streamingType, prevalentStreamingTarget) match {
+    def contextServerCallHandler(C: TypeName): Tree = (streamingType, prevalentStreamingTarget) match {
       case (Some(RequestStreaming), _: Fs2StreamTpe) =>
         q"""
-        _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.contextClientStreaming[$F, $contextTerm, $reqElemType, $respElemType](
+        _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.contextClientStreaming[$F, $C, $reqElemType, $respElemType](
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
           $dispatcherValueName,
@@ -268,7 +267,7 @@ class OperationModels[C <: Context](val c: C) {
         """
       case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
         q"""
-        _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.contextServerStreaming[$F, $contextTerm, $reqElemType, $respElemType](
+        _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.contextServerStreaming[$F, $C, $reqElemType, $respElemType](
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
           $dispatcherValueName,
@@ -277,7 +276,7 @@ class OperationModels[C <: Context](val c: C) {
         """
       case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
         q"""
-        _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.contextBidiStreaming[$F, $contextTerm, $reqElemType, $respElemType](
+        _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.contextBidiStreaming[$F, $C, $reqElemType, $respElemType](
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
           $dispatcherValueName,
@@ -286,7 +285,7 @@ class OperationModels[C <: Context](val c: C) {
         """
       case (None, _) =>
         q"""
-        _root_.higherkindness.mu.rpc.internal.server.handlers.contextUnary[$F, $contextTerm, $reqElemType, $respElemType](
+        _root_.higherkindness.mu.rpc.internal.server.handlers.contextUnary[$F, $C, $reqElemType, $respElemType](
           algebra.$name,
           $methodDescriptorName.$methodDescriptorValName,
           $compressionTypeTree,
@@ -300,8 +299,8 @@ class OperationModels[C <: Context](val c: C) {
         )
     }
 
-    val descriptorAndContextHandler: Tree =
-      q"($methodDescriptorName.$methodDescriptorValName, $contextServerCallHandler)"
+    def descriptorAndContextHandler(C: TypeName): Tree =
+      q"($methodDescriptorName.$methodDescriptorValName, ${contextServerCallHandler(C)})"
 
   }
 
