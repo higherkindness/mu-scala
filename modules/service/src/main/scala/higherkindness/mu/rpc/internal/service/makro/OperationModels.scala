@@ -185,19 +185,23 @@ class OperationModels[C <: Context](val c: C) {
       case (Some(RequestStreaming), _: Fs2StreamTpe) =>
         // def foo(input: Stream[Kleisli[F, MC, *], Req]): Kleisli[F, MC, Resp]
         q"""
-        def $name(input: _root_.fs2.Stream[${kleisliFContext(C)}, $reqElemType]): ${kleisliContextFResp(C)} =
+        def $name(input: _root_.fs2.Stream[${kleisliFContext(
+          C
+        )}, $reqElemType]): ${kleisliContextFResp(C)} =
           ${clientContextCallMethodFor(C, "contextClientStreaming")}
         """
       case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
         // def foo(input: Req): Kleisli[F, MC, Stream[Kleisli[F, MC, *], Resp]]
-        val returnType = kleisliFContextB(C, tq"_root_.fs2.Stream[${kleisliFContext(C)}, $respElemType]")
+        val returnType =
+          kleisliFContextB(C, tq"_root_.fs2.Stream[${kleisliFContext(C)}, $respElemType]")
         q"""
         def $name(input: $reqType): $returnType =
           ${clientContextCallMethodFor(C, "contextServerStreaming")}
         """
       case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
         // def foo(input: Stream[Kleisli[F, MC, *], Req]): Stream[Kleisli[F, MC, *], Resp]
-        val returnType = kleisliFContextB(C, tq"_root_.fs2.Stream[${kleisliFContext(C)}, $respElemType]")
+        val returnType =
+          kleisliFContextB(C, tq"_root_.fs2.Stream[${kleisliFContext(C)}, $respElemType]")
         q"""
         def $name(input: _root_.fs2.Stream[${kleisliFContext(C)}, $reqElemType]): $returnType =
           ${clientContextCallMethodFor(C, "contextBidiStreaming")}
@@ -255,9 +259,10 @@ class OperationModels[C <: Context](val c: C) {
     val descriptorAndHandler: Tree =
       q"($methodDescriptorName.$methodDescriptorValName, $serverCallHandler)"
 
-    def contextServerCallHandler(C: TypeName): Tree = (streamingType, prevalentStreamingTarget) match {
-      case (Some(RequestStreaming), _: Fs2StreamTpe) =>
-        q"""
+    def contextServerCallHandler(C: TypeName): Tree =
+      (streamingType, prevalentStreamingTarget) match {
+        case (Some(RequestStreaming), _: Fs2StreamTpe) =>
+          q"""
         _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.contextClientStreaming[$F, $C, $reqElemType, $respElemType](
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
@@ -265,8 +270,8 @@ class OperationModels[C <: Context](val c: C) {
           $compressionTypeTree
         )
         """
-      case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
-        q"""
+        case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
+          q"""
         _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.contextServerStreaming[$F, $C, $reqElemType, $respElemType](
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
@@ -274,8 +279,8 @@ class OperationModels[C <: Context](val c: C) {
           $compressionTypeTree
         )
         """
-      case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
-        q"""
+        case (Some(BidirectionalStreaming), _: Fs2StreamTpe) =>
+          q"""
         _root_.higherkindness.mu.rpc.internal.server.fs2.handlers.contextBidiStreaming[$F, $C, $reqElemType, $respElemType](
           algebra.$name _,
           $methodDescriptorName.$methodDescriptorValName,
@@ -283,8 +288,8 @@ class OperationModels[C <: Context](val c: C) {
           $compressionTypeTree
         )
         """
-      case (None, _) =>
-        q"""
+        case (None, _) =>
+          q"""
         _root_.higherkindness.mu.rpc.internal.server.handlers.contextUnary[$F, $C, $reqElemType, $respElemType](
           algebra.$name,
           $methodDescriptorName.$methodDescriptorValName,
@@ -292,12 +297,12 @@ class OperationModels[C <: Context](val c: C) {
           $dispatcherValueName
         )
         """
-      case _ =>
-        c.abort(
-          c.enclosingPosition,
-          s"Unable to define a context handler for the streaming type $streamingType and $prevalentStreamingTarget for the method $name in the service ${service.serviceName}"
-        )
-    }
+        case _ =>
+          c.abort(
+            c.enclosingPosition,
+            s"Unable to define a context handler for the streaming type $streamingType and $prevalentStreamingTarget for the method $name in the service ${service.serviceName}"
+          )
+      }
 
     def descriptorAndContextHandler(C: TypeName): Tree =
       q"($methodDescriptorName.$methodDescriptorValName, ${contextServerCallHandler(C)})"

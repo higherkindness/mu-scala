@@ -44,7 +44,7 @@ class RPCServiceModel[C <: Context](val c: C) {
     val F_ : TypeDef = serviceDef.tparams.head
     val F: TypeName  = F_.name
 
-    private val C : TypeName = TypeName("Context")
+    private val C: TypeName = TypeName("Context")
 
     require(
       F_.tparams.length == 1,
@@ -173,10 +173,13 @@ class RPCServiceModel[C <: Context](val c: C) {
     def contextAlgebra(C: TypeName) = q"algebra: $serviceName[${kleisliFContext(C)}]"
     def bindContextServiceImplicits(C: TypeName): List[Tree] =
       ceImplicit :: serverContextImplicits(C) :: contextAlgebra(C) :: Nil
-    val bindTracingServiceImplicits: List[Tree] = ceImplicit :: q"algebra: $serviceName[$kleisliFSpan]" :: Nil
+    val bindTracingServiceImplicits: List[Tree] =
+      ceImplicit :: q"algebra: $serviceName[$kleisliFSpan]" :: Nil
 
     val bindContextService: DefDef = q"""
-      def bindContextService[$F_, $C](implicit ..${bindContextServiceImplicits(C)}): _root_.cats.effect.Resource[$F, _root_.io.grpc.ServerServiceDefinition] =
+      def bindContextService[$F_, $C](implicit ..${bindContextServiceImplicits(
+      C
+    )}): _root_.cats.effect.Resource[$F, _root_.io.grpc.ServerServiceDefinition] =
         _root_.cats.effect.std.Dispatcher.apply[$F](CE).evalMap { disp =>
           _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](
             ${lit(fullServiceName)},
@@ -266,15 +269,18 @@ class RPCServiceModel[C <: Context](val c: C) {
       )(implicit ..$classImplicits): $serviceName[$F] = new $Client[$F, _root_.natchez.Span[$F]](channel, options)
       """.suppressWarts("DefaultArguments")
 
-    private def contextClientCallMethods(C: TypeName): List[Tree] = rpcRequests.map(_.contextClientDef(C))
-    private val ContextClient                        = TypeName("ContextClient")
+    private def contextClientCallMethods(C: TypeName): List[Tree] =
+      rpcRequests.map(_.contextClientDef(C))
+    private val ContextClient = TypeName("ContextClient")
     val contextClientClass: ClassDef =
       q"""
       class $ContextClient[$F_, $C](
         channel: _root_.io.grpc.Channel,
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
       )(implicit ..${clientContextClassImplicits(C)})
-        extends _root_.io.grpc.stub.AbstractStub[$ContextClient[$F, $C]](channel, options) with $serviceName[${kleisliFContext(C)}] {
+        extends _root_.io.grpc.stub.AbstractStub[$ContextClient[$F, $C]](channel, options) with $serviceName[${kleisliFContext(
+        C
+      )}] {
         override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $ContextClient[$F, $C] =
             new $ContextClient[$F, $C](channel, options)
 
@@ -289,7 +295,9 @@ class RPCServiceModel[C <: Context](val c: C) {
         channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
           List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-      )(implicit ..${clientContextClassImplicits(C)}): _root_.cats.effect.Resource[F, $serviceName[${kleisliFContext(C)}]] =
+      )(implicit ..${clientContextClassImplicits(
+        C
+      )}): _root_.cats.effect.Resource[F, $serviceName[${kleisliFContext(C)}]] =
         _root_.cats.effect.Resource.make(
           new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
         )(channel =>
@@ -323,7 +331,9 @@ class RPCServiceModel[C <: Context](val c: C) {
       def contextClientFromChannel[$F_, $C](
         channel: $F[_root_.io.grpc.ManagedChannel],
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
-      )(implicit ..${clientContextClassImplicits(C)}): _root_.cats.effect.Resource[$F, $serviceName[${kleisliFContext(C)}]] =
+      )(implicit ..${clientContextClassImplicits(
+        C
+      )}): _root_.cats.effect.Resource[$F, $serviceName[${kleisliFContext(C)}]] =
         _root_.cats.effect.Resource.make(channel)(channel =>
           CE.void(CE.delay(channel.shutdown()))
         ).flatMap(ch =>
