@@ -76,11 +76,11 @@ object handlers {
       descriptor: MethodDescriptor[Req, Res],
       disp: Dispatcher[F],
       compressionType: CompressionType
-  )(implicit C: ServerContext[F, C]): ServerCallHandler[Req, Res] =
+  )(implicit serverContext: ServerContext[F, C]): ServerCallHandler[Req, Res] =
     clientStreaming[F, Req, Res](
       { (req: Stream[F, Req], metadata: Metadata) =>
         val streamK: Stream[Kleisli[F, C, *], Req] = req.translate(Kleisli.liftK[F, C])
-        C[Req, Res](descriptor, metadata).use[Res] { context =>
+        serverContext[Req, Res](descriptor, metadata).use[Res] { context =>
           f(streamK).run(context)
         }
       },
@@ -93,10 +93,10 @@ object handlers {
       descriptor: MethodDescriptor[Req, Res],
       disp: Dispatcher[F],
       compressionType: CompressionType
-  )(implicit C: ServerContext[F, C]): ServerCallHandler[Req, Res] =
+  )(implicit serverContext: ServerContext[F, C]): ServerCallHandler[Req, Res] =
     serverStreaming[F, Req, Res](
       { (req: Req, metadata: Metadata) =>
-        C[Req, Res](descriptor, metadata)
+        serverContext[Req, Res](descriptor, metadata)
           .use[Stream[F, Res]] { context =>
             val kleisli: Kleisli[F, C, Stream[Kleisli[F, C, *], Res]] = f(req)
             val fStreamK: F[Stream[Kleisli[F, C, *], Res]]            = kleisli.run(context)
@@ -112,12 +112,12 @@ object handlers {
       descriptor: MethodDescriptor[Req, Res],
       disp: Dispatcher[F],
       compressionType: CompressionType
-  )(implicit C: ServerContext[F, C]): ServerCallHandler[Req, Res] =
+  )(implicit serverContext: ServerContext[F, C]): ServerCallHandler[Req, Res] =
     bidiStreaming[F, Req, Res](
       { (req: Stream[F, Req], metadata: Metadata) =>
         val reqStreamK: Stream[Kleisli[F, C, *], Req] =
           req.translate(Kleisli.liftK[F, C])
-        C[Req, Res](descriptor, metadata)
+        serverContext[Req, Res](descriptor, metadata)
           .use[Stream[F, Res]] { context =>
             val kleisli: Kleisli[F, C, Stream[Kleisli[F, C, *], Res]] = f(reqStreamK)
             val fStreamK: F[Stream[Kleisli[F, C, *], Res]]            = kleisli.run(context)

@@ -41,13 +41,13 @@ object handlers {
       methodDescriptor: MethodDescriptor[Req, Res],
       compressionType: CompressionType,
       disp: Dispatcher[F]
-  )(implicit C: ServerContext[F, C]): ServerCallHandler[Req, Res] =
+  )(implicit serverContext: ServerContext[F, C]): ServerCallHandler[Req, Res] =
     new ServerCallHandler[Req, Res] {
       def startCall(
           call: ServerCall[Req, Res],
           metadata: Metadata
       ): Listener[Req] = {
-        val contextResource = C[Req, Res](methodDescriptor, metadata)
+        val contextResource = serverContext[Req, Res](methodDescriptor, metadata)
         val method = unaryMethod[F, Req, Res](
           req => contextResource.use(span => f(req).run(span)),
           compressionType,

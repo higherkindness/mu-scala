@@ -90,9 +90,9 @@ object calls {
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
       options: CallOptions
-  )(implicit C: ClientContext[F, C]): Kleisli[F, C, Res] =
+  )(implicit clientContext: ClientContext[F, C]): Kleisli[F, C, Res] =
     Kleisli[F, C, Res] { context =>
-      C[Req, Res](descriptor, channel, options, context).use { c =>
+      clientContext[Req, Res](descriptor, channel, options, context).use { c =>
         val streamF: Stream[F, Req] =
           input.translate(Kleisli.applyK[F, C](c.context))
         clientStreaming[F, Req, Res](
@@ -110,9 +110,9 @@ object calls {
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
       options: CallOptions
-  )(implicit C: ClientContext[F, C]): Kleisli[F, C, Stream[Kleisli[F, C, *], Res]] =
+  )(implicit clientContext: ClientContext[F, C]): Kleisli[F, C, Stream[Kleisli[F, C, *], Res]] =
     Kleisli[F, C, Stream[Kleisli[F, C, *], Res]] { context =>
-      C[Req, Res](descriptor, channel, options, context).use { c =>
+      clientContext[Req, Res](descriptor, channel, options, context).use { c =>
         Stream
           .resource(Dispatcher[F])
           .flatMap { disp =>
@@ -130,9 +130,9 @@ object calls {
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
       options: CallOptions
-  )(implicit C: ClientContext[F, C]): Kleisli[F, C, Stream[Kleisli[F, C, *], Res]] =
+  )(implicit clientContext: ClientContext[F, C]): Kleisli[F, C, Stream[Kleisli[F, C, *], Res]] =
     Kleisli[F, C, Stream[Kleisli[F, C, *], Res]] { context =>
-      C[Req, Res](descriptor, channel, options, context).use { c =>
+      clientContext[Req, Res](descriptor, channel, options, context).use { c =>
         val streamF: Stream[F, Req] = input.translate(Kleisli.applyK[F, C](c.context))
         Stream
           .resource(Dispatcher[F])

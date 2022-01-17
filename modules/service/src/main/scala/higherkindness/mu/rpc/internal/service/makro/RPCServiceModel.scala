@@ -189,7 +189,7 @@ class RPCServiceModel[C <: Context](val c: C) {
       """
 
     val bindTracingService: DefDef = q"""
-      @deprecated("Use bindContextService instead", "0.27.5")
+      @deprecated("Use bindContextService[F, Span[F]] instead", "0.27.5")
       def bindTracingService[$F_](entrypoint: _root_.natchez.EntryPoint[$F])
                                  (implicit ..$bindTracingServiceImplicits): _root_.cats.effect.Resource[$F, _root_.io.grpc.ServerServiceDefinition] = {
         implicit val SC: _root_.higherkindness.mu.rpc.internal.context.ServerContext[$F, _root_.natchez.Span[$F]] =
@@ -313,7 +313,7 @@ class RPCServiceModel[C <: Context](val c: C) {
 
     val tracingClient: DefDef =
       q"""
-      @deprecated("Use contextClient instead", "0.27.5")
+      @deprecated("Use contextClient[F, Span[F]] instead", "0.27.5")
       def tracingClient[$F_](
         channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
         channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
@@ -347,7 +347,7 @@ class RPCServiceModel[C <: Context](val c: C) {
 
     val tracingClientFromChannel: DefDef =
       q"""
-      @deprecated("Use contextClientFromChannel instead", "0.27.5")
+      @deprecated("Use contextClientFromChannel[F, Span[F]] instead", "0.27.5")
       def tracingClientFromChannel[$F_](
         channel: $F[_root_.io.grpc.ManagedChannel],
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
@@ -374,7 +374,7 @@ class RPCServiceModel[C <: Context](val c: C) {
 
     val unsafeTracingClient: DefDef =
       q"""
-      @deprecated("Use unsafeContextClient instead", "0.27.5")
+      @deprecated("Use unsafeContextClient[F, Span[F]] instead", "0.27.5")
       def unsafeTracingClient[$F_](
         channelFor: _root_.higherkindness.mu.rpc.ChannelFor,
         channelConfigList: List[_root_.higherkindness.mu.rpc.channel.ManagedChannelConfig] =
@@ -399,7 +399,7 @@ class RPCServiceModel[C <: Context](val c: C) {
 
     val unsafeTracingClientFromChannel: DefDef =
       q"""
-      @deprecated("Use unsafeContextClientFromChannel instead", "0.27.5")
+      @deprecated("Use unsafeContextClientFromChannel[F, Span[F]] instead", "0.27.5")
       def unsafeTracingClientFromChannel[$F_](
         channel: _root_.io.grpc.Channel,
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT

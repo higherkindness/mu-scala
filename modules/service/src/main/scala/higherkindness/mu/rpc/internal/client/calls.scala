@@ -46,9 +46,9 @@ object calls {
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
       options: CallOptions
-  )(implicit C: ClientContext[F, C]): Kleisli[F, C, Res] =
+  )(implicit clientContext: ClientContext[F, C]): Kleisli[F, C, Res] =
     Kleisli[F, C, Res] { context =>
-      C[Req, Res](descriptor, channel, options, context).use { c =>
+      clientContext[Req, Res](descriptor, channel, options, context).use { c =>
         unary[F, Req, Res](request, descriptor, channel, options, c.metadata)
       }
     }
