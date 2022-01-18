@@ -19,7 +19,6 @@ permalink: reference/modules-artifacts
 | *Artifact Name*  | *Scope*  | *Mandatory*  | *Description*  |
 |---|---|---|---|
 | `mu-rpc-service`  | Server/Client  | Yes  | Mandatory to define protocols and auto-derived clients. |
-| `mu-rpc-monix`  | Server/Client  | Yes  | Mandatory to define streaming operations with Monix Observables. |
 | `mu-rpc-fs2`  | Server/Client  | Yes  | Mandatory to define streaming operations with FS2 Streams. |
 | `mu-rpc-server`  | Server  | Yes  | Needed to attach RPC Services and spin-up an RPC Server. |
 | `mu-rpc-client-netty`  | Client  | Yes*  | `Netty` transport layer for the client. Mandatory if you need SSL/TLS support. |
@@ -51,8 +50,6 @@ You can install any of these dependencies in your build as follows:
 libraryDependencies += "io.higherkindness" %% "mu-rpc-service" % "@VERSION@"
 
 // required for a protocol definition with streaming operations:
-libraryDependencies += "io.higherkindness" %% "mu-rpc-monix" % "@VERSION@"
-// or:
 libraryDependencies += "io.higherkindness" %% "mu-rpc-fs2" % "@VERSION@"
 
 // required for the RPC server
@@ -84,8 +81,7 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-testing" % "@VERSION@" % T
 
 ### sbt plugin
 
-To generate Scala code from IDL files (`.proto`, `.avdl`, OpenAPI `.yaml`,
-etc.), you will need the `sbt-mu-srcgen` plugin:
+To generate Scala code from IDL files (`.proto`, `.avdl`, etc.), you will need the `sbt-mu-srcgen` plugin:
 
 ```sbt
 addSbtPlugin("io.higherkindness" %% "sbt-mu-srcgen" % "@VERSION@")
@@ -94,8 +90,6 @@ addSbtPlugin("io.higherkindness" %% "sbt-mu-srcgen" % "@VERSION@")
 [Avro]: https://avro.apache.org/
 [FS2]: https://github.com/functional-streams-for-scala/fs2
 [gRPC]: https://grpc.io/
-[Monix]: https://monix.io/
 [Mu]: https://github.com/higherkindness/mu-scala
-[OpenAPI]: https://swagger.io/docs/specification/about/
 [Protobuf]: https://developers.google.com/protocol-buffers
 [pureconfig]: https://github.com/pureconfig/pureconfig

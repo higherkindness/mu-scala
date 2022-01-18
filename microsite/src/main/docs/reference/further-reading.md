@@ -15,7 +15,6 @@ permalink: /reference/further-reading
 * [Protocol Buffers Docs](https://developers.google.com/protocol-buffers/docs/overview)
 * [scalamacros](https://github.com/scalamacros/paradise)
 * [PBDirect](https://github.com/47deg/pbdirect)
-* [Monix](https://monix.io)
 * [FS2 Docs](https://github.com/functional-streams-for-scala/fs2)
 * [gRPC Java API](https://grpc.io/grpc-java/javadoc/)
 * [Metrifier](https://github.com/47deg/metrifier)
