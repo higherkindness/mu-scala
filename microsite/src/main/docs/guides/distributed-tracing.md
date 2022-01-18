@@ -34,6 +34,8 @@ Specifically, the integration provides the following features.
 
 ## How to use
 
+Please, be sure you've checked the [Accessing metadata on services](accessing-metadata) first.
+
 Let's look at how to enable tracing on the server side first.
 
 ### Server side
@@ -68,35 +70,22 @@ class MyAmazingService[F[_]: Applicative] extends MyService[F] {
 }
 ```
 
-Ordinarily, if you were not using tracing, you would create a gRPC service
-definition using the macro-generated `MyService.bindService` method, specifying
-your effect monad of choice:
+To use the same service with tracing enabled, you need to call the
+`MyService.bindContextService[F, Span[F]]` method instead.
 
-```scala mdoc:silent
-import cats.effect.{IO, IOApp, ExitCode}
-import higherkindness.mu.rpc.server.{GrpcServer, AddService}
+There's an implicit definition of the `ServerContext[F, Span[F]]` in the 
+object `higherkindness.mu.rpc.internal.tracing.implicits`
 
-object OrdinaryServer extends IOApp {
+```scala
+import higherkindness.mu.rpc.internal.context.ServerContext
+import natchez.{EntryPoint, Span}
 
-  implicit val service: MyService[IO] = new MyAmazingService[IO]
-
-  def run(args: List[String]): IO[ExitCode] = (for {
-    serviceDef <- MyService.bindService[IO]
-    _          <- GrpcServer.defaultServer[IO](8080, List(AddService(serviceDef)))
-  } yield ()).useForever
-
-}
+implicit def serverContext[F[_]](implicit entrypoint: EntryPoint[F]): ServerContext[F, Span[F]]
 ```
 
-To use the same service with tracing enabled, you need to call the
-`MyService.bindTracingService` method instead.
-
-`bindTracingService[F[_]]` differs from `bindService[F[_]]` in two ways, which
-we will explain below.
-
-1. It takes a [Natchez] `EntryPoint` as an argument.
-2. It takes a `MyService` as an implicit argument, but instead of a
-   `MyService[F]` it requires a `MyService[Kleisli[F, Span[F], *]]`.
+So, to trace our service, we need to call to `MyService.bindContextService[F, Span[F]]`
+with the import `higherkindness.mu.rpc.internal.tracing.implicits._` in the scope and 
+providing an [Natchez] `EntryPoint` implicitly.
 
 #### EntryPoint
 
@@ -140,22 +129,28 @@ Luckily, there are instances of most of the cats-effect type classes for
 able to substitute `MyService[Kleisli[F, Span[F], *]]` for `MyService[F]`
 without requiring any changes to your service implementation code.
 
-#### Using bindTracingService
+#### Using bindContextService
 
 Putting all this together, your server setup code will look something like this:
 
 ```scala mdoc:silent
+import cats.effect._
 import cats.data.Kleisli
+import higherkindness.mu.rpc.server._
 import natchez.Span
 
 object TracingServer extends IOApp {
+
+  import higherkindness.mu.rpc.internal.tracing.implicits._
 
   implicit val service: MyService[Kleisli[IO, Span[IO], *]] =
     new MyAmazingService[Kleisli[IO, Span[IO], *]]
 
   def run(args: List[String]): IO[ExitCode] =
     entryPoint[IO]
-      .flatMap { ep => MyService.bindTracingService[IO](ep) }
+      .flatMap { implicit ep => 
+        MyService.bindContextService[IO, Span[IO]]
+      }
       .flatMap { serviceDef =>
         GrpcServer.defaultServer[IO](8080, List(AddService(serviceDef)))
       }.useForever
@@ -187,44 +182,36 @@ class MyTracingService[F[_]: Monad: Trace] extends MyService[F] {
 
 ### Client side
 
-Ordinarily, if you were not using tracing, you would create a cats-effect
-`Resource` of an RPC client using the macro-generated `MyService.client` method:
-
-```scala mdoc:silent
-import higherkindness.mu.rpc.{ChannelFor, ChannelForAddress}
-
-object OrdinaryClientApp extends IOApp {
-
-  val channelFor: ChannelFor = ChannelForAddress("localhost", 8080)
-
-  val clientRes: Resource[IO, MyService[IO]] =
-    MyService.client[IO](channelFor)
-
-  def run(args: List[String]): IO[ExitCode] =
-    clientRes.use { client =>
-      for {
-        resp <- client.SayHello(HelloRequest("Chris"))
-        _    <- IO(println(s"Response: $resp"))
-      } yield (ExitCode.Success)
-    }
-}
-```
-
-To obtain a tracing client, use `MyService.tracingClient` instead of
+To obtain a tracing client, use `MyService.contextClient[F, Span[F]]` instead of
 `MyService.client`.
 
 This returns a `MyService[Kleisli[F, Span[F], *]]`, i.e. a client which takes
 the current span as input and returns a response inside the `F` effect.
 
+Like in the case in the server, there's an implicit definition for `ClientContext[F, Span[F]]`
+in the object `higherkindness.mu.rpc.internal.tracing.implicits`
+
+```scala
+import cats.effect.Async
+import higherkindness.mu.rpc.internal.context.ClientContext
+import natchez.Span
+
+implicit def clientContext[F[_]: Async]: ClientContext[F, Span[F]]
+```
+
 For example:
 
 ```scala mdoc:silent
+import higherkindness.mu.rpc._
+
 object TracingClientApp extends IOApp {
+
+  import higherkindness.mu.rpc.internal.tracing.implicits._
 
   val channelFor: ChannelFor = ChannelForAddress("localhost", 8080)
 
   val clientRes: Resource[IO, MyService[Kleisli[IO, Span[IO], *]]] =
-    MyService.tracingClient[IO](channelFor)
+    MyService.contextClient[IO, Span[IO]](channelFor)
 
   def run(args: List[String]): IO[ExitCode] =
     entryPoint[IO].use { ep =>
@@ -246,7 +233,7 @@ object TracingClientApp extends IOApp {
 
 To see a full working example of distributed tracing across multiple Mu
 services, take a look at this repo:
-[cb372/mu-tracing-example](https://github.com/cb372/mu-tracing-example).
+[higherkindness/mu-scala-examples](https://github.com/higherkindness/mu-scala-examples/tree/master/tracing).
 
 The README explains how to run the example and inspect the resulting traces.
 

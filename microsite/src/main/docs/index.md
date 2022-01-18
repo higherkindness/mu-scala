@@ -27,6 +27,7 @@ care of the boilerplate and non-functional requirements, including:
 * building high-performance [gRPC] servers and clients
 * building HTTP REST servers and clients using [http4s]
 * handling of [streaming requests and responses](guides/grpc-streaming) using [FS2] Stream
+* [accessing metadata on services](guides/accessing-metadata)
 * [distributed tracing](guides/distributed-tracing)
 * [metrics reporting](guides/metrics-reporting)
 * ... and plenty more features on the way!
