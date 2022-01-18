@@ -215,7 +215,6 @@ can check a full explanation and an example about securing communications.
 [gRPC guide]: https://grpc.io/docs/guides/
 [PBDirect]: https://github.com/47deg/pbdirect
 [scalamacros]: https://github.com/scalamacros/paradise
-[Monix]: https://monix.io/
 [cats-effect]: https://github.com/typelevel/cats-effect
 [Metrifier]: https://github.com/47deg/metrifier
 
