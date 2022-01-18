@@ -155,8 +155,7 @@ object calls {
       }
     }
 
-  // This is kind of ugly, but fixing the macro which calls the other methods in here would be complex,
-  // since it also handles monix etc, not just fs2-grpc
+  // This is kind of ugly, but fixing the macro which calls the other methods in here would be complex
   private def clientOptions(options: CallOptions): ClientOptions =
     ClientOptions.default.configureCallOptions(_ => options)
 }

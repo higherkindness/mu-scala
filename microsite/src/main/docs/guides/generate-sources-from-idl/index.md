@@ -9,7 +9,7 @@ permalink: /guides/generate-sources-from-idl
 
 While it is possible to use Mu by hand-writing your service definitions, message
 classes and clients in Scala, we recommend you use `sbt-mu-srcgen` to generate
-this code from Protobuf/Avro/OpenAPI IDL files.
+this code from Protobuf/Avro IDL files.
 
 IDL files are language-agnostic, more concise than Scala code, easily shared
 with 3rd parties, and supported by a lot of existing tools.
@@ -20,8 +20,6 @@ Mu can generate code from a number of different IDL formats:
   [Generating sources from Protocol Buffers](generate-sources-from-proto) for detailed instructions)
 * message classes, gRPC server and client from Avro `.avpr` or `.avdl` files (see
   [Generating sources from Avro](generate-sources-from-avro))
-* message classes and REST client from OpenAPI `.yaml` files (see the
-  [OpenAPI REST client tutorial](../tutorials/openapi-client))
 
 ## Plugin Installation
 

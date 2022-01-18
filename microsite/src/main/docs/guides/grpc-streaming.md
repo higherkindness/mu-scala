@@ -32,11 +32,9 @@ The relevant Avro issue is
 
 ## Stream implementation
 
-Mu supports both [Monix
-Observable](https://monix.io/docs/2x/reactive/observable.html) and [FS2
+Mu uses [FS2
 Stream](https://github.com/functional-streams-for-scala/fs2) for streaming of
-RPC requests and responses. You can choose whichever data type fits your
-application's needs best.
+RPC requests and responses.
 
 ## Service definition with streaming endpoints
 
