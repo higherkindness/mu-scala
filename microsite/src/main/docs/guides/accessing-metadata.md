@@ -7,12 +7,12 @@ permalink: /guides/accessing-metadata
 
 # Context on services
 
-Mu provides way to create contexts available in the client and/or in the server. Specifically, it provides the following features.
+Mu provides a way to create contexts available in the client and server. Specifically, it offers the following features.
 
 ## Client
 
 * For every RPC call, you need to create an initial context that will be passed to the client
-* The client will have the ability to operate and transform that context, that will be sent to the server in the headers.
+* The client will have the ability to operate and transform that context, which will be sent to the server in the headers.
 
 ## Server
 
@@ -20,7 +20,7 @@ Mu provides way to create contexts available in the client and/or in the server.
 
 ## How to use
 
-We'll assume the following service definition:
+Let's assume the following service definition:
 
 ```scala mdoc:silent
 import higherkindness.mu.rpc.protocol._
@@ -36,7 +36,7 @@ trait MyService[F[_]] {
 }
 ```
 
-Let's look at how to enable the context on the client side first.
+Let's look at enabling the context on the client-side first.
 
 ### Client side
 
@@ -91,10 +91,10 @@ trait ClientContext[F[_], C] {
 ```
 
 A `ClientContext` is an algebra that will take different information from the current call and the initial context (`current`)
-and need to generate a transformed context and a `io.grpc.Medatada`. The metadata is the information that will travel through
+and need to generate a transformed context and an `io.grpc.Medatada`. The metadata is the information that will travel through
 the wire in the requests.
 
-There's a utility `def` in the companion object for generating a `ClientContext` instance from a function:
+There's a `def` utility in the companion object for generating a `ClientContext` instance from a function:
 
 ```scala
 def impl[F[_], C](f: (C, Metadata) => F[Unit]): ClientContext[F, C]
@@ -146,7 +146,7 @@ class MyAmazingService[F[_]: Applicative] extends MyService[F] {
 }
 ```
 
-Ordinarily, if you were not using context, you would create a gRPC service
+In general, if you were not using context, you would need to create a gRPC service
 definition using the macro-generated `MyService.bindService` method, specifying
 your effect monad of choice:
 

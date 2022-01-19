@@ -71,7 +71,7 @@ options:
 
   - title: Accessing metadata on services
     menu_type: guides
-    url: guides/distributed-tracing
+    url: guides/accessing-metadata
 
   - title: Distributed tracing
     menu_type: guides
