@@ -273,7 +273,6 @@ object Utils extends CommonUtils {
     import service._
     import handlers.server._
     import higherkindness.mu.rpc.server._
-    import cats.instances.list._
     import cats.syntax.traverse._
 
     // ////////////////////////////////

@@ -18,7 +18,7 @@ package higherkindness.mu.rpc.dropwizard
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import cats.implicits._
+import cats.syntax.all._
 import com.codahale.metrics.MetricRegistry
 import higherkindness.mu.rpc.dropwizard.DropWizardMetrics._
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
