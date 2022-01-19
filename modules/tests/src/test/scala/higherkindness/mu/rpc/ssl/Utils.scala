@@ -71,7 +71,6 @@ object Utils extends CommonUtils {
 
     import service._
     import handlers.server._
-    import cats.instances.list._
     import cats.syntax.traverse._
 
     // ////////////////////////////////

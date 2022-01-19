@@ -15,8 +15,6 @@
  */
 
 package integrationtest.protobuf
-
-import cats.instances.int._
 import cats.syntax.applicative._
 import cats.syntax.functor._
 import fs2._

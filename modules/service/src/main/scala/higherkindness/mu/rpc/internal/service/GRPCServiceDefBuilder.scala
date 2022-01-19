@@ -18,7 +18,6 @@ package higherkindness.mu.rpc
 package internal.service
 
 import cats.effect.Sync
-import cats.instances.list._
 import cats.syntax.foldable._
 import cats.syntax.flatMap._
 import io.grpc._

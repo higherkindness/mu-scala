@@ -17,7 +17,6 @@
 package higherkindness.mu.rpc.healthcheck
 
 import cats.kernel.Order
-import cats.instances.string._
 import higherkindness.mu.rpc.healthcheck.unary.handler.HealthCheck
 
 object ordering {

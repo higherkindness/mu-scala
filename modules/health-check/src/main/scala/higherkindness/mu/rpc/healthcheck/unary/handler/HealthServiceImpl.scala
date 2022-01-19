@@ -18,7 +18,7 @@ package higherkindness.mu.rpc.healthcheck.unary.handler
 
 import cats.Functor
 import cats.effect.Sync
-import cats.implicits._
+import cats.syntax.all._
 import higherkindness.mu.rpc.healthcheck.unary.serviceUnary.HealthCheckServiceUnary
 import higherkindness.mu.rpc.protocol.Empty
 import cats.effect.Ref
