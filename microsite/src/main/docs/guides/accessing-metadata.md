@@ -70,7 +70,7 @@ To obtain a client with the context available, use `MyService.contextClient[F, C
 This returns a `MyService[Kleisli[F, C, *]]`, i.e. a client which takes
 an arbitrary `C` as input and returns a response inside the `F` effect.
 
-This method requires an implicit instance in the scope. Concretely a `ClientContext[F, C]`
+This method requires an implicit instance in scope, specifically a `ClientContext[F, C]`:
 
 ```scala
 import cats.effect.Resource
@@ -91,7 +91,7 @@ trait ClientContext[F[_], C] {
 ```
 
 A `ClientContext` is an algebra that will take different information from the current call and the initial context (`current`)
-and need to generate a transformed context and an `io.grpc.Medatada`. The metadata is the information that will travel through
+and generates a transformed context and an `io.grpc.Metadata`. The metadata is the information that will travel through
 the wire in the requests.
 
 There's a `def` utility in the companion object for generating a `ClientContext` instance from a function:
@@ -189,7 +189,7 @@ trait ServerContext[F[_], C] {
 }
 ```
 
-Like in the case of the client, we have a `def` in the companion object that make us easier to build instances of `ServerContext`s:
+Like in the case of the client, we have a `def` in the companion object that makes it easier to build instances of `ServerContext`s:
 
 ```scala
 def impl[F[_], C](f: Metadata => F[C]): ServerContext[F, C]
