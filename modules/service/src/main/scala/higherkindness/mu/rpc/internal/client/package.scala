@@ -19,9 +19,6 @@ package higherkindness.mu.rpc.internal
 import cats.effect.Async
 import cats.syntax.all._
 import com.google.common.util.concurrent.ListenableFuture
-import io.grpc.Metadata
-import io.grpc.Metadata.{ASCII_STRING_MARSHALLER, Key}
-import natchez.Kernel
 
 import scala.concurrent.ExecutionException
 import scala.util.Try
@@ -51,13 +48,5 @@ package object client {
 
       back.as(None)
     }
-
-  private[internal] def tracingKernelToHeaders(kernel: Kernel): Metadata = {
-    val headers = new Metadata()
-    kernel.toHeaders.foreach { case (k, v) =>
-      headers.put(Key.of(k, ASCII_STRING_MARSHALLER), v)
-    }
-    headers
-  }
 
 }

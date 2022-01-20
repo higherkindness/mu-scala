@@ -22,10 +22,9 @@ import cats.effect.std.Dispatcher
 import cats.syntax.functor._
 import fs2.Stream
 import fs2.grpc.server.{Fs2ServerCallHandler, GzipCompressor, ServerOptions}
-import higherkindness.mu.rpc.internal.server.extractTracingKernel
+import higherkindness.mu.rpc.internal.context.ServerContext
 import higherkindness.mu.rpc.protocol.{CompressionType, Gzip, Identity}
 import io.grpc.{Metadata, MethodDescriptor, ServerCallHandler}
-import natchez.{EntryPoint, Span}
 
 object handlers {
 
@@ -72,68 +71,57 @@ object handlers {
     Fs2ServerCallHandler[F](disp, serverCallOptions(compressionType))
       .streamingToStreamingCall[Req, Res]((stream, metadata) => Stream.force(f(stream, metadata)))
 
-  private type Traced[F[_], A]         = Kleisli[F, Span[F], A]
-  private type StreamOfTraced[F[_], A] = Stream[Kleisli[F, Span[F], *], A]
-
-  def tracingClientStreaming[F[_]: Async, Req, Res](
-      f: StreamOfTraced[F, Req] => Traced[F, Res],
+  def contextClientStreaming[F[_]: Async, C, Req, Res](
+      f: Stream[Kleisli[F, C, *], Req] => Kleisli[F, C, Res],
       descriptor: MethodDescriptor[Req, Res],
-      entrypoint: EntryPoint[F],
       disp: Dispatcher[F],
       compressionType: CompressionType
-  ): ServerCallHandler[Req, Res] =
+  )(implicit serverContext: ServerContext[F, C]): ServerCallHandler[Req, Res] =
     clientStreaming[F, Req, Res](
       { (req: Stream[F, Req], metadata: Metadata) =>
-        val kernel                          = extractTracingKernel(metadata)
-        val streamK: StreamOfTraced[F, Req] = req.translate(Kleisli.liftK[F, Span[F]])
-        entrypoint.continueOrElseRoot(descriptor.getFullMethodName(), kernel).use[Res] { span =>
-          f(streamK).run(span)
+        val streamK: Stream[Kleisli[F, C, *], Req] = req.translate(Kleisli.liftK[F, C])
+        serverContext[Req, Res](descriptor, metadata).use[Res] { context =>
+          f(streamK).run(context)
         }
       },
       disp,
       compressionType
     )
 
-  def tracingServerStreaming[F[_]: Async, Req, Res](
-      f: Req => Traced[F, StreamOfTraced[F, Res]],
+  def contextServerStreaming[F[_]: Async, C, Req, Res](
+      f: Req => Kleisli[F, C, Stream[Kleisli[F, C, *], Res]],
       descriptor: MethodDescriptor[Req, Res],
-      entrypoint: EntryPoint[F],
       disp: Dispatcher[F],
       compressionType: CompressionType
-  ): ServerCallHandler[Req, Res] =
+  )(implicit serverContext: ServerContext[F, C]): ServerCallHandler[Req, Res] =
     serverStreaming[F, Req, Res](
       { (req: Req, metadata: Metadata) =>
-        val kernel = extractTracingKernel(metadata)
-        entrypoint
-          .continueOrElseRoot(descriptor.getFullMethodName(), kernel)
-          .use[Stream[F, Res]] { span =>
-            val kleisli: Traced[F, StreamOfTraced[F, Res]] = f(req)
-            val fStreamK: F[StreamOfTraced[F, Res]]        = kleisli.run(span)
-            fStreamK.map(_.translate(Kleisli.applyK[F, Span[F]](span)))
+        serverContext[Req, Res](descriptor, metadata)
+          .use[Stream[F, Res]] { context =>
+            val kleisli: Kleisli[F, C, Stream[Kleisli[F, C, *], Res]] = f(req)
+            val fStreamK: F[Stream[Kleisli[F, C, *], Res]]            = kleisli.run(context)
+            fStreamK.map(_.translate(Kleisli.applyK[F, C](context)))
           }
       },
       disp,
       compressionType
     )
 
-  def tracingBidiStreaming[F[_]: Async, Req, Res](
-      f: StreamOfTraced[F, Req] => Traced[F, StreamOfTraced[F, Res]],
+  def contextBidiStreaming[F[_]: Async, C, Req, Res](
+      f: Stream[Kleisli[F, C, *], Req] => Kleisli[F, C, Stream[Kleisli[F, C, *], Res]],
       descriptor: MethodDescriptor[Req, Res],
-      entrypoint: EntryPoint[F],
       disp: Dispatcher[F],
       compressionType: CompressionType
-  ): ServerCallHandler[Req, Res] =
+  )(implicit serverContext: ServerContext[F, C]): ServerCallHandler[Req, Res] =
     bidiStreaming[F, Req, Res](
       { (req: Stream[F, Req], metadata: Metadata) =>
-        val kernel = extractTracingKernel(metadata)
-        val reqStreamK: StreamOfTraced[F, Req] =
-          req.translate(Kleisli.liftK[F, Span[F]])
-        entrypoint
-          .continueOrElseRoot(descriptor.getFullMethodName(), kernel)
-          .use[Stream[F, Res]] { span =>
-            val kleisli: Traced[F, StreamOfTraced[F, Res]] = f(reqStreamK)
-            val fStreamK: F[StreamOfTraced[F, Res]]        = kleisli.run(span)
-            fStreamK.map(_.translate(Kleisli.applyK[F, Span[F]](span)))
+        val reqStreamK: Stream[Kleisli[F, C, *], Req] =
+          req.translate(Kleisli.liftK[F, C])
+        serverContext[Req, Res](descriptor, metadata)
+          .use[Stream[F, Res]] { context =>
+            val kleisli: Kleisli[F, C, Stream[Kleisli[F, C, *], Res]] = f(reqStreamK)
+            val fStreamK: F[Stream[Kleisli[F, C, *], Res]]            = kleisli.run(context)
+            fStreamK.map(_.translate(Kleisli.applyK[F, C](context)))
           }
       },
       disp,

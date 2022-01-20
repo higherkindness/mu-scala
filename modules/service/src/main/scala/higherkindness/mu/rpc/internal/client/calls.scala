@@ -18,10 +18,9 @@ package higherkindness.mu.rpc.internal.client
 
 import cats.data.Kleisli
 import cats.effect.{Async, Sync}
-import cats.syntax.flatMap._
+import higherkindness.mu.rpc.internal.context.ClientContext
 import io.grpc.stub.ClientCalls
 import io.grpc.{CallOptions, Channel, Metadata, MethodDescriptor}
-import natchez.Span
 
 object calls {
 
@@ -42,18 +41,15 @@ object calls {
       )
     )
 
-  def tracingUnary[F[_]: Async, Req, Res](
+  def contextUnary[F[_]: Async, C, Req, Res](
       request: Req,
       descriptor: MethodDescriptor[Req, Res],
       channel: Channel,
       options: CallOptions
-  ): Kleisli[F, Span[F], Res] =
-    Kleisli[F, Span[F], Res] { parentSpan =>
-      parentSpan.span(descriptor.getFullMethodName).use { span =>
-        span.kernel.flatMap { kernel =>
-          val headers = tracingKernelToHeaders(kernel)
-          unary[F, Req, Res](request, descriptor, channel, options, headers)
-        }
+  )(implicit clientContext: ClientContext[F, C]): Kleisli[F, C, Res] =
+    Kleisli[F, C, Res] { context =>
+      clientContext[Req, Res](descriptor, channel, options, context).use { c =>
+        unary[F, Req, Res](request, descriptor, channel, options, c.metadata)
       }
     }
 
