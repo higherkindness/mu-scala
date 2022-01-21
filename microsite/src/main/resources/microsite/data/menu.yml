@@ -69,6 +69,10 @@ options:
     menu_type: guides
     url: guides/metrics-reporting
 
+  - title: Accessing metadata on services
+    menu_type: guides
+    url: guides/accessing-metadata
+
   - title: Distributed tracing
     menu_type: guides
     url: guides/distributed-tracing
