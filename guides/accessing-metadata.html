@@ -1,0 +1,244 @@
+<!DOCTYPE html><html><head><title>Mu-Scala: Accessing metadata on services</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="47 Degrees Open Source" /><meta name="description" content="A purely functional library for building RPC endpoint-based services" /><meta name="og:image" content="/mu-scala/img/poster.png" /><meta name="image" property="og:image" content="/mu-scala/img/poster.png" /><meta name="og:title" content="Mu-Scala: Accessing metadata on services" /><meta name="title" property="og:title" content="Mu-Scala: Accessing metadata on services" /><meta name="og:site_name" content="Mu-Scala" /><meta name="og:url" content="https://github.com/higherkindness/mu-scala" /><meta name="og:type" content="website" /><meta name="og:description" content="A purely functional library for building RPC endpoint-based services" /><link rel="icon" type="image/png" href="/mu-scala/img/favicon.png" /><meta name="twitter:title" content="Mu-Scala: Accessing metadata on services" /><meta name="twitter:image" content="/mu-scala/img/poster.png" /><meta name="twitter:description" content="A purely functional library for building RPC endpoint-based services" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/mu-scala/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/mu-scala/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/mu-scala/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/mu-scala/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/mu-scala/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/mu-scala/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/mu-scala/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/mu-scala/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/mu-scala/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/mu-scala/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/mu-scala/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/mu-scala/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/mu-scala/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/mu-scala/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/mu-scala/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/mu-scala/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/mu-scala/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/mu-scala/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/mu-scala/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/mu-scala/img/favicon310x150.png" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/mu-scala/highlight/styles/github-gist.css" /><link rel="stylesheet" href="/mu-scala/css/light-style.css" /><link rel="stylesheet" href="/mu-scala/css/mu-styles.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><div id="sidebar-brand"><a href="/mu-scala/" class="brand"><div class="brand-wrapper"></div><span>Mu-Scala</span></a><button id="main-toggle" class="sidebar-toggle"><span class="close"></span></button></div><div class="sidebar-nav">           <div class="sidebar-nav-item  "><a href="/mu-scala/guides" title="How-To Guides" class="">How-To Guides</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/grpc-streaming" title="gRPC streaming" class="">gRPC streaming</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/custom-grpc-serialization" title="Custom gRPC serialization" class="">Custom gRPC serialization</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/metrics-reporting" title="Metrics reporting" class="">Metrics reporting</a></div> <div class="sidebar-nav-item active "><a href="/mu-scala/guides/accessing-metadata" title="Accessing metadata on services" class="active">Accessing metadata on services</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/distributed-tracing" title="Distributed tracing" class="">Distributed tracing</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/ssl-tls" title="SSL/TLS" class="">SSL/TLS</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/generate-sources-from-idl" title="Generate sources from IDL" class="drop-nested">Generate sources from IDL</a><i class="fa fa-angle-right"></i><div class="sub-section"> <a href="/mu-scala/guides/generate-sources-from-avro" title="Avro" class="">Avro</a> <a href="/mu-scala/guides/generate-sources-from-proto" title="Protocol Buffers" class="">Protocol Buffers</a> <a href="/mu-scala/guides/generate-sources-from-compendium" title="Compendium" class="">Compendium</a></div></div>     </div></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li class="search-nav"><div id="search-dropdown"><label><i class="fa fa-search"></i>Search</label><input id="search-bar" type="text" placeholder="Enter keywords here..." onclick="displayToggleSearch(event)" /><ul id="search-dropdown-content" class="dropdown dropdown-content"></ul></div></li><li id="gh-eyes-item" class="hidden-xs to-uppercase"><a href="https://github.com/higherkindness/mu-scala" target="_blank" rel="noopener noreferrer"><i class="fa fa-eye"></i><span>Watchers<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs to-uppercase"><a href="https://github.com/higherkindness/mu-scala" target="_blank" rel="noopener noreferrer"><i class="fa fa-star-o"></i><span>Stars<span id="stars" class="label label-default">--</span></span></a></li></ul></div></div></div></div><div id="content" data-github-owner="higherkindness" data-github-repo="mu-scala"><div class="content-wrapper"><section><h1 id="context-on-services">Context on services</h1>
+
+<p>Mu provides a way to create contexts available in the client and server. Specifically, it offers the following features.</p>
+
+<h2 id="client">Client</h2>
+
+<ul>
+  <li>For every RPC call, you need to create an initial context that will be passed to the client</li>
+  <li>The client will have the ability to operate and transform that context, which will be sent to the server in the headers.</li>
+</ul>
+
+<h2 id="server">Server</h2>
+
+<ul>
+  <li>The server will have the ability to extract the context information from the request headers and use them.</li>
+</ul>
+
+<h2 id="how-to-use">How to use</h2>
+
+<p>Let’s assume the following service definition:</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">higherkindness.mu.rpc.protocol._</span>
+
+<span class="k">case</span> <span class="k">class</span> <span class="nc">HelloRequest</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
+<span class="k">case</span> <span class="k">class</span> <span class="nc">HelloResponse</span><span class="o">(</span><span class="n">greeting</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
+
+<span class="nd">@service</span><span class="o">(</span><span class="nc">Protobuf</span><span class="o">,</span> <span class="n">namespace</span> <span class="k">=</span> <span class="nc">Some</span><span class="o">(</span><span class="s">"com.foo"</span><span class="o">))</span>
+<span class="k">trait</span> <span class="nc">MyService</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
+
+  <span class="k">def</span> <span class="nf">SayHello</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Let’s look at enabling the context on the client-side first.</p>
+
+<h3 id="client-side">Client side</h3>
+
+<p>Ordinarily, if you don’t want to use this feature, you would create a cats-effect
+<code class="highlighter-rouge">Resource</code> of an RPC client using the macro-generated <code class="highlighter-rouge">MyService.client</code> method:</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect._</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.</span><span class="o">{</span><span class="nc">ChannelFor</span><span class="o">,</span> <span class="nc">ChannelForAddress</span><span class="o">}</span>
+
+<span class="k">object</span> <span class="nc">OrdinaryClientApp</span> <span class="k">extends</span> <span class="nc">IOApp</span> <span class="o">{</span>
+
+  <span class="k">val</span> <span class="nv">channelFor</span><span class="k">:</span> <span class="kt">ChannelFor</span> <span class="o">=</span> <span class="nc">ChannelForAddress</span><span class="o">(</span><span class="s">"localhost"</span><span class="o">,</span> <span class="mi">8080</span><span class="o">)</span>
+
+  <span class="k">val</span> <span class="nv">clientRes</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">MyService</span><span class="o">[</span><span class="kt">IO</span><span class="o">]]</span> <span class="k">=</span>
+    <span class="nv">MyService</span><span class="o">.</span><span class="py">client</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="n">channelFor</span><span class="o">)</span>
+
+  <span class="k">def</span> <span class="nf">run</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">ExitCode</span><span class="o">]</span> <span class="k">=</span>
+    <span class="nv">clientRes</span><span class="o">.</span><span class="py">use</span> <span class="o">{</span> <span class="n">client</span> <span class="k">=&gt;</span>
+      <span class="k">for</span> <span class="o">{</span>
+        <span class="n">resp</span> <span class="k">&lt;-</span> <span class="nv">client</span><span class="o">.</span><span class="py">SayHello</span><span class="o">(</span><span class="nc">HelloRequest</span><span class="o">(</span><span class="s">"Chris"</span><span class="o">))</span>
+        <span class="k">_</span>    <span class="k">&lt;-</span> <span class="nc">IO</span><span class="o">(</span><span class="nf">println</span><span class="o">(</span><span class="n">s</span><span class="s">"Response: $resp"</span><span class="o">))</span>
+      <span class="o">}</span> <span class="nf">yield</span> <span class="o">(</span><span class="nv">ExitCode</span><span class="o">.</span><span class="py">Success</span><span class="o">)</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>To obtain a client with the context available, use <code class="highlighter-rouge">MyService.contextClient[F, C]</code> instead of
+<code class="highlighter-rouge">MyService.client</code>.</p>
+
+<p>This returns a <code class="highlighter-rouge">MyService[Kleisli[F, C, *]]</code>, i.e. a client which takes
+an arbitrary <code class="highlighter-rouge">C</code> as input and returns a response inside the <code class="highlighter-rouge">F</code> effect.</p>
+
+<p>This method requires an implicit instance in scope, specifically a <code class="highlighter-rouge">ClientContext[F, C]</code>:</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.Resource</span>
+<span class="k">import</span> <span class="nn">io.grpc.</span><span class="o">{</span><span class="nc">CallOptions</span><span class="o">,</span> <span class="nc">Channel</span><span class="o">,</span> <span class="nc">Metadata</span><span class="o">,</span> <span class="nc">MethodDescriptor</span><span class="o">}</span>
+
+<span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">ClientContextMetaData</span><span class="o">[</span><span class="kt">C</span><span class="o">](</span><span class="n">context</span><span class="k">:</span> <span class="kt">C</span><span class="o">,</span> <span class="n">metadata</span><span class="k">:</span> <span class="kt">Metadata</span><span class="o">)</span>
+
+<span class="k">trait</span> <span class="nc">ClientContext</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span>, <span class="kt">C</span><span class="o">]</span> <span class="o">{</span>
+
+  <span class="k">def</span> <span class="nf">apply</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Res</span><span class="o">](</span>
+      <span class="n">descriptor</span><span class="k">:</span> <span class="kt">MethodDescriptor</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Res</span><span class="o">],</span>
+      <span class="n">channel</span><span class="k">:</span> <span class="kt">Channel</span><span class="o">,</span>
+      <span class="n">options</span><span class="k">:</span> <span class="kt">CallOptions</span><span class="o">,</span>
+      <span class="n">current</span><span class="k">:</span> <span class="kt">C</span>
+  <span class="o">)</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">ClientContextMetaData</span><span class="o">[</span><span class="kt">C</span><span class="o">]]</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>A <code class="highlighter-rouge">ClientContext</code> is an algebra that will take different information from the current call and the initial context (<code class="highlighter-rouge">current</code>)
+and generates a transformed context and an <code class="highlighter-rouge">io.grpc.Metadata</code>. The metadata is the information that will travel through
+the wire in the requests.</p>
+
+<p>There’s a <code class="highlighter-rouge">def</code> utility in the companion object for generating a <code class="highlighter-rouge">ClientContext</code> instance from a function:</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">impl</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span>, <span class="kt">C</span><span class="o">](</span><span class="n">f</span><span class="k">:</span> <span class="o">(</span><span class="kt">C</span><span class="o">,</span> <span class="kt">Metadata</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="n">F</span><span class="o">[</span><span class="kt">Unit</span><span class="o">])</span><span class="k">:</span> <span class="kt">ClientContext</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">C</span><span class="o">]</span>
+</code></pre></div></div>
+
+<p>For example, suppose we want to send a “tag” available in the headers:</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.data.Kleisli</span>
+<span class="k">import</span> <span class="nn">io.grpc.Metadata</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.internal.context.ClientContext</span>
+
+<span class="k">object</span> <span class="nc">TracingClientApp</span> <span class="k">extends</span> <span class="nc">IOApp</span> <span class="o">{</span>
+
+  <span class="k">val</span> <span class="nv">channelFor</span><span class="k">:</span> <span class="kt">ChannelFor</span> <span class="o">=</span> <span class="nc">ChannelForAddress</span><span class="o">(</span><span class="s">"localhost"</span><span class="o">,</span> <span class="mi">8080</span><span class="o">)</span>
+  
+  <span class="k">val</span> <span class="nv">key</span><span class="k">:</span> <span class="kt">Metadata.Key</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="nv">Metadata</span><span class="o">.</span><span class="py">Key</span><span class="o">.</span><span class="py">of</span><span class="o">(</span><span class="s">"key"</span><span class="o">,</span> <span class="nv">Metadata</span><span class="o">.</span><span class="py">ASCII_STRING_MARSHALLER</span><span class="o">)</span>
+  
+  <span class="k">implicit</span> <span class="k">val</span> <span class="nv">cc</span><span class="k">:</span> <span class="kt">ClientContext</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="nv">ClientContext</span><span class="o">.</span><span class="py">impl</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">String</span><span class="o">]((</span><span class="n">tag</span><span class="o">,</span> <span class="n">md</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="nc">IO</span><span class="o">(</span><span class="nv">md</span><span class="o">.</span><span class="py">put</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">tag</span><span class="o">)))</span>
+
+  <span class="k">val</span> <span class="nv">clientRes</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">MyService</span><span class="o">[</span><span class="kt">Kleisli</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">String</span>, <span class="kt">*</span><span class="o">]]]</span> <span class="k">=</span>
+    <span class="nv">MyService</span><span class="o">.</span><span class="py">contextClient</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">String</span><span class="o">](</span><span class="n">channelFor</span><span class="o">)</span>
+
+  <span class="k">def</span> <span class="nf">run</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">ExitCode</span><span class="o">]</span> <span class="k">=</span>
+    <span class="nv">clientRes</span><span class="o">.</span><span class="py">use</span> <span class="o">{</span> <span class="n">client</span> <span class="k">=&gt;</span>
+      <span class="k">val</span> <span class="nv">kleisli</span> <span class="k">=</span> <span class="nv">client</span><span class="o">.</span><span class="py">SayHello</span><span class="o">(</span><span class="nc">HelloRequest</span><span class="o">(</span><span class="s">"Chris"</span><span class="o">))</span>
+      <span class="k">for</span> <span class="o">{</span>
+        <span class="n">resp</span> <span class="k">&lt;-</span> <span class="nv">kleisli</span><span class="o">.</span><span class="py">run</span><span class="o">(</span><span class="s">"my-tag"</span><span class="o">)</span>
+        <span class="k">_</span>    <span class="k">&lt;-</span> <span class="nc">IO</span><span class="o">(</span><span class="nf">println</span><span class="o">(</span><span class="n">s</span><span class="s">"Response: $resp"</span><span class="o">))</span>
+      <span class="o">}</span> <span class="nf">yield</span> <span class="o">(</span><span class="nv">ExitCode</span><span class="o">.</span><span class="py">Success</span><span class="o">)</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="server-side">Server side</h3>
+
+<p>For the server, as usual, we need an implementation of the service (shown below):</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.Applicative</span>
+<span class="k">import</span> <span class="nn">cats.syntax.applicative._</span>
+
+<span class="k">class</span> <span class="nc">MyAmazingService</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span><span class="kt">:</span> <span class="kt">Applicative</span><span class="o">]</span> <span class="nc">extends</span> <span class="nc">MyService</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span> <span class="o">{</span>
+
+  <span class="k">def</span> <span class="nf">SayHello</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span> <span class="k">=</span>
+    <span class="nc">HelloResponse</span><span class="o">(</span><span class="n">s</span><span class="s">"Hello, ${req.name}!"</span><span class="o">).</span><span class="py">pure</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>In general, if you were not using context, you would need to create a gRPC service
+definition using the macro-generated <code class="highlighter-rouge">MyService.bindService</code> method, specifying
+your effect monad of choice:</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect.</span><span class="o">{</span><span class="nc">IO</span><span class="o">,</span> <span class="nc">IOApp</span><span class="o">,</span> <span class="nc">ExitCode</span><span class="o">}</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.server.</span><span class="o">{</span><span class="nc">GrpcServer</span><span class="o">,</span> <span class="nc">AddService</span><span class="o">}</span>
+
+<span class="k">object</span> <span class="nc">OrdinaryServer</span> <span class="k">extends</span> <span class="nc">IOApp</span> <span class="o">{</span>
+
+  <span class="k">implicit</span> <span class="k">val</span> <span class="nv">service</span><span class="k">:</span> <span class="kt">MyService</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">MyAmazingService</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
+
+  <span class="k">def</span> <span class="nf">run</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">ExitCode</span><span class="o">]</span> <span class="k">=</span> <span class="o">(</span><span class="k">for</span> <span class="o">{</span>
+    <span class="n">serviceDef</span> <span class="k">&lt;-</span> <span class="nv">MyService</span><span class="o">.</span><span class="py">bindService</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
+    <span class="k">_</span>          <span class="k">&lt;-</span> <span class="nv">GrpcServer</span><span class="o">.</span><span class="py">defaultServer</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="mi">8080</span><span class="o">,</span> <span class="nc">List</span><span class="o">(</span><span class="nc">AddService</span><span class="o">(</span><span class="n">serviceDef</span><span class="o">)))</span>
+  <span class="o">}</span> <span class="nf">yield</span> <span class="o">()).</span><span class="py">useForever</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>To use the same service with context enabled, you need to call the
+<code class="highlighter-rouge">MyService.bindContextService</code> method instead.</p>
+
+<p><code class="highlighter-rouge">bindContextService[F[_], C]</code> differs from <code class="highlighter-rouge">bindService[F[_]]</code> in two ways, which
+we will explain below.</p>
+
+<ol>
+  <li>It takes a <code class="highlighter-rouge">MyService</code> as an implicit argument, but instead of a
+<code class="highlighter-rouge">MyService[F]</code> it requires a <code class="highlighter-rouge">MyService[Kleisli[F, C, *]]</code>.</li>
+  <li>It expects an implicit instance of <code class="highlighter-rouge">ServerContext[F, C]</code> in the scope.</li>
+</ol>
+
+<p>A <code class="highlighter-rouge">ServerContext[F, C]</code> is an algebra that specifies how to build a context from the metadata</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.effect._</span>
+<span class="k">import</span> <span class="nn">io.grpc.</span><span class="o">{</span><span class="nc">Metadata</span><span class="o">,</span> <span class="nc">MethodDescriptor</span><span class="o">}</span>
+
+<span class="k">trait</span> <span class="nc">ServerContext</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span>, <span class="kt">C</span><span class="o">]</span> <span class="o">{</span>
+
+  <span class="k">def</span> <span class="nf">apply</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Res</span><span class="o">](</span><span class="n">descriptor</span><span class="k">:</span> <span class="kt">MethodDescriptor</span><span class="o">[</span><span class="kt">Req</span>, <span class="kt">Res</span><span class="o">],</span> <span class="n">metadata</span><span class="k">:</span> <span class="kt">Metadata</span><span class="o">)</span><span class="k">:</span> <span class="kt">Resource</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">C</span><span class="o">]</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Like in the case of the client, we have a <code class="highlighter-rouge">def</code> in the companion object that makes it easier to build instances of <code class="highlighter-rouge">ServerContext</code>s:</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">impl</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span>, <span class="kt">C</span><span class="o">](</span><span class="n">f</span><span class="k">:</span> <span class="kt">Metadata</span> <span class="o">=&gt;</span> <span class="n">F</span><span class="o">[</span><span class="kt">C</span><span class="o">])</span><span class="k">:</span> <span class="kt">ServerContext</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">C</span><span class="o">]</span>
+</code></pre></div></div>
+
+<p>Then, to get access to the context in the service, we can implement the service using the <code class="highlighter-rouge">Kleisli</code> as the <em>F-type</em>:</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.Applicative</span>
+<span class="k">import</span> <span class="nn">cats.syntax.applicative._</span>
+
+<span class="k">class</span> <span class="nc">MyAmazingContextService</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]</span><span class="kt">:</span> <span class="kt">Applicative</span><span class="o">]</span> <span class="nc">extends</span> <span class="nc">MyService</span><span class="o">[</span><span class="kt">Kleisli</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">String</span>, <span class="kt">*</span><span class="o">]]</span> <span class="o">{</span>
+
+  <span class="k">def</span> <span class="nf">SayHello</span><span class="o">(</span><span class="n">req</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">Kleisli</span><span class="o">[</span><span class="kt">F</span>, <span class="kt">String</span>, <span class="kt">HelloResponse</span><span class="o">]</span> <span class="k">=</span> <span class="nc">Kleisli</span> <span class="o">{</span> <span class="n">tag</span> <span class="k">=&gt;</span>
+    <span class="c1">// You can use `tag` here</span>
+    <span class="nc">HelloResponse</span><span class="o">(</span><span class="n">s</span><span class="s">"Hello, ${req.name}!"</span><span class="o">).</span><span class="py">pure</span><span class="o">[</span><span class="kt">F</span><span class="o">]</span>
+  <span class="o">}</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h4 id="using-bindcontextservice">Using bindContextService</h4>
+
+<p>Putting all this together, your server setup code will look something like this:</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.data.Kleisli</span>
+<span class="k">import</span> <span class="nn">higherkindness.mu.rpc.internal.context.ServerContext</span>
+<span class="k">import</span> <span class="nn">io.grpc.Metadata</span>
+
+<span class="k">object</span> <span class="nc">TracingServer</span> <span class="k">extends</span> <span class="nc">IOApp</span> <span class="o">{</span>
+
+  <span class="k">implicit</span> <span class="k">val</span> <span class="nv">service</span><span class="k">:</span> <span class="kt">MyService</span><span class="o">[</span><span class="kt">Kleisli</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">String</span>, <span class="kt">*</span><span class="o">]]</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">MyAmazingContextService</span><span class="o">[</span><span class="kt">IO</span><span class="o">]</span>
+  
+  <span class="k">val</span> <span class="nv">key</span><span class="k">:</span> <span class="kt">Metadata.Key</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="nv">Metadata</span><span class="o">.</span><span class="py">Key</span><span class="o">.</span><span class="py">of</span><span class="o">(</span><span class="s">"key"</span><span class="o">,</span> <span class="nv">Metadata</span><span class="o">.</span><span class="py">ASCII_STRING_MARSHALLER</span><span class="o">)</span>
+  <span class="k">implicit</span> <span class="k">val</span> <span class="nv">sc</span><span class="k">:</span> <span class="kt">ServerContext</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">String</span><span class="o">]</span> <span class="k">=</span> <span class="nv">ServerContext</span><span class="o">.</span><span class="py">impl</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">String</span><span class="o">](</span><span class="n">md</span> <span class="k">=&gt;</span> <span class="nc">IO</span><span class="o">(</span><span class="nv">md</span><span class="o">.</span><span class="py">get</span><span class="o">(</span><span class="n">key</span><span class="o">)))</span>
+
+  <span class="k">def</span> <span class="nf">run</span><span class="o">(</span><span class="n">args</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">ExitCode</span><span class="o">]</span> <span class="k">=</span>
+    <span class="nv">MyService</span><span class="o">.</span><span class="py">bindContextService</span><span class="o">[</span><span class="kt">IO</span>, <span class="kt">String</span><span class="o">]</span>
+      <span class="o">.</span><span class="py">flatMap</span> <span class="o">{</span> <span class="n">serviceDef</span> <span class="k">=&gt;</span>
+        <span class="nv">GrpcServer</span><span class="o">.</span><span class="py">defaultServer</span><span class="o">[</span><span class="kt">IO</span><span class="o">](</span><span class="mi">8080</span><span class="o">,</span> <span class="nc">List</span><span class="o">(</span><span class="nc">AddService</span><span class="o">(</span><span class="n">serviceDef</span><span class="o">)))</span>
+      <span class="o">}.</span><span class="py">useForever</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+</section></div></div></div></div><script src="/mu-scala/highlight/highlight.pack.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/protobuf.min.js"></script><script src="/mu-scala/lunr/lunr.js"></script><script>
+// For all code blocks, copy the language from the containing div
+// to the inner code tag (where hljs expects it to be)
+const langPrefix = 'language-';
+document.querySelectorAll(`div[class^='${langPrefix}']`).forEach(function(div) {
+  div.classList.forEach(function(cssClass) {
+    if (cssClass.startsWith(langPrefix)) {
+      const lang = cssClass.substring(langPrefix.length);
+      div.querySelectorAll('pre code').forEach(function(code) {
+        code.classList.add(lang);
+      });
+    }
+  });
+});
+
+hljs.configure({languages:['scala','java','bash','protobuf']});
+hljs.initHighlightingOnLoad();
+      </script><script>console.info('\x57\x65\x62\x73\x69\x74\x65\x20\x62\x75\x69\x6c\x74\x20\x77\x69\x74\x68\x3a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x5f\x5f\x0a\x20\x20\x20\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x5f\x20\x20\x2f\x20\x2f\x5f\x20\x20\x20\x20\x20\x20\x5f\x5f\x5f\x5f\x20\x5f\x5f\x5f\x20\x20\x28\x5f\x29\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x28\x5f\x29\x20\x2f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x0a\x20\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x60\x5f\x5f\x20\x5c\x2f\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x20\x2f\x20\x5f\x5f\x2f\x20\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x0a\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x5f\x2f\x20\x2f\x20\x2f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x5f\x5f\x2f\x20\x2f\x20\x20\x2f\x20\x2f\x5f\x2f\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x20\x2f\x5f\x2f\x20\x20\x5f\x5f\x28\x5f\x5f\x20\x20\x29\x0a\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2e\x5f\x5f\x5f\x2f\x5c\x5f\x5f\x2f\x20\x20\x20\x20\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x2f\x20\x20\x20\x5c\x5f\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x0a\x0a\x68\x74\x74\x70\x73\x3a\x2f\x2f\x34\x37\x64\x65\x67\x2e\x67\x69\x74\x68\x75\x62\x2e\x69\x6f\x2f\x73\x62\x74\x2d\x6d\x69\x63\x72\x6f\x73\x69\x74\x65\x73')</script><script>((window.gitter = {}).chat = {}).options = {
+room: '47deg/mu'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/mu-scala/js/search.js"></script><script src="/mu-scala/js/docs.js"></script></body></html>
