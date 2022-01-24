@@ -11,7 +11,6 @@ The maintainers of the project are:
 - [![alejandrohdezma](https://avatars.githubusercontent.com/u/9027541?v=4&s=20) **Alejandro Hernández (alejandrohdezma)**](https://github.com/alejandrohdezma)
 - [![BenFradet](https://avatars.githubusercontent.com/u/1737211?v=4&s=20) **Ben Fradet (BenFradet)**](https://github.com/BenFradet)
 - [![cb372](https://avatars.githubusercontent.com/u/106760?v=4&s=20) **Chris Birchall (cb372)**](https://github.com/cb372)
-- [![fedefernandez](https://avatars.githubusercontent.com/u/720923?v=4&s=20) **Fede Fernández (fedefernandez)**](https://github.com/fedefernandez)
 - [![JesusMtnez](https://avatars.githubusercontent.com/u/8639179?v=4&s=20) **Jesús Martínez (JesusMtnez)**](https://github.com/JesusMtnez)
 - [![juanpedromoreno](https://avatars.githubusercontent.com/u/4879373?v=4&s=20) **Juan Pedro Moreno (juanpedromoreno)**](https://github.com/juanpedromoreno)
 - [![pepegar](https://avatars.githubusercontent.com/u/694179?v=4&s=20) **Pepe García (pepegar)**](https://github.com/pepegar)
