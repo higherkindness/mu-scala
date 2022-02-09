@@ -178,8 +178,8 @@ class RPCServiceModel[C <: Context](val c: C) {
 
     val bindContextService: DefDef = q"""
       def bindContextService[$F_, $C](implicit ..${bindContextServiceImplicits(
-      C
-    )}): _root_.cats.effect.Resource[$F, _root_.io.grpc.ServerServiceDefinition] =
+        C
+      )}): _root_.cats.effect.Resource[$F, _root_.io.grpc.ServerServiceDefinition] =
         _root_.cats.effect.std.Dispatcher.apply[$F](CE).evalMap { disp =>
           _root_.higherkindness.mu.rpc.internal.service.GRPCServiceDefBuilder.build[$F](
             ${lit(fullServiceName)},
@@ -279,8 +279,8 @@ class RPCServiceModel[C <: Context](val c: C) {
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
       )(implicit ..${clientContextClassImplicits(C)})
         extends _root_.io.grpc.stub.AbstractStub[$ContextClient[$F, $C]](channel, options) with $serviceName[${kleisliFContext(
-        C
-      )}] {
+          C
+        )}] {
         override def build(channel: _root_.io.grpc.Channel, options: _root_.io.grpc.CallOptions): $ContextClient[$F, $C] =
             new $ContextClient[$F, $C](channel, options)
 
@@ -296,8 +296,8 @@ class RPCServiceModel[C <: Context](val c: C) {
           List(_root_.higherkindness.mu.rpc.channel.UsePlaintext()),
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
       )(implicit ..${clientContextClassImplicits(
-        C
-      )}): _root_.cats.effect.Resource[F, $serviceName[${kleisliFContext(C)}]] =
+          C
+        )}): _root_.cats.effect.Resource[F, $serviceName[${kleisliFContext(C)}]] =
         _root_.cats.effect.Resource.make(
           new _root_.higherkindness.mu.rpc.channel.ManagedChannelInterpreter[$F](channelFor, channelConfigList).build
         )(channel =>
@@ -332,8 +332,8 @@ class RPCServiceModel[C <: Context](val c: C) {
         channel: $F[_root_.io.grpc.ManagedChannel],
         options: _root_.io.grpc.CallOptions = _root_.io.grpc.CallOptions.DEFAULT
       )(implicit ..${clientContextClassImplicits(
-        C
-      )}): _root_.cats.effect.Resource[$F, $serviceName[${kleisliFContext(C)}]] =
+          C
+        )}): _root_.cats.effect.Resource[$F, $serviceName[${kleisliFContext(C)}]] =
         _root_.cats.effect.Resource.make(channel)(channel =>
           CE.void(CE.delay(channel.shutdown()))
         ).flatMap(ch =>

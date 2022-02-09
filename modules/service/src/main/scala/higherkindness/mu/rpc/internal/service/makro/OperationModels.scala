@@ -186,8 +186,8 @@ class OperationModels[C <: Context](val c: C) {
         // def foo(input: Stream[Kleisli[F, MC, *], Req]): Kleisli[F, MC, Resp]
         q"""
         def $name(input: _root_.fs2.Stream[${kleisliFContext(
-          C
-        )}, $reqElemType]): ${kleisliContextFResp(C)} =
+            C
+          )}, $reqElemType]): ${kleisliContextFResp(C)} =
           ${clientContextCallMethodFor(C, "contextClientStreaming")}
         """
       case (Some(ResponseStreaming), _: Fs2StreamTpe) =>
