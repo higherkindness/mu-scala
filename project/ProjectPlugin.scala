@@ -16,12 +16,12 @@ object ProjectPlugin extends AutoPlugin {
     lazy val V = new {
       val avro4s: String                = "4.0.12"
       val betterMonadicFor: String      = "0.3.1"
-      val catsEffect: String            = "3.3.4"
+      val catsEffect: String            = "3.3.5"
       val dockerItScala                 = "0.9.9"
-      val dropwizard: String            = "4.2.7"
+      val dropwizard: String            = "4.2.8"
       val enumeratum: String            = "1.7.0"
       val fs2: String                   = "3.2.4"
-      val fs2Grpc: String               = "2.4.3"
+      val fs2Grpc: String               = "2.4.4"
       val grpc: String                  = "1.44.0"
       val kindProjector: String         = "0.13.2"
       val log4cats: String              = "2.2.0"
@@ -33,14 +33,14 @@ object ProjectPlugin extends AutoPlugin {
       val nettySSL: String              = "2.0.46.Final"
       val paradise: String              = "2.1.1"
       val pbdirect: String              = "0.7.0"
-      val prometheus: String            = "0.14.1"
+      val prometheus: String            = "0.15.0"
       val pureconfig: String            = "0.17.1"
       val scalaCollectionCompat: String = "2.6.0"
       val scalacheckToolbox: String     = "0.6.0"
       val scalamock: String             = "5.1.0"
       val scalatest: String             = "3.2.11"
       val scalatestplusScheck: String   = "3.2.2.0"
-      val slf4j: String                 = "1.7.35"
+      val slf4j: String                 = "1.7.36"
     }
 
     lazy val rpcServiceSettings: Seq[Def.Setting[_]] = Seq(
