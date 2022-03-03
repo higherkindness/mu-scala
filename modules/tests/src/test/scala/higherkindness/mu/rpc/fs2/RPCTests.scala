@@ -77,7 +77,7 @@ class RPCTests extends CatsEffectSuite {
           clientProgram("RTE", s)
             .assertEquals(List(C("INTERNAL: RTE", a1))) *>
           clientProgram("Thrown", s)
-            .assertEquals(List(C("INTERNAL: Thrown", a1)))
+            .assertEquals(List(C("UNKNOWN", a1)))
       }
   }
 
