@@ -47,7 +47,7 @@ Before starting, here is one import we'll need:
 import higherkindness.mu.rpc.protocol._
 ```
 
-And here are the equest/response models for our service:
+And here are the request/response models for our service:
 
 ```scala mdoc:silent
 case class HelloRequest(greeting: String)
