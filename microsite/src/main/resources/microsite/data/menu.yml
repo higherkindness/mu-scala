@@ -93,9 +93,6 @@ options:
       - title: Protocol Buffers
         url: guides/generate-sources-from-proto
 
-      - title: Compendium
-        url: guides/generate-sources-from-compendium
-
   # Menu displayed on Reference pages
 
   - title: Reference
