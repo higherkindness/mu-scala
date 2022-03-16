@@ -132,7 +132,10 @@ class RPCServiceModel[C <: Context](val c: C) {
 
     val encodersImport = serializationType match {
       case Protobuf =>
-        List(q"import _root_.higherkindness.mu.rpc.internal.encoders.pbd._")
+        List(
+          q"import _root_.higherkindness.mu.rpc.internal.encoders.pbd._",
+          q"import _root_.higherkindness.mu.rpc.internal.encoders.spb._"
+        )
       case Avro =>
         List(q"import _root_.higherkindness.mu.rpc.internal.encoders.avro._")
       case AvroWithSchema =>
