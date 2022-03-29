@@ -1,7 +1,12 @@
+val scala213 = "2.13.8"
+val scala3   = "3.1.1"
+
 ThisBuild / organization       := "io.higherkindness"
 ThisBuild / githubOrganization := "47degrees"
-ThisBuild / scalaVersion       := "2.13.8"
-ThisBuild / crossScalaVersions := Seq("2.12.15", "2.13.8")
+ThisBuild / scalaVersion       := scala213
+
+// we expand this to (2.13, 3) on specific projects where we can cross-build
+ThisBuild / crossScalaVersions := Seq(scala213)
 
 publish / skip := true
 
@@ -22,12 +27,14 @@ lazy val `rpc-service` = project
   .in(file("modules/service"))
   .settings(moduleName := "mu-rpc-service")
   .settings(rpcServiceSettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
 
 lazy val fs2 = project
   .in(file("modules/fs2"))
   .dependsOn(`rpc-service`)
   .settings(moduleName := "mu-rpc-fs2")
   .settings(fs2Settings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
 
 lazy val config = project
   .in(file("modules/config"))
@@ -50,12 +57,14 @@ lazy val `client-netty` = project
   .dependsOn(`rpc-service`)
   .settings(moduleName := "mu-rpc-client-netty")
   .settings(clientNettySettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
 
 lazy val `client-okhttp` = project
   .in(file("modules/client/okhttp"))
   .dependsOn(`rpc-service`)
   .settings(moduleName := "mu-rpc-client-okhttp")
   .settings(clientOkHttpSettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
 
 lazy val `client-cache` = project
   .in(file("modules/client/cache"))
@@ -70,6 +79,7 @@ lazy val `netty-ssl` = project
   .in(file("modules/netty-ssl"))
   .settings(moduleName := "mu-rpc-netty-ssl")
   .settings(nettySslSettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
 
 ////////////////
 //// SERVER ////
@@ -80,6 +90,7 @@ lazy val server = project
   .dependsOn(`rpc-service`)
   .settings(moduleName := "mu-rpc-server")
   .settings(serverSettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
 
 /////////////////////
 //// HEALTHCHECK ////
@@ -101,6 +112,7 @@ lazy val prometheus = project
   .dependsOn(`rpc-service`)
   .settings(moduleName := "mu-rpc-prometheus")
   .settings(prometheusMetricsSettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
 
 ////////////////////
 //// DROPWIZARD ////
@@ -111,6 +123,7 @@ lazy val dropwizard = project
   .dependsOn(`rpc-service`)
   .settings(moduleName := "mu-rpc-dropwizard")
   .settings(dropwizardMetricsSettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
 
 ////////////////////
 //// BENCHMARKS ////
