@@ -64,17 +64,7 @@ object ProjectPlugin extends AutoPlugin {
       scalacOptions --= on(2, 13)("-Wunused:patvars").value
     )
 
-    // TODO why are we adding the compiler as a dependency to every project?
     lazy val macroSettings: Seq[Setting[_]] = Seq(
-      libraryDependencies ++= {
-        CrossVersion.partialVersion(scalaVersion.value) match {
-          case Some((2, _)) =>
-            Seq(
-              scalaOrganization.value % "scala-compiler" % scalaVersion.value % Provided
-            )
-          case _ => Nil
-        }
-      },
       scalacOptions ++= on(2, 13)("-Ymacro-annotations").value
     )
 
