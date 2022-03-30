@@ -128,10 +128,16 @@ object GrpcServer {
    * Helper to convert an `io.grpc.Server` into a [[GrpcServer]].
    */
   def fromServer[F[_]: Sync](server: Server): GrpcServer[F] =
-    handlers.GrpcServerHandler[F].mapK(λ[GrpcServerOps[F, *] ~> F](_.run(server)))
+    handlers
+      .GrpcServerHandler[F]
+      .mapK(
+        new (GrpcServerOps[F, *] ~> F) {
+          def apply[A](fa: GrpcServerOps[F, A]): F[A] = fa.run(server)
+        }
+      )
 
   private[this] def buildServer[F[_]: Sync](
-      bldr: ServerBuilder[SB] forSome { type SB <: ServerBuilder[SB] },
+      bldr: ServerBuilder[_],
       configList: List[GrpcConfig]
   ): F[Server] = Sync[F].delay {
     configList

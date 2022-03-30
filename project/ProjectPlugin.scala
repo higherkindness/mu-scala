@@ -47,26 +47,24 @@ object ProjectPlugin extends AutoPlugin {
     lazy val rpcServiceSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "org.typelevel"          %% "cats-effect"             % V.catsEffect,
-        "com.47deg"              %% "pbdirect"                % V.pbdirect,
         "com.thesamet.scalapb"   %% "scalapb-runtime-grpc"    % V.scalapb,
-        "com.beachape"           %% "enumeratum"              % V.enumeratum,
-        "com.sksamuel.avro4s"    %% "avro4s-core"             % V.avro4s,
         "org.log4s"              %% "log4s"                   % V.log4s,
         "org.tpolecat"           %% "natchez-core"            % V.natchez,
         "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat,
         "io.grpc"                 % "grpc-stub"               % V.grpc
       ),
-      scalacOptions --= on(2, 13)("-Wunused:patvars").value,
-      scalacOptions --= on(2, 12)("-Ywarn-unused:patvars").value
+      libraryDependencies ++= scalaVersionSpecificDeps(2)(
+        "com.sksamuel.avro4s" %% "avro4s-core" % V.avro4s,
+        "com.47deg"           %% "pbdirect"    % V.pbdirect,
+        "com.beachape"        %% "enumeratum"  % V.enumeratum
+      ).value,
+      libraryDependencies ++= scalaVersionSpecificDeps(3)(
+        "com.sksamuel.avro4s" %% "avro4s-core" % "5.0.0.M1"
+      ).value,
+      scalacOptions --= on(2, 13)("-Wunused:patvars").value
     )
 
     lazy val macroSettings: Seq[Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        scalaOrganization.value % "scala-compiler" % scalaVersion.value % Provided
-      ),
-      libraryDependencies ++= on(2, 12)(
-        compilerPlugin("org.scalamacros" %% "paradise" % V.paradise cross CrossVersion.full)
-      ).value,
       scalacOptions ++= on(2, 13)("-Ymacro-annotations").value
     )
 
@@ -232,6 +230,16 @@ object ProjectPlugin extends AutoPlugin {
         }
       }
 
+    def scalaVersionSpecificDeps(
+        majorScalaVersion: Int
+    )(moduleIDs: ModuleID*): Def.Initialize[Seq[ModuleID]] =
+      Def.setting {
+        CrossVersion.partialVersion(scalaVersion.value) match {
+          case Some((v, _)) if v == majorScalaVersion => moduleIDs
+          case _                                      => Nil
+        }
+      }
+
   }
 
   lazy val missingLinkSettings: Seq[Def.Setting[_]] =
@@ -265,8 +273,10 @@ object ProjectPlugin extends AutoPlugin {
       Test / fork            := false,
       Compile / compileOrder := CompileOrder.JavaThenScala,
       coverageFailOnMinimum  := false,
-      addCompilerPlugin(
-        "org.typelevel" % "kind-projector" % V.kindProjector cross CrossVersion.full
-      )
+      libraryDependencies ++= scalaVersionSpecificDeps(2)(
+        compilerPlugin(
+          "org.typelevel" % "kind-projector" % V.kindProjector cross CrossVersion.full
+        )
+      ).value
     ) ++ macroSettings ++ missingLinkSettings
 }
