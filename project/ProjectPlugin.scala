@@ -45,13 +45,15 @@ object ProjectPlugin extends AutoPlugin {
     }
 
     lazy val rpcServiceSettings: Seq[Def.Setting[_]] = Seq(
+      testFrameworks += new TestFramework("munit.Framework"),
       libraryDependencies ++= Seq(
         "org.typelevel"          %% "cats-effect"             % V.catsEffect,
         "com.thesamet.scalapb"   %% "scalapb-runtime-grpc"    % V.scalapb,
         "org.log4s"              %% "log4s"                   % V.log4s,
         "org.tpolecat"           %% "natchez-core"            % V.natchez,
         "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat,
-        "io.grpc"                 % "grpc-stub"               % V.grpc
+        "io.grpc"                 % "grpc-stub"               % V.grpc,
+        "org.scalameta"          %% "munit"                   % V.munit % Test
       ),
       libraryDependencies ++= scalaVersionSpecificDeps(2)(
         "com.sksamuel.avro4s" %% "avro4s-core" % V.avro4s,
