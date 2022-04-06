@@ -27,10 +27,9 @@ import scala.math.BigDecimal.RoundingMode
 
 object avro {
 
-  implicit val emptyMarshaller: Marshaller[Empty.type] = new Marshaller[Empty.type] {
+  given Marshaller[Empty.type] with
     override def parse(stream: InputStream): Empty.type = Empty
     override def stream(value: Empty.type)              = new ByteArrayInputStream(Array.empty)
-  }
 
   import com.sksamuel.avro4s._
 
@@ -39,8 +38,7 @@ object avro {
    * Warning: it's possible to call this for non-record types (e.g. Int),
    * but it will blow up at runtime.
    */
-  implicit def avroMarshallers[A: SchemaFor: Encoder: Decoder]: Marshaller[A] =
-    new Marshaller[A] {
+  given [A: SchemaFor: Encoder: Decoder]: Marshaller[A] with
 
       override def parse(stream: InputStream): A = {
         val input: AvroInputStream[A] = AvroInputStream.binary[A].from(stream).build(AvroSchema[A])
@@ -55,8 +53,6 @@ object avro {
 
         new ByteArrayInputStream(baos.toByteArray)
       }
-
-    }
 
 }
 
