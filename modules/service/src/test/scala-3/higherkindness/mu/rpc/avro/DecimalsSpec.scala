@@ -20,7 +20,9 @@ class DecimalsSpec extends FunSuite {
   test("TaggedDecimal.apply - precision > tag") {
     assertEquals(
       TaggedDecimal[6, 4](BigDecimal("123.4567")),
-      Left("Precision is too high. Maximum allowed precision is 6, but this BigDecimal has precision 7.")
+      Left(
+        "Precision is too high. Maximum allowed precision is 6, but this BigDecimal has precision 7."
+      )
     )
   }
 
@@ -66,7 +68,9 @@ class DecimalsSpec extends FunSuite {
 
     assertEquals(
       TaggedDecimal[6, 4](bd),
-      Left("Scale (3) is too low. Calling setScale(4) would cause precision to become 7, which exceeds the maximum precision (6).")
+      Left(
+        "Scale (3) is too low. Calling setScale(4) would cause precision to become 7, which exceeds the maximum precision (6)."
+      )
     )
   }
 
@@ -84,7 +88,9 @@ class DecimalsSpec extends FunSuite {
 
     assertEquals(
       TaggedDecimal[6, 4](bd),
-      Left("Scale (1) is too low. Calling setScale(4) would cause precision to become 7, which exceeds the maximum precision (6).")
+      Left(
+        "Scale (1) is too low. Calling setScale(4) would cause precision to become 7, which exceeds the maximum precision (6)."
+      )
     )
   }
 
