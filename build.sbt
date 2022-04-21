@@ -104,6 +104,7 @@ lazy val `health-check` = project
   .dependsOn(`rpc-service`, fs2)
   .settings(healthCheckSettings)
   .settings(moduleName := "mu-rpc-health-check")
+  .settings(crossScalaVersions := Seq(scala213, scala3))
 
 ////////////////////
 //// PROMETHEUS ////
