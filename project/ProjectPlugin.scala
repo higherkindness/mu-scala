@@ -6,6 +6,8 @@ import scoverage.ScoverageKeys._
 import scala.language.reflectiveCalls
 import mdoc.MdocPlugin.autoImport._
 import ch.epfl.scala.sbtmissinglink.MissingLinkPlugin.autoImport._
+import higherkindness.mu.rpc.srcgen.Model._
+import higherkindness.mu.rpc.srcgen.SrcGenPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
 
@@ -101,7 +103,8 @@ object ProjectPlugin extends AutoPlugin {
     lazy val healthCheckSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "org.typelevel" %% "cats-effect" % V.catsEffect
-      )
+      ),
+      muSrcGenIdlType := IdlType.Proto
     )
 
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
@@ -208,6 +211,7 @@ object ProjectPlugin extends AutoPlugin {
         "org.scalameta"          %% "munit"                   % V.munit                 % Test,
         "org.scalameta"          %% "munit-scalacheck"        % V.munit                 % Test,
         "org.typelevel"          %% "munit-cats-effect-3"     % V.munitCE               % Test,
+        "org.typelevel"          %% "cats-effect-testkit"     % V.catsEffect            % Test,
         "ch.qos.logback"          % "logback-classic"         % V.logback               % Test,
         "org.slf4j"               % "slf4j-nop"               % V.slf4j                 % Test
       )

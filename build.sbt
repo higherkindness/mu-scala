@@ -5,6 +5,8 @@ ThisBuild / organization       := "io.higherkindness"
 ThisBuild / githubOrganization := "47degrees"
 ThisBuild / scalaVersion       := scala213
 
+ThisBuild / resolvers += Resolver.sonatypeRepo("snapshots")
+
 // we expand this to (2.13, 3) on specific projects where we can cross-build
 ThisBuild / crossScalaVersions := Seq(scala213)
 
@@ -98,8 +100,8 @@ lazy val server = project
 
 lazy val `health-check` = project
   .in(file("modules/health-check"))
-  .dependsOn(`rpc-service`)
-  .dependsOn(fs2 % "optional->compile")
+  .enablePlugins(SrcGenPlugin)
+  .dependsOn(`rpc-service`, fs2)
   .settings(healthCheckSettings)
   .settings(moduleName := "mu-rpc-health-check")
 
@@ -182,7 +184,7 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   testing,
   `netty-ssl`,
   `health-check`,
-  `benchmarks-vnext`
+  `benchmarks-vnext` // TODO benchmarks can be removed from this list
 )
 
 lazy val coreModulesDeps: Seq[ClasspathDependency] =
