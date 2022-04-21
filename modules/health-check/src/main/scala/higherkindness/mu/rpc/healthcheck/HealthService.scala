@@ -77,7 +77,7 @@ class HealthServiceFS2Impl[F[_]: MonadThrow](
     val currentStatus =
       Stream.eval(getStatus(req.service).map(_.getOrElse(ServingStatus.SERVICE_UNKNOWN)))
     val futureStatuses = watchSignal.discrete
-      .filter(_.service == req.service)
+      .filter(_.service === req.service)
       .map(_.status)
 
     (currentStatus ++ futureStatuses).changes
