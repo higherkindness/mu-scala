@@ -5,6 +5,8 @@ ThisBuild / organization       := "io.higherkindness"
 ThisBuild / githubOrganization := "47degrees"
 ThisBuild / scalaVersion       := scala213
 
+ThisBuild / resolvers += Resolver.sonatypeRepo("snapshots")
+
 // we expand this to (2.13, 3) on specific projects where we can cross-build
 ThisBuild / crossScalaVersions := Seq(scala213)
 
@@ -38,8 +40,7 @@ lazy val fs2 = project
 
 lazy val config = project
   .in(file("modules/config"))
-  .dependsOn(`rpc-service`)
-  .dependsOn(server)
+  .dependsOn(`rpc-service`, server)
   .settings(moduleName := "mu-config")
   .settings(configSettings)
 
@@ -47,6 +48,7 @@ lazy val testing = project
   .in(file("modules/testing"))
   .settings(moduleName := "mu-rpc-testing")
   .settings(testingSettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
 
 ////////////////
 //// CLIENT ////
@@ -70,6 +72,7 @@ lazy val `client-cache` = project
   .in(file("modules/client/cache"))
   .settings(moduleName := "mu-rpc-client-cache")
   .settings(clientCacheSettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
 
 ///////////////////
 //// NETTY SSL ////
@@ -98,10 +101,11 @@ lazy val server = project
 
 lazy val `health-check` = project
   .in(file("modules/health-check"))
-  .dependsOn(`rpc-service`)
-  .dependsOn(fs2 % "optional->compile")
+  .enablePlugins(SrcGenPlugin)
+  .dependsOn(`rpc-service`, fs2)
   .settings(healthCheckSettings)
   .settings(moduleName := "mu-rpc-health-check")
+  .settings(crossScalaVersions := Seq(scala213, scala3))
 
 ////////////////////
 //// PROMETHEUS ////
@@ -161,9 +165,9 @@ lazy val tests = project
 
 lazy val `haskell-integration-tests` = project
   .in(file("modules/haskell-integration-tests"))
+  .dependsOn(server, `client-netty`, fs2)
   .settings(publish / skip := true)
   .settings(haskellIntegrationTestSettings)
-  .dependsOn(server, `client-netty`, fs2)
 
 //////////////////////////
 //// MODULES REGISTRY ////
@@ -181,8 +185,7 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   prometheus,
   testing,
   `netty-ssl`,
-  `health-check`,
-  `benchmarks-vnext`
+  `health-check`
 )
 
 lazy val coreModulesDeps: Seq[ClasspathDependency] =

@@ -6,6 +6,8 @@ import scoverage.ScoverageKeys._
 import scala.language.reflectiveCalls
 import mdoc.MdocPlugin.autoImport._
 import ch.epfl.scala.sbtmissinglink.MissingLinkPlugin.autoImport._
+import higherkindness.mu.rpc.srcgen.Model._
+import higherkindness.mu.rpc.srcgen.SrcGenPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
 
@@ -15,7 +17,6 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String                = "4.0.12"
-      val betterMonadicFor: String      = "0.3.1"
       val catsEffect: String            = "3.3.11"
       val dockerItScala                 = "0.9.9"
       val dropwizard: String            = "4.2.9"
@@ -93,15 +94,15 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         "org.log4s"     %% "log4s"       % V.log4s,
         "co.fs2"        %% "fs2-core"    % V.fs2,
-        "org.typelevel" %% "cats-effect" % V.catsEffect,
-        compilerPlugin("com.olegpy" %% "better-monadic-for" % V.betterMonadicFor)
+        "org.typelevel" %% "cats-effect" % V.catsEffect
       )
     )
 
     lazy val healthCheckSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "org.typelevel" %% "cats-effect" % V.catsEffect
-      )
+      ),
+      muSrcGenIdlType := IdlType.Proto
     )
 
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
@@ -208,6 +209,7 @@ object ProjectPlugin extends AutoPlugin {
         "org.scalameta"          %% "munit"                   % V.munit                 % Test,
         "org.scalameta"          %% "munit-scalacheck"        % V.munit                 % Test,
         "org.typelevel"          %% "munit-cats-effect-3"     % V.munitCE               % Test,
+        "org.typelevel"          %% "cats-effect-testkit"     % V.catsEffect            % Test,
         "ch.qos.logback"          % "logback-classic"         % V.logback               % Test,
         "org.slf4j"               % "slf4j-nop"               % V.slf4j                 % Test
       )
