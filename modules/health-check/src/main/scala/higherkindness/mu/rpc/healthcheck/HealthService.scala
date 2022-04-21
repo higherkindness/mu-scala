@@ -25,10 +25,8 @@ object HealthService {
       // rather than any particular gRPC service running on the server
       Ref.of[F, Map[String, ServingStatus]](Map("" -> ServingStatus.SERVING))
 
-    val watchSignal: F[SignallingRef[F, ServiceStatus]] =
-      SignallingRef.of[F, ServiceStatus](
-        ServiceStatus("DummyService", HealthCheckResponse.ServingStatus.UNKNOWN)
-      )
+    val watchSignal: F[SignallingRef[F, Option[ServiceStatus]]] =
+      SignallingRef.of[F, Option[ServiceStatus]](None)
 
     for {
       ref <- checkRef
@@ -40,7 +38,7 @@ object HealthService {
 
 class HealthServiceFS2Impl[F[_]: MonadThrow](
     checkRef: Ref[F, Map[String, ServingStatus]],
-    watchSignal: SignallingRef[F, ServiceStatus]
+    watchSignal: SignallingRef[F, Option[ServiceStatus]]
 ) extends HealthService[F] {
 
   private implicit val eqServingStatus: Eq[ServingStatus] =
@@ -77,6 +75,7 @@ class HealthServiceFS2Impl[F[_]: MonadThrow](
     val currentStatus =
       Stream.eval(getStatus(req.service).map(_.getOrElse(ServingStatus.SERVICE_UNKNOWN)))
     val futureStatuses = watchSignal.discrete
+      .collect { case Some(x) => x }
       .filter(_.service === req.service)
       .map(_.status)
 
@@ -88,7 +87,7 @@ class HealthServiceFS2Impl[F[_]: MonadThrow](
   def setStatus(serviceStatus: ServiceStatus): F[Unit] =
     for {
       _ <- checkRef.update(_ + (serviceStatus.service -> serviceStatus.status))
-      _ <- watchSignal.set(serviceStatus)
+      _ <- watchSignal.set(Some(serviceStatus))
     } yield ()
 
   def clearStatus(service: String): F[Unit] =
