@@ -185,8 +185,7 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   prometheus,
   testing,
   `netty-ssl`,
-  `health-check`,
-  `benchmarks-vnext` // TODO benchmarks can be removed from this list
+  `health-check`
 )
 
 lazy val coreModulesDeps: Seq[ClasspathDependency] =
