@@ -59,9 +59,10 @@ object ClientCache {
     def create(ref: Ref[F, State]): ClientCache[Client, F] =
       new ClientCache[Client, F] {
         val getClient: F[Client[F]] = for {
-          key      <- getKey
-          now      <- nowUnix
-          (map, _) <- ref.get
+          key   <- getKey
+          now   <- nowUnix
+          state <- ref.get
+          (map, _) = state
           client <-
             map
               .get(key)
@@ -79,7 +80,8 @@ object ClientCache {
                     .as(clientMeta.client)
               )
 
-          (_, lastClean) <- ref.get
+          state2 <- ref.get
+          (_, lastClean) = state2
           _ <- F.whenA(lastClean < (now - tryToRemoveUnusedEvery))(
             cleanup(ref, _.lastAccessed < (now - removeUnusedAfter)).start
           )

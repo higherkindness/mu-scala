@@ -17,7 +17,6 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String                = "4.0.12"
-      val betterMonadicFor: String      = "0.3.1"
       val catsEffect: String            = "3.3.11"
       val dockerItScala                 = "0.9.9"
       val dropwizard: String            = "4.2.9"
@@ -95,8 +94,7 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         "org.log4s"     %% "log4s"       % V.log4s,
         "co.fs2"        %% "fs2-core"    % V.fs2,
-        "org.typelevel" %% "cats-effect" % V.catsEffect,
-        compilerPlugin("com.olegpy" %% "better-monadic-for" % V.betterMonadicFor)
+        "org.typelevel" %% "cats-effect" % V.catsEffect
       )
     )
 

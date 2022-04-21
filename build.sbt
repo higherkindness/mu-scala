@@ -40,8 +40,7 @@ lazy val fs2 = project
 
 lazy val config = project
   .in(file("modules/config"))
-  .dependsOn(`rpc-service`)
-  .dependsOn(server)
+  .dependsOn(`rpc-service`, server)
   .settings(moduleName := "mu-config")
   .settings(configSettings)
 
@@ -49,6 +48,7 @@ lazy val testing = project
   .in(file("modules/testing"))
   .settings(moduleName := "mu-rpc-testing")
   .settings(testingSettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
 
 ////////////////
 //// CLIENT ////
@@ -72,6 +72,7 @@ lazy val `client-cache` = project
   .in(file("modules/client/cache"))
   .settings(moduleName := "mu-rpc-client-cache")
   .settings(clientCacheSettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
 
 ///////////////////
 //// NETTY SSL ////
@@ -164,9 +165,9 @@ lazy val tests = project
 
 lazy val `haskell-integration-tests` = project
   .in(file("modules/haskell-integration-tests"))
+  .dependsOn(server, `client-netty`, fs2)
   .settings(publish / skip := true)
   .settings(haskellIntegrationTestSettings)
-  .dependsOn(server, `client-netty`, fs2)
 
 //////////////////////////
 //// MODULES REGISTRY ////
