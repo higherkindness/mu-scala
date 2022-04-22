@@ -17,21 +17,23 @@
 package higherkindness.mu.rpc.config.channel
 
 import cats.effect.IO
-import higherkindness.mu.rpc.common.SC
 import higherkindness.mu.rpc.{ChannelForAddress, ChannelForTarget}
 import munit.CatsEffectSuite
 
 class ChannelConfigTests extends CatsEffectSuite {
 
+  val port: Int    = 50051
+  val host: String = "localhost"
+
   test("ChannelConfig for Address [host, port] work as expected") {
     ConfigForAddress[IO](
-      SC.host,
-      SC.port.toString
+      host,
+      port.toString
     ).assertEquals(ChannelForAddress("localhost", 50051))
   }
 
   test("ChannelConfig for Target work as expected") {
-    ConfigForTarget[IO](SC.host).assertEquals(ChannelForTarget("target"))
+    ConfigForTarget[IO](host).assertEquals(ChannelForTarget("target"))
   }
 
 }

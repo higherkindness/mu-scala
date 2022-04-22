@@ -24,7 +24,7 @@ import org.scalacheck.Prop._
 class EncoderUtilTest extends ScalaCheckSuite {
 
   property("EncoderUtil should allow to convert int to and from byteArray") {
-    forAll { n: Int =>
+    forAll { (n: Int) =>
       val value: Array[Byte] = EncoderUtil.intToByteArray(n)
 
       EncoderUtil.byteArrayToInt(value) == n
@@ -33,7 +33,7 @@ class EncoderUtilTest extends ScalaCheckSuite {
   }
 
   property("EncoderUtil should allow to convert long to and from byteArray") {
-    forAll { n: Long =>
+    forAll { (n: Long) =>
       val value: Array[Byte] = EncoderUtil.longToByteArray(n)
 
       EncoderUtil.byteArrayToLong(value) == n

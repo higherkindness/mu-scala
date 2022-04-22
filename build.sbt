@@ -14,7 +14,7 @@ publish / skip := true
 
 addCommandAlias(
   "ci-test",
-  "scalafmtCheckAll; scalafmtSbtCheck; missinglinkCheck; mdoc; +compile; +rpc-service/test; +tests/test; +haskell-integration-tests/test"
+  "scalafmtCheckAll; scalafmtSbtCheck; missinglinkCheck; mdoc; +compile; config/test; +tests/test; +haskell-integration-tests/test"
 )
 addCommandAlias("ci-docs", "github; mdoc; headerCreateAll; publishMicrosite")
 addCommandAlias("ci-publish", "github; ci-release")
@@ -154,10 +154,11 @@ lazy val `benchmarks-vnext` = project
 
 lazy val tests = project
   .in(file("modules/tests"))
-  .dependsOn(coreModulesDeps: _*)
+  .dependsOn(deps(crossBuiltModules): _*)
   .settings(moduleName := "mu-rpc-tests")
   .settings(publish / skip := true)
   .settings(testSettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
 
 //////////////////////////////////////
 //// MU-HASKELL INTEGRATION TESTS ////
@@ -173,14 +174,13 @@ lazy val `haskell-integration-tests` = project
 //// MODULES REGISTRY ////
 //////////////////////////
 
-lazy val coreModules: Seq[ProjectReference] = Seq(
+lazy val crossBuiltModules: Seq[Project] = Seq(
   `rpc-service`,
   fs2,
   `client-netty`,
   `client-okhttp`,
   `client-cache`,
   server,
-  config,
   dropwizard,
   prometheus,
   testing,
@@ -188,11 +188,14 @@ lazy val coreModules: Seq[ProjectReference] = Seq(
   `health-check`
 )
 
-lazy val coreModulesDeps: Seq[ClasspathDependency] =
-  coreModules.map(ClasspathDependency(_, None))
+lazy val coreModules: Seq[Project] =
+  crossBuiltModules ++ Seq(config)
+
+def deps(modules: Seq[Project]): Seq[ClasspathDependency] =
+  modules.map(ClasspathDependency(_, None))
 
 lazy val microsite = project
-  .dependsOn(coreModulesDeps: _*)
+  .dependsOn(deps(coreModules): _*)
   .settings(docsSettings)
   .settings(micrositeSettings)
   .settings(publish / skip := true)

@@ -17,13 +17,15 @@
 package higherkindness.mu.rpc.config.server
 
 import cats.effect.IO
-import higherkindness.mu.rpc.common.SC
 import higherkindness.mu.rpc.server._
 import munit.CatsEffectSuite
 
 import scala.concurrent.ExecutionContext
 
 class ServerConfigTests extends CatsEffectSuite {
+
+  val port: Int    = 51111
+  val host: String = "localhost"
 
   val ec: ExecutionContext = ExecutionContext.Implicits.global
 
@@ -37,7 +39,7 @@ class ServerConfigTests extends CatsEffectSuite {
       _      <- server.awaitTermination
     } yield port
 
-    loadAndPort.assertEquals(SC.port)
+    loadAndPort.assertEquals(port)
   }
 
   test("ServerConfig load the default port when the config port path is not found") {

@@ -32,14 +32,14 @@ class BigDecimalUtilTests extends ScalaCheckSuite {
     implicit val bigDecimalArbitrary: Arbitrary[BigDecimal] =
       Arbitrary(Gen.posNum[T].map(f))
 
-    forAll { bd: BigDecimal =>
+    forAll { (bd: BigDecimal) =>
       val array = BigDecimalUtil.bigDecimalToByte(bd)
       BigDecimalUtil.byteToBigDecimal(array) == bd
     }
   }
 
   property("BigDecimalUtil should allow to convert BigDecimals to and from byte arrays") {
-    forAll { bd: BigDecimal =>
+    forAll { (bd: BigDecimal) =>
       val array = BigDecimalUtil.bigDecimalToByte(bd)
       BigDecimalUtil.byteToBigDecimal(array) == bd
     }
