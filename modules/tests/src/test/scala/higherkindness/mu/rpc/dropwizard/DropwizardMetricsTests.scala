@@ -62,8 +62,6 @@ class DropwizardMetricsTests extends ScalaCheckSuite {
           (registry.getTimers().asScala.toMap, registry.timer(gaugeName).getCount)
         case Counter =>
           (registry.getCounters().asScala.toMap, registry.counter(gaugeName).getCount)
-        case _ =>
-          (Map.empty[String, GaugeType], 0)
       }
     gaugeMap.contains(gaugeName) && gaugeCount == expectedCount
   }

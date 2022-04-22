@@ -158,6 +158,7 @@ lazy val tests = project
   .settings(moduleName := "mu-rpc-tests")
   .settings(publish / skip := true)
   .settings(testSettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
 
 //////////////////////////////////////
 //// MU-HASKELL INTEGRATION TESTS ////
