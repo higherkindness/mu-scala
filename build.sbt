@@ -160,6 +160,15 @@ lazy val tests = project
   .settings(testSettings)
   .settings(crossScalaVersions := Seq(scala213, scala3))
 
+lazy val `protobuf-rpc-tests` = project
+  .in(file("modules/tests/rpc/proto"))
+  .enablePlugins(SrcGenPlugin)
+  .dependsOn(deps(crossBuiltModules): _*)
+  .settings(moduleName := "mu-rpc-protobuf-tests")
+  .settings(publish / skip := true)
+  .settings(protobufRPCTestSettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
+
 //////////////////////////////////////
 //// MU-HASKELL INTEGRATION TESTS ////
 //////////////////////////////////////

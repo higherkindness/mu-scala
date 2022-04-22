@@ -219,6 +219,10 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
+    lazy val protobufRPCTestSettings = testSettings ++ Seq(
+      muSrcGenIdlType := IdlType.Proto
+    )
+
     lazy val haskellIntegrationTestSettings = Seq(
       publishArtifact          := false,
       Test / parallelExecution := false,
