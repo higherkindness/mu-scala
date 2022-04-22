@@ -122,7 +122,7 @@ lazy val prometheus = project
 //// DROPWIZARD ////
 ////////////////////
 
-lazy val dropwizard: Project = project
+lazy val dropwizard = project
   .in(file("modules/metrics/dropwizard"))
   .dependsOn(`rpc-service`)
   .settings(moduleName := "mu-rpc-dropwizard")
