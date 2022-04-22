@@ -113,7 +113,11 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val configSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "com.github.pureconfig" %% "pureconfig" % V.pureconfig
+        "com.github.pureconfig" %% "pureconfig"          % V.pureconfig,
+        "org.scalameta"         %% "munit"               % V.munit      % Test,
+        "org.scalameta"         %% "munit-scalacheck"    % V.munit      % Test,
+        "org.typelevel"         %% "munit-cats-effect-3" % V.munitCE    % Test,
+        "org.typelevel"         %% "cats-effect-testkit" % V.catsEffect % Test
       )
     )
 
