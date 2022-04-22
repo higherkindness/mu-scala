@@ -14,7 +14,7 @@ publish / skip := true
 
 addCommandAlias(
   "ci-test",
-  "scalafmtCheckAll; scalafmtSbtCheck; missinglinkCheck; mdoc; +compile; +rpc-service/test; config/test; +tests/test; +haskell-integration-tests/test"
+  "scalafmtCheckAll; scalafmtSbtCheck; missinglinkCheck; mdoc; +compile; config/test; +tests/test; +haskell-integration-tests/test"
 )
 addCommandAlias("ci-docs", "github; mdoc; headerCreateAll; publishMicrosite")
 addCommandAlias("ci-publish", "github; ci-release")
