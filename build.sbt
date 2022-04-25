@@ -168,7 +168,7 @@ lazy val tests = project
   .settings(publish / skip := true)
   .settings(testSettings)
   .settings(crossScalaVersions := Seq(scala213, scala3))
-  .aggregate(`protobuf-rpc-tests`)
+  .aggregate(`protobuf-rpc-tests`, `avro-rpc-tests`)
 
 lazy val `protobuf-rpc-tests` = project
   .in(file("modules/tests/rpc/proto"))
@@ -178,6 +178,15 @@ lazy val `protobuf-rpc-tests` = project
   .settings(moduleName := "mu-rpc-protobuf-tests")
   .settings(publish / skip := true)
   .settings(protobufRPCTestSettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
+
+lazy val `avro-rpc-tests` = project
+  .in(file("modules/tests/rpc/avro"))
+  .enablePlugins(SrcGenPlugin)
+  .dependsOn(deps(crossBuiltModules): _*)
+  .settings(moduleName := "mu-rpc-avro-tests")
+  .settings(publish / skip := true)
+  .settings(avroRPCTestSettings)
   .settings(crossScalaVersions := Seq(scala213, scala3))
 
 //////////////////////////////////////

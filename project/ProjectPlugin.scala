@@ -233,6 +233,11 @@ object ProjectPlugin extends AutoPlugin {
       muSrcGenIdlType := IdlType.Proto
     )
 
+    lazy val avroRPCTestSettings = testSettings ++ Seq(
+      muSrcGenIdlType := IdlType.Avro,
+      muSrcGenSerializationType := SerializationType.Avro
+    )
+
     lazy val haskellIntegrationTestSettings = Seq(
       publishArtifact          := false,
       Test / parallelExecution := false,
