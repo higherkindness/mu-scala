@@ -17,11 +17,11 @@ class ProtobufRPCTest extends CatsEffectSuite {
   val grpcServer: Resource[IO, GrpcServer[IO]] =
     for {
       serviceDefn <- ProtoRPCService.bindService[IO]
-      server <- GrpcServer.defaultServer[IO](port, List(AddService(serviceDefn)))
+      server      <- GrpcServer.defaultServer[IO](port, List(AddService(serviceDefn)))
     } yield server
 
   val client: Resource[IO, ProtoRPCService[IO]] =
-      ProtoRPCService.client[IO](ChannelForAddress("localhost", port))
+    ProtoRPCService.client[IO](ChannelForAddress("localhost", port))
 
   test("server smoke test") {
     grpcServer.use(_.isShutdown).assertEquals(false)
@@ -42,9 +42,7 @@ class ProtobufRPCTest extends CatsEffectSuite {
   test("server streaming") {
     (grpcServer *> client)
       .use { c =>
-        Stream.force(c.serverStreaming(B(Some(A(1, 2)), Some(A(3, 4)))))
-          .compile
-          .toList
+        Stream.force(c.serverStreaming(B(Some(A(1, 2)), Some(A(3, 4))))).compile.toList
       }
       .assertEquals(List(C("first", Some(A(1, 2))), C("second", Some(A(3, 4)))))
   }
@@ -76,9 +74,7 @@ class ProtobufRPCTest extends CatsEffectSuite {
           E(Some(A(1, 2)), "hello"),
           E(Some(A(3, 4)), "world")
         ).covary[IO]
-        Stream.force(c.bidiStreaming(req))
-          .compile
-          .toList
+        Stream.force(c.bidiStreaming(req)).compile.toList
       }
       .assertEquals(List(B(Some(A(1, 2)), Some(A(1, 2))), B(Some(A(3, 4)), Some(A(3, 4)))))
   }

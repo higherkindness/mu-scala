@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.internal.metrics
+package higherkindness.mu.tests.rpc.metrics
 
 import cats.effect.IO
 import cats.syntax.apply._
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
+import higherkindness.mu.rpc.internal.metrics.MetricsOps
 import io.grpc.Status
 import cats.effect.Ref
 

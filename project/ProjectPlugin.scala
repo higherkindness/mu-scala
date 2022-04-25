@@ -201,6 +201,16 @@ object ProjectPlugin extends AutoPlugin {
       ).contains)
     )
 
+    lazy val testUtilsSettings = Seq(
+      publishArtifact          := false,
+      Test / parallelExecution := false,
+      testFrameworks += new TestFramework("munit.Framework"),
+      libraryDependencies ++= Seq(
+        "io.grpc"        % "grpc-core"        % V.grpc,
+        "org.scalameta" %% "munit-scalacheck" % V.munit,
+        "org.typelevel" %% "cats-effect"      % V.catsEffect
+      )
+    )
     lazy val testSettings = Seq(
       publishArtifact          := false,
       Test / parallelExecution := false,
