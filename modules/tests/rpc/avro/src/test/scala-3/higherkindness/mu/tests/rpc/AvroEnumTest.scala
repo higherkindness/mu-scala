@@ -5,12 +5,13 @@ import cats.syntax.all._
 import higherkindness.mu.rpc.ChannelForAddress
 import higherkindness.mu.rpc.server._
 import munit.CatsEffectSuite
+import io.grpc.StatusRuntimeException
 
-class AvroRPCTest extends CatsEffectSuite {
+class AvroEnumTest extends CatsEffectSuite {
 
   implicit val service: AvroRPCService[IO] = new ServiceImpl
 
-  val port = 54322
+  val port = 54323
 
   val grpcServer: Resource[IO, GrpcServer[IO]] =
     for {
@@ -21,14 +22,11 @@ class AvroRPCTest extends CatsEffectSuite {
   val client: Resource[IO, AvroRPCService[IO]] =
     AvroRPCService.client[IO](ChannelForAddress("localhost", port))
 
-  test("server smoke test") {
-    grpcServer.use(_.isShutdown).assertEquals(false)
-  }
-
-  test("unary method") {
+  test("avro4s cannot decode a request message containing an enum field") {
+    // see https://github.com/sksamuel/avro4s/pull/717 for the fix for this issue
     (grpcServer *> client)
-      .use(_.hello(TestData.request))
-      .assertEquals(Response(TestData.request.a))
+      .use(_.helloEnum(TestData.requestWithEnumField))
+      .intercept[StatusRuntimeException]
   }
 
 }
