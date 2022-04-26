@@ -8,6 +8,8 @@ import mdoc.MdocPlugin.autoImport._
 import ch.epfl.scala.sbtmissinglink.MissingLinkPlugin.autoImport._
 import higherkindness.mu.rpc.srcgen.Model._
 import higherkindness.mu.rpc.srcgen.SrcGenPlugin.autoImport._
+import _root_.io.github.davidgregory084.ScalacOptions
+import _root_.io.github.davidgregory084.TpolecatPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
 
@@ -235,7 +237,17 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val avroRPCTestSettings = testSettings ++ Seq(
       muSrcGenIdlType           := IdlType.Avro,
-      muSrcGenSerializationType := SerializationType.Avro
+      muSrcGenSerializationType := SerializationType.Avro,
+      tpolecatScalacOptions ~= { options =>
+        // sbt-mu-srcgen generates the 'bigDecimalTagged' import, which can be unused
+        options.filterNot(
+          Set(
+            ScalacOptions.privateWarnUnusedImport,
+            ScalacOptions.privateWarnUnusedImports,
+            ScalacOptions.warnUnusedImports
+          )
+        )
+      }
     )
 
     lazy val haskellIntegrationTestSettings = Seq(

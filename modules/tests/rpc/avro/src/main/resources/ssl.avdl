@@ -1,0 +1,15 @@
+@namespace("higherkindness.mu.tests.rpc.ssl")
+protocol SSLService {
+
+  record Request {
+    int a;
+  }
+
+  record Response {
+    int a;
+  }
+
+  higherkindness.mu.tests.rpc.ssl.Response hello(higherkindness.mu.tests.rpc.ssl.Request request);
+
+
+}
