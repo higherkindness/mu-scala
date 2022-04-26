@@ -23,8 +23,8 @@ class AvroEnumTest extends CatsEffectSuite {
 
   test("request message containing an enum field") {
     (grpcServer *> client)
-      .use(_.helloEnum(TestData.requestWithEnumField)
-      .assertEquals(Response(TestData.request.a)))
+      .use(_.helloEnum(TestData.requestWithEnumField))
+      .assertEquals(Response(TestData.request.a))
   }
 
 }

@@ -3,7 +3,9 @@ package higherkindness.mu.tests.rpc
 import cats.effect.{IO, Resource}
 import cats.syntax.all._
 import higherkindness.mu.rpc.ChannelForAddress
+import higherkindness.mu.rpc.protocol.{Gzip, Identity}
 import higherkindness.mu.rpc.server._
+import io.grpc.CallOptions
 import munit.CatsEffectSuite
 
 class AvroRPCTest extends CatsEffectSuite {
@@ -12,23 +14,33 @@ class AvroRPCTest extends CatsEffectSuite {
 
   val port = 54322
 
-  val grpcServer: Resource[IO, GrpcServer[IO]] =
-    for {
-      serviceDefn <- AvroRPCService.bindService[IO]
-      server      <- GrpcServer.defaultServer[IO](port, List(AddService(serviceDefn)))
-    } yield server
+  for (compression <- List(Identity, Gzip)) {
 
-  val client: Resource[IO, AvroRPCService[IO]] =
-    AvroRPCService.client[IO](ChannelForAddress("localhost", port))
+    val server: Resource[IO, GrpcServer[IO]] =
+      for {
+        serviceDefn <- AvroRPCService._bindService[IO](compression)
+        server      <- GrpcServer.defaultServer[IO](port, List(AddService(serviceDefn)))
+      } yield server
 
-  test("server smoke test") {
-    grpcServer.use(_.isShutdown).assertEquals(false)
-  }
+    val client: Resource[IO, AvroRPCService[IO]] =
+      AvroRPCService.client[IO](
+        ChannelForAddress("localhost", port),
+        options = compression match {
+          case Identity => CallOptions.DEFAULT
+          case Gzip     => CallOptions.DEFAULT.withCompression("gzip")
+        }
+      )
 
-  test("unary method") {
-    (grpcServer *> client)
-      .use(_.hello(TestData.request))
-      .assertEquals(Response(TestData.request.a))
+    test(s"server smoke test ($compression)") {
+      server.use(_.isShutdown).assertEquals(false)
+    }
+
+    test(s"unary method ($compression)") {
+      (server *> client)
+        .use(_.hello(TestData.request))
+        .assertEquals(Response(TestData.request.a))
+    }
+
   }
 
 }

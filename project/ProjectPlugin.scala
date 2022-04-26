@@ -234,7 +234,7 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val avroRPCTestSettings = testSettings ++ Seq(
-      muSrcGenIdlType := IdlType.Avro,
+      muSrcGenIdlType           := IdlType.Avro,
       muSrcGenSerializationType := SerializationType.Avro
     )
 
