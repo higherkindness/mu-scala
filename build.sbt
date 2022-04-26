@@ -152,12 +152,41 @@ lazy val `benchmarks-vnext` = project
 //// TESTS ////
 ///////////////
 
+lazy val `test-utils` = project
+  .in(file("modules/tests/utils"))
+  .dependsOn(deps(crossBuiltModules): _*)
+  .settings(moduleName := "mu-rpc-test-utils")
+  .settings(publish / skip := true)
+  .settings(testUtilsSettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
+
 lazy val tests = project
   .in(file("modules/tests"))
   .dependsOn(deps(crossBuiltModules): _*)
+  .dependsOn(`test-utils`)
   .settings(moduleName := "mu-rpc-tests")
   .settings(publish / skip := true)
   .settings(testSettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
+  .aggregate(`protobuf-rpc-tests`, `avro-rpc-tests`)
+
+lazy val `protobuf-rpc-tests` = project
+  .in(file("modules/tests/rpc/proto"))
+  .enablePlugins(SrcGenPlugin)
+  .dependsOn(deps(crossBuiltModules): _*)
+  .dependsOn(`test-utils`)
+  .settings(moduleName := "mu-rpc-protobuf-tests")
+  .settings(publish / skip := true)
+  .settings(protobufRPCTestSettings)
+  .settings(crossScalaVersions := Seq(scala213, scala3))
+
+lazy val `avro-rpc-tests` = project
+  .in(file("modules/tests/rpc/avro"))
+  .enablePlugins(SrcGenPlugin)
+  .dependsOn(deps(crossBuiltModules): _*)
+  .settings(moduleName := "mu-rpc-avro-tests")
+  .settings(publish / skip := true)
+  .settings(avroRPCTestSettings)
   .settings(crossScalaVersions := Seq(scala213, scala3))
 
 //////////////////////////////////////

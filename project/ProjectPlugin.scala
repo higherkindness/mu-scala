@@ -8,6 +8,8 @@ import mdoc.MdocPlugin.autoImport._
 import ch.epfl.scala.sbtmissinglink.MissingLinkPlugin.autoImport._
 import higherkindness.mu.rpc.srcgen.Model._
 import higherkindness.mu.rpc.srcgen.SrcGenPlugin.autoImport._
+import _root_.io.github.davidgregory084.ScalacOptions
+import _root_.io.github.davidgregory084.TpolecatPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
 
@@ -201,6 +203,16 @@ object ProjectPlugin extends AutoPlugin {
       ).contains)
     )
 
+    lazy val testUtilsSettings = Seq(
+      publishArtifact          := false,
+      Test / parallelExecution := false,
+      testFrameworks += new TestFramework("munit.Framework"),
+      libraryDependencies ++= Seq(
+        "io.grpc"        % "grpc-core"        % V.grpc,
+        "org.scalameta" %% "munit-scalacheck" % V.munit,
+        "org.typelevel" %% "cats-effect"      % V.catsEffect
+      )
+    )
     lazy val testSettings = Seq(
       publishArtifact          := false,
       Test / parallelExecution := false,
@@ -217,6 +229,25 @@ object ProjectPlugin extends AutoPlugin {
         "ch.qos.logback"          % "logback-classic"         % V.logback               % Test,
         "org.slf4j"               % "slf4j-nop"               % V.slf4j                 % Test
       )
+    )
+
+    lazy val protobufRPCTestSettings = testSettings ++ Seq(
+      muSrcGenIdlType := IdlType.Proto
+    )
+
+    lazy val avroRPCTestSettings = testSettings ++ Seq(
+      muSrcGenIdlType           := IdlType.Avro,
+      muSrcGenSerializationType := SerializationType.Avro,
+      tpolecatScalacOptions ~= { options =>
+        // sbt-mu-srcgen generates the 'bigDecimalTagged' import, which can be unused
+        options.filterNot(
+          Set(
+            ScalacOptions.privateWarnUnusedImport,
+            ScalacOptions.privateWarnUnusedImports,
+            ScalacOptions.warnUnusedImports
+          )
+        )
+      }
     )
 
     lazy val haskellIntegrationTestSettings = Seq(

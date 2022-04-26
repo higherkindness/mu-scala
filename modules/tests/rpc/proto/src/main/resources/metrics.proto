@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package higherkindness.mu.tests.rpc;
+
+message Request {}
+
+message Response {}
+
+service MetricsTestService {
+  rpc serviceOp1(Request) returns (Response);
+  rpc serviceOp2(Request) returns (Response);
+}

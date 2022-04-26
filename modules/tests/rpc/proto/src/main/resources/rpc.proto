@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package higherkindness.mu.tests;
+
+import "models.proto";
+
+service ProtoRPCService {
+
+  rpc unary(higherkindness.mu.tests.A) returns (higherkindness.mu.tests.C);
+
+  rpc clientStreaming(stream higherkindness.mu.tests.A) returns (higherkindness.mu.tests.D);
+
+  rpc serverStreaming(higherkindness.mu.tests.B) returns (stream higherkindness.mu.tests.C);
+
+  rpc serverStreamingWithError(higherkindness.mu.tests.E) returns (stream higherkindness.mu.tests.C);
+
+  rpc bidiStreaming(stream higherkindness.mu.tests.E) returns (stream higherkindness.mu.tests.B);
+
+}

@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package higherkindness.mu.tests;
+
+message A {
+  int32 x = 1;
+  int32 y = 2;
+}
+
+message B {
+  A a1 = 1;
+  A a2 = 2;
+}
+
+message C {
+  string foo = 1;
+  A a = 2;
+}
+
+message D {
+  int32 bar = 1;
+}
+
+message E {
+  A a = 1;
+  string foo = 2;
+}

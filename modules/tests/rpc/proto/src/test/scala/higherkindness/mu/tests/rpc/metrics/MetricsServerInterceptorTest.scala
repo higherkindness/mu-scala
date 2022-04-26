@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-package higherkindness.mu.rpc.server.metrics
+package higherkindness.mu.tests.rpc.metrics
 
+import cats.effect.IO
 import cats.effect.std.Dispatcher
-import cats.effect.{IO, Resource}
-import higherkindness.mu.rpc.common.{A => _}
 import higherkindness.mu.rpc.internal.interceptors.GrpcMethodInfo
-import higherkindness.mu.rpc.internal.metrics.{MetricsOps, MetricsOpsRegister}
-import higherkindness.mu.rpc.protocol._
+import higherkindness.mu.rpc.internal.metrics.MetricsOps
 import higherkindness.mu.rpc.server.interceptors.implicits._
+import higherkindness.mu.rpc.server.metrics.MetricsServerInterceptor
 import higherkindness.mu.rpc.testing.servers._
-import io.grpc.MethodDescriptor.MethodType
 import io.grpc.Status
 import munit.CatsEffectSuite
 
-class MetricsServerInterceptorTests extends CatsEffectSuite {
+class MetricsServerInterceptorTest extends CatsEffectSuite {
 
-  import services._
+  import Services._
 
   val myClassifier: Option[String] = Some("MyClassifier")
 
@@ -70,12 +68,12 @@ class MetricsServerInterceptorTests extends CatsEffectSuite {
   }
 
   private[this] def makeProtoCalls[A](metricsOps: MetricsOps[IO])(
-      f: ProtoRPCService[IO] => IO[A]
-  )(implicit H: ProtoRPCService[IO]): IO[Either[Throwable, A]] = {
+      f: MetricsTestService[IO] => IO[A]
+  )(implicit H: MetricsTestService[IO]): IO[Either[Throwable, A]] = {
     Dispatcher[IO]
       .flatMap { disp =>
         withServerChannel[IO](
-          service = ProtoRPCService
+          service = MetricsTestService
             .bindService[IO]
             .map(_.interceptWith(MetricsServerInterceptor(metricsOps, disp, myClassifier)))
         ).flatMap(createClient)
@@ -119,40 +117,4 @@ class MetricsServerInterceptorTests extends CatsEffectSuite {
       assertEquals(totalArgs.map(_._4).toSet, argList.map(_._2))
     }
   }
-}
-
-object services {
-
-  val EC: scala.concurrent.ExecutionContext =
-    scala.concurrent.ExecutionContext.Implicits.global
-
-  final case class Request()
-  final case class Response()
-
-  val error: Throwable = new RuntimeException("BOOM!")
-
-  @service(Protobuf) trait ProtoRPCService[F[_]] {
-    def serviceOp1(r: Request): F[Response]
-    def serviceOp2(r: Request): F[Response]
-  }
-
-  val serviceOp1Info: GrpcMethodInfo =
-    GrpcMethodInfo("ProtoRPCService", "ProtoRPCService/serviceOp1", "serviceOp1", MethodType.UNARY)
-
-  val serviceOp2Info: GrpcMethodInfo =
-    GrpcMethodInfo("ProtoRPCService", "ProtoRPCService/serviceOp2", "serviceOp2", MethodType.UNARY)
-
-  val protoRPCServiceImpl: ProtoRPCService[IO] = new ProtoRPCService[IO] {
-    def serviceOp1(r: Request): IO[Response] = IO(Response())
-    def serviceOp2(r: Request): IO[Response] = IO(Response())
-  }
-
-  val protoRPCServiceErrorImpl: ProtoRPCService[IO] = new ProtoRPCService[IO] {
-    def serviceOp1(r: Request): IO[Response] = IO.raiseError(error)
-    def serviceOp2(r: Request): IO[Response] = IO.raiseError(error)
-  }
-
-  def createClient(sc: ServerChannel): Resource[IO, ProtoRPCService[IO]] =
-    ProtoRPCService.clientFromChannel[IO](IO.pure(sc.channel))
-
 }
