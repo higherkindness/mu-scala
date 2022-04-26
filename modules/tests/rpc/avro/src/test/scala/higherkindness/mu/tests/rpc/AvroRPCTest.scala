@@ -7,12 +7,13 @@ import higherkindness.mu.rpc.protocol.{Gzip, Identity}
 import higherkindness.mu.rpc.server._
 import io.grpc.CallOptions
 import munit.CatsEffectSuite
+import scala.util.Random
 
 class AvroRPCTest extends CatsEffectSuite {
 
   implicit val service: AvroRPCService[IO] = new ServiceImpl
 
-  val port = 54322
+  val port = 51000 + Random.nextInt(2000)
 
   for (compression <- List(Identity, Gzip)) {
 

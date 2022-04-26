@@ -4,14 +4,15 @@ import cats.effect.{IO, Resource}
 import cats.syntax.all._
 import higherkindness.mu.rpc.ChannelForAddress
 import higherkindness.mu.rpc.server._
-import munit.CatsEffectSuite
 import io.grpc.StatusRuntimeException
+import munit.CatsEffectSuite
+import scala.util.Random
 
 class AvroEnumTest extends CatsEffectSuite {
 
   implicit val service: AvroRPCService[IO] = new ServiceImpl
 
-  val port = 54323
+  val port = 51000 + Random.nextInt(2000)
 
   val grpcServer: Resource[IO, GrpcServer[IO]] =
     for {
