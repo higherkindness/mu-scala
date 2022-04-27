@@ -142,7 +142,6 @@ lazy val `benchmarks-vnext` = project
       "org.typelevel" %% "log4cats-slf4j" % V.log4cats
     )
   )
-  .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vnext")
   .settings(benchmarksSettings)
   .settings(publish / skip := true)

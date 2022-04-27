@@ -1,7 +1,6 @@
 import microsites.MicrositesPlugin.autoImport._
 import sbt.Keys._
 import sbt._
-import scoverage.ScoverageKeys._
 
 import scala.language.reflectiveCalls
 import mdoc.MdocPlugin.autoImport._
@@ -311,7 +310,6 @@ object ProjectPlugin extends AutoPlugin {
     Seq(
       Test / fork            := false,
       Compile / compileOrder := CompileOrder.JavaThenScala,
-      coverageFailOnMinimum  := false,
       libraryDependencies ++= scalaVersionSpecificDeps(2)(
         compilerPlugin(
           "org.typelevel" % "kind-projector" % V.kindProjector cross CrossVersion.full
