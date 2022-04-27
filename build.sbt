@@ -220,8 +220,12 @@ lazy val crossBuiltModules: Seq[sbt.internal.ProjectMatrix] = Seq(
   `health-check`
 )
 
-lazy val crossBuiltModuleDeps: Seq[sbt.internal.MatrixClasspathDep[sbt.internal.ProjectMatrixReference]] =
-  crossBuiltModules.map(m => sbt.internal.ProjectMatrix.MatrixClasspathDependency(m, configuration = None))
+lazy val crossBuiltModuleDeps: Seq[
+  sbt.internal.MatrixClasspathDep[sbt.internal.ProjectMatrixReference]
+] =
+  crossBuiltModules.map(m =>
+    sbt.internal.ProjectMatrix.MatrixClasspathDependency(m, configuration = None)
+  )
 
 lazy val microsite = projectMatrix
   .dependsOn(crossBuiltModuleDeps: _*)
