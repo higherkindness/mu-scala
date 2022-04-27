@@ -15,14 +15,15 @@ import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}
 import java.io.File
 import java.security.cert.X509Certificate
 import munit.CatsEffectSuite
+import scala.concurrent.duration._
 import scala.util.Random
+import java.nio.file.Files
 
 class SSLTest extends CatsEffectSuite {
 
-  val port = 51000 + Random.nextInt(2000)
-
   implicit val service: SSLService[IO] = new ServiceImpl
 
+  // These files are loaded from the classpath (they are inside the grpc-testing jar)
   val serverCertFile: File                         = TestUtils.loadCert("server1.pem")
   val serverPrivateKeyFile: File                   = TestUtils.loadCert("server1.key")
   val serverTrustedCaCerts: Array[X509Certificate] = Array(TestUtils.loadX509Cert("ca.pem"))
@@ -42,11 +43,20 @@ class SSLTest extends CatsEffectSuite {
       .bindService[IO]
       .map(service => List(SetSslContext(serverSslContext), AddService(service)))
 
-  val server: Resource[IO, GrpcServer[IO]] =
+  def mkServer(port: Int): Resource[IO, GrpcServer[IO]] =
     grpcConfigs.evalMap(GrpcServer.netty[IO](port, _)).flatMap { s =>
-      Resource.make(s.start)(_ => s.shutdown >> s.awaitTermination).as(s)
+      GrpcServer.serverResource(s).as(s)
     }
 
+  val server =
+    for {
+      p <- Resource.eval(IO(51000 + Random.nextInt(10000)))
+      s <- mkServer(p)
+    } yield s
+
+  val serverPort = server.evalMap(_.getPort)
+
+  // These files are loaded from the classpath (they are inside the grpc-testing jar)
   val clientCertChainFile: File                    = TestUtils.loadCert("client.pem")
   val clientPrivateKeyFile: File                   = TestUtils.loadCert("client.key")
   val clientTrustedCaCerts: Array[X509Certificate] = Array(TestUtils.loadX509Cert("ca.pem"))
@@ -57,7 +67,10 @@ class SSLTest extends CatsEffectSuite {
       .trustManager(clientTrustedCaCerts: _*)
       .build()
 
-  def buildChannelInterpreter(configs: List[NettyChannelConfig]): NettyChannelInterpreter =
+  def buildChannelInterpreter(
+      port: Int,
+      configs: List[NettyChannelConfig]
+  ): NettyChannelInterpreter =
     new NettyChannelInterpreter(
       ChannelForAddress("localhost", port),
       List(OverrideAuthority(TestUtils.TEST_SERVER_HOST)),
@@ -69,18 +82,20 @@ class SSLTest extends CatsEffectSuite {
   }
 
   test("TLS happy path") {
-    val channelInterpreter = buildChannelInterpreter(
-      List(
-        NettyUsePlaintext(),
-        NettyNegotiationType(NegotiationType.TLS),
-        NettySslContext(clientSslContext)
-      )
-    )
-
     val client: Resource[IO, SSLService[IO]] =
-      SSLService.clientFromChannel[IO](IO(channelInterpreter.build))
+      serverPort.flatMap { p =>
+        val channelInterpreter = buildChannelInterpreter(
+          p,
+          List(
+            NettyUsePlaintext(),
+            NettyNegotiationType(NegotiationType.TLS),
+            NettySslContext(clientSslContext)
+          )
+        )
+        SSLService.clientFromChannel[IO](IO(channelInterpreter.build))
+      }
 
-    (server *> client)
+    client
       .use(_.hello(Request(123)))
       .assertEquals(Response(123))
   }
@@ -89,17 +104,19 @@ class SSLTest extends CatsEffectSuite {
     "mu-rpc client with TLS connection should " +
       "throw a io.grpc.StatusRuntimeException when no SSLContext is provided"
   ) {
-    val channelInterpreter = buildChannelInterpreter(
-      List(
-        NettyUsePlaintext(),
-        NettyNegotiationType(NegotiationType.TLS)
-      )
-    )
-
     val client: Resource[IO, SSLService[IO]] =
-      SSLService.clientFromChannel[IO](IO(channelInterpreter.build))
+      serverPort.flatMap { p =>
+        val channelInterpreter = buildChannelInterpreter(
+          p,
+          List(
+            NettyUsePlaintext(),
+            NettyNegotiationType(NegotiationType.TLS)
+          )
+        )
+        SSLService.clientFromChannel[IO](IO(channelInterpreter.build))
+      }
 
-    (server *> client)
+    client
       .use(_.hello(Request(123)))
       .intercept[StatusRuntimeException]
   }
@@ -108,18 +125,19 @@ class SSLTest extends CatsEffectSuite {
     "mu-rpc client with SSL/TSL connection should " +
       "throw a io.grpc.StatusRuntimeException when negotiation is skipped"
   ) {
-
-    val channelInterpreter = buildChannelInterpreter(
-      List(
-        NettyUsePlaintext(),
-        NettySslContext(clientSslContext)
-      )
-    )
-
     val client: Resource[IO, SSLService[IO]] =
-      SSLService.clientFromChannel[IO](IO(channelInterpreter.build))
+      serverPort.flatMap { p =>
+        val channelInterpreter = buildChannelInterpreter(
+          p,
+          List(
+            NettyUsePlaintext(),
+            NettySslContext(clientSslContext)
+          )
+        )
+        SSLService.clientFromChannel[IO](IO(channelInterpreter.build))
+      }
 
-    (server *> client)
+    client
       .use(_.hello(Request(123)))
       .intercept[StatusRuntimeException]
   }

@@ -13,17 +13,15 @@ class AvroRPCTest extends CatsEffectSuite {
 
   implicit val service: AvroRPCService[IO] = new ServiceImpl
 
-  val port = 51000 + Random.nextInt(2000)
-
   for (compression <- List(Identity, Gzip)) {
 
-    val server: Resource[IO, GrpcServer[IO]] =
+    def mkServer(port: Int): Resource[IO, GrpcServer[IO]] =
       for {
         serviceDefn <- AvroRPCService._bindService[IO](compression)
         server      <- GrpcServer.defaultServer[IO](port, List(AddService(serviceDefn)))
       } yield server
 
-    val client: Resource[IO, AvroRPCService[IO]] =
+    def mkClient(port: Int): Resource[IO, AvroRPCService[IO]] =
       AvroRPCService.client[IO](
         ChannelForAddress("localhost", port),
         options = compression match {
@@ -32,12 +30,22 @@ class AvroRPCTest extends CatsEffectSuite {
         }
       )
 
+    val server =
+      for {
+        p <- Resource.eval(IO(51000 + Random.nextInt(10000)))
+        s <- mkServer(p)
+      } yield s
+
+    val serverPort = server.evalMap(_.getPort)
+
+    val client = serverPort.flatMap(mkClient)
+
     test(s"server smoke test ($compression)") {
       server.use(_.isShutdown).assertEquals(false)
     }
 
     test(s"unary method ($compression)") {
-      (server *> client)
+      client
         .use(_.hello(TestData.request))
         .assertEquals(Response(TestData.request.a))
     }

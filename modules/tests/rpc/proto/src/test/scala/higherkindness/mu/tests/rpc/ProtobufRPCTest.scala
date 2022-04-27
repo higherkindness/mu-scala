@@ -2,7 +2,6 @@ package higherkindness.mu.tests.rpc
 
 import _root_.fs2._
 import cats.effect.{IO, Resource}
-import cats.syntax.all._
 import higherkindness.mu.rpc.ChannelForAddress
 import higherkindness.mu.rpc.protocol.{Gzip, Identity}
 import higherkindness.mu.rpc.server._
@@ -15,17 +14,15 @@ class ProtobufRPCTest extends CatsEffectSuite {
 
   implicit val service: ProtoRPCService[IO] = new ServiceImpl
 
-  val port = 51000 + Random.nextInt(2000)
-
   for (compression <- List(Identity, Gzip)) {
 
-    val server: Resource[IO, GrpcServer[IO]] =
+    def mkServer(port: Int): Resource[IO, GrpcServer[IO]] =
       for {
         serviceDefn <- ProtoRPCService._bindService[IO](compression)
         server      <- GrpcServer.defaultServer[IO](port, List(AddService(serviceDefn)))
       } yield server
 
-    val client: Resource[IO, ProtoRPCService[IO]] =
+    def mkClient(port: Int): Resource[IO, ProtoRPCService[IO]] =
       ProtoRPCService.client[IO](
         ChannelForAddress("localhost", port),
         options = compression match {
@@ -34,24 +31,34 @@ class ProtobufRPCTest extends CatsEffectSuite {
         }
       )
 
+    val server =
+      for {
+        p <- Resource.eval(IO(51000 + Random.nextInt(10000)))
+        s <- mkServer(p)
+      } yield s
+
+    val serverPort = server.evalMap(_.getPort)
+
+    val client = serverPort.flatMap(mkClient)
+
     test(s"server smoke test ($compression)") {
       server.use(_.isShutdown).assertEquals(false)
     }
 
     test(s"unary method ($compression)") {
-      (server *> client)
+      client
         .use(_.unary(A(1, 2)))
         .assertEquals(C("hello", Some(A(1, 2))))
     }
 
     test(s"client streaming ($compression)") {
-      (server *> client)
+      client
         .use(_.clientStreaming(Stream(A(1, 2), A(3, 4), A(5, 6))))
         .assertEquals(D(3))
     }
 
     test(s"server streaming ($compression)") {
-      (server *> client)
+      client
         .use { c =>
           Stream.force(c.serverStreaming(B(Some(A(1, 2)), Some(A(3, 4))))).compile.toList
         }
@@ -65,7 +72,7 @@ class ProtobufRPCTest extends CatsEffectSuite {
           .map(_.handleErrorWith(ex => Stream(C(ex.getMessage, Some(a)))))
           .flatMap(_.compile.toList)
 
-      (server *> client)
+      client
         .use { s =>
           clientProgram("SE", s)
             .assertEquals(List(C("INVALID_ARGUMENT: SE", Some(a)))) *>
@@ -79,7 +86,7 @@ class ProtobufRPCTest extends CatsEffectSuite {
     }
 
     test(s"bidirectional streaming ($compression)") {
-      (server *> client)
+      client
         .use { c =>
           val req = Stream(
             E(Some(A(1, 2)), "hello"),

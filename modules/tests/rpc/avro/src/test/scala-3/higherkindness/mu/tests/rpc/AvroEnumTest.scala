@@ -12,7 +12,7 @@ class AvroEnumTest extends CatsEffectSuite {
 
   implicit val service: AvroRPCService[IO] = new ServiceImpl
 
-  val port = 51000 + Random.nextInt(2000)
+  val port = 51000 + Random.nextInt(10000)
 
   val grpcServer: Resource[IO, GrpcServer[IO]] =
     for {
