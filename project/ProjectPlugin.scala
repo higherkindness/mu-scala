@@ -225,8 +225,7 @@ object ProjectPlugin extends AutoPlugin {
         "org.scalameta"          %% "munit-scalacheck"        % V.munit                 % Test,
         "org.typelevel"          %% "munit-cats-effect-3"     % V.munitCE               % Test,
         "org.typelevel"          %% "cats-effect-testkit"     % V.catsEffect            % Test,
-        "ch.qos.logback"          % "logback-classic"         % V.logback               % Test,
-        "org.slf4j"               % "slf4j-nop"               % V.slf4j                 % Test
+        "ch.qos.logback"          % "logback-classic"         % V.logback               % Test
       )
     )
 
