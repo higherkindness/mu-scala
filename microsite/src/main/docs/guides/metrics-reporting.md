@@ -89,10 +89,8 @@ In this case, in order to intercept the client calls we need additional configur
 ```scala mdoc:silent
 import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc._
-import higherkindness.mu.rpc.config._
 import higherkindness.mu.rpc.channel._
 import higherkindness.mu.rpc.channel.metrics.MetricsChannelInterceptor
-import higherkindness.mu.rpc.config.channel._
 import io.prometheus.client.CollectorRegistry
 import service._
 
@@ -102,11 +100,10 @@ object InterceptingClientCalls {
 
   val serviceClient: Resource[IO, Greeter[IO]] =
     for {
-      channelFor    <- Resource.eval(ConfigForAddress[IO]("rpc.host", "rpc.port"))
       metricsOps    <- Resource.eval(PrometheusMetrics.build[IO](cr, "client"))
       disp          <- Dispatcher[IO]
       serviceClient <- Greeter.client[IO](
-        channelFor = channelFor,
+        channelFor = ChannelForAddress("localhost", 8080),
         channelConfigList = List(UsePlaintext(), AddInterceptor(MetricsChannelInterceptor(metricsOps, disp))))
     } yield serviceClient
 
