@@ -23,24 +23,18 @@ you are using Avro.
 ## Service definition
 
 Let's use the following service definition. (For an explanation of how to create
-service definition, check out the [RPC service definition with Protobuf tutorial](service-definition/protobuf).)
+a service definition, check out the [RPC service definition with Protobuf
+tutorial](service-definition/protobuf).)
 
 A client sends a `HelloRequest` containing a name, and the server responds with
 a greeting and an indication of whether it is feeling happy or not.
 
-```scala mdoc:silent
-import higherkindness.mu.rpc.protocol._
+```scala
+case class HelloRequest(name: String)
+case class HelloResponse(greeting: String, happy: Boolean)
 
-object hello {
-  case class HelloRequest(@pbdirect.pbIndex(1) name: String)
-  case class HelloResponse(@pbdirect.pbIndex(1) greeting: String, @pbdirect.pbIndex(2) happy: Boolean)
-
-  // Note: the @service annotation in your code might reference Avro instead of Protobuf
-  @service(Protobuf, namespace = Some("com.example"))
-  trait Greeter[F[_]] {
-    def SayHello(req: HelloRequest): F[HelloResponse]
-  }
-
+trait Greeter[F[_]] {
+  def SayHello(req: HelloRequest): F[HelloResponse]
 }
 ```
 
@@ -51,7 +45,7 @@ Here's the implementation we want to test.
 ```scala mdoc:silent
 import cats.Applicative
 import cats.syntax.applicative._
-import hello._
+import mu.examples.protobuf.greeter._
 
 class HappyGreeter[F[_]: Applicative] extends Greeter[F] {
 
@@ -70,7 +64,6 @@ In our test we'll use cats-effect `IO` as our concrete effect monad.
 We need to provide a couple of implicits to make that work:
 
 ```scala mdoc:silent
-import cats.effect.IO
 import scala.concurrent.ExecutionContext
 
 trait CatsEffectImplicits {
@@ -103,8 +96,8 @@ We'll also create a client and connect it to the same in-memory channel, so it
 can make requests to the service.
 
 ```scala mdoc:silent
-import hello._
-import cats.effect.Resource
+import mu.examples.protobuf.greeter.Greeter
+import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc.testing.servers.withServerChannel
 
 trait ServiceAndClient extends CatsEffectImplicits {
@@ -135,7 +128,7 @@ With the service and client in place, the test consists of using the client to
 make a request and then asserting that the response matches what we expect.
 
 ```scala mdoc:silent
-import hello._
+import mu.examples.protobuf.greeter.{HelloRequest, HelloResponse}
 import org.scalatest.flatspec.AnyFlatSpec
 
 class ServiceSpec extends AnyFlatSpec with ServiceAndClient {
@@ -174,7 +167,7 @@ import org.scalacheck.Prop._
 
 class PropertyBasedServiceSpec extends AnyFlatSpec with ServiceAndClient with Checkers {
 
-  val requestGen: Gen[HelloRequest] = Gen.alphaStr.map(HelloRequest)
+  val requestGen: Gen[HelloRequest] = Gen.alphaStr.map(HelloRequest(_))
 
   behavior of "Greeter service"
 
