@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package mu.examples.protobuf.greeter;
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloResponse {
+  string greeting = 1;
+}
+
+service StreamingGreeter {
+  rpc LotsOfHellos (stream HelloRequest) returns (HelloResponse);
+
+  rpc LotsOfReplies (HelloRequest) returns (stream HelloResponse);
+
+  rpc BidirectionalHello (stream HelloRequest) returns (stream HelloResponse);
+}

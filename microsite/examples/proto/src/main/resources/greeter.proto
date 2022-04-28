@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package mu.examples.protobuf;
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloResponse {
+  string greeting = 1;
+  bool happy = 2;
+}
+
+service Greeter {
+  rpc SayHello (HelloRequest) returns (HelloResponse);
+}
