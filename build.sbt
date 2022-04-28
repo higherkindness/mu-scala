@@ -3,18 +3,20 @@ val scala3   = "3.1.2"
 
 ThisBuild / organization       := "io.higherkindness"
 ThisBuild / githubOrganization := "47degrees"
-ThisBuild / scalaVersion       := scala213
+ThisBuild / scalaVersion       := scala3
 
 ThisBuild / resolvers += Resolver.sonatypeRepo("snapshots")
-
-// we expand this to (2.13, 3) on specific projects where we can cross-build
-ThisBuild / crossScalaVersions := Seq(scala213)
 
 publish / skip := true
 
 addCommandAlias(
+  "all-tests",
+  "config/test; tests/test; tests3/test; avro-rpc-tests/test; avro-rpc-tests3/test; protobuf-rpc-tests/test; protobuf-rpc-tests3/test"
+)
+
+addCommandAlias(
   "ci-test",
-  "scalafmtCheckAll; scalafmtSbtCheck; missinglinkCheck; mdoc; +compile; config/test; +tests/test; +haskell-integration-tests/test"
+  "scalafmtCheckAll; scalafmtSbtCheck; missinglinkCheck; mdoc; all-tests; haskell-integration-tests/test"
 )
 addCommandAlias("ci-docs", "github; mdoc; headerCreateAll; publishMicrosite")
 addCommandAlias("ci-publish", "github; ci-release")
@@ -25,115 +27,116 @@ Global / concurrentRestrictions += Tags.limit(Tags.Test, 1)
 //// COMMON ////
 ////////////////
 
-lazy val `rpc-service` = project
+lazy val `rpc-service` = projectMatrix
   .in(file("modules/service"))
   .settings(moduleName := "mu-rpc-service")
   .settings(rpcServiceSettings)
-  .settings(crossScalaVersions := Seq(scala213, scala3))
+  .jvmPlatform(scalaVersions = Seq(scala3, scala213))
 
-lazy val fs2 = project
+lazy val fs2 = projectMatrix
   .in(file("modules/fs2"))
   .dependsOn(`rpc-service`)
   .settings(moduleName := "mu-rpc-fs2")
   .settings(fs2Settings)
-  .settings(crossScalaVersions := Seq(scala213, scala3))
+  .jvmPlatform(scalaVersions = Seq(scala3, scala213))
 
-lazy val config = project
+lazy val config = projectMatrix
   .in(file("modules/config"))
   .dependsOn(`rpc-service`, server)
   .settings(moduleName := "mu-config")
   .settings(configSettings)
+  .jvmPlatform(scalaVersions = Seq(scala213))
 
-lazy val testing = project
+lazy val testing = projectMatrix
   .in(file("modules/testing"))
   .settings(moduleName := "mu-rpc-testing")
   .settings(testingSettings)
-  .settings(crossScalaVersions := Seq(scala213, scala3))
+  .jvmPlatform(scalaVersions = Seq(scala3, scala213))
 
 ////////////////
 //// CLIENT ////
 ////////////////
 
-lazy val `client-netty` = project
+lazy val `client-netty` = projectMatrix
   .in(file("modules/client/netty"))
   .dependsOn(`rpc-service`)
   .settings(moduleName := "mu-rpc-client-netty")
   .settings(clientNettySettings)
-  .settings(crossScalaVersions := Seq(scala213, scala3))
+  .jvmPlatform(scalaVersions = Seq(scala3, scala213))
 
-lazy val `client-okhttp` = project
+lazy val `client-okhttp` = projectMatrix
   .in(file("modules/client/okhttp"))
   .dependsOn(`rpc-service`)
   .settings(moduleName := "mu-rpc-client-okhttp")
   .settings(clientOkHttpSettings)
-  .settings(crossScalaVersions := Seq(scala213, scala3))
+  .jvmPlatform(scalaVersions = Seq(scala3, scala213))
 
-lazy val `client-cache` = project
+lazy val `client-cache` = projectMatrix
   .in(file("modules/client/cache"))
   .settings(moduleName := "mu-rpc-client-cache")
   .settings(clientCacheSettings)
-  .settings(crossScalaVersions := Seq(scala213, scala3))
+  .jvmPlatform(scalaVersions = Seq(scala3, scala213))
 
 ///////////////////
 //// NETTY SSL ////
 ///////////////////
 
-lazy val `netty-ssl` = project
+lazy val `netty-ssl` = projectMatrix
   .in(file("modules/netty-ssl"))
   .settings(moduleName := "mu-rpc-netty-ssl")
   .settings(nettySslSettings)
-  .settings(crossScalaVersions := Seq(scala213, scala3))
+  .jvmPlatform(scalaVersions = Seq(scala3, scala213))
 
 ////////////////
 //// SERVER ////
 ////////////////
 
-lazy val server = project
+lazy val server = projectMatrix
   .in(file("modules/server"))
   .dependsOn(`rpc-service`)
   .settings(moduleName := "mu-rpc-server")
   .settings(serverSettings)
-  .settings(crossScalaVersions := Seq(scala213, scala3))
+  .jvmPlatform(scalaVersions = Seq(scala3, scala213))
 
 /////////////////////
 //// HEALTHCHECK ////
 /////////////////////
 
-lazy val `health-check` = project
+lazy val `health-check` = projectMatrix
   .in(file("modules/health-check"))
   .enablePlugins(SrcGenPlugin)
   .dependsOn(`rpc-service`, fs2)
   .settings(healthCheckSettings)
   .settings(moduleName := "mu-rpc-health-check")
-  .settings(crossScalaVersions := Seq(scala213, scala3))
+  .jvmPlatform(scalaVersions = Seq(scala3, scala213))
 
 ////////////////////
 //// PROMETHEUS ////
 ////////////////////
 
-lazy val prometheus = project
+lazy val prometheus = projectMatrix
   .in(file("modules/metrics/prometheus"))
   .dependsOn(`rpc-service`)
   .settings(moduleName := "mu-rpc-prometheus")
   .settings(prometheusMetricsSettings)
-  .settings(crossScalaVersions := Seq(scala213, scala3))
+  .jvmPlatform(scalaVersions = Seq(scala3, scala213))
 
 ////////////////////
 //// DROPWIZARD ////
 ////////////////////
 
-lazy val dropwizard = project
+lazy val dropwizard = projectMatrix
   .in(file("modules/metrics/dropwizard"))
   .dependsOn(`rpc-service`)
   .settings(moduleName := "mu-rpc-dropwizard")
   .settings(dropwizardMetricsSettings)
-  .settings(crossScalaVersions := Seq(scala213, scala3))
+  .jvmPlatform(scalaVersions = Seq(scala3, scala213))
 
 ////////////////////
 //// BENCHMARKS ////
 ////////////////////
 
-lazy val `benchmarks-vnext` = project
+lazy val `benchmarks-vnext` = projectMatrix
   .in(file("benchmarks/vnext"))
   .dependsOn(server)
   .settings(
@@ -142,68 +145,68 @@ lazy val `benchmarks-vnext` = project
       "org.typelevel" %% "log4cats-slf4j" % V.log4cats
     )
   )
-  .settings(coverageEnabled := false)
   .settings(moduleName := "mu-benchmarks-vnext")
   .settings(benchmarksSettings)
   .settings(publish / skip := true)
+  .jvmPlatform(scalaVersions = Seq(scala213))
   .enablePlugins(JmhPlugin)
 
 ///////////////
 //// TESTS ////
 ///////////////
 
-lazy val `test-utils` = project
+lazy val `test-utils` = projectMatrix
   .in(file("modules/tests/utils"))
-  .dependsOn(deps(crossBuiltModules): _*)
+  .dependsOn(crossBuiltModuleDeps: _*)
   .settings(moduleName := "mu-rpc-test-utils")
   .settings(publish / skip := true)
   .settings(testUtilsSettings)
-  .settings(crossScalaVersions := Seq(scala213, scala3))
+  .jvmPlatform(scalaVersions = Seq(scala3, scala213))
 
-lazy val tests = project
+lazy val tests = projectMatrix
   .in(file("modules/tests"))
-  .dependsOn(deps(crossBuiltModules): _*)
+  .dependsOn(crossBuiltModuleDeps: _*)
   .dependsOn(`test-utils`)
   .settings(moduleName := "mu-rpc-tests")
   .settings(publish / skip := true)
   .settings(testSettings)
-  .settings(crossScalaVersions := Seq(scala213, scala3))
-  .aggregate(`protobuf-rpc-tests`, `avro-rpc-tests`)
+  .jvmPlatform(scalaVersions = Seq(scala3, scala213))
 
-lazy val `protobuf-rpc-tests` = project
+lazy val `protobuf-rpc-tests` = projectMatrix
   .in(file("modules/tests/rpc/proto"))
   .enablePlugins(SrcGenPlugin)
-  .dependsOn(deps(crossBuiltModules): _*)
+  .dependsOn(crossBuiltModuleDeps: _*)
   .dependsOn(`test-utils`)
   .settings(moduleName := "mu-rpc-protobuf-tests")
   .settings(publish / skip := true)
   .settings(protobufRPCTestSettings)
-  .settings(crossScalaVersions := Seq(scala213, scala3))
+  .jvmPlatform(scalaVersions = Seq(scala3, scala213))
 
-lazy val `avro-rpc-tests` = project
+lazy val `avro-rpc-tests` = projectMatrix
   .in(file("modules/tests/rpc/avro"))
   .enablePlugins(SrcGenPlugin)
-  .dependsOn(deps(crossBuiltModules): _*)
+  .dependsOn(crossBuiltModuleDeps: _*)
   .settings(moduleName := "mu-rpc-avro-tests")
   .settings(publish / skip := true)
   .settings(avroRPCTestSettings)
-  .settings(crossScalaVersions := Seq(scala213, scala3))
+  .jvmPlatform(scalaVersions = Seq(scala3, scala213))
 
 //////////////////////////////////////
 //// MU-HASKELL INTEGRATION TESTS ////
 //////////////////////////////////////
 
-lazy val `haskell-integration-tests` = project
+lazy val `haskell-integration-tests` = projectMatrix
   .in(file("modules/haskell-integration-tests"))
   .dependsOn(server, `client-netty`, fs2)
   .settings(publish / skip := true)
   .settings(haskellIntegrationTestSettings)
+  .jvmPlatform(scalaVersions = Seq(scala213))
 
 //////////////////////////
 //// MODULES REGISTRY ////
 //////////////////////////
 
-lazy val crossBuiltModules: Seq[Project] = Seq(
+lazy val crossBuiltModules: Seq[sbt.internal.ProjectMatrix] = Seq(
   `rpc-service`,
   fs2,
   `client-netty`,
@@ -217,21 +220,23 @@ lazy val crossBuiltModules: Seq[Project] = Seq(
   `health-check`
 )
 
-lazy val coreModules: Seq[Project] =
-  crossBuiltModules ++ Seq(config)
+lazy val crossBuiltModuleDeps: Seq[
+  sbt.internal.MatrixClasspathDep[sbt.internal.ProjectMatrixReference]
+] =
+  crossBuiltModules.map(m =>
+    sbt.internal.ProjectMatrix.MatrixClasspathDependency(m, configuration = None)
+  )
 
-def deps(modules: Seq[Project]): Seq[ClasspathDependency] =
-  modules.map(ClasspathDependency(_, None))
-
-lazy val microsite = project
-  .dependsOn(deps(coreModules): _*)
+lazy val microsite = projectMatrix
+  .dependsOn(crossBuiltModuleDeps: _*)
   .settings(docsSettings)
   .settings(micrositeSettings)
   .settings(publish / skip := true)
   .enablePlugins(MicrositesPlugin)
   .enablePlugins(MdocPlugin)
+  .jvmPlatform(scalaVersions = Seq(scala213))
 
-lazy val documentation = project
+lazy val documentation = projectMatrix
   .settings(mdocOut := file("."))
   .settings(publish / skip := true)
   .enablePlugins(MdocPlugin)

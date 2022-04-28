@@ -1,7 +1,6 @@
 import microsites.MicrositesPlugin.autoImport._
 import sbt.Keys._
 import sbt._
-import scoverage.ScoverageKeys._
 
 import scala.language.reflectiveCalls
 import mdoc.MdocPlugin.autoImport._
@@ -226,8 +225,7 @@ object ProjectPlugin extends AutoPlugin {
         "org.scalameta"          %% "munit-scalacheck"        % V.munit                 % Test,
         "org.typelevel"          %% "munit-cats-effect-3"     % V.munitCE               % Test,
         "org.typelevel"          %% "cats-effect-testkit"     % V.catsEffect            % Test,
-        "ch.qos.logback"          % "logback-classic"         % V.logback               % Test,
-        "org.slf4j"               % "slf4j-nop"               % V.slf4j                 % Test
+        "ch.qos.logback"          % "logback-classic"         % V.logback               % Test
       )
     )
 
@@ -311,7 +309,6 @@ object ProjectPlugin extends AutoPlugin {
     Seq(
       Test / fork            := false,
       Compile / compileOrder := CompileOrder.JavaThenScala,
-      coverageFailOnMinimum  := false,
       libraryDependencies ++= scalaVersionSpecificDeps(2)(
         compilerPlugin(
           "org.typelevel" % "kind-projector" % V.kindProjector cross CrossVersion.full

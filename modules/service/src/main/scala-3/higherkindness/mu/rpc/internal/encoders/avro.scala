@@ -40,19 +40,19 @@ object avro {
    */
   given [A: SchemaFor: Encoder: Decoder]: Marshaller[A] with
 
-      override def parse(stream: InputStream): A = {
-        val input: AvroInputStream[A] = AvroInputStream.binary[A].from(stream).build(AvroSchema[A])
-        input.iterator.toList.head
-      }
+    override def parse(stream: InputStream): A = {
+      val input: AvroInputStream[A] = AvroInputStream.binary[A].from(stream).build(AvroSchema[A])
+      input.iterator.toList.head
+    }
 
-      override def stream(value: A): InputStream = {
-        val baos: ByteArrayOutputStream = new ByteArrayOutputStream()
-        val output: AvroOutputStream[A] = AvroOutputStream.binary[A].to(baos).build()
-        output.write(value)
-        output.close()
+    override def stream(value: A): InputStream = {
+      val baos: ByteArrayOutputStream = new ByteArrayOutputStream()
+      val output: AvroOutputStream[A] = AvroOutputStream.binary[A].to(baos).build()
+      output.write(value)
+      output.close()
 
-        new ByteArrayInputStream(baos.toByteArray)
-      }
+      new ByteArrayInputStream(baos.toByteArray)
+    }
 
 }
 
