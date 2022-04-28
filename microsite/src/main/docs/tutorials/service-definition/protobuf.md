@@ -1,6 +1,6 @@
 ---
 layout: docs
-title: gRPC with Protobuf
+title: RPC service definition with Protobuf
 section: tutorials
 permalink: tutorials/service-definition/protobuf
 ---
