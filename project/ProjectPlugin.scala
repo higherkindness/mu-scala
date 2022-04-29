@@ -191,10 +191,10 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "org.scalatest"        %% "scalatest"       % V.scalatest,
-        "org.scalatestplus"    %% "scalacheck-1-14" % V.scalatestplusScheck,
-        "io.dropwizard.metrics" % "metrics-jmx"     % V.dropwizard,
-        "org.tpolecat"         %% "natchez-jaeger"  % V.natchez
+        "org.scalameta"        %% "munit-scalacheck"    % V.munit,
+        "org.typelevel"        %% "munit-cats-effect-3" % V.munitCE,
+        "io.dropwizard.metrics" % "metrics-jmx"         % V.dropwizard,
+        "org.tpolecat"         %% "natchez-jaeger"      % V.natchez
       ),
       scalacOptions ~= (_ filterNot Set(
         "-Xfatal-warnings",

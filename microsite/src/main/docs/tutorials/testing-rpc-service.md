@@ -57,30 +57,13 @@ class HappyGreeter[F[_]: Applicative] extends Greeter[F] {
 
 We're going to write a test to check that the service is always happy.
 
-## cats-effect implicits
-
-In our test we'll use cats-effect `IO` as our concrete effect monad.
-
-We need to provide a couple of implicits to make that work:
-
-```scala mdoc:silent
-import scala.concurrent.ExecutionContext
-
-trait CatsEffectImplicits {
-  import cats.effect.unsafe
-
-  val EC: ExecutionContext = ExecutionContext.global
-
-  implicit val ioRuntime: unsafe.IORuntime = unsafe.IORuntime.global
-
-
-}
-```
+We'll use the [MUnit] testing library, with [munit-cats-effect] for smooth
+integration with cats-effect `IO`.
 
 ## mu-rpc-testing
 
-You'll need to add a dependency on the `mu-rpc-testing` module. This contains
-some helpers for setting up an in-memory service for testing.
+We'll also make use of the `mu-rpc-testing` module. This contains some helpers
+for setting up an in-memory service for testing.
 
 ```sbt
 libraryDependencies += "io.higherkindness" %% "mu-rpc-testing" % "@VERSION@" % Test
@@ -100,7 +83,7 @@ import mu.examples.protobuf.greeter.Greeter
 import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc.testing.servers.withServerChannel
 
-trait ServiceAndClient extends CatsEffectImplicits {
+trait ServiceAndClient {
 
   implicit val greeter: Greeter[IO] = new HappyGreeter[IO]
 
@@ -129,18 +112,15 @@ make a request and then asserting that the response matches what we expect.
 
 ```scala mdoc:silent
 import mu.examples.protobuf.greeter.{HelloRequest, HelloResponse}
-import org.scalatest.flatspec.AnyFlatSpec
+import munit.CatsEffectSuite
 
-class ServiceSpec extends AnyFlatSpec with ServiceAndClient {
+class ServiceSpec extends CatsEffectSuite with ServiceAndClient {
 
-  behavior of "Greeter service"
-
-  it should "be happy" in {
-    val response: HelloResponse = clientResource
+  test("service is happy") {
+    clientResource
       .use(client => client.SayHello(HelloRequest("somebody")))
-      .unsafeRunSync()
-
-    assert(response.happy === true)
+      .map(_.happy)
+      .assertEquals(true)
   }
 
 }
@@ -150,8 +130,11 @@ class ServiceSpec extends AnyFlatSpec with ServiceAndClient {
 
 Let's see the test in action:
 
-```scala mdoc
-org.scalatest.nocolor.run(new ServiceSpec)
+```
+sbt:hello-mu-protobuf> tests/test
+mu.examples.protobuf.greeter.ServiceSpec:
+  + service is happy 0.314s
+[info] Passed: Total 1, Failed 0, Errors 0, Passed 1
 ```
 
 ## Bonus points: property-based test
@@ -161,27 +144,24 @@ a property-based test with ScalaCheck to verify that the service's happiness
 does not depend on the incoming request.
 
 ```scala mdoc:silent
-import org.scalatestplus.scalacheck.Checkers
+import munit.ScalaCheckSuite
 import org.scalacheck.Gen
 import org.scalacheck.Prop._
 
-class PropertyBasedServiceSpec extends AnyFlatSpec with ServiceAndClient with Checkers {
+class PropertyBasedServiceSpec extends CatsEffectSuite with ScalaCheckSuite with ServiceAndClient {
 
   val requestGen: Gen[HelloRequest] = Gen.alphaStr.map(HelloRequest(_))
 
-  behavior of "Greeter service"
+  val client = ResourceSuiteLocalFixture("client", clientResource)
 
-  it should "be happy" in {
-    clientResource.use { client =>
-      IO {
-        check {
-          forAll(requestGen) { request =>
-            val response: HelloResponse = client.SayHello(request).unsafeRunSync()
-            response.happy :| "response should be happy"
-          }
-        }
-      }
-    }.unsafeRunSync()
+  override def munitFixtures: Seq[Fixture[_]] = List(client)
+
+  property("server is always happy") {
+    val c = client()
+    forAllNoShrink(requestGen) { request =>
+      val response: HelloResponse = c.SayHello(request).unsafeRunSync()
+      response.happy :| "response should be happy"
+    }
   }
 
 }
@@ -189,6 +169,12 @@ class PropertyBasedServiceSpec extends AnyFlatSpec with ServiceAndClient with Ch
 
 Let's run this test as well:
 
-```scala mdoc
-org.scalatest.nocolor.run(new PropertyBasedServiceSpec)
 ```
+sbt:hello-mu-protobuf> tests/testOnly mu.examples.protobuf.greeter.PropertyBasedServiceSpec
+mu.examples.protobuf.greeter.PropertyBasedServiceSpec:
+  + server is always happy 0.243s
+[info] Passed: Total 1, Failed 0, Errors 0, Passed 1
+```
+
+[MUnit]: https://scalameta.org/munit/
+[munit-cats-effect]: https://github.com/typelevel/munit-cats-effect
