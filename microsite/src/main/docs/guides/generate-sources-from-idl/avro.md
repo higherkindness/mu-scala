@@ -11,49 +11,30 @@ permalink: /guides/generate-sources-from-avro
 
 First add the sbt plugin in `project/plugins.sbt`:
 
-```sbt
+```scala
 addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "@VERSION@")
 ```
 
-**NOTE**
+And enable the plugin on the appropriate project(s):
 
-For users of the `sbt-mu-srcgen` plugin `v0.22.x` and below, the plugin is enabled automatically as soon as it's added to the `project/plugins.sbt`.
-However, for users of the `sbt-mu-srcgen` plugin `v0.23.x` and beyond, the plugin needs to be manually enabled for any module for which you want to generate code.
-To enable the module, add the following line to your `build.sbt`
-
-```sbt
+```scala
 enablePlugins(SrcGenPlugin)
 ```
 
-Once the plugin is enabled, you can configure it by adding a few lines to `build.sbt`:
+Once the plugin is enabled, you can configure it by adding a few lines to
+`build.sbt`:
 
-```sbt
+```scala
 import higherkindness.mu.rpc.srcgen.Model._
 
 // Look for Avro IDL files
 muSrcGenIdlType := IdlType.Avro
 ```
 
-Finally, make sure you have Scala macro annotations enabled, to ensure the
-generated code compiles. How you do this depends on which Scala version you are
-using.
-
-For Scala 2.12, add this to `build.sbt`:
-
-```sbt
-addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch)
-```
-
-For Scala 2.13, add this:
-
-```sbt
-scalacOptions += "-Ymacro-annotations"
-```
-
 Suppose you want to generate Scala code for a gRPC service based on the
 following Avro IDL file, `src/main/resources/hello.avdl`:
 
-```avroidl
+```
 @namespace("foo")
 protocol AvroGreeter {
 
@@ -73,18 +54,19 @@ protocol AvroGreeter {
 }
 ```
 
-**NOTE:** please be aware that `mu-scala` restricts Avro RPC method arguments to a single record type and only permits records as return types;
-for more context, see the [source generation reference](../reference/source-generation).
+**NOTE:** please be aware that `mu-scala` restricts Avro RPC method arguments to
+a single record type and only permits records as return types; for more context,
+see the [source generation reference](../reference/source-generation).
 
 You can run the source generator directly:
 
-```shell script
+```shell
 sbt muSrcGen
 ```
 
 or as part of compilation:
 
-```shell script
+```shell
 sbt compile
 ```
 
@@ -97,8 +79,6 @@ It will look like this (tidied up and simplified for readability):
 package foo
 
 import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._
-import higherkindness.mu.rpc.internal.encoders.avro.javatime._
-import higherkindness.mu.rpc.protocol._
 
 final case class HelloRequest(
   arg1: String,
@@ -112,16 +92,23 @@ final case class HelloResponse(
   arg3: List[String]
 )
 
-@service(Avro, compressionType = Identity, namespace = Some("foo")) trait AvroGreeter[F[_]] {
+trait AvroGreeter[F[_]] {
   def sayHelloAvro(arg: HelloRequest): F[HelloResponse]
+}
+
+object AvroGreeter {
+
+  // ... lots of generated code
+
 }
 ```
 
 It's also possible to generate Scala code from `.avpr` (JSON) files.
 
-Suppose you delete `src/main/resources/hello.avdl` and replace it with `src/main/resources/hello.avpr`:
+Suppose you delete `src/main/resources/hello.avdl` and replace it with
+`src/main/resources/hello.avpr`:
 
-```avroidl
+```
 {
   "namespace" : "foo",
   "protocol" : "AvroGreeter",
@@ -189,22 +176,25 @@ Suppose you delete `src/main/resources/hello.avdl` and replace it with `src/main
 }
 ```
 
-If you run `sbt clean muSrcGen`, you should end up with exactly the same generated
-Scala file as before.
+If you run `sbt clean muSrcGen`, you should end up with exactly the same
+generated Scala file as before.
 
 ## Avro code generation details
 
-This section explains the different Scala structures that are generated from Avro IDL.
+This section explains the different Scala structures that are generated from
+Avro IDL.
 
-To achieve this generation Mu's source generator uses [avrohugger](https://github.com/julianpeeters/avrohugger) behind the scenes.
+To achieve this generation Mu's source generator uses
+[avrohugger](https://github.com/julianpeeters/avrohugger) behind the scenes.
 
 ### Avro Protocols
 
-Let's start from the beginning, everything on Avro should be declared inside a `protocol`.
+Let's start from the beginning, everything in Avro IDL should be declared inside
+a `protocol`.
 
 The name of that protocol will be the name of our Scala file.
 
-```avroidl
+```
 protocol People {
  ...
 }
@@ -214,9 +204,10 @@ protocol People {
 
 `People.scala`
 
-Furthermore, the `protocol` can have a `namespace` which will be our Scala package:
+Furthermore, the `protocol` can have a `namespace` which will be our Scala
+package:
 
-```avroidl
+```
 @namespace("example.protocol")
 protocol People {
  ...
@@ -225,14 +216,15 @@ protocol People {
 
 ***muSrcGen =>***
 
-`example.protocol.People.scala`
+`example/protocol/People.scala`
 
 ### Messages
 
-On Avro, the messages are declared with the keyword `record` and contains different fields inside.
-The `record` will be translated to a `case class` with the same fields on it:
+In Avro IDL, the messages are declared with the keyword `record` and contain
+fields. The `record` will be translated to a `case class` with corresponding
+fields:
 
-```avroidl
+```
 record Person {
   string name;
   int age;
@@ -242,7 +234,7 @@ record Person {
 
 ***muSrcGen =>***
 
-```scala mdoc:silent
+```scala
 case class Person(name: String, age: Int, crossfitter: Boolean)
 ```
 
@@ -250,7 +242,7 @@ case class Person(name: String, age: Int, crossfitter: Boolean)
 
 Avro supports `enum`s too and they are translated to a Scala `Enumeration`:
 
-```avroidl
+```
 enum Errors {
   NotFound, Duplicated, None
 }
@@ -258,7 +250,7 @@ enum Errors {
 
 ***muSrcGen =>***
 
-```scala mdoc:silent
+```scala
 object Errors extends Enumeration {
   type Errors = Value
   val NotFound, Duplicated, None = Value
@@ -267,16 +259,18 @@ object Errors extends Enumeration {
 
 ### Unions
 
-`Unions` are a complex Avro type for fields inside `record`s.
-As its name suggest, it represents a type composed by another types.
+`Unions` are a complex Avro type for fields inside `record`s. As its name
+suggest, it represents a type composed by another types.
 
-Depending on the types composing the `union`, `Mu` will interpret it on different ways:
+Depending on the types composing the `union`, `Mu` will interpret it on
+different ways:
 
 ### Optional fields
 
-When we add a **`null`** to a `union` expression, we'll get a Scala `Option` of the other types declared along the `null`:
+When we add a **`null`** to a `union` expression, we'll get a Scala `Option` of
+the other type declared along the `null`:
 
-```avroidl
+```
 record PeopleRequest {
   union {null, string} name;
 }
@@ -284,15 +278,16 @@ record PeopleRequest {
 
 ***muSrcGen =>***
 
-```scala mdoc:silent
+```scala
 case class PeopleRequest(name: Option[String])
 ```
 
 ### Eithers
 
-When we join **`two non-null types`** on a `union` we'll get an Scala `Either` with the same types order:
+When we join **`two non-null types`** on a `union` we'll get an Scala `Either`
+with the same types order:
 
-```avroidl
+```
 record PeopleResponse {
   union { Errors, Person } result;
 }
@@ -300,16 +295,18 @@ record PeopleResponse {
 
 ***muSrcGen =>***
 
-```scala mdoc:silent:nest
+```scala
 case class PeopleResponse(result: Either[Errors.Value, Person])
 ```
 
 ### Coproducts
 
-And finally, when we have **`three or more non-null types`** on a single `union`,
-we'll have a [shapeless](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#coproducts-and-discriminated-unions)' `Coproduct` on the same order as well:
+And finally, when we have **`three or more non-null types`** on a single
+`union`, we'll have a
+[shapeless](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#coproducts-and-discriminated-unions)'
+`Coproduct` on the same order as well:
 
-```avroidl
+```
 record PeopleResponse {
   union{ string, int, Errors } result;
 }
@@ -317,7 +314,7 @@ record PeopleResponse {
 
 ***muSrcGen =>***
 
-```scala mdoc:silent:nest
+```scala
 import shapeless.{:+:, CNil}
 
 case class PeopleResponse(result: String :+: Int :+: Errors.Value :+: CNil)
@@ -325,11 +322,13 @@ case class PeopleResponse(result: String :+: Int :+: Errors.Value :+: CNil)
 
 ### Services
 
-When we declare a method or `endpoint` inside a `protocol` this will be converted to a `trait` and intended as a **`Mu service`**.
+When we declare a method or `endpoint` inside a `protocol` this will be
+converted to a `trait` to define a **Mu service**.
 
-As we would want to have our models separated from our services. Avro make us able to import other Avro files to use their `record`s:
+If we want to keep our models separate from our service definitions, Avro allows
+us to import other Avro files and use their `record`s:
 
-```avroidl
+```
 protocol PeopleService {
   import idl "People.avdl"; //Under the same folder
 
@@ -340,14 +339,15 @@ protocol PeopleService {
 ***muSrcGen =>***
 
 ```scala
-@service(Avro) trait PeopleService[F[_]] {
+trait PeopleService[F[_]] {
   def getPerson(request: example.protocol.PeopleRequest): F[example.protocol.PeopleResponse]
 }
 ```
 
-Also, an endpoint can be declared without params or non returning anything and `Mu` will use its `Empty` type to cover these cases:
+Also, an endpoint can be declared without params or not returning anything. `Mu`
+will use its `Empty` type to cover these cases:
 
-```avroidl
+```
 protocol PeopleService {
   void insertPerson();
 }
@@ -356,7 +356,7 @@ protocol PeopleService {
 ***muSrcGen =>***
 
 ```scala
-@service(Avro) trait PeopleService[F[_]] {
+trait PeopleService[F[_]] {
   def insertPerson(arg: Empty.type): F[Empty.type]
 }
 ```
