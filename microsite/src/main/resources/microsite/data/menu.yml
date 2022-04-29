@@ -61,9 +61,9 @@ options:
     menu_type: guides
     url: guides/grpc-streaming
 
-  - title: Custom gRPC serialization
+  - title: Compression
     menu_type: guides
-    url: guides/custom-grpc-serialization
+    url: guides/compression
 
   - title: Metrics reporting
     menu_type: guides
