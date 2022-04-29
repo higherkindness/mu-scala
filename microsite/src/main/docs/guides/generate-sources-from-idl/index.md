@@ -19,13 +19,13 @@ Mu can generate code from a number of different IDL formats:
 
 Add the following line to `project/plugins.sbt`:
 
-```sbt
+```scala
 addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "@VERSION@")
 ```
 
 And enable the plugin on the appropriate project(s):
 
-```sbt
+```scala
 enablePlugins(SrcGenPlugin)
 ```
 
@@ -37,13 +37,13 @@ process, so the sources are generated before compilation when you run the
 
 You can also run the sbt task manually. To generate code from Avro IDL files:
 
-```shell script
+```shell
 sbt muSrcGen
 ```
 
 Or for Protobuf:
 
-```shell script
+```shell
 sbt protocGenerate
 ```
 
@@ -52,7 +52,7 @@ sbt protocGenerate
 If you want to customize the plugin's configuration, you will need to add this
 import at the top of your `build.sbt`:
 
-```sbt
+```scala
 import higherkindness.mu.rpc.srcgen.Model._
 ```
 

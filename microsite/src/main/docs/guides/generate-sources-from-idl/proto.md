@@ -11,20 +11,20 @@ permalink: /guides/generate-sources-from-proto
 
 First add the sbt plugin in `project/plugins.sbt`:
 
-```sbt
+```scala
 addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "@VERSION@")
 ```
 
 And enable the plugin on the appropriate project(s):
 
-```sbt
+```scala
 enablePlugins(SrcGenPlugin)
 ```
 
 Once the plugin is enabled, you can configure it by adding a few lines to
 `build.sbt`:
 
-```sbt
+```scala
 import higherkindness.mu.rpc.srcgen.Model._
 
 // Look for .proto files
@@ -58,13 +58,13 @@ service ProtoGreeter {
 
 You can run the source generator directly:
 
-```shell script
+```shell
 sbt protocGenerate
 ```
 
 or as part of compilation:
 
-```shell script
+```shell
 sbt compile
 ```
 
@@ -95,7 +95,7 @@ Note how each field has a default value, in line with the Protobuf spec.
 
 The service definition in `ProtoGreeter.scala` will look something like this:
 
-```
+```scala
 trait ProtoGreeter[F[_]] {
   def SayHelloProto(req: HelloRequest): F[HelloResponse]
 }

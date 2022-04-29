@@ -124,7 +124,7 @@ val metricsOps = DropWizardMetrics[IO](registry)
 To check the metrics from our server or client, `Dropwizard` exposes it through
 `JMX`. You'll need the following dependency:
 
-```sbt
+```
 "io.dropwizard.metrics" % "metrics-jmx" % "4.1.4"
 ```
 

@@ -65,7 +65,7 @@ integration with cats-effect `IO`.
 We'll also make use of the `mu-rpc-testing` module. This contains some helpers
 for setting up an in-memory service for testing.
 
-```sbt
+```
 libraryDependencies += "io.higherkindness" %% "mu-rpc-testing" % "@VERSION@" % Test
 ```
 
