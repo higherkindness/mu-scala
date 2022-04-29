@@ -32,68 +32,96 @@ The relevant Avro issue is
 
 ## Stream implementation
 
-Mu uses [FS2
-Stream](https://github.com/functional-streams-for-scala/fs2) for streaming of
-RPC requests and responses.
+Mu uses [FS2 Stream](https://github.com/typelevel/fs2) for streaming of RPC
+requests and responses.
 
 ## Service definition with streaming endpoints
 
 Let's see what a Mu RPC service definition looks like when we introduce
 streaming endpoints.
 
-Before starting, here is one import we'll need:
+Here is an example `.proto` file:
 
-```scala mdoc:silent
-import higherkindness.mu.rpc.protocol._
+```proto
+syntax = "proto3";
+
+package mu.examples.protobuf.greeter;
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloResponse {
+  string greeting = 1;
+}
+
+service StreamingGreeter {
+  rpc LotsOfHellos (stream HelloRequest) returns (HelloResponse);
+
+  rpc LotsOfReplies (HelloRequest) returns (stream HelloResponse);
+
+  rpc BidirectionalHello (stream HelloRequest) returns (stream HelloResponse);
+}
 ```
 
-And here are the request/response models for our service:
+The service defines 3 RPC endpoints:
 
-```scala mdoc:silent
-case class HelloRequest(greeting: String)
+* `LotsOfHellos` is client-streaming
+* `LotsOfReplies` is server-streaming
+* `BidirectionalHello` is bidirectional streaming
 
-case class HelloResponse(reply: String)
+## Service definition in Scala
+
+If we use the sbt-mu-srcgen plugin to generate Scala code, it will output a
+service definition that looks like this (cleaned up for readability):
+
+```scala
+package mu.examples.protobuf.greeter.streaming
+
+trait StreamingGreeter[F[_]] {
+
+  def LotsOfHellos(req: Stream[F, HelloRequest]): F[HelloResponse]
+
+  def LotsOfReplies(req: HelloRequest): F[Stream[F, HelloResponse]]
+
+  def BidirectionalHello(req: Stream[F, HelloRequest]): F[Stream[F, HelloResponse]]
+
+}
+
+object StreamingGreeter {
+
+  // ... lots of generated code
+
+}
 ```
 
-We'll write the service definition using FS2.
+## Service implementation example
 
-### Using FS2
-
-Let's write the same service definition using `fs2.Stream` instead of `Observable`.
+An implementation of this service on the server side might look something like
+this:
 
 ```scala mdoc:silent
-object servicefs2 {
+import mu.examples.protobuf.greeter.streaming._
+import cats.effect.Concurrent
+import cats.syntax.all._
+import fs2.Stream
 
-  import fs2.Stream
+class MyStreamingGreeter[F[_]: Concurrent] extends StreamingGreeter[F] {
 
-  @service(Protobuf)
-  trait Greeter[F[_]] {
+  def LotsOfHellos(reqStream: Stream[F, HelloRequest]): F[HelloResponse] =
+    reqStream.compile.toList.map { requests =>
+      val names = requests.map(_.name).mkString(" and ")
+      HelloResponse(s"Hello, $names")
+    }
 
-    /**
-     * Server streaming RPC
-     *
-     * @param request Single client request.
-     * @return Stream of server responses.
-     */
-    def lotsOfReplies(request: HelloRequest): F[Stream[F, HelloResponse]]
+  def LotsOfReplies(req: HelloRequest): F[Stream[F, HelloResponse]] =
+    Stream(
+      HelloResponse(s"Hello, ${req.name}"),
+      HelloResponse(s"Hello again, ${req.name}")
+    ).covary[F].pure[F]
 
-    /**
-     * Client streaming RPC
-     *
-     * @param request Stream of client requests.
-     * @return Single server response.
-     */
-    def lotsOfGreetings(request: Stream[F, HelloRequest]): F[HelloResponse]
-
-    /**
-     * Bidirectional streaming RPC
-     *
-     * @param request Stream of client requests.
-     * @return Stream of server responses.
-     */
-    def bidiHello(request: Stream[F, HelloRequest]): F[Stream[F, HelloResponse]]
-
-  }
+  def BidirectionalHello(reqStream: Stream[F, HelloRequest]): F[Stream[F, HelloResponse]] =
+    reqStream.map(req => HelloResponse(s"Hello, ${req.name}")).pure[F]
 
 }
 ```
