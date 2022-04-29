@@ -64,42 +64,19 @@ certificates found
 Let's see a piece of code where we will explain line by line how to build a gRPC
 server with SSL encryption enabled.
 
-We won't cover the details regarding creation of `RPCService`,
-`ServerRPCService` and runtime implicits. You can find more information about
-these in the [gRPC server and client tutorial](../tutorials/grpc-server-client).
+We won't cover the details of implementing the `Greeter` service or starting
+the gRPC server. You can find more information about these in the [gRPC server
+and client tutorial](../tutorials/grpc-server-client).
 
 ```scala mdoc:invisible
-trait CommonRuntime {
-  import cats.effect.unsafe
-
-  val EC: scala.concurrent.ExecutionContext =
-    scala.concurrent.ExecutionContext.Implicits.global
-
-  implicit val ioRuntime: unsafe.IORuntime = unsafe.IORuntime.global
-}
-
-import higherkindness.mu.rpc.protocol._
-
-object service {
-
-  case class HelloRequest(greeting: String)
-
-  case class HelloResponse(reply: String)
-
-  @service(Protobuf)
-  trait Greeter[F[_]] {
-    def sayHello(request: HelloRequest): F[HelloResponse]
-  }
-}
-
+import mu.examples.protobuf.greeter._
 import cats.Applicative
 import cats.syntax.applicative._
-import service._
 
 class ServiceHandler[F[_]: Applicative] extends Greeter[F] {
 
-  override def sayHello(request: service.HelloRequest): F[service.HelloResponse] =
-    HelloResponse(reply = "Good bye!").pure
+  override def SayHello(request: HelloRequest): F[HelloResponse] =
+    HelloResponse("Good bye!", happy = true).pure
 
 }
 ```
@@ -115,9 +92,9 @@ import io.grpc.internal.testing.TestUtils
 import io.grpc.netty.GrpcSslContexts
 import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}
 
-trait Runtime extends CommonRuntime {
+object ServerExample {
 
-  implicit val muRPCHandler: ServiceHandler[IO] =
+  implicit val muRPCHandler: Greeter[IO] =
     new ServiceHandler[IO]
 
   // Load the certicate and private key files.
@@ -151,8 +128,6 @@ trait Runtime extends CommonRuntime {
   val server: Resource[IO, GrpcServer[IO]] = grpcConfigs.evalMap(GrpcServer.netty[IO](8080, _))
 
 }
-
-object implicits extends Runtime
 ```
 
 ### Client side
@@ -166,7 +141,7 @@ import higherkindness.mu.rpc.channel.OverrideAuthority
 import higherkindness.mu.rpc.channel.netty.{NettyChannelInterpreter, NettyNegotiationType, NettySslContext}
 import io.grpc.netty.NegotiationType
 
-object MainApp extends CommonRuntime {
+object ClientExample {
 
   // Load the certicate and private key files.
 
@@ -206,15 +181,5 @@ For more details,
 [here](https://www.47deg.com/blog/mu-rpc-securing-communications-with-mu/) you
 can check a full explanation and an example about securing communications.
 
-[RPC]: https://en.wikipedia.org/wiki/Remote_procedure_call
-[HTTP/2]: https://http2.github.io/
-[gRPC]: https://grpc.io/
 [Mu]: https://github.com/higherkindness/mu-scala
-[Java gRPC]: https://github.com/grpc/grpc-java
-[JSON]: https://en.wikipedia.org/wiki/JSON
-[gRPC guide]: https://grpc.io/docs/guides/
-[PBDirect]: https://github.com/47deg/pbdirect
-[scalamacros]: https://github.com/scalamacros/paradise
-[cats-effect]: https://github.com/typelevel/cats-effect
-[Metrifier]: https://github.com/47deg/metrifier
 
