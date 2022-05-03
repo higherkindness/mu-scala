@@ -119,7 +119,7 @@ object ServerExample {
 
   val grpcConfigs: Resource[IO, List[GrpcConfig]] =
      Greeter.bindService[IO]
-       .map(AddService)
+       .map(AddService(_))
        .map(c => List(SetSslContext(serverSslContext), c))
 
   // Important: we have to create the server with Netty.

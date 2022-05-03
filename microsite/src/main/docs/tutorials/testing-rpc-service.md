@@ -110,6 +110,14 @@ Now we're ready to write our test.
 With the service and client in place, the test consists of using the client to
 make a request and then asserting that the response matches what we expect.
 
+```scala mdoc:invisible
+// MUnit's Location macro doesn't like running inside mdoc,
+// so we work around it by providing a dummy Location to avoid
+// invoking the macro
+import munit.Location
+given Location = Location.empty
+```
+
 ```scala mdoc:silent
 import mu.examples.protobuf.greeter.{HelloRequest, HelloResponse}
 import munit.CatsEffectSuite
