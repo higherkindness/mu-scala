@@ -51,7 +51,7 @@ endpoint later.
 Copy the following Avro IDL and save it as
 `protocol/src/main/resources/avro/greeter.avdl`:
 
-```avroidl
+```
 @namespace("mu.examples.avro")
 protocol Greeter {
 
@@ -101,7 +101,7 @@ protocol.
 
 Add the following line to `greeter.avdl` to define an RPC endpoint:
 
-```avroidl
+```
 HelloResponse SayHello(HelloRequest request);
 ```
 
