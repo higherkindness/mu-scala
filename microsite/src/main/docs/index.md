@@ -34,6 +34,15 @@ care of the boilerplate and non-functional requirements, including:
 Specifically, Mu helps you to build [gRPC] servers and clients based on either
 [Avro] or [Protobuf] protocol definitions.
 
+## Scala versions
+
+Mu is available for Scala 2.13 and 3.x.
+
+However, Avro support for Scala 3 should be considered *experimental*. It relies
+on a milestone release of Avro4s with several known issues. For example, fields
+with default values are not supported properly, and enum fields are not
+supported at all.
+
 [Avro]: https://avro.apache.org/
 [FS2]: https://github.com/typelevel/fs2
 [gRPC]: https://grpc.io/
