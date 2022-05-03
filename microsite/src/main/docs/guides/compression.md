@@ -32,10 +32,10 @@ option" when constructing the client.
 Here is an example of a client with request compression enabled.
 
 ```scala mdoc:silent
-import cats.effect._
-import higherkindness.mu.rpc._
+import cats.effect.*
+import higherkindness.mu.rpc.*
 import io.grpc.CallOptions
-import mu.examples.protobuf.greeter._
+import mu.examples.protobuf.greeter.*
 
 object CompressionExampleClient {
 

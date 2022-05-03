@@ -44,8 +44,8 @@ Here's the implementation we want to test.
 
 ```scala mdoc:silent
 import cats.Applicative
-import cats.syntax.applicative._
-import mu.examples.protobuf.greeter._
+import cats.syntax.applicative.*
+import mu.examples.protobuf.greeter.*
 
 class HappyGreeter[F[_]: Applicative] extends Greeter[F] {
 
@@ -85,7 +85,7 @@ import higherkindness.mu.rpc.testing.servers.withServerChannel
 
 trait ServiceAndClient {
 
-  implicit val greeter: Greeter[IO] = new HappyGreeter[IO]
+  given Greeter[IO] = new HappyGreeter[IO]
 
   /*
    * A cats-effect Resource that builds a gRPC server and client
@@ -154,7 +154,7 @@ does not depend on the incoming request.
 ```scala mdoc:silent
 import munit.ScalaCheckSuite
 import org.scalacheck.Gen
-import org.scalacheck.Prop._
+import org.scalacheck.Prop.*
 
 class PropertyBasedServiceSpec extends CatsEffectSuite with ScalaCheckSuite with ServiceAndClient {
 

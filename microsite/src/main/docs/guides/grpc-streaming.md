@@ -101,9 +101,9 @@ An implementation of this service on the server side might look something like
 this:
 
 ```scala mdoc:silent
-import mu.examples.protobuf.greeter.streaming._
+import mu.examples.protobuf.greeter.streaming.*
 import cats.effect.Concurrent
-import cats.syntax.all._
+import cats.syntax.all.*
 import fs2.Stream
 
 class MyStreamingGreeter[F[_]: Concurrent] extends StreamingGreeter[F] {

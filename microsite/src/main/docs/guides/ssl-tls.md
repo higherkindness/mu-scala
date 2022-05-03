@@ -69,9 +69,9 @@ the gRPC server. You can find more information about these in the [gRPC server
 and client tutorial](../tutorials/grpc-server-client).
 
 ```scala mdoc:invisible
-import mu.examples.protobuf.greeter._
+import mu.examples.protobuf.greeter.*
 import cats.Applicative
-import cats.syntax.applicative._
+import cats.syntax.applicative.*
 
 class ServiceHandler[F[_]: Applicative] extends Greeter[F] {
 
@@ -94,8 +94,7 @@ import io.netty.handler.ssl.{ClientAuth, SslContext, SslProvider}
 
 object ServerExample {
 
-  implicit val muRPCHandler: Greeter[IO] =
-    new ServiceHandler[IO]
+  given Greeter[IO] = new ServiceHandler[IO]
 
   // Load the certicate and private key files.
 

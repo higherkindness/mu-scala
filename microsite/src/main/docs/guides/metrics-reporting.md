@@ -36,9 +36,9 @@ Let's see how to register server metrics using `Prometheus` in the following
 fragment.
 
 ```scala mdoc:invisible
-import mu.examples.protobuf.greeter._
+import mu.examples.protobuf.greeter.*
 import cats.Applicative
-import cats.syntax.applicative._
+import cats.syntax.applicative.*
 
 class ServiceHandler[F[_]: Applicative] extends Greeter[F] {
 
@@ -49,12 +49,12 @@ class ServiceHandler[F[_]: Applicative] extends Greeter[F] {
 ```
 
 ```scala mdoc:silent
-import mu.examples.protobuf.greeter._
+import mu.examples.protobuf.greeter.*
 import cats.effect.{IO, Resource}
 import cats.effect.std.Dispatcher
 import higherkindness.mu.rpc.prometheus.PrometheusMetrics
-import higherkindness.mu.rpc.server._
-import higherkindness.mu.rpc.server.interceptors.implicits._
+import higherkindness.mu.rpc.server.*
+import higherkindness.mu.rpc.server.interceptors.implicits.*
 import higherkindness.mu.rpc.server.metrics.MetricsServerInterceptor
 import io.prometheus.client.CollectorRegistry
 
@@ -62,7 +62,7 @@ object InterceptingServerCalls {
 
   lazy val cr: CollectorRegistry = new CollectorRegistry()
 
-  implicit val greeterServiceHandler: Greeter[IO] = new ServiceHandler[IO]
+  given Greeter[IO] = new ServiceHandler[IO]
 
   val server: Resource[IO, GrpcServer[IO]] = for {
     metricsOps  <- Resource.eval(PrometheusMetrics.build[IO](cr, "server"))
@@ -81,11 +81,11 @@ In this case, in order to intercept the client calls we need additional
 configuration settings (by using `AddInterceptor`):
 
 ```scala mdoc:silent
-import mu.examples.protobuf.greeter._
+import mu.examples.protobuf.greeter.*
 import cats.effect.{IO, Resource}
 import cats.effect.std.Dispatcher
-import higherkindness.mu.rpc._
-import higherkindness.mu.rpc.channel._
+import higherkindness.mu.rpc.*
+import higherkindness.mu.rpc.channel.*
 import higherkindness.mu.rpc.channel.metrics.MetricsChannelInterceptor
 import io.prometheus.client.CollectorRegistry
 

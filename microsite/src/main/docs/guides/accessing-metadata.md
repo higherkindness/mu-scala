@@ -41,8 +41,8 @@ Ordinarily, if you don't want to use this feature, you would create a cats-effec
 `Resource` of an RPC client using the auto-generated `Greeter.client` method:
 
 ```scala mdoc:silent
-import mu.examples.protobuf.greeter._
-import cats.effect._
+import mu.examples.protobuf.greeter.*
+import cats.effect.*
 import higherkindness.mu.rpc.{ChannelFor, ChannelForAddress}
 
 object OrdinaryClientApp extends IOApp {
@@ -68,7 +68,7 @@ instead of `Greeter.client`.
 This returns a `Greeter[Kleisli[F, C, *]]`, i.e. a client which takes an
 arbitrary `C` as input and returns a response inside the `F` effect.
 
-This method requires an implicit instance in scope, specifically a
+This method requires a given instance in scope, specifically a
 `ClientContext[F, C]`:
 
 ```scala
@@ -114,7 +114,7 @@ object TaggingClientApp extends IOApp {
 
   val key: Metadata.Key[String] = Metadata.Key.of("key", Metadata.ASCII_STRING_MARSHALLER)
 
-  implicit val cc: ClientContext[IO, String] =
+  given ClientContext[IO, String] =
     ClientContext.impl[IO, String]((tag, md) => IO(md.put(key, tag)))
 
   val clientRes: Resource[IO, Greeter[Kleisli[IO, String, *]]] =
@@ -139,7 +139,7 @@ below):
 
 ```scala mdoc:silent
 import cats.Applicative
-import cats.syntax.applicative._
+import cats.syntax.applicative.*
 
 class MyAmazingGreeter[F[_]: Applicative] extends Greeter[F] {
 
@@ -159,7 +159,7 @@ import higherkindness.mu.rpc.server.{GrpcServer, AddService}
 
 object OrdinaryServer extends IOApp {
 
-  implicit val service: Greeter[IO] = new MyAmazingGreeter[IO]
+  given service: Greeter[IO] = new MyAmazingGreeter[IO]
 
   def run(args: List[String]): IO[ExitCode] = (for {
     serviceDef <- Greeter.bindService[IO]
@@ -183,7 +183,7 @@ A `ServerContext[F, C]` is an algebra that specifies how to build a context of
 type `C` from the metadata.
 
 ```scala
-import cats.effect._
+import cats.effect.*
 import io.grpc.{Metadata, MethodDescriptor}
 
 trait ServerContext[F[_], C] {
@@ -208,7 +208,7 @@ using the `Kleisli` as the *F-type*:
 
 ```scala mdoc:silent
 import cats.Applicative
-import cats.syntax.applicative._
+import cats.syntax.applicative.*
 
 class MyAmazingContextGreeter[F[_]: Applicative] extends Greeter[Kleisli[F, String, *]] {
 
@@ -231,11 +231,11 @@ import io.grpc.Metadata
 
 object TaggingServer extends IOApp {
 
-  implicit val service: Greeter[Kleisli[IO, String, *]] = new MyAmazingContextGreeter[IO]
+  given Greeter[Kleisli[IO, String, *]] = new MyAmazingContextGreeter[IO]
 
   val key: Metadata.Key[String] = Metadata.Key.of("key", Metadata.ASCII_STRING_MARSHALLER)
 
-  implicit val sc: ServerContext[IO, String] =
+  given ServerContext[IO, String] =
     ServerContext.impl[IO, String](md => IO(md.get(key)))
 
   def run(args: List[String]): IO[ExitCode] = (for {

@@ -43,6 +43,8 @@ on a milestone release of Avro4s with several known issues. For example, fields
 with default values are not supported properly, and enum fields are not
 supported at all.
 
+Most code samples in this documentation site use Scala 3 syntax.
+
 [Avro]: https://avro.apache.org/
 [FS2]: https://github.com/typelevel/fs2
 [gRPC]: https://grpc.io/

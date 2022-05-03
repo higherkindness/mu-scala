@@ -48,8 +48,8 @@ We do this by implementing the `Greeter` trait. Let's make a `Greeter` that says
 
 ```scala mdoc:silent
 import cats.Applicative
-import cats.syntax.applicative._
-import mu.examples.protobuf.greeter._
+import cats.syntax.applicative.*
+import mu.examples.protobuf.greeter.*
 
 class HappyGreeter[F[_]: Applicative] extends Greeter[F] {
 
@@ -76,7 +76,7 @@ import higherkindness.mu.rpc.server.{GrpcServer, AddService}
 
 object Server extends IOApp {
 
-  implicit val greeter: Greeter[IO] = new HappyGreeter[IO]  // 1
+  given Greeter[IO] = new HappyGreeter[IO]  // 1
 
   def run(args: List[String]): IO[ExitCode] = (for {
     serviceDef <- Greeter.bindService[IO]                                                     // 2
@@ -118,7 +118,7 @@ prints out the reply to the console.
 ```scala mdoc:silent
 import cats.effect.{IO, IOApp, Resource, ExitCode}
 import mu.examples.protobuf.greeter.{Greeter, HelloRequest}
-import higherkindness.mu.rpc._
+import higherkindness.mu.rpc.*
 
 object ClientDemo extends IOApp {
 

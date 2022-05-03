@@ -56,9 +56,9 @@ trait Greeter[F[_]] {
 and an implementation of that definition:
 
 ```scala mdoc:silent
-import mu.examples.protobuf.greeter._
+import mu.examples.protobuf.greeter.*
 import cats.Applicative
-import cats.syntax.applicative._
+import cats.syntax.applicative.*
 
 class MyAmazingGreeter[F[_]: Applicative] extends Greeter[F] {
 
@@ -83,7 +83,7 @@ implicit def serverContext[F[_]](implicit entrypoint: EntryPoint[F]): ServerCont
 ```
 
 So, to trace our service, we need to call to `Greeter.bindContextService[F,
-Span[F]]` with the import `higherkindness.mu.rpc.internal.tracing.implicits._`
+Span[F]]` with the import `higherkindness.mu.rpc.internal.tracing.implicits.*`
 in the scope and providing a [Natchez] `EntryPoint` implicitly.
 
 #### EntryPoint
@@ -133,16 +133,16 @@ to your service implementation code.
 Putting all this together, your server setup code will look something like this:
 
 ```scala mdoc:silent
-import cats.effect._
+import cats.effect.*
 import cats.data.Kleisli
-import higherkindness.mu.rpc.server._
+import higherkindness.mu.rpc.server.*
 import natchez.Span
 
 object TracingServer extends IOApp {
 
-  import higherkindness.mu.rpc.internal.tracing.implicits._
+  import higherkindness.mu.rpc.internal.tracing.implicits.*
 
-  implicit val service: Greeter[Kleisli[IO, Span[IO], *]] =
+  given Greeter[Kleisli[IO, Span[IO], *]] =
     new MyAmazingGreeter[Kleisli[IO, Span[IO], *]]
 
   def run(args: List[String]): IO[ExitCode] =
@@ -165,7 +165,7 @@ spans:
 ```scala mdoc:silent
 import natchez.Trace
 import cats.Monad
-import cats.syntax.all._
+import cats.syntax.all.*
 
 class MyTracingService[F[_]: Monad: Trace] extends Greeter[F] {
 
@@ -201,11 +201,11 @@ implicit def clientContext[F[_]: Async]: ClientContext[F, Span[F]]
 For example:
 
 ```scala mdoc:silent
-import higherkindness.mu.rpc._
+import higherkindness.mu.rpc.*
 
 object TracingClientApp extends IOApp {
 
-  import higherkindness.mu.rpc.internal.tracing.implicits._
+  import higherkindness.mu.rpc.internal.tracing.implicits.*
 
   val channelFor: ChannelFor = ChannelForAddress("localhost", 8080)
 

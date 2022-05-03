@@ -71,25 +71,23 @@ sbt compile
 ```
 
 Once the source generator has run, there should be a generated Scala file at
-`target/scala-2.13/src_managed/main/foo/AvroGreeter.scala`.
+`target/scala-3.1.2/src_managed/main/foo/AvroGreeter.scala`.
 
 It will look like this (tidied up and simplified for readability):
 
 ```scala
 package foo
 
-import higherkindness.mu.rpc.internal.encoders.avro.bigDecimalTagged._
-
 final case class HelloRequest(
   arg1: String,
   arg2: Option[String],
-  arg3: List[String]
+  arg3: Seq[String]
 )
 
 final case class HelloResponse(
   arg1: String,
   arg2: Option[String],
-  arg3: List[String]
+  arg3: Seq[String]
 )
 
 trait AvroGreeter[F[_]] {
@@ -240,7 +238,8 @@ case class Person(name: String, age: Int, crossfitter: Boolean)
 
 ### Enums
 
-Avro supports `enum`s too and they are translated to a Scala `Enumeration`:
+Avro supports `enum`s too and they are translated to a Scala sealed trait + case
+objects:
 
 ```
 enum Errors {
@@ -251,9 +250,12 @@ enum Errors {
 ***muSrcGen =>***
 
 ```scala
-object Errors extends Enumeration {
-  type Errors = Value
-  val NotFound, Duplicated, None = Value
+sealed trait Errors
+
+object Errors {
+  @AvroSortPriority(0) case object NotFound extends Errors
+  @AvroSortPriority(1) case object Duplicated extends Errors
+  @AvroSortPriority(2) case object None extends Errors
 }
 ```
 
@@ -299,12 +301,11 @@ record PeopleResponse {
 case class PeopleResponse(result: Either[Errors.Value, Person])
 ```
 
-### Coproducts
+### Scala union types
 
 And finally, when we have **`three or more non-null types`** on a single
-`union`, we'll have a
-[shapeless](https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#coproducts-and-discriminated-unions)'
-`Coproduct` on the same order as well:
+`union`, a `TaggedUnion` will be used. This is a wrapper around a Scala 3 union
+type, defined by Mu.
 
 ```
 record PeopleResponse {
@@ -315,9 +316,7 @@ record PeopleResponse {
 ***muSrcGen =>***
 
 ```scala
-import shapeless.{:+:, CNil}
-
-case class PeopleResponse(result: String :+: Int :+: Errors.Value :+: CNil)
+case class PeopleResponse(result: TaggedUnion3[String, Int, Errors])
 ```
 
 ### Services
