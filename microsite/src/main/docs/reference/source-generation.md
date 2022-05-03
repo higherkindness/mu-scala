@@ -10,20 +10,33 @@ permalink: /reference/source-generation
 This is a reference page for the `sbt-mu-srcgen` sbt plugin, which generates
 Scala source code from Avro/Protobuf IDL files.
 
+## Tasks
+
+The sbt task used to perform source generation depends on your IDL type:
+
+* For Avro, use the sbt-mu-srcgen plugin's `muSrcGen` task
+* For Protobuf, use the sbt-protoc plugin's `protocGenerate` task
+  (sbt-mu-srcgen automatically adds the sbt-protoc plugin to your project)
+
+Alternatively you can just run the `compile` task, and the appropriate source
+generation task will be executed before compilation.
+
 ## Settings
 
-This section explains each of the sbt plugin's settings.  As a reminder, this plugin needs to be manually enabled for any module for which you want to generate code; you can do that by adding the following to your `build.sbt`:
+This section explains each of the sbt plugin's settings.  As a reminder, this
+plugin needs to be manually enabled for any module for which you want to
+generate code; you can do that by adding the following to your `build.sbt`:
 
-```sbt
+```
 enablePlugins(SrcGenPlugin)
 ```
 
 ### muSrcGenIdlType
 
-The most important sbt setting is `muSrcGenIdlType`, which tells the plugin what kind of
-IDL files (Avro/Protobuf) to look for.
+The most important sbt setting is `muSrcGenIdlType`, which tells the plugin what
+kind of IDL files (Avro/Protobuf) to look for.
 
-```sbt
+```
 muSrcGenIdlType := IdlType.Proto // or IdlType.Avro
 ```
 
@@ -33,7 +46,8 @@ Another important setting is `muSrcGenSerializationType`, which specifies how
 messages should be encoded on the wire. This should match the format you chose
 for the `muSrcGenIdlType` setting:
 
-* For Protobuf, choose `SerializationType.Protobuf`
+* For Protobuf, there is no need to configure this setting, as there is only one
+  possible serialization type
 * For Avro, choose either `SerializationType.Avro` or `SerializationType.AvroWithSchema`.
     * If you choose `Avro`, it means your client and server must always use
       exactly the same version of the schema.
@@ -44,7 +58,7 @@ for the `muSrcGenIdlType` setting:
       the [schema evolution](schema-evolution/avro) section for more details on
       schema evolution.
 
-```sbt
+```
 muSrcGenSerializationType := SerializationType.Protobuf // or SerializationType.Avro or SerializationType.AvroWithSchema
 ```
 
@@ -62,13 +76,11 @@ muSrcGenSerializationType := SerializationType.Protobuf // or SerializationType.
 
 | Setting | Description | Default value |
 | --- | --- | --- |
-| `muSrcGenJarNames` | A list of JAR file or sbt module names where extra IDL files can be found. See the [srcGenJarNames section](#musrcgenjarnames) section below for more details. | `Nil` |
+| `muSrcGenJarNames` | A list of JAR file or sbt module names where extra IDL files can be found. See the [muSrcGenJarNames section](#musrcgenjarnames) section below for more details. | `Nil` |
 | `muSrcGenIdlExtension` | The extension of IDL files to extract from JAR files or sbt modules. | * `avdl` if `muSrcGenIdlType` is `avro`<br/> * `proto` if `muSrcGenIdlType` is `Proto` |
 | `muSrcGenCompressionType` | The compression type that will be used by generated RPC services. Set to `higherkindness.mu.rpc.srcgen.Model.GzipGen` for Gzip compression. | `higherkindness.mu.rpc.srcgen.Model.NoCompressionGen` |
 | `muSrcGenIdiomaticEndpoints` | Flag indicating if idiomatic gRPC endpoints should be used. If `true`, the service operations will be prefixed by the namespace. | `true` |
-| `muSrcGenAvroGeneratorType` | Allows to generate Scala code either using [avrohugger](https://github.com/julianpeeters/avrohugger) or [skeuomorph](https://github.com/higherkindness/skeuomorph). `AvroGeneratorTypeGen.SkeumorphGen` is the default; set to `AvroGeneratorTypeGen.AvrohuggerGen` to use the [avrohugger](https://github.com/julianpeeters/avrohugger) library to generate the Scala code. | `AvroGeneratorTypeGen.SkeumorphGen` |
-| `muSrcGenProtocVersion` | Specifies the protoc version when generating source files from proto files. | Check the [SrcGenPlugin.scala](https://github.com/higherkindness/sbt-mu-srcgen/blob/main/plugin/src/main/scala/higherkindness/mu/rpc/srcgen/SrcGenPlugin.scala) | 
-
+| `muSrcGenProtocVersion` | Specifies the protoc version that [ScalaPB](https://scalapb.github.io/) should use when generating source files from proto files. | `None` (let ScalaPB choose the protoc version) |
 
 ### muSrcGenJarNames
 
@@ -81,7 +93,7 @@ without binary code (to prevent binary conflicts in clients).
 The following example shows how to set up a dependency with another artifact or
 sbt module containing the IDL definitions (`foo-domain`):
 
-```sbt
+```
 //...
 .settings(
   Seq(
@@ -99,167 +111,59 @@ sbt module containing the IDL definitions (`foo-domain`):
 
 ## Implementation Notes: An Intentional Incompatibility with the Avro Standard
 
-In order to make it so that it's easier for users to evolve their schemas over time, 
-`sbt-mu-srcgen` intentionally deviates from the Avro standard in one key way: 
-it restricts RPC return types to record types (`string sendUser(UserWithCountry user)` is not permitted)
-as well as restricting the arguments of RPC messages to _none_ or to a single record type (`SendUserResponse sendUser(UserWithCountry user, RequestId id)` is not permitted).  
-If you attempt to write an Avro schema using primitive types instead
-of records (for example, something like this)
+In order to make it easier for users to evolve their schemas over time,
+`sbt-mu-srcgen` intentionally deviates from the Avro standard in one key way: it
+restricts RPC return types to record types (`string sendUser(UserWithCountry
+user)` is not permitted) as well as restricting the arguments of RPC messages to
+_none_ or to a single record type (`SendUserResponse sendUser(UserWithCountry
+user, RequestId id)` is not permitted).
 
-```avroidl
+If you attempt to write an Avro schema using primitive types instead of records
+(for example, something like this):
+
+```
 @namespace("foo")
-
 protocol UserV1 {
-  record UserWithCountry {
-    string name;
-    int age;
-    string country;
-  }
-
   string sendUser(string user);
 }
 ```
 
-the source generation command (i.e. `muSrcGen`) will fail and return all the incompatible
-Avro schema records (for example, the above schema would trigger the following 
-message:
+the source generation command (i.e. `muSrcGen`) will fail with an error message
+explaining why the protocol was rejected. For example, the above schema would trigger
+the following message:
 
 ```
-[error] (protocol / muSrcGen) One or more IDL files are invalid. Error details:
-[error]  /path/to/the/invalid/file.avdl has the following errors:
-Encountered an unsupported request type: Skeuomorph only supports Record types for Avro requests. Encountered request schema with type STRING
-Encountered an unsupported response type: Skeuomorph only supports Record types for Avro responses. Encountered response schema with type STRING
+[error] (avro-protocol / Compile / muSrcGen) One or more IDL files are invalid. Error details:
+[error]  /path/to/the/invalid/file.avdl has the following errors: RPC method request parameter 'user' has non-record request type 'STRING', RPC method response parameter has non-record response type 'STRING'
 ```
 
 ### Additional Context
 
 To understand this potential issue with schema evolution, consider the following example,
 
-```avroidl
+```
 record SearchRequest {
   string query;
 }
 
 SearchResponse search(SearchRequest request);
 ```
-This schema can be evolved to add optional fields (e.g. ordering, filters, ...) to the request.  All the user has to do is just change the _single record_.
 
-This API design, on the other hand, can't be evolved because changing the `SearchResponse` argument from a `string` to any other datatype would introduce backward incompatibility.
+This schema can be evolved to add optional fields (e.g. ordering, filters, ...)
+to the request. All the user has to do is just change the _single record_.
 
-```avroidl
+The following API design, on the other hand, can't be evolved because changing
+the `query` argument from a `string` to any other datatype would introduce
+backward incompatibility.
+
+```
 SearchResponse search(string query);
 ```
 
-Similarly, multiple arguments don't fully restrict API evolutions but can become inconsistent. Consider,
-
-```avroidl
-record Filter {
-  array<string> exclude;
-}
-SearchResponse search(SearchRequest query, Filter filter)
-```
-
-If we wanted to add a way to order the results and add it to our `SearchRequest`, it doesn't make sense to have `filter` be its own argument.
-
 For this reason, we **enforce that all requests and responses must be records**.
 
-## Implementation note: two-stage code generation
-
-For gRPC services generated from an Avro or Protobuf definition, there are
-actually two stages of code generation at work.
-
-1. The `sbt-mu-srcgen` plugin will parse your IDL files and transform them into
-   Scala code. It writes this code to `.scala` files under
-   `target/scala-2.13/src_managed`.
-
-2. The generated Scala code contains `@service` macro annotations. When these
-   files are compiled, the compiler will expand these annotations by executing a
-   macro, which generates a load of boilerplate code to help with building a
-   gRPC server or client.
-
-For example, the following `.proto` file:
-
-```proto
-syntax = "proto3";
-
-package foo.bar;
-
-message MyRequest {
-  string a = 1;
-}
-
-message MyResponse {
-  string a = 1;
-}
-
-service MyService {
-  rpc MyEndpoint (MyRequest) returns (MyResponse);
-}
-```
-
-would result in a `.scala` file that looks like (slightly simplified):
-
-```scala
-package foo.bar
-
-object myproto {
-  final case class MyRequest(a: String)
-  final case class MyResponse(a: String)
-
-  @service(Protobuf) trait MyService[F[_]] {
-    def MyEndpoint(req: MyRequest): F[MyResponse]
-  }
-}
-```
-
-After the `@service` annotation is expanded at compile time, the entire
-generated code would look something like:
-
-```scala
-package foo.bar
-
-object myproto {
-  final case class MyRequest(a: String)
-  final case class MyResponse(a: String)
-
-  @service(Protobuf) trait MyService[F[_]] {
-    def MyEndpoint(req: MyRequest): F[MyResponse]
-  }
-
-  object MyService {
-
-    def bindService[F[_]: Concurrent](
-      implicit algebra: MyService[F]
-    ): F[io.grpc.ServerServiceDefinition] = ...
-
-    def client[F[_]: Concurrent](
-      channelFor: higherkindness.mu.rpc.ChannelFor,
-      channelConfigList: List[higherkindness.mu.rpc.channel.ManagedChannelConfig] = List(UsePlaintext),
-      options: io.grpc.CallOptions = io.grpc.CallOptions.DEFAULT
-    ): Resource[F, MyService[F]] = ...
-
-    def clientFromChannel[F[_]: Concurrent](
-      channel: F[io.grpc.ManagedChannel],
-      options: io.grpc.CallOptions = io.grpc.CallOptions.DEFAULT
-    ): Resource[F, MyService[F]]
-
-    def unsafeClient[F[_]: Concurrent](
-      channelFor: higherkindness.mu.rpc.ChannelFor,
-      channelConfigList: List[higherkindness.mu.rpc.channel.ManagedChannelConfig] = List(UsePlaintext),
-      options: io.grpc.CallOptions = io.grpc.CallOptions.DEFAULT
-    ): MyService[F] = ...
-
-    def unsafeClientFromChannel[F[_]: Concurrent](
-      channel: io.grpc.ManagedChannel,
-      options: io.grpc.CallOptions = io.grpc.CallOptions.DEFAULT
-    ): MyService[F]
-
-  }
-
-}
-```
-
-You can see that the macro has generated a `MyService` companion object
-containing a number of helper methods for building gRPC servers and clients.
+The reason for disallowing multiple request arguments, on the other hand, is
+that the gRPC spec does not support it. There is no obvious way to map multiple
+arguments in the Avro RPC definition to a single gRPC request.
 
 [Mu]: https://github.com/higherkindness/mu-scala
