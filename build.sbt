@@ -18,7 +18,10 @@ addCommandAlias(
   "ci-test",
   "scalafmtCheckAll; scalafmtSbtCheck; missinglinkCheck; mdoc; all-tests; haskell-integration-tests/test"
 )
-addCommandAlias("ci-docs", "github; documentation3/mdoc; headerCreateAll; microsite3/publishMicrosite")
+addCommandAlias(
+  "ci-docs",
+  "github; documentation3/mdoc; headerCreateAll; microsite3/publishMicrosite"
+)
 addCommandAlias("ci-publish", "github; ci-release")
 
 Global / concurrentRestrictions += Tags.limit(Tags.Test, 1)
@@ -276,7 +279,7 @@ lazy val microsite = projectMatrix
 lazy val documentation = projectMatrix
   .enablePlugins(MdocPlugin)
   .settings(
-    mdocOut := file("."),
+    mdocOut            := file("."),
     mdocExtraArguments := Seq("--no-link-hygiene")
   )
   .settings(publish / skip := true)
