@@ -14,11 +14,14 @@ permalink: reference/modules-artifacts
 * `Server/Client`: used from other artifacts for both Server and Client.
 * `Test`: useful to test `Mu` applications.
 
+All of these artifacts are published for both Scala 2.13 and 3.x, except where noted
+below.
+
 ## RPC Client/Server
 
 | *Artifact Name*  | *Scope*  | *Mandatory*  | *Description*  |
 |---|---|---|---|
-| `mu-rpc-service`  | Server/Client  | Yes  | Mandatory to define protocols and auto-derived clients. |
+| `mu-rpc-service`  | Server/Client  | Yes  | Mandatory to build gRPC services and clients. |
 | `mu-rpc-fs2`  | Server/Client  | Yes  | Mandatory to define streaming operations with FS2 Streams. |
 | `mu-rpc-server`  | Server  | Yes  | Needed to attach RPC Services and spin-up an RPC Server. |
 | `mu-rpc-client-netty`  | Client  | Yes*  | `Netty` transport layer for the client. Mandatory if you need SSL/TLS support. |
@@ -38,14 +41,14 @@ permalink: reference/modules-artifacts
 
 | *Artifact Name*  | *Scope*  | *Mandatory*  | *Description*  |
 |---|---|---|---|
-| `mu-config`  | Server/Client  | No  | Provides configuration helpers using [pureconfig] to load the application configuration values.  |
+| `mu-config`  | Server/Client  | No  | Provides configuration helpers using [pureconfig] to load the application configuration values. *Only available for Scala 2.13* because there is no Scala 3 build of pureconfig yet. |
 | `mu-rpc-testing`  | Test  | No  | Utilities to test out `Mu` applications. It provides the `grpc-testing` library as the transitive dependency.  |
 | `mu-rpc-client-cache`  | Client  | No  | Provides an algebra for caching RPC clients.  |
 
 ## Build
 You can install any of these dependencies in your build as follows:
 
-```sbt
+```
 // required for a protocol definition:
 libraryDependencies += "io.higherkindness" %% "mu-rpc-service" % "@VERSION@"
 
@@ -83,7 +86,7 @@ libraryDependencies += "io.higherkindness" %% "mu-rpc-testing" % "@VERSION@" % T
 
 To generate Scala code from IDL files (`.proto`, `.avdl`, etc.), you will need the `sbt-mu-srcgen` plugin:
 
-```sbt
+```
 addSbtPlugin("io.higherkindness" %% "sbt-mu-srcgen" % "@VERSION@")
 ```
 

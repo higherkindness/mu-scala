@@ -178,6 +178,7 @@ object ProjectPlugin extends AutoPlugin {
       micrositeOrganizationHomepage := "https://www.47deg.com",
       micrositePushSiteWith         := GitHub4s,
       mdocIn                        := (Compile / sourceDirectory).value / "docs",
+      mdocExtraArguments            := Seq("--no-link-hygiene"),
       micrositeGithubToken          := Option(System.getenv().get("GITHUB_TOKEN")),
       micrositePalette := Map(
         "brand-primary"   -> "#001e38",
@@ -190,10 +191,10 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "org.scalatest"        %% "scalatest"       % V.scalatest,
-        "org.scalatestplus"    %% "scalacheck-1-14" % V.scalatestplusScheck,
-        "io.dropwizard.metrics" % "metrics-jmx"     % V.dropwizard,
-        "org.tpolecat"         %% "natchez-jaeger"  % V.natchez
+        "org.scalameta"        %% "munit-scalacheck"    % V.munit,
+        "org.typelevel"        %% "munit-cats-effect-3" % V.munitCE,
+        "io.dropwizard.metrics" % "metrics-jmx"         % V.dropwizard,
+        "org.tpolecat"         %% "natchez-jaeger"      % V.natchez
       ),
       scalacOptions ~= (_ filterNot Set(
         "-Xfatal-warnings",
@@ -229,11 +230,13 @@ object ProjectPlugin extends AutoPlugin {
       )
     )
 
-    lazy val protobufRPCTestSettings = testSettings ++ Seq(
+    lazy val protobufSrcGenSettings = Seq(
       muSrcGenIdlType := IdlType.Proto
     )
 
-    lazy val avroRPCTestSettings = testSettings ++ Seq(
+    lazy val protobufRPCTestSettings = testSettings ++ protobufSrcGenSettings
+
+    lazy val avroSrcGenSettings = Seq(
       muSrcGenIdlType           := IdlType.Avro,
       muSrcGenSerializationType := SerializationType.Avro,
       tpolecatScalacOptions ~= { options =>
@@ -247,6 +250,8 @@ object ProjectPlugin extends AutoPlugin {
         )
       }
     )
+
+    lazy val avroRPCTestSettings = testSettings ++ avroSrcGenSettings
 
     lazy val haskellIntegrationTestSettings = Seq(
       publishArtifact          := false,
