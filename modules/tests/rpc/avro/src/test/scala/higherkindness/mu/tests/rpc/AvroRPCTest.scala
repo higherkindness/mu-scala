@@ -47,7 +47,7 @@ class AvroRPCTest extends CatsEffectSuite {
     test(s"unary method ($compression)") {
       client
         .use(_.hello(TestData.request))
-        .assertEquals(Response(TestData.request.a))
+        .assertEquals(Response(TestData.request.a, TestData.request.d))
     }
 
   }

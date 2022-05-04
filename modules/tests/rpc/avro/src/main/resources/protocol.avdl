@@ -16,21 +16,14 @@ protocol AvroRPCService {
     int a;
     decimal(8, 4) b;
     union { long, string, boolean, Foo } c;
-  }
-
-  record RequestWithEnumField {
-    int a;
-    decimal(8, 4) b;
-    union { long, string, boolean, Foo } c;
     Direction d;
   }
 
   record Response {
     int a;
+    Direction d;
   }
 
   higherkindness.mu.tests.rpc.Response hello(higherkindness.mu.tests.rpc.Request request);
-
-  higherkindness.mu.tests.rpc.Response helloEnum(higherkindness.mu.tests.rpc.RequestWithEnumField request);
 
 }

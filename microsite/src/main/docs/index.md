@@ -38,10 +38,9 @@ Specifically, Mu helps you to build [gRPC] servers and clients based on either
 
 Mu is available for Scala 2.13 and 3.x.
 
-However, Avro support for Scala 3 should be considered *experimental*. It relies
-on a milestone release of Avro4s with several known issues. For example, fields
-with default values are not supported properly, and enum fields are not
-supported at all.
+However, Avro support for Scala 3 should be considered *experimental* because
+the Scala 3 version of Avro4s is not yet feature-complete. For example, fields
+with default values are not supported properly.
 
 Most code samples in this documentation site use Scala 3 syntax.
 
