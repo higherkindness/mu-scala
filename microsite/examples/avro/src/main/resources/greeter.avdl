@@ -1,0 +1,15 @@
+@namespace("mu.examples.avro")
+protocol Greeter {
+
+  record HelloRequest {
+    string name;
+  }
+
+  record HelloResponse {
+    string greeting;
+    boolean happy;
+  }
+
+  HelloResponse SayHello(HelloRequest request);
+
+}

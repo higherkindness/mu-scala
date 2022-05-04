@@ -11,46 +11,28 @@ permalink: /guides/generate-sources-from-proto
 
 First add the sbt plugin in `project/plugins.sbt`:
 
-```sbt
+```scala
 addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "@VERSION@")
 ```
 
-**NOTE**
+And enable the plugin on the appropriate project(s):
 
-For users of the `sbt-mu-srcgen` plugin `v0.22.x` and below, the plugin is enabled automatically as soon as it's added to the `project/plugins.sbt`.
-However, for users of the `sbt-mu-srcgen` plugin `v0.23.x` and beyond, the plugin needs to be manually enabled for any module for which you want to generate code.
-To enable the module, add the following line to your `build.sbt`:
-
-```sbt
+```scala
 enablePlugins(SrcGenPlugin)
 ```
 
-Once the plugin is enabled, you can configure it by adding a few lines to `build.sbt`:
+Once the plugin is enabled, you can configure it by adding a few lines to
+`build.sbt`:
 
-```sbt
+```scala
 import higherkindness.mu.rpc.srcgen.Model._
 
 // Look for .proto files
 muSrcGenIdlType := IdlType.Proto
 ```
 
-Finally, make sure you have Scala macro annotations enabled, to ensure the
-generated code compiles. How you do this depends on which Scala version you are
-using.
-
-For Scala 2.12, add this to `build.sbt`:
-
-```sbt
-addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch)
-```
-
-For Scala 2.13, add this:
-
-```sbt
-scalacOptions += "-Ymacro-annotations"
-```
-
-Suppose you want to generate Scala code for a gRPC service based on the following Protobuf IDL file, `src/main/resources/hello.proto`:
+Suppose you want to generate Scala code for a gRPC service based on the
+following Protobuf IDL file, `src/main/resources/hello.proto`:
 
 ```proto
 syntax = "proto3";
@@ -76,40 +58,62 @@ service ProtoGreeter {
 
 You can run the source generator directly:
 
-```shell script
-sbt muSrcGen
+```shell
+sbt protocGenerate
 ```
 
 or as part of compilation:
 
-```shell script
+```shell
 sbt compile
 ```
 
-Once the source generator has run, there should be a generated Scala file at
-`target/scala-2.13/src_managed/main/foo/hello.scala`.
+Once the source generator has run, there should be some generated Scala file
+under `target/scala-2.13/src_managed/main/foo/hello/`.
 
-It will look roughly like this (tidied up and simplified for readability):
+There will be a separate file for each message class, plus a file for the
+service definition.
+
+`HelloRequest.scala` will look roughly like this (tidied up and simplified for
+readability):
 
 ```scala
-package foo
+package foo.hello
 
-import higherkindness.mu.rpc.protocol._
+final case class HelloRequest(
+  arg1: String = "",
+  arg2: String = "",
+  arg3: Seq[String] = Seq.empty
+) extends scalapb.GeneratedMessage with scalapb.lenses.Updatable[HelloRequest] {
 
-object hello {
-  final case class HelloRequest(
-    arg1: String,
-    arg2: String,
-    arg3: List[String]
-  )
-  final case class HelloResponse(
-    arg1: String,
-    arg2: String,
-    arg3: List[String]
-  )
+  // ... lots of generated code
 
-  @service(Protobuf, namespace = Some("foo")) trait ProtoGreeter[F[_]] {
-    def SayHelloProto(req: HelloRequest): F[HelloResponse]
-  }
 }
 ```
+
+Note how each field has a default value, in line with the Protobuf spec.
+
+The service definition in `ProtoGreeter.scala` will look something like this:
+
+```scala
+trait ProtoGreeter[F[_]] {
+  def SayHelloProto(req: HelloRequest): F[HelloResponse]
+}
+
+object ProtoGreeter {
+
+  // ... lots of generated code
+
+}
+```
+
+## Custom types
+
+ScalaPB allows you to customise what types are used in the generated code. For
+example, if you have a `string` field in your Protobuf message that represents a
+date, you might want to model it in Scala using `java.time.LocalDate`.
+
+Take a look at the [ScalaPB
+docs](https://scalapb.github.io/docs/customizations#custom-types) for details on
+how to achieve this using ScalaPB's `TypeMapper` mechanism.
+

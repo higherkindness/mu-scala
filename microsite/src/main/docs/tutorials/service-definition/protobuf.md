@@ -1,6 +1,6 @@
 ---
 layout: docs
-title: gRPC with Protobuf
+title: RPC service definition with Protobuf
 section: tutorials
 permalink: tutorials/service-definition/protobuf
 ---
@@ -15,9 +15,9 @@ this service definition to create a fully working gRPC server or client.
 
 This tutorial is aimed at developers who:
 
-* are new to Mu-Scala
-* have some understanding of Protobuf and `.proto` file syntax
-* have read the [Getting Started guide](../../getting-started)
+- are new to Mu-Scala
+- have some understanding of Protobuf and `.proto` file syntax
+- have read the [Getting Started guide](../../getting-started)
 
 This document will focus on Protobuf. If you would like to use gRPC with Avro,
 see the [RPC service definition with Avro tutorial](avro).
@@ -41,12 +41,12 @@ These messages will be used as the request and response types for a gRPC
 endpoint later.
 
 Copy the following Protobuf protocol and save it as
-`protocol/src/main/resources/proto/hello.proto`:
+`protocol/src/main/resources/greeter.proto`:
 
 ```proto
 syntax = "proto3";
 
-package com.example;
+package mu.examples.protobuf;
 
 message HelloRequest {
   string name = 1;
@@ -62,40 +62,46 @@ message HelloResponse {
 
 Now we have a `.proto` file, we can generate Scala code from it.
 
-Start sbt and run the `muSrcGen` task. You should see some Protobuf-related log
-output:
+Start sbt and run the `compile` task. This will trigger the sbt-mu-srcgen plugin
+to generate some Scala source files from the `.proto` file, and then those Scala
+files will be compiled.
 
 ```
-sbt:hello-mu-protobuf> muSrcGen
-protoc-jar: protoc version: 3.11.1, detected platform: osx-x86_64 (mac os x/x86_64)
-protoc-jar: embedded: bin/3.11.1/protoc-3.11.1-osx-x86_64.exe
-protoc-jar: executing: [/var/folders/33/gbkw7lt97l7b38jnzh49bwvh0000gn/T/protocjar11045051115974206116/bin/protoc.exe, --proto_path=/Users/chris/code/hello-mu-protobuf/protocol/target/scala-2.13/resource_managed/main/proto/proto, --proto_path=/Users/chris/code/hello-mu-protobuf/protocol/target/scala-2.13/resource_managed/main/proto, --plugin=protoc-gen-proto2_to_proto3, --include_imports, --descriptor_set_out=hello.proto.desc, hello.proto]
+sbt:hello-mu-protobuf> compile
+[info] Compiling 1 protobuf files to /Users/chris/code/hello-mu-protobuf/protocol/target/scala-2.13/src_managed/main
+[info] compiling 3 Scala sources to /Users/chris/code/hello-mu-protobuf/protocol/target/scala-2.13/classes ...
+[success] Total time: 2 s, completed 28 Apr 2022, 12:08:49
 ```
 
-Let's have a look at the code that Mu-Scala has generated. Open the file
-`protocol/target/scala-2.13/src_managed/main/com/example/hello.scala` in your
-editor of choice.
+Let's have a look at the code that was generated. Open the file
+`protocol/target/scala-2.13/src_managed/main/mu/examples/protobuf/greeter/HelloRequest.scala`
+in your editor of choice.
 
 It's generated code, so it will look pretty ugly. Here's a version of it tidied
 up a bit to make it more readable:
 
 ```scala
-package com.example
+package mu.examples.protobuf.greeter
 
-import higherkindness.mu.rpc.protocol._
+final case class HelloRequest(
+    name: String = "",
+    unknownFields: _root_.scalapb.UnknownFieldSet = _root_.scalapb.UnknownFieldSet.empty
+) extends scalapb.GeneratedMessage {
 
-object hello {
-  final case class HelloRequest(@pbIndex(1) name: String)
-  final case class HelloResponse(@pbIndex(1) greeting: String, @pbIndex(2) happy: Boolean)
+  // ... lots of generated code
+
 }
 ```
 
 A few things to note:
 
-* Mu-Scala has generated one case class for each Protobuf message
-* The package name matches the one specified in the `.proto` file
-* The case classes are inside an object whose name matches the filename of
+- Mu-Scala has generated one case class for each Protobuf message
+- The package name is derived from the protobuf package declaration in the
+  `.proto` file (`mu.examples.protobuf`) and the filename (`greeter.proto`)
   `hello.proto`
+- The case class extends `scalapb.GeneratedMessage`. The sbt-mu-srcgen plugin
+  delegates generation of code from `.proto` files to another plugin called
+  [ScalaPB].
 
 ## Add an RPC service
 
@@ -114,24 +120,17 @@ service Greeter {
 
 ## Regenerate the code
 
-If you run the `muSrcGen` sbt task again, and inspect the
-`protocol/target/scala-2.13/src_managed/main/com/example/hello.scala` file again, it should
-look something like this:
+If you run the `compile` sbt task again, and inspect the
+`protocol/target/scala-2.13/src_managed/main/mu/examples/greeter/Greeter.scala`
+file, it should look something like this:
 
 ```scala
-package com.example
+trait Greeter[F[_]] {
+  def SayHello(req: HelloRequest): F[HelloResponse]
+}
 
-import higherkindness.mu.rpc.protocol._
-
-object hello {
-  final case class HelloRequest(@pbIndex(1) name: String)
-  final case class HelloResponse(@pbIndex(1) greeting: String, @pbIndex(2) happy: Boolean)
-
-  @service(Protobuf, namespace = Some("com.example"))
-  trait Greeter[F[_]] {
-    def SayHello(req: HelloRequest): F[HelloResponse]
-  }
-
+object Greeter {
+  // ... lots of generated code
 }
 ```
 
@@ -140,25 +139,19 @@ added to `hello.proto`.
 
 There's quite a lot going on there, so let's unpack it a bit.
 
-* The trait is called `Greeter`, which matches the service name in the `.proto`
+- The trait is called `Greeter`, which matches the service name in the `.proto`
   file.
-* The trait contains a method for each endpoint in the service.
-* Mu-Scala uses "tagless final" encoding: the trait has a higher-kinded
+- The trait contains a method for each endpoint in the service.
+- Mu-Scala uses "tagless final" encoding: the trait has a higher-kinded
   type parameter `F[_]` and all methods return their result wrapped in `F[...]`.
-    * As we'll see in a later tutorial, `F[_]` becomes an IO monad such as
-      [cats-effect] `IO` when we implement a gRPC server or client.
-* The trait is annotated with `@service`. This is a macro annotation. When we
-  compile the code, it will create a companion object for the trait containing a
-  load of useful helper methods for creating servers and clients. We'll see how
-  to make use of these helpers in the next tutorial.
-* The annotation has 3 parameters:
-    1. `Protobuf` describes how gRPC requests and responses are serialized
-    2. `Identity` means GZip compression of requests and responses is disabled
-    3. `"com.example"` is the namespace in which the RPC endpoint will be exposed
+  - As we'll see in a later tutorial, `F[_]` becomes an IO monad such as
+    [cats-effect] `IO` when we implement a gRPC server or client.
+- There is also a companion object containing a load of useful helper methods
+  for creating servers and clients. We'll see how to make use of these helpers
+  in the next tutorial.
 
-These parameters can be customised using sbt settings. Take a look at the
-[source generation reference](../../reference/source-generation) for more
-details.
+For details on how to customise this generated code using sbt settings, take a
+look at the [source generation reference](../../reference/source-generation).
 
 ## Next steps
 
@@ -166,5 +159,6 @@ To find out how to turn this service definition into a working gRPC client or
 server, continue to the [gRPC server and client tutorial](../grpc-server-client).
 
 [cats-effect]: https://typelevel.org/cats-effect/
-[gRPC]: https://grpc.io/
-[Protocol Buffers]: https://developers.google.com/protocol-buffers
+[grpc]: https://grpc.io/
+[protocol buffers]: https://developers.google.com/protocol-buffers
+[ScalaPB]: https://scalapb.github.io/

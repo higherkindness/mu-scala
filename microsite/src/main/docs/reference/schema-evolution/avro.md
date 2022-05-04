@@ -7,17 +7,29 @@ permalink: /reference/schema-evolution/avro
 
 # Avro - Schema Evolution
 
-From now on, consider that we are using `AvroWithSchema` as the serialization mechanism in your [Mu] program.
+From now on, consider that we are using `AvroWithSchema` as the serialization
+mechanism in your [Mu] program.
 
-According to the [Avro Specs](http://avro.apache.org/docs/current/spec.html#Schema+Resolution):
+According to the [Avro
+Specs](http://avro.apache.org/docs/current/spec.html#Schema+Resolution):
 
-> A reader of Avro data, whether from an RPC or a file, can always parse that data because its schema is provided. 
+> A reader of Avro data, whether from an RPC or a file, can always parse that data because its schema is provided.
 > But that schema may not be exactly the schema that was expected. For example, if the data was written with a different
 > version of the software than it is read, then records may have had fields added or removed.
 
-For Scala, this section specifies how such schema differences should be resolved to preserve compatibility.
-We'll try to summarise a bit all the possible cases in both ends: request and response.
-However, you could go deeper by using this [repo](https://github.com/higherkindness/mu-protocol-decimal-update) where you can play with all of the possibilities.
+This page explains how such schema differences should be resolved to preserve
+compatibility.
+
+We'll try to summarise all the possible cases in both ends: request and
+response.
+
+However, you could go deeper by using this
+[repo](https://github.com/higherkindness/mu-protocol-decimal-update) where you
+can play with all of the possibilities.
+
+All the cases below assume we are changing the schema used on the *server side*
+first, so there are clients using the previous version of the schema while the
+server uses the new schema.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -44,174 +56,270 @@ However, you could go deeper by using this [repo](https://github.com/higherkindn
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-### Modifying the Request (Client side)
+### Modifying the Request
 
 #### A: Adding a new non-optional field
 
-You need to specify a default value for the new field.
+You need to specify a default value for the new field, because clients using the
+old schema will not include the new field in their requests.
 
 * Before:
 
-```scala
-case class Request(a: String, b: Int)
+```
+record Request {
+  string a;
+  int b;
+}
 ```
 
 * After:
 
-```scala
-case class NewRequest(a: String, b: Int, c: Boolean = true)
+```
+record Request {
+  string a;
+  int b;
+  boolean c = true;
+}
 ```
 
 #### B: Adding a new optional field
 
-This is a particular case of the previous scenario, hence, the solution could be providing a default value, that presumably, in Scala would be `None`.
-
-#### C: Adding new item to a union
-
-In this case, we are safe and no actions are required.
+This is a special case of the previous scenario. `null` should be used as the
+default value.
 
 * Before:
 
-```scala
-case class Request(a: Int :+: String :+: CNil)
+```
+record Request {
+  string a;
+  int b;
+}
 ```
 
 * After:
 
-```scala
-case class NewRequest(a: Int :+: String :+: Boolean :+: CNil)
+```
+record Request {
+  string a;
+  int b;
+  union {null, boolean} c = null;
+}
+```
+
+#### C: Adding new item to a union
+
+This change is safe. Older clients will only send an `int` or a `string`, while
+newer clients might send a `boolean`.
+
+* Before:
+
+```
+record Request {
+  union {int, string} a;
+}
+```
+
+* After:
+
+```
+record Request {
+  union {int, string, boolean} a;
+}
 ```
 
 #### D: Removing item from a union
 
-In this case, we'd be breaking the compatibility. The only way to deal with this situation is considering this as a change of type, see the next case for details.
+This change is NOT safe: older clients might send a `string`, and the server
+will not know how to handle it.
+
+The only safe choice is to add a new field with a default value.
+
+Older clients will send only the old field, while newer clients should send the
+same value for both the old and new fields. The server side will need to
+implement logic to handle this situation.
 
 * Before:
 
-```scala
-case class Request(a: Int :+: String :+: CNil)
+```
+record Request {
+  union {int, string, boolean} a;
+}
 ```
 
 * After:
 
 ```scala
-case class NewRequest(b: String :+: CNil = Coproduct[String :+: CNil](""))
+record Request {
+  union {int, string, boolean} a;
+  union {int, boolean} b = 0;
+}
 ```
 
 #### E: Replacing item in a union
 
-As we saw previously, again we are breaking the compatibility. If the type is replaced, it will work while the provided value is one of the types in common between the previous `coproduct` and the new one.
+This is also an incompatible change. If the type is replaced, it will work while
+the provided value is one of the types in common between the previous union and
+the new one.
 
 * Before:
 
-```scala
-case class Request(a: Int :+: String :+: CNil)
+```
+record Request {
+  union {int, string} a;
+}
 ```
 
 * After:
 
-```scala
-case class NewRequest(a: Int :+: Boolean :+: CNil)
+```
+record Request {
+  union {int, boolean} a;
+}
 ```
 
 It will work if the request is:
 
 ```scala
-Request(a = Coproduct[Int :+: String :+: CNil](10))
+Request(a = 10)
 ```
 
 And it will fail if the request is:
 
 ```scala
-Request(a = Coproduct[Int :+: String :+: CNil]("Hi"))
+Request(a = "Hi")
 ```
+
+Again, the safest strategy is to leave the existing field untouched and add a
+new field.
 
 #### F: Changing the type of an existing field
 
-In this case, it's not possible to deal with a type swap, if we are maintaining the same name of the field. So the solution would be to consider this replacement as a combination of removing the old field/type, and adding a new field with the new type with a default value.
+Changing the type of a field is an incompatible change, except in a few special
+cases. So you need to add a new field with a default value.
+
+Older clients will send only the old field, while newer clients will populate
+both the old and new fields. The server side will need to implement logic to
+handle this situation.
 
 * Before:
 
-```scala
-case class Request(a: String, b: Int)
+```
+record Request {
+  string a;
+  int b;
+}
 ```
 
 * After:
 
-```scala
-case class NewRequest(a: String, c: Boolean = true)
+```
+record Request {
+  string a;
+  int b;
+  boolean c = true;
+}
 ```
 
 #### G: Renaming a field
 
-This operation is completely safe, in Avro, the names are not being sent as part of the request, so no matter how they are named.
+This is NOT safe. Avro has no way of knowing that field `b` in the writer
+(client's) schema and field `c` in the reader (server's) schema refer to the
+same field. Schema resolution on the server side will ignore the unkown field
+`b` and throw an error because the field `c` is not present.
 
 * Before:
 
-```scala
-case class Request(a: String, b: Int)
+```
+record Request {
+  string a;
+  int b;
+}
 ```
 
 * After:
 
-```scala
-case class NewRequest(a: String, c: Int)
+```
+record Request {
+  string a;
+  int c;
+}
 ```
 
 #### H: Removing a field
 
-No action required. However, keep in mind that the value will be ignored when old clients include it in the request.
+No action required. However, keep in mind that the value will be ignored when
+old clients include it in the request.
 
 * Before:
 
-```scala
-case class Request(a: String, b: Int)
+```
+record Request {
+  string a;
+  int b;
+}
 ```
 
 * After:
 
-```scala
-case class NewRequest(a: String)
+```
+record Request {
+  string a;
+}
 ```
 
-### Modifying the Response (Server side)
+### Modifying the Response
 
 #### I: Adding a new non-optional field
 
-In this case, the old clients will ignore the value of the new field, so everything will be safe in terms of backward compatibility.
+In this case, the old clients will ignore the value of the new field, so
+this is a compatible change.
 
 * Before:
 
-```scala
-case class Response(a: String, b: Int)
+```
+record Response {
+  string a;
+  int b;
+}
 ```
 
 * After:
 
-```scala
-case class NewResponse(a: String, b: Int, c: Boolean)
+```
+record Response {
+  string a;
+  int b;
+  boolean c;
+}
 ```
 
 #### J: Adding a new optional field
 
-This would be just a particular case of the previous scenario, where the default value would be `None`, in the case of `Scala`.
+This is just a special case of the previous scenario.
 
 #### K: Adding a new item to a union
 
-In this scenario, the old clients will fail when the result is including the new item. Hence, the solution would be to provide a default value to the old coproduct and creating a new field with the new coproduct.
+In this scenario, older clients will fail when the server sets the field to a
+value with the new type.
+
+The safest solution would be to add a default value to the existing field and
+add a new field.
 
 * Before:
 
-```scala
-case class Response(a: Int :+: String :+: CNil)
+```
+record Response {
+  union {int, string} a;
+}
 ```
 
 * After:
 
-```scala
-case class NewResponse(
-      a: Int :+: String :+: CNil = Coproduct[Int :+: String :+: CNil](0),
-      b: Int :+: String :+: Boolean :+: CNil)
+```
+record Response {
+  union {int, string} a = 0;
+  union {int, string, boolean} b;
+}
 ```
 
 #### L: Removing item from a union
@@ -220,78 +328,116 @@ No action will be required in this case.
 
 * Before:
 
-```scala
-case class Response(a: Int :+: String :+: CNil)
+```
+record Response {
+  union {int, string, boolean} a;
+}
 ```
 
 * After:
 
-```scala
-case class NewResponse(a: Int :+: CNil)
+```
+record Response {
+  union {int, string} a;
+}
 ```
 
 #### M: Replacing item from a union
 
-As long as the value of the coproduct belongs to the previous version, the old client should be able to accept the response as valid. Thus, we would need to follow the same approach as above when _Adding a new item to a coproduct_.
+As long as the value of the union field belongs to one of the previous version's
+types, older clients should be able to accept the response as valid. Thus, we
+would need to follow the same approach as above when _Adding a new item to a
+union_.
 
 * Before:
 
-```scala
-case class Response(a: Int :+: String :+: CNil)
+```
+record Response {
+  union {int, string} a;
+}
 ```
 
 * After:
 
-```scala
-case class NewResponse(a: Int :+: Boolean :+: CNil)
 ```
+record Response {
+  union {int, boolean} a;
+}
+```
+
+In this example, as long as the server only sends `int` values, we're OK.
 
 #### N: Changing the type of an existing field
 
-It will require providing a default value for the previous type, and then, we would need to create a new field with the new type.
+We should add a default value to the existing field and add a new field with the
+new type.
 
 * Before:
 
-```scala
-case class Response(a: String, b: Int)
+```
+record Response {
+  string a;
+  int b;
+}
 ```
 
 * After:
 
-```scala
-case class NewResponse(a: String, b: Int = 123, c: Boolean)
+```
+record Response {
+  string a;
+  int b = 123;
+  boolean c;
+}
 ```
 
 #### O: Renaming a field
 
-It's also safe in Avro, the server responses don't include the parameter names inside and they will be ignored when the data is serialized and sent through the wire.
+This is NOT safe. Avro has no way of knowing that field `b` in the reader
+(client's) schema and field `c` in the writer (server's) schema refer to the
+same field. Schema resolution on the client side will ignore the unknown field
+`c` and throw an error because the field `b` is not present.
 
 * Before:
 
-```scala
-case class Response(a: String, b: Int)
+```
+record Response {
+  string a;
+  int b;
+}
 ```
 
 * After:
 
-```scala
-case class NewResponse(a: String, c: Int)
+```
+record Response {
+  string a;
+  int c;
+}
 ```
 
 #### P: Removing a field
 
-This evolution should never happen since we would lose backward compatibility. Nonetheless, it would work only under the special case that the old response has a default value for the field that we want to delete, where this operation would be feasible by removing the field in the new version of the server response.
+This evolution should never happen since we would lose backward compatibility.
+Nonetheless, it would work only under the special case that the old response has
+a default value for the field that we want to delete, where this operation would
+be feasible by removing the field in the new version of the server response.
 
 * Before:
 
-```scala
-case class Response(a: String, b: Int = 123)
+```
+record Response {
+  string a;
+  int b = 123;
+}
 ```
 
 * After:
 
-```scala
-case class NewResponse(a: String)
+```
+record Response {
+  string a;
+}
 ```
 
 [Mu]: https://github.com/higherkindness/mu-scala

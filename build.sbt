@@ -18,7 +18,10 @@ addCommandAlias(
   "ci-test",
   "scalafmtCheckAll; scalafmtSbtCheck; missinglinkCheck; mdoc; all-tests; haskell-integration-tests/test"
 )
-addCommandAlias("ci-docs", "github; mdoc; headerCreateAll; publishMicrosite")
+addCommandAlias(
+  "ci-docs",
+  "github; documentation3/mdoc; headerCreateAll; microsite3/publishMicrosite"
+)
 addCommandAlias("ci-publish", "github; ci-release")
 
 Global / concurrentRestrictions += Tags.limit(Tags.Test, 1)
@@ -227,16 +230,57 @@ lazy val crossBuiltModuleDeps: Seq[
     sbt.internal.ProjectMatrix.MatrixClasspathDependency(m, configuration = None)
   )
 
+///////////////////
+//// MICROSITE ////
+///////////////////
+
+lazy val `microsite-examples-protobuf` = projectMatrix
+  .in(file("microsite/examples/proto"))
+  .dependsOn(`rpc-service`, fs2)
+  .enablePlugins(SrcGenPlugin)
+  .settings(publish / skip := true)
+  .settings(protobufSrcGenSettings)
+  .jvmPlatform(scalaVersions = Seq(scala3))
+
+lazy val `microsite-examples-avro` = projectMatrix
+  .in(file("microsite/examples/avro"))
+  .dependsOn(`rpc-service`)
+  .enablePlugins(SrcGenPlugin)
+  .settings(publish / skip := true)
+  .settings(avroSrcGenSettings)
+  .jvmPlatform(scalaVersions = Seq(scala3))
+
 lazy val microsite = projectMatrix
   .dependsOn(crossBuiltModuleDeps: _*)
+  .dependsOn(`microsite-examples-protobuf`, `microsite-examples-avro`)
+  .enablePlugins(MicrositesPlugin)
+  .enablePlugins(MdocPlugin)
   .settings(docsSettings)
   .settings(micrositeSettings)
   .settings(publish / skip := true)
-  .enablePlugins(MicrositesPlugin)
-  .enablePlugins(MdocPlugin)
-  .jvmPlatform(scalaVersions = Seq(scala213))
+  .settings(
+    excludeDependencies ++= Seq(
+      /*
+       * Exclude _2.13 version of these libraries,
+       because we also have the _3 version on the classpath.
+
+       mdoc_3 -> mdoc-cli_3 -> scalameta_2.13 -> scalapb-runtime_2.13
+       */
+      ExclusionRule("com.thesamet.scalapb", "scalapb-runtime_2.13"),
+      ExclusionRule("com.thesamet.scalapb", "lenses_2.13")
+    )
+  )
+  .jvmPlatform(scalaVersions = Seq(scala3))
+
+/////////////////////////////////
+//// GENERATED DOCUMENTATION ////
+/////////////////////////////////
 
 lazy val documentation = projectMatrix
-  .settings(mdocOut := file("."))
-  .settings(publish / skip := true)
   .enablePlugins(MdocPlugin)
+  .settings(
+    mdocOut            := file("."),
+    mdocExtraArguments := Seq("--no-link-hygiene")
+  )
+  .settings(publish / skip := true)
+  .jvmPlatform(scalaVersions = Seq(scala3))

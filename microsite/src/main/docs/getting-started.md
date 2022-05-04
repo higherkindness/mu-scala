@@ -10,7 +10,7 @@ permalink: /getting-started
 The easiest way to get started is to use our [giter8 template](https://github.com/higherkindness/mu-scala.g8)
 to start a new project:
 
-```shell script
+```shell
 sbt new higherkindness/mu-scala.g8
 ```
 You can customise the template using a few parameters:
