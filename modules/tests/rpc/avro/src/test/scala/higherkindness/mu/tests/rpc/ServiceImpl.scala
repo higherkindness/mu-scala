@@ -7,16 +7,7 @@ class ServiceImpl extends AvroRPCService[IO] {
 
   def hello(req: Request): IO[Response] =
     if (req == TestData.request) {
-      IO.pure(Response(req.a))
-    } else {
-      IO.raiseError(
-        Status.INTERNAL.withDescription("Request did not match what I expected").asException
-      )
-    }
-
-  def helloEnum(req: RequestWithEnumField): IO[Response] =
-    if (req == TestData.requestWithEnumField) {
-      IO.pure(Response(req.a))
+      IO.pure(Response(req.a, req.d))
     } else {
       IO.raiseError(
         Status.INTERNAL.withDescription("Request did not match what I expected").asException
