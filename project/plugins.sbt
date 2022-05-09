@@ -14,4 +14,4 @@ addSbtPlugin("ch.epfl.scala"             % "sbt-missinglink"          % "0.3.3")
 
 // TODO update when sbt-mu-srcgen is released
 resolvers += Resolver.sonatypeRepo("snapshots")
-addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "0.28.0+41-e4960524-SNAPSHOT")
+addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "0.28.0+42-f5b46f26-SNAPSHOT")
