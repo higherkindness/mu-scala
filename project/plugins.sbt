@@ -11,7 +11,4 @@ addSbtPlugin("com.alejandrohdezma"       % "sbt-github-mdoc"          % "0.11.2"
 addSbtPlugin("com.alejandrohdezma"       % "sbt-remove-test-from-pom" % "0.1.0")
 addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat"             % "0.3.1")
 addSbtPlugin("ch.epfl.scala"             % "sbt-missinglink"          % "0.3.3")
-
-// TODO update when sbt-mu-srcgen is released
-resolvers += Resolver.sonatypeRepo("snapshots")
-addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "0.28.0+42-f5b46f26-SNAPSHOT")
+addSbtPlugin("io.higherkindness"         % "sbt-mu-srcgen"            % "0.29.0")
