@@ -17,22 +17,27 @@ care of the boilerplate and non-functional requirements, including:</p>
   <li>generation of model classes, service interfaces and clients from <a href="https://avro.apache.org/">Avro</a>,
 or <a href="https://developers.google.com/protocol-buffers">Protobuf</a> <abbr title="Interface definition language">IDL</abbr>
 files</li>
-  <li>serialization of requests and responses into Avro/Protobuf/JSON</li>
+  <li>serialization of requests and responses into Avro/Protobuf</li>
   <li>building high-performance <a href="https://grpc.io/">gRPC</a> servers and clients</li>
-  <li>building HTTP REST servers and clients using <a href="https://http4s.org/">http4s</a></li>
-  <li>handling of <a href="guides/grpc-streaming">streaming requests and responses</a> using <a href="https://github.com/functional-streams-for-scala/fs2">FS2</a> Stream</li>
+  <li>handling of <a href="guides/grpc-streaming">streaming requests and responses</a> using <a href="https://github.com/typelevel/fs2">FS2</a> Stream</li>
   <li><a href="guides/accessing-metadata">accessing metadata on services</a></li>
   <li><a href="guides/distributed-tracing">distributed tracing</a></li>
   <li><a href="guides/metrics-reporting">metrics reporting</a></li>
   <li>… and plenty more features on the way!</li>
 </ul>
 
-<p>Specifically, Mu helps you to build:</p>
+<p>Specifically, Mu helps you to build <a href="https://grpc.io/">gRPC</a> servers and clients based on either
+<a href="https://avro.apache.org/">Avro</a> or <a href="https://developers.google.com/protocol-buffers">Protobuf</a> protocol definitions.</p>
 
-<ul>
-  <li><a href="https://grpc.io/">gRPC</a> servers and clients based on either <a href="https://avro.apache.org/">Avro</a> or <a href="https://developers.google.com/protocol-buffers">Protobuf</a> protocol
-definitions</li>
-</ul>
+<h2 id="scala-versions">Scala versions</h2>
+
+<p>Mu is available for Scala 2.13 and 3.x.</p>
+
+<p>However, Avro support for Scala 3 should be considered <em>experimental</em> because
+the Scala 3 version of Avro4s is not yet feature-complete. For example, fields
+with default values are not supported properly.</p>
+
+<p>Most code samples in this documentation site use Scala 3 syntax.</p>
 
 </section></div></div></div></div><script src="/mu-scala/highlight/highlight.pack.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/protobuf.min.js"></script><script src="/mu-scala/lunr/lunr.js"></script><script>
 // For all code blocks, copy the language from the containing div
