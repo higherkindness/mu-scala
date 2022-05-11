@@ -8,7 +8,6 @@
 
 The maintainers of the project are:
 
-- [![alejandrohdezma](https://avatars.githubusercontent.com/u/9027541?v=4&s=20) **Alejandro Hernández (alejandrohdezma)**](https://github.com/alejandrohdezma)
 - [![BenFradet](https://avatars.githubusercontent.com/u/1737211?v=4&s=20) **Ben Fradet (BenFradet)**](https://github.com/BenFradet)
 - [![cb372](https://avatars.githubusercontent.com/u/106760?v=4&s=20) **Chris Birchall (cb372)**](https://github.com/cb372)
 - [![JesusMtnez](https://avatars.githubusercontent.com/u/8639179?v=4&s=20) **Jesús Martínez (JesusMtnez)**](https://github.com/JesusMtnez)
@@ -54,3 +53,4 @@ These are the people that have contributed to the _mu-scala_ project:
 - [![rlmark](https://avatars.githubusercontent.com/u/7613551?v=4&s=20) **rlmark**](https://github.com/rlmark)
 - [![bilki](https://avatars.githubusercontent.com/u/1669748?v=4&s=20) **bilki**](https://github.com/bilki)
 - [![Chicker](https://avatars.githubusercontent.com/u/516518?v=4&s=20) **Chicker**](https://github.com/Chicker)
+- [![rohitbishnoi](https://avatars.githubusercontent.com/u/6151462?v=4&s=20) **rohitbishnoi**](https://github.com/rohitbishnoi)
