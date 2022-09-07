@@ -81,6 +81,7 @@ muSrcGenSerializationType := SerializationType.Protobuf // or SerializationType.
 | `muSrcGenCompressionType` | The compression type that will be used by generated RPC services. Set to `higherkindness.mu.rpc.srcgen.Model.GzipGen` for Gzip compression. | `higherkindness.mu.rpc.srcgen.Model.NoCompressionGen` |
 | `muSrcGenIdiomaticEndpoints` | Flag indicating if idiomatic gRPC endpoints should be used. If `true`, the service operations will be prefixed by the namespace. | `true` |
 | `muSrcGenProtocVersion` | Specifies the protoc version that [ScalaPB](https://scalapb.github.io/) should use when generating source files from proto files. | `None` (let ScalaPB choose the protoc version) |
+| `muSrcGenValidateProto` | Flag indicating if the plugin should generate validation methods based on rules and constraints defined in the specs. Only proto is supported at this moment. | `false` |
 
 ### muSrcGenJarNames
 
