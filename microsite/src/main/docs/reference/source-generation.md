@@ -110,6 +110,32 @@ sbt module containing the IDL definitions (`foo-domain`):
 //...
 ```
 
+### muSrcGenValidateProto
+
+The sbt-mu-srcgen has compatibility with the plugin [scalapb-validate](https://github.com/scalapb/scalapb-validate).
+This plugin generate validators for your models, using the base validators defined the [PGV protoc plugin](https://github.com/envoyproxy/protoc-gen-validate)
+
+As you probably guessed, this is only compatible with proto and the setting will be ignored when working with Avro files.
+
+In order to enable the validation methods generation, you need to set the setting `muSrcGenValidateProto` to true and
+import the PVG validators provided transitively by the `scalapb-validate-core` protobuf library:
+
+```
+//...
+.settings(
+  Seq(
+      muSrcGenIdlType := IdlType.Proto,
+      muSrcGenTargetDir := (Compile / sourceManaged).value / "compiled_proto",
+      muSrcGenValidateProto := true,
+      libraryDependencies ++= Seq(
+        "com.thesamet.scalapb" %% "scalapb-validate-core" % scalapb.validate.compiler.BuildInfo.version % "protobuf",
+        "io.higherkindness" %% "mu-rpc-service" % V.muRPC
+      )
+  )
+)
+//...
+```
+
 ## Implementation Notes: An Intentional Incompatibility with the Avro Standard
 
 In order to make it easier for users to evolve their schemas over time,
