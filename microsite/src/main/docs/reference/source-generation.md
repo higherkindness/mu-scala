@@ -112,12 +112,12 @@ sbt module containing the IDL definitions (`foo-domain`):
 
 ### muSrcGenValidateProto
 
-The sbt-mu-srcgen has compatibility with the plugin [scalapb-validate](https://github.com/scalapb/scalapb-validate).
-This plugin generate validators for your models, using the base validators defined the [PGV protoc plugin](https://github.com/envoyproxy/protoc-gen-validate)
+The sbt-mu-srcgen supports the plugin [scalapb-validate](https://github.com/scalapb/scalapb-validate).
+This plugin generates validators for your models, using the base validators defined by the [PGV protoc plugin](https://github.com/envoyproxy/protoc-gen-validate)
 
 As you probably guessed, this is only compatible with proto and the setting will be ignored when working with Avro files.
 
-In order to enable the validation methods generation, you need to set the setting `muSrcGenValidateProto` to true and
+To enable the validation methods generation, you need to set the setting `muSrcGenValidateProto` to true and
 import the PVG validators provided transitively by the `scalapb-validate-core` protobuf library:
 
 ```
