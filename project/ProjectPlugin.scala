@@ -36,7 +36,7 @@ object ProjectPlugin extends AutoPlugin {
       val paradise: String              = "2.1.1"
       val pbdirect: String              = "0.7.0"
       val prometheus: String            = "0.16.0"
-      val pureconfig: String            = "0.17.1"
+      val pureconfig: String            = "0.17.2"
       val scalaCollectionCompat: String = "2.8.1"
       val scalacheckToolbox: String     = "0.6.0"
       val scalamock: String             = "5.1.0"
