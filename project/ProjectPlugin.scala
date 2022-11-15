@@ -103,7 +103,8 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         "org.typelevel" %% "cats-effect" % V.catsEffect
       ),
-      muSrcGenIdlType := IdlType.Proto
+      muSrcGenIdlType := IdlType.Proto,
+      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings"))
     )
 
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
@@ -227,11 +228,13 @@ object ProjectPlugin extends AutoPlugin {
         "org.typelevel"          %% "munit-cats-effect-3"     % V.munitCE               % Test,
         "org.typelevel"          %% "cats-effect-testkit"     % V.catsEffect            % Test,
         "ch.qos.logback"          % "logback-classic"         % V.logback               % Test
-      )
+      ),
+      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings"))
     )
 
     lazy val protobufSrcGenSettings = Seq(
-      muSrcGenIdlType := IdlType.Proto
+      muSrcGenIdlType := IdlType.Proto,
+      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings"))
     )
 
     lazy val protobufRPCTestSettings = testSettings ++ protobufSrcGenSettings
@@ -248,7 +251,8 @@ object ProjectPlugin extends AutoPlugin {
             ScalacOptions.warnUnusedImports
           )
         )
-      }
+      },
+      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings"))
     )
 
     lazy val avroRPCTestSettings = testSettings ++ avroSrcGenSettings
