@@ -33,7 +33,7 @@ abstract class ManagedChannelInterpreterTests extends CatsEffectSuite {
       channelConfigList: List[ManagedChannelConfig]
   ): ManagedChannelInterpreter[IO]
 
-  val dispatcher = ResourceFixture(Dispatcher[IO])
+  val dispatcher = ResourceFixture(Dispatcher.parallel[IO])
 
   dispatcher.test(
     "ManagedChannelInterpreter build a io.grpc.ManagedChannel based on the specified configuration, for an address"
