@@ -17,33 +17,33 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String                = "4.0.13"
-      val catsEffect: String            = "3.3.12"
+      val avro4s: String                = "4.1.0"
+      val catsEffect: String            = "3.4.0"
       val dockerItScala                 = "0.9.9"
-      val dropwizard: String            = "4.2.9"
+      val dropwizard: String            = "4.2.12"
       val enumeratum: String            = "1.7.0"
-      val fs2: String                   = "3.2.7"
-      val fs2Grpc: String               = "2.4.10"
-      val grpc: String                  = "1.47.0"
+      val fs2: String                   = "3.3.0"
+      val fs2Grpc: String               = "2.4.12"
+      val grpc: String                  = "1.50.2"
       val kindProjector: String         = "0.13.2"
-      val log4cats: String              = "2.3.1"
+      val log4cats: String              = "2.5.0"
       val log4s: String                 = "1.10.0"
-      val logback: String               = "1.2.11"
+      val logback: String               = "1.4.4"
       val munit: String                 = "0.7.29"
       val munitCE: String               = "1.0.7"
       val natchez: String               = "0.1.6"
-      val nettySSL: String              = "2.0.46.Final"
+      val nettySSL: String              = "2.0.53.Final"
       val paradise: String              = "2.1.1"
       val pbdirect: String              = "0.7.0"
-      val prometheus: String            = "0.15.0"
-      val pureconfig: String            = "0.17.1"
-      val scalaCollectionCompat: String = "2.7.0"
+      val prometheus: String            = "0.16.0"
+      val pureconfig: String            = "0.17.2"
+      val scalaCollectionCompat: String = "2.8.1"
       val scalacheckToolbox: String     = "0.6.0"
       val scalamock: String             = "5.1.0"
-      val scalapb: String               = "0.11.11"
+      val scalapb: String               = "0.11.12"
       val scalatest: String             = "3.2.12"
       val scalatestplusScheck: String   = "3.2.2.0"
-      val slf4j: String                 = "1.7.36"
+      val slf4j: String                 = "2.0.3"
     }
 
     lazy val rpcServiceSettings: Seq[Def.Setting[_]] = Seq(
@@ -63,7 +63,7 @@ object ProjectPlugin extends AutoPlugin {
         "com.beachape"        %% "enumeratum"  % V.enumeratum
       ).value,
       libraryDependencies ++= scalaVersionSpecificDeps(3)(
-        "com.sksamuel.avro4s" %% "avro4s-core" % "5.0.0"
+        "com.sksamuel.avro4s" %% "avro4s-core" % "5.0.3"
       ).value,
       scalacOptions --= on(2, 13)("-Wunused:patvars").value
     )
@@ -103,7 +103,8 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         "org.typelevel" %% "cats-effect" % V.catsEffect
       ),
-      muSrcGenIdlType := IdlType.Proto
+      muSrcGenIdlType := IdlType.Proto,
+      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings"))
     )
 
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
@@ -227,11 +228,13 @@ object ProjectPlugin extends AutoPlugin {
         "org.typelevel"          %% "munit-cats-effect-3"     % V.munitCE               % Test,
         "org.typelevel"          %% "cats-effect-testkit"     % V.catsEffect            % Test,
         "ch.qos.logback"          % "logback-classic"         % V.logback               % Test
-      )
+      ),
+      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings"))
     )
 
     lazy val protobufSrcGenSettings = Seq(
-      muSrcGenIdlType := IdlType.Proto
+      muSrcGenIdlType := IdlType.Proto,
+      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings"))
     )
 
     lazy val protobufRPCTestSettings = testSettings ++ protobufSrcGenSettings
@@ -248,7 +251,8 @@ object ProjectPlugin extends AutoPlugin {
             ScalacOptions.warnUnusedImports
           )
         )
-      }
+      },
+      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings"))
     )
 
     lazy val avroRPCTestSettings = testSettings ++ avroSrcGenSettings

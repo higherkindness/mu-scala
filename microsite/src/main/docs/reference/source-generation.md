@@ -81,6 +81,7 @@ muSrcGenSerializationType := SerializationType.Protobuf // or SerializationType.
 | `muSrcGenCompressionType` | The compression type that will be used by generated RPC services. Set to `higherkindness.mu.rpc.srcgen.Model.GzipGen` for Gzip compression. | `higherkindness.mu.rpc.srcgen.Model.NoCompressionGen` |
 | `muSrcGenIdiomaticEndpoints` | Flag indicating if idiomatic gRPC endpoints should be used. If `true`, the service operations will be prefixed by the namespace. | `true` |
 | `muSrcGenProtocVersion` | Specifies the protoc version that [ScalaPB](https://scalapb.github.io/) should use when generating source files from proto files. | `None` (let ScalaPB choose the protoc version) |
+| `muSrcGenValidateProto` | Flag indicating if the plugin should generate validation methods based on rules and constraints defined in the specs. Only proto is supported at this moment. | `false` |
 
 ### muSrcGenJarNames
 
@@ -102,6 +103,32 @@ sbt module containing the IDL definitions (`foo-domain`):
       muSrcGenJarNames := Seq("foo-domain"),
       muSrcGenTargetDir := (Compile / sourceManaged).value / "compiled_avro",
       libraryDependencies ++= Seq(
+        "io.higherkindness" %% "mu-rpc-service" % V.muRPC
+      )
+  )
+)
+//...
+```
+
+### muSrcGenValidateProto
+
+The sbt-mu-srcgen supports the plugin [scalapb-validate](https://github.com/scalapb/scalapb-validate).
+This plugin generates validators for your models, using the base validators defined by the [PGV protoc plugin](https://github.com/envoyproxy/protoc-gen-validate)
+
+As you probably guessed, this is only compatible with proto and the setting will be ignored when working with Avro files.
+
+To enable the validation methods generation, you need to set the setting `muSrcGenValidateProto` to true and
+import the PVG validators provided transitively by the `scalapb-validate-core` protobuf library:
+
+```
+//...
+.settings(
+  Seq(
+      muSrcGenIdlType := IdlType.Proto,
+      muSrcGenTargetDir := (Compile / sourceManaged).value / "compiled_proto",
+      muSrcGenValidateProto := true,
+      libraryDependencies ++= Seq(
+        "com.thesamet.scalapb" %% "scalapb-validate-core" % scalapb.validate.compiler.BuildInfo.version % "protobuf",
         "io.higherkindness" %% "mu-rpc-service" % V.muRPC
       )
   )

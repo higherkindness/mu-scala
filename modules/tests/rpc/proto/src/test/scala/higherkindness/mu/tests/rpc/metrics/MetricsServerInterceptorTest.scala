@@ -70,7 +70,8 @@ class MetricsServerInterceptorTest extends CatsEffectSuite {
   private[this] def makeProtoCalls[A](metricsOps: MetricsOps[IO])(
       f: MetricsTestService[IO] => IO[A]
   )(implicit H: MetricsTestService[IO]): IO[Either[Throwable, A]] = {
-    Dispatcher[IO]
+    Dispatcher
+      .parallel[IO]
       .flatMap { disp =>
         withServerChannel[IO](
           service = MetricsTestService
