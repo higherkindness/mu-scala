@@ -65,7 +65,8 @@ class MetricsChannelInterceptorTest extends CatsEffectSuite {
       f: MetricsTestService[IO] => IO[A]
   )(implicit H: MetricsTestService[IO]): IO[Either[Throwable, A]] = {
 
-    Dispatcher[IO]
+    Dispatcher
+      .parallel[IO]
       .flatMap { disp =>
         withServerChannel[IO](
           service = MetricsTestService.bindService[IO],

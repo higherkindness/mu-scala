@@ -34,7 +34,7 @@ object calls {
       options: CallOptions,
       headers: Metadata = new Metadata()
   ): F[Res] = {
-    Dispatcher[F].use { disp =>
+    Dispatcher.parallel[F].use { disp =>
       Fs2ClientCall[F]
         .apply(channel, descriptor, disp, clientOptions(options))
         .flatMap(_.unaryToUnaryCall(request, headers))
@@ -48,7 +48,7 @@ object calls {
       options: CallOptions,
       headers: Metadata = new Metadata()
   ): F[Res] =
-    Dispatcher[F].use { disp =>
+    Dispatcher.parallel[F].use { disp =>
       Fs2ClientCall[F](channel, descriptor, disp, clientOptions(options))
         .flatMap(_.streamingToUnaryCall(input, headers))
     }
@@ -61,7 +61,7 @@ object calls {
       headers: Metadata = new Metadata()
   ): F[Stream[F, Res]] =
     Stream
-      .resource(Dispatcher[F])
+      .resource(Dispatcher.parallel[F])
       .flatMap { disp =>
         Stream
           .eval(Fs2ClientCall[F](channel, descriptor, disp, clientOptions(options)))
@@ -77,7 +77,7 @@ object calls {
       headers: Metadata = new Metadata()
   ): F[Stream[F, Res]] =
     Stream
-      .resource(Dispatcher[F])
+      .resource(Dispatcher.parallel[F])
       .flatMap { disp =>
         Stream
           .eval(Fs2ClientCall[F](channel, descriptor, disp, clientOptions(options)))
@@ -114,7 +114,7 @@ object calls {
     Kleisli[F, C, Stream[Kleisli[F, C, *], Res]] { context =>
       clientContext[Req, Res](descriptor, channel, options, context).use { c =>
         Stream
-          .resource(Dispatcher[F])
+          .resource(Dispatcher.parallel[F])
           .flatMap { disp =>
             Stream
               .eval(Fs2ClientCall[F](channel, descriptor, disp, clientOptions(options)))
@@ -135,7 +135,7 @@ object calls {
       clientContext[Req, Res](descriptor, channel, options, context).use { c =>
         val streamF: Stream[F, Req] = input.translate(Kleisli.applyK[F, C](c.context))
         Stream
-          .resource(Dispatcher[F])
+          .resource(Dispatcher.parallel[F])
           .flatMap { disp =>
             Stream
               .eval(Fs2ClientCall[F](channel, descriptor, disp, clientOptions(options)))
