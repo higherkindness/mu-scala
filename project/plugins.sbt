@@ -5,7 +5,7 @@ ThisBuild / libraryDependencySchemes ++= Seq(
 addSbtPlugin("com.eed3si9n"              % "sbt-projectmatrix"        % "0.9.0")
 addSbtPlugin("pl.project13.scala"        % "sbt-jmh"                  % "0.4.3")
 addSbtPlugin("com.github.sbt"            % "sbt-ci-release"           % "1.5.11")
-addSbtPlugin("com.47deg"                 % "sbt-microsites"           % "1.4.0")
+addSbtPlugin("com.47deg"                 % "sbt-microsites"           % "1.4.1")
 addSbtPlugin("org.scalameta"             % "sbt-scalafmt"             % "2.5.0")
 addSbtPlugin("org.scalameta"             % "sbt-mdoc"                 % "2.3.6")
 addSbtPlugin("de.heikoseeberger"         % "sbt-header"               % "5.9.0")
