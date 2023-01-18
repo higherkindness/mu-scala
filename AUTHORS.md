@@ -53,4 +53,5 @@ These are the people that have contributed to the _mu-scala_ project:
 - [![rlmark](https://avatars.githubusercontent.com/u/7613551?v=4&s=20) **rlmark**](https://github.com/rlmark)
 - [![bilki](https://avatars.githubusercontent.com/u/1669748?v=4&s=20) **bilki**](https://github.com/bilki)
 - [![Chicker](https://avatars.githubusercontent.com/u/516518?v=4&s=20) **Chicker**](https://github.com/Chicker)
+- [![davesmith00047](https://avatars.githubusercontent.com/u/119872582?v=4&s=20) **davesmith00047**](https://github.com/davesmith00047)
 - [![rohitbishnoi](https://avatars.githubusercontent.com/u/6151462?v=4&s=20) **rohitbishnoi**](https://github.com/rohitbishnoi)
