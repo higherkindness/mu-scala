@@ -46,7 +46,7 @@ object Decimals:
       }
 
     given [P <: Int, S <: Int](using p: ValueOf[P], s: ValueOf[S]): SchemaFor[TaggedDecimal[P, S]]
-      with
+    with
       def schema: Schema =
         val sp = ScalePrecision(s.value, p.value)
         new BigDecimalSchemaFor(sp).schema
