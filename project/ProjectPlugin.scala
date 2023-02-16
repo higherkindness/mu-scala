@@ -19,7 +19,7 @@ object ProjectPlugin extends AutoPlugin {
     lazy val V = new {
       val avro4s: String                = "4.1.0"
       val catsEffect: String            = "3.4.6"
-      val dockerItScala                 = "0.9.9"
+      val dockerItScala                 = "0.11.0"
       val dropwizard: String            = "4.2.15"
       val enumeratum: String            = "1.7.2"
       val fs2: String                   = "3.6.1"
@@ -257,10 +257,10 @@ object ProjectPlugin extends AutoPlugin {
       publishArtifact          := false,
       Test / parallelExecution := false,
       libraryDependencies ++= Seq(
-        "co.fs2"        %% "fs2-core"                    % V.fs2,
-        "org.scalameta" %% "munit"                       % V.munit         % Test,
-        "org.typelevel" %% "munit-cats-effect-3"         % V.munitCE       % Test,
-        "com.whisk"     %% "docker-testkit-impl-spotify" % V.dockerItScala % Test
+        "co.fs2"        %% "fs2-core"                 % V.fs2,
+        "org.scalameta" %% "munit"                    % V.munit         % Test,
+        "org.typelevel" %% "munit-cats-effect-3"      % V.munitCE       % Test,
+        "com.whisk"     %% "docker-testkit-scalatest" % V.dockerItScala % Test
       )
     )
 
