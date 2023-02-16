@@ -228,7 +228,6 @@ object ProjectPlugin extends AutoPlugin {
         "org.typelevel"          %% "munit-cats-effect-3"     % V.munitCE               % Test,
         "org.typelevel"          %% "cats-effect-testkit"     % V.catsEffect            % Test,
         "ch.qos.logback"          % "logback-classic"         % V.logback               % Test,
-        "org.typelevel"          %% "log4cats-slf4j"          % V.log4cats              % Test,
         "com.github.cb372"       %% "cats-retry"              % V.catsRetry             % Test
       )
     )

@@ -21,15 +21,14 @@ import fs2.Stream
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.fs2.Utils.service.ProtoRPCService
 import munit.CatsEffectSuite
-import org.typelevel.log4cats.Logger
-import org.typelevel.log4cats.slf4j.Slf4jLogger
+import org.log4s.{getLogger, Logger}
 
 import java.io.IOException
 import scala.concurrent.duration._
 
 class RPCTests extends CatsEffectSuite {
 
-  val logger: Logger[IO] = Slf4jLogger.getLogger[IO]
+  private val logger: Logger = getLogger
 
   import higherkindness.mu.rpc.fs2.Utils.database._
   import higherkindness.mu.rpc.fs2.Utils.implicits._
@@ -50,7 +49,7 @@ class RPCTests extends CatsEffectSuite {
           (e, details) =>
             details match {
               case retry.RetryDetails.WillDelayAndRetry(_, retries: Int, _) =>
-                logger.info(e)(s"Failed, retried $retries times")
+                IO(logger.info(e)(s"Failed, retried $retries times"))
               case _ => IO.unit
             }
         )(io)
