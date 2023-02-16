@@ -257,10 +257,10 @@ object ProjectPlugin extends AutoPlugin {
       publishArtifact          := false,
       Test / parallelExecution := false,
       libraryDependencies ++= Seq(
-        "co.fs2"        %% "fs2-core"                 % V.fs2,
-        "org.scalameta" %% "munit"                    % V.munit         % Test,
-        "org.typelevel" %% "munit-cats-effect-3"      % V.munitCE       % Test,
-        "com.whisk"     %% "docker-testkit-scalatest" % V.dockerItScala % Test
+        "co.fs2"        %% "fs2-core"            % V.fs2,
+        "org.scalameta" %% "munit"               % V.munit         % Test,
+        "org.typelevel" %% "munit-cats-effect-3" % V.munitCE       % Test,
+        "com.whisk"     %% "docker-testkit-core" % V.dockerItScala % Test
       )
     )
 
