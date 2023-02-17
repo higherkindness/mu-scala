@@ -11,7 +11,7 @@ extra-deps:
 - mu-grpc-server-0.4.0.0
 - mu-grpc-common-0.4.0.0
 - compendium-client-0.2.1.1
-# dependencies of mu
+# dependencies of mu
 - http2-client-0.9.0.0
 - http2-client-grpc-0.8.0.0
 - http2-grpc-types-0.5.0.0
