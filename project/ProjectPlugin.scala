@@ -18,9 +18,9 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String                = "4.1.0"
-      val catsEffect: String            = "3.4.6"
+      val catsEffect: String            = "3.4.7"
       val catsRetry: String             = "3.1.0"
-      val dockerItScala                 = "0.9.9"
+      val dockerItScala                 = "0.11.0"
       val dropwizard: String            = "4.2.15"
       val enumeratum: String            = "1.7.2"
       val fs2: String                   = "3.6.1"
@@ -39,7 +39,7 @@ object ProjectPlugin extends AutoPlugin {
       val prometheus: String            = "0.16.0"
       val pureconfig: String            = "0.17.2"
       val scalaCollectionCompat: String = "2.9.0"
-      val scalacheckToolbox: String     = "0.6.0"
+      val scalacheckToolbox: String     = "0.7.0"
       val scalamock: String             = "5.1.0"
       val scalapb: String               = "0.11.13"
       val scalatest: String             = "3.2.12"
@@ -259,10 +259,10 @@ object ProjectPlugin extends AutoPlugin {
       publishArtifact          := false,
       Test / parallelExecution := false,
       libraryDependencies ++= Seq(
-        "co.fs2"        %% "fs2-core"                    % V.fs2,
-        "org.scalameta" %% "munit"                       % V.munit         % Test,
-        "org.typelevel" %% "munit-cats-effect-3"         % V.munitCE       % Test,
-        "com.whisk"     %% "docker-testkit-impl-spotify" % V.dockerItScala % Test
+        "co.fs2"        %% "fs2-core"            % V.fs2,
+        "org.scalameta" %% "munit"               % V.munit         % Test,
+        "org.typelevel" %% "munit-cats-effect-3" % V.munitCE       % Test,
+        "com.whisk"     %% "docker-testkit-core" % V.dockerItScala % Test
       )
     )
 
