@@ -21,28 +21,55 @@ import fs2.Stream
 import higherkindness.mu.rpc.common._
 import higherkindness.mu.rpc.fs2.Utils.service.ProtoRPCService
 import munit.CatsEffectSuite
+import org.log4s.{getLogger, Logger}
 
+import java.io.IOException
 import scala.concurrent.duration._
 
 class RPCTests extends CatsEffectSuite {
 
+  private val logger: Logger = getLogger
+
   import higherkindness.mu.rpc.fs2.Utils.database._
   import higherkindness.mu.rpc.fs2.Utils.implicits._
+
+  val retryFiveTimes: retry.RetryPolicy[IO] =
+    retry.RetryPolicies.limitRetries[IO](5)
+
+  implicit class IOOps[Result](private val io: IO[Result]) {
+    def withRetry: IO[Result] =
+      retry
+        .retryingOnSomeErrors[Result]
+        .apply[IO, Throwable](
+          retryFiveTimes,
+          {
+            case _: IOException => IO.pure(true)
+            case _              => IO.pure(false)
+          },
+          (e, details) =>
+            details match {
+              case retry.RetryDetails.WillDelayAndRetry(_, retries: Int, _) =>
+                IO(logger.info(e)(s"Failed, retried $retries times"))
+              case _ => IO.unit
+            }
+        )(io)
+  }
 
   val behaviourOf: String = "mu-rpc client with fs2.Stream"
 
   test("mu-rpc server should allow to startup a server and check if it's alive") {
-    grpcServer.use(_.isShutdown).assertEquals(false)
+    grpcServer.use(_.isShutdown).withRetry.assertEquals(false)
   }
 
   test("mu-rpc server should allow to get the port where it's running") {
-    grpcServer.use(_.getPort).assertEquals(SC.port)
+    grpcServer.use(_.getPort).withRetry.assertEquals(SC.port)
   }
 
   test(behaviourOf + " be able to run unary services") {
     grpcServer
       .flatMap(_ => muAvroRPCServiceClient)
       .use(_.unary(a1))
+      .withRetry
       .assertEquals(c1)
   }
 
@@ -50,6 +77,7 @@ class RPCTests extends CatsEffectSuite {
     grpcServer
       .flatMap(_ => muAvroWithSchemaRPCServiceClient)
       .use(_.unaryWithSchema(a1))
+      .withRetry
       .assertEquals(c1)
   }
 
@@ -57,6 +85,7 @@ class RPCTests extends CatsEffectSuite {
     grpcServer
       .flatMap(_ => muProtoRPCServiceClient)
       .use(_.serverStreaming(b1).flatMap(_.compile.toList))
+      .withRetry
       .assertEquals(cList)
   }
 
@@ -79,12 +108,14 @@ class RPCTests extends CatsEffectSuite {
           clientProgram("Thrown", s)
             .assertEquals(List(C("UNKNOWN", a1)))
       }
+      .withRetry
   }
 
   test(behaviourOf + " be able to run client streaming services") {
     grpcServer
       .flatMap(_ => muProtoRPCServiceClient)
       .use(_.clientStreaming(Stream.fromIterator[IO](aList.iterator, 1)))
+      .withRetry
       .assertEquals(dResult33)
   }
 
@@ -94,6 +125,7 @@ class RPCTests extends CatsEffectSuite {
       .use(
         _.biStreaming(Stream.fromIterator[IO](eList.iterator, 1)).flatMap(_.compile.toList)
       )
+      .withRetry
       .map(_.distinct)
       .assertEquals(eList)
   }
@@ -107,6 +139,7 @@ class RPCTests extends CatsEffectSuite {
         _.biStreamingWithSchema(Stream.fromIterator[IO](eList.iterator, 1))
           .flatMap(_.compile.toList)
       )
+      .withRetry
       .map(_.distinct)
       .assertEquals(eList)
   }
@@ -147,7 +180,7 @@ class RPCTests extends CatsEffectSuite {
           .clientStreaming(Stream.fromIterator[IO](aList.iterator, 1))
           .assertEquals(dResult33)
       )
-    } yield ()).use_.timeoutTo(opTimeout, IO.println("ERROR on multi-op fs2!"))
+    } yield ()).use_.withRetry.timeoutTo(opTimeout, IO.println("ERROR on multi-op fs2!"))
   }
 
   val behaviourOfC: String = behaviourOf + " and compression enabled"
@@ -156,6 +189,7 @@ class RPCTests extends CatsEffectSuite {
     grpcServer
       .flatMap(_ => muCompressedAvroRPCServiceClient)
       .use(_.unaryCompressed(a1))
+      .withRetry
       .assertEquals(c1)
   }
 
@@ -163,6 +197,7 @@ class RPCTests extends CatsEffectSuite {
     grpcServer
       .flatMap(_ => muCompressedAvroWithSchemaRPCServiceClient)
       .use(_.unaryCompressedWithSchema(a1))
+      .withRetry
       .assertEquals(c1)
   }
 
@@ -170,6 +205,7 @@ class RPCTests extends CatsEffectSuite {
     grpcServer
       .flatMap(_ => muCompressedProtoRPCServiceClient)
       .use(_.serverStreamingCompressed(b1).flatMap(_.compile.toList))
+      .withRetry
       .assertEquals(cList)
   }
 
@@ -177,6 +213,7 @@ class RPCTests extends CatsEffectSuite {
     grpcServer
       .flatMap(_ => muCompressedProtoRPCServiceClient)
       .use(_.clientStreamingCompressed(Stream.fromIterator[IO](aList.iterator, 1)))
+      .withRetry
       .assertEquals(dResult33)
   }
 
@@ -187,6 +224,7 @@ class RPCTests extends CatsEffectSuite {
         _.biStreamingCompressed(Stream.fromIterator[IO](eList.iterator, 1))
           .flatMap(_.compile.toList)
       )
+      .withRetry
       .map(_.distinct)
       .assertEquals(eList)
   }
@@ -200,6 +238,7 @@ class RPCTests extends CatsEffectSuite {
         _.biStreamingCompressedWithSchema(Stream.fromIterator[IO](eList.iterator, 1))
           .flatMap(_.compile.toList)
       )
+      .withRetry
       .map(_.distinct)
       .assertEquals(eList)
   }
@@ -244,7 +283,7 @@ class RPCTests extends CatsEffectSuite {
           .clientStreamingCompressed(Stream.fromIterator[IO](aList.iterator, 1))
           .assertEquals(dResult33)
       )
-    } yield ()).use_.timeout(opTimeout)
+    } yield ()).use_.withRetry.timeout(opTimeout)
   }
 
 }
