@@ -16,7 +16,7 @@
 
 package higherkindness.mu.tests.rpc
 
-import _root_.fs2._
+import fs2.Stream
 import cats.effect.{IO, Resource}
 import higherkindness.mu.rpc.ChannelForAddress
 import higherkindness.mu.rpc.protocol.{Gzip, Identity}
