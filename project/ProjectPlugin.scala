@@ -20,7 +20,7 @@ object ProjectPlugin extends AutoPlugin {
       val avro4s: String                = "4.1.0"
       val catsEffect: String            = "3.4.6"
       val dockerItScala                 = "0.9.9"
-      val dropwizard: String            = "4.2.15"
+      val dropwizard: String            = "4.2.16"
       val enumeratum: String            = "1.7.2"
       val fs2: String                   = "3.6.1"
       val fs2Grpc: String               = "2.5.10"
