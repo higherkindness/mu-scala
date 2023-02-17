@@ -17,7 +17,7 @@
 package integrationtest.protobuf
 
 import cats.effect.{IO, Resource}
-import fs2._
+import fs2.Stream
 import higherkindness.mu.rpc._
 import higherkindness.mu.rpc.protocol.Empty
 import integrationtest._
