@@ -22,6 +22,7 @@ import natchez._
 
 import java.net.URI
 import cats.effect.Ref
+import org.typelevel.ci.CIString
 
 /*
  * A minimal Natchez tracing implementation that accumulates
@@ -47,9 +48,9 @@ object Tracing {
       IO.unit // not implemented
 
     def kernel: IO[Kernel] =
-      IO.pure(Kernel(Map("span-id" -> id.toString)))
+      IO.pure(Kernel(Map(CIString("span-id") -> id.toString)))
 
-    def span(name: String): Resource[IO, Span[IO]] =
+    override def span(name: String, options: Span.Options): Resource[IO, Span[IO]] =
       Resource.make(
         for {
           spanId <- ref.modify(_.incrementNextSpanId)
@@ -63,12 +64,21 @@ object Tracing {
     override def traceUri: IO[Option[URI]] = IO.pure(None)
 
     override def spanId: IO[Option[String]] = IO.pure(Some(id.toString))
+
+    override def log(fields: (String, TraceValue)*): IO[Unit] =
+      IO.unit // not implemented
+
+    override def log(event: String): IO[Unit] =
+      IO.unit // not implemented
+
+    override def attachError(err: Throwable, fields: (String, TraceValue)*): IO[Unit] =
+      IO.unit // not implemented
   }
 
   def entrypoint(ref: Ref[IO, TracingData]): EntryPoint[IO] =
     new EntryPoint[IO] {
 
-      def root(name: String): Resource[IO, Span[IO]] =
+      override def root(name: String, options: Span.Options): Resource[IO, Span[IO]] =
         Resource.make(
           for {
             spanId <- ref.modify(_.incrementNextSpanId)
@@ -77,12 +87,16 @@ object Tracing {
           } yield span
         )(span => ref.update(_.append(s"End $span")))
 
-      def continue(name: String, kernel: Kernel): Resource[IO, Span[IO]] =
+      override def continue(
+          name: String,
+          kernel: Kernel,
+          options: Span.Options
+      ): Resource[IO, Span[IO]] =
         Resource.make(
           for {
             parentSpanId <- IO {
               kernel.toHeaders
-                .get("span-id")
+                .get(CIString("span-id"))
                 .map(_.toInt)
                 .getOrElse(throw new Exception("Required trace header not found!"))
             }
@@ -92,7 +106,11 @@ object Tracing {
           } yield span
         )(span => ref.update(_.append(s"End $span")))
 
-      def continueOrElseRoot(name: String, kernel: Kernel): Resource[IO, Span[IO]] =
+      override def continueOrElseRoot(
+          name: String,
+          kernel: Kernel,
+          options: Span.Options
+      ): Resource[IO, Span[IO]] =
         continue(name, kernel).recoverWith { case _: Exception =>
           root(name)
         }

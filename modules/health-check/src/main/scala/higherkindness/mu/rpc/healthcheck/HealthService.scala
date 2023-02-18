@@ -23,7 +23,7 @@ import _root_.fs2._
 import _root_.fs2.concurrent._
 import _root_.grpc.health.v1.health._
 import _root_.grpc.health.v1.health.HealthCheckResponse.ServingStatus
-import io.grpc.{Status, StatusException}
+import _root_.io.grpc.{Status, StatusException}
 
 trait HealthService[F[_]] extends Health[F] {
 
