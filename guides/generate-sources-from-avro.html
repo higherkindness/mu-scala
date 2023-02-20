@@ -1,0 +1,353 @@
+<!DOCTYPE html><html><head><title>Mu-Scala: Generating sources from Avro</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="47 Degrees Open Source" /><meta name="description" content="A purely functional library for building RPC endpoint-based services" /><meta name="og:image" content="/mu-scala/img/poster.png" /><meta name="image" property="og:image" content="/mu-scala/img/poster.png" /><meta name="og:title" content="Mu-Scala: Generating sources from Avro" /><meta name="title" property="og:title" content="Mu-Scala: Generating sources from Avro" /><meta name="og:site_name" content="Mu-Scala" /><meta name="og:url" content="https://github.com/higherkindness/mu-scala" /><meta name="og:type" content="website" /><meta name="og:description" content="A purely functional library for building RPC endpoint-based services" /><link rel="icon" type="image/png" href="/mu-scala/img/favicon.png" /><meta name="twitter:title" content="Mu-Scala: Generating sources from Avro" /><meta name="twitter:image" content="/mu-scala/img/poster.png" /><meta name="twitter:description" content="A purely functional library for building RPC endpoint-based services" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/mu-scala/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/mu-scala/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/mu-scala/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/mu-scala/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/mu-scala/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/mu-scala/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/mu-scala/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/mu-scala/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/mu-scala/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/mu-scala/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/mu-scala/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/mu-scala/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/mu-scala/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/mu-scala/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/mu-scala/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/mu-scala/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/mu-scala/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/mu-scala/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/mu-scala/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/mu-scala/img/favicon310x150.png" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/mu-scala/highlight/styles/github-gist.css" /><link rel="stylesheet" href="/mu-scala/css/light-style.css" /><link rel="stylesheet" href="/mu-scala/css/mu-styles.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><div id="sidebar-brand"><a href="/mu-scala/" class="brand"><div class="brand-wrapper"></div><span>Mu-Scala</span></a><button id="main-toggle" class="sidebar-toggle"><span class="close"></span></button></div><div class="sidebar-nav">           <div class="sidebar-nav-item  "><a href="/mu-scala/guides" title="How-To Guides" class="">How-To Guides</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/grpc-streaming" title="gRPC streaming" class="">gRPC streaming</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/compression" title="Compression" class="">Compression</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/metrics-reporting" title="Metrics reporting" class="">Metrics reporting</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/accessing-metadata" title="Accessing metadata on services" class="">Accessing metadata on services</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/distributed-tracing" title="Distributed tracing" class="">Distributed tracing</a></div> <div class="sidebar-nav-item  "><a href="/mu-scala/guides/ssl-tls" title="SSL/TLS" class="">SSL/TLS</a></div> <div class="sidebar-nav-item  open"><a href="/mu-scala/guides/generate-sources-from-idl" title="Generate sources from IDL" class="drop-nested">Generate sources from IDL</a><i class="fa fa-angle-right"></i><div class="sub-section"> <a href="/mu-scala/guides/generate-sources-from-avro" title="Avro" class="active">Avro</a> <a href="/mu-scala/guides/generate-sources-from-proto" title="Protocol Buffers" class="">Protocol Buffers</a></div></div>     </div></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li class="search-nav"><div id="search-dropdown"><label><i class="fa fa-search"></i>Search</label><input id="search-bar" type="text" placeholder="Enter keywords here..." onclick="displayToggleSearch(event)" /><ul id="search-dropdown-content" class="dropdown dropdown-content"></ul></div></li><li id="gh-eyes-item" class="hidden-xs to-uppercase"><a href="https://github.com/higherkindness/mu-scala" target="_blank" rel="noopener noreferrer"><i class="fa fa-eye"></i><span>Watchers<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs to-uppercase"><a href="https://github.com/higherkindness/mu-scala" target="_blank" rel="noopener noreferrer"><i class="fa fa-star-o"></i><span>Stars<span id="stars" class="label label-default">--</span></span></a></li></ul></div></div></div></div><div id="content" data-github-owner="higherkindness" data-github-repo="mu-scala"><div class="content-wrapper"><section><h1 id="generating-sources-from-avro">Generating sources from Avro</h1>
+
+<h2 id="getting-started">Getting started</h2>
+
+<p>First add the sbt plugin in <code class="highlighter-rouge">project/plugins.sbt</code>:</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">addSbtPlugin</span><span class="o">(</span><span class="s">"io.higherkindness"</span> <span class="o">%</span> <span class="s">"sbt-mu-srcgen"</span> <span class="o">%</span> <span class="s">"0.30.3"</span><span class="o">)</span>
+</code></pre></div></div>
+
+<p>And enable the plugin on the appropriate project(s):</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">enablePlugins</span><span class="o">(</span><span class="nc">SrcGenPlugin</span><span class="o">)</span>
+</code></pre></div></div>
+
+<p>Once the plugin is enabled, you can configure it by adding a few lines to
+<code class="highlighter-rouge">build.sbt</code>:</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">higherkindness.mu.rpc.srcgen.Model._</span>
+
+<span class="c1">// Look for Avro IDL files</span>
+<span class="n">muSrcGenIdlType</span> <span class="o">:=</span> <span class="nv">IdlType</span><span class="o">.</span><span class="py">Avro</span>
+</code></pre></div></div>
+
+<p>Suppose you want to generate Scala code for a gRPC service based on the
+following Avro IDL file, <code class="highlighter-rouge">src/main/resources/hello.avdl</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@namespace("foo")
+protocol AvroGreeter {
+
+    record HelloRequest {
+        string arg1;
+        union { null, string } arg2;
+        array&lt;string&gt; arg3;
+    }
+
+    record HelloResponse {
+        string arg1;
+        union { null, string } arg2;
+        array&lt;string&gt;  arg3;
+    }
+
+    foo.HelloResponse sayHelloAvro(foo.HelloRequest arg);
+}
+</code></pre></div></div>
+
+<p><strong>NOTE:</strong> please be aware that <code class="highlighter-rouge">mu-scala</code> restricts Avro RPC method arguments to
+a single record type and only permits records as return types; for more context,
+see the <a href="../reference/source-generation">source generation reference</a>.</p>
+
+<p>You can run the source generator directly:</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sbt muSrcGen
+</code></pre></div></div>
+
+<p>or as part of compilation:</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sbt compile
+</code></pre></div></div>
+
+<p>Once the source generator has run, there should be a generated Scala file at
+<code class="highlighter-rouge">target/scala-3.1.2/src_managed/main/foo/AvroGreeter.scala</code>.</p>
+
+<p>It will look like this (tidied up and simplified for readability):</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="nn">foo</span>
+
+<span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloRequest</span><span class="o">(</span>
+  <span class="n">arg1</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span>
+  <span class="n">arg2</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">],</span>
+  <span class="n">arg3</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span>
+<span class="o">)</span>
+
+<span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">HelloResponse</span><span class="o">(</span>
+  <span class="n">arg1</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span>
+  <span class="n">arg2</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">],</span>
+  <span class="n">arg3</span><span class="k">:</span> <span class="kt">Seq</span><span class="o">[</span><span class="kt">String</span><span class="o">]</span>
+<span class="o">)</span>
+
+<span class="k">trait</span> <span class="nc">AvroGreeter</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="nf">sayHelloAvro</span><span class="o">(</span><span class="n">arg</span><span class="k">:</span> <span class="kt">HelloRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">HelloResponse</span><span class="o">]</span>
+<span class="o">}</span>
+
+<span class="k">object</span> <span class="nc">AvroGreeter</span> <span class="o">{</span>
+
+  <span class="c1">// ... lots of generated code</span>
+
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>It’s also possible to generate Scala code from <code class="highlighter-rouge">.avpr</code> (JSON) files.</p>
+
+<p>Suppose you delete <code class="highlighter-rouge">src/main/resources/hello.avdl</code> and replace it with
+<code class="highlighter-rouge">src/main/resources/hello.avpr</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+  "namespace" : "foo",
+  "protocol" : "AvroGreeter",
+  "types" : [
+    {
+      "name" : "HelloRequest",
+      "type" : "record",
+      "fields" : [
+        {
+          "name" : "arg1",
+          "type" : "string"
+        },
+        {
+          "name" : "arg2",
+          "type" : [
+            "null",
+            "string"
+          ]
+        },
+        {
+          "name" : "arg3",
+          "type" : {
+            "type" : "array",
+            "items" : "string"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "HelloResponse",
+      "type" : "record",
+      "fields" : [
+        {
+          "name" : "arg1",
+          "type" : "string"
+        },
+        {
+          "name" : "arg2",
+          "type" : [
+            "null",
+            "string"
+          ]
+        },
+        {
+          "name" : "arg3",
+          "type" : {
+            "type" : "array",
+            "items" : "string"
+          }
+        }
+      ]
+    }
+  ],
+  "messages" : {
+    "sayHelloAvro" : {
+      "request" : [
+        {
+          "name" : "arg",
+          "type" : "HelloRequest"
+        }
+      ],
+      "response" : "HelloResponse"
+    }
+  }
+}
+</code></pre></div></div>
+
+<p>If you run <code class="highlighter-rouge">sbt clean muSrcGen</code>, you should end up with exactly the same
+generated Scala file as before.</p>
+
+<h2 id="avro-code-generation-details">Avro code generation details</h2>
+
+<p>This section explains the different Scala structures that are generated from
+Avro IDL.</p>
+
+<p>To achieve this generation Mu’s source generator uses
+<a href="https://github.com/julianpeeters/avrohugger">avrohugger</a> behind the scenes.</p>
+
+<h3 id="avro-protocols">Avro Protocols</h3>
+
+<p>Let’s start from the beginning, everything in Avro IDL should be declared inside
+a <code class="highlighter-rouge">protocol</code>.</p>
+
+<p>The name of that protocol will be the name of our Scala file.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>protocol People {
+ ...
+}
+</code></pre></div></div>
+
+<p><strong><em>muSrcGen =&gt;</em></strong></p>
+
+<p><code class="highlighter-rouge">People.scala</code></p>
+
+<p>Furthermore, the <code class="highlighter-rouge">protocol</code> can have a <code class="highlighter-rouge">namespace</code> which will be our Scala
+package:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@namespace("example.protocol")
+protocol People {
+ ...
+}
+</code></pre></div></div>
+
+<p><strong><em>muSrcGen =&gt;</em></strong></p>
+
+<p><code class="highlighter-rouge">example/protocol/People.scala</code></p>
+
+<h3 id="messages">Messages</h3>
+
+<p>In Avro IDL, the messages are declared with the keyword <code class="highlighter-rouge">record</code> and contain
+fields. The <code class="highlighter-rouge">record</code> will be translated to a <code class="highlighter-rouge">case class</code> with corresponding
+fields:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>record Person {
+  string name;
+  int age;
+  boolean crossfitter;
+}
+</code></pre></div></div>
+
+<p><strong><em>muSrcGen =&gt;</em></strong></p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">Person</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">age</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">crossfitter</span><span class="k">:</span> <span class="kt">Boolean</span><span class="o">)</span>
+</code></pre></div></div>
+
+<h3 id="enums">Enums</h3>
+
+<p>Avro supports <code class="highlighter-rouge">enum</code>s too and they are translated to a Scala sealed trait + case
+objects:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>enum Errors {
+  NotFound, Duplicated, None
+}
+</code></pre></div></div>
+
+<p><strong><em>muSrcGen =&gt;</em></strong></p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">sealed</span> <span class="k">trait</span> <span class="nc">Errors</span>
+
+<span class="k">object</span> <span class="nc">Errors</span> <span class="o">{</span>
+  <span class="nd">@AvroSortPriority</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span> <span class="k">case</span> <span class="k">object</span> <span class="nc">NotFound</span> <span class="k">extends</span> <span class="nc">Errors</span>
+  <span class="nd">@AvroSortPriority</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span> <span class="k">case</span> <span class="k">object</span> <span class="nc">Duplicated</span> <span class="k">extends</span> <span class="nc">Errors</span>
+  <span class="nd">@AvroSortPriority</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span> <span class="k">case</span> <span class="k">object</span> <span class="nc">None</span> <span class="k">extends</span> <span class="nc">Errors</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="unions">Unions</h3>
+
+<p><code class="highlighter-rouge">Unions</code> are a complex Avro type for fields inside <code class="highlighter-rouge">record</code>s. As its name
+suggest, it represents a type composed by another types.</p>
+
+<p>Depending on the types composing the <code class="highlighter-rouge">union</code>, <code class="highlighter-rouge">Mu</code> will interpret it on
+different ways:</p>
+
+<h3 id="optional-fields">Optional fields</h3>
+
+<p>When we add a <strong><code class="highlighter-rouge">null</code></strong> to a <code class="highlighter-rouge">union</code> expression, we’ll get a Scala <code class="highlighter-rouge">Option</code> of
+the other type declared along the <code class="highlighter-rouge">null</code>:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>record PeopleRequest {
+  union {null, string} name;
+}
+</code></pre></div></div>
+
+<p><strong><em>muSrcGen =&gt;</em></strong></p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">PeopleRequest</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span>
+</code></pre></div></div>
+
+<h3 id="eithers">Eithers</h3>
+
+<p>When we join <strong><code class="highlighter-rouge">two non-null types</code></strong> on a <code class="highlighter-rouge">union</code> we’ll get an Scala <code class="highlighter-rouge">Either</code>
+with the same types order:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>record PeopleResponse {
+  union { Errors, Person } result;
+}
+</code></pre></div></div>
+
+<p><strong><em>muSrcGen =&gt;</em></strong></p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">PeopleResponse</span><span class="o">(</span><span class="n">result</span><span class="k">:</span> <span class="kt">Either</span><span class="o">[</span><span class="kt">Errors.Value</span>, <span class="kt">Person</span><span class="o">])</span>
+</code></pre></div></div>
+
+<h3 id="scala-union-types">Scala union types</h3>
+
+<p>And finally, when we have <strong><code class="highlighter-rouge">three or more non-null types</code></strong> on a single
+<code class="highlighter-rouge">union</code>, a <code class="highlighter-rouge">TaggedUnion</code> will be used. This is a wrapper around a Scala 3 union
+type, defined by Mu.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>record PeopleResponse {
+  union{ string, int, Errors } result;
+}
+</code></pre></div></div>
+
+<p><strong><em>muSrcGen =&gt;</em></strong></p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">case</span> <span class="k">class</span> <span class="nc">PeopleResponse</span><span class="o">(</span><span class="n">result</span><span class="k">:</span> <span class="kt">TaggedUnion3</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">Int</span>, <span class="kt">Errors</span><span class="o">])</span>
+</code></pre></div></div>
+
+<h3 id="services">Services</h3>
+
+<p>When we declare a method or <code class="highlighter-rouge">endpoint</code> inside a <code class="highlighter-rouge">protocol</code> this will be
+converted to a <code class="highlighter-rouge">trait</code> to define a <strong>Mu service</strong>.</p>
+
+<p>If we want to keep our models separate from our service definitions, Avro allows
+us to import other Avro files and use their <code class="highlighter-rouge">record</code>s:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>protocol PeopleService {
+  import idl "People.avdl"; //Under the same folder
+
+  example.protocol.PeopleResponse getPerson(example.protocol.PeopleRequest request);
+}
+</code></pre></div></div>
+
+<p><strong><em>muSrcGen =&gt;</em></strong></p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="nc">PeopleService</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="nf">getPerson</span><span class="o">(</span><span class="n">request</span><span class="k">:</span> <span class="kt">example.protocol.PeopleRequest</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">example.protocol.PeopleResponse</span><span class="o">]</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Also, an endpoint can be declared without params or not returning anything. <code class="highlighter-rouge">Mu</code>
+will use its <code class="highlighter-rouge">Empty</code> type to cover these cases:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>protocol PeopleService {
+  void insertPerson();
+}
+</code></pre></div></div>
+
+<p><strong><em>muSrcGen =&gt;</em></strong></p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">trait</span> <span class="nc">PeopleService</span><span class="o">[</span><span class="kt">F</span><span class="o">[</span><span class="k">_</span><span class="o">]]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="nf">insertPerson</span><span class="o">(</span><span class="n">arg</span><span class="k">:</span> <span class="kt">Empty.</span><span class="k">type</span><span class="o">)</span><span class="k">:</span> <span class="kt">F</span><span class="o">[</span><span class="kt">Empty.</span><span class="k">type</span><span class="o">]</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>For a full understanding of the Avro syntax we recommend you to take a look to
+the <a href="http://avro.apache.org/docs/current/idl.html">Avro Official site</a> where you
+can find all the Avro supported types and some interesting resources.</p>
+</section></div></div></div></div><script src="/mu-scala/highlight/highlight.pack.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/protobuf.min.js"></script><script src="/mu-scala/lunr/lunr.js"></script><script>
+// For all code blocks, copy the language from the containing div
+// to the inner code tag (where hljs expects it to be)
+const langPrefix = 'language-';
+document.querySelectorAll(`div[class^='${langPrefix}']`).forEach(function(div) {
+  div.classList.forEach(function(cssClass) {
+    if (cssClass.startsWith(langPrefix)) {
+      const lang = cssClass.substring(langPrefix.length);
+      div.querySelectorAll('pre code').forEach(function(code) {
+        code.classList.add(lang);
+      });
+    }
+  });
+});
+
+hljs.configure({languages:['scala','java','bash','protobuf']});
+hljs.initHighlightingOnLoad();
+      </script><script>console.info('\x57\x65\x62\x73\x69\x74\x65\x20\x62\x75\x69\x6c\x74\x20\x77\x69\x74\x68\x3a\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x5f\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x5f\x20\x5f\x5f\x0a\x20\x20\x20\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x5f\x20\x20\x2f\x20\x2f\x5f\x20\x20\x20\x20\x20\x20\x5f\x5f\x5f\x5f\x20\x5f\x5f\x5f\x20\x20\x28\x5f\x29\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x28\x5f\x29\x20\x2f\x5f\x5f\x5f\x5f\x20\x20\x5f\x5f\x5f\x5f\x5f\x0a\x20\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x60\x5f\x5f\x20\x5c\x2f\x20\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x5f\x2f\x20\x5f\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x20\x2f\x20\x5f\x5f\x2f\x20\x5f\x20\x5c\x2f\x20\x5f\x5f\x5f\x2f\x0a\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x5f\x2f\x20\x2f\x20\x2f\x5f\x2f\x5f\x5f\x5f\x5f\x5f\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x20\x2f\x5f\x5f\x2f\x20\x2f\x20\x20\x2f\x20\x2f\x5f\x2f\x20\x28\x5f\x5f\x20\x20\x29\x20\x2f\x20\x2f\x5f\x2f\x20\x20\x5f\x5f\x28\x5f\x5f\x20\x20\x29\x0a\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2e\x5f\x5f\x5f\x2f\x5c\x5f\x5f\x2f\x20\x20\x20\x20\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x20\x2f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x2f\x20\x20\x20\x5c\x5f\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x5f\x2f\x5c\x5f\x5f\x2f\x5c\x5f\x5f\x5f\x2f\x5f\x5f\x5f\x5f\x2f\x0a\x0a\x68\x74\x74\x70\x73\x3a\x2f\x2f\x34\x37\x64\x65\x67\x2e\x67\x69\x74\x68\x75\x62\x2e\x69\x6f\x2f\x73\x62\x74\x2d\x6d\x69\x63\x72\x6f\x73\x69\x74\x65\x73')</script><script>((window.gitter = {}).chat = {}).options = {
+room: '47deg/mu'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/mu-scala/js/search.js"></script><script src="/mu-scala/js/docs.js"></script></body></html>
