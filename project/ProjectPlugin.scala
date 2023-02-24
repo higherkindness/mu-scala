@@ -18,7 +18,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String                = "4.1.0"
-      val catsEffect: String            = "3.4.7"
+      val catsEffect: String            = "3.4.8"
       val catsRetry: String             = "3.1.0"
       val dockerItScala                 = "0.11.0"
       val dropwizard: String            = "4.2.15"
