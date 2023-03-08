@@ -29,6 +29,8 @@ jobs:
           java-version: adopt@1.11
       - name: Cache
         uses: coursier/cache-action@v6
+        with:
+          extraSbtFiles: '["project/target/**" ]'
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
