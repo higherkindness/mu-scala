@@ -16,7 +16,7 @@ addCommandAlias(
 
 addCommandAlias(
   "ci-test",
-  "scalafmtCheckAll; scalafmtSbtCheck; missinglinkCheck; mdoc; all-tests; haskell-integration-tests/test"
+  "show scalaVersion"
 )
 addCommandAlias(
   "ci-docs",

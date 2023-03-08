@@ -1,2 +1,3 @@
 pre:
+    ci: "ls -l $GITHUB_WORKSPACE; ls -l $GITHUB_WORKSPACE/project; ls -l $GITHUB_WORKSPACE/project/target; ls -l $GITHUB_WORKSPACE/target; ls -l ~/.cache/coursier/v1; ls -l ~/.sbt"
     docs: 'gem install jekyll -v 4'
