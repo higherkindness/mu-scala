@@ -320,6 +320,7 @@ object ProjectPlugin extends AutoPlugin {
         compilerPlugin(
           "org.typelevel" % "kind-projector" % V.kindProjector cross CrossVersion.full
         )
-      ).value
+      ).value,
+      updateOptions := updateOptions.value.withCachedResolution(true)
     ) ++ macroSettings ++ missingLinkSettings
 }
