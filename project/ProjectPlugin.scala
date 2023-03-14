@@ -104,7 +104,8 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         "org.typelevel" %% "cats-effect" % V.catsEffect
       ),
-      muSrcGenIdlType := IdlType.Proto
+      muSrcGenIdlType := IdlType.Proto,
+      scalacOptions += "-Wconf:src=src_managed/.*:silent"
     )
 
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
