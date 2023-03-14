@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 47 Degrees Open Source <https://www.47deg.com>
+ * Copyright 2017-2023 47 Degrees Open Source <https://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,32 +16,54 @@
 
 package integrationtest
 
-import com.whisk.docker.DockerContainer
-import com.whisk.docker.impl.spotify.DockerKitSpotify
+import com.spotify.docker.client.messages.PortBinding
+import com.spotify.docker.client.{DefaultDockerClient, DockerClient}
+import com.whisk.docker.testkit.{
+  ContainerCommandExecutor,
+  ContainerSpec,
+  DockerContainerManager,
+  DockerTestTimeouts,
+  ManagedContainers
+}
 
-trait HaskellServerRunningInDocker extends DockerKitSpotify { self: munit.FunSuite =>
+import java.util.concurrent.ForkJoinPool
+import scala.concurrent.ExecutionContext
+
+trait HaskellServerRunningInDocker { self: munit.FunSuite =>
 
   def serverPort: Int
   def serverExecutableName: String
 
-  override def dockerContainers: List[DockerContainer] =
-    List(
-      DockerContainer(Constants.ImageName)
-        .withPorts(serverPort -> Some(serverPort))
-        .withCommand(s"/opt/mu-haskell-client-server/$serverExecutableName")
-    )
+  val dockerClient: DockerClient = DefaultDockerClient.fromEnv().build()
 
-  override def startAllOrFail(): Unit = {
+  val dockerExecutionContext: ExecutionContext = ExecutionContext.fromExecutor(new ForkJoinPool())
+
+  val managedContainers: ManagedContainers = ContainerSpec(Constants.ImageName)
+    .withPortBindings(serverPort -> PortBinding.of("0.0.0.0", serverPort))
+    .withCommand(s"/opt/mu-haskell-client-server/$serverExecutableName")
+    .toContainer
+    .toManagedContainer
+
+  val dockerTestTimeouts: DockerTestTimeouts = DockerTestTimeouts.Default
+
+  implicit lazy val dockerExecutor: ContainerCommandExecutor =
+    new ContainerCommandExecutor(dockerClient)
+
+  lazy val containerManager = new DockerContainerManager(
+    managedContainers,
+    dockerExecutor,
+    dockerTestTimeouts,
+    dockerExecutionContext
+  )
+
+  override def beforeAll(): Unit = {
     println("Starting Mu-Haskell server in Docker container...")
-    super.startAllOrFail()
+    containerManager.start()
     println("Started Docker container.")
     Thread.sleep(2000) // give the Haskell server a chance to start up properly
   }
 
-  override def beforeAll(): Unit =
-    startAllOrFail()
-
   override def afterAll(): Unit =
-    stopAllQuietly()
+    containerManager.stop()
 
 }

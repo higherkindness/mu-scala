@@ -18,32 +18,33 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val V = new {
       val avro4s: String                = "4.1.0"
-      val catsEffect: String            = "3.4.0"
-      val dockerItScala                 = "0.9.9"
-      val dropwizard: String            = "4.2.12"
-      val enumeratum: String            = "1.7.0"
-      val fs2: String                   = "3.3.0"
-      val fs2Grpc: String               = "2.4.12"
-      val grpc: String                  = "1.50.2"
+      val catsEffect: String            = "3.4.8"
+      val catsRetry: String             = "3.1.0"
+      val dockerItScala                 = "0.11.0"
+      val dropwizard: String            = "4.2.17"
+      val enumeratum: String            = "1.7.2"
+      val fs2: String                   = "3.6.1"
+      val fs2Grpc: String               = "2.5.11"
+      val grpc: String                  = "1.53.0"
       val kindProjector: String         = "0.13.2"
       val log4cats: String              = "2.5.0"
       val log4s: String                 = "1.10.0"
-      val logback: String               = "1.4.4"
+      val logback: String               = "1.4.5"
       val munit: String                 = "0.7.29"
       val munitCE: String               = "1.0.7"
-      val natchez: String               = "0.1.6"
-      val nettySSL: String              = "2.0.53.Final"
+      val natchez: String               = "0.3.1"
+      val nettySSL: String              = "2.0.54.Final"
       val paradise: String              = "2.1.1"
       val pbdirect: String              = "0.7.0"
       val prometheus: String            = "0.16.0"
       val pureconfig: String            = "0.17.2"
-      val scalaCollectionCompat: String = "2.8.1"
-      val scalacheckToolbox: String     = "0.6.0"
+      val scalaCollectionCompat: String = "2.9.0"
+      val scalacheckToolbox: String     = "0.7.0"
       val scalamock: String             = "5.1.0"
-      val scalapb: String               = "0.11.12"
+      val scalapb: String               = "0.11.13"
       val scalatest: String             = "3.2.12"
       val scalatestplusScheck: String   = "3.2.2.0"
-      val slf4j: String                 = "2.0.3"
+      val slf4j: String                 = "2.0.6"
     }
 
     lazy val rpcServiceSettings: Seq[Def.Setting[_]] = Seq(
@@ -103,8 +104,7 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         "org.typelevel" %% "cats-effect" % V.catsEffect
       ),
-      muSrcGenIdlType := IdlType.Proto,
-      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings"))
+      muSrcGenIdlType := IdlType.Proto
     )
 
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
@@ -227,14 +227,13 @@ object ProjectPlugin extends AutoPlugin {
         "org.scalameta"          %% "munit-scalacheck"        % V.munit                 % Test,
         "org.typelevel"          %% "munit-cats-effect-3"     % V.munitCE               % Test,
         "org.typelevel"          %% "cats-effect-testkit"     % V.catsEffect            % Test,
-        "ch.qos.logback"          % "logback-classic"         % V.logback               % Test
-      ),
-      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings"))
+        "ch.qos.logback"          % "logback-classic"         % V.logback               % Test,
+        "com.github.cb372"       %% "cats-retry"              % V.catsRetry             % Test
+      )
     )
 
     lazy val protobufSrcGenSettings = Seq(
-      muSrcGenIdlType := IdlType.Proto,
-      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings"))
+      muSrcGenIdlType := IdlType.Proto
     )
 
     lazy val protobufRPCTestSettings = testSettings ++ protobufSrcGenSettings
@@ -251,8 +250,7 @@ object ProjectPlugin extends AutoPlugin {
             ScalacOptions.warnUnusedImports
           )
         )
-      },
-      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings"))
+      }
     )
 
     lazy val avroRPCTestSettings = testSettings ++ avroSrcGenSettings
@@ -261,10 +259,10 @@ object ProjectPlugin extends AutoPlugin {
       publishArtifact          := false,
       Test / parallelExecution := false,
       libraryDependencies ++= Seq(
-        "co.fs2"        %% "fs2-core"                    % V.fs2,
-        "org.scalameta" %% "munit"                       % V.munit         % Test,
-        "org.typelevel" %% "munit-cats-effect-3"         % V.munitCE       % Test,
-        "com.whisk"     %% "docker-testkit-impl-spotify" % V.dockerItScala % Test
+        "co.fs2"        %% "fs2-core"            % V.fs2,
+        "org.scalameta" %% "munit"               % V.munit         % Test,
+        "org.typelevel" %% "munit-cats-effect-3" % V.munitCE       % Test,
+        "com.whisk"     %% "docker-testkit-core" % V.dockerItScala % Test
       )
     )
 

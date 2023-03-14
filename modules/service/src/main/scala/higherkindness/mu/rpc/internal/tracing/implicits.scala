@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 47 Degrees Open Source <https://www.47deg.com>
+ * Copyright 2017-2023 47 Degrees Open Source <https://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import higherkindness.mu.rpc.internal.context.{ClientContext, ClientContextMetaD
 import io.grpc.Metadata.{ASCII_STRING_MARSHALLER, BINARY_HEADER_SUFFIX, Key}
 import io.grpc.{CallOptions, Channel, Metadata, MethodDescriptor}
 import natchez.{EntryPoint, Kernel, Span}
+import org.typelevel.ci.CIString
 
 import scala.jdk.CollectionConverters._
 
@@ -55,7 +56,7 @@ object implicits {
   def tracingKernelToHeaders(kernel: Kernel): Metadata = {
     val headers = new Metadata()
     kernel.toHeaders.foreach { case (k, v) =>
-      headers.put(Key.of(k, ASCII_STRING_MARSHALLER), v)
+      headers.put(Key.of(k.toString, ASCII_STRING_MARSHALLER), v)
     }
     headers
   }
@@ -66,7 +67,7 @@ object implicits {
       .asScala
       .collect {
         case k if !k.endsWith(BINARY_HEADER_SUFFIX) =>
-          k -> headers.get(Key.of(k, ASCII_STRING_MARSHALLER))
+          CIString(k) -> headers.get(Key.of(k, ASCII_STRING_MARSHALLER))
       }
       .toMap
     Kernel(asciiHeaders)

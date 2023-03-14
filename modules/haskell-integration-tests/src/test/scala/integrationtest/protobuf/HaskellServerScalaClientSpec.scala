@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 47 Degrees Open Source <https://www.47deg.com>
+ * Copyright 2017-2023 47 Degrees Open Source <https://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package integrationtest.protobuf
 
 import cats.effect.{IO, Resource}
-import fs2._
+import fs2.Stream
 import higherkindness.mu.rpc._
 import higherkindness.mu.rpc.protocol.Empty
 import integrationtest._

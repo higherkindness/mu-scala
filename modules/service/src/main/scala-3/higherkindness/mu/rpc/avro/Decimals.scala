@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 47 Degrees Open Source <https://www.47deg.com>
+ * Copyright 2017-2023 47 Degrees Open Source <https://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ object Decimals:
       }
 
     given [P <: Int, S <: Int](using p: ValueOf[P], s: ValueOf[S]): SchemaFor[TaggedDecimal[P, S]]
-      with
+    with
       def schema: Schema =
         val sp = ScalePrecision(s.value, p.value)
         new BigDecimalSchemaFor(sp).schema
