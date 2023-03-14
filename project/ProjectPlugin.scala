@@ -234,7 +234,8 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val protobufSrcGenSettings = Seq(
-      muSrcGenIdlType := IdlType.Proto
+      muSrcGenIdlType := IdlType.Proto,
+      scalacOptions += "-Wconf:src=src_managed/.*:silent"
     )
 
     lazy val protobufRPCTestSettings = testSettings ++ protobufSrcGenSettings
@@ -251,7 +252,8 @@ object ProjectPlugin extends AutoPlugin {
             ScalacOptions.warnUnusedImports
           )
         )
-      }
+      },
+      scalacOptions += "-Wconf:src=src_managed/.*:silent"
     )
 
     lazy val avroRPCTestSettings = testSettings ++ avroSrcGenSettings
