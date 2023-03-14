@@ -121,8 +121,8 @@ object Utils extends CommonUtils {
 
         def biStreaming(oe: Stream[F, E]): F[Stream[F, E]] =
           oe.flatMap { e: E =>
-            save(e)
-            Stream.fromIterator(eList.iterator, 1)
+            Stream.emit(save(e)) >>
+              Stream.fromIterator(eList.iterator, 1)
           }.pure[F]
 
         def biStreamingWithSchema(oe: Stream[F, E]): F[Stream[F, E]] = biStreaming(oe)
