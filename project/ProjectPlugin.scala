@@ -23,7 +23,7 @@ object ProjectPlugin extends AutoPlugin {
       val dockerItScala                 = "0.11.0"
       val dropwizard: String            = "4.2.19"
       val enumeratum: String            = "1.7.3"
-      val fs2: String                   = "3.8.0"
+      val fs2: String                   = "3.9.1"
       val fs2Grpc: String               = "2.7.5"
       val grpc: String                  = "1.57.2"
       val kindProjector: String         = "0.13.2"
@@ -64,7 +64,7 @@ object ProjectPlugin extends AutoPlugin {
         "com.beachape"        %% "enumeratum"  % V.enumeratum
       ).value,
       libraryDependencies ++= scalaVersionSpecificDeps(3)(
-        "com.sksamuel.avro4s" %% "avro4s-core" % "5.0.4"
+        "com.sksamuel.avro4s" %% "avro4s-core" % "5.0.5"
       ).value,
       scalacOptions --= on(2, 13)("-Wunused:patvars").value
     )
