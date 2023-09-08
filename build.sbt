@@ -1,5 +1,5 @@
 val scala213 = "2.13.11"
-val scala3   = "3.3.0"
+val scala3   = "3.3.1"
 
 ThisBuild / organization       := "io.higherkindness"
 ThisBuild / githubOrganization := "47degrees"
