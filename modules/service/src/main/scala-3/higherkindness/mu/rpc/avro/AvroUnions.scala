@@ -18,7 +18,6 @@ package higherkindness.mu.rpc.avro
 
 import com.sksamuel.avro4s._
 import org.apache.avro._
-import org.apache.avro.generic.GenericContainer
 import scala.reflect.Typeable
 
 final case class AvroUnion2[T1, T2](value: T1 | T2)

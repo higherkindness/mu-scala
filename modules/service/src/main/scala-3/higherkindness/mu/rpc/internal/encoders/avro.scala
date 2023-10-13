@@ -19,11 +19,8 @@ package internal.encoders
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream}
 
-import com.google.common.io.ByteStreams
 import higherkindness.mu.rpc.protocol.Empty
 import io.grpc.MethodDescriptor.Marshaller
-
-import scala.math.BigDecimal.RoundingMode
 
 object avro {
 
