@@ -3,6 +3,7 @@ ThisBuild / libraryDependencySchemes ++= Seq(
   "com.lihaoyi"            %% "geny"               % VersionScheme.Always,
   "org.scala-lang.modules" %% "scala-java8-compat" % VersionScheme.Always
 )
+resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 addSbtPlugin("com.eed3si9n"              % "sbt-projectmatrix"        % "0.9.1")
 addSbtPlugin("pl.project13.scala"        % "sbt-jmh"                  % "0.4.6")
 addSbtPlugin("com.github.sbt"            % "sbt-ci-release"           % "1.5.12")
@@ -16,4 +17,4 @@ addSbtPlugin("com.alejandrohdezma"       % "sbt-github-mdoc"          % "0.11.11
 addSbtPlugin("com.alejandrohdezma"       % "sbt-remove-test-from-pom" % "0.1.0")
 addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat"             % "0.4.2")
 addSbtPlugin("ch.epfl.scala"             % "sbt-missinglink"          % "0.3.6")
-addSbtPlugin("io.higherkindness"         % "sbt-mu-srcgen"            % "0.31.0")
+addSbtPlugin("io.higherkindness" % "sbt-mu-srcgen" % "0.31.0+6-a95d5c35-SNAPSHOT")
