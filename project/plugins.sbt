@@ -1,6 +1,7 @@
 ThisBuild / libraryDependencySchemes ++= Seq(
-  "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always,
-  "com.lihaoyi"            %% "geny"      % VersionScheme.Always
+  "org.scala-lang.modules" %% "scala-xml"          % VersionScheme.Always,
+  "com.lihaoyi"            %% "geny"               % VersionScheme.Always,
+  "org.scala-lang.modules" %% "scala-java8-compat" % VersionScheme.Always
 )
 addSbtPlugin("com.eed3si9n"              % "sbt-projectmatrix"        % "0.9.1")
 addSbtPlugin("pl.project13.scala"        % "sbt-jmh"                  % "0.4.6")
