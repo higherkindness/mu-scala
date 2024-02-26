@@ -97,7 +97,7 @@ class ProtobufRPCTest extends CatsEffectSuite {
             clientProgram("RTE", s)
               .assertEquals(List(C("INTERNAL: RTE", Some(a)))) *>
             clientProgram("Thrown", s)
-              .assertEquals(List(C("UNKNOWN", Some(a))))
+              .assertEquals(List(C("UNKNOWN: Application error processing RPC", Some(a))))
         }
     }
 
