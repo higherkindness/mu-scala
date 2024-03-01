@@ -22,7 +22,7 @@ import java.util.UUID
 import cats.effect.{Resource, Sync}
 import cats.syntax.all._
 import io.grpc.inprocess.{InProcessChannelBuilder, InProcessServerBuilder}
-import io.grpc.internal.NoopServerCall.NoopServerCallListener
+import io.grpc.NoopServerCall.NoopServerCallListener
 import io.grpc.util.MutableHandlerRegistry
 import io.grpc._
 
