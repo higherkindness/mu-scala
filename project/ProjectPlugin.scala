@@ -84,7 +84,8 @@ object ProjectPlugin extends AutoPlugin {
     lazy val clientNettySettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.grpc" % "grpc-netty" % V.grpc
-      )
+      ),
+      scalacOptions --= on(3, 4)("-Xfatal-warnings").value
     )
 
     lazy val clientOkHttpSettings: Seq[Def.Setting[_]] = Seq(
@@ -106,13 +107,15 @@ object ProjectPlugin extends AutoPlugin {
         "org.typelevel" %% "cats-effect" % V.catsEffect
       ),
       muSrcGenIdlType := IdlType.Proto,
-      scalacOptions += "-Wconf:src=src_managed/.*:silent"
+      scalacOptions += "-Wconf:src=src_managed/.*:silent",
+      scalacOptions --= on(3, 4)("-Xfatal-warnings").value
     )
 
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.grpc" % "grpc-netty" % V.grpc
-      )
+      ),
+      scalacOptions --= on(3, 4)("-Xfatal-warnings").value
     )
 
     lazy val configSettings: Seq[Def.Setting[_]] = Seq(
@@ -128,7 +131,8 @@ object ProjectPlugin extends AutoPlugin {
     lazy val prometheusMetricsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.prometheus" % "simpleclient" % V.prometheus
-      )
+      ),
+      scalacOptions --= on(3, 4)("-Xfatal-warnings").value
     )
 
     lazy val dropwizardMetricsSettings: Seq[Def.Setting[_]] = Seq(
@@ -236,7 +240,8 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val protobufSrcGenSettings = Seq(
       muSrcGenIdlType := IdlType.Proto,
-      scalacOptions += "-Wconf:src=src_managed/.*:silent"
+      scalacOptions += "-Wconf:src=src_managed/.*:silent",
+      scalacOptions --= on(3, 4)("-Xfatal-warnings").value
     )
 
     lazy val protobufRPCTestSettings = testSettings ++ protobufSrcGenSettings
