@@ -203,7 +203,6 @@ lazy val `haskell-integration-tests` = projectMatrix
   .dependsOn(server, `client-netty`, fs2)
   .settings(publish / skip := true)
   .settings(haskellIntegrationTestSettings)
-  .settings(scalacOptions -= "-Xfatal-warnings")
   .jvmPlatform(scalaVersions = Seq(scala213))
 
 //////////////////////////

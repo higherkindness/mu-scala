@@ -66,7 +66,8 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= scalaVersionSpecificDeps(3)(
         "com.sksamuel.avro4s" %% "avro4s-core" % "5.0.9"
       ).value,
-      scalacOptions --= on(2, 13)("-Wunused:patvars").value
+      scalacOptions --= on(2, 13)("-Wunused:patvars").value,
+      scalacOptions --= on(3, 4)("-Xfatal-warnings").value
     )
 
     lazy val macroSettings: Seq[Setting[_]] = Seq(
@@ -261,6 +262,7 @@ object ProjectPlugin extends AutoPlugin {
     lazy val haskellIntegrationTestSettings = Seq(
       publishArtifact          := false,
       Test / parallelExecution := false,
+      scalacOptions -= "-Xfatal-warnings",
       libraryDependencies ++= Seq(
         "co.fs2"        %% "fs2-core"            % V.fs2,
         "org.scalameta" %% "munit"               % V.munit         % Test,
