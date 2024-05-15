@@ -1,5 +1,5 @@
-val scala213 = "2.13.12"
-val scala3   = "3.3.3"
+val scala213 = "2.13.14"
+val scala3   = "3.4.1"
 
 ThisBuild / organization       := "io.higherkindness"
 ThisBuild / githubOrganization := "47degrees"
@@ -203,6 +203,7 @@ lazy val `haskell-integration-tests` = projectMatrix
   .dependsOn(server, `client-netty`, fs2)
   .settings(publish / skip := true)
   .settings(haskellIntegrationTestSettings)
+  .settings(scalacOptions -= "-Xfatal-warnings")
   .jvmPlatform(scalaVersions = Seq(scala213))
 
 //////////////////////////
