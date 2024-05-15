@@ -214,6 +214,7 @@ object ProjectPlugin extends AutoPlugin {
       publishArtifact          := false,
       Test / parallelExecution := false,
       testFrameworks += new TestFramework("munit.Framework"),
+      scalacOptions -= "-Xfatal-warnings",
       libraryDependencies ++= Seq(
         "io.grpc"        % "grpc-core"        % V.grpc,
         "org.scalameta" %% "munit-scalacheck" % V.munit,
@@ -224,6 +225,7 @@ object ProjectPlugin extends AutoPlugin {
       publishArtifact          := false,
       Test / parallelExecution := false,
       testFrameworks += new TestFramework("munit.Framework"),
+      scalacOptions -= "-Xfatal-warnings",
       libraryDependencies ++= Seq(
         "io.grpc"    % "grpc-netty"                      % V.grpc              % Test,
         "io.netty"   % "netty-tcnative-boringssl-static" % V.nettySSL          % Test,
