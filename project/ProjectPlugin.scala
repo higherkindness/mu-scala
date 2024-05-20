@@ -64,7 +64,7 @@ object ProjectPlugin extends AutoPlugin {
         "com.beachape"        %% "enumeratum"  % V.enumeratum
       ).value,
       libraryDependencies ++= scalaVersionSpecificDeps(3)(
-        "com.sksamuel.avro4s" %% "avro4s-core" % "5.0.10"
+        "com.sksamuel.avro4s" %% "avro4s-core" % "5.0.11"
       ).value,
       scalacOptions --= on(2, 13)("-Wunused:patvars").value,
       scalacOptions --= on(3, 4)("-Xfatal-warnings").value
