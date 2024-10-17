@@ -21,11 +21,11 @@ object ProjectPlugin extends AutoPlugin {
       val catsEffect: String            = "3.5.4"
       val catsRetry: String             = "3.1.3"
       val dockerItScala                 = "0.12.0"
-      val dropwizard: String            = "4.2.25"
+      val dropwizard: String            = "4.2.26"
       val enumeratum: String            = "1.7.3"
       val fs2: String                   = "3.10.2"
-      val fs2Grpc: String               = "2.7.14"
-      val grpc: String                  = "1.63.0"
+      val fs2Grpc: String               = "2.7.16"
+      val grpc: String                  = "1.64.0"
       val kindProjector: String         = "0.13.3"
       val log4cats: String              = "2.7.0"
       val log4s: String                 = "1.10.0"
@@ -37,11 +37,11 @@ object ProjectPlugin extends AutoPlugin {
       val paradise: String              = "2.1.1"
       val pbdirect: String              = "0.7.0"
       val prometheus: String            = "0.16.0"
-      val pureconfig: String            = "0.17.6"
+      val pureconfig: String            = "0.17.7"
       val scalaCollectionCompat: String = "2.12.0"
       val scalacheckToolbox: String     = "0.7.0"
       val scalamock: String             = "5.1.0"
-      val scalapb: String               = "0.11.15"
+      val scalapb: String               = "0.11.17"
       val scalatest: String             = "3.2.12"
       val scalatestplusScheck: String   = "3.2.2.0"
       val slf4j: String                 = "2.0.13"
@@ -64,7 +64,7 @@ object ProjectPlugin extends AutoPlugin {
         "com.beachape"        %% "enumeratum"  % V.enumeratum
       ).value,
       libraryDependencies ++= scalaVersionSpecificDeps(3)(
-        "com.sksamuel.avro4s" %% "avro4s-core" % "5.0.11"
+        "com.sksamuel.avro4s" %% "avro4s-core" % "5.0.13"
       ).value,
       scalacOptions --= on(2, 13)("-Wunused:patvars").value,
       scalacOptions --= on(3, 4)("-Xfatal-warnings").value
