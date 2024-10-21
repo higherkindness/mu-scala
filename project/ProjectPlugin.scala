@@ -31,6 +31,7 @@ object ProjectPlugin extends AutoPlugin {
       val log4s: String                 = "1.10.0"
       val logback: String               = "1.5.11"
       val munit: String                 = "1.0.2"
+      val munitSC: String               = "1.0.0"
       val munitCE: String               = "1.0.7"
       val natchez: String               = "0.3.7"
       val nettySSL: String              = "2.0.61.Final"
@@ -122,7 +123,7 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         "com.github.pureconfig" %% "pureconfig"          % V.pureconfig,
         "org.scalameta"         %% "munit"               % V.munit      % Test,
-        "org.scalameta"         %% "munit-scalacheck"    % V.munit      % Test,
+        "org.scalameta"         %% "munit-scalacheck"    % V.munitSC    % Test,
         "org.typelevel"         %% "munit-cats-effect-3" % V.munitCE    % Test,
         "org.typelevel"         %% "cats-effect-testkit" % V.catsEffect % Test
       )
@@ -198,7 +199,7 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "org.scalameta"        %% "munit-scalacheck"    % V.munit,
+        "org.scalameta"        %% "munit-scalacheck"    % V.munitSC,
         "org.typelevel"        %% "munit-cats-effect-3" % V.munitCE,
         "io.dropwizard.metrics" % "metrics-jmx"         % V.dropwizard,
         "org.tpolecat"         %% "natchez-jaeger"      % V.natchez
@@ -217,7 +218,7 @@ object ProjectPlugin extends AutoPlugin {
       scalacOptions -= "-Xfatal-warnings",
       libraryDependencies ++= Seq(
         "io.grpc"        % "grpc-core"        % V.grpc,
-        "org.scalameta" %% "munit-scalacheck" % V.munit,
+        "org.scalameta" %% "munit-scalacheck" % V.munitSC,
         "org.typelevel" %% "cats-effect"      % V.catsEffect
       )
     )
@@ -232,7 +233,7 @@ object ProjectPlugin extends AutoPlugin {
         "com.47deg" %% "scalacheck-toolbox-datetime"     % V.scalacheckToolbox % Test,
         "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat % Test,
         "org.scalameta"          %% "munit"                   % V.munit                 % Test,
-        "org.scalameta"          %% "munit-scalacheck"        % V.munit                 % Test,
+        "org.scalameta"          %% "munit-scalacheck"        % V.munitSC               % Test,
         "org.typelevel"          %% "munit-cats-effect-3"     % V.munitCE               % Test,
         "org.typelevel"          %% "cats-effect-testkit"     % V.catsEffect            % Test,
         "ch.qos.logback"          % "logback-classic"         % V.logback               % Test,
