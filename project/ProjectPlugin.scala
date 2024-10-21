@@ -266,18 +266,6 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val avroRPCTestSettings = testSettings ++ avroSrcGenSettings
 
-    lazy val haskellIntegrationTestSettings = Seq(
-      publishArtifact          := false,
-      Test / parallelExecution := false,
-      scalacOptions -= "-Xfatal-warnings",
-      libraryDependencies ++= Seq(
-        "co.fs2"        %% "fs2-core"            % V.fs2,
-        "org.scalameta" %% "munit"               % V.munit         % Test,
-        "org.typelevel" %% "munit-cats-effect-3" % V.munitCE       % Test,
-        "com.whisk"     %% "docker-testkit-core" % V.dockerItScala % Test
-      )
-    )
-
     def on[A](major: Int, minor: Int)(a: A): Def.Initialize[Seq[A]] =
       Def.setting {
         CrossVersion.partialVersion(scalaVersion.value) match {
