@@ -10,6 +10,8 @@ import higherkindness.mu.rpc.srcgen.SrcGenPlugin.autoImport._
 import _root_.io.github.davidgregory084.ScalacOptions
 import _root_.io.github.davidgregory084.TpolecatPlugin.autoImport._
 
+import scala.language.reflectiveCalls
+
 object ProjectPlugin extends AutoPlugin {
 
   override def trigger: PluginTrigger = allRequirements
@@ -21,18 +23,19 @@ object ProjectPlugin extends AutoPlugin {
       val catsEffect: String            = "3.5.4"
       val catsRetry: String             = "3.1.3"
       val dockerItScala                 = "0.12.0"
-      val dropwizard: String            = "4.2.26"
-      val enumeratum: String            = "1.7.4"
+      val dropwizard: String            = "4.2.28"
+      val enumeratum: String            = "1.7.5"
       val fs2: String                   = "3.10.2"
-      val fs2Grpc: String               = "2.7.16"
+      val fs2Grpc: String               = "2.7.20"
       val grpc: String                  = "1.65.0"
       val kindProjector: String         = "0.13.3"
       val log4cats: String              = "2.7.0"
       val log4s: String                 = "1.10.0"
-      val logback: String               = "1.5.6"
-      val munit: String                 = "0.7.29"
-      val munitCE: String               = "1.0.7"
-      val natchez: String               = "0.3.5"
+      val logback: String               = "1.5.11"
+      val munit: String                 = "1.0.2"
+      val munitSC: String               = "1.0.0"
+      val munitCE: String               = "2.0.0"
+      val natchez: String               = "0.3.7"
       val nettySSL: String              = "2.0.61.Final"
       val paradise: String              = "2.1.1"
       val pbdirect: String              = "0.7.0"
@@ -44,7 +47,7 @@ object ProjectPlugin extends AutoPlugin {
       val scalapb: String               = "0.11.17"
       val scalatest: String             = "3.2.12"
       val scalatestplusScheck: String   = "3.2.2.0"
-      val slf4j: String                 = "2.0.13"
+      val slf4j: String                 = "2.0.16"
     }
 
     lazy val rpcServiceSettings: Seq[Def.Setting[_]] = Seq(
@@ -122,8 +125,8 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         "com.github.pureconfig" %% "pureconfig"          % V.pureconfig,
         "org.scalameta"         %% "munit"               % V.munit      % Test,
-        "org.scalameta"         %% "munit-scalacheck"    % V.munit      % Test,
-        "org.typelevel"         %% "munit-cats-effect-3" % V.munitCE    % Test,
+        "org.scalameta"         %% "munit-scalacheck"    % V.munitSC    % Test,
+        "org.typelevel"         %% "munit-cats-effect"   % V.munitCE    % Test,
         "org.typelevel"         %% "cats-effect-testkit" % V.catsEffect % Test
       )
     )
@@ -198,10 +201,10 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "org.scalameta"        %% "munit-scalacheck"    % V.munit,
-        "org.typelevel"        %% "munit-cats-effect-3" % V.munitCE,
-        "io.dropwizard.metrics" % "metrics-jmx"         % V.dropwizard,
-        "org.tpolecat"         %% "natchez-jaeger"      % V.natchez
+        "org.scalameta"        %% "munit-scalacheck"  % V.munitSC,
+        "org.typelevel"        %% "munit-cats-effect" % V.munitCE,
+        "io.dropwizard.metrics" % "metrics-jmx"       % V.dropwizard,
+        "org.tpolecat"         %% "natchez-jaeger"    % V.natchez
       ),
       scalacOptions ~= (_ filterNot Set(
         "-Xfatal-warnings",
@@ -217,7 +220,7 @@ object ProjectPlugin extends AutoPlugin {
       scalacOptions -= "-Xfatal-warnings",
       libraryDependencies ++= Seq(
         "io.grpc"        % "grpc-core"        % V.grpc,
-        "org.scalameta" %% "munit-scalacheck" % V.munit,
+        "org.scalameta" %% "munit-scalacheck" % V.munitSC,
         "org.typelevel" %% "cats-effect"      % V.catsEffect
       )
     )
@@ -232,8 +235,8 @@ object ProjectPlugin extends AutoPlugin {
         "com.47deg" %% "scalacheck-toolbox-datetime"     % V.scalacheckToolbox % Test,
         "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat % Test,
         "org.scalameta"          %% "munit"                   % V.munit                 % Test,
-        "org.scalameta"          %% "munit-scalacheck"        % V.munit                 % Test,
-        "org.typelevel"          %% "munit-cats-effect-3"     % V.munitCE               % Test,
+        "org.scalameta"          %% "munit-scalacheck"        % V.munitSC               % Test,
+        "org.typelevel"          %% "munit-cats-effect"       % V.munitCE               % Test,
         "org.typelevel"          %% "cats-effect-testkit"     % V.catsEffect            % Test,
         "ch.qos.logback"          % "logback-classic"         % V.logback               % Test,
         "com.github.cb372"       %% "cats-retry"              % V.catsRetry             % Test
@@ -310,7 +313,7 @@ object ProjectPlugin extends AutoPlugin {
       missinglinkIgnoreSourcePackages += IgnoredPackage("io.netty.handler.ssl")
     )
 
-  import autoImport._
+  import autoImport.*
 
   override def projectSettings: Seq[Def.Setting[_]] =
     Seq(
