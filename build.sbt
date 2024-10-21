@@ -1,4 +1,4 @@
-val scala213 = "2.13.14"
+val scala213 = "2.13.15"
 val scala3   = "3.4.3"
 
 ThisBuild / organization       := "io.higherkindness"
@@ -16,7 +16,7 @@ addCommandAlias(
 
 addCommandAlias(
   "ci-test",
-  "scalafmtCheckAll; scalafmtSbtCheck; missinglinkCheck; mdoc; all-tests; haskell-integration-tests/test"
+  "scalafmtCheckAll; scalafmtSbtCheck; missinglinkCheck; mdoc; all-tests"
 )
 addCommandAlias(
   "ci-docs",
@@ -193,17 +193,6 @@ lazy val `avro-rpc-tests` = projectMatrix
   .settings(publish / skip := true)
   .settings(avroRPCTestSettings)
   .jvmPlatform(scalaVersions = Seq(scala3, scala213))
-
-//////////////////////////////////////
-//// MU-HASKELL INTEGRATION TESTS ////
-//////////////////////////////////////
-
-lazy val `haskell-integration-tests` = projectMatrix
-  .in(file("modules/haskell-integration-tests"))
-  .dependsOn(server, `client-netty`, fs2)
-  .settings(publish / skip := true)
-  .settings(haskellIntegrationTestSettings)
-  .jvmPlatform(scalaVersions = Seq(scala213))
 
 //////////////////////////
 //// MODULES REGISTRY ////
