@@ -153,6 +153,7 @@ does not depend on the incoming request.
 
 ```scala mdoc:silent
 import munit.ScalaCheckSuite
+import munit.catseffect.IOFixture
 import org.scalacheck.Gen
 import org.scalacheck.Prop.*
 
@@ -162,7 +163,7 @@ class PropertyBasedServiceSpec extends CatsEffectSuite with ScalaCheckSuite with
 
   val client = ResourceSuiteLocalFixture("client", clientResource)
 
-  override def munitFixtures: Seq[Fixture[_]] = List(client)
+  override def munitFixtures: Seq[IOFixture[_]] = List(client)
 
   property("server is always happy") {
     val c = client()
