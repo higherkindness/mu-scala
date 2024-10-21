@@ -21,18 +21,18 @@ object ProjectPlugin extends AutoPlugin {
       val catsEffect: String            = "3.5.4"
       val catsRetry: String             = "3.1.3"
       val dockerItScala                 = "0.12.0"
-      val dropwizard: String            = "4.2.26"
-      val enumeratum: String            = "1.7.3"
+      val dropwizard: String            = "4.2.28"
+      val enumeratum: String            = "1.7.5"
       val fs2: String                   = "3.10.2"
-      val fs2Grpc: String               = "2.7.16"
-      val grpc: String                  = "1.64.0"
+      val fs2Grpc: String               = "2.7.20"
+      val grpc: String                  = "1.65.0"
       val kindProjector: String         = "0.13.3"
       val log4cats: String              = "2.7.0"
       val log4s: String                 = "1.10.0"
-      val logback: String               = "1.5.6"
+      val logback: String               = "1.5.11"
       val munit: String                 = "1.0.2"
       val munitCE: String               = "1.0.7"
-      val natchez: String               = "0.3.5"
+      val natchez: String               = "0.3.7"
       val nettySSL: String              = "2.0.61.Final"
       val paradise: String              = "2.1.1"
       val pbdirect: String              = "0.7.0"
@@ -44,7 +44,7 @@ object ProjectPlugin extends AutoPlugin {
       val scalapb: String               = "0.11.17"
       val scalatest: String             = "3.2.12"
       val scalatestplusScheck: String   = "3.2.2.0"
-      val slf4j: String                 = "2.0.13"
+      val slf4j: String                 = "2.0.16"
     }
 
     lazy val rpcServiceSettings: Seq[Def.Setting[_]] = Seq(
@@ -265,18 +265,6 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val avroRPCTestSettings = testSettings ++ avroSrcGenSettings
-
-    lazy val haskellIntegrationTestSettings = Seq(
-      publishArtifact          := false,
-      Test / parallelExecution := false,
-      scalacOptions -= "-Xfatal-warnings",
-      libraryDependencies ++= Seq(
-        "co.fs2"        %% "fs2-core"            % V.fs2,
-        "org.scalameta" %% "munit"               % V.munit         % Test,
-        "org.typelevel" %% "munit-cats-effect-3" % V.munitCE       % Test,
-        "com.whisk"     %% "docker-testkit-core" % V.dockerItScala % Test
-      )
-    )
 
     def on[A](major: Int, minor: Int)(a: A): Def.Initialize[Seq[A]] =
       Def.setting {
