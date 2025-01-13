@@ -158,15 +158,12 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val benchmarksSettings: Seq[Def.Setting[_]] = Seq(
-      Compile / unmanagedSourceDirectories += {
-        baseDirectory.value.getParentFile / "shared" / "src" / "main" / "scala"
-      },
-      Compile / unmanagedResourceDirectories += {
-        baseDirectory.value.getParentFile / "shared" / "src" / "main" / "resources"
-      },
-      Test / unmanagedSourceDirectories += {
-        baseDirectory.value.getParentFile / "shared" / "src" / "test" / "scala"
-      },
+      Compile / unmanagedSourceDirectories +=
+        baseDirectory.value.getParentFile / "shared" / "src" / "main" / "scala",
+      Compile / unmanagedResourceDirectories +=
+        baseDirectory.value.getParentFile / "shared" / "src" / "main" / "resources",
+      Test / unmanagedSourceDirectories +=
+        baseDirectory.value.getParentFile / "shared" / "src" / "test" / "scala",
       libraryDependencies ++= Seq(
         "io.grpc"        % "grpc-all"         % V.grpc,
         "org.slf4j"      % "log4j-over-slf4j" % V.slf4j,
