@@ -10,6 +10,8 @@ import higherkindness.mu.rpc.srcgen.SrcGenPlugin.autoImport._
 import _root_.io.github.davidgregory084.ScalacOptions
 import _root_.io.github.davidgregory084.TpolecatPlugin.autoImport._
 
+import scala.language.reflectiveCalls
+
 object ProjectPlugin extends AutoPlugin {
 
   override def trigger: PluginTrigger = allRequirements
@@ -17,34 +19,35 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     lazy val V = new {
-      val avro4s: String                = "4.1.1"
-      val catsEffect: String            = "3.5.1"
-      val catsRetry: String             = "3.1.0"
-      val dockerItScala                 = "0.11.0"
-      val dropwizard: String            = "4.2.19"
-      val enumeratum: String            = "1.7.3"
-      val fs2: String                   = "3.8.0"
-      val fs2Grpc: String               = "2.7.5"
-      val grpc: String                  = "1.57.2"
-      val kindProjector: String         = "0.13.2"
-      val log4cats: String              = "2.6.0"
+      val avro4s: String                = "4.1.2"
+      val catsEffect: String            = "3.5.7"
+      val catsRetry: String             = "3.1.3"
+      val dockerItScala                 = "0.12.0"
+      val dropwizard: String            = "4.2.30"
+      val enumeratum: String            = "1.7.5"
+      val fs2: String                   = "3.11.0"
+      val fs2Grpc: String               = "2.7.21"
+      val grpc: String                  = "1.70.0"
+      val kindProjector: String         = "0.13.3"
+      val log4cats: String              = "2.7.0"
       val log4s: String                 = "1.10.0"
-      val logback: String               = "1.4.11"
-      val munit: String                 = "0.7.29"
-      val munitCE: String               = "1.0.7"
-      val natchez: String               = "0.3.3"
-      val nettySSL: String              = "2.0.54.Final"
+      val logback: String               = "1.5.16"
+      val munit: String                 = "1.1.0"
+      val munitSC: String               = "1.1.0"
+      val munitCE: String               = "2.0.0"
+      val natchez: String               = "0.3.7"
+      val nettySSL: String              = "2.0.61.Final"
       val paradise: String              = "2.1.1"
       val pbdirect: String              = "0.7.0"
       val prometheus: String            = "0.16.0"
-      val pureconfig: String            = "0.17.4"
-      val scalaCollectionCompat: String = "2.11.0"
+      val pureconfig: String            = "0.17.8"
+      val scalaCollectionCompat: String = "2.13.0"
       val scalacheckToolbox: String     = "0.7.0"
       val scalamock: String             = "5.1.0"
-      val scalapb: String               = "0.11.13"
+      val scalapb: String               = "0.11.17"
       val scalatest: String             = "3.2.12"
       val scalatestplusScheck: String   = "3.2.2.0"
-      val slf4j: String                 = "2.0.7"
+      val slf4j: String                 = "2.0.16"
     }
 
     lazy val rpcServiceSettings: Seq[Def.Setting[_]] = Seq(
@@ -64,9 +67,10 @@ object ProjectPlugin extends AutoPlugin {
         "com.beachape"        %% "enumeratum"  % V.enumeratum
       ).value,
       libraryDependencies ++= scalaVersionSpecificDeps(3)(
-        "com.sksamuel.avro4s" %% "avro4s-core" % "5.0.4"
+        "com.sksamuel.avro4s" %% "avro4s-core" % "5.0.14"
       ).value,
-      scalacOptions --= on(2, 13)("-Wunused:patvars").value
+      scalacOptions --= on(2, 13)("-Wunused:patvars").value,
+      scalacOptions --= on(3, 4)("-Xfatal-warnings").value
     )
 
     lazy val macroSettings: Seq[Setting[_]] = Seq(
@@ -83,7 +87,8 @@ object ProjectPlugin extends AutoPlugin {
     lazy val clientNettySettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.grpc" % "grpc-netty" % V.grpc
-      )
+      ),
+      scalacOptions --= on(3, 4)("-Xfatal-warnings").value
     )
 
     lazy val clientOkHttpSettings: Seq[Def.Setting[_]] = Seq(
@@ -105,21 +110,23 @@ object ProjectPlugin extends AutoPlugin {
         "org.typelevel" %% "cats-effect" % V.catsEffect
       ),
       muSrcGenIdlType := IdlType.Proto,
-      scalacOptions += "-Wconf:src=src_managed/.*:silent"
+      scalacOptions += "-Wconf:src=src_managed/.*:silent",
+      scalacOptions --= on(3, 4)("-Xfatal-warnings").value
     )
 
     lazy val serverSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.grpc" % "grpc-netty" % V.grpc
-      )
+      ),
+      scalacOptions --= on(3, 4)("-Xfatal-warnings").value
     )
 
     lazy val configSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "com.github.pureconfig" %% "pureconfig"          % V.pureconfig,
         "org.scalameta"         %% "munit"               % V.munit      % Test,
-        "org.scalameta"         %% "munit-scalacheck"    % V.munit      % Test,
-        "org.typelevel"         %% "munit-cats-effect-3" % V.munitCE    % Test,
+        "org.scalameta"         %% "munit-scalacheck"    % V.munitSC    % Test,
+        "org.typelevel"         %% "munit-cats-effect"   % V.munitCE    % Test,
         "org.typelevel"         %% "cats-effect-testkit" % V.catsEffect % Test
       )
     )
@@ -127,7 +134,8 @@ object ProjectPlugin extends AutoPlugin {
     lazy val prometheusMetricsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         "io.prometheus" % "simpleclient" % V.prometheus
-      )
+      ),
+      scalacOptions --= on(3, 4)("-Xfatal-warnings").value
     )
 
     lazy val dropwizardMetricsSettings: Seq[Def.Setting[_]] = Seq(
@@ -150,15 +158,12 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val benchmarksSettings: Seq[Def.Setting[_]] = Seq(
-      Compile / unmanagedSourceDirectories += {
-        baseDirectory.value.getParentFile / "shared" / "src" / "main" / "scala"
-      },
-      Compile / unmanagedResourceDirectories += {
-        baseDirectory.value.getParentFile / "shared" / "src" / "main" / "resources"
-      },
-      Test / unmanagedSourceDirectories += {
-        baseDirectory.value.getParentFile / "shared" / "src" / "test" / "scala"
-      },
+      Compile / unmanagedSourceDirectories +=
+        baseDirectory.value.getParentFile / "shared" / "src" / "main" / "scala",
+      Compile / unmanagedResourceDirectories +=
+        baseDirectory.value.getParentFile / "shared" / "src" / "main" / "resources",
+      Test / unmanagedSourceDirectories +=
+        baseDirectory.value.getParentFile / "shared" / "src" / "test" / "scala",
       libraryDependencies ++= Seq(
         "io.grpc"        % "grpc-all"         % V.grpc,
         "org.slf4j"      % "log4j-over-slf4j" % V.slf4j,
@@ -193,10 +198,10 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val docsSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
-        "org.scalameta"        %% "munit-scalacheck"    % V.munit,
-        "org.typelevel"        %% "munit-cats-effect-3" % V.munitCE,
-        "io.dropwizard.metrics" % "metrics-jmx"         % V.dropwizard,
-        "org.tpolecat"         %% "natchez-jaeger"      % V.natchez
+        "org.scalameta"        %% "munit-scalacheck"  % V.munitSC,
+        "org.typelevel"        %% "munit-cats-effect" % V.munitCE,
+        "io.dropwizard.metrics" % "metrics-jmx"       % V.dropwizard,
+        "org.tpolecat"         %% "natchez-jaeger"    % V.natchez
       ),
       scalacOptions ~= (_ filterNot Set(
         "-Xfatal-warnings",
@@ -209,9 +214,10 @@ object ProjectPlugin extends AutoPlugin {
       publishArtifact          := false,
       Test / parallelExecution := false,
       testFrameworks += new TestFramework("munit.Framework"),
+      scalacOptions -= "-Xfatal-warnings",
       libraryDependencies ++= Seq(
         "io.grpc"        % "grpc-core"        % V.grpc,
-        "org.scalameta" %% "munit-scalacheck" % V.munit,
+        "org.scalameta" %% "munit-scalacheck" % V.munitSC,
         "org.typelevel" %% "cats-effect"      % V.catsEffect
       )
     )
@@ -219,14 +225,15 @@ object ProjectPlugin extends AutoPlugin {
       publishArtifact          := false,
       Test / parallelExecution := false,
       testFrameworks += new TestFramework("munit.Framework"),
+      scalacOptions -= "-Xfatal-warnings",
       libraryDependencies ++= Seq(
         "io.grpc"    % "grpc-netty"                      % V.grpc              % Test,
         "io.netty"   % "netty-tcnative-boringssl-static" % V.nettySSL          % Test,
         "com.47deg" %% "scalacheck-toolbox-datetime"     % V.scalacheckToolbox % Test,
         "org.scala-lang.modules" %% "scala-collection-compat" % V.scalaCollectionCompat % Test,
         "org.scalameta"          %% "munit"                   % V.munit                 % Test,
-        "org.scalameta"          %% "munit-scalacheck"        % V.munit                 % Test,
-        "org.typelevel"          %% "munit-cats-effect-3"     % V.munitCE               % Test,
+        "org.scalameta"          %% "munit-scalacheck"        % V.munitSC               % Test,
+        "org.typelevel"          %% "munit-cats-effect"       % V.munitCE               % Test,
         "org.typelevel"          %% "cats-effect-testkit"     % V.catsEffect            % Test,
         "ch.qos.logback"          % "logback-classic"         % V.logback               % Test,
         "com.github.cb372"       %% "cats-retry"              % V.catsRetry             % Test
@@ -235,7 +242,8 @@ object ProjectPlugin extends AutoPlugin {
 
     lazy val protobufSrcGenSettings = Seq(
       muSrcGenIdlType := IdlType.Proto,
-      scalacOptions += "-Wconf:src=src_managed/.*:silent"
+      scalacOptions += "-Wconf:src=src_managed/.*:silent",
+      scalacOptions --= on(3, 4)("-Xfatal-warnings").value
     )
 
     lazy val protobufRPCTestSettings = testSettings ++ protobufSrcGenSettings
@@ -257,17 +265,6 @@ object ProjectPlugin extends AutoPlugin {
     )
 
     lazy val avroRPCTestSettings = testSettings ++ avroSrcGenSettings
-
-    lazy val haskellIntegrationTestSettings = Seq(
-      publishArtifact          := false,
-      Test / parallelExecution := false,
-      libraryDependencies ++= Seq(
-        "co.fs2"        %% "fs2-core"            % V.fs2,
-        "org.scalameta" %% "munit"               % V.munit         % Test,
-        "org.typelevel" %% "munit-cats-effect-3" % V.munitCE       % Test,
-        "com.whisk"     %% "docker-testkit-core" % V.dockerItScala % Test
-      )
-    )
 
     def on[A](major: Int, minor: Int)(a: A): Def.Initialize[Seq[A]] =
       Def.setting {
@@ -313,7 +310,7 @@ object ProjectPlugin extends AutoPlugin {
       missinglinkIgnoreSourcePackages += IgnoredPackage("io.netty.handler.ssl")
     )
 
-  import autoImport._
+  import autoImport.*
 
   override def projectSettings: Seq[Def.Setting[_]] =
     Seq(

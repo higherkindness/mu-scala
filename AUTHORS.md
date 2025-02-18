@@ -13,7 +13,6 @@ The maintainers of the project are:
 - [![JesusMtnez](https://avatars.githubusercontent.com/u/8639179?v=4&s=20) **Jesús Martínez (JesusMtnez)**](https://github.com/JesusMtnez)
 - [![juanpedromoreno](https://avatars.githubusercontent.com/u/4879373?v=4&s=20) **Juan Pedro Moreno (juanpedromoreno)**](https://github.com/juanpedromoreno)
 - [![pepegar](https://avatars.githubusercontent.com/u/694179?v=4&s=20) **Pepe García (pepegar)**](https://github.com/pepegar)
-- [![rafaparadela](https://avatars.githubusercontent.com/u/315070?v=4&s=20) **Rafa Paradela (rafaparadela)**](https://github.com/rafaparadela)
 - [![tyler-clark](https://avatars.githubusercontent.com/u/2521136?v=4&s=20) **Tyler Clark (tyler-clark)**](https://github.com/tyler-clark)
 
 ## Contributors
@@ -34,7 +33,6 @@ These are the people that have contributed to the _mu-scala_ project:
 - [![BenFradet](https://avatars.githubusercontent.com/u/1737211?v=4&s=20) **BenFradet**](https://github.com/BenFradet)
 - [![JesusMtnez](https://avatars.githubusercontent.com/u/8639179?v=4&s=20) **JesusMtnez**](https://github.com/JesusMtnez)
 - [![pepegar](https://avatars.githubusercontent.com/u/694179?v=4&s=20) **pepegar**](https://github.com/pepegar)
-- [![rafaparadela](https://avatars.githubusercontent.com/u/315070?v=4&s=20) **rafaparadela**](https://github.com/rafaparadela)
 - [![AntonioMateoGomez](https://avatars.githubusercontent.com/u/25897490?v=4&s=20) **AntonioMateoGomez**](https://github.com/AntonioMateoGomez)
 - [![eperinan](https://avatars.githubusercontent.com/u/3660921?v=4&s=20) **eperinan**](https://github.com/eperinan)
 - [![franciscodr](https://avatars.githubusercontent.com/u/1200151?v=4&s=20) **franciscodr**](https://github.com/franciscodr)
