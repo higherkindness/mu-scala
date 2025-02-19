@@ -17,4 +17,4 @@ addSbtPlugin("com.alejandrohdezma"       % "sbt-github-mdoc"          % "0.12.0"
 addSbtPlugin("com.alejandrohdezma"       % "sbt-remove-test-from-pom" % "0.1.0")
 addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat"             % "0.4.4")
 addSbtPlugin("ch.epfl.scala"             % "sbt-missinglink"          % "0.3.6")
-addSbtPlugin("io.higherkindness"         % "sbt-mu-srcgen"            % "0.33.0")
+addSbtPlugin("io.higherkindness"         % "sbt-mu-srcgen"            % "0.34.0")
