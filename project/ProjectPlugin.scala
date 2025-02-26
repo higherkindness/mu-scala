@@ -47,7 +47,7 @@ object ProjectPlugin extends AutoPlugin {
       val scalapb: String               = "0.11.17"
       val scalatest: String             = "3.2.12"
       val scalatestplusScheck: String   = "3.2.2.0"
-      val slf4j: String                 = "2.0.16"
+      val slf4j: String                 = "2.0.17"
     }
 
     lazy val rpcServiceSettings: Seq[Def.Setting[_]] = Seq(
