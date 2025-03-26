@@ -25,7 +25,7 @@ object ProjectPlugin extends AutoPlugin {
       val dockerItScala                 = "0.12.0"
       val dropwizard: String            = "4.2.30"
       val enumeratum: String            = "1.7.5"
-      val fs2: String                   = "3.11.0"
+      val fs2: String                   = "3.12.0"
       val fs2Grpc: String               = "2.7.21"
       val grpc: String                  = "1.71.0"
       val kindProjector: String         = "0.13.3"
