@@ -35,7 +35,7 @@ object ProjectPlugin extends AutoPlugin {
       val munit: String                 = "1.1.0"
       val munitSC: String               = "1.1.0"
       val munitCE: String               = "2.1.0"
-      val natchez: String               = "0.3.7"
+      val natchez: String               = "0.3.8"
       val nettySSL: String              = "2.0.65.Final"
       val paradise: String              = "2.1.1"
       val pbdirect: String              = "0.7.0"
