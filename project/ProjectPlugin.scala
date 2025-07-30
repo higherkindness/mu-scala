@@ -27,7 +27,7 @@ object ProjectPlugin extends AutoPlugin {
       val enumeratum: String            = "1.9.0"
       val fs2: String                   = "3.12.0"
       val fs2Grpc: String               = "2.8.2"
-      val grpc: String                  = "1.73.0"
+      val grpc: String                  = "1.74.0"
       val kindProjector: String         = "0.13.3"
       val log4cats: String              = "2.7.1"
       val log4s: String                 = "1.10.0"
