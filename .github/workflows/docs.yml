@@ -14,6 +14,8 @@ jobs:
   documentation:
     if: "!contains(github.event.head_commit.message, 'skip ci')"
     runs-on: ubuntu-latest
+    env:
+      JAVA_OPTS: -Xms2048M -Xmx2048M -Xss6M -XX:ReservedCodeCacheSize=256M -Dfile.encoding=UTF-8
     steps:
       - name: Checkout project
         uses: actions/checkout@v2
@@ -22,10 +24,13 @@ jobs:
           ref: main
       - name: Fetch tags
         run: git fetch --tags
-      - name: Setup Scala
-        uses: olafurpg/setup-scala@v11
+      - name: Setup JDK
+        uses: actions/setup-java@v4
         with:
-          java-version: adopt@1.11
+          distribution: oracle
+          java-version: 23
+          cache: sbt
+      - uses: sbt/setup-sbt@v1
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
