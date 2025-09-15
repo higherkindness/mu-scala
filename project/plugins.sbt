@@ -10,7 +10,7 @@ addSbtPlugin("com.github.sbt"            % "sbt-ci-release"           % "1.11.1"
 addSbtPlugin("com.47deg"                 % "sbt-microsites"           % "1.4.4")
 addSbtPlugin("org.scalameta"             % "sbt-scalafmt"             % "2.5.5")
 addSbtPlugin("org.scalameta"             % "sbt-mdoc"                 % "2.5.2")
-addSbtPlugin("de.heikoseeberger"         % "sbt-header"               % "5.10.0")
+addSbtPlugin("com.github.sbt"            % "sbt-header"               % "5.11.0")
 addSbtPlugin("com.alejandrohdezma"       % "sbt-github"               % "0.12.0")
 addSbtPlugin("com.alejandrohdezma"       % "sbt-github-header"        % "0.12.0")
 addSbtPlugin("com.alejandrohdezma"       % "sbt-github-mdoc"          % "0.12.0")
